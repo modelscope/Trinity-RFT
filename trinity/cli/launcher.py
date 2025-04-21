@@ -19,7 +19,7 @@ def explore(config: Config) -> None:
     try:
         ray.get(explorer.prepare.remote())
         ray.get(explorer.sync_weight.remote())
-        ray.get([explorer.explore.remote()])
+        ray.get(explorer.explore.remote())
         logger.info("Explore finished.")
     except Exception as e:
         logger.error(f"Explore failed: {e}")
@@ -33,7 +33,7 @@ def train(config: Config) -> None:
     trainer = Trainer.remote(config)
     try:
         ray.get(trainer.prepare.remote())
-        ray.get([trainer.train.remote(algo_type)])
+        ray.get(trainer.train.remote(algo_type))
         logger.info("Train finished.")
     except Exception as e:
         logger.error(f"Train failed {e}.")
