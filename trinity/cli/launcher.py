@@ -99,7 +99,8 @@ def activate_data_module(config: Config, config_path: str):
     """Check whether to activate data module and preprocess datasets."""
     data_config = config.data
     if data_config.dj_config_path or data_config.dj_process_desc:
-        from trinity.data.client import request, LOCAL_SERVER_URL
+        from trinity.data.client import LOCAL_SERVER_URL, request
+
         logger.info("Activating data module...")
         res = request(
             url=LOCAL_SERVER_URL,
