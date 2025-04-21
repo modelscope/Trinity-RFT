@@ -72,10 +72,10 @@ def both(config: Config) -> None:
     algo_type = config.trainer.algorithm_type
     while True:
         try:
-            ref = explorer.explore_step.remote()
-            explore_continue, explore_iter_num = ray.get(ref)
-            ref = trainer.train_step.remote(algo_type)
-            train_continue, train_iter_num = ray.get(ref)
+            ref_explore = explorer.explore_step.remote()
+            ref_train = trainer.train_step.remote(algo_type)
+            explore_continue, _ = ray.get(ref_explore)
+            train_continue, train_iter_num = ray.get(ref_train)
             if not explore_continue:
                 logger.info("Explorer finished, stopping...")
                 break
