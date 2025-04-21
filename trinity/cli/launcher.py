@@ -19,8 +19,7 @@ def explore(config: Config) -> None:
     try:
         ray.get(explorer.prepare.remote())
         ray.get(explorer.sync_weight.remote())
-        ref, _ = ray.wait([explorer.explore.remote()])
-        ray.get(ref)
+        ray.get([explorer.explore.remote()])
         logger.info("Explore finished.")
     except Exception as e:
         logger.error(f"Explore failed: {e}")
@@ -34,8 +33,7 @@ def train(config: Config) -> None:
     trainer = Trainer.remote(config)
     try:
         ray.get(trainer.prepare.remote())
-        ref, _ = ray.wait([trainer.train.remote(algo_type)])
-        ray.get(ref)
+        ray.get([trainer.train.remote(algo_type)])
         logger.info("Train finished.")
     except Exception as e:
         logger.error(f"Train failed {e}.")
@@ -67,19 +65,21 @@ def both(config: Config) -> None:
 
     if config.trainer.sft_warmup_iteration > 0:
         for step in range(config.trainer.sft_warmup_iteration):
-            ray.get([trainer.train_step.remote(AlgorithmType.SFT)])
+            ray.get(trainer.train_step.remote(AlgorithmType.SFT))
             logger.info(f"SFT warmup step {step} finished.")
         ray.get([explorer.sync_weight.remote(), trainer.sync_weight.remote()])
 
     algo_type = config.trainer.algorithm_type
     while True:
         try:
-            explore_continue = explorer.explore_step.remote()
-            train_continue = trainer.train_step.remote(algo_type)
-            if not ray.get(explore_continue):
+            ref = explorer.explore_step.remote()
+            explore_continue, explore_iter_num = ray.get(ref)
+            ref = trainer.train_step.remote(algo_type)
+            train_continue, train_iter_num = ray.get(ref)
+            if not explore_continue:
                 logger.info("Explorer finished, stopping...")
                 break
-            if not ray.get(train_continue):
+            if not train_continue:
                 logger.info("Trainer finished, stopping...")
                 break
             ray.get([explorer.sync_weight.remote(), trainer.sync_weight.remote()])
@@ -88,11 +88,9 @@ def both(config: Config) -> None:
             logger.error(e)
             logger.error("Training stopped due to exception.")
             raise e
-        train_step_num = ray.get(trainer.get_current_step.remote())
-        if (train_step_num - 1) % config.trainer.eval_interval == 0:
-            ref, _ = ray.wait([explorer.eval.remote(step=train_step_num)])
+        if (train_iter_num - 1) % config.trainer.eval_interval == 0:
             try:
-                ray.get(ref)
+                ray.get(explorer.eval.remote(train_iter_num))
                 logger.info("Evaluation finished.")
             except Exception as e:
                 logger.error(e)

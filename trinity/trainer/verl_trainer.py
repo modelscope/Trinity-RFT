@@ -4,6 +4,7 @@
 Modified from verl/trainer/ppo/ray_trainer.py
 """
 import os
+from typing import Tuple
 
 import pandas as pd
 import ray
@@ -182,7 +183,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         # else:
         self.total_training_steps = float("inf")
 
-    def train_dpo_iteration(self, experiences: Experiences) -> bool:
+    def train_dpo_iteration(self, experiences: Experiences) -> Tuple[bool, int]:
         metrics = {}
         timing_raw = {}
 
@@ -243,9 +244,9 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                 self._save_checkpoint()
 
         self.global_steps += 1
-        return True
+        return True, self.global_steps
 
-    def train_sft_iteration(self, experiences: Experiences) -> bool:
+    def train_sft_iteration(self, experiences: Experiences) -> Tuple[bool, int]:
         metrics = {}
         timing_raw = {}
 
@@ -309,9 +310,9 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             with _timer("save_checkpoint", timing_raw):
                 self._save_checkpoint()
         self.global_steps += 1
-        return True
+        return True, self.global_steps
 
-    def train_rft_iteration(self, experiences: Experiences) -> bool:
+    def train_rft_iteration(self, experiences: Experiences) -> Tuple[bool, int]:
         metrics = {}
         timing_raw = {}
 
@@ -456,10 +457,10 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                 with _timer("save_checkpoint", timing_raw):
                     self._save_checkpoint()
             # stop training
-            return False
+            return False, self.global_steps
         else:
             # continue
-            return True
+            return True, self.global_steps
 
     def _log_single_experience(
         self, experiences: Experiences, idx: int, skip_special_tokens: bool
@@ -559,6 +560,3 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
 
     def shutdown(self) -> None:
         pass
-
-    def get_current_step(self) -> int:
-        return self.global_steps

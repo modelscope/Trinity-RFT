@@ -7,6 +7,7 @@ And is a reproduction code of Jiayi-Pan/TinyZero.
 Note that we don't combine the main with ray_trainer as ray_trainer is used by other main.
 """
 from abc import ABC, abstractmethod
+from typing import Tuple
 
 import ray
 
@@ -45,18 +46,23 @@ class Trainer:
     def train(self, algo_type: AlgorithmType = AlgorithmType.PPO):
         """Train the model."""
         while True:
-            if not self.train_iteration(algo_type):
+            train_status, _ = self.train_iteration(algo_type)
+            if not train_status:
                 break
 
-    def train_step(self, algo_type: AlgorithmType = AlgorithmType.PPO) -> bool:
-        """Train one step. Each step contains `sync_iteration_interval` iteration."""
+    def train_step(self, algo_type: AlgorithmType = AlgorithmType.PPO) -> Tuple[bool, int]:
+        """Train one step. Each step contains `sync_iteration_interval` iteration.
+        Returns:
+            train_status: Whether to continue training.
+            train_iter_num: The number of training iterations"""
         for _ in range(self.config.synchronizer.sync_iteration_interval):
-            if not self.train_iteration(algo_type):
-                return False
+            train_status, train_iter_num = self.train_iteration(algo_type)
+            if not train_status:
+                return False, train_iter_num
         self.logger.info("Trainer finished.")
-        return True
+        return True, train_iter_num
 
-    def train_iteration(self, algo_type: AlgorithmType = AlgorithmType.PPO) -> bool:
+    def train_iteration(self, algo_type: AlgorithmType = AlgorithmType.PPO) -> Tuple[bool, int]:
         """Train one iteration.
 
         Args:
@@ -99,9 +105,6 @@ class Trainer:
         if self.config.synchronizer.sync_method == "online":
             self.engine.sync_weight()
 
-    def get_current_step(self) -> int:
-        return self.engine.get_current_step()
-
 
 class TrainEngineWrapper(ABC):
     """A wrapper class to wrap various training engines."""
@@ -111,15 +114,15 @@ class TrainEngineWrapper(ABC):
         """Do some preparation before training started."""
 
     @abstractmethod
-    def train_rft_iteration(self, experiences) -> bool:
+    def train_rft_iteration(self, experiences) -> Tuple[bool, int]:
         """Train on the RFT data."""
 
     @abstractmethod
-    def train_sft_iteration(self, experiences) -> bool:
+    def train_sft_iteration(self, experiences) -> Tuple[bool, int]:
         """Train on the SFT data."""
 
     @abstractmethod
-    def train_dpo_iteration(self, experiences) -> bool:
+    def train_dpo_iteration(self, experiences) -> Tuple[bool, int]:
         """Train on the DPO data."""
 
     @abstractmethod
