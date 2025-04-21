@@ -312,7 +312,9 @@ class Config:
             self.trainer.eval_interval = (
                 self.trainer.eval_interval // self.synchronizer.sync_iteration_interval
             ) * self.synchronizer.sync_iteration_interval
-            print(f"Warning: eval_interval is not a multiple of sync_iteration_interval; adjusted to the nearest integer={self.trainer.eval_interval}.")
+            print(
+                f"Warning: eval_interval is not a multiple of sync_iteration_interval; adjusted to the nearest integer={self.trainer.eval_interval}."
+            )
 
         # check monitor
         if not self.monitor.cache_root_dir:
