@@ -1,0 +1,7 @@
+trinity
+=======
+
+.. automodule:: trinity
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,7 @@
+trinity.common.rewards
+======================
+
+.. automodule:: trinity.common.rewards
+   :members:
+   :undoc-members:
+   :show-inheritance:

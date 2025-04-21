@@ -1,0 +1,7 @@
+trinity.manager
+===============
+
+.. automodule:: trinity.manager
+   :members:
+   :undoc-members:
+   :show-inheritance:

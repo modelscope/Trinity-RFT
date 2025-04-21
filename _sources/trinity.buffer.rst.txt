@@ -1,0 +1,7 @@
+trinity.buffer
+==============
+
+.. automodule:: trinity.buffer
+   :members:
+   :undoc-members:
+   :show-inheritance:

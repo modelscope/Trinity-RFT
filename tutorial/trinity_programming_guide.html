@@ -1,0 +1,269 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trinity-RFT Developer Guide &mdash; Trinity-RFT 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="trinity.buffer.reader" href="../trinity.buffer.reader.html" />
+    <link rel="prev" title="Trinity-RFT Configuration" href="trinity_configs.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Trinity-RFT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="example_reasoning_basic.html">A quick example with GSM8k</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_reasoning_advanced.html">Example: off-policy / asynchronous RFT mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_multi_turn.html">Example: Multi-Turn RFT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_dpo.html">Example: Run DPO on Human-Like-DPO-Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_data_functionalities.html">Data processing functionalities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trinity_configs.html">Trinity-RFT Configuration</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Trinity-RFT Developer Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#creating-new-task-types">Creating New Task Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#step-0-basic-concepts">Step 0: Basic Concepts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-1-prepare-task-dataset">Step 1: Prepare Task Dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-2-write-workflow">Step 2: Write Workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-3-modify-configuration-file">Step 3: Modify Configuration File</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#check-code-style">Check Code Style</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../trinity.buffer.reader.html">trinity.buffer.reader</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../trinity.buffer.html">trinity.buffer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../trinity.buffer.schema.html">trinity.buffer.schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../trinity.buffer.writer.html">trinity.buffer.writer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../trinity.common.models.html">trinity.common.models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../trinity.common.rewards.html">trinity.common.rewards</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../trinity.common.html">trinity.common</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../trinity.common.workflows.html">trinity.common.workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../trinity.explorer.html">trinity.explorer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../trinity.manager.html">trinity.manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../trinity.html">trinity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../trinity.trainer.html">trinity.trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../trinity.trainer.verl.html">trinity.trainer.verl</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../trinity.utils.html">trinity.utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Trinity-RFT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Trinity-RFT Developer Guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorial/trinity_programming_guide.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="trinity-rft-developer-guide">
+<h1>Trinity-RFT Developer Guide<a class="headerlink" href="#trinity-rft-developer-guide" title="Link to this heading">¶</a></h1>
+<p>This guide will introduce how to add new task types to Trinity-RFT and provide relevant development guidelines.</p>
+<blockquote>
+<div><p><strong>Note</strong>: Trinity-RFT is still under development, and the following interfaces may change. Please read this section in conjunction with the latest code.</p>
+</div></blockquote>
+<hr class="docutils" />
+<section id="creating-new-task-types">
+<h2>Creating New Task Types<a class="headerlink" href="#creating-new-task-types" title="Link to this heading">¶</a></h2>
+<p>Trinity-RFT supports developers in registering new task types (e.g., multi-round interaction scenarios). Below are the steps for creating a new task type.</p>
+<hr class="docutils" />
+<section id="step-0-basic-concepts">
+<h3>Step 0: Basic Concepts<a class="headerlink" href="#step-0-basic-concepts" title="Link to this heading">¶</a></h3>
+<p>Before starting development, it’s important to understand several core concepts:</p>
+<ul class="simple">
+<li><p><strong>Task</strong>: Represents a data structure that can be converted into a <code class="docutils literal notranslate"><span class="pre">Workflow</span></code>. The <code class="docutils literal notranslate"><span class="pre">Task</span></code> data format may vary significantly depending on the type of task:</p>
+<ul>
+<li><p><strong>Math problems</strong>: <code class="docutils literal notranslate"><span class="pre">Task</span></code> contains the problem description and the standard answer.</p></li>
+<li><p><strong>Programming scenarios</strong>: <code class="docutils literal notranslate"><span class="pre">Task</span></code> includes the problem description, test cases, runtime environment, and other complex information.</p></li>
+</ul>
+</li>
+<li><p><strong>Workflow</strong>: Can be understood as the running state of a <code class="docutils literal notranslate"><span class="pre">Task</span></code>, defining the interaction flow between Agents and Environments, including logic similar to <em>Rollout</em> and <em>Reward</em> calculations in other frameworks. After execution, it generates <code class="docutils literal notranslate"><span class="pre">Experience</span></code>. Trinity-RFT has several built-in <code class="docutils literal notranslate"><span class="pre">Workflows</span></code>:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">MathWorkflow</span></code>: For math scenarios, submits problems to LLM, parses results, and calculates scores (rewards).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CodeWorkflow</span></code> (Coming soon): For coding scenarios, executes returned code, runs tests, and calculates rewards based on test results.</p></li>
+<li><p>…</p></li>
+</ul>
+</li>
+<li><p><strong>Experience</strong>: The output of running a <code class="docutils literal notranslate"><span class="pre">Workflow</span></code>, where the internal data format depends on the algorithm used for training. For example, for common PPO/GRPO algorithms, <code class="docutils literal notranslate"><span class="pre">Experience</span></code> includes lists of token_ids, action_mask (identifying which tokens were generated by the LLM), logprobs, rewards, etc.</p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="step-1-prepare-task-dataset">
+<h3>Step 1: Prepare Task Dataset<a class="headerlink" href="#step-1-prepare-task-dataset" title="Link to this heading">¶</a></h3>
+<p>Each <code class="docutils literal notranslate"><span class="pre">Task</span></code> is a Python dictionary (<code class="docutils literal notranslate"><span class="pre">Dict[str,</span> <span class="pre">Any]</span></code>), containing various parameters needed to initialize the <code class="docutils literal notranslate"><span class="pre">Workflow</span></code>. Due to significant differences in initialization parameters across different <code class="docutils literal notranslate"><span class="pre">Workflows</span></code>, the following example uses a math problem scenario.</p>
+<p>In the math problem scenario, the <code class="docutils literal notranslate"><span class="pre">Task</span></code> dataset can be a <code class="docutils literal notranslate"><span class="pre">jsonl</span></code> file, where each line’s JSON contains <code class="docutils literal notranslate"><span class="pre">question</span></code> and <code class="docutils literal notranslate"><span class="pre">answer</span></code> fields representing the problem description and standard answer, respectively.</p>
+<div class="highlight-jsonl notranslate"><div class="highlight"><pre><span></span>{&quot;question&quot;: &quot;1+1=&quot;, &quot;answer&quot;: &quot;2&quot;}
+{&quot;question&quot;: &quot;2+2=&quot;, &quot;answer&quot;: &quot;4&quot;}
+...
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="step-2-write-workflow">
+<h3>Step 2: Write Workflow<a class="headerlink" href="#step-2-write-workflow" title="Link to this heading">¶</a></h3>
+<p>The core of creating a new task type is writing a new <code class="docutils literal notranslate"><span class="pre">Workflow</span></code>, whose base class interface is as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Workflow</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">ModelWrapper</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run the workflow and return a list of Experiences.&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>Developers can register their own <code class="docutils literal notranslate"><span class="pre">Workflow</span></code> through the <code class="docutils literal notranslate"><span class="pre">WORKFLOWS.register_module</span></code> method, but need to ensure that the name does not conflict with existing <code class="docutils literal notranslate"><span class="pre">Workflows</span></code>.</p>
+<section id="initialization-parameters">
+<h4>Initialization Parameters<a class="headerlink" href="#initialization-parameters" title="Link to this heading">¶</a></h4>
+<p>When initializing, <code class="docutils literal notranslate"><span class="pre">Workflow</span></code> receives the following parameters:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">model</span></code>: Provides an API call interface similar to OpenAI, capable of receiving a list of conversation messages and returning content generated by the LLM (including reply text <code class="docutils literal notranslate"><span class="pre">response_text</span></code>, full sequence token ids <code class="docutils literal notranslate"><span class="pre">tokens</span></code>, prompt part token length <code class="docutils literal notranslate"><span class="pre">prompt_length</span></code>, and a list of output token logprobs <code class="docutils literal notranslate"><span class="pre">logprobs</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">kwargs</span></code>: Reads one line of data from the <code class="docutils literal notranslate"><span class="pre">Task</span></code> dataset, allowing developers to initialize internal modules such as Agent and Environment within the <code class="docutils literal notranslate"><span class="pre">Workflow</span></code> based on these parameters.</p></li>
+</ul>
+</section>
+<section id="example-code">
+<h4>Example Code<a class="headerlink" href="#example-code" title="Link to this heading">¶</a></h4>
+<p>Below is a simple example demonstrating how to implement a math problem <code class="docutils literal notranslate"><span class="pre">Workflow</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;example_workflow&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">ModelWrapper</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">question</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;question&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">answer</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;answer&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">chat</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Question:</span><span class="se">\n</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">question</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">reward</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">calculate_reward</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">response_text</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">answer</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">Experience</span><span class="p">(</span>
+            <span class="n">tokens</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">tokens</span><span class="p">,</span>
+            <span class="n">prompt_length</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">prompt_length</span><span class="p">,</span>
+            <span class="n">reward</span><span class="o">=</span><span class="n">reward</span><span class="p">,</span>
+            <span class="n">logprobs</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">logprobs</span><span class="p">,</span>
+        <span class="p">)]</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="step-3-modify-configuration-file">
+<h3>Step 3: Modify Configuration File<a class="headerlink" href="#step-3-modify-configuration-file" title="Link to this heading">¶</a></h3>
+<p>After completing the development of the <code class="docutils literal notranslate"><span class="pre">Workflow</span></code>, you need to modify the configuration file to set the <code class="docutils literal notranslate"><span class="pre">default_workflow_type</span></code> in the <code class="docutils literal notranslate"><span class="pre">data</span></code> domain to the newly registered <code class="docutils literal notranslate"><span class="pre">Workflow</span></code> name.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">data</span><span class="p">:</span>
+<span class="w">  </span><span class="c1"># Other fields</span>
+<span class="w">  </span><span class="nt">default_workflow_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example_workflow</span>
+<span class="w">  </span><span class="c1"># Other fields</span>
+<span class="c1"># Other fields</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="check-code-style">
+<h2>Check Code Style<a class="headerlink" href="#check-code-style" title="Link to this heading">¶</a></h2>
+<p>Before submitting the code, make sure it passes the code style check. Follow these steps:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># Install code style checking tools</span>
+<span class="nb">cd</span><span class="w"> </span>&lt;path_to_trinity_rft&gt;
+<span class="c1"># bash</span>
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="o">[</span>dev<span class="o">]</span>
+<span class="c1"># zsh</span>
+<span class="c1"># pip install -e .\[dev\]</span>
+
+<span class="c1"># Run code style checks</span>
+pre-commit<span class="w"> </span>--all-files
+
+<span class="c1"># Commit the code after all checks pass</span>
+git<span class="w"> </span>commit<span class="w"> </span>-am<span class="w"> </span><span class="s2">&quot;create example workflow&quot;</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="trinity_configs.html" class="btn btn-neutral float-left" title="Trinity-RFT Configuration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../trinity.buffer.reader.html" class="btn btn-neutral float-right" title="trinity.buffer.reader" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Trinity-RFT Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
