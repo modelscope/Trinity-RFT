@@ -95,6 +95,21 @@ def both(config: Config) -> None:
             logger.info("Eval step finished.")
 
 
+def activate_data_module(config: Config, config_path: str):
+    """Check whether to activate data module and preprocess datasets."""
+    data_config = config.data
+    if data_config.dj_config_path or data_config.dj_process_desc:
+        from trinity.data.client import request, LOCAL_SERVER_URL
+        logger.info("Activating data module...")
+        res = request(
+            url=LOCAL_SERVER_URL,
+            configPath=config_path,
+        )
+        if res["return_code"] != 0:
+            logger.error(f"Failed to activate data module: {res['return_msg']}.")
+            return
+
+
 def main() -> None:
     """The main entrypoint."""
     parser = argparse.ArgumentParser()
@@ -111,6 +126,8 @@ def main() -> None:
         # TODO: support parse all args from command line
         config = load_config(args.config)
         config.check_and_update()
+        # try to activate data module
+        activate_data_module(config, args.config)
         ray.init()
         if config.mode == "explore":
             explore(config)
