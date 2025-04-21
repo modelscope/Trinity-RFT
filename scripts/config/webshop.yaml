@@ -3,8 +3,8 @@ data:
   batch_size: 4
   dataset_path: 'scripts/data_prepare/webshop_data'
   default_workflow_type: 'webshop_workflow'
-  dataset_config:
-    split: 'train'
+  train_split: 'train'
+  eval_split: ''
   format_config:
     prompt_key: 'task_id'
 model:

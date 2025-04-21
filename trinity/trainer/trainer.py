@@ -99,6 +99,9 @@ class Trainer:
         if self.config.synchronizer.sync_method == "online":
             self.engine.sync_weight()
 
+    def get_current_step(self) -> int:
+        return self.engine.get_current_step()
+
 
 class TrainEngineWrapper(ABC):
     """A wrapper class to wrap various training engines."""

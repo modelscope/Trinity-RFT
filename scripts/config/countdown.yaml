@@ -3,8 +3,8 @@ data:
   batch_size: 96
   dataset_path: 'countdown_dataset/oneshot-split'
   default_workflow_type: 'math_workflow'
-  dataset_config:
-    split: 'train'
+  train_split: 'train'
+  eval_split: ''
   default_reward_fn_type: 'countdown_reward'
   format_config:
     prompt_key: 'question'

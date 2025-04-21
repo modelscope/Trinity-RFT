@@ -3,7 +3,8 @@ data:
   dataset_path: ''
   total_epoch: 1
   batch_size: 1
-  split: train
+  train_split: 'train'
+  eval_split: ''
   default_workflow_type: ''
   default_reward_fn_type: ''
   dataset_config: {}

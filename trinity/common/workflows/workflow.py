@@ -58,7 +58,8 @@ class SimpleWorkflow(Workflow):
         else:
             messages = [{"role": "user", "content": self.task_desc}]
         logger.debug("start chat")
-        responses = self.model.chat(messages, n=self.repeat_times)
+        n = 1 if self.is_eval else self.repeat_times
+        responses = self.model.chat(messages, n=n)
         for response in responses:
             reward = self.reward_fn(  # type: ignore [misc]
                 response=response.response_text,  # type: ignore [arg-type]
@@ -69,9 +70,9 @@ class SimpleWorkflow(Workflow):
                 f"self.task_desc: {self.task_desc}, messages: {messages}, response: {response.response_text}, reward: {reward}"
             )
             if isinstance(reward, dict):
-                if response.info is None:
-                    response.info = {}
-                response.info.update(reward)
+                if response.metrics is None:
+                    response.metrics = {}
+                response.metrics.update(reward)
                 reward = sum(reward.values())
             response.reward = reward
         return responses

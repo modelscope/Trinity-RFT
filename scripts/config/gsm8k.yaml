@@ -1,8 +1,8 @@
 data:
   # basic info
   dataset_path: '/PATH/TO/DATASET/'
-  dataset_config:
-    split: 'train'
+  train_split: 'train'
+  eval_split: ''
   format_config:
     prompt_key: 'question'
     response_key: 'answer'
@@ -70,6 +70,7 @@ trainer:
   algorithm_type: ppo
   trainer_config_path: 'scripts/config/train_gsm8k.yaml'
   sft_warmup_iteration: 0 # Set to integer to enable sft warmup
+  eval_interval: 10
 monitor:
   cache_root_dir: ""
   project: "Trinity-RFT-gsm8k"

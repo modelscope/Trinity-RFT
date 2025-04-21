@@ -559,3 +559,6 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
 
     def shutdown(self) -> None:
         pass
+
+    def get_current_step(self) -> int:
+        return self.global_steps

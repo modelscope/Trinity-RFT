@@ -306,6 +306,14 @@ class Config:
         self.synchronizer.backend = self.explorer.backend
         if self.synchronizer.sync_method == "online" and self.mode != "both":
             raise ValueError("Online synchronization is only supported in both mode")
+
+        # check eval_interval
+        if self.trainer.eval_interval % self.synchronizer.sync_iteration_interval != 0:
+            self.trainer.eval_interval = (
+                self.trainer.eval_interval // self.synchronizer.sync_iteration_interval
+            ) * self.synchronizer.sync_iteration_interval
+            print(f"Warning: eval_interval is not a multiple of sync_iteration_interval; adjusted to the nearest integer={self.trainer.eval_interval}.")
+
         # check monitor
         if not self.monitor.cache_root_dir:
             # create a cache dir in <checkpoint_path>/.cache

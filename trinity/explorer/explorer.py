@@ -210,9 +210,9 @@ class Explorer:
         self.logger.info("Explore step finished.")
         return True
 
-    def eval(self) -> bool:
+    def eval(self, step) -> bool:
         """Evaluation on all evaluation data samples."""
-        self.logger.info("\n\nEvaluation started.\n\n")
+        self.logger.info("Evaluation started.")
         st = time.time()
         all_metrics = defaultdict(list)
 
@@ -231,11 +231,9 @@ class Explorer:
                     for metric_name, metric_value in status.metric.items():
                         all_metrics[metric_name].append(metric_value)
 
-        self.logger.info("Evaluation finished.")
-
         log_metrics = self.monitor.calculate_metrics(all_metrics, prefix="eval")  # type: ignore
         log_metrics["eval/total_time"] = time.time() - st
-        self.monitor.log(log_metrics, step=self.iteration)  # type: ignore
+        self.monitor.log(log_metrics, step=step)  # type: ignore
         return True
 
     def sync_weight(self) -> None:
