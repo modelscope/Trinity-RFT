@@ -83,7 +83,6 @@ class ModelConfig:
     max_response_tokens: int = 2048
     # The checkpoint directory, contains a latest dir link and multiple checkpoint dirs.
     checkpoint_path: str = ""
-    load_checkpoint: bool = True
 
 
 @dataclass
@@ -201,8 +200,6 @@ class MonitorConfig:
     # TODO: add more
     project: str = "trinity"
     name: str = "rft"
-    group: str = ""
-    run_id: str = ""
 
     # ! DO NOT SET
     # the root directory for cache and meta files, automatically generated
