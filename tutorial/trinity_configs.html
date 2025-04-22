@@ -50,13 +50,13 @@
 <li class="toctree-l1"><a class="reference internal" href="example_dpo.html">Example: Run DPO on Human-Like-DPO-Dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_data_functionalities.html">Data processing functionalities</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Trinity-RFT Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#monitor">Monitor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#data">Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#model">Model</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#cluster">Cluster</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#buffer">Buffer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#explorer">Explorer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#synchronizer">Synchronizer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#monitor">Monitor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#trainer">Trainer</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#verl-trainer-configuration">veRL Trainer Configuration</a></li>
 </ul>
@@ -102,6 +102,18 @@
   <section id="trinity-rft-configuration">
 <h1>Trinity-RFT Configuration<a class="headerlink" href="#trinity-rft-configuration" title="Link to this heading"></a></h1>
 <p>The following is the main config file for Trinity-RFT. Take <code class="docutils literal notranslate"><span class="pre">scripts/config/countdown.yaml</span></code> as an example.</p>
+<section id="monitor">
+<h2>Monitor<a class="headerlink" href="#monitor" title="Link to this heading"></a></h2>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">monitor</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Trinity-RFT-countdown&quot;</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;qwen2.5-1.5B-countdown&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">monitor.project</span></code>: The project name. It must be set manually.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">monitor.name</span></code>: The name of the experiment. It must be set manually.</p></li>
+</ul>
+</section>
 <section id="data">
 <h2>Data<a class="headerlink" href="#data" title="Link to this heading"></a></h2>
 <!-- The `data` configuration specifies the data used for training. It includes the total number of epochs, the batch size, the path to the dataset, the default workflow type, the default reward function type, and the format configuration. -->
@@ -150,7 +162,6 @@
 <span class="w">  </span><span class="nt">max_prompt_tokens</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">256</span>
 <span class="w">  </span><span class="nt">max_response_tokens</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1024</span>
 <span class="w">  </span><span class="nt">checkpoint_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;checkpoints/qwen2.5-1.5B-countdown&#39;</span>
-<span class="w">  </span><span class="nt">load_checkpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -159,7 +170,6 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">model.max_prompt_tokens</span></code>: The maximum number of tokens in the prompt. Default is <code class="docutils literal notranslate"><span class="pre">2048</span></code>. It should be set manually.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">model.max_response_tokens</span></code>: The maximum number of tokens in the response. Default is <code class="docutils literal notranslate"><span class="pre">2048</span></code>. It should be set manually.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">model.checkpoint_path</span></code>: The path to the checkpoint of the model. It must be set manually.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">model.load_checkpoint</span></code>: Whether to load the checkpoint of the model. Default is <code class="docutils literal notranslate"><span class="pre">true</span></code>.</p></li>
 </ul>
 </section>
 <section id="cluster">
@@ -248,20 +258,6 @@
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">synchronizer.sync_method</span></code>: The synchronization method, Support <code class="docutils literal notranslate"><span class="pre">online</span></code> and <code class="docutils literal notranslate"><span class="pre">offline</span></code>. Default is <code class="docutils literal notranslate"><span class="pre">online</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">synchronizer.sync_iteration_interval</span></code>: The interval between two synchronizations. Default is <code class="docutils literal notranslate"><span class="pre">10</span></code>. It should be set manually.</p></li>
-</ul>
-</section>
-<section id="monitor">
-<h2>Monitor<a class="headerlink" href="#monitor" title="Link to this heading"></a></h2>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">monitor</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">cache_root_dir</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
-<span class="w">  </span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Trinity-RFT-countdown&quot;</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;qwen2.5-1.5B-countdown&quot;</span>
-</pre></div>
-</div>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">monitor.cache_root_dir</span></code>: The root directory of the cache. Default is <code class="docutils literal notranslate"><span class="pre">os.path.join(model.checkpoint_path,</span> <span class="pre">&quot;.cache&quot;)</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">monitor.project</span></code>: The project name. It must be set manually.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">monitor.name</span></code>: The name of the experiment. It must be set manually.</p></li>
 </ul>
 </section>
 <section id="trainer">
@@ -486,6 +482,7 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu</span></code>: Batch size for one GPU in one forward pass.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.grad_clip</span></code>: Gradient clip for actor model training.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.clip_ratio</span></code>: Used for compute policy loss.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.entropy_coeff</span></code>: Used for compute policy loss.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.use_kl_loss</span></code>: True for GRPO.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.kl_loss_coef</span></code>: Used for GRPO, optional value is <code class="docutils literal notranslate"><span class="pre">kl</span></code>, <code class="docutils literal notranslate"><span class="pre">abs</span></code>, <code class="docutils literal notranslate"><span class="pre">mse</span></code> or <code class="docutils literal notranslate"><span class="pre">low_var_kl</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.ulysses_sequence_parallel_size</span></code>: Ulysses sequence parallel size.</p></li>
@@ -509,6 +506,7 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">critic.grad_clip</span></code>: Gradient clip for critic model training.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">critic.cliprange_value</span></code>: Used for compute value loss.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">algorithm</span></code>: Training algorithm settings.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trainer.balance_batch</span></code>: Whether to balance batch size between GPUs during training.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">trainer.save_freq</span></code>: Frequency of saving checkpoints.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">trainer.resume_mode</span></code>: Resume mode for training. Support <code class="docutils literal notranslate"><span class="pre">disable</span></code>, <code class="docutils literal notranslate"><span class="pre">auto</span></code> and <code class="docutils literal notranslate"><span class="pre">resume_path</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">trainer.resume_from_path</span></code>: Path to resume from.</p></li>

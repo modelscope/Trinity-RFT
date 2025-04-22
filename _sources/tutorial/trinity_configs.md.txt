@@ -2,6 +2,18 @@
 
 The following is the main config file for Trinity-RFT. Take `scripts/config/countdown.yaml` as an example.
 
+
+## Monitor
+
+```yaml
+monitor:
+  project: "Trinity-RFT-countdown"
+  name: "qwen2.5-1.5B-countdown"
+```
+
+- `monitor.project`: The project name. It must be set manually.
+- `monitor.name`: The name of the experiment. It must be set manually.
+
 ## Data
 
 <!-- The `data` configuration specifies the data used for training. It includes the total number of epochs, the batch size, the path to the dataset, the default workflow type, the default reward function type, and the format configuration. -->
@@ -53,7 +65,6 @@ model:
   max_prompt_tokens: 256
   max_response_tokens: 1024
   checkpoint_path: 'checkpoints/qwen2.5-1.5B-countdown'
-  load_checkpoint: true
 ```
 
 - `model.model_path`: The path to the model checkpoint. It must be set manually.
@@ -61,7 +72,6 @@ model:
 - `model.max_prompt_tokens`: The maximum number of tokens in the prompt. Default is `2048`. It should be set manually.
 - `model.max_response_tokens`: The maximum number of tokens in the response. Default is `2048`. It should be set manually.
 - `model.checkpoint_path`: The path to the checkpoint of the model. It must be set manually.
-- `model.load_checkpoint`: Whether to load the checkpoint of the model. Default is `true`.
 
 ## Cluster
 
@@ -148,19 +158,6 @@ synchronizer:
 
 - `synchronizer.sync_method`: The synchronization method, Support `online` and `offline`. Default is `online`.
 - `synchronizer.sync_iteration_interval`: The interval between two synchronizations. Default is `10`. It should be set manually.
-
-## Monitor
-
-```yaml
-monitor:
-  cache_root_dir: ""
-  project: "Trinity-RFT-countdown"
-  name: "qwen2.5-1.5B-countdown"
-```
-
-- `monitor.cache_root_dir`: The root directory of the cache. Default is `os.path.join(model.checkpoint_path, ".cache")`.
-- `monitor.project`: The project name. It must be set manually.
-- `monitor.name`: The name of the experiment. It must be set manually.
 
 ## Trainer
 
@@ -386,6 +383,7 @@ trainer:
 - `actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu`: Batch size for one GPU in one forward pass.
 - `actor_rollout_ref.actor.grad_clip`: Gradient clip for actor model training.
 - `actor_rollout_ref.actor.clip_ratio`: Used for compute policy loss.
+- `actor_rollout_ref.actor.entropy_coeff`: Used for compute policy loss.
 - `actor_rollout_ref.actor.use_kl_loss`: True for GRPO.
 - `actor_rollout_ref.actor.kl_loss_coef`: Used for GRPO, optional value is `kl`, `abs`, `mse` or `low_var_kl`.
 - `actor_rollout_ref.actor.ulysses_sequence_parallel_size`: Ulysses sequence parallel size.
@@ -412,6 +410,7 @@ trainer:
 
 - `algorithm`: Training algorithm settings.
 
+- `trainer.balance_batch`: Whether to balance batch size between GPUs during training.
 - `trainer.save_freq`: Frequency of saving checkpoints.
 - `trainer.resume_mode`: Resume mode for training. Support `disable`, `auto` and `resume_path`.
 - `trainer.resume_from_path`: Path to resume from.
