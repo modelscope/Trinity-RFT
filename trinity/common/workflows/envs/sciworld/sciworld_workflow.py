@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from typing import List
 import json
+from typing import List
 
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
@@ -11,7 +11,7 @@ You are an agent, you job is to do some scientific experiment in a virtual test-
 
 ## Notes:
 At each step, you should first think then perform action to fulfill the instruction. You should ALWAYS wrap your thinking with the <think> </think> tag and wrap your action with the <action> </action> tag.
-You should ALWAYS take one action each step. 
+You should ALWAYS take one action each step.
 DONOT try to interact with the user at anytime. Finish the task by yourself.
 
 ## Action Format:
@@ -66,7 +66,7 @@ class SciWorldWorkflow(MultiTurnWorkflow):
         self.truth = kwargs.get("truth")  # Unuse here
         self.reward_fn = kwargs.get("reward_fn")  # Unuse here
         self.repeat_times = kwargs.get("repeat_times", 1)
-        self.max_env_steps = 30 # should be less than 100
+        self.max_env_steps = 30  # should be less than 100
 
     def get_model_response(self, messages):
         responses = self.model.chat(messages, repeat_times=1)
@@ -82,7 +82,9 @@ class SciWorldWorkflow(MultiTurnWorkflow):
         experience_list = []
         for i in range(rollout_num):
             observation, info = env.reset()
-            observation =  "Task Description: " + str(env.get_task_description()) + "\n" + observation
+            observation = (
+                "Task Description: " + str(env.get_task_description()) + "\n" + observation
+            )
             final_reward = 0.0
             current_reward = 0.0
             memory = []
@@ -99,7 +101,11 @@ class SciWorldWorkflow(MultiTurnWorkflow):
                 if done:
                     break
             final_reward = final_reward / 100.0
-            experience = self.process_messages_to_experience(memory, final_reward, {"env_rounds": r, "env_done": 1 if done else 0, "golden_rounds": golden_rounds})
+            experience = self.process_messages_to_experience(
+                memory,
+                final_reward,
+                {"env_rounds": r, "env_done": 1 if done else 0, "golden_rounds": golden_rounds},
+            )
             experience_list.append(experience)
         # Close the env to save cpu memory
         env.close()
@@ -115,7 +121,8 @@ class SciWorldWorkflow(MultiTurnWorkflow):
         # TODO: Make parallel envs
         try:
             from scienceworld import ScienceWorldEnv
-            def create_environment(task_config):    
+
+            def create_environment(task_config):
                 var_num = task_config["var_num"]
                 task_name = task_config["task_name"]
                 jar_path = task_config["jar_path"]
