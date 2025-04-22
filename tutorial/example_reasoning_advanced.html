@@ -104,7 +104,7 @@
 <p>As an experimental feature of Trinity-RFT, we develop an embarrasingly simple off-policy RL algorithm, termed as OPMD (Online Policy Mirror Descent, inspired by <a class="reference external" href="https://arxiv.org/abs/2501.12599">Kimi k1.5</a>).
 The algorithm design and analysis can be found in this <a class="reference download internal" download="" href="../_downloads/cdfa45ed2070fe1a298521f0cb5a8529/opmd.pdf"><span class="xref download myst">technical report</span></a>.</p>
 <p>To try out the OPMD algorithm:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>as-rft<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>scripts/config/gsm8k_opmd.yaml
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>scripts/config/gsm8k_opmd.yaml
 </pre></div>
 </div>
 <p>Note that in this config file, <code class="docutils literal notranslate"><span class="pre">sync_iteration_interval</span></code> is set to 10, i.e., the model weights of explorer and trainer are synchronized only once every 10 training steps, which leads to a challenging off-policy scenario (potentially with abrupt distribution shift during the RFT process).

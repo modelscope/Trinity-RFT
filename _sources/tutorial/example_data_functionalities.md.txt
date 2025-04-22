@@ -151,7 +151,7 @@ ray start --head
 ray start --address=<master_address>
 
 # run RFT
-as-rft run --config <Trinity-RFT_config_path>
+trinity run --config <Trinity-RFT_config_path>
 ```
 
 If you follow the steps above, Trinity-RFT will send a request to the data module server, the data active iterator will be activated and compute difficulty scores for each sample in the raw dataset. After that, the data module server stores the result dataset into the database, when exploring begins, it will load the prepared dataset and continue the downstream steps.

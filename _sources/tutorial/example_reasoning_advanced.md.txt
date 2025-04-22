@@ -17,7 +17,7 @@ The algorithm design and analysis can be found in this [technical report](./opmd
 
 To try out the OPMD algorithm:
 ```shell
-as-rft run --config scripts/config/gsm8k_opmd.yaml
+trinity run --config scripts/config/gsm8k_opmd.yaml
 ```
 
 Note that in this config file, `sync_iteration_interval` is set to 10, i.e., the model weights of explorer and trainer are synchronized only once every 10 training steps, which leads to a challenging off-policy scenario (potentially with abrupt distribution shift during the RFT process).
