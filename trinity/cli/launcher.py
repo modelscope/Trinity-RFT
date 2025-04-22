@@ -74,7 +74,7 @@ def both(config: Config) -> None:
         try:
             ref_explore = explorer.explore_step.remote()
             ref_train = trainer.train_step.remote(algo_type)
-            explore_continue, _ = ray.get(ref_explore)
+            explore_continue, explore_iter_num = ray.get(ref_explore)
             train_continue, train_iter_num = ray.get(ref_train)
             if not explore_continue:
                 logger.info("Explorer finished, stopping...")
@@ -88,9 +88,9 @@ def both(config: Config) -> None:
             logger.error(e)
             logger.error("Training stopped due to exception.")
             raise e
-        if (train_iter_num - 1) % config.trainer.eval_interval == 0:
+        if train_iter_num % config.trainer.eval_interval == 0:
             try:
-                ray.get(explorer.eval.remote(train_iter_num))
+                ray.get(explorer.eval.remote())
                 logger.info("Evaluation finished.")
             except Exception as e:
                 logger.error(e)

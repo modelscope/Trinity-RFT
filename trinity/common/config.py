@@ -310,7 +310,7 @@ class Config:
         # check eval_interval
         if self.trainer.eval_interval % self.synchronizer.sync_iteration_interval != 0:
             self.trainer.eval_interval = (
-                self.trainer.eval_interval // self.synchronizer.sync_iteration_interval
+                max(self.trainer.eval_interval // self.synchronizer.sync_iteration_interval, 1)
             ) * self.synchronizer.sync_iteration_interval
             print(
                 f"Warning: eval_interval is not a multiple of sync_iteration_interval; adjusted to the nearest integer={self.trainer.eval_interval}."

@@ -244,7 +244,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                 self._save_checkpoint()
 
         self.global_steps += 1
-        return True, self.global_steps
+        return True, self.global_steps - 1
 
     def train_sft_iteration(self, experiences: Experiences) -> Tuple[bool, int]:
         metrics = {}
@@ -310,7 +310,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             with _timer("save_checkpoint", timing_raw):
                 self._save_checkpoint()
         self.global_steps += 1
-        return True, self.global_steps
+        return True, self.global_steps - 1
 
     def train_rft_iteration(self, experiences: Experiences) -> Tuple[bool, int]:
         metrics = {}
@@ -457,10 +457,10 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                 with _timer("save_checkpoint", timing_raw):
                     self._save_checkpoint()
             # stop training
-            return False, self.global_steps
+            return False, self.global_steps - 1
         else:
             # continue
-            return True, self.global_steps
+            return True, self.global_steps - 1
 
     def _log_single_experience(
         self, experiences: Experiences, idx: int, skip_special_tokens: bool
