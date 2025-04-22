@@ -70,7 +70,7 @@
 <li class="toctree-l2"><a class="reference internal" href="trinity.common.html#module-trinity.common.constants">trinity.common.constants module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="trinity.common.html#module-trinity.common.experience">trinity.common.experience module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="trinity.common.html#module-trinity.common.schema">trinity.common.schema module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="trinity.common.html#module-trinity.common.task">trinity.common.task module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.common.html#trinity-common-task-module">trinity.common.task module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="trinity.common.html#module-trinity.common.verl_config">trinity.common.verl_config module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="trinity.common.html#module-trinity.common">Module contents</a></li>
 </ul>
@@ -131,6 +131,29 @@
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="trinity.common.workflows.workflow.MultiTurnWorkflow">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.common.workflows.workflow.</span></span><span class="sig-name descname"><span class="pre">MultiTurnWorkflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.models.html#trinity.common.models.model.ModelWrapper" title="trinity.common.models.model.ModelWrapper"><span class="pre">ModelWrapper</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/workflow.html#MultiTurnWorkflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.workflow.MultiTurnWorkflow" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#trinity.common.workflows.workflow.Workflow" title="trinity.common.workflows.workflow.Workflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">Workflow</span></code></a></p>
+<p>The base workflow class for multi-turn tasks.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.workflows.workflow.MultiTurnWorkflow.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.models.html#trinity.common.models.model.ModelWrapper" title="trinity.common.models.model.ModelWrapper"><span class="pre">ModelWrapper</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/workflow.html#MultiTurnWorkflow.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.workflow.MultiTurnWorkflow.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.workflows.workflow.MultiTurnWorkflow.run">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/workflows/workflow.html#MultiTurnWorkflow.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.workflow.MultiTurnWorkflow.run" title="Link to this definition"></a></dt>
+<dd><p>Run workflow and return a list of experiences.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.workflows.workflow.MultiTurnWorkflow.process_messages_to_experience">
+<span class="sig-name descname"><span class="pre">process_messages_to_experience</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">messages</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reward</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a></span></span><a class="reference internal" href="../_modules/trinity/common/workflows/workflow.html#MultiTurnWorkflow.process_messages_to_experience"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.workflow.MultiTurnWorkflow.process_messages_to_experience" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="trinity.common.workflows.workflow.SimpleWorkflow">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.common.workflows.workflow.</span></span><span class="sig-name descname"><span class="pre">SimpleWorkflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.models.html#trinity.common.models.model.ModelWrapper" title="trinity.common.models.model.ModelWrapper"><span class="pre">ModelWrapper</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/workflow.html#SimpleWorkflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.workflow.SimpleWorkflow" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#trinity.common.workflows.workflow.Workflow" title="trinity.common.workflows.workflow.Workflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">Workflow</span></code></a></p>
@@ -161,115 +184,8 @@
 </dd></dl>
 
 </section>
-<section id="module-trinity.common.workflows">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-trinity.common.workflows" title="Link to this heading"></a></h2>
-<p>Workflow module</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="trinity.common.workflows.SimpleWorkflow">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.common.workflows.</span></span><span class="sig-name descname"><span class="pre">SimpleWorkflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.models.html#trinity.common.models.model.ModelWrapper" title="trinity.common.models.model.ModelWrapper"><span class="pre">ModelWrapper</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/workflow.html#SimpleWorkflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.SimpleWorkflow" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#trinity.common.workflows.workflow.Workflow" title="trinity.common.workflows.workflow.Workflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">Workflow</span></code></a></p>
-<p>A workflow for simple single-round task.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.workflows.SimpleWorkflow.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.models.html#trinity.common.models.model.ModelWrapper" title="trinity.common.models.model.ModelWrapper"><span class="pre">ModelWrapper</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/workflow.html#SimpleWorkflow.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.SimpleWorkflow.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.workflows.SimpleWorkflow.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/workflows/workflow.html#SimpleWorkflow.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.SimpleWorkflow.run" title="Link to this definition"></a></dt>
-<dd><p>Run workflow and return a list of experiences.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="trinity.common.workflows.MathWorkflow">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.common.workflows.</span></span><span class="sig-name descname"><span class="pre">MathWorkflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.models.html#trinity.common.models.model.ModelWrapper" title="trinity.common.models.model.ModelWrapper"><span class="pre">ModelWrapper</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/workflow.html#MathWorkflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.MathWorkflow" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#trinity.common.workflows.workflow.SimpleWorkflow" title="trinity.common.workflows.workflow.SimpleWorkflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleWorkflow</span></code></a></p>
-<p>A workflow for math tasks as introduced in DeepSeek-R1.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.workflows.MathWorkflow.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.models.html#trinity.common.models.model.ModelWrapper" title="trinity.common.models.model.ModelWrapper"><span class="pre">ModelWrapper</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/workflow.html#MathWorkflow.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.MathWorkflow.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="trinity.common.workflows.WebShopWorkflow">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.common.workflows.</span></span><span class="sig-name descname"><span class="pre">WebShopWorkflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.models.html#trinity.common.models.model.ModelWrapper" title="trinity.common.models.model.ModelWrapper"><span class="pre">ModelWrapper</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/webshop/webshop_workflow.html#WebShopWorkflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.WebShopWorkflow" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#trinity.common.workflows.workflow.Workflow" title="trinity.common.workflows.workflow.Workflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">Workflow</span></code></a></p>
-<p>A workflow for webshop task.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.workflows.WebShopWorkflow.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.models.html#trinity.common.models.model.ModelWrapper" title="trinity.common.models.model.ModelWrapper"><span class="pre">ModelWrapper</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/webshop/webshop_workflow.html#WebShopWorkflow.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.WebShopWorkflow.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.workflows.WebShopWorkflow.get_model_response">
-<span class="sig-name descname"><span class="pre">get_model_response</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">messages</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/webshop/webshop_workflow.html#WebShopWorkflow.get_model_response"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.WebShopWorkflow.get_model_response" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.workflows.WebShopWorkflow.get_model_response_text">
-<span class="sig-name descname"><span class="pre">get_model_response_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">messages</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'actor'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/webshop/webshop_workflow.html#WebShopWorkflow.get_model_response_text"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.WebShopWorkflow.get_model_response_text" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.workflows.WebShopWorkflow.generate_env_inference_samples">
-<span class="sig-name descname"><span class="pre">generate_env_inference_samples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">env</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rollout_num</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/webshop/webshop_workflow.html#WebShopWorkflow.generate_env_inference_samples"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.WebShopWorkflow.generate_env_inference_samples" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.workflows.WebShopWorkflow.process_batch_messages">
-<span class="sig-name descname"><span class="pre">process_batch_messages</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">all_messages</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_rewards</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_infos</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/webshop/webshop_workflow.html#WebShopWorkflow.process_batch_messages"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.WebShopWorkflow.process_batch_messages" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.workflows.WebShopWorkflow.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/webshop/webshop_workflow.html#WebShopWorkflow.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.WebShopWorkflow.run" title="Link to this definition"></a></dt>
-<dd><p>Run workflow and return a list of experiences.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="trinity.common.workflows.AlfworldWorkflow">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.common.workflows.</span></span><span class="sig-name descname"><span class="pre">AlfworldWorkflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.models.html#trinity.common.models.model.ModelWrapper" title="trinity.common.models.model.ModelWrapper"><span class="pre">ModelWrapper</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/alfworld/alfworld_workflow.html#AlfworldWorkflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.AlfworldWorkflow" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#trinity.common.workflows.workflow.Workflow" title="trinity.common.workflows.workflow.Workflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">Workflow</span></code></a></p>
-<p>A workflow for alfworld task.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.workflows.AlfworldWorkflow.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.models.html#trinity.common.models.model.ModelWrapper" title="trinity.common.models.model.ModelWrapper"><span class="pre">ModelWrapper</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/alfworld/alfworld_workflow.html#AlfworldWorkflow.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.AlfworldWorkflow.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.workflows.AlfworldWorkflow.get_model_response">
-<span class="sig-name descname"><span class="pre">get_model_response</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">messages</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/alfworld/alfworld_workflow.html#AlfworldWorkflow.get_model_response"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.AlfworldWorkflow.get_model_response" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.workflows.AlfworldWorkflow.get_model_response_text">
-<span class="sig-name descname"><span class="pre">get_model_response_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">messages</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/alfworld/alfworld_workflow.html#AlfworldWorkflow.get_model_response_text"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.AlfworldWorkflow.get_model_response_text" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.workflows.AlfworldWorkflow.generate_env_inference_samples">
-<span class="sig-name descname"><span class="pre">generate_env_inference_samples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">env</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rollout_num</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/alfworld/alfworld_workflow.html#AlfworldWorkflow.generate_env_inference_samples"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.AlfworldWorkflow.generate_env_inference_samples" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.workflows.AlfworldWorkflow.process_batch_messages">
-<span class="sig-name descname"><span class="pre">process_batch_messages</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">all_messages</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_rewards</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_infos</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/alfworld/alfworld_workflow.html#AlfworldWorkflow.process_batch_messages"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.AlfworldWorkflow.process_batch_messages" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.workflows.AlfworldWorkflow.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/alfworld/alfworld_workflow.html#AlfworldWorkflow.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.AlfworldWorkflow.run" title="Link to this definition"></a></dt>
-<dd><p>Run workflow and return a list of experiences.</p>
-</dd></dl>
-
-</dd></dl>
-
+<section id="module-contents">
+<h2>Module contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
 </section>
 </section>
 
