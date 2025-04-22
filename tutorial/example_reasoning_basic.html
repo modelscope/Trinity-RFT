@@ -11,6 +11,8 @@
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../_static/documentation_options.js?v=01f34227"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
@@ -62,20 +64,12 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.buffer.reader.html">trinity.buffer.reader</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.buffer.html">trinity.buffer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.buffer.schema.html">trinity.buffer.schema</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.buffer.writer.html">trinity.buffer.writer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.common.models.html">trinity.common.models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.common.rewards.html">trinity.common.rewards</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.common.html">trinity.common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.common.workflows.html">trinity.common.workflows</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.explorer.html">trinity.explorer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.manager.html">trinity.manager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.html">trinity</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.trainer.html">trinity.trainer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.trainer.verl.html">trinity.trainer.verl</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.utils.html">trinity.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.buffer.html">trinity.buffer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.explorer.html">trinity.explorer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.trainer.html">trinity.trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.manager.html">trinity.manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.common.html">trinity.common</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.utils.html">trinity.utils</a></li>
 </ul>
 
         </div>
@@ -103,10 +97,10 @@
            <div itemprop="articleBody">
              
   <section id="a-quick-example-with-gsm8k">
-<h1>A quick example with GSM8k<a class="headerlink" href="#a-quick-example-with-gsm8k" title="Link to this heading">¶</a></h1>
+<h1>A quick example with GSM8k<a class="headerlink" href="#a-quick-example-with-gsm8k" title="Link to this heading"></a></h1>
 <p>This example shows how to run RFT with the Qwen-2.5-1.5B-Instruct model and GSM8K dataset.</p>
 <section id="step-1-model-and-data-preparation">
-<h2>Step 1: Model and Data Preparation<a class="headerlink" href="#step-1-model-and-data-preparation" title="Link to this heading">¶</a></h2>
+<h2>Step 1: Model and Data Preparation<a class="headerlink" href="#step-1-model-and-data-preparation" title="Link to this heading"></a></h2>
 <p><strong>Model Preparation.</strong></p>
 <p>Download the Qwen-2.5-1B-Instruct model to the local directory <code class="docutils literal notranslate"><span class="pre">$MODEL_PATH/Qwen2.5-1.5B-Instruct</span></code>:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Using Modelscope</span>
@@ -129,9 +123,9 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>openai/gs
 <p>More details on dataset downloading are referred to <a class="reference external" href="https://modelscope.cn/docs/datasets/download">ModelScope</a> or <a class="reference external" href="https://huggingface.co/docs/huggingface_hub/main/en/guides/cli#download-a-dataset-or-a-space">Huggingface</a>.</p>
 </section>
 <section id="step-2-set-up-configuration-and-run-experiment">
-<h2>Step 2: Set up Configuration and Run Experiment<a class="headerlink" href="#step-2-set-up-configuration-and-run-experiment" title="Link to this heading">¶</a></h2>
+<h2>Step 2: Set up Configuration and Run Experiment<a class="headerlink" href="#step-2-set-up-configuration-and-run-experiment" title="Link to this heading"></a></h2>
 <section id="synchronous-mode-of-trinity-rft">
-<h3>Synchronous Mode of Trinity-RFT<a class="headerlink" href="#synchronous-mode-of-trinity-rft" title="Link to this heading">¶</a></h3>
+<h3>Synchronous Mode of Trinity-RFT<a class="headerlink" href="#synchronous-mode-of-trinity-rft" title="Link to this heading"></a></h3>
 <p>We run the experiment in a synchronous mode where the Explorer and Trainer operate in turn. To enable this mode, we config <code class="docutils literal notranslate"><span class="pre">mode</span></code> to <code class="docutils literal notranslate"><span class="pre">both</span></code> (default) and set <code class="docutils literal notranslate"><span class="pre">sync_iteration_interval</span></code> properly. A smaller value of <code class="docutils literal notranslate"><span class="pre">sync_iteration_interval</span></code> makes the training closer to an on-policy setup.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">both</span>
 <span class="nt">synchronizer</span><span class="p">:</span>
@@ -141,7 +135,7 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>openai/gs
 </div>
 </section>
 <section id="use-grpo-or-ppo-algorithm">
-<h3>Use GRPO or PPO Algorithm<a class="headerlink" href="#use-grpo-or-ppo-algorithm" title="Link to this heading">¶</a></h3>
+<h3>Use GRPO or PPO Algorithm<a class="headerlink" href="#use-grpo-or-ppo-algorithm" title="Link to this heading"></a></h3>
 <p>We use the configurations in <code class="docutils literal notranslate"><span class="pre">scripts/config/gsm8k.yaml</span></code>and <code class="docutils literal notranslate"><span class="pre">scripts/config/train_gsm8k.yaml</span></code> for this experiment. Some important setups are listed in the following:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># scripts/config/gsm8k.yaml</span>
 <span class="nt">explorer</span><span class="p">:</span>
@@ -158,7 +152,7 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>openai/gs
 </div>
 </section>
 <section id="run-the-experiment">
-<h3>Run the Experiment<a class="headerlink" href="#run-the-experiment" title="Link to this heading">¶</a></h3>
+<h3>Run the Experiment<a class="headerlink" href="#run-the-experiment" title="Link to this heading"></a></h3>
 <p>Run the RFT process with the following command:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>scripts/config/gsm8k.yaml
 </pre></div>
@@ -166,7 +160,7 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>openai/gs
 </section>
 </section>
 <section id="optional-rft-with-sft-warmup">
-<h2>Optional: RFT with SFT Warmup<a class="headerlink" href="#optional-rft-with-sft-warmup" title="Link to this heading">¶</a></h2>
+<h2>Optional: RFT with SFT Warmup<a class="headerlink" href="#optional-rft-with-sft-warmup" title="Link to this heading"></a></h2>
 <p>Before RFT, we may use SFT as a warmup step. We need to set <code class="docutils literal notranslate"><span class="pre">trainer.sft_warmup_iteration</span> <span class="pre">&gt;</span> <span class="pre">0</span></code> and prepare the SFT data to <code class="docutils literal notranslate"><span class="pre">buffer.train_dataset.path=$DATASET_PATH/{sft_data}</span></code>.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Properly set the following configs in scripts/config/gsm8k.yaml</span>
 <span class="nt">buffer</span><span class="p">:</span>

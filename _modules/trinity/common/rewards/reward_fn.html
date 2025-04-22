@@ -10,6 +10,8 @@
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
 
   
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../../../../_static/documentation_options.js?v=01f34227"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
@@ -49,20 +51,12 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.buffer.reader.html">trinity.buffer.reader</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.buffer.html">trinity.buffer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.buffer.schema.html">trinity.buffer.schema</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.buffer.writer.html">trinity.buffer.writer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.common.models.html">trinity.common.models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.common.rewards.html">trinity.common.rewards</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.common.html">trinity.common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.common.workflows.html">trinity.common.workflows</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.explorer.html">trinity.explorer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.manager.html">trinity.manager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.html">trinity</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.trainer.html">trinity.trainer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.trainer.verl.html">trinity.trainer.verl</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.utils.html">trinity.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../build_api/trinity.buffer.html">trinity.buffer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../build_api/trinity.explorer.html">trinity.explorer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../build_api/trinity.trainer.html">trinity.trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../build_api/trinity.manager.html">trinity.manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../build_api/trinity.common.html">trinity.common</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../build_api/trinity.utils.html">trinity.utils</a></li>
 </ul>
 
         </div>
@@ -116,7 +110,7 @@
 
 
 <div class="viewcode-block" id="RewardFn">
-<a class="viewcode-back" href="../../../../trinity.common.rewards.html#trinity.common.rewards.RewardFn">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.html#trinity.common.rewards.reward_fn.RewardFn">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">RewardFn</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base Reward Function Class.&quot;&quot;&quot;</span>
 
@@ -135,7 +129,7 @@
 
 
 <div class="viewcode-block" id="AccuracyReward">
-<a class="viewcode-back" href="../../../../trinity.common.rewards.html#trinity.common.rewards.AccuracyReward">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.html#trinity.common.rewards.reward_fn.AccuracyReward">[docs]</a>
 <span class="nd">@REWARD_FUNCTIONS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;accuracy_reward&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">AccuracyReward</span><span class="p">(</span><span class="n">RewardFn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A reward function that rewards correct answers.</span>
@@ -143,7 +137,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="AccuracyReward.__init__">
-<a class="viewcode-back" href="../../../../trinity.common.rewards.html#trinity.common.rewards.AccuracyReward.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.html#trinity.common.rewards.reward_fn.AccuracyReward.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">answer_parser</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">answer_parser</span> <span class="o">=</span> <span class="n">answer_parser</span></div>
 
@@ -199,7 +193,7 @@
 
 
 <div class="viewcode-block" id="FormatReward">
-<a class="viewcode-back" href="../../../../trinity.common.rewards.html#trinity.common.rewards.FormatReward">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.html#trinity.common.rewards.reward_fn.FormatReward">[docs]</a>
 <span class="nd">@REWARD_FUNCTIONS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;format_reward&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">FormatReward</span><span class="p">(</span><span class="n">RewardFn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A reward function that checks if the reasoning process is enclosed within &lt;think&gt; and &lt;/think&gt; tags, while the final answer is enclosed within &lt;answer&gt; and &lt;/answer&gt; tags.</span>
@@ -207,7 +201,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="FormatReward.__init__">
-<a class="viewcode-back" href="../../../../trinity.common.rewards.html#trinity.common.rewards.FormatReward.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.html#trinity.common.rewards.reward_fn.FormatReward.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pattern</span> <span class="o">=</span> <span class="n">pattern</span> <span class="k">if</span> <span class="n">pattern</span> <span class="k">else</span> <span class="sa">r</span><span class="s2">&quot;^&lt;think&gt;\n.*?\n&lt;/think&gt;\n&lt;answer&gt;\n.*?\n&lt;/answer&gt;$&quot;</span></div>
 
@@ -226,6 +220,8 @@
 
 
 
+<div class="viewcode-block" id="MathRewardFn">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.html#trinity.common.rewards.reward_fn.MathRewardFn">[docs]</a>
 <span class="nd">@REWARD_FUNCTIONS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;math_reward&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MathRewardFn</span><span class="p">(</span><span class="n">RewardFn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A reward function that rewards for math task.&quot;&quot;&quot;</span>
@@ -234,13 +230,16 @@
     <span class="n">DEFAULT_FORMAT_PATTERN</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;.*?&lt;think&gt;.*?&lt;/think&gt;\s*&lt;answer&gt;.*?&lt;/answer&gt;\s*$&quot;</span>
     <span class="n">DEFAULT_ANSWER_PARSER</span> <span class="o">=</span> <span class="n">simple_answer_parser</span>
 
+<div class="viewcode-block" id="MathRewardFn.__init__">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.html#trinity.common.rewards.reward_fn.MathRewardFn.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">answer_parser</span><span class="o">=</span><span class="n">DEFAULT_ANSWER_PARSER</span><span class="p">,</span>
         <span class="n">pattern</span><span class="o">=</span><span class="n">DEFAULT_FORMAT_PATTERN</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">accuracy_reward</span> <span class="o">=</span> <span class="n">AccuracyReward</span><span class="p">(</span><span class="n">answer_parser</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">format_reward</span> <span class="o">=</span> <span class="n">FormatReward</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">format_reward</span> <span class="o">=</span> <span class="n">FormatReward</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -256,15 +255,21 @@
         <span class="k">if</span> <span class="n">return_dict</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;accuracy&quot;</span><span class="p">:</span> <span class="n">accuracy_score</span><span class="p">,</span> <span class="s2">&quot;format_score&quot;</span><span class="p">:</span> <span class="n">format_score</span><span class="p">}</span>
 
-        <span class="k">return</span> <span class="n">accuracy_score</span> <span class="o">+</span> <span class="n">format_score</span>
+        <span class="k">return</span> <span class="n">accuracy_score</span> <span class="o">+</span> <span class="n">format_score</span></div>
 
 
+
+<div class="viewcode-block" id="CountDownRewardFn">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.html#trinity.common.rewards.reward_fn.CountDownRewardFn">[docs]</a>
 <span class="nd">@REWARD_FUNCTIONS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;countdown_reward&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CountDownRewardFn</span><span class="p">(</span><span class="n">RewardFn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A reward function that rewards for countdown task.&quot;&quot;&quot;</span>
 
+<div class="viewcode-block" id="CountDownRewardFn.__init__">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.html#trinity.common.rewards.reward_fn.CountDownRewardFn.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">pass</span>
+        <span class="k">pass</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -301,7 +306,8 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">format_score</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># noqa: F841</span>
-            <span class="k">return</span> <span class="n">format_score</span>
+            <span class="k">return</span> <span class="n">format_score</span></div>
+
 </pre></div>
 
            </div>

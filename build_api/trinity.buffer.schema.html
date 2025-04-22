@@ -1,0 +1,350 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>trinity.buffer.schema &mdash; Trinity-RFT 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="trinity.buffer.writer" href="trinity.buffer.writer.html" />
+    <link rel="prev" title="trinity.buffer.reader" href="trinity.buffer.reader.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Trinity-RFT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/example_reasoning_basic.html">A quick example with GSM8k</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/example_reasoning_advanced.html">Example: off-policy / asynchronous RFT mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/example_multi_turn.html">Example: Multi-Turn RFT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/example_dpo.html">Example: Run DPO on Human-Like-DPO-Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/example_data_functionalities.html">Data processing functionalities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/trinity_configs.html">Trinity-RFT Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/trinity_programming_guide.html">Trinity-RFT Developer Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="trinity.buffer.html">trinity.buffer</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="trinity.buffer.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="trinity.buffer.reader.html">trinity.buffer.reader</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">trinity.buffer.schema</a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.buffer.writer.html">trinity.buffer.writer</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.buffer.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.buffer.html#module-trinity.buffer.buffer">trinity.buffer.buffer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.buffer.html#module-trinity.buffer.buffer_reader">trinity.buffer.buffer_reader module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.buffer.html#module-trinity.buffer.buffer_writer">trinity.buffer.buffer_writer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.buffer.html#module-trinity.buffer.queue">trinity.buffer.queue module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.buffer.html#module-trinity.buffer.utils">trinity.buffer.utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.buffer.html#module-trinity.buffer">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="trinity.explorer.html">trinity.explorer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trinity.trainer.html">trinity.trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trinity.manager.html">trinity.manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trinity.common.html">trinity.common</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trinity.utils.html">trinity.utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Trinity-RFT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="trinity.buffer.html">trinity.buffer</a></li>
+      <li class="breadcrumb-item active">trinity.buffer.schema</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/build_api/trinity.buffer.schema.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="trinity-buffer-schema">
+<h1>trinity.buffer.schema<a class="headerlink" href="#trinity-buffer-schema" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-trinity.buffer.schema.sql_schema">
+<span id="trinity-buffer-schema-sql-schema-module"></span><h2>trinity.buffer.schema.sql_schema module<a class="headerlink" href="#module-trinity.buffer.schema.sql_schema" title="Link to this heading"></a></h2>
+<p>Schema for SQLAlchemy models.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.TaskModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.buffer.schema.sql_schema.</span></span><span class="sig-name descname"><span class="pre">TaskModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/schema/sql_schema.html#TaskModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.schema.sql_schema.TaskModel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#trinity.buffer.schema.Base" title="sqlalchemy.orm.decl_api.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<p>Model for storing tasks in SQLAlchemy.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.TaskModel.id">
+<span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Column(None,</span> <span class="pre">Integer(),</span> <span class="pre">table=None,</span> <span class="pre">primary_key=True,</span> <span class="pre">nullable=False)</span></em><a class="headerlink" href="#trinity.buffer.schema.sql_schema.TaskModel.id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.TaskModel.task_desc">
+<span class="sig-name descname"><span class="pre">task_desc</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Column(None,</span> <span class="pre">String(),</span> <span class="pre">table=None)</span></em><a class="headerlink" href="#trinity.buffer.schema.sql_schema.TaskModel.task_desc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.TaskModel.workflow_type">
+<span class="sig-name descname"><span class="pre">workflow_type</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Column(None,</span> <span class="pre">String(),</span> <span class="pre">table=None)</span></em><a class="headerlink" href="#trinity.buffer.schema.sql_schema.TaskModel.workflow_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.TaskModel.reward_type">
+<span class="sig-name descname"><span class="pre">reward_type</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Column(None,</span> <span class="pre">String(),</span> <span class="pre">table=None)</span></em><a class="headerlink" href="#trinity.buffer.schema.sql_schema.TaskModel.reward_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.ExperienceModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.buffer.schema.sql_schema.</span></span><span class="sig-name descname"><span class="pre">ExperienceModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/schema/sql_schema.html#ExperienceModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.schema.sql_schema.ExperienceModel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#trinity.buffer.schema.Base" title="sqlalchemy.orm.decl_api.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<p>SQLAlchemy model for Experience.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.ExperienceModel.id">
+<span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Column(None,</span> <span class="pre">Integer(),</span> <span class="pre">table=None,</span> <span class="pre">primary_key=True,</span> <span class="pre">nullable=False)</span></em><a class="headerlink" href="#trinity.buffer.schema.sql_schema.ExperienceModel.id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.ExperienceModel.serialized_exp">
+<span class="sig-name descname"><span class="pre">serialized_exp</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Column(None,</span> <span class="pre">LargeBinary(),</span> <span class="pre">table=None)</span></em><a class="headerlink" href="#trinity.buffer.schema.sql_schema.ExperienceModel.serialized_exp" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.ExperienceModel.prompt">
+<span class="sig-name descname"><span class="pre">prompt</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Column(None,</span> <span class="pre">String(),</span> <span class="pre">table=None)</span></em><a class="headerlink" href="#trinity.buffer.schema.sql_schema.ExperienceModel.prompt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.ExperienceModel.response">
+<span class="sig-name descname"><span class="pre">response</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Column(None,</span> <span class="pre">String(),</span> <span class="pre">table=None)</span></em><a class="headerlink" href="#trinity.buffer.schema.sql_schema.ExperienceModel.response" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.ExperienceModel.reward">
+<span class="sig-name descname"><span class="pre">reward</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Column(None,</span> <span class="pre">Float(),</span> <span class="pre">table=None)</span></em><a class="headerlink" href="#trinity.buffer.schema.sql_schema.ExperienceModel.reward" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.ExperienceModel.consumed">
+<span class="sig-name descname"><span class="pre">consumed</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Column(None,</span> <span class="pre">Integer(),</span> <span class="pre">table=None,</span> <span class="pre">default=ScalarElementColumnDefault(0))</span></em><a class="headerlink" href="#trinity.buffer.schema.sql_schema.ExperienceModel.consumed" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.ExperienceModel.priority">
+<span class="sig-name descname"><span class="pre">priority</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Column(None,</span> <span class="pre">Float(),</span> <span class="pre">table=None,</span> <span class="pre">default=ScalarElementColumnDefault(0.0))</span></em><a class="headerlink" href="#trinity.buffer.schema.sql_schema.ExperienceModel.priority" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.ExperienceModel.to_experience">
+<span class="sig-name descname"><span class="pre">to_experience</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a></span></span><a class="reference internal" href="../_modules/trinity/buffer/schema/sql_schema.html#ExperienceModel.to_experience"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.schema.sql_schema.ExperienceModel.to_experience" title="Link to this definition"></a></dt>
+<dd><p>Load the experience from the database.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.ExperienceModel.from_experience">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_experience</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experience</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/schema/sql_schema.html#ExperienceModel.from_experience"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.schema.sql_schema.ExperienceModel.from_experience" title="Link to this definition"></a></dt>
+<dd><p>Save the experience to database.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.SFTDataModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.buffer.schema.sql_schema.</span></span><span class="sig-name descname"><span class="pre">SFTDataModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/schema/sql_schema.html#SFTDataModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.schema.sql_schema.SFTDataModel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#trinity.buffer.schema.Base" title="sqlalchemy.orm.decl_api.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<p>SQLAlchemy model for SFT data.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.SFTDataModel.id">
+<span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Column(None,</span> <span class="pre">Integer(),</span> <span class="pre">table=None,</span> <span class="pre">primary_key=True,</span> <span class="pre">nullable=False)</span></em><a class="headerlink" href="#trinity.buffer.schema.sql_schema.SFTDataModel.id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.SFTDataModel.serialized_exp">
+<span class="sig-name descname"><span class="pre">serialized_exp</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Column(None,</span> <span class="pre">LargeBinary(),</span> <span class="pre">table=None)</span></em><a class="headerlink" href="#trinity.buffer.schema.sql_schema.SFTDataModel.serialized_exp" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.SFTDataModel.messages">
+<span class="sig-name descname"><span class="pre">messages</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Column(None,</span> <span class="pre">String(),</span> <span class="pre">table=None)</span></em><a class="headerlink" href="#trinity.buffer.schema.sql_schema.SFTDataModel.messages" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.SFTDataModel.consumed">
+<span class="sig-name descname"><span class="pre">consumed</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Column(None,</span> <span class="pre">Integer(),</span> <span class="pre">table=None,</span> <span class="pre">default=ScalarElementColumnDefault(0))</span></em><a class="headerlink" href="#trinity.buffer.schema.sql_schema.SFTDataModel.consumed" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.SFTDataModel.to_experience">
+<span class="sig-name descname"><span class="pre">to_experience</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a></span></span><a class="reference internal" href="../_modules/trinity/buffer/schema/sql_schema.html#SFTDataModel.to_experience"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.schema.sql_schema.SFTDataModel.to_experience" title="Link to this definition"></a></dt>
+<dd><p>Load the experience from the database.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.SFTDataModel.from_messages">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_messages</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">messages</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tokenizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chat_template</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#trinity.buffer.schema.sql_schema.SFTDataModel" title="trinity.buffer.schema.sql_schema.SFTDataModel"><span class="pre">SFTDataModel</span></a></span></span><a class="reference internal" href="../_modules/trinity/buffer/schema/sql_schema.html#SFTDataModel.from_messages"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.schema.sql_schema.SFTDataModel.from_messages" title="Link to this definition"></a></dt>
+<dd><p>Convert a list of messages into a single instance of SFT data.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.DPODataModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.buffer.schema.sql_schema.</span></span><span class="sig-name descname"><span class="pre">DPODataModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/schema/sql_schema.html#DPODataModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.schema.sql_schema.DPODataModel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#trinity.buffer.schema.Base" title="sqlalchemy.orm.decl_api.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<p>SQLAlchemy model for DPO data.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.DPODataModel.id">
+<span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Column(None,</span> <span class="pre">Integer(),</span> <span class="pre">table=None,</span> <span class="pre">primary_key=True,</span> <span class="pre">nullable=False)</span></em><a class="headerlink" href="#trinity.buffer.schema.sql_schema.DPODataModel.id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.DPODataModel.serialized_exp">
+<span class="sig-name descname"><span class="pre">serialized_exp</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Column(None,</span> <span class="pre">LargeBinary(),</span> <span class="pre">table=None)</span></em><a class="headerlink" href="#trinity.buffer.schema.sql_schema.DPODataModel.serialized_exp" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.DPODataModel.chosen">
+<span class="sig-name descname"><span class="pre">chosen</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Column(None,</span> <span class="pre">LargeBinary(),</span> <span class="pre">table=None)</span></em><a class="headerlink" href="#trinity.buffer.schema.sql_schema.DPODataModel.chosen" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.DPODataModel.rejected">
+<span class="sig-name descname"><span class="pre">rejected</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Column(None,</span> <span class="pre">LargeBinary(),</span> <span class="pre">table=None)</span></em><a class="headerlink" href="#trinity.buffer.schema.sql_schema.DPODataModel.rejected" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.DPODataModel.consumed">
+<span class="sig-name descname"><span class="pre">consumed</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Column(None,</span> <span class="pre">Integer(),</span> <span class="pre">table=None,</span> <span class="pre">default=ScalarElementColumnDefault(0))</span></em><a class="headerlink" href="#trinity.buffer.schema.sql_schema.DPODataModel.consumed" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.DPODataModel.to_experience">
+<span class="sig-name descname"><span class="pre">to_experience</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a></span></span><a class="reference internal" href="../_modules/trinity/buffer/schema/sql_schema.html#DPODataModel.to_experience"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.schema.sql_schema.DPODataModel.to_experience" title="Link to this definition"></a></dt>
+<dd><p>Load the experience from the database.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.buffer.schema.sql_schema.create_dynamic_table">
+<span class="sig-prename descclassname"><span class="pre">trinity.buffer.schema.sql_schema.</span></span><span class="sig-name descname"><span class="pre">create_dynamic_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.constants.AlgorithmType" title="trinity.common.constants.AlgorithmType"><span class="pre">AlgorithmType</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">table_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/schema/sql_schema.html#create_dynamic_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.schema.sql_schema.create_dynamic_table" title="Link to this definition"></a></dt>
+<dd><p>Create a dynamic table based on the provided algorithm type and table name.</p>
+</dd></dl>
+
+</section>
+<section id="module-trinity.buffer.schema">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-trinity.buffer.schema" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.buffer.schema.create_dynamic_table">
+<span class="sig-prename descclassname"><span class="pre">trinity.buffer.schema.</span></span><span class="sig-name descname"><span class="pre">create_dynamic_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.constants.AlgorithmType" title="trinity.common.constants.AlgorithmType"><span class="pre">AlgorithmType</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">table_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/schema/sql_schema.html#create_dynamic_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.schema.create_dynamic_table" title="Link to this definition"></a></dt>
+<dd><p>Create a dynamic table based on the provided algorithm type and table name.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="trinity.buffer.schema.Base">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.buffer.schema.</span></span><span class="sig-name descname"><span class="pre">Base</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.buffer.schema.Base" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The base class of the class hierarchy.</p>
+<p>When called, it accepts no arguments and returns a new featureless
+instance that has no instance attributes and cannot be given any.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.buffer.schema.Base.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#trinity.buffer.schema.Base.__init__" title="Link to this definition"></a></dt>
+<dd><p>A simple constructor that allows initialization from kwargs.</p>
+<p>Sets attributes on the constructed instance using the names and
+values in <code class="docutils literal notranslate"><span class="pre">kwargs</span></code>.</p>
+<p>Only keys that are present as
+attributes of the instance’s class are allowed. These could be,
+for example, any mapped columns or relationships.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.buffer.schema.Base.metadata">
+<span class="sig-name descname"><span class="pre">metadata</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">MetaData</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">MetaData()</span></em><a class="headerlink" href="#trinity.buffer.schema.Base.metadata" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.buffer.schema.Base.registry">
+<span class="sig-name descname"><span class="pre">registry</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">registry</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;sqlalchemy.orm.decl_api.registry</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#trinity.buffer.schema.Base.registry" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="trinity.buffer.reader.html" class="btn btn-neutral float-left" title="trinity.buffer.reader" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="trinity.buffer.writer.html" class="btn btn-neutral float-right" title="trinity.buffer.writer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Trinity-RFT Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

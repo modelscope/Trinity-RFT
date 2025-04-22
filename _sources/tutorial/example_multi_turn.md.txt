@@ -125,5 +125,5 @@ and include them in the init files in `trinity/common/workflows/__init__.py`
 
 Then you are all set! It should be pretty simple😄, and both environments converge.
 
-<img src="../../assets/alfworld_reward_curve.png" width="300" height="150">
-<img src="../../assets/webshop_reward_curve.png" width="300" height="150">
+![]("../../assets/alfworld_reward_curve.png")
+![]("../../assets/webshop_reward_curve.png")

@@ -10,6 +10,8 @@
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
 
   
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../../../../_static/documentation_options.js?v=01f34227"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
@@ -49,20 +51,12 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.buffer.reader.html">trinity.buffer.reader</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.buffer.html">trinity.buffer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.buffer.schema.html">trinity.buffer.schema</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.buffer.writer.html">trinity.buffer.writer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.common.models.html">trinity.common.models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.common.rewards.html">trinity.common.rewards</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.common.html">trinity.common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.common.workflows.html">trinity.common.workflows</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.explorer.html">trinity.explorer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.manager.html">trinity.manager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.html">trinity</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.trainer.html">trinity.trainer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.trainer.verl.html">trinity.trainer.verl</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.utils.html">trinity.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../build_api/trinity.buffer.html">trinity.buffer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../build_api/trinity.explorer.html">trinity.explorer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../build_api/trinity.trainer.html">trinity.trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../build_api/trinity.manager.html">trinity.manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../build_api/trinity.common.html">trinity.common</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../build_api/trinity.utils.html">trinity.utils</a></li>
 </ul>
 
         </div>
@@ -104,6 +98,8 @@
 <span class="n">Base</span> <span class="o">=</span> <span class="n">declarative_base</span><span class="p">()</span>
 
 
+<div class="viewcode-block" id="TaskModel">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.html#trinity.buffer.schema.sql_schema.TaskModel">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TaskModel</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Model for storing tasks in SQLAlchemy.&quot;&quot;&quot;</span>
 
@@ -116,9 +112,12 @@
     <span class="nb">id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">autoincrement</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">task_desc</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">workflow_type</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">reward_type</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">reward_type</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
+
+<div class="viewcode-block" id="ExperienceModel">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.html#trinity.buffer.schema.sql_schema.ExperienceModel">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ExperienceModel</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;SQLAlchemy model for Experience.&quot;&quot;&quot;</span>
 
@@ -136,10 +135,15 @@
     <span class="n">consumed</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">priority</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
 
+<div class="viewcode-block" id="ExperienceModel.to_experience">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.html#trinity.buffer.schema.sql_schema.ExperienceModel.to_experience">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_experience</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Experience</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Load the experience from the database.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">Experience</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serialized_exp</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Experience</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serialized_exp</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="ExperienceModel.from_experience">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.html#trinity.buffer.schema.sql_schema.ExperienceModel.from_experience">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_experience</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">experience</span><span class="p">:</span> <span class="n">Experience</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Save the experience to database.&quot;&quot;&quot;</span>
@@ -148,9 +152,13 @@
             <span class="n">reward</span><span class="o">=</span><span class="n">experience</span><span class="o">.</span><span class="n">reward</span><span class="p">,</span>
             <span class="n">prompt</span><span class="o">=</span><span class="n">experience</span><span class="o">.</span><span class="n">prompt_text</span><span class="p">,</span>
             <span class="n">response</span><span class="o">=</span><span class="n">experience</span><span class="o">.</span><span class="n">response_text</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
+</div>
 
 
+
+<div class="viewcode-block" id="SFTDataModel">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.html#trinity.buffer.schema.sql_schema.SFTDataModel">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SFTDataModel</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;SQLAlchemy model for SFT data.&quot;&quot;&quot;</span>
 
@@ -165,10 +173,15 @@
     <span class="n">messages</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">consumed</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
+<div class="viewcode-block" id="SFTDataModel.to_experience">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.html#trinity.buffer.schema.sql_schema.SFTDataModel.to_experience">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_experience</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Experience</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Load the experience from the database.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">Experience</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serialized_exp</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Experience</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serialized_exp</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="SFTDataModel.from_messages">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.html#trinity.buffer.schema.sql_schema.SFTDataModel.from_messages">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_messages</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
@@ -191,9 +204,13 @@
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
             <span class="n">serialized_exp</span><span class="o">=</span><span class="n">exp</span><span class="o">.</span><span class="n">serialize</span><span class="p">(),</span>
             <span class="n">messages</span><span class="o">=</span><span class="n">messages</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
+</div>
 
 
+
+<div class="viewcode-block" id="DPODataModel">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.html#trinity.buffer.schema.sql_schema.DPODataModel">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">DPODataModel</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;SQLAlchemy model for DPO data.&quot;&quot;&quot;</span>
 
@@ -209,12 +226,16 @@
     <span class="n">rejected</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">LargeBinary</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">consumed</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
+<div class="viewcode-block" id="DPODataModel.to_experience">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.html#trinity.buffer.schema.sql_schema.DPODataModel.to_experience">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_experience</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Experience</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Load the experience from the database.&quot;&quot;&quot;</span>
         <span class="n">exp</span> <span class="o">=</span> <span class="n">Experience</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serialized_exp</span><span class="p">)</span>
         <span class="n">exp</span><span class="o">.</span><span class="n">chosen</span> <span class="o">=</span> <span class="n">Experience</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chosen</span><span class="p">)</span>
         <span class="n">exp</span><span class="o">.</span><span class="n">rejected</span> <span class="o">=</span> <span class="n">Experience</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rejected</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">exp</span>
+        <span class="k">return</span> <span class="n">exp</span></div>
+</div>
+
 
 
 <span class="n">SCHEMA_MAPPING</span> <span class="o">=</span> <span class="p">{</span>
@@ -228,7 +249,7 @@
 
 
 <div class="viewcode-block" id="create_dynamic_table">
-<a class="viewcode-back" href="../../../../trinity.buffer.schema.html#trinity.buffer.schema.create_dynamic_table">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.html#trinity.buffer.schema.sql_schema.create_dynamic_table">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">create_dynamic_table</span><span class="p">(</span><span class="n">algorithm_type</span><span class="p">:</span> <span class="n">AlgorithmType</span><span class="p">,</span> <span class="n">table_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a dynamic table based on the provided algorithm type and table name.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">algorithm_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">SCHEMA_MAPPING</span><span class="p">:</span>

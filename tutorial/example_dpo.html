@@ -11,6 +11,8 @@
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../_static/documentation_options.js?v=01f34227"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
@@ -64,20 +66,12 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.buffer.reader.html">trinity.buffer.reader</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.buffer.html">trinity.buffer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.buffer.schema.html">trinity.buffer.schema</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.buffer.writer.html">trinity.buffer.writer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.common.models.html">trinity.common.models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.common.rewards.html">trinity.common.rewards</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.common.html">trinity.common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.common.workflows.html">trinity.common.workflows</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.explorer.html">trinity.explorer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.manager.html">trinity.manager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.html">trinity</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.trainer.html">trinity.trainer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.trainer.verl.html">trinity.trainer.verl</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.utils.html">trinity.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.buffer.html">trinity.buffer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.explorer.html">trinity.explorer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.trainer.html">trinity.trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.manager.html">trinity.manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.common.html">trinity.common</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.utils.html">trinity.utils</a></li>
 </ul>
 
         </div>
@@ -105,12 +99,12 @@
            <div itemprop="articleBody">
              
   <section id="example-run-dpo-on-human-like-dpo-dataset">
-<h1>Example: Run DPO on Human-Like-DPO-Dataset<a class="headerlink" href="#example-run-dpo-on-human-like-dpo-dataset" title="Link to this heading">¶</a></h1>
+<h1>Example: Run DPO on Human-Like-DPO-Dataset<a class="headerlink" href="#example-run-dpo-on-human-like-dpo-dataset" title="Link to this heading"></a></h1>
 <p>This example describes DPO based on the Qwen-2.5-1.5B-Instruct model and <a class="reference external" href="https://huggingface.co/datasets/HumanLLMs/Human-Like-DPO-Dataset">Human-like-DPO-dataset</a>.</p>
 <section id="step-1-model-and-data-preparation">
-<h2>Step 1: Model and Data Preparation<a class="headerlink" href="#step-1-model-and-data-preparation" title="Link to this heading">¶</a></h2>
+<h2>Step 1: Model and Data Preparation<a class="headerlink" href="#step-1-model-and-data-preparation" title="Link to this heading"></a></h2>
 <section id="model-preparation">
-<h3>Model Preparation<a class="headerlink" href="#model-preparation" title="Link to this heading">¶</a></h3>
+<h3>Model Preparation<a class="headerlink" href="#model-preparation" title="Link to this heading"></a></h3>
 <p>Download the Qwen-2.5-1B-Instruct model to the local directory <code class="docutils literal notranslate"><span class="pre">$MODEL_PATH/Qwen2.5-1.5B-Instruct</span></code>:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># Using Modelscope</span>
 modelscope<span class="w"> </span>download<span class="w"> </span>Qwen/Qwen2.5-1.5B-Instruct<span class="w"> </span>--local_dir<span class="w"> </span><span class="nv">$MODEL_PATH</span>/Qwen2.5-1.5B-Instruct
@@ -122,7 +116,7 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>Qwen/Qwen
 <p>More details of model downloading are referred to <a class="reference external" href="https://modelscope.cn/docs/models/download">ModelScope</a> or <a class="reference external" href="https://huggingface.co/docs/huggingface_hub/main/en/guides/cli">Huggingface</a>.</p>
 </section>
 <section id="data-preparation">
-<h3>Data Preparation<a class="headerlink" href="#data-preparation" title="Link to this heading">¶</a></h3>
+<h3>Data Preparation<a class="headerlink" href="#data-preparation" title="Link to this heading"></a></h3>
 <p>Download the Human-Like-DPO-Dataset dataset to the local directory <code class="docutils literal notranslate"><span class="pre">$DATASET_PATH/human_like_dpo_dataset</span></code>:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># Using Modelscope</span>
 modelscope<span class="w"> </span>download<span class="w"> </span>--dataset<span class="w"> </span>HumanLLMs/Human-Like-DPO-Dataset<span class="w"> </span>--local_dir<span class="w"> </span><span class="nv">$DATASET_PATH</span>/human_like_dpo_dataset
@@ -136,9 +130,9 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>HumanLLMs
 </section>
 </section>
 <section id="step-2-setup-configuration-and-run-experiment">
-<h2>Step 2: Setup Configuration and Run Experiment<a class="headerlink" href="#step-2-setup-configuration-and-run-experiment" title="Link to this heading">¶</a></h2>
+<h2>Step 2: Setup Configuration and Run Experiment<a class="headerlink" href="#step-2-setup-configuration-and-run-experiment" title="Link to this heading"></a></h2>
 <section id="configuration">
-<h3>Configuration<a class="headerlink" href="#configuration" title="Link to this heading">¶</a></h3>
+<h3>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h3>
 <p>We use the configurations in <code class="docutils literal notranslate"><span class="pre">scripts/config/dpo.yaml</span></code>and <code class="docutils literal notranslate"><span class="pre">scripts/config/train_dpo.yaml</span></code> for this experiment. Some important setups are listed in the following:</p>
 <p>We run the experiment in a train mode, as there is no Explorer. To enable this mode, we config <code class="docutils literal notranslate"><span class="pre">mode</span></code> to <code class="docutils literal notranslate"><span class="pre">train</span></code> and set <code class="docutils literal notranslate"><span class="pre">sync_method</span></code> to <code class="docutils literal notranslate"><span class="pre">offline</span></code>. The value of <code class="docutils literal notranslate"><span class="pre">sync_iteration_interval</span></code> can be set as same of the value of <code class="docutils literal notranslate"><span class="pre">save_freq</span></code>.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># scripts/config/dpo.yaml</span>
@@ -168,7 +162,7 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>HumanLLMs
 </div>
 </section>
 <section id="run-the-experiment">
-<h3>Run the Experiment<a class="headerlink" href="#run-the-experiment" title="Link to this heading">¶</a></h3>
+<h3>Run the Experiment<a class="headerlink" href="#run-the-experiment" title="Link to this heading"></a></h3>
 <p>Run RFT process with the following command:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>scripts/config/dpo.yaml
 </pre></div>

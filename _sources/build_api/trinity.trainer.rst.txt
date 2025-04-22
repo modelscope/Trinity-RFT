@@ -1,0 +1,36 @@
+trinity.trainer
+===============
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   trinity.trainer.verl
+
+Submodules
+----------
+
+trinity.trainer.trainer module
+------------------------------
+
+.. automodule:: trinity.trainer.trainer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+trinity.trainer.verl\_trainer module
+------------------------------------
+
+.. automodule:: trinity.trainer.verl_trainer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: trinity.trainer
+   :members:
+   :undoc-members:
+   :show-inheritance:

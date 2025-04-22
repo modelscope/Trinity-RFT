@@ -11,13 +11,15 @@
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../_static/documentation_options.js?v=01f34227"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="trinity.buffer.reader" href="../trinity.buffer.reader.html" />
+    <link rel="next" title="trinity.buffer" href="../build_api/trinity.buffer.html" />
     <link rel="prev" title="Trinity-RFT Configuration" href="trinity_configs.html" /> 
 </head>
 
@@ -62,20 +64,12 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.buffer.reader.html">trinity.buffer.reader</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.buffer.html">trinity.buffer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.buffer.schema.html">trinity.buffer.schema</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.buffer.writer.html">trinity.buffer.writer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.common.models.html">trinity.common.models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.common.rewards.html">trinity.common.rewards</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.common.html">trinity.common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.common.workflows.html">trinity.common.workflows</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.explorer.html">trinity.explorer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.manager.html">trinity.manager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.html">trinity</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.trainer.html">trinity.trainer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.trainer.verl.html">trinity.trainer.verl</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.utils.html">trinity.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.buffer.html">trinity.buffer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.explorer.html">trinity.explorer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.trainer.html">trinity.trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.manager.html">trinity.manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.common.html">trinity.common</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.utils.html">trinity.utils</a></li>
 </ul>
 
         </div>
@@ -103,18 +97,18 @@
            <div itemprop="articleBody">
              
   <section id="trinity-rft-developer-guide">
-<h1>Trinity-RFT Developer Guide<a class="headerlink" href="#trinity-rft-developer-guide" title="Link to this heading">¶</a></h1>
+<h1>Trinity-RFT Developer Guide<a class="headerlink" href="#trinity-rft-developer-guide" title="Link to this heading"></a></h1>
 <p>This guide will introduce how to add new task types to Trinity-RFT and provide relevant development guidelines.</p>
 <blockquote>
 <div><p><strong>Note</strong>: Trinity-RFT is still under development, and the following interfaces may change. Please read this section in conjunction with the latest code.</p>
 </div></blockquote>
 <hr class="docutils" />
 <section id="creating-new-task-types">
-<h2>Creating New Task Types<a class="headerlink" href="#creating-new-task-types" title="Link to this heading">¶</a></h2>
+<h2>Creating New Task Types<a class="headerlink" href="#creating-new-task-types" title="Link to this heading"></a></h2>
 <p>Trinity-RFT supports developers in registering new task types (e.g., multi-round interaction scenarios). Below are the steps for creating a new task type.</p>
 <hr class="docutils" />
 <section id="step-0-basic-concepts">
-<h3>Step 0: Basic Concepts<a class="headerlink" href="#step-0-basic-concepts" title="Link to this heading">¶</a></h3>
+<h3>Step 0: Basic Concepts<a class="headerlink" href="#step-0-basic-concepts" title="Link to this heading"></a></h3>
 <p>Before starting development, it’s important to understand several core concepts:</p>
 <ul class="simple">
 <li><p><strong>Task</strong>: Represents a data structure that can be converted into a <code class="docutils literal notranslate"><span class="pre">Workflow</span></code>. The <code class="docutils literal notranslate"><span class="pre">Task</span></code> data format may vary significantly depending on the type of task:</p>
@@ -135,18 +129,18 @@
 </section>
 <hr class="docutils" />
 <section id="step-1-prepare-task-dataset">
-<h3>Step 1: Prepare Task Dataset<a class="headerlink" href="#step-1-prepare-task-dataset" title="Link to this heading">¶</a></h3>
+<h3>Step 1: Prepare Task Dataset<a class="headerlink" href="#step-1-prepare-task-dataset" title="Link to this heading"></a></h3>
 <p>Each <code class="docutils literal notranslate"><span class="pre">Task</span></code> is a Python dictionary (<code class="docutils literal notranslate"><span class="pre">Dict[str,</span> <span class="pre">Any]</span></code>), containing various parameters needed to initialize the <code class="docutils literal notranslate"><span class="pre">Workflow</span></code>. Due to significant differences in initialization parameters across different <code class="docutils literal notranslate"><span class="pre">Workflows</span></code>, the following example uses a math problem scenario.</p>
 <p>In the math problem scenario, the <code class="docutils literal notranslate"><span class="pre">Task</span></code> dataset can be a <code class="docutils literal notranslate"><span class="pre">jsonl</span></code> file, where each line’s JSON contains <code class="docutils literal notranslate"><span class="pre">question</span></code> and <code class="docutils literal notranslate"><span class="pre">answer</span></code> fields representing the problem description and standard answer, respectively.</p>
-<div class="highlight-jsonl notranslate"><div class="highlight"><pre><span></span>{&quot;question&quot;: &quot;1+1=&quot;, &quot;answer&quot;: &quot;2&quot;}
-{&quot;question&quot;: &quot;2+2=&quot;, &quot;answer&quot;: &quot;4&quot;}
-...
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;question&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1+1=&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;answer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2&quot;</span><span class="p">}</span>
+<span class="p">{</span><span class="nt">&quot;question&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2+2=&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;answer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;4&quot;</span><span class="p">}</span>
+<span class="err">...</span>
 </pre></div>
 </div>
 </section>
 <hr class="docutils" />
 <section id="step-2-write-workflow">
-<h3>Step 2: Write Workflow<a class="headerlink" href="#step-2-write-workflow" title="Link to this heading">¶</a></h3>
+<h3>Step 2: Write Workflow<a class="headerlink" href="#step-2-write-workflow" title="Link to this heading"></a></h3>
 <p>The core of creating a new task type is writing a new <code class="docutils literal notranslate"><span class="pre">Workflow</span></code>, whose base class interface is as follows:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
@@ -163,7 +157,7 @@
 </div>
 <p>Developers can register their own <code class="docutils literal notranslate"><span class="pre">Workflow</span></code> through the <code class="docutils literal notranslate"><span class="pre">WORKFLOWS.register_module</span></code> method, but need to ensure that the name does not conflict with existing <code class="docutils literal notranslate"><span class="pre">Workflows</span></code>.</p>
 <section id="initialization-parameters">
-<h4>Initialization Parameters<a class="headerlink" href="#initialization-parameters" title="Link to this heading">¶</a></h4>
+<h4>Initialization Parameters<a class="headerlink" href="#initialization-parameters" title="Link to this heading"></a></h4>
 <p>When initializing, <code class="docutils literal notranslate"><span class="pre">Workflow</span></code> receives the following parameters:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">model</span></code>: Provides an API call interface similar to OpenAI, capable of receiving a list of conversation messages and returning content generated by the LLM (including reply text <code class="docutils literal notranslate"><span class="pre">response_text</span></code>, full sequence token ids <code class="docutils literal notranslate"><span class="pre">tokens</span></code>, prompt part token length <code class="docutils literal notranslate"><span class="pre">prompt_length</span></code>, and a list of output token logprobs <code class="docutils literal notranslate"><span class="pre">logprobs</span></code>).</p></li>
@@ -171,7 +165,7 @@
 </ul>
 </section>
 <section id="example-code">
-<h4>Example Code<a class="headerlink" href="#example-code" title="Link to this heading">¶</a></h4>
+<h4>Example Code<a class="headerlink" href="#example-code" title="Link to this heading"></a></h4>
 <p>Below is a simple example demonstrating how to implement a math problem <code class="docutils literal notranslate"><span class="pre">Workflow</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;example_workflow&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
@@ -203,7 +197,7 @@
 </section>
 <hr class="docutils" />
 <section id="step-3-modify-configuration-file">
-<h3>Step 3: Modify Configuration File<a class="headerlink" href="#step-3-modify-configuration-file" title="Link to this heading">¶</a></h3>
+<h3>Step 3: Modify Configuration File<a class="headerlink" href="#step-3-modify-configuration-file" title="Link to this heading"></a></h3>
 <p>After completing the development of the <code class="docutils literal notranslate"><span class="pre">Workflow</span></code>, you need to modify the configuration file to set the <code class="docutils literal notranslate"><span class="pre">default_workflow_type</span></code> in the <code class="docutils literal notranslate"><span class="pre">data</span></code> domain to the newly registered <code class="docutils literal notranslate"><span class="pre">Workflow</span></code> name.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">data</span><span class="p">:</span>
 <span class="w">  </span><span class="c1"># Other fields</span>
@@ -216,7 +210,7 @@
 </section>
 <hr class="docutils" />
 <section id="check-code-style">
-<h2>Check Code Style<a class="headerlink" href="#check-code-style" title="Link to this heading">¶</a></h2>
+<h2>Check Code Style<a class="headerlink" href="#check-code-style" title="Link to this heading"></a></h2>
 <p>Before submitting the code, make sure it passes the code style check. Follow these steps:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># Install code style checking tools</span>
 <span class="nb">cd</span><span class="w"> </span>&lt;path_to_trinity_rft&gt;
@@ -240,7 +234,7 @@ git<span class="w"> </span>commit<span class="w"> </span>-am<span class="w"> </s
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="trinity_configs.html" class="btn btn-neutral float-left" title="Trinity-RFT Configuration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../trinity.buffer.reader.html" class="btn btn-neutral float-right" title="trinity.buffer.reader" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../build_api/trinity.buffer.html" class="btn btn-neutral float-right" title="trinity.buffer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

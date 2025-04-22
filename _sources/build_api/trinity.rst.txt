@@ -1,0 +1,22 @@
+trinity
+=======
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   trinity.buffer
+   trinity.common
+   trinity.explorer
+   trinity.manager
+   trinity.trainer
+   trinity.utils
+
+Module contents
+---------------
+
+.. automodule:: trinity
+   :members:
+   :undoc-members:
+   :show-inheritance:

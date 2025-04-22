@@ -10,6 +10,8 @@
       <link rel="stylesheet" type="text/css" href="../../../../../../_static/css/theme.css?v=e59714d7" />
 
   
+      <script src="../../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../../../../../../_static/documentation_options.js?v=01f34227"></script>
       <script src="../../../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
@@ -49,20 +51,12 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../../trinity.buffer.reader.html">trinity.buffer.reader</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../../trinity.buffer.html">trinity.buffer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../../trinity.buffer.schema.html">trinity.buffer.schema</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../../trinity.buffer.writer.html">trinity.buffer.writer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../../trinity.common.models.html">trinity.common.models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../../trinity.common.rewards.html">trinity.common.rewards</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../../trinity.common.html">trinity.common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../../trinity.common.workflows.html">trinity.common.workflows</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../../trinity.explorer.html">trinity.explorer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../../trinity.manager.html">trinity.manager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../../trinity.html">trinity</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../../trinity.trainer.html">trinity.trainer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../../trinity.trainer.verl.html">trinity.trainer.verl</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../../trinity.utils.html">trinity.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../build_api/trinity.buffer.html">trinity.buffer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../build_api/trinity.explorer.html">trinity.explorer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../build_api/trinity.trainer.html">trinity.trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../build_api/trinity.manager.html">trinity.manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../build_api/trinity.common.html">trinity.common</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../build_api/trinity.utils.html">trinity.utils</a></li>
 </ul>
 
         </div>
@@ -188,13 +182,13 @@
 
 
 <div class="viewcode-block" id="AlfworldWorkflow">
-<a class="viewcode-back" href="../../../../../../trinity.common.workflows.html#trinity.common.workflows.AlfworldWorkflow">[docs]</a>
+<a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.AlfworldWorkflow">[docs]</a>
 <span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;alfworld_workflow&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">AlfworldWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A workflow for alfworld task.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="AlfworldWorkflow.__init__">
-<a class="viewcode-back" href="../../../../../../trinity.common.workflows.html#trinity.common.workflows.AlfworldWorkflow.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.AlfworldWorkflow.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">ModelWrapper</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;system_prompt&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># Unuse here</span>
@@ -206,20 +200,20 @@
 
 
 <div class="viewcode-block" id="AlfworldWorkflow.get_model_response">
-<a class="viewcode-back" href="../../../../../../trinity.common.workflows.html#trinity.common.workflows.AlfworldWorkflow.get_model_response">[docs]</a>
+<a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.AlfworldWorkflow.get_model_response">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_model_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">):</span>
         <span class="n">responses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">chat</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span> <span class="n">repeat_times</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">responses</span></div>
 
 
 <div class="viewcode-block" id="AlfworldWorkflow.get_model_response_text">
-<a class="viewcode-back" href="../../../../../../trinity.common.workflows.html#trinity.common.workflows.AlfworldWorkflow.get_model_response_text">[docs]</a>
+<a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.AlfworldWorkflow.get_model_response_text">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_model_response_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_model_response</span><span class="p">(</span><span class="n">messages</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">response_text</span></div>
 
 
 <div class="viewcode-block" id="AlfworldWorkflow.generate_env_inference_samples">
-<a class="viewcode-back" href="../../../../../../trinity.common.workflows.html#trinity.common.workflows.AlfworldWorkflow.generate_env_inference_samples">[docs]</a>
+<a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.AlfworldWorkflow.generate_env_inference_samples">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">generate_env_inference_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">rollout_num</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
         <span class="c1"># TODO: Make this parallel</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Generating env inference samples...&quot;</span><span class="p">)</span>
@@ -250,7 +244,7 @@
 
 
 <div class="viewcode-block" id="AlfworldWorkflow.process_batch_messages">
-<a class="viewcode-back" href="../../../../../../trinity.common.workflows.html#trinity.common.workflows.AlfworldWorkflow.process_batch_messages">[docs]</a>
+<a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.AlfworldWorkflow.process_batch_messages">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">process_batch_messages</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_messages</span><span class="p">,</span> <span class="n">all_rewards</span><span class="p">,</span> <span class="n">all_infos</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
         <span class="c1"># TODO: What about the max_length for training here? Should we process here?</span>
         <span class="n">new_uid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span>
@@ -292,7 +286,7 @@
 
 
 <div class="viewcode-block" id="AlfworldWorkflow.run">
-<a class="viewcode-back" href="../../../../../../trinity.common.workflows.html#trinity.common.workflows.AlfworldWorkflow.run">[docs]</a>
+<a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.AlfworldWorkflow.run">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
         <span class="c1"># assume the task_description is the game_file_path generated.</span>
         <span class="c1"># see Trinity-RFT/script/data_prepare/get_alfworld_data.py</span>

@@ -1,7 +1,0 @@
-trinity.trainer
-===============
-
-.. automodule:: trinity.trainer
-   :members:
-   :undoc-members:
-   :show-inheritance:

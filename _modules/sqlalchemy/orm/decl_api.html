@@ -1,0 +1,2033 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>sqlalchemy.orm.decl_api &mdash; Trinity-RFT 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Trinity-RFT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial/example_reasoning_basic.html">A quick example with GSM8k</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial/example_reasoning_advanced.html">Example: off-policy / asynchronous RFT mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial/example_multi_turn.html">Example: Multi-Turn RFT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial/example_dpo.html">Example: Run DPO on Human-Like-DPO-Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial/example_data_functionalities.html">Data processing functionalities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial/trinity_configs.html">Trinity-RFT Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial/trinity_programming_guide.html">Trinity-RFT Developer Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../build_api/trinity.buffer.html">trinity.buffer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../build_api/trinity.explorer.html">trinity.explorer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../build_api/trinity.trainer.html">trinity.trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../build_api/trinity.manager.html">trinity.manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../build_api/trinity.common.html">trinity.common</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../build_api/trinity.utils.html">trinity.utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Trinity-RFT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">sqlalchemy.orm.decl_api</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for sqlalchemy.orm.decl_api</h1><div class="highlight"><pre>
+<span></span><span class="c1"># orm/decl_api.py</span>
+<span class="c1"># Copyright (C) 2005-2025 the SQLAlchemy authors and contributors</span>
+<span class="c1"># &lt;see AUTHORS file&gt;</span>
+<span class="c1">#</span>
+<span class="c1"># This module is part of SQLAlchemy and is released under</span>
+<span class="c1"># the MIT License: https://www.opensource.org/licenses/mit-license.php</span>
+
+<span class="sd">&quot;&quot;&quot;Public API functions and helpers for declarative.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">typing</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClassVar</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrozenSet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Generic</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapping</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">overload</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Set</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Type</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeVar</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">weakref</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">attributes</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">clsregistry</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">instrumentation</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">interfaces</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">mapperlib</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._orm_constructors</span><span class="w"> </span><span class="kn">import</span> <span class="n">composite</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._orm_constructors</span><span class="w"> </span><span class="kn">import</span> <span class="n">deferred</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._orm_constructors</span><span class="w"> </span><span class="kn">import</span> <span class="n">mapped_column</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._orm_constructors</span><span class="w"> </span><span class="kn">import</span> <span class="n">relationship</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._orm_constructors</span><span class="w"> </span><span class="kn">import</span> <span class="n">synonym</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">InstrumentedAttribute</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">_inspect_mapped_class</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">_is_mapped_class</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapped</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ORMDescriptor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.decl_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">_add_attribute</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.decl_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">_as_declarative</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.decl_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">_ClassScanMapperConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.decl_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">_declarative_constructor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.decl_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">_DeferredMapperConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.decl_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">_del_attribute</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.decl_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">_mapper</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.descriptor_props</span><span class="w"> </span><span class="kn">import</span> <span class="n">Composite</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.descriptor_props</span><span class="w"> </span><span class="kn">import</span> <span class="n">Synonym</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.descriptor_props</span><span class="w"> </span><span class="kn">import</span> <span class="n">Synonym</span> <span class="k">as</span> <span class="n">_orm_synonym</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.mapper</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapper</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.properties</span><span class="w"> </span><span class="kn">import</span> <span class="n">MappedColumn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.relationships</span><span class="w"> </span><span class="kn">import</span> <span class="n">RelationshipProperty</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">InstanceState</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">exc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">inspection</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">util</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">sqltypes</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..sql.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">_NoArg</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..sql.elements</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQLCoreOperations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..sql.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">MetaData</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..sql.selectable</span><span class="w"> </span><span class="kn">import</span> <span class="n">FromClause</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..util</span><span class="w"> </span><span class="kn">import</span> <span class="n">hybridmethod</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..util</span><span class="w"> </span><span class="kn">import</span> <span class="n">hybridproperty</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..util</span><span class="w"> </span><span class="kn">import</span> <span class="n">typing</span> <span class="k">as</span> <span class="n">compat_typing</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..util</span><span class="w"> </span><span class="kn">import</span> <span class="n">warn_deprecated</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..util.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">CallableReference</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..util.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">de_optionalize_union_types</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..util.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">flatten_newtype</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..util.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_generic</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..util.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_literal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..util.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_newtype</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..util.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_pep695</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..util.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..util.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">LITERAL_TYPES</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..util.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Self</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">_O</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">_RegistryType</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.decl_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">_DataclassArguments</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.instrumentation</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClassManager</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.interfaces</span><span class="w"> </span><span class="kn">import</span> <span class="n">MapperProperty</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">InstanceState</span>  <span class="c1"># noqa</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">..sql._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">_TypeEngineArgument</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">..sql.type_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">_MatchedOnType</span>
+
+<span class="n">_T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;_T&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Any</span><span class="p">)</span>
+
+<span class="n">_TT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;_TT&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Any</span><span class="p">)</span>
+
+<span class="c1"># it&#39;s not clear how to have Annotated, Union objects etc. as keys here</span>
+<span class="c1"># from a typing perspective so just leave it open ended for now</span>
+<span class="n">_TypeAnnotationMapType</span> <span class="o">=</span> <span class="n">Mapping</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="s2">&quot;_TypeEngineArgument[Any]&quot;</span><span class="p">]</span>
+<span class="n">_MutableTypeAnnotationMapType</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="s2">&quot;_TypeEngineArgument[Any]&quot;</span><span class="p">]</span>
+
+<span class="n">_DeclaredAttrDecorated</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[</span>
+    <span class="o">...</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Mapped</span><span class="p">[</span><span class="n">_T</span><span class="p">],</span> <span class="n">ORMDescriptor</span><span class="p">[</span><span class="n">_T</span><span class="p">],</span> <span class="n">SQLCoreOperations</span><span class="p">[</span><span class="n">_T</span><span class="p">]]</span>
+<span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">has_inherited_table</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">_O</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Given a class, return True if any of the classes it inherits from has a</span>
+<span class="sd">    mapped table, otherwise return False.</span>
+
+<span class="sd">    This is used in declarative mixins to build attributes that behave</span>
+<span class="sd">    differently for the base class vs. a subclass in an inheritance</span>
+<span class="sd">    hierarchy.</span>
+
+<span class="sd">    .. seealso::</span>
+
+<span class="sd">        :ref:`decl_mixin_inheritance`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">class_</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__mro__</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">class_</span><span class="p">,</span> <span class="s2">&quot;__table__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_DynamicAttributesType</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;__mapper__&quot;</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
+            <span class="n">_add_attribute</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">type</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__delattr__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;__mapper__&quot;</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
+            <span class="n">_del_attribute</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">type</span><span class="o">.</span><span class="fm">__delattr__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">DeclarativeAttributeIntercept</span><span class="p">(</span>
+    <span class="n">_DynamicAttributesType</span><span class="p">,</span>
+    <span class="c1"># Inspectable is used only by the mypy plugin</span>
+    <span class="n">inspection</span><span class="o">.</span><span class="n">Inspectable</span><span class="p">[</span><span class="n">Mapper</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Metaclass that may be used in conjunction with the</span>
+<span class="sd">    :class:`_orm.DeclarativeBase` class to support addition of class</span>
+<span class="sd">    attributes dynamically.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+<span class="nd">@compat_typing</span><span class="o">.</span><span class="n">dataclass_transform</span><span class="p">(</span>
+    <span class="n">field_specifiers</span><span class="o">=</span><span class="p">(</span>
+        <span class="n">MappedColumn</span><span class="p">,</span>
+        <span class="n">RelationshipProperty</span><span class="p">,</span>
+        <span class="n">Composite</span><span class="p">,</span>
+        <span class="n">Synonym</span><span class="p">,</span>
+        <span class="n">mapped_column</span><span class="p">,</span>
+        <span class="n">relationship</span><span class="p">,</span>
+        <span class="n">composite</span><span class="p">,</span>
+        <span class="n">synonym</span><span class="p">,</span>
+        <span class="n">deferred</span><span class="p">,</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DCTransformDeclarative</span><span class="p">(</span><span class="n">DeclarativeAttributeIntercept</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;metaclass that includes @dataclass_transforms&quot;&quot;&quot;</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">DeclarativeMeta</span><span class="p">(</span><span class="n">DeclarativeAttributeIntercept</span><span class="p">):</span>
+    <span class="n">metadata</span><span class="p">:</span> <span class="n">MetaData</span>
+    <span class="n">registry</span><span class="p">:</span> <span class="n">RegistryType</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">classname</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">bases</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># use cls.__dict__, which can be modified by an</span>
+        <span class="c1"># __init_subclass__() method (#7900)</span>
+        <span class="n">dict_</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span>
+
+        <span class="c1"># early-consume registry from the initial declarative base,</span>
+        <span class="c1"># assign privately to not conflict with subclass attributes named</span>
+        <span class="c1"># &quot;registry&quot;</span>
+        <span class="n">reg</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;_sa_registry&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">reg</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reg</span> <span class="o">=</span> <span class="n">dict_</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;registry&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="n">registry</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">exc</span><span class="o">.</span><span class="n">InvalidRequestError</span><span class="p">(</span>
+                    <span class="s2">&quot;Declarative base class has no &#39;registry&#39; attribute, &quot;</span>
+                    <span class="s2">&quot;or registry is not a sqlalchemy.orm.registry() object&quot;</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">cls</span><span class="o">.</span><span class="n">_sa_registry</span> <span class="o">=</span> <span class="n">reg</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;__abstract__&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+            <span class="n">_as_declarative</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">dict_</span><span class="p">)</span>
+        <span class="nb">type</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">classname</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">dict_</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">synonym_for</span><span class="p">(</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">map_column</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span> <span class="n">Synonym</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Decorator that produces an :func:`_orm.synonym`</span>
+<span class="sd">    attribute in conjunction with a Python descriptor.</span>
+
+<span class="sd">    The function being decorated is passed to :func:`_orm.synonym` as the</span>
+<span class="sd">    :paramref:`.orm.synonym.descriptor` parameter::</span>
+
+<span class="sd">        class MyClass(Base):</span>
+<span class="sd">            __tablename__ = &quot;my_table&quot;</span>
+
+<span class="sd">            id = Column(Integer, primary_key=True)</span>
+<span class="sd">            _job_status = Column(&quot;job_status&quot;, String(50))</span>
+
+<span class="sd">            @synonym_for(&quot;job_status&quot;)</span>
+<span class="sd">            @property</span>
+<span class="sd">            def job_status(self):</span>
+<span class="sd">                return &quot;Status: %s&quot; % self._job_status</span>
+
+<span class="sd">    The :ref:`hybrid properties &lt;mapper_hybrids&gt;` feature of SQLAlchemy</span>
+<span class="sd">    is typically preferred instead of synonyms, which is a more legacy</span>
+<span class="sd">    feature.</span>
+
+<span class="sd">    .. seealso::</span>
+
+<span class="sd">        :ref:`synonyms` - Overview of synonyms</span>
+
+<span class="sd">        :func:`_orm.synonym` - the mapper-level function</span>
+
+<span class="sd">        :ref:`mapper_hybrids` - The Hybrid Attribute extension provides an</span>
+<span class="sd">        updated approach to augmenting attribute behavior more flexibly than</span>
+<span class="sd">        can be achieved with synonyms.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">decorate</span><span class="p">(</span><span class="n">fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Synonym</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">_orm_synonym</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">map_column</span><span class="o">=</span><span class="n">map_column</span><span class="p">,</span> <span class="n">descriptor</span><span class="o">=</span><span class="n">fn</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">decorate</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_declared_attr_common</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+        <span class="n">cascading</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">quiet</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="c1"># suppport</span>
+        <span class="c1"># @declared_attr</span>
+        <span class="c1"># @classmethod</span>
+        <span class="c1"># def foo(cls) -&gt; Mapped[thing]:</span>
+        <span class="c1">#    ...</span>
+        <span class="c1"># which seems to help typing tools interpret the fn as a classmethod</span>
+        <span class="c1"># for situations where needed</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="nb">classmethod</span><span class="p">):</span>
+            <span class="n">fn</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="vm">__func__</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fget</span> <span class="o">=</span> <span class="n">fn</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cascading</span> <span class="o">=</span> <span class="n">cascading</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_quiet</span> <span class="o">=</span> <span class="n">quiet</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="vm">__doc__</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_collect_return_annotation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+        <span class="k">return</span> <span class="n">util</span><span class="o">.</span><span class="n">get_annotations</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fget</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;return&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">object</span><span class="p">],</span> <span class="n">owner</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="c1"># the declared_attr needs to make use of a cache that exists</span>
+        <span class="c1"># for the span of the declarative scan_attributes() phase.</span>
+        <span class="c1"># to achieve this we look at the class manager that&#39;s configured.</span>
+
+        <span class="c1"># note this method should not be called outside of the declarative</span>
+        <span class="c1"># setup phase</span>
+
+        <span class="bp">cls</span> <span class="o">=</span> <span class="n">owner</span>
+        <span class="n">manager</span> <span class="o">=</span> <span class="n">attributes</span><span class="o">.</span><span class="n">opt_manager_of_class</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">manager</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^__.+__$&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fget</span><span class="o">.</span><span class="vm">__name__</span><span class="p">):</span>
+                <span class="c1"># if there is no manager at all, then this class hasn&#39;t been</span>
+                <span class="c1"># run through declarative or mapper() at all, emit a warning.</span>
+                <span class="n">util</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="s2">&quot;Unmanaged access of declarative attribute </span><span class="si">%s</span><span class="s2"> from &quot;</span>
+                    <span class="s2">&quot;non-mapped class </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fget</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fget</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">manager</span><span class="o">.</span><span class="n">is_mapped</span><span class="p">:</span>
+            <span class="c1"># the class is mapped, which means we&#39;re outside of the declarative</span>
+            <span class="c1"># scan setup, just run the function.</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fget</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+
+        <span class="c1"># here, we are inside of the declarative scan.  use the registry</span>
+        <span class="c1"># that is tracking the values of these attributes.</span>
+        <span class="n">declarative_scan</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">declarative_scan</span><span class="p">()</span>
+
+        <span class="c1"># assert that we are in fact in the declarative scan</span>
+        <span class="k">assert</span> <span class="n">declarative_scan</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+        <span class="n">reg</span> <span class="o">=</span> <span class="n">declarative_scan</span><span class="o">.</span><span class="n">declared_attr_reg</span>
+
+        <span class="k">if</span> <span class="bp">self</span> <span class="ow">in</span> <span class="n">reg</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">reg</span><span class="p">[</span><span class="bp">self</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">reg</span><span class="p">[</span><span class="bp">self</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fget</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">obj</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_declared_directive</span><span class="p">(</span><span class="n">_declared_attr_common</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_T</span><span class="p">]):</span>
+    <span class="c1"># see mapping_api.rst for docstring</span>
+
+    <span class="k">if</span> <span class="n">typing</span><span class="o">.</span><span class="n">TYPE_CHECKING</span><span class="p">:</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">_T</span><span class="p">],</span>
+            <span class="n">cascading</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="p">):</span> <span class="o">...</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="fm">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">object</span><span class="p">],</span> <span class="n">owner</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_T</span><span class="p">:</span> <span class="o">...</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="fm">__set__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="fm">__delete__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">_TT</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">_declared_directive</span><span class="p">[</span><span class="n">_TT</span><span class="p">]:</span>
+            <span class="c1"># extensive fooling of mypy underway...</span>
+            <span class="o">...</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">declared_attr</span><span class="p">(</span><span class="n">interfaces</span><span class="o">.</span><span class="n">_MappedAttribute</span><span class="p">[</span><span class="n">_T</span><span class="p">],</span> <span class="n">_declared_attr_common</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mark a class-level method as representing the definition of</span>
+<span class="sd">    a mapped property or Declarative directive.</span>
+
+<span class="sd">    :class:`_orm.declared_attr` is typically applied as a decorator to a class</span>
+<span class="sd">    level method, turning the attribute into a scalar-like property that can be</span>
+<span class="sd">    invoked from the uninstantiated class. The Declarative mapping process</span>
+<span class="sd">    looks for these :class:`_orm.declared_attr` callables as it scans classes,</span>
+<span class="sd">    and assumes any attribute marked with :class:`_orm.declared_attr` will be a</span>
+<span class="sd">    callable that will produce an object specific to the Declarative mapping or</span>
+<span class="sd">    table configuration.</span>
+
+<span class="sd">    :class:`_orm.declared_attr` is usually applicable to</span>
+<span class="sd">    :ref:`mixins &lt;orm_mixins_toplevel&gt;`, to define relationships that are to be</span>
+<span class="sd">    applied to different implementors of the class. It may also be used to</span>
+<span class="sd">    define dynamically generated column expressions and other Declarative</span>
+<span class="sd">    attributes.</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        class ProvidesUserMixin:</span>
+<span class="sd">            &quot;A mixin that adds a &#39;user&#39; relationship to classes.&quot;</span>
+
+<span class="sd">            user_id: Mapped[int] = mapped_column(ForeignKey(&quot;user_table.id&quot;))</span>
+
+<span class="sd">            @declared_attr</span>
+<span class="sd">            def user(cls) -&gt; Mapped[&quot;User&quot;]:</span>
+<span class="sd">                return relationship(&quot;User&quot;)</span>
+
+<span class="sd">    When used with Declarative directives such as ``__tablename__``, the</span>
+<span class="sd">    :meth:`_orm.declared_attr.directive` modifier may be used which indicates</span>
+<span class="sd">    to :pep:`484` typing tools that the given method is not dealing with</span>
+<span class="sd">    :class:`_orm.Mapped` attributes::</span>
+
+<span class="sd">        class CreateTableName:</span>
+<span class="sd">            @declared_attr.directive</span>
+<span class="sd">            def __tablename__(cls) -&gt; str:</span>
+<span class="sd">                return cls.__name__.lower()</span>
+
+<span class="sd">    :class:`_orm.declared_attr` can also be applied directly to mapped</span>
+<span class="sd">    classes, to allow for attributes that dynamically configure themselves</span>
+<span class="sd">    on subclasses when using mapped inheritance schemes.   Below</span>
+<span class="sd">    illustrates :class:`_orm.declared_attr` to create a dynamic scheme</span>
+<span class="sd">    for generating the :paramref:`_orm.Mapper.polymorphic_identity` parameter</span>
+<span class="sd">    for subclasses::</span>
+
+<span class="sd">        class Employee(Base):</span>
+<span class="sd">            __tablename__ = &quot;employee&quot;</span>
+
+<span class="sd">            id: Mapped[int] = mapped_column(primary_key=True)</span>
+<span class="sd">            type: Mapped[str] = mapped_column(String(50))</span>
+
+<span class="sd">            @declared_attr.directive</span>
+<span class="sd">            def __mapper_args__(cls) -&gt; Dict[str, Any]:</span>
+<span class="sd">                if cls.__name__ == &quot;Employee&quot;:</span>
+<span class="sd">                    return {</span>
+<span class="sd">                        &quot;polymorphic_on&quot;: cls.type,</span>
+<span class="sd">                        &quot;polymorphic_identity&quot;: &quot;Employee&quot;,</span>
+<span class="sd">                    }</span>
+<span class="sd">                else:</span>
+<span class="sd">                    return {&quot;polymorphic_identity&quot;: cls.__name__}</span>
+
+
+<span class="sd">        class Engineer(Employee):</span>
+<span class="sd">            pass</span>
+
+<span class="sd">    :class:`_orm.declared_attr` supports decorating functions that are</span>
+<span class="sd">    explicitly decorated with ``@classmethod``. This is never necessary from a</span>
+<span class="sd">    runtime perspective, however may be needed in order to support :pep:`484`</span>
+<span class="sd">    typing tools that don&#39;t otherwise recognize the decorated function as</span>
+<span class="sd">    having class-level behaviors for the ``cls`` parameter::</span>
+
+<span class="sd">        class SomethingMixin:</span>
+<span class="sd">            x: Mapped[int]</span>
+<span class="sd">            y: Mapped[int]</span>
+
+<span class="sd">            @declared_attr</span>
+<span class="sd">            @classmethod</span>
+<span class="sd">            def x_plus_y(cls) -&gt; Mapped[int]:</span>
+<span class="sd">                return column_property(cls.x + cls.y)</span>
+
+<span class="sd">    .. versionadded:: 2.0 - :class:`_orm.declared_attr` can accommodate a</span>
+<span class="sd">       function decorated with ``@classmethod`` to help with :pep:`484`</span>
+<span class="sd">       integration where needed.</span>
+
+
+<span class="sd">    .. seealso::</span>
+
+<span class="sd">        :ref:`orm_mixins_toplevel` - Declarative Mixin documentation with</span>
+<span class="sd">        background on use patterns for :class:`_orm.declared_attr`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa: E501</span>
+
+    <span class="k">if</span> <span class="n">typing</span><span class="o">.</span><span class="n">TYPE_CHECKING</span><span class="p">:</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">fn</span><span class="p">:</span> <span class="n">_DeclaredAttrDecorated</span><span class="p">[</span><span class="n">_T</span><span class="p">],</span>
+            <span class="n">cascading</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="p">):</span> <span class="o">...</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="fm">__set__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="fm">__delete__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
+
+        <span class="c1"># this is the Mapped[] API where at class descriptor get time we want</span>
+        <span class="c1"># the type checker to see InstrumentedAttribute[_T].   However the</span>
+        <span class="c1"># callable function prior to mapping in fact calls the given</span>
+        <span class="c1"># declarative function that does not return InstrumentedAttribute</span>
+        <span class="nd">@overload</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__get__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="n">owner</span><span class="p">:</span> <span class="n">Any</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InstrumentedAttribute</span><span class="p">[</span><span class="n">_T</span><span class="p">]:</span> <span class="o">...</span>
+
+        <span class="nd">@overload</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="n">owner</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_T</span><span class="p">:</span> <span class="o">...</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="fm">__get__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">object</span><span class="p">],</span> <span class="n">owner</span><span class="p">:</span> <span class="n">Any</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">InstrumentedAttribute</span><span class="p">[</span><span class="n">_T</span><span class="p">],</span> <span class="n">_T</span><span class="p">]:</span> <span class="o">...</span>
+
+    <span class="nd">@hybridmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_stateful</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_stateful_declared_attr</span><span class="p">[</span><span class="n">_T</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">_stateful_declared_attr</span><span class="p">(</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+    <span class="nd">@hybridproperty</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">directive</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_declared_directive</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+        <span class="c1"># see mapping_api.rst for docstring</span>
+        <span class="k">return</span> <span class="n">_declared_directive</span>  <span class="c1"># type: ignore</span>
+
+    <span class="nd">@hybridproperty</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cascading</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_stateful_declared_attr</span><span class="p">[</span><span class="n">_T</span><span class="p">]:</span>
+        <span class="c1"># see mapping_api.rst for docstring</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_stateful</span><span class="p">(</span><span class="n">cascading</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_stateful_declared_attr</span><span class="p">(</span><span class="n">declared_attr</span><span class="p">[</span><span class="n">_T</span><span class="p">]):</span>
+    <span class="n">kw</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kw</span> <span class="o">=</span> <span class="n">kw</span>
+
+    <span class="nd">@hybridmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_stateful</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_stateful_declared_attr</span><span class="p">[</span><span class="n">_T</span><span class="p">]:</span>
+        <span class="n">new_kw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kw</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">new_kw</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kw</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_stateful_declared_attr</span><span class="p">(</span><span class="o">**</span><span class="n">new_kw</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span> <span class="n">_DeclaredAttrDecorated</span><span class="p">[</span><span class="n">_T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">declared_attr</span><span class="p">[</span><span class="n">_T</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">declared_attr</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kw</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">declarative_mixin</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">_T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">[</span><span class="n">_T</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mark a class as providing the feature of &quot;declarative mixin&quot;.</span>
+
+<span class="sd">    E.g.::</span>
+
+<span class="sd">        from sqlalchemy.orm import declared_attr</span>
+<span class="sd">        from sqlalchemy.orm import declarative_mixin</span>
+
+
+<span class="sd">        @declarative_mixin</span>
+<span class="sd">        class MyMixin:</span>
+
+<span class="sd">            @declared_attr</span>
+<span class="sd">            def __tablename__(cls):</span>
+<span class="sd">                return cls.__name__.lower()</span>
+
+<span class="sd">            __table_args__ = {&quot;mysql_engine&quot;: &quot;InnoDB&quot;}</span>
+<span class="sd">            __mapper_args__ = {&quot;always_refresh&quot;: True}</span>
+
+<span class="sd">            id = Column(Integer, primary_key=True)</span>
+
+
+<span class="sd">        class MyModel(MyMixin, Base):</span>
+<span class="sd">            name = Column(String(1000))</span>
+
+<span class="sd">    The :func:`_orm.declarative_mixin` decorator currently does not modify</span>
+<span class="sd">    the given class in any way; it&#39;s current purpose is strictly to assist</span>
+<span class="sd">    the :ref:`Mypy plugin &lt;mypy_toplevel&gt;` in being able to identify</span>
+<span class="sd">    SQLAlchemy declarative mixin classes when no other context is present.</span>
+
+<span class="sd">    .. versionadded:: 1.4.6</span>
+
+<span class="sd">    .. seealso::</span>
+
+<span class="sd">        :ref:`orm_mixins_toplevel`</span>
+
+<span class="sd">        :ref:`mypy_declarative_mixins` - in the</span>
+<span class="sd">        :ref:`Mypy plugin documentation &lt;mypy_toplevel&gt;`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa: E501</span>
+
+    <span class="k">return</span> <span class="bp">cls</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_setup_declarative_base</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="s2">&quot;metadata&quot;</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="s2">&quot;type_annotation_map&quot;</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
+        <span class="n">type_annotation_map</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;type_annotation_map&quot;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">type_annotation_map</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">reg</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;registry&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">reg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="n">registry</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">exc</span><span class="o">.</span><span class="n">InvalidRequestError</span><span class="p">(</span>
+                <span class="s2">&quot;Declarative base class has a &#39;registry&#39; attribute that is &quot;</span>
+                <span class="s2">&quot;not an instance of sqlalchemy.orm.registry()&quot;</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">type_annotation_map</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exc</span><span class="o">.</span><span class="n">InvalidRequestError</span><span class="p">(</span>
+                <span class="s2">&quot;Declarative base class has both a &#39;registry&#39; attribute and a &quot;</span>
+                <span class="s2">&quot;type_annotation_map entry.  Per-base type_annotation_maps &quot;</span>
+                <span class="s2">&quot;are not supported.  Please apply the type_annotation_map &quot;</span>
+                <span class="s2">&quot;to this registry directly.&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">reg</span> <span class="o">=</span> <span class="n">registry</span><span class="p">(</span>
+            <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span> <span class="n">type_annotation_map</span><span class="o">=</span><span class="n">type_annotation_map</span>
+        <span class="p">)</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">registry</span> <span class="o">=</span> <span class="n">reg</span>
+
+    <span class="bp">cls</span><span class="o">.</span><span class="n">_sa_registry</span> <span class="o">=</span> <span class="n">reg</span>
+
+    <span class="k">if</span> <span class="s2">&quot;metadata&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">metadata</span>
+
+    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__init__&quot;</span><span class="p">,</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__init__</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__init__</span><span class="p">:</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">constructor</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MappedAsDataclass</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">DCTransformDeclarative</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mixin class to indicate when mapping this class, also convert it to be</span>
+<span class="sd">    a dataclass.</span>
+
+<span class="sd">    .. seealso::</span>
+
+<span class="sd">        :ref:`orm_declarative_native_dataclasses` - complete background</span>
+<span class="sd">        on SQLAlchemy native dataclass mapping</span>
+
+<span class="sd">    .. versionadded:: 2.0</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__init_subclass__</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">init</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">_NoArg</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="n">_NoArg</span><span class="o">.</span><span class="n">NO_ARG</span><span class="p">,</span>
+        <span class="nb">repr</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">_NoArg</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="n">_NoArg</span><span class="o">.</span><span class="n">NO_ARG</span><span class="p">,</span>  <span class="c1"># noqa: A002</span>
+        <span class="n">eq</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">_NoArg</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="n">_NoArg</span><span class="o">.</span><span class="n">NO_ARG</span><span class="p">,</span>
+        <span class="n">order</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">_NoArg</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="n">_NoArg</span><span class="o">.</span><span class="n">NO_ARG</span><span class="p">,</span>
+        <span class="n">unsafe_hash</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">_NoArg</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="n">_NoArg</span><span class="o">.</span><span class="n">NO_ARG</span><span class="p">,</span>
+        <span class="n">match_args</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">_NoArg</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="n">_NoArg</span><span class="o">.</span><span class="n">NO_ARG</span><span class="p">,</span>
+        <span class="n">kw_only</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">_NoArg</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="n">_NoArg</span><span class="o">.</span><span class="n">NO_ARG</span><span class="p">,</span>
+        <span class="n">dataclass_callable</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span>
+            <span class="n">_NoArg</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">_NoArg</span><span class="o">.</span><span class="n">NO_ARG</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kw</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">apply_dc_transforms</span><span class="p">:</span> <span class="n">_DataclassArguments</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;init&quot;</span><span class="p">:</span> <span class="n">init</span><span class="p">,</span>
+            <span class="s2">&quot;repr&quot;</span><span class="p">:</span> <span class="nb">repr</span><span class="p">,</span>
+            <span class="s2">&quot;eq&quot;</span><span class="p">:</span> <span class="n">eq</span><span class="p">,</span>
+            <span class="s2">&quot;order&quot;</span><span class="p">:</span> <span class="n">order</span><span class="p">,</span>
+            <span class="s2">&quot;unsafe_hash&quot;</span><span class="p">:</span> <span class="n">unsafe_hash</span><span class="p">,</span>
+            <span class="s2">&quot;match_args&quot;</span><span class="p">:</span> <span class="n">match_args</span><span class="p">,</span>
+            <span class="s2">&quot;kw_only&quot;</span><span class="p">:</span> <span class="n">kw_only</span><span class="p">,</span>
+            <span class="s2">&quot;dataclass_callable&quot;</span><span class="p">:</span> <span class="n">dataclass_callable</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="n">current_transforms</span><span class="p">:</span> <span class="n">_DataclassArguments</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;_sa_apply_dc_transforms&quot;</span><span class="p">):</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_sa_apply_dc_transforms</span>
+
+            <span class="n">_ClassScanMapperConfig</span><span class="o">.</span><span class="n">_assert_dc_arguments</span><span class="p">(</span><span class="n">current</span><span class="p">)</span>
+
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_sa_apply_dc_transforms</span> <span class="o">=</span> <span class="n">current_transforms</span> <span class="o">=</span> <span class="p">{</span>  <span class="c1"># type: ignore  # noqa: E501</span>
+                <span class="n">k</span><span class="p">:</span> <span class="n">current</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">_NoArg</span><span class="o">.</span><span class="n">NO_ARG</span><span class="p">)</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="n">_NoArg</span><span class="o">.</span><span class="n">NO_ARG</span> <span class="k">else</span> <span class="n">v</span>
+                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">apply_dc_transforms</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_sa_apply_dc_transforms</span> <span class="o">=</span> <span class="n">current_transforms</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">apply_dc_transforms</span>
+            <span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_is_mapped_class</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+            <span class="n">new_anno</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">_ClassScanMapperConfig</span><span class="o">.</span><span class="n">_update_annotations_for_non_mapped_class</span>
+            <span class="p">)(</span><span class="bp">cls</span><span class="p">)</span>
+            <span class="n">_ClassScanMapperConfig</span><span class="o">.</span><span class="n">_apply_dataclasses_to_any_class</span><span class="p">(</span>
+                <span class="n">current_transforms</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">new_anno</span>
+            <span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">DeclarativeBase</span><span class="p">(</span>
+    <span class="c1"># Inspectable is used only by the mypy plugin</span>
+    <span class="n">inspection</span><span class="o">.</span><span class="n">Inspectable</span><span class="p">[</span><span class="n">InstanceState</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
+    <span class="n">metaclass</span><span class="o">=</span><span class="n">DeclarativeAttributeIntercept</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class used for declarative class definitions.</span>
+
+<span class="sd">    The :class:`_orm.DeclarativeBase` allows for the creation of new</span>
+<span class="sd">    declarative bases in such a way that is compatible with type checkers::</span>
+
+
+<span class="sd">        from sqlalchemy.orm import DeclarativeBase</span>
+
+
+<span class="sd">        class Base(DeclarativeBase):</span>
+<span class="sd">            pass</span>
+
+<span class="sd">    The above ``Base`` class is now usable as the base for new declarative</span>
+<span class="sd">    mappings.  The superclass makes use of the ``__init_subclass__()``</span>
+<span class="sd">    method to set up new classes and metaclasses aren&#39;t used.</span>
+
+<span class="sd">    When first used, the :class:`_orm.DeclarativeBase` class instantiates a new</span>
+<span class="sd">    :class:`_orm.registry` to be used with the base, assuming one was not</span>
+<span class="sd">    provided explicitly. The :class:`_orm.DeclarativeBase` class supports</span>
+<span class="sd">    class-level attributes which act as parameters for the construction of this</span>
+<span class="sd">    registry; such as to indicate a specific :class:`_schema.MetaData`</span>
+<span class="sd">    collection as well as a specific value for</span>
+<span class="sd">    :paramref:`_orm.registry.type_annotation_map`::</span>
+
+<span class="sd">        from typing_extensions import Annotated</span>
+
+<span class="sd">        from sqlalchemy import BigInteger</span>
+<span class="sd">        from sqlalchemy import MetaData</span>
+<span class="sd">        from sqlalchemy import String</span>
+<span class="sd">        from sqlalchemy.orm import DeclarativeBase</span>
+
+<span class="sd">        bigint = Annotated[int, &quot;bigint&quot;]</span>
+<span class="sd">        my_metadata = MetaData()</span>
+
+
+<span class="sd">        class Base(DeclarativeBase):</span>
+<span class="sd">            metadata = my_metadata</span>
+<span class="sd">            type_annotation_map = {</span>
+<span class="sd">                str: String().with_variant(String(255), &quot;mysql&quot;, &quot;mariadb&quot;),</span>
+<span class="sd">                bigint: BigInteger(),</span>
+<span class="sd">            }</span>
+
+<span class="sd">    Class-level attributes which may be specified include:</span>
+
+<span class="sd">    :param metadata: optional :class:`_schema.MetaData` collection.</span>
+<span class="sd">     If a :class:`_orm.registry` is constructed automatically, this</span>
+<span class="sd">     :class:`_schema.MetaData` collection will be used to construct it.</span>
+<span class="sd">     Otherwise, the local :class:`_schema.MetaData` collection will supercede</span>
+<span class="sd">     that used by an existing :class:`_orm.registry` passed using the</span>
+<span class="sd">     :paramref:`_orm.DeclarativeBase.registry` parameter.</span>
+<span class="sd">    :param type_annotation_map: optional type annotation map that will be</span>
+<span class="sd">     passed to the :class:`_orm.registry` as</span>
+<span class="sd">     :paramref:`_orm.registry.type_annotation_map`.</span>
+<span class="sd">    :param registry: supply a pre-existing :class:`_orm.registry` directly.</span>
+
+<span class="sd">    .. versionadded:: 2.0  Added :class:`.DeclarativeBase`, so that declarative</span>
+<span class="sd">       base classes may be constructed in such a way that is also recognized</span>
+<span class="sd">       by :pep:`484` type checkers.   As a result, :class:`.DeclarativeBase`</span>
+<span class="sd">       and other subclassing-oriented APIs should be seen as</span>
+<span class="sd">       superseding previous &quot;class returned by a function&quot; APIs, namely</span>
+<span class="sd">       :func:`_orm.declarative_base` and :meth:`_orm.registry.generate_base`,</span>
+<span class="sd">       where the base class returned cannot be recognized by type checkers</span>
+<span class="sd">       without using plugins.</span>
+
+<span class="sd">    **__init__ behavior**</span>
+
+<span class="sd">    In a plain Python class, the base-most ``__init__()`` method in the class</span>
+<span class="sd">    hierarchy is ``object.__init__()``, which accepts no arguments. However,</span>
+<span class="sd">    when the :class:`_orm.DeclarativeBase` subclass is first declared, the</span>
+<span class="sd">    class is given an ``__init__()`` method that links to the</span>
+<span class="sd">    :paramref:`_orm.registry.constructor` constructor function, if no</span>
+<span class="sd">    ``__init__()`` method is already present; this is the usual declarative</span>
+<span class="sd">    constructor that will assign keyword arguments as attributes on the</span>
+<span class="sd">    instance, assuming those attributes are established at the class level</span>
+<span class="sd">    (i.e. are mapped, or are linked to a descriptor). This constructor is</span>
+<span class="sd">    **never accessed by a mapped class without being called explicitly via</span>
+<span class="sd">    super()**, as mapped classes are themselves given an ``__init__()`` method</span>
+<span class="sd">    directly which calls :paramref:`_orm.registry.constructor`, so in the</span>
+<span class="sd">    default case works independently of what the base-most ``__init__()``</span>
+<span class="sd">    method does.</span>
+
+<span class="sd">    .. versionchanged:: 2.0.1  :class:`_orm.DeclarativeBase` has a default</span>
+<span class="sd">       constructor that links to :paramref:`_orm.registry.constructor` by</span>
+<span class="sd">       default, so that calls to ``super().__init__()`` can access this</span>
+<span class="sd">       constructor. Previously, due to an implementation mistake, this default</span>
+<span class="sd">       constructor was missing, and calling ``super().__init__()`` would invoke</span>
+<span class="sd">       ``object.__init__()``.</span>
+
+<span class="sd">    The :class:`_orm.DeclarativeBase` subclass may also declare an explicit</span>
+<span class="sd">    ``__init__()`` method which will replace the use of the</span>
+<span class="sd">    :paramref:`_orm.registry.constructor` function at this level::</span>
+
+<span class="sd">        class Base(DeclarativeBase):</span>
+<span class="sd">            def __init__(self, id=None):</span>
+<span class="sd">                self.id = id</span>
+
+<span class="sd">    Mapped classes still will not invoke this constructor implicitly; it</span>
+<span class="sd">    remains only accessible by calling ``super().__init__()``::</span>
+
+<span class="sd">        class MyClass(Base):</span>
+<span class="sd">            def __init__(self, id=None, name=None):</span>
+<span class="sd">                self.name = name</span>
+<span class="sd">                super().__init__(id=id)</span>
+
+<span class="sd">    Note that this is a different behavior from what functions like the legacy</span>
+<span class="sd">    :func:`_orm.declarative_base` would do; the base created by those functions</span>
+<span class="sd">    would always install :paramref:`_orm.registry.constructor` for</span>
+<span class="sd">    ``__init__()``.</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">typing</span><span class="o">.</span><span class="n">TYPE_CHECKING</span><span class="p">:</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">_sa_inspect_type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapper</span><span class="p">[</span><span class="n">Self</span><span class="p">]:</span> <span class="o">...</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">_sa_inspect_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InstanceState</span><span class="p">[</span><span class="n">Self</span><span class="p">]:</span> <span class="o">...</span>
+
+        <span class="n">_sa_registry</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="n">_RegistryType</span><span class="p">]</span>
+
+        <span class="n">registry</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="n">_RegistryType</span><span class="p">]</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Refers to the :class:`_orm.registry` in use where new</span>
+<span class="sd">        :class:`_orm.Mapper` objects will be associated.&quot;&quot;&quot;</span>
+
+        <span class="n">metadata</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="n">MetaData</span><span class="p">]</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Refers to the :class:`_schema.MetaData` collection that will be used</span>
+<span class="sd">        for new :class:`_schema.Table` objects.</span>
+
+<span class="sd">        .. seealso::</span>
+
+<span class="sd">            :ref:`orm_declarative_metadata`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="vm">__name__</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+
+        <span class="c1"># this ideally should be Mapper[Self], but mypy as of 1.4.1 does not</span>
+        <span class="c1"># like it, and breaks the declared_attr_one test. Pyright/pylance is</span>
+        <span class="c1"># ok with it.</span>
+        <span class="n">__mapper__</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="n">Mapper</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The :class:`_orm.Mapper` object to which a particular class is</span>
+<span class="sd">        mapped.</span>
+
+<span class="sd">        May also be acquired using :func:`_sa.inspect`, e.g.</span>
+<span class="sd">        ``inspect(klass)``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">__table__</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="n">FromClause</span><span class="p">]</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The :class:`_sql.FromClause` to which a particular subclass is</span>
+<span class="sd">        mapped.</span>
+
+<span class="sd">        This is usually an instance of :class:`_schema.Table` but may also</span>
+<span class="sd">        refer to other kinds of :class:`_sql.FromClause` such as</span>
+<span class="sd">        :class:`_sql.Subquery`, depending on how the class is mapped.</span>
+
+<span class="sd">        .. seealso::</span>
+
+<span class="sd">            :ref:`orm_declarative_metadata`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># pyright/pylance do not consider a classmethod a ClassVar so use Any</span>
+        <span class="c1"># https://github.com/microsoft/pylance-release/issues/3484</span>
+        <span class="n">__tablename__</span><span class="p">:</span> <span class="n">Any</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;String name to assign to the generated</span>
+<span class="sd">        :class:`_schema.Table` object, if not specified directly via</span>
+<span class="sd">        :attr:`_orm.DeclarativeBase.__table__`.</span>
+
+<span class="sd">        .. seealso::</span>
+
+<span class="sd">            :ref:`orm_declarative_table`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">__mapper_args__</span><span class="p">:</span> <span class="n">Any</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Dictionary of arguments which will be passed to the</span>
+<span class="sd">        :class:`_orm.Mapper` constructor.</span>
+
+<span class="sd">        .. seealso::</span>
+
+<span class="sd">            :ref:`orm_declarative_mapper_options`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">__table_args__</span><span class="p">:</span> <span class="n">Any</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A dictionary or tuple of arguments that will be passed to the</span>
+<span class="sd">        :class:`_schema.Table` constructor.  See</span>
+<span class="sd">        :ref:`orm_declarative_table_configuration`</span>
+<span class="sd">        for background on the specific structure of this collection.</span>
+
+<span class="sd">        .. seealso::</span>
+
+<span class="sd">            :ref:`orm_declarative_table_configuration`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span> <span class="o">...</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">DeclarativeBase</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__bases__</span><span class="p">:</span>
+            <span class="n">_check_not_declarative</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">DeclarativeBase</span><span class="p">)</span>
+            <span class="n">_setup_declarative_base</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_as_declarative</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_sa_registry</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_not_declarative</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">base</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">cls_dict</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="s2">&quot;__table__&quot;</span> <span class="ow">in</span> <span class="n">cls_dict</span>
+        <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span>
+            <span class="nb">callable</span><span class="p">(</span><span class="n">cls_dict</span><span class="p">[</span><span class="s2">&quot;__table__&quot;</span><span class="p">])</span>
+            <span class="ow">or</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">cls_dict</span><span class="p">[</span><span class="s2">&quot;__table__&quot;</span><span class="p">],</span> <span class="s2">&quot;__get__&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cls_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;__tablename__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">exc</span><span class="o">.</span><span class="n">InvalidRequestError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Cannot use </span><span class="si">{</span><span class="n">base</span><span class="o">.</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s2"> directly as a declarative base &quot;</span>
+            <span class="s2">&quot;class. Create a Base by creating a subclass of it.&quot;</span>
+        <span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">DeclarativeBaseNoMeta</span><span class="p">(</span>
+    <span class="c1"># Inspectable is used only by the mypy plugin</span>
+    <span class="n">inspection</span><span class="o">.</span><span class="n">Inspectable</span><span class="p">[</span><span class="n">InstanceState</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Same as :class:`_orm.DeclarativeBase`, but does not use a metaclass</span>
+<span class="sd">    to intercept new attributes.</span>
+
+<span class="sd">    The :class:`_orm.DeclarativeBaseNoMeta` base may be used when use of</span>
+<span class="sd">    custom metaclasses is desirable.</span>
+
+<span class="sd">    .. versionadded:: 2.0</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_sa_registry</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="n">_RegistryType</span><span class="p">]</span>
+
+    <span class="n">registry</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="n">_RegistryType</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Refers to the :class:`_orm.registry` in use where new</span>
+<span class="sd">    :class:`_orm.Mapper` objects will be associated.&quot;&quot;&quot;</span>
+
+    <span class="n">metadata</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="n">MetaData</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Refers to the :class:`_schema.MetaData` collection that will be used</span>
+<span class="sd">    for new :class:`_schema.Table` objects.</span>
+
+<span class="sd">    .. seealso::</span>
+
+<span class="sd">        :ref:`orm_declarative_metadata`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># this ideally should be Mapper[Self], but mypy as of 1.4.1 does not</span>
+    <span class="c1"># like it, and breaks the declared_attr_one test. Pyright/pylance is</span>
+    <span class="c1"># ok with it.</span>
+    <span class="n">__mapper__</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="n">Mapper</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The :class:`_orm.Mapper` object to which a particular class is</span>
+<span class="sd">    mapped.</span>
+
+<span class="sd">    May also be acquired using :func:`_sa.inspect`, e.g.</span>
+<span class="sd">    ``inspect(klass)``.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">__table__</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">FromClause</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The :class:`_sql.FromClause` to which a particular subclass is</span>
+<span class="sd">    mapped.</span>
+
+<span class="sd">    This is usually an instance of :class:`_schema.Table` but may also</span>
+<span class="sd">    refer to other kinds of :class:`_sql.FromClause` such as</span>
+<span class="sd">    :class:`_sql.Subquery`, depending on how the class is mapped.</span>
+
+<span class="sd">    .. seealso::</span>
+
+<span class="sd">        :ref:`orm_declarative_metadata`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">typing</span><span class="o">.</span><span class="n">TYPE_CHECKING</span><span class="p">:</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">_sa_inspect_type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapper</span><span class="p">[</span><span class="n">Self</span><span class="p">]:</span> <span class="o">...</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">_sa_inspect_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InstanceState</span><span class="p">[</span><span class="n">Self</span><span class="p">]:</span> <span class="o">...</span>
+
+        <span class="n">__tablename__</span><span class="p">:</span> <span class="n">Any</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;String name to assign to the generated</span>
+<span class="sd">        :class:`_schema.Table` object, if not specified directly via</span>
+<span class="sd">        :attr:`_orm.DeclarativeBase.__table__`.</span>
+
+<span class="sd">        .. seealso::</span>
+
+<span class="sd">            :ref:`orm_declarative_table`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">__mapper_args__</span><span class="p">:</span> <span class="n">Any</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Dictionary of arguments which will be passed to the</span>
+<span class="sd">        :class:`_orm.Mapper` constructor.</span>
+
+<span class="sd">        .. seealso::</span>
+
+<span class="sd">            :ref:`orm_declarative_mapper_options`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">__table_args__</span><span class="p">:</span> <span class="n">Any</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A dictionary or tuple of arguments that will be passed to the</span>
+<span class="sd">        :class:`_schema.Table` constructor.  See</span>
+<span class="sd">        :ref:`orm_declarative_table_configuration`</span>
+<span class="sd">        for background on the specific structure of this collection.</span>
+
+<span class="sd">        .. seealso::</span>
+
+<span class="sd">            :ref:`orm_declarative_table_configuration`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span> <span class="o">...</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">DeclarativeBaseNoMeta</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__bases__</span><span class="p">:</span>
+            <span class="n">_check_not_declarative</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">DeclarativeBaseNoMeta</span><span class="p">)</span>
+            <span class="n">_setup_declarative_base</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_as_declarative</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_sa_registry</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">add_mapped_attribute</span><span class="p">(</span>
+    <span class="n">target</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">_O</span><span class="p">],</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="n">MapperProperty</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add a new mapped attribute to an ORM mapped class.</span>
+
+<span class="sd">    E.g.::</span>
+
+<span class="sd">        add_mapped_attribute(User, &quot;addresses&quot;, relationship(Address))</span>
+
+<span class="sd">    This may be used for ORM mappings that aren&#39;t using a declarative</span>
+<span class="sd">    metaclass that intercepts attribute set operations.</span>
+
+<span class="sd">    .. versionadded:: 2.0</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_add_attribute</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">declarative_base</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">MetaData</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">mapper</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Mapper</span><span class="p">[</span><span class="n">Any</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="nb">object</span><span class="p">,</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Base&quot;</span><span class="p">,</span>
+    <span class="n">class_registry</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">clsregistry</span><span class="o">.</span><span class="n">_ClsRegistryType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">type_annotation_map</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">_TypeAnnotationMapType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">constructor</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="n">_declarative_constructor</span><span class="p">,</span>
+    <span class="n">metaclass</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">DeclarativeMeta</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Construct a base class for declarative class definitions.</span>
+
+<span class="sd">    The new base class will be given a metaclass that produces</span>
+<span class="sd">    appropriate :class:`~sqlalchemy.schema.Table` objects and makes</span>
+<span class="sd">    the appropriate :class:`_orm.Mapper` calls based on the</span>
+<span class="sd">    information provided declaratively in the class and any subclasses</span>
+<span class="sd">    of the class.</span>
+
+<span class="sd">    .. versionchanged:: 2.0 Note that the :func:`_orm.declarative_base`</span>
+<span class="sd">       function is superseded by the new :class:`_orm.DeclarativeBase` class,</span>
+<span class="sd">       which generates a new &quot;base&quot; class using subclassing, rather than</span>
+<span class="sd">       return value of a function.  This allows an approach that is compatible</span>
+<span class="sd">       with :pep:`484` typing tools.</span>
+
+<span class="sd">    The :func:`_orm.declarative_base` function is a shorthand version</span>
+<span class="sd">    of using the :meth:`_orm.registry.generate_base`</span>
+<span class="sd">    method.  That is, the following::</span>
+
+<span class="sd">        from sqlalchemy.orm import declarative_base</span>
+
+<span class="sd">        Base = declarative_base()</span>
+
+<span class="sd">    Is equivalent to::</span>
+
+<span class="sd">        from sqlalchemy.orm import registry</span>
+
+<span class="sd">        mapper_registry = registry()</span>
+<span class="sd">        Base = mapper_registry.generate_base()</span>
+
+<span class="sd">    See the docstring for :class:`_orm.registry`</span>
+<span class="sd">    and :meth:`_orm.registry.generate_base`</span>
+<span class="sd">    for more details.</span>
+
+<span class="sd">    .. versionchanged:: 1.4  The :func:`_orm.declarative_base`</span>
+<span class="sd">       function is now a specialization of the more generic</span>
+<span class="sd">       :class:`_orm.registry` class.  The function also moves to the</span>
+<span class="sd">       ``sqlalchemy.orm`` package from the ``declarative.ext`` package.</span>
+
+
+<span class="sd">    :param metadata:</span>
+<span class="sd">      An optional :class:`~sqlalchemy.schema.MetaData` instance.  All</span>
+<span class="sd">      :class:`~sqlalchemy.schema.Table` objects implicitly declared by</span>
+<span class="sd">      subclasses of the base will share this MetaData.  A MetaData instance</span>
+<span class="sd">      will be created if none is provided.  The</span>
+<span class="sd">      :class:`~sqlalchemy.schema.MetaData` instance will be available via the</span>
+<span class="sd">      ``metadata`` attribute of the generated declarative base class.</span>
+
+<span class="sd">    :param mapper:</span>
+<span class="sd">      An optional callable, defaults to :class:`_orm.Mapper`. Will</span>
+<span class="sd">      be used to map subclasses to their Tables.</span>
+
+<span class="sd">    :param cls:</span>
+<span class="sd">      Defaults to :class:`object`. A type to use as the base for the generated</span>
+<span class="sd">      declarative base class. May be a class or tuple of classes.</span>
+
+<span class="sd">    :param name:</span>
+<span class="sd">      Defaults to ``Base``.  The display name for the generated</span>
+<span class="sd">      class.  Customizing this is not required, but can improve clarity in</span>
+<span class="sd">      tracebacks and debugging.</span>
+
+<span class="sd">    :param constructor:</span>
+<span class="sd">      Specify the implementation for the ``__init__`` function on a mapped</span>
+<span class="sd">      class that has no ``__init__`` of its own.  Defaults to an</span>
+<span class="sd">      implementation that assigns \**kwargs for declared</span>
+<span class="sd">      fields and relationships to an instance.  If ``None`` is supplied,</span>
+<span class="sd">      no __init__ will be provided and construction will fall back to</span>
+<span class="sd">      cls.__init__ by way of the normal Python semantics.</span>
+
+<span class="sd">    :param class_registry: optional dictionary that will serve as the</span>
+<span class="sd">      registry of class names-&gt; mapped classes when string names</span>
+<span class="sd">      are used to identify classes inside of :func:`_orm.relationship`</span>
+<span class="sd">      and others.  Allows two or more declarative base classes</span>
+<span class="sd">      to share the same registry of class names for simplified</span>
+<span class="sd">      inter-base relationships.</span>
+
+<span class="sd">    :param type_annotation_map: optional dictionary of Python types to</span>
+<span class="sd">        SQLAlchemy :class:`_types.TypeEngine` classes or instances.  This</span>
+<span class="sd">        is used exclusively by the :class:`_orm.MappedColumn` construct</span>
+<span class="sd">        to produce column types based on annotations within the</span>
+<span class="sd">        :class:`_orm.Mapped` type.</span>
+
+
+<span class="sd">        .. versionadded:: 2.0</span>
+
+<span class="sd">        .. seealso::</span>
+
+<span class="sd">            :ref:`orm_declarative_mapped_column_type_map`</span>
+
+<span class="sd">    :param metaclass:</span>
+<span class="sd">      Defaults to :class:`.DeclarativeMeta`.  A metaclass or __metaclass__</span>
+<span class="sd">      compatible callable to use as the meta type of the generated</span>
+<span class="sd">      declarative base class.</span>
+
+<span class="sd">    .. seealso::</span>
+
+<span class="sd">        :class:`_orm.registry`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">registry</span><span class="p">(</span>
+        <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span>
+        <span class="n">class_registry</span><span class="o">=</span><span class="n">class_registry</span><span class="p">,</span>
+        <span class="n">constructor</span><span class="o">=</span><span class="n">constructor</span><span class="p">,</span>
+        <span class="n">type_annotation_map</span><span class="o">=</span><span class="n">type_annotation_map</span><span class="p">,</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">generate_base</span><span class="p">(</span>
+        <span class="n">mapper</span><span class="o">=</span><span class="n">mapper</span><span class="p">,</span>
+        <span class="bp">cls</span><span class="o">=</span><span class="bp">cls</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+        <span class="n">metaclass</span><span class="o">=</span><span class="n">metaclass</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">registry</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generalized registry for mapping classes.</span>
+
+<span class="sd">    The :class:`_orm.registry` serves as the basis for maintaining a collection</span>
+<span class="sd">    of mappings, and provides configurational hooks used to map classes.</span>
+
+<span class="sd">    The three general kinds of mappings supported are Declarative Base,</span>
+<span class="sd">    Declarative Decorator, and Imperative Mapping.   All of these mapping</span>
+<span class="sd">    styles may be used interchangeably:</span>
+
+<span class="sd">    * :meth:`_orm.registry.generate_base` returns a new declarative base</span>
+<span class="sd">      class, and is the underlying implementation of the</span>
+<span class="sd">      :func:`_orm.declarative_base` function.</span>
+
+<span class="sd">    * :meth:`_orm.registry.mapped` provides a class decorator that will</span>
+<span class="sd">      apply declarative mapping to a class without the use of a declarative</span>
+<span class="sd">      base class.</span>
+
+<span class="sd">    * :meth:`_orm.registry.map_imperatively` will produce a</span>
+<span class="sd">      :class:`_orm.Mapper` for a class without scanning the class for</span>
+<span class="sd">      declarative class attributes. This method suits the use case historically</span>
+<span class="sd">      provided by the ``sqlalchemy.orm.mapper()`` classical mapping function,</span>
+<span class="sd">      which is removed as of SQLAlchemy 2.0.</span>
+
+<span class="sd">    .. versionadded:: 1.4</span>
+
+<span class="sd">    .. seealso::</span>
+
+<span class="sd">        :ref:`orm_mapping_classes_toplevel` - overview of class mapping</span>
+<span class="sd">        styles.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_class_registry</span><span class="p">:</span> <span class="n">clsregistry</span><span class="o">.</span><span class="n">_ClsRegistryType</span>
+    <span class="n">_managers</span><span class="p">:</span> <span class="n">weakref</span><span class="o">.</span><span class="n">WeakKeyDictionary</span><span class="p">[</span><span class="n">ClassManager</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">True</span><span class="p">]]</span>
+    <span class="n">_non_primary_mappers</span><span class="p">:</span> <span class="n">weakref</span><span class="o">.</span><span class="n">WeakKeyDictionary</span><span class="p">[</span><span class="n">Mapper</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">True</span><span class="p">]]</span>
+    <span class="n">metadata</span><span class="p">:</span> <span class="n">MetaData</span>
+    <span class="n">constructor</span><span class="p">:</span> <span class="n">CallableReference</span><span class="p">[</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="kc">None</span><span class="p">]]</span>
+    <span class="n">type_annotation_map</span><span class="p">:</span> <span class="n">_MutableTypeAnnotationMapType</span>
+    <span class="n">_dependents</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">_RegistryType</span><span class="p">]</span>
+    <span class="n">_dependencies</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">_RegistryType</span><span class="p">]</span>
+    <span class="n">_new_mappers</span><span class="p">:</span> <span class="nb">bool</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">MetaData</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">class_registry</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">clsregistry</span><span class="o">.</span><span class="n">_ClsRegistryType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">type_annotation_map</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">_TypeAnnotationMapType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">constructor</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="n">_declarative_constructor</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Construct a new :class:`_orm.registry`</span>
+
+<span class="sd">        :param metadata:</span>
+<span class="sd">          An optional :class:`_schema.MetaData` instance.  All</span>
+<span class="sd">          :class:`_schema.Table` objects generated using declarative</span>
+<span class="sd">          table mapping will make use of this :class:`_schema.MetaData`</span>
+<span class="sd">          collection.  If this argument is left at its default of ``None``,</span>
+<span class="sd">          a blank :class:`_schema.MetaData` collection is created.</span>
+
+<span class="sd">        :param constructor:</span>
+<span class="sd">          Specify the implementation for the ``__init__`` function on a mapped</span>
+<span class="sd">          class that has no ``__init__`` of its own.  Defaults to an</span>
+<span class="sd">          implementation that assigns \**kwargs for declared</span>
+<span class="sd">          fields and relationships to an instance.  If ``None`` is supplied,</span>
+<span class="sd">          no __init__ will be provided and construction will fall back to</span>
+<span class="sd">          cls.__init__ by way of the normal Python semantics.</span>
+
+<span class="sd">        :param class_registry: optional dictionary that will serve as the</span>
+<span class="sd">          registry of class names-&gt; mapped classes when string names</span>
+<span class="sd">          are used to identify classes inside of :func:`_orm.relationship`</span>
+<span class="sd">          and others.  Allows two or more declarative base classes</span>
+<span class="sd">          to share the same registry of class names for simplified</span>
+<span class="sd">          inter-base relationships.</span>
+
+<span class="sd">        :param type_annotation_map: optional dictionary of Python types to</span>
+<span class="sd">          SQLAlchemy :class:`_types.TypeEngine` classes or instances.</span>
+<span class="sd">          The provided dict will update the default type mapping.  This</span>
+<span class="sd">          is used exclusively by the :class:`_orm.MappedColumn` construct</span>
+<span class="sd">          to produce column types based on annotations within the</span>
+<span class="sd">          :class:`_orm.Mapped` type.</span>
+
+<span class="sd">          .. versionadded:: 2.0</span>
+
+<span class="sd">          .. seealso::</span>
+
+<span class="sd">              :ref:`orm_declarative_mapped_column_type_map`</span>
+
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lcl_metadata</span> <span class="o">=</span> <span class="n">metadata</span> <span class="ow">or</span> <span class="n">MetaData</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">class_registry</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">class_registry</span> <span class="o">=</span> <span class="n">weakref</span><span class="o">.</span><span class="n">WeakValueDictionary</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_class_registry</span> <span class="o">=</span> <span class="n">class_registry</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_managers</span> <span class="o">=</span> <span class="n">weakref</span><span class="o">.</span><span class="n">WeakKeyDictionary</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_non_primary_mappers</span> <span class="o">=</span> <span class="n">weakref</span><span class="o">.</span><span class="n">WeakKeyDictionary</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">lcl_metadata</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">constructor</span> <span class="o">=</span> <span class="n">constructor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type_annotation_map</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">type_annotation_map</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_type_annotation_map</span><span class="p">(</span><span class="n">type_annotation_map</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dependents</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dependencies</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_new_mappers</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">with</span> <span class="n">mapperlib</span><span class="o">.</span><span class="n">_CONFIGURE_MUTEX</span><span class="p">:</span>
+            <span class="n">mapperlib</span><span class="o">.</span><span class="n">_mapper_registries</span><span class="p">[</span><span class="bp">self</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_type_annotation_map</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">type_annotation_map</span><span class="p">:</span> <span class="n">_TypeAnnotationMapType</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;update the :paramref:`_orm.registry.type_annotation_map` with new</span>
+<span class="sd">        values.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">type_annotation_map</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="n">de_optionalize_union_types</span><span class="p">(</span><span class="n">typ</span><span class="p">):</span> <span class="n">sqltype</span>
+                <span class="k">for</span> <span class="n">typ</span><span class="p">,</span> <span class="n">sqltype</span> <span class="ow">in</span> <span class="n">type_annotation_map</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_resolve_type</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">python_type</span><span class="p">:</span> <span class="n">_MatchedOnType</span><span class="p">,</span> <span class="n">_do_fallbacks</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">sqltypes</span><span class="o">.</span><span class="n">TypeEngine</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+        <span class="n">python_type_type</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span>
+        <span class="n">search</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">_MatchedOnType</span><span class="p">,</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]]]</span>
+
+        <span class="k">if</span> <span class="n">is_generic</span><span class="p">(</span><span class="n">python_type</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">is_literal</span><span class="p">(</span><span class="n">python_type</span><span class="p">):</span>
+                <span class="n">python_type_type</span> <span class="o">=</span> <span class="n">python_type</span>  <span class="c1"># type: ignore[assignment]</span>
+
+                <span class="n">search</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="p">(</span><span class="n">python_type</span><span class="p">,</span> <span class="n">python_type_type</span><span class="p">),</span>
+                    <span class="o">*</span><span class="p">((</span><span class="n">lt</span><span class="p">,</span> <span class="n">python_type_type</span><span class="p">)</span> <span class="k">for</span> <span class="n">lt</span> <span class="ow">in</span> <span class="n">LITERAL_TYPES</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">python_type_type</span> <span class="o">=</span> <span class="n">python_type</span><span class="o">.</span><span class="n">__origin__</span>
+                <span class="n">search</span> <span class="o">=</span> <span class="p">((</span><span class="n">python_type</span><span class="p">,</span> <span class="n">python_type_type</span><span class="p">),)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">python_type</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+            <span class="n">python_type_type</span> <span class="o">=</span> <span class="n">python_type</span>
+            <span class="n">search</span> <span class="o">=</span> <span class="p">((</span><span class="n">pt</span><span class="p">,</span> <span class="n">pt</span><span class="p">)</span> <span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="n">python_type_type</span><span class="o">.</span><span class="vm">__mro__</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">python_type_type</span> <span class="o">=</span> <span class="n">python_type</span>  <span class="c1"># type: ignore[assignment]</span>
+            <span class="n">search</span> <span class="o">=</span> <span class="p">((</span><span class="n">python_type</span><span class="p">,</span> <span class="n">python_type_type</span><span class="p">),)</span>
+
+        <span class="k">for</span> <span class="n">pt</span><span class="p">,</span> <span class="n">flattened</span> <span class="ow">in</span> <span class="n">search</span><span class="p">:</span>
+            <span class="c1"># we search through full __mro__ for types.  however...</span>
+            <span class="n">sql_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_annotation_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pt</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">sql_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">sql_type</span> <span class="o">=</span> <span class="n">sqltypes</span><span class="o">.</span><span class="n">_type_map_get</span><span class="p">(</span><span class="n">pt</span><span class="p">)</span>  <span class="c1"># type: ignore  # noqa: E501</span>
+
+            <span class="k">if</span> <span class="n">sql_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">sql_type_inst</span> <span class="o">=</span> <span class="n">sqltypes</span><span class="o">.</span><span class="n">to_instance</span><span class="p">(</span><span class="n">sql_type</span><span class="p">)</span>
+
+                <span class="c1"># ... this additional step will reject most</span>
+                <span class="c1"># type -&gt; supertype matches, such as if we had</span>
+                <span class="c1"># a MyInt(int) subclass.  note also we pass NewType()</span>
+                <span class="c1"># here directly; these always have to be in the</span>
+                <span class="c1"># type_annotation_map to be useful</span>
+                <span class="n">resolved_sql_type</span> <span class="o">=</span> <span class="n">sql_type_inst</span><span class="o">.</span><span class="n">_resolve_for_python_type</span><span class="p">(</span>
+                    <span class="n">python_type_type</span><span class="p">,</span>
+                    <span class="n">pt</span><span class="p">,</span>
+                    <span class="n">flattened</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">resolved_sql_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">resolved_sql_type</span>
+
+        <span class="c1"># 2.0 fallbacks</span>
+        <span class="k">if</span> <span class="n">_do_fallbacks</span><span class="p">:</span>
+            <span class="n">python_type_to_check</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">kind</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">is_pep695</span><span class="p">(</span><span class="n">python_type</span><span class="p">):</span>
+                <span class="c1"># NOTE: assume there aren&#39;t type alias types of new types.</span>
+                <span class="n">python_type_to_check</span> <span class="o">=</span> <span class="n">python_type</span>
+                <span class="k">while</span> <span class="n">is_pep695</span><span class="p">(</span><span class="n">python_type_to_check</span><span class="p">):</span>
+                    <span class="n">python_type_to_check</span> <span class="o">=</span> <span class="n">python_type_to_check</span><span class="o">.</span><span class="n">__value__</span>
+                <span class="n">python_type_to_check</span> <span class="o">=</span> <span class="n">de_optionalize_union_types</span><span class="p">(</span>
+                    <span class="n">python_type_to_check</span>
+                <span class="p">)</span>
+                <span class="n">kind</span> <span class="o">=</span> <span class="s2">&quot;TypeAliasType&quot;</span>
+            <span class="k">if</span> <span class="n">is_newtype</span><span class="p">(</span><span class="n">python_type</span><span class="p">):</span>
+                <span class="n">python_type_to_check</span> <span class="o">=</span> <span class="n">flatten_newtype</span><span class="p">(</span><span class="n">python_type</span><span class="p">)</span>
+                <span class="n">kind</span> <span class="o">=</span> <span class="s2">&quot;NewType&quot;</span>
+
+            <span class="k">if</span> <span class="n">python_type_to_check</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">res_after_fallback</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_type</span><span class="p">(</span>
+                    <span class="n">python_type_to_check</span><span class="p">,</span> <span class="kc">False</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">res_after_fallback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">assert</span> <span class="n">kind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                    <span class="n">warn_deprecated</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Matching the provided </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2"> &#39;</span><span class="si">{</span><span class="n">python_type</span><span class="si">}</span><span class="s2">&#39; on &quot;</span>
+                        <span class="s2">&quot;its resolved value without matching it in the &quot;</span>
+                        <span class="s2">&quot;type_annotation_map is deprecated; add this type to &quot;</span>
+                        <span class="s2">&quot;the type_annotation_map to allow it to match &quot;</span>
+                        <span class="s2">&quot;explicitly.&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;2.0&quot;</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="k">return</span> <span class="n">res_after_fallback</span>
+
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mappers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FrozenSet</span><span class="p">[</span><span class="n">Mapper</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;read only collection of all :class:`_orm.Mapper` objects.&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="nb">frozenset</span><span class="p">(</span><span class="n">manager</span><span class="o">.</span><span class="n">mapper</span> <span class="k">for</span> <span class="n">manager</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_managers</span><span class="p">)</span><span class="o">.</span><span class="n">union</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_non_primary_mappers</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_depends_on</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">registry</span><span class="p">:</span> <span class="n">RegistryType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">registry</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">registry</span><span class="o">.</span><span class="n">_dependents</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dependencies</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">registry</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_flag_new_mapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mapper</span><span class="p">:</span> <span class="n">Mapper</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">mapper</span><span class="o">.</span><span class="n">_ready_for_configure</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_new_mappers</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">for</span> <span class="n">reg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_recurse_with_dependents</span><span class="p">({</span><span class="bp">self</span><span class="p">}):</span>
+            <span class="n">reg</span><span class="o">.</span><span class="n">_new_mappers</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_recurse_with_dependents</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">registries</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">RegistryType</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">RegistryType</span><span class="p">]:</span>
+        <span class="n">todo</span> <span class="o">=</span> <span class="n">registries</span>
+        <span class="n">done</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">todo</span><span class="p">:</span>
+            <span class="n">reg</span> <span class="o">=</span> <span class="n">todo</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="n">done</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">reg</span><span class="p">)</span>
+
+            <span class="c1"># if yielding would remove dependents, make sure we have</span>
+            <span class="c1"># them before</span>
+            <span class="n">todo</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">reg</span><span class="o">.</span><span class="n">_dependents</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">done</span><span class="p">))</span>
+            <span class="k">yield</span> <span class="n">reg</span>
+
+            <span class="c1"># if yielding would add dependents, make sure we have them</span>
+            <span class="c1"># after</span>
+            <span class="n">todo</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">reg</span><span class="o">.</span><span class="n">_dependents</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">done</span><span class="p">))</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_recurse_with_dependencies</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">registries</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">RegistryType</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">RegistryType</span><span class="p">]:</span>
+        <span class="n">todo</span> <span class="o">=</span> <span class="n">registries</span>
+        <span class="n">done</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">todo</span><span class="p">:</span>
+            <span class="n">reg</span> <span class="o">=</span> <span class="n">todo</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="n">done</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">reg</span><span class="p">)</span>
+
+            <span class="c1"># if yielding would remove dependencies, make sure we have</span>
+            <span class="c1"># them before</span>
+            <span class="n">todo</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">reg</span><span class="o">.</span><span class="n">_dependencies</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">done</span><span class="p">))</span>
+
+            <span class="k">yield</span> <span class="n">reg</span>
+
+            <span class="c1"># if yielding would remove dependencies, make sure we have</span>
+            <span class="c1"># them before</span>
+            <span class="n">todo</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">reg</span><span class="o">.</span><span class="n">_dependencies</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">done</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_mappers_to_configure</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Mapper</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+        <span class="k">return</span> <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="n">manager</span><span class="o">.</span><span class="n">mapper</span>
+                <span class="k">for</span> <span class="n">manager</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_managers</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">manager</span><span class="o">.</span><span class="n">is_mapped</span>
+                <span class="ow">and</span> <span class="ow">not</span> <span class="n">manager</span><span class="o">.</span><span class="n">mapper</span><span class="o">.</span><span class="n">configured</span>
+                <span class="ow">and</span> <span class="n">manager</span><span class="o">.</span><span class="n">mapper</span><span class="o">.</span><span class="n">_ready_for_configure</span>
+            <span class="p">),</span>
+            <span class="p">(</span>
+                <span class="n">npm</span>
+                <span class="k">for</span> <span class="n">npm</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_non_primary_mappers</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">npm</span><span class="o">.</span><span class="n">configured</span> <span class="ow">and</span> <span class="n">npm</span><span class="o">.</span><span class="n">_ready_for_configure</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_add_non_primary_mapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">np_mapper</span><span class="p">:</span> <span class="n">Mapper</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_non_primary_mappers</span><span class="p">[</span><span class="n">np_mapper</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_dispose_cls</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">_O</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">clsregistry</span><span class="o">.</span><span class="n">remove_class</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_class_registry</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_add_manager</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">manager</span><span class="p">:</span> <span class="n">ClassManager</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_managers</span><span class="p">[</span><span class="n">manager</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">manager</span><span class="o">.</span><span class="n">is_mapped</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exc</span><span class="o">.</span><span class="n">ArgumentError</span><span class="p">(</span>
+                <span class="s2">&quot;Class &#39;</span><span class="si">%s</span><span class="s2">&#39; already has a primary mapper defined. &quot;</span>
+                <span class="o">%</span> <span class="n">manager</span><span class="o">.</span><span class="n">class_</span>
+            <span class="p">)</span>
+        <span class="k">assert</span> <span class="n">manager</span><span class="o">.</span><span class="n">registry</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="n">manager</span><span class="o">.</span><span class="n">registry</span> <span class="o">=</span> <span class="bp">self</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">configure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cascade</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Configure all as-yet unconfigured mappers in this</span>
+<span class="sd">        :class:`_orm.registry`.</span>
+
+<span class="sd">        The configure step is used to reconcile and initialize the</span>
+<span class="sd">        :func:`_orm.relationship` linkages between mapped classes, as well as</span>
+<span class="sd">        to invoke configuration events such as the</span>
+<span class="sd">        :meth:`_orm.MapperEvents.before_configured` and</span>
+<span class="sd">        :meth:`_orm.MapperEvents.after_configured`, which may be used by ORM</span>
+<span class="sd">        extensions or user-defined extension hooks.</span>
+
+<span class="sd">        If one or more mappers in this registry contain</span>
+<span class="sd">        :func:`_orm.relationship` constructs that refer to mapped classes in</span>
+<span class="sd">        other registries, this registry is said to be *dependent* on those</span>
+<span class="sd">        registries. In order to configure those dependent registries</span>
+<span class="sd">        automatically, the :paramref:`_orm.registry.configure.cascade` flag</span>
+<span class="sd">        should be set to ``True``. Otherwise, if they are not configured, an</span>
+<span class="sd">        exception will be raised.  The rationale behind this behavior is to</span>
+<span class="sd">        allow an application to programmatically invoke configuration of</span>
+<span class="sd">        registries while controlling whether or not the process implicitly</span>
+<span class="sd">        reaches other registries.</span>
+
+<span class="sd">        As an alternative to invoking :meth:`_orm.registry.configure`, the ORM</span>
+<span class="sd">        function :func:`_orm.configure_mappers` function may be used to ensure</span>
+<span class="sd">        configuration is complete for all :class:`_orm.registry` objects in</span>
+<span class="sd">        memory. This is generally simpler to use and also predates the usage of</span>
+<span class="sd">        :class:`_orm.registry` objects overall. However, this function will</span>
+<span class="sd">        impact all mappings throughout the running Python process and may be</span>
+<span class="sd">        more memory/time consuming for an application that has many registries</span>
+<span class="sd">        in use for different purposes that may not be needed immediately.</span>
+
+<span class="sd">        .. seealso::</span>
+
+<span class="sd">            :func:`_orm.configure_mappers`</span>
+
+
+<span class="sd">        .. versionadded:: 1.4.0b2</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">mapperlib</span><span class="o">.</span><span class="n">_configure_registries</span><span class="p">({</span><span class="bp">self</span><span class="p">},</span> <span class="n">cascade</span><span class="o">=</span><span class="n">cascade</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">dispose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cascade</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Dispose of all mappers in this :class:`_orm.registry`.</span>
+
+<span class="sd">        After invocation, all the classes that were mapped within this registry</span>
+<span class="sd">        will no longer have class instrumentation associated with them. This</span>
+<span class="sd">        method is the per-:class:`_orm.registry` analogue to the</span>
+<span class="sd">        application-wide :func:`_orm.clear_mappers` function.</span>
+
+<span class="sd">        If this registry contains mappers that are dependencies of other</span>
+<span class="sd">        registries, typically via :func:`_orm.relationship` links, then those</span>
+<span class="sd">        registries must be disposed as well. When such registries exist in</span>
+<span class="sd">        relation to this one, their :meth:`_orm.registry.dispose` method will</span>
+<span class="sd">        also be called, if the :paramref:`_orm.registry.dispose.cascade` flag</span>
+<span class="sd">        is set to ``True``; otherwise, an error is raised if those registries</span>
+<span class="sd">        were not already disposed.</span>
+
+<span class="sd">        .. versionadded:: 1.4.0b2</span>
+
+<span class="sd">        .. seealso::</span>
+
+<span class="sd">            :func:`_orm.clear_mappers`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">mapperlib</span><span class="o">.</span><span class="n">_dispose_registries</span><span class="p">({</span><span class="bp">self</span><span class="p">},</span> <span class="n">cascade</span><span class="o">=</span><span class="n">cascade</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_dispose_manager_and_mapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">manager</span><span class="p">:</span> <span class="n">ClassManager</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;mapper&quot;</span> <span class="ow">in</span> <span class="n">manager</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
+            <span class="n">mapper</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">mapper</span>
+
+            <span class="n">mapper</span><span class="o">.</span><span class="n">_set_dispose_flags</span><span class="p">()</span>
+
+        <span class="n">class_</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">class_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dispose_cls</span><span class="p">(</span><span class="n">class_</span><span class="p">)</span>
+        <span class="n">instrumentation</span><span class="o">.</span><span class="n">_instrumentation_factory</span><span class="o">.</span><span class="n">unregister</span><span class="p">(</span><span class="n">class_</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_base</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">mapper</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Mapper</span><span class="p">[</span><span class="n">Any</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="nb">object</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Base&quot;</span><span class="p">,</span>
+        <span class="n">metaclass</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">DeclarativeMeta</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate a declarative base class.</span>
+
+<span class="sd">        Classes that inherit from the returned class object will be</span>
+<span class="sd">        automatically mapped using declarative mapping.</span>
+
+<span class="sd">        E.g.::</span>
+
+<span class="sd">            from sqlalchemy.orm import registry</span>
+
+<span class="sd">            mapper_registry = registry()</span>
+
+<span class="sd">            Base = mapper_registry.generate_base()</span>
+
+
+<span class="sd">            class MyClass(Base):</span>
+<span class="sd">                __tablename__ = &quot;my_table&quot;</span>
+<span class="sd">                id = Column(Integer, primary_key=True)</span>
+
+<span class="sd">        The above dynamically generated class is equivalent to the</span>
+<span class="sd">        non-dynamic example below::</span>
+
+<span class="sd">            from sqlalchemy.orm import registry</span>
+<span class="sd">            from sqlalchemy.orm.decl_api import DeclarativeMeta</span>
+
+<span class="sd">            mapper_registry = registry()</span>
+
+
+<span class="sd">            class Base(metaclass=DeclarativeMeta):</span>
+<span class="sd">                __abstract__ = True</span>
+<span class="sd">                registry = mapper_registry</span>
+<span class="sd">                metadata = mapper_registry.metadata</span>
+
+<span class="sd">                __init__ = mapper_registry.constructor</span>
+
+<span class="sd">        .. versionchanged:: 2.0 Note that the</span>
+<span class="sd">           :meth:`_orm.registry.generate_base` method is superseded by the new</span>
+<span class="sd">           :class:`_orm.DeclarativeBase` class, which generates a new &quot;base&quot;</span>
+<span class="sd">           class using subclassing, rather than return value of a function.</span>
+<span class="sd">           This allows an approach that is compatible with :pep:`484` typing</span>
+<span class="sd">           tools.</span>
+
+<span class="sd">        The :meth:`_orm.registry.generate_base` method provides the</span>
+<span class="sd">        implementation for the :func:`_orm.declarative_base` function, which</span>
+<span class="sd">        creates the :class:`_orm.registry` and base class all at once.</span>
+
+<span class="sd">        See the section :ref:`orm_declarative_mapping` for background and</span>
+<span class="sd">        examples.</span>
+
+<span class="sd">        :param mapper:</span>
+<span class="sd">          An optional callable, defaults to :class:`_orm.Mapper`.</span>
+<span class="sd">          This function is used to generate new :class:`_orm.Mapper` objects.</span>
+
+<span class="sd">        :param cls:</span>
+<span class="sd">          Defaults to :class:`object`. A type to use as the base for the</span>
+<span class="sd">          generated declarative base class. May be a class or tuple of classes.</span>
+
+<span class="sd">        :param name:</span>
+<span class="sd">          Defaults to ``Base``.  The display name for the generated</span>
+<span class="sd">          class.  Customizing this is not required, but can improve clarity in</span>
+<span class="sd">          tracebacks and debugging.</span>
+
+<span class="sd">        :param metaclass:</span>
+<span class="sd">          Defaults to :class:`.DeclarativeMeta`.  A metaclass or __metaclass__</span>
+<span class="sd">          compatible callable to use as the meta type of the generated</span>
+<span class="sd">          declarative base class.</span>
+
+<span class="sd">        .. seealso::</span>
+
+<span class="sd">            :ref:`orm_declarative_mapping`</span>
+
+<span class="sd">            :func:`_orm.declarative_base`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span>
+
+        <span class="n">bases</span> <span class="o">=</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">cls</span><span class="p">,)</span> <span class="ow">or</span> <span class="bp">cls</span>
+
+        <span class="n">class_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">registry</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+            <span class="n">class_dict</span><span class="p">[</span><span class="s2">&quot;__doc__&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__doc__</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">constructor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">class_dict</span><span class="p">[</span><span class="s2">&quot;__init__&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">constructor</span>
+
+        <span class="n">class_dict</span><span class="p">[</span><span class="s2">&quot;__abstract__&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">mapper</span><span class="p">:</span>
+            <span class="n">class_dict</span><span class="p">[</span><span class="s2">&quot;__mapper_cls__&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapper</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__class_getitem__&quot;</span><span class="p">):</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="nf">__class_getitem__</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">_T</span><span class="p">],</span> <span class="n">key</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">[</span><span class="n">_T</span><span class="p">]:</span>
+                <span class="c1"># allow generic classes in py3.9+</span>
+                <span class="k">return</span> <span class="bp">cls</span>
+
+            <span class="n">class_dict</span><span class="p">[</span><span class="s2">&quot;__class_getitem__&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">__class_getitem__</span>
+
+        <span class="k">return</span> <span class="n">metaclass</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">class_dict</span><span class="p">)</span>
+
+    <span class="nd">@compat_typing</span><span class="o">.</span><span class="n">dataclass_transform</span><span class="p">(</span>
+        <span class="n">field_specifiers</span><span class="o">=</span><span class="p">(</span>
+            <span class="n">MappedColumn</span><span class="p">,</span>
+            <span class="n">RelationshipProperty</span><span class="p">,</span>
+            <span class="n">Composite</span><span class="p">,</span>
+            <span class="n">Synonym</span><span class="p">,</span>
+            <span class="n">mapped_column</span><span class="p">,</span>
+            <span class="n">relationship</span><span class="p">,</span>
+            <span class="n">composite</span><span class="p">,</span>
+            <span class="n">synonym</span><span class="p">,</span>
+            <span class="n">deferred</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+    <span class="nd">@overload</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mapped_as_dataclass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">_O</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">[</span><span class="n">_O</span><span class="p">]:</span> <span class="o">...</span>
+
+    <span class="nd">@overload</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mapped_as_dataclass</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">__cls</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">init</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">_NoArg</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+        <span class="nb">repr</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">_NoArg</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>  <span class="c1"># noqa: A002</span>
+        <span class="n">eq</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">_NoArg</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+        <span class="n">order</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">_NoArg</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+        <span class="n">unsafe_hash</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">_NoArg</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+        <span class="n">match_args</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">_NoArg</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+        <span class="n">kw_only</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">_NoArg</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+        <span class="n">dataclass_callable</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">_NoArg</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]]]</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Type</span><span class="p">[</span><span class="n">_O</span><span class="p">]],</span> <span class="n">Type</span><span class="p">[</span><span class="n">_O</span><span class="p">]]:</span> <span class="o">...</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">mapped_as_dataclass</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">__cls</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">_O</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">init</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">_NoArg</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="n">_NoArg</span><span class="o">.</span><span class="n">NO_ARG</span><span class="p">,</span>
+        <span class="nb">repr</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">_NoArg</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="n">_NoArg</span><span class="o">.</span><span class="n">NO_ARG</span><span class="p">,</span>  <span class="c1"># noqa: A002</span>
+        <span class="n">eq</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">_NoArg</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="n">_NoArg</span><span class="o">.</span><span class="n">NO_ARG</span><span class="p">,</span>
+        <span class="n">order</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">_NoArg</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="n">_NoArg</span><span class="o">.</span><span class="n">NO_ARG</span><span class="p">,</span>
+        <span class="n">unsafe_hash</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">_NoArg</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="n">_NoArg</span><span class="o">.</span><span class="n">NO_ARG</span><span class="p">,</span>
+        <span class="n">match_args</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">_NoArg</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="n">_NoArg</span><span class="o">.</span><span class="n">NO_ARG</span><span class="p">,</span>
+        <span class="n">kw_only</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">_NoArg</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="n">_NoArg</span><span class="o">.</span><span class="n">NO_ARG</span><span class="p">,</span>
+        <span class="n">dataclass_callable</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span>
+            <span class="n">_NoArg</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">_NoArg</span><span class="o">.</span><span class="n">NO_ARG</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">_O</span><span class="p">],</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Type</span><span class="p">[</span><span class="n">_O</span><span class="p">]],</span> <span class="n">Type</span><span class="p">[</span><span class="n">_O</span><span class="p">]]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Class decorator that will apply the Declarative mapping process</span>
+<span class="sd">        to a given class, and additionally convert the class to be a</span>
+<span class="sd">        Python dataclass.</span>
+
+<span class="sd">        .. seealso::</span>
+
+<span class="sd">            :ref:`orm_declarative_native_dataclasses` - complete background</span>
+<span class="sd">            on SQLAlchemy native dataclass mapping</span>
+
+
+<span class="sd">        .. versionadded:: 2.0</span>
+
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">decorate</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">_O</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">[</span><span class="n">_O</span><span class="p">]:</span>
+            <span class="nb">setattr</span><span class="p">(</span>
+                <span class="bp">cls</span><span class="p">,</span>
+                <span class="s2">&quot;_sa_apply_dc_transforms&quot;</span><span class="p">,</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;init&quot;</span><span class="p">:</span> <span class="n">init</span><span class="p">,</span>
+                    <span class="s2">&quot;repr&quot;</span><span class="p">:</span> <span class="nb">repr</span><span class="p">,</span>
+                    <span class="s2">&quot;eq&quot;</span><span class="p">:</span> <span class="n">eq</span><span class="p">,</span>
+                    <span class="s2">&quot;order&quot;</span><span class="p">:</span> <span class="n">order</span><span class="p">,</span>
+                    <span class="s2">&quot;unsafe_hash&quot;</span><span class="p">:</span> <span class="n">unsafe_hash</span><span class="p">,</span>
+                    <span class="s2">&quot;match_args&quot;</span><span class="p">:</span> <span class="n">match_args</span><span class="p">,</span>
+                    <span class="s2">&quot;kw_only&quot;</span><span class="p">:</span> <span class="n">kw_only</span><span class="p">,</span>
+                    <span class="s2">&quot;dataclass_callable&quot;</span><span class="p">:</span> <span class="n">dataclass_callable</span><span class="p">,</span>
+                <span class="p">},</span>
+            <span class="p">)</span>
+            <span class="n">_as_declarative</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span>
+
+        <span class="k">if</span> <span class="n">__cls</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">decorate</span><span class="p">(</span><span class="n">__cls</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">decorate</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">mapped</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">_O</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">[</span><span class="n">_O</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Class decorator that will apply the Declarative mapping process</span>
+<span class="sd">        to a given class.</span>
+
+<span class="sd">        E.g.::</span>
+
+<span class="sd">            from sqlalchemy.orm import registry</span>
+
+<span class="sd">            mapper_registry = registry()</span>
+
+
+<span class="sd">            @mapper_registry.mapped</span>
+<span class="sd">            class Foo:</span>
+<span class="sd">                __tablename__ = &quot;some_table&quot;</span>
+
+<span class="sd">                id = Column(Integer, primary_key=True)</span>
+<span class="sd">                name = Column(String)</span>
+
+<span class="sd">        See the section :ref:`orm_declarative_mapping` for complete</span>
+<span class="sd">        details and examples.</span>
+
+<span class="sd">        :param cls: class to be mapped.</span>
+
+<span class="sd">        :return: the class that was passed.</span>
+
+<span class="sd">        .. seealso::</span>
+
+<span class="sd">            :ref:`orm_declarative_mapping`</span>
+
+<span class="sd">            :meth:`_orm.registry.generate_base` - generates a base class</span>
+<span class="sd">            that will apply Declarative mapping to subclasses automatically</span>
+<span class="sd">            using a Python metaclass.</span>
+
+<span class="sd">        .. seealso::</span>
+
+<span class="sd">            :meth:`_orm.registry.mapped_as_dataclass`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_as_declarative</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">as_declarative_base</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Type</span><span class="p">[</span><span class="n">_T</span><span class="p">]],</span> <span class="n">Type</span><span class="p">[</span><span class="n">_T</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Class decorator which will invoke</span>
+<span class="sd">        :meth:`_orm.registry.generate_base`</span>
+<span class="sd">        for a given base class.</span>
+
+<span class="sd">        E.g.::</span>
+
+<span class="sd">            from sqlalchemy.orm import registry</span>
+
+<span class="sd">            mapper_registry = registry()</span>
+
+
+<span class="sd">            @mapper_registry.as_declarative_base()</span>
+<span class="sd">            class Base:</span>
+<span class="sd">                @declared_attr</span>
+<span class="sd">                def __tablename__(cls):</span>
+<span class="sd">                    return cls.__name__.lower()</span>
+
+<span class="sd">                id = Column(Integer, primary_key=True)</span>
+
+
+<span class="sd">            class MyMappedClass(Base): ...</span>
+
+<span class="sd">        All keyword arguments passed to</span>
+<span class="sd">        :meth:`_orm.registry.as_declarative_base` are passed</span>
+<span class="sd">        along to :meth:`_orm.registry.generate_base`.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">decorate</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">_T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">[</span><span class="n">_T</span><span class="p">]:</span>
+            <span class="n">kw</span><span class="p">[</span><span class="s2">&quot;cls&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span>
+            <span class="n">kw</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_base</span><span class="p">(</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+
+        <span class="k">return</span> <span class="n">decorate</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">map_declaratively</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">_O</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Mapper</span><span class="p">[</span><span class="n">_O</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Map a class declaratively.</span>
+
+<span class="sd">        In this form of mapping, the class is scanned for mapping information,</span>
+<span class="sd">        including for columns to be associated with a table, and/or an</span>
+<span class="sd">        actual table object.</span>
+
+<span class="sd">        Returns the :class:`_orm.Mapper` object.</span>
+
+<span class="sd">        E.g.::</span>
+
+<span class="sd">            from sqlalchemy.orm import registry</span>
+
+<span class="sd">            mapper_registry = registry()</span>
+
+
+<span class="sd">            class Foo:</span>
+<span class="sd">                __tablename__ = &quot;some_table&quot;</span>
+
+<span class="sd">                id = Column(Integer, primary_key=True)</span>
+<span class="sd">                name = Column(String)</span>
+
+
+<span class="sd">            mapper = mapper_registry.map_declaratively(Foo)</span>
+
+<span class="sd">        This function is more conveniently invoked indirectly via either the</span>
+<span class="sd">        :meth:`_orm.registry.mapped` class decorator or by subclassing a</span>
+<span class="sd">        declarative metaclass generated from</span>
+<span class="sd">        :meth:`_orm.registry.generate_base`.</span>
+
+<span class="sd">        See the section :ref:`orm_declarative_mapping` for complete</span>
+<span class="sd">        details and examples.</span>
+
+<span class="sd">        :param cls: class to be mapped.</span>
+
+<span class="sd">        :return: a :class:`_orm.Mapper` object.</span>
+
+<span class="sd">        .. seealso::</span>
+
+<span class="sd">            :ref:`orm_declarative_mapping`</span>
+
+<span class="sd">            :meth:`_orm.registry.mapped` - more common decorator interface</span>
+<span class="sd">            to this function.</span>
+
+<span class="sd">            :meth:`_orm.registry.map_imperatively`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_as_declarative</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__mapper__</span>  <span class="c1"># type: ignore</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">map_imperatively</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">class_</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">_O</span><span class="p">],</span>
+        <span class="n">local_table</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">FromClause</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kw</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapper</span><span class="p">[</span><span class="n">_O</span><span class="p">]:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Map a class imperatively.</span>
+
+<span class="sd">        In this form of mapping, the class is not scanned for any mapping</span>
+<span class="sd">        information.  Instead, all mapping constructs are passed as</span>
+<span class="sd">        arguments.</span>
+
+<span class="sd">        This method is intended to be fully equivalent to the now-removed</span>
+<span class="sd">        SQLAlchemy ``mapper()`` function, except that it&#39;s in terms of</span>
+<span class="sd">        a particular registry.</span>
+
+<span class="sd">        E.g.::</span>
+
+<span class="sd">            from sqlalchemy.orm import registry</span>
+
+<span class="sd">            mapper_registry = registry()</span>
+
+<span class="sd">            my_table = Table(</span>
+<span class="sd">                &quot;my_table&quot;,</span>
+<span class="sd">                mapper_registry.metadata,</span>
+<span class="sd">                Column(&quot;id&quot;, Integer, primary_key=True),</span>
+<span class="sd">            )</span>
+
+
+<span class="sd">            class MyClass:</span>
+<span class="sd">                pass</span>
+
+
+<span class="sd">            mapper_registry.map_imperatively(MyClass, my_table)</span>
+
+<span class="sd">        See the section :ref:`orm_imperative_mapping` for complete background</span>
+<span class="sd">        and usage examples.</span>
+
+<span class="sd">        :param class\_: The class to be mapped.  Corresponds to the</span>
+<span class="sd">         :paramref:`_orm.Mapper.class_` parameter.</span>
+
+<span class="sd">        :param local_table: the :class:`_schema.Table` or other</span>
+<span class="sd">         :class:`_sql.FromClause` object that is the subject of the mapping.</span>
+<span class="sd">         Corresponds to the</span>
+<span class="sd">         :paramref:`_orm.Mapper.local_table` parameter.</span>
+
+<span class="sd">        :param \**kw: all other keyword arguments are passed to the</span>
+<span class="sd">         :class:`_orm.Mapper` constructor directly.</span>
+
+<span class="sd">        .. seealso::</span>
+
+<span class="sd">            :ref:`orm_imperative_mapping`</span>
+
+<span class="sd">            :ref:`orm_declarative_mapping`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">_mapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">class_</span><span class="p">,</span> <span class="n">local_table</span><span class="p">,</span> <span class="n">kw</span><span class="p">)</span>
+
+
+<span class="n">RegistryType</span> <span class="o">=</span> <span class="n">registry</span>
+
+<span class="k">if</span> <span class="ow">not</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="c1"># allow for runtime type resolution of ``ClassVar[_RegistryType]``</span>
+    <span class="n">_RegistryType</span> <span class="o">=</span> <span class="n">registry</span>  <span class="c1"># noqa</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">as_declarative</span><span class="p">(</span><span class="o">**</span><span class="n">kw</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Type</span><span class="p">[</span><span class="n">_T</span><span class="p">]],</span> <span class="n">Type</span><span class="p">[</span><span class="n">_T</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class decorator which will adapt a given class into a</span>
+<span class="sd">    :func:`_orm.declarative_base`.</span>
+
+<span class="sd">    This function makes use of the :meth:`_orm.registry.as_declarative_base`</span>
+<span class="sd">    method, by first creating a :class:`_orm.registry` automatically</span>
+<span class="sd">    and then invoking the decorator.</span>
+
+<span class="sd">    E.g.::</span>
+
+<span class="sd">        from sqlalchemy.orm import as_declarative</span>
+
+
+<span class="sd">        @as_declarative()</span>
+<span class="sd">        class Base:</span>
+<span class="sd">            @declared_attr</span>
+<span class="sd">            def __tablename__(cls):</span>
+<span class="sd">                return cls.__name__.lower()</span>
+
+<span class="sd">            id = Column(Integer, primary_key=True)</span>
+
+
+<span class="sd">        class MyMappedClass(Base): ...</span>
+
+<span class="sd">    .. seealso::</span>
+
+<span class="sd">        :meth:`_orm.registry.as_declarative_base`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">metadata</span><span class="p">,</span> <span class="n">class_registry</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">kw</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;metadata&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="n">kw</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;class_registry&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">registry</span><span class="p">(</span>
+        <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span> <span class="n">class_registry</span><span class="o">=</span><span class="n">class_registry</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">as_declarative_base</span><span class="p">(</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+
+<span class="nd">@inspection</span><span class="o">.</span><span class="n">_inspects</span><span class="p">(</span>
+    <span class="n">DeclarativeMeta</span><span class="p">,</span> <span class="n">DeclarativeBase</span><span class="p">,</span> <span class="n">DeclarativeAttributeIntercept</span>
+<span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_inspect_decl_meta</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Mapper</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+    <span class="n">mp</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Mapper</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="n">_inspect_mapped_class</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">_DeferredMapperConfig</span><span class="o">.</span><span class="n">has_cls</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+            <span class="n">_DeferredMapperConfig</span><span class="o">.</span><span class="n">raise_unmapped_for_cls</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">mp</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Trinity-RFT Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

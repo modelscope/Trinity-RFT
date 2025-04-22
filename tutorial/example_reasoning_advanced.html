@@ -11,6 +11,8 @@
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../_static/documentation_options.js?v=01f34227"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
@@ -56,20 +58,12 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.buffer.reader.html">trinity.buffer.reader</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.buffer.html">trinity.buffer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.buffer.schema.html">trinity.buffer.schema</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.buffer.writer.html">trinity.buffer.writer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.common.models.html">trinity.common.models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.common.rewards.html">trinity.common.rewards</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.common.html">trinity.common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.common.workflows.html">trinity.common.workflows</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.explorer.html">trinity.explorer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.manager.html">trinity.manager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.html">trinity</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.trainer.html">trinity.trainer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.trainer.verl.html">trinity.trainer.verl</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.utils.html">trinity.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.buffer.html">trinity.buffer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.explorer.html">trinity.explorer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.trainer.html">trinity.trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.manager.html">trinity.manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.common.html">trinity.common</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.utils.html">trinity.utils</a></li>
 </ul>
 
         </div>
@@ -97,12 +91,12 @@
            <div itemprop="articleBody">
              
   <section id="example-off-policy-asynchronous-rft-mode">
-<h1>Example: off-policy / asynchronous RFT mode<a class="headerlink" href="#example-off-policy-asynchronous-rft-mode" title="Link to this heading">¶</a></h1>
+<h1>Example: off-policy / asynchronous RFT mode<a class="headerlink" href="#example-off-policy-asynchronous-rft-mode" title="Link to this heading"></a></h1>
 <p>Let’s continue with the <a class="reference internal" href="example_reasoning_basic.html"><span class="std std-doc">previous GSM8k example</span></a> and show some advanced features provided by Trinity-RFT, namely, off-policy or asynchronous RFT mode.</p>
 <section id="opmd-a-native-off-policy-rl-algorithm">
-<h2>OPMD: a native off-policy RL algorithm<a class="headerlink" href="#opmd-a-native-off-policy-rl-algorithm" title="Link to this heading">¶</a></h2>
+<h2>OPMD: a native off-policy RL algorithm<a class="headerlink" href="#opmd-a-native-off-policy-rl-algorithm" title="Link to this heading"></a></h2>
 <p>As an experimental feature of Trinity-RFT, we develop an embarrasingly simple off-policy RL algorithm, termed as OPMD (Online Policy Mirror Descent, inspired by <a class="reference external" href="https://arxiv.org/abs/2501.12599">Kimi k1.5</a>).
-The algorithm design and analysis can be found in this <a class="reference download internal" download="" href="../_downloads/cdfa45ed2070fe1a298521f0cb5a8529/opmd.pdf"><span class="xref download myst">technical report</span></a>.</p>
+The algorithm design and analysis can be found in this <a class="reference download internal" download="" href="../_downloads/58b8fcb03170ae266deecc350a70b8be/opmd.pdf"><span class="xref download myst">technical report</span></a>.</p>
 <p>To try out the OPMD algorithm:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>scripts/config/gsm8k_opmd.yaml
 </pre></div>
@@ -116,7 +110,7 @@ A similar performance boost is shown at step 21, which leads to a converged scor
 <p><img alt="opmd" src="../_images/opmd-curve.png" /></p>
 </section>
 <section id="asynchronous-mode">
-<h2>Asynchronous mode<a class="headerlink" href="#asynchronous-mode" title="Link to this heading">¶</a></h2>
+<h2>Asynchronous mode<a class="headerlink" href="#asynchronous-mode" title="Link to this heading"></a></h2>
 <p>Trinity-RFT supports the asynchronous and decoupled mode of RFT, where explorer and trainer act independently and asynchronously.
 To run this mode, the explorer and trainer need to be launched separately, with the <code class="docutils literal notranslate"><span class="pre">mode</span></code> parameter in the config file set to <code class="docutils literal notranslate"><span class="pre">explore</span></code> and <code class="docutils literal notranslate"><span class="pre">train</span></code> respectively.</p>
 <p>We are still testing this mode more thoroughly. A concrete example is coming soon!</p>

@@ -10,6 +10,8 @@
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
 
   
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../../../../_static/documentation_options.js?v=01f34227"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
@@ -49,20 +51,12 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.buffer.reader.html">trinity.buffer.reader</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.buffer.html">trinity.buffer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.buffer.schema.html">trinity.buffer.schema</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.buffer.writer.html">trinity.buffer.writer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.common.models.html">trinity.common.models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.common.rewards.html">trinity.common.rewards</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.common.html">trinity.common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.common.workflows.html">trinity.common.workflows</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.explorer.html">trinity.explorer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.manager.html">trinity.manager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.html">trinity</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.trainer.html">trinity.trainer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.trainer.verl.html">trinity.trainer.verl</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../trinity.utils.html">trinity.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../build_api/trinity.buffer.html">trinity.buffer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../build_api/trinity.explorer.html">trinity.explorer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../build_api/trinity.trainer.html">trinity.trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../build_api/trinity.manager.html">trinity.manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../build_api/trinity.common.html">trinity.common</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../build_api/trinity.utils.html">trinity.utils</a></li>
 </ul>
 
         </div>
@@ -108,28 +102,37 @@
 <span class="n">WORKFLOWS</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span><span class="s2">&quot;workflows&quot;</span><span class="p">)</span>
 
 
+<div class="viewcode-block" id="Workflow">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.Workflow">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Workflow</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;The base workflow class.</span>
 
 <span class="sd">    A workflow is a runnable object which generates a list of experiences.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+<div class="viewcode-block" id="Workflow.__init__">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.Workflow.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">ModelWrapper</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span></div>
 
+
+<div class="viewcode-block" id="Workflow.run">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.Workflow.run">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run workflow and return a list of experiences.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run workflow and return a list of experiences.&quot;&quot;&quot;</span></div>
+</div>
+
 
 
 <div class="viewcode-block" id="SimpleWorkflow">
-<a class="viewcode-back" href="../../../../trinity.common.workflows.html#trinity.common.workflows.SimpleWorkflow">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.SimpleWorkflow">[docs]</a>
 <span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;simple_workflow&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">SimpleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A workflow for simple single-round task.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="SimpleWorkflow.__init__">
-<a class="viewcode-back" href="../../../../trinity.common.workflows.html#trinity.common.workflows.SimpleWorkflow.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.SimpleWorkflow.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">model</span><span class="p">:</span> <span class="n">ModelWrapper</span><span class="p">,</span>
@@ -146,7 +149,7 @@
 
 
 <div class="viewcode-block" id="SimpleWorkflow.run">
-<a class="viewcode-back" href="../../../../trinity.common.workflows.html#trinity.common.workflows.SimpleWorkflow.run">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.SimpleWorkflow.run">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
         <span class="c1"># TODO: Optimize the generate function</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt</span><span class="p">:</span>
@@ -180,13 +183,13 @@
 
 
 <div class="viewcode-block" id="MathWorkflow">
-<a class="viewcode-back" href="../../../../trinity.common.workflows.html#trinity.common.workflows.MathWorkflow">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.MathWorkflow">[docs]</a>
 <span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;math_workflow&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MathWorkflow</span><span class="p">(</span><span class="n">SimpleWorkflow</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A workflow for math tasks as introduced in DeepSeek-R1.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="MathWorkflow.__init__">
-<a class="viewcode-back" href="../../../../trinity.common.workflows.html#trinity.common.workflows.MathWorkflow.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.MathWorkflow.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">model</span><span class="p">:</span> <span class="n">ModelWrapper</span><span class="p">,</span>

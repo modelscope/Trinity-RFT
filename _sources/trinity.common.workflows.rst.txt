@@ -1,7 +1,0 @@
-trinity.common.workflows
-========================
-
-.. automodule:: trinity.common.workflows
-   :members:
-   :undoc-members:
-   :show-inheritance:

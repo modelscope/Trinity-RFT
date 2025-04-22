@@ -1,0 +1,420 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ray &mdash; Trinity-RFT 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Trinity-RFT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/example_reasoning_basic.html">A quick example with GSM8k</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/example_reasoning_advanced.html">Example: off-policy / asynchronous RFT mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/example_multi_turn.html">Example: Multi-Turn RFT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/example_dpo.html">Example: Run DPO on Human-Like-DPO-Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/example_data_functionalities.html">Data processing functionalities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/trinity_configs.html">Trinity-RFT Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/trinity_programming_guide.html">Trinity-RFT Developer Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.buffer.html">trinity.buffer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.explorer.html">trinity.explorer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.trainer.html">trinity.trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.manager.html">trinity.manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.common.html">trinity.common</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.utils.html">trinity.utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Trinity-RFT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">ray</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for ray</h1><div class="highlight"><pre>
+<span></span><span class="c1"># isort: skip_file</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ray._private</span><span class="w"> </span><span class="kn">import</span> <span class="n">log</span>  <span class="c1"># isort: skip # noqa: F401</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+
+<span class="n">log</span><span class="o">.</span><span class="n">generate_logging_config</span><span class="p">()</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_configure_system</span><span class="p">():</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">platform</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Wraps system configuration to avoid &#39;leaking&#39; variables into ray.&quot;&quot;&quot;</span>
+
+    <span class="c1"># Sanity check pickle5 if it has been installed.</span>
+    <span class="k">if</span> <span class="s2">&quot;pickle5&quot;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Package pickle5 becomes unnecessary in Python 3.8 and above. &quot;</span>
+                <span class="s2">&quot;Its presence may confuse libraries including Ray. &quot;</span>
+                <span class="s2">&quot;Please uninstall the package.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="kn">import</span><span class="w"> </span><span class="nn">importlib.metadata</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">version_str</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">version</span><span class="p">(</span><span class="s2">&quot;pickle5&quot;</span><span class="p">)</span>
+            <span class="n">version</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">version_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">version</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s2">&quot;Although not used by Ray, a version of pickle5 that leaks memory &quot;</span>
+                    <span class="s2">&quot;is found in the environment. Please run &#39;pip install pickle5 -U&#39; &quot;</span>
+                    <span class="s2">&quot;to upgrade.&quot;</span>
+                <span class="p">)</span>
+        <span class="k">except</span> <span class="n">importlib</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">PackageNotFoundError</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;You are using the &#39;pickle5&#39; module, but &quot;</span>
+                <span class="s2">&quot;the exact version is unknown (possibly carried as &quot;</span>
+                <span class="s2">&quot;an internal component by another module). Please &quot;</span>
+                <span class="s2">&quot;make sure you are using pickle5 &gt;= 0.0.10 because &quot;</span>
+                <span class="s2">&quot;previous versions may leak memory.&quot;</span>
+            <span class="p">)</span>
+
+    <span class="c1"># Importing psutil &amp; setproctitle. Must be before ray._raylet is</span>
+    <span class="c1"># initialized.</span>
+    <span class="n">thirdparty_files</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)),</span> <span class="s2">&quot;thirdparty_files&quot;</span>
+    <span class="p">)</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">thirdparty_files</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;Linux&quot;</span>
+        <span class="ow">and</span> <span class="s2">&quot;Microsoft&quot;</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">platform</span><span class="o">.</span><span class="n">release</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">ray._private</span><span class="w"> </span><span class="kn">import</span> <span class="n">compat</span>  <span class="c1"># noqa: E402</span>
+
+        <span class="n">compat</span><span class="o">.</span><span class="n">patch_psutil</span><span class="p">()</span>
+
+    <span class="c1"># Expose ray ABI symbols which may be dependent by other shared</span>
+    <span class="c1"># libraries such as _streaming.so. See BUILD.bazel:_raylet</span>
+    <span class="n">python_shared_lib_suffix</span> <span class="o">=</span> <span class="s2">&quot;.so&quot;</span> <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">!=</span> <span class="s2">&quot;win32&quot;</span> <span class="k">else</span> <span class="s2">&quot;.pyd&quot;</span>
+    <span class="n">so_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;_raylet&quot;</span> <span class="o">+</span> <span class="n">python_shared_lib_suffix</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">so_path</span><span class="p">):</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">ctypes</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">ctypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">CDLL</span>
+
+        <span class="n">CDLL</span><span class="p">(</span><span class="n">so_path</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">RTLD_GLOBAL</span><span class="p">)</span>
+
+
+<span class="n">_configure_system</span><span class="p">()</span>
+<span class="c1"># Delete configuration function.</span>
+<span class="k">del</span> <span class="n">_configure_system</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">ray</span><span class="w"> </span><span class="kn">import</span> <span class="n">_version</span>  <span class="c1"># noqa: E402</span>
+
+<span class="n">__commit__</span> <span class="o">=</span> <span class="n">_version</span><span class="o">.</span><span class="n">commit</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="n">_version</span><span class="o">.</span><span class="n">version</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">ray._raylet</span>  <span class="c1"># noqa: E402</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">ray._raylet</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>  <span class="c1"># noqa: E402,F401</span>
+    <span class="n">ActorClassID</span><span class="p">,</span>
+    <span class="n">ActorID</span><span class="p">,</span>
+    <span class="n">NodeID</span><span class="p">,</span>
+    <span class="n">Config</span> <span class="k">as</span> <span class="n">_Config</span><span class="p">,</span>
+    <span class="n">JobID</span><span class="p">,</span>
+    <span class="n">WorkerID</span><span class="p">,</span>
+    <span class="n">FunctionID</span><span class="p">,</span>
+    <span class="n">ObjectID</span><span class="p">,</span>
+    <span class="n">ObjectRef</span><span class="p">,</span>
+    <span class="n">ObjectRefGenerator</span><span class="p">,</span>
+    <span class="n">DynamicObjectRefGenerator</span><span class="p">,</span>
+    <span class="n">TaskID</span><span class="p">,</span>
+    <span class="n">UniqueID</span><span class="p">,</span>
+    <span class="n">Language</span><span class="p">,</span>
+    <span class="n">PlacementGroupID</span><span class="p">,</span>
+    <span class="n">ClusterID</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">_config</span> <span class="o">=</span> <span class="n">_Config</span><span class="p">()</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">ray._private.state</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>  <span class="c1"># noqa: E402,F401</span>
+    <span class="n">nodes</span><span class="p">,</span>
+    <span class="n">timeline</span><span class="p">,</span>
+    <span class="n">cluster_resources</span><span class="p">,</span>
+    <span class="n">available_resources</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ray._private.worker</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>  <span class="c1"># noqa: E402,F401</span>
+    <span class="n">LOCAL_MODE</span><span class="p">,</span>
+    <span class="n">SCRIPT_MODE</span><span class="p">,</span>
+    <span class="n">WORKER_MODE</span><span class="p">,</span>
+    <span class="n">RESTORE_WORKER_MODE</span><span class="p">,</span>
+    <span class="n">SPILL_WORKER_MODE</span><span class="p">,</span>
+    <span class="n">cancel</span><span class="p">,</span>
+    <span class="n">get</span><span class="p">,</span>
+    <span class="n">get_actor</span><span class="p">,</span>
+    <span class="n">get_gpu_ids</span><span class="p">,</span>
+    <span class="n">init</span><span class="p">,</span>
+    <span class="n">is_initialized</span><span class="p">,</span>
+    <span class="n">put</span><span class="p">,</span>
+    <span class="n">kill</span><span class="p">,</span>
+    <span class="n">remote</span><span class="p">,</span>
+    <span class="n">shutdown</span><span class="p">,</span>
+    <span class="n">wait</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">ray._private.ray_logging.logging_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">LoggingConfig</span>  <span class="c1"># noqa: E402</span>
+
+<span class="c1"># We import ray.actor because some code is run in actor.py which initializes</span>
+<span class="c1"># some functions in the worker.</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ray.actor</span>  <span class="c1"># noqa: E402,F401</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ray.actor</span><span class="w"> </span><span class="kn">import</span> <span class="n">method</span>  <span class="c1"># noqa: E402,F401</span>
+
+<span class="c1"># TODO(qwang): We should remove this exporting in Ray2.0.</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ray.cross_language</span><span class="w"> </span><span class="kn">import</span> <span class="n">java_function</span><span class="p">,</span> <span class="n">java_actor_class</span>  <span class="c1"># noqa: E402,F401</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ray.runtime_context</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_runtime_context</span>  <span class="c1"># noqa: E402,F401</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ray</span><span class="w"> </span><span class="kn">import</span> <span class="n">internal</span>  <span class="c1"># noqa: E402,F401</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ray</span><span class="w"> </span><span class="kn">import</span> <span class="n">util</span>  <span class="c1"># noqa: E402,F401</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ray</span><span class="w"> </span><span class="kn">import</span> <span class="n">_private</span>  <span class="c1"># noqa: E402,F401</span>
+
+<span class="c1"># We import ClientBuilder so that modules can inherit from `ray.ClientBuilder`.</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ray.client_builder</span><span class="w"> </span><span class="kn">import</span> <span class="n">client</span><span class="p">,</span> <span class="n">ClientBuilder</span>  <span class="c1"># noqa: E402,F401</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_DeprecationWrapper</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">real_worker</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_real_worker</span> <span class="o">=</span> <span class="n">real_worker</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_warned</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_real_worker</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">attr</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_warned</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_warned</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;DeprecationWarning: `ray.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s2">` is a private &quot;</span>
+                <span class="s2">&quot;attribute and access will be removed in a future Ray version.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span>
+
+
+<span class="c1"># TODO(ekl) remove this entirely after 3rd party libraries are all migrated.</span>
+<span class="n">worker</span> <span class="o">=</span> <span class="n">_DeprecationWrapper</span><span class="p">(</span><span class="s2">&quot;worker&quot;</span><span class="p">,</span> <span class="n">ray</span><span class="o">.</span><span class="n">_private</span><span class="o">.</span><span class="n">worker</span><span class="p">)</span>
+<span class="n">ray_constants</span> <span class="o">=</span> <span class="n">_DeprecationWrapper</span><span class="p">(</span><span class="s2">&quot;ray_constants&quot;</span><span class="p">,</span> <span class="n">ray</span><span class="o">.</span><span class="n">_private</span><span class="o">.</span><span class="n">ray_constants</span><span class="p">)</span>
+<span class="n">serialization</span> <span class="o">=</span> <span class="n">_DeprecationWrapper</span><span class="p">(</span><span class="s2">&quot;serialization&quot;</span><span class="p">,</span> <span class="n">ray</span><span class="o">.</span><span class="n">_private</span><span class="o">.</span><span class="n">serialization</span><span class="p">)</span>
+<span class="n">state</span> <span class="o">=</span> <span class="n">_DeprecationWrapper</span><span class="p">(</span><span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="n">ray</span><span class="o">.</span><span class="n">_private</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+
+
+<span class="c1"># Pulic Ray APIs</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;__version__&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;_config&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_runtime_context&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;autoscaler&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;available_resources&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;cancel&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;client&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ClientBuilder&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;cluster_resources&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_actor&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_gpu_ids&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;init&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;is_initialized&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;java_actor_class&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;java_function&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;cpp_function&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;kill&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Language&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;nodes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;put&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;remote&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;shutdown&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;show_in_dashboard&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;timeline&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;wait&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;LOCAL_MODE&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SCRIPT_MODE&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;WORKER_MODE&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;LoggingConfig&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="c1"># Public APIs that should automatically trigger ray.init().</span>
+<span class="n">AUTO_INIT_APIS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;cancel&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_actor&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_gpu_ids&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;kill&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;put&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;wait&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_runtime_context&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># Public APIs that should not automatically trigger ray.init().</span>
+<span class="n">NON_AUTO_INIT_APIS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;ClientBuilder&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;LOCAL_MODE&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Language&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SCRIPT_MODE&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;WORKER_MODE&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;__version__&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;_config&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;autoscaler&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;available_resources&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;client&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;cluster_resources&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;cpp_function&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;init&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;is_initialized&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;java_actor_class&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;java_function&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;method&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;nodes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;remote&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;show_in_dashboard&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;shutdown&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;timeline&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;LoggingConfig&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="k">assert</span> <span class="nb">set</span><span class="p">(</span><span class="n">__all__</span><span class="p">)</span> <span class="o">==</span> <span class="n">AUTO_INIT_APIS</span> <span class="o">|</span> <span class="n">NON_AUTO_INIT_APIS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ray._private.auto_init_hook</span><span class="w"> </span><span class="kn">import</span> <span class="n">wrap_auto_init_for_all_apis</span>  <span class="c1"># noqa: E402</span>
+
+<span class="n">wrap_auto_init_for_all_apis</span><span class="p">(</span><span class="n">AUTO_INIT_APIS</span><span class="p">)</span>
+<span class="k">del</span> <span class="n">wrap_auto_init_for_all_apis</span>
+
+<span class="c1"># Subpackages</span>
+<span class="n">__all__</span> <span class="o">+=</span> <span class="p">[</span>
+    <span class="s2">&quot;actor&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;autoscaler&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;data&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;internal&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;util&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;widgets&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;workflow&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="c1"># ID types</span>
+<span class="n">__all__</span> <span class="o">+=</span> <span class="p">[</span>
+    <span class="s2">&quot;ActorClassID&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ActorID&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;NodeID&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;JobID&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;WorkerID&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;FunctionID&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ObjectID&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ObjectRef&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ObjectRefGenerator&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;DynamicObjectRefGenerator&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TaskID&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;UniqueID&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PlacementGroupID&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<span class="c1"># Delay importing of expensive, isolated subpackages. Note that for proper type</span>
+<span class="c1"># checking support these imports must be kept in sync between type checking and</span>
+<span class="c1"># runtime behavior.</span>
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ray</span><span class="w"> </span><span class="kn">import</span> <span class="n">autoscaler</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ray</span><span class="w"> </span><span class="kn">import</span> <span class="n">data</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ray</span><span class="w"> </span><span class="kn">import</span> <span class="n">workflow</span>
+<span class="k">else</span><span class="p">:</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">importlib</span>
+
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;workflow&quot;</span><span class="p">,</span> <span class="s2">&quot;autoscaler&quot;</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">name</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;module </span><span class="si">{</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s2"> has no attribute </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+<span class="k">del</span> <span class="n">os</span>
+<span class="k">del</span> <span class="n">logging</span>
+<span class="k">del</span> <span class="n">sys</span>
+<span class="k">del</span> <span class="n">TYPE_CHECKING</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Trinity-RFT Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

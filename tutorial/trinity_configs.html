@@ -11,6 +11,8 @@
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../_static/documentation_options.js?v=01f34227"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
@@ -65,20 +67,12 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.buffer.reader.html">trinity.buffer.reader</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.buffer.html">trinity.buffer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.buffer.schema.html">trinity.buffer.schema</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.buffer.writer.html">trinity.buffer.writer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.common.models.html">trinity.common.models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.common.rewards.html">trinity.common.rewards</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.common.html">trinity.common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.common.workflows.html">trinity.common.workflows</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.explorer.html">trinity.explorer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.manager.html">trinity.manager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.html">trinity</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.trainer.html">trinity.trainer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.trainer.verl.html">trinity.trainer.verl</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../trinity.utils.html">trinity.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.buffer.html">trinity.buffer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.explorer.html">trinity.explorer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.trainer.html">trinity.trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.manager.html">trinity.manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.common.html">trinity.common</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.utils.html">trinity.utils</a></li>
 </ul>
 
         </div>
@@ -106,10 +100,10 @@
            <div itemprop="articleBody">
              
   <section id="trinity-rft-configuration">
-<h1>Trinity-RFT Configuration<a class="headerlink" href="#trinity-rft-configuration" title="Link to this heading">¶</a></h1>
+<h1>Trinity-RFT Configuration<a class="headerlink" href="#trinity-rft-configuration" title="Link to this heading"></a></h1>
 <p>The following is the main config file for Trinity-RFT. Take <code class="docutils literal notranslate"><span class="pre">scripts/config/countdown.yaml</span></code> as an example.</p>
 <section id="data">
-<h2>Data<a class="headerlink" href="#data" title="Link to this heading">¶</a></h2>
+<h2>Data<a class="headerlink" href="#data" title="Link to this heading"></a></h2>
 <!-- The `data` configuration specifies the data used for training. It includes the total number of epochs, the batch size, the path to the dataset, the default workflow type, the default reward function type, and the format configuration. -->
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">data</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">dataset_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;/PATH/TO/DATASET&#39;</span>
@@ -148,7 +142,7 @@
 <!-- TODO explain the dataset_config and format_config -->
 </section>
 <section id="model">
-<h2>Model<a class="headerlink" href="#model" title="Link to this heading">¶</a></h2>
+<h2>Model<a class="headerlink" href="#model" title="Link to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">model</span></code> configuration specifies the model used for training. It includes the path to the model checkpoint, the maximum number of tokens in the prompt, the maximum number of tokens in the response, the path to the checkpoint of the model, and whether to load the checkpoint of the model.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">model_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;/PATH/TO/MODEL/CHECKPOINT/&#39;</span>
@@ -169,7 +163,7 @@
 </ul>
 </section>
 <section id="cluster">
-<h2>Cluster<a class="headerlink" href="#cluster" title="Link to this heading">¶</a></h2>
+<h2>Cluster<a class="headerlink" href="#cluster" title="Link to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">cluster</span></code> configuration specifies the cluster configuration. It includes the number of nodes and the number of GPUs per node.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">cluster</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">node_num</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
@@ -182,7 +176,7 @@
 </ul>
 </section>
 <section id="buffer">
-<h2>Buffer<a class="headerlink" href="#buffer" title="Link to this heading">¶</a></h2>
+<h2>Buffer<a class="headerlink" href="#buffer" title="Link to this heading"></a></h2>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">buffer</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">max_retry_times</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
 <span class="w">  </span><span class="nt">max_retry_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
@@ -202,7 +196,7 @@
 </ul>
 </section>
 <section id="explorer">
-<h2>Explorer<a class="headerlink" href="#explorer" title="Link to this heading">¶</a></h2>
+<h2>Explorer<a class="headerlink" href="#explorer" title="Link to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">explorer</span></code> configuration specifies the explorer configuration. It includes the type of the engine, the number of engines, the number of workflow runners, the tensor parallel size, whether to enable prefix caching, whether to enforce eager mode, the data type, the <code class="docutils literal notranslate"><span class="pre">temperature</span></code>, the <code class="docutils literal notranslate"><span class="pre">top-p</span></code>, the <code class="docutils literal notranslate"><span class="pre">top-k</span></code>, the <code class="docutils literal notranslate"><span class="pre">seed</span></code>, the <code class="docutils literal notranslate"><span class="pre">logprobs</span></code>, the number of times to repeat each task, whether to use Ray, the backend, the maximum number of pending requests, and the maximum number of waitingsteps.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">explorer</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">engine_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vllm_async</span>
@@ -245,7 +239,7 @@
 </ul>
 </section>
 <section id="synchronizer">
-<h2>Synchronizer<a class="headerlink" href="#synchronizer" title="Link to this heading">¶</a></h2>
+<h2>Synchronizer<a class="headerlink" href="#synchronizer" title="Link to this heading"></a></h2>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">synchronizer</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">sync_method</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;online&#39;</span>
 <span class="w">  </span><span class="nt">sync_iteration_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
@@ -257,7 +251,7 @@
 </ul>
 </section>
 <section id="monitor">
-<h2>Monitor<a class="headerlink" href="#monitor" title="Link to this heading">¶</a></h2>
+<h2>Monitor<a class="headerlink" href="#monitor" title="Link to this heading"></a></h2>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">monitor</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">cache_root_dir</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
 <span class="w">  </span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Trinity-RFT-countdown&quot;</span>
@@ -271,7 +265,7 @@
 </ul>
 </section>
 <section id="trainer">
-<h2>Trainer<a class="headerlink" href="#trainer" title="Link to this heading">¶</a></h2>
+<h2>Trainer<a class="headerlink" href="#trainer" title="Link to this heading"></a></h2>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">trainer</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">trainer_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;verl&#39;</span>
 <span class="w">  </span><span class="nt">algorithm_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ppo</span>
@@ -288,7 +282,7 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">trainer.eval_interval</span></code>: The interval between two evaluations. Default is <code class="docutils literal notranslate"><span class="pre">1000</span></code>.</p></li>
 </ul>
 <section id="verl-trainer-configuration">
-<h3>veRL Trainer Configuration<a class="headerlink" href="#verl-trainer-configuration" title="Link to this heading">¶</a></h3>
+<h3>veRL Trainer Configuration<a class="headerlink" href="#verl-trainer-configuration" title="Link to this heading"></a></h3>
 <p>Here we mainly introduce the parameters that can be set in veRL. For the specific meaning of the parameters, please refer to the official document of <a class="reference external" href="https://github.com/volcengine/verl/blob/0bdf7f469854815177e73dcfe9e420836c952e6e/docs/examples/config.rst">veRL</a>.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">data</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">tokenizer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>

@@ -1,7 +1,0 @@
-trinity.common.models
-=====================
-
-.. automodule:: trinity.common.models
-   :members:
-   :undoc-members:
-   :show-inheritance:
