@@ -115,12 +115,31 @@ source .venv/bin/activate
 pip install -e .[dev]
 # for zsh
 pip install -e .\[dev\]
+
+# Install flash-attn after all dependencies are installed
+# Note: flash-attn will take a long time to compile, please be patient.
+pip install flash-attn -v
+# Try the following command if you encounter errors during installation
+# pip install flash-attn -v --no-build-isolation
 ```
 
 
+Installation from docker:
 
-Installation with pip:
-(coming soon)
+We provided a dockerfile for Trinity-RFT (trinity)
+
+```shell
+git clone https://github.com/modelscope/Trinity-RFT
+cd Trinity-RFT
+
+# build the docker image
+# Note: you can edit the dockerfile to customize the environment
+# e.g., use pip mirrors or set api key
+docker build -f scripts/docker/Dockerfile -t trinity-rft:latest .
+
+# run the docker image
+docker run -it --gpus all --shm-size="64g" --rm -v $PWD:/workspace -v <root_path_of_data_and_checkpoints>:/data trinity-rft:latest
+```
 
 
 
@@ -253,18 +272,6 @@ Please refer to [this document](tutorial/trinity_programming_guide.md).
 
 
 This project is currently under active development, and we welcome contributions from the community!
-
-
-
-Installation for development:
-
-```shell
-# for bash
-pip install -e .[dev]
-# for zsh
-pip install -e .\[dev\]
-```
-
 
 
 Code style check:
