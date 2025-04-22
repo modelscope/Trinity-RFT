@@ -7,17 +7,20 @@
 </div>
 
 
+&nbsp;
+
+
 
 **Trinity-RFT is a general-purpose, flexible and scalable framework designed for reinforcement fine-tuning (RFT) of large language models (LLM).**
 
 
-Built with a decoupled architecture, seamless integration for agentic workflows, and systematic data processing pipelines, Trinity-RFT can be easily adapted for diverse application scenarios, and serve as a platform for exploring advanced reinforcement learning (RL) paradigms.
+Built with a decoupled design, seamless integration for agentic workflows, and systematic data processing pipelines, Trinity-RFT can be easily adapted for diverse application scenarios, and serve as a platform for exploring advanced reinforcement learning (RL) paradigms.
 
 
 
 
 
-**Vision of this project:**
+## Vision of this project
 
 
 Current RFT approaches, such as RLHF (Reinforcement Learning from Human Feedback) with proxy reward models or training long-CoT reasoning models with rule-based rewards, are limited in their ability to handle dynamic, real-world learning.
@@ -34,7 +37,7 @@ Trinity-RFT offers a path into this future by addressing critical gaps in existi
 
 
 
-**Key features of Trinity-RFT:**
+## Key features
 
 
 
@@ -102,7 +105,8 @@ e.g., utilizing NCCL (when feasible) for model weight synchronization, sequence 
 ## Getting started
 
 
-*Note: this project is currently under active development; comments and suggestions are welcome!*
+> [!NOTE]
+> This project is currently under active development. Comments and suggestions are welcome!
 
 
 
