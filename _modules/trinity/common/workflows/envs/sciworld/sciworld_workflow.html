@@ -1,0 +1,273 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>trinity.common.workflows.envs.sciworld.sciworld_workflow &mdash; Trinity-RFT 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../../index.html" class="icon icon-home">
+            Trinity-RFT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../tutorial/example_reasoning_basic.html">A quick example with GSM8k</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../tutorial/example_reasoning_advanced.html">Example: off-policy / asynchronous RFT mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../tutorial/example_multi_turn.html">Example: Multi-Turn RFT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../tutorial/example_dpo.html">Example: Run DPO on Human-Like-DPO-Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../tutorial/example_data_functionalities.html">Data processing functionalities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../tutorial/trinity_configs.html">Trinity-RFT Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../tutorial/trinity_programming_guide.html">Trinity-RFT Developer Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../build_api/trinity.buffer.html">trinity.buffer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../build_api/trinity.explorer.html">trinity.explorer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../build_api/trinity.trainer.html">trinity.trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../build_api/trinity.manager.html">trinity.manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../build_api/trinity.common.html">trinity.common</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../build_api/trinity.utils.html">trinity.utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../../index.html">Trinity-RFT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">trinity.common.workflows.envs.sciworld.sciworld_workflow</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for trinity.common.workflows.envs.sciworld.sciworld_workflow</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelWrapper</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">WORKFLOWS</span><span class="p">,</span> <span class="n">MultiTurnWorkflow</span>
+
+<span class="n">SCIWORLD_SYSTEM_PROMPT</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">You are an agent, you job is to do some scientific experiment in a virtual test-based environments.</span>
+
+<span class="s2">## Notes:</span>
+<span class="s2">At each step, you should first think then perform action to fulfill the instruction. You should ALWAYS wrap your thinking with the &lt;think&gt; &lt;/think&gt; tag and wrap your action with the &lt;action&gt; &lt;/action&gt; tag.</span>
+<span class="s2">You should ALWAYS take one action each step.</span>
+<span class="s2">DONOT try to interact with the user at anytime. Finish the task by yourself.</span>
+
+<span class="s2">## Action Format:</span>
+<span class="s2">Below are the available commands you can use:</span>
+<span class="s2">    open OBJ: open a container</span>
+<span class="s2">    close OBJ: close a container</span>
+<span class="s2">    activate OBJ: activate a device</span>
+<span class="s2">    deactivate OBJ: deactivate a device</span>
+<span class="s2">    connect OBJ to OBJ: connect electrical components</span>
+<span class="s2">    disconnect OBJ: disconnect electrical components</span>
+<span class="s2">    use OBJ [on OBJ]: use a device/item</span>
+<span class="s2">    look around: describe the current room</span>
+<span class="s2">    examine OBJ: describe an object in detail</span>
+<span class="s2">    look at OBJ: describe a container&#39;s contents</span>
+<span class="s2">    read OBJ: read a note or book</span>
+<span class="s2">    move OBJ to OBJ: move an object to a container</span>
+<span class="s2">    pick up OBJ: move an object to the inventory</span>
+<span class="s2">    pour OBJ into OBJ: pour a liquid into a container</span>
+<span class="s2">    mix OBJ: chemically mix a container</span>
+<span class="s2">    teleport to LOC: teleport to a specific room</span>
+<span class="s2">    focus on OBJ: signal intent on a task object</span>
+<span class="s2">    wait: task no action for 10 steps</span>
+<span class="s2">    wait1: task no action for a step</span>
+
+<span class="s2">For example your output should be like this:</span>
+<span class="s2">&lt;think&gt; Now I will check the bedroom ... &lt;/think&gt;&lt;action&gt;teleport to bedroom&lt;/action&gt;</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">format_observation</span><span class="p">(</span><span class="n">observation</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">return</span> <span class="s2">&quot;Observation: </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">observation</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_action</span><span class="p">(</span><span class="n">response</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># parse the action within the &lt;action&gt; &lt;/action&gt; tag</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;&lt;action&gt;&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;&lt;/action&gt;&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">action</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error parsing action:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="SciWorldWorkflow">
+<a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.SciWorldWorkflow">[docs]</a>
+<span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;sciworld_workflow&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SciWorldWorkflow</span><span class="p">(</span><span class="n">MultiTurnWorkflow</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A workflow for sciworld task.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="SciWorldWorkflow.__init__">
+<a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.SciWorldWorkflow.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">ModelWrapper</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;system_prompt&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># Unuse here</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">task_desc</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;task_desc&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">truth</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;truth&quot;</span><span class="p">)</span>  <span class="c1"># Unuse here</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reward_fn</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;reward_fn&quot;</span><span class="p">)</span>  <span class="c1"># Unuse here</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">repeat_times</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;repeat_times&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_env_steps</span> <span class="o">=</span> <span class="mi">30</span>  <span class="c1"># should be less than 100</span></div>
+
+
+<div class="viewcode-block" id="SciWorldWorkflow.get_model_response">
+<a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.SciWorldWorkflow.get_model_response">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_model_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">):</span>
+        <span class="n">responses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">chat</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span> <span class="n">repeat_times</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">responses</span></div>
+
+
+<div class="viewcode-block" id="SciWorldWorkflow.get_model_response_text">
+<a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.SciWorldWorkflow.get_model_response_text">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_model_response_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_model_response</span><span class="p">(</span><span class="n">messages</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">response_text</span></div>
+
+
+<div class="viewcode-block" id="SciWorldWorkflow.generate_env_inference_samples">
+<a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.SciWorldWorkflow.generate_env_inference_samples">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_env_inference_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">rollout_num</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+        <span class="c1"># TODO: Make this parallel</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Generating env inference samples...&quot;</span><span class="p">)</span>
+        <span class="n">golden_rounds</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">get_gold_action_sequence</span><span class="p">())</span>
+        <span class="n">experience_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">rollout_num</span><span class="p">):</span>
+            <span class="n">observation</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+            <span class="n">observation</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;Task Description: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">get_task_description</span><span class="p">())</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">observation</span>
+            <span class="p">)</span>
+            <span class="n">final_reward</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="n">current_reward</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="n">memory</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">memory</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">SCIWORLD_SYSTEM_PROMPT</span><span class="p">})</span>
+            <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_env_steps</span><span class="p">):</span>
+                <span class="n">format_obs</span> <span class="o">=</span> <span class="n">format_observation</span><span class="p">(</span><span class="n">observation</span><span class="p">)</span>
+                <span class="n">memory</span> <span class="o">=</span> <span class="n">memory</span> <span class="o">+</span> <span class="p">[{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">format_obs</span><span class="p">}]</span>
+                <span class="n">response_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_model_response_text</span><span class="p">(</span><span class="n">memory</span><span class="p">)</span>
+                <span class="n">memory</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;assistant&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">response_text</span><span class="p">})</span>
+                <span class="n">action</span> <span class="o">=</span> <span class="n">parse_action</span><span class="p">(</span><span class="n">response_text</span><span class="p">)</span>
+                <span class="n">observation</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+                <span class="n">current_reward</span> <span class="o">+=</span> <span class="n">reward</span>
+                <span class="n">final_reward</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">current_reward</span><span class="p">,</span> <span class="n">final_reward</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">done</span><span class="p">:</span>
+                    <span class="k">break</span>
+            <span class="n">final_reward</span> <span class="o">=</span> <span class="n">final_reward</span> <span class="o">/</span> <span class="mf">100.0</span>
+            <span class="n">experience</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_messages_to_experience</span><span class="p">(</span>
+                <span class="n">memory</span><span class="p">,</span>
+                <span class="n">final_reward</span><span class="p">,</span>
+                <span class="p">{</span><span class="s2">&quot;env_rounds&quot;</span><span class="p">:</span> <span class="n">r</span><span class="p">,</span> <span class="s2">&quot;env_done&quot;</span><span class="p">:</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">done</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;golden_rounds&quot;</span><span class="p">:</span> <span class="n">golden_rounds</span><span class="p">},</span>
+            <span class="p">)</span>
+            <span class="n">experience_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">experience</span><span class="p">)</span>
+        <span class="c1"># Close the env to save cpu memory</span>
+        <span class="n">env</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">experience_list</span></div>
+
+
+<div class="viewcode-block" id="SciWorldWorkflow.run">
+<a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.SciWorldWorkflow.run">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+        <span class="c1"># assume the task_description is the json object containing task index and the var_num</span>
+        <span class="c1"># see Trinity-RFT/script/data_prepare/get_scriworld_data.py</span>
+        <span class="n">task_desc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">task_desc</span>
+        <span class="n">task_config</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">task_desc</span><span class="p">)</span>
+
+        <span class="n">rollout_n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repeat_times</span>
+        <span class="c1"># TODO: Make parallel envs</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">scienceworld</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScienceWorldEnv</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="nf">create_environment</span><span class="p">(</span><span class="n">task_config</span><span class="p">):</span>
+                <span class="n">var_num</span> <span class="o">=</span> <span class="n">task_config</span><span class="p">[</span><span class="s2">&quot;var_num&quot;</span><span class="p">]</span>
+                <span class="n">task_name</span> <span class="o">=</span> <span class="n">task_config</span><span class="p">[</span><span class="s2">&quot;task_name&quot;</span><span class="p">]</span>
+                <span class="n">jar_path</span> <span class="o">=</span> <span class="n">task_config</span><span class="p">[</span><span class="s2">&quot;jar_path&quot;</span><span class="p">]</span>
+                <span class="n">simplificationStr</span> <span class="o">=</span> <span class="s2">&quot;easy&quot;</span>
+                <span class="n">env</span> <span class="o">=</span> <span class="n">ScienceWorldEnv</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">jar_path</span><span class="p">,</span> <span class="n">envStepLimit</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+                <span class="n">env</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">task_name</span><span class="p">,</span> <span class="n">var_num</span><span class="p">,</span> <span class="n">simplificationStr</span><span class="p">,</span> <span class="n">generateGoldPath</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">env</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please make sure you have installed the sciworld package.&quot;</span><span class="p">)</span>
+            <span class="n">error_message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Error importing SciWorldTWEnv </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">. Please make sure you have installed the sciworld package successfully, following the instructions in https://github.com/allenai/ScienceWorld&quot;</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
+        <span class="n">env</span> <span class="o">=</span> <span class="n">create_environment</span><span class="p">(</span><span class="n">task_config</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_env_inference_samples</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">rollout_n</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Trinity-RFT Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
