@@ -27,7 +27,6 @@ model:
   max_prompt_tokens: 2048
   max_response_tokens: 2048
   checkpoint_path: ''
-  load_checkpoint: true
 cluster:
   node_num: 1
   gpu_per_node: 8
@@ -60,7 +59,6 @@ trainer:
   trainer_config_path: tests/common/tmp/template_verl_config.yaml
 monitor:
   project: unittest
-  group: test
   name: test
 synchronizer:
   sync_method: offline

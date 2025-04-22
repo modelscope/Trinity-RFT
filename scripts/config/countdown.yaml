@@ -14,7 +14,6 @@ model:
   max_prompt_tokens: 256
   max_response_tokens: 1024
   checkpoint_path: 'checkpoints/qwen2.5-1.5B-countdown'
-  load_checkpoint: true
 cluster:
   node_num: 1
   gpu_per_node: 8

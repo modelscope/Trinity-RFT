@@ -11,7 +11,6 @@ model:
   max_prompt_tokens: 256
   max_response_tokens: 1024
   checkpoint_path: '{path to checkpoints}/test-opmd-gsm8k/qwen2.5-1.5B-gsm8k-opmd-kl_0.001-entropy_0-tau_4-beta1_0.0-beta2_0.95-lr_2e-6-sync10'
-  load_checkpoint: false
 cluster:
   node_num: 1
   gpu_per_node: 8
