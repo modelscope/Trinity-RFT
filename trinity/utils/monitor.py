@@ -4,8 +4,8 @@ from typing import Any, List, Optional, Union
 
 import numpy as np
 import pandas as pd
-
 import wandb
+
 from trinity.utils.log import get_logger
 
 
