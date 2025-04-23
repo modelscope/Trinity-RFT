@@ -23,7 +23,6 @@ dependencies = [
     "ray==2.43.0",
     "vllm==0.8.3",
     "tensordict==0.6.2",
-    "redis",
     "wandb",
     "omegaconf",
     "sqlalchemy",
