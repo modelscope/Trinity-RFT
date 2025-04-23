@@ -32,6 +32,7 @@ dependencies = [
     "math_verify",
     "ninja",
     "fire",
+    "flask",
 ]
 
 [project.scripts]
