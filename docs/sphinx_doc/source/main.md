@@ -180,7 +180,7 @@ For more details about dataset downloading, please refer to [Huggingface](https:
 ### Step 3: configurations
 
 
-You may customize the configurations in [`examples`](examples/). For example, the model and dataset are specified as:
+You may customize the configurations in [`examples`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/). For example, the model and dataset are specified as:
 
 ```yaml
 model:
@@ -190,7 +190,7 @@ data:
   dataset_path: $DATASET_PATH/{dataset_name}
 ```
 
-Please refer to [`examples`](examples/) for more details.
+Please refer to [`examples`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/) for more details.
 
 
 

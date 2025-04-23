@@ -48,7 +48,7 @@ synchronizer:
 
 ### Use GRPO or PPO Algorithm
 
-We use the configurations in [`gsm8k.yaml`](../../../../examples/grpo_gsm8k/gsm8k.yaml) and [`train_gsm8k.yaml`](../../../../examples/grpo_gsm8k/train_gsm8k.yaml) for this experiment. Some important setups are listed in the following:
+We use the configurations in [`gsm8k.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k/gsm8k.yaml) and [`train_gsm8k.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k/train_gsm8k.yaml) for this experiment. Some important setups are listed in the following:
 
 
 ```yaml

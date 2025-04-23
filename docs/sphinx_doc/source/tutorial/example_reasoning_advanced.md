@@ -21,7 +21,7 @@ trinity run --config examples/opmd_gsm8k/opmd_gsm8k.yaml
 ```
 
 Note that in this config file, `sync_iteration_interval` is set to 10, i.e., the model weights of explorer and trainer are synchronized only once every 10 training steps, which leads to a challenging off-policy scenario (potentially with abrupt distribution shift during the RFT process).
-Other configurations of particular interest are explained at the beginning of [`train_opmd_gsm8k.yaml`](../../../../examples/opmd_gsm8k/train_opmd_gsm8k.yaml).
+Other configurations of particular interest are explained at the beginning of [`train_opmd_gsm8k.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/opmd_gsm8k/train_opmd_gsm8k.yaml).
 
 
 
