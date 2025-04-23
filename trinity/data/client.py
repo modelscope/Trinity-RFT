@@ -34,6 +34,6 @@ def request(url, **kwargs):
 if __name__ == "__main__":
     res = request(
         url=LOCAL_SERVER_URL,
-        configPath="scripts/config/gsm8k.yaml",
+        configPath="examples/grpo_gsm8k/gsm8k.yaml",
     )
     print(res)

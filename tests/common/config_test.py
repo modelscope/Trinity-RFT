@@ -22,7 +22,7 @@ class TestConfig(unittest.TestCase):
             config.synchronizer.sync_iteration_interval,
         )
 
-    def test_all_examples_are_valid(self):
+    def test_all_examples_are_valid(self): # TODO: useless
         # ../../scripts/config
         example_dir = os.path.join(os.path.dirname(__file__), "..", "..", "scripts", "config")
         for filename in ["countdown", "gsm8k"]:

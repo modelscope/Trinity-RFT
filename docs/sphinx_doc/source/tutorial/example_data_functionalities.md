@@ -133,7 +133,7 @@ And you can set the `clean_strategy` to 'iterative' to get a better dataset.
 
 
 
-All config items in the `data` section can be found [here](trinity_configs.md). A prepared config file for this example of GSM-8K can be found in [the config file of gsm8k](../../../../scripts/config/gsm8k.yaml).
+All config items in the `data` section can be found [here](trinity_configs.md). A prepared config file for this example of GSM-8K can be found in [the config file of gsm8k](../../../../examples/grpo_gsm8k/gsm8k.yaml).
 
 
 

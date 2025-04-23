@@ -53,7 +53,7 @@ synchronizer:
 trainer:
   trainer_type: 'verl'
   algorithm_type: dpo
-  trainer_config_path: 'scripts/config/train_dpo.yaml'
+  trainer_config_path: 'examples/dpo_humanlike/train_dpo.yaml'
 monitor:
   cache_root_dir: ""
   project: "dpo_example"

@@ -173,7 +173,7 @@ class ExplorerConfig:
 class TrainerConfig:
     trainer_type: str = "verl"
     trainer_data_type: str = "RFT"
-    trainer_config_path: str = "scripts/config/train_countdown.yaml"
+    trainer_config_path: str = "examples/ppo_countdown/train_countdown.yaml"
     eval_interval: int = 100
     enable_preview: bool = True  # enable rollout preview in wandb
     trainer_config: Any = None
