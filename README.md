@@ -3,7 +3,7 @@
 <!-- ![trinity-rft](./docs/sphinx_doc/assets/trinity-title.png) -->
 
 <div align="center">
-  <img src="./docs/sphinx_doc/assets/trinity-title.png" alt="Trinity-RFT">
+  <img src="./docs/sphinx_doc/assets/trinity-title.png" alt="Trinity-RFT" style="height: 100px;">
 </div>
 
 
