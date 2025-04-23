@@ -13,7 +13,6 @@ model:
   max_prompt_tokens: 1792
   max_response_tokens: 256
   checkpoint_path: 'checkpoints/trinity_dpo'
-  load_checkpoint: true
 cluster:
   node_num: 1
   gpu_per_node: 8

@@ -11,7 +11,7 @@ readme = "README.md"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -23,7 +23,6 @@ dependencies = [
     "ray==2.43.0",
     "vllm==0.8.3",
     "tensordict==0.6.2",
-    "redis",
     "wandb",
     "omegaconf",
     "sqlalchemy",

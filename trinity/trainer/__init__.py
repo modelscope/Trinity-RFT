@@ -1,3 +1,3 @@
-from trinity.trainer.trainer import Trainer
+from trinity.trainer.trainer import TrainEngineWrapper, Trainer, get_trainer_wrapper
 
-__all__ = ["Trainer"]
+__all__ = ["Trainer", "TrainEngineWrapper", "get_trainer_wrapper"]

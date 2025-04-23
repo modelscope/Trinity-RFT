@@ -8,7 +8,7 @@ In this example, you will learn how to apply the data module of Trinity-RFT to p
 2. how to configure the data module
 3. what the data module can do
 
-Before getting started, you need to prepare the main environment of Trinity-RFT according to the [installation section of the README file](main.md#getting-started), and you need to install [postgresql](https://www.postgresql.org/docs/current/tutorial-install.html) as well.
+Before getting started, you need to prepare the main environment of Trinity-RFT according to the [installation section of the README file](../main.md), and you need to install [postgresql](https://www.postgresql.org/docs/current/tutorial-install.html) as well.
 
 ### Data Preparation
 
@@ -151,7 +151,7 @@ ray start --head
 ray start --address=<master_address>
 
 # run RFT
-as-rft run --config <Trinity-RFT_config_path>
+trinity run --config <Trinity-RFT_config_path>
 ```
 
 If you follow the steps above, Trinity-RFT will send a request to the data module server, the data active iterator will be activated and compute difficulty scores for each sample in the raw dataset. After that, the data module server stores the result dataset into the database, when exploring begins, it will load the prepared dataset and continue the downstream steps.
@@ -243,7 +243,7 @@ You can set more config items for this OP (e.g. notification when annotation is 
 
 When you start running with the RFT config, the data module will start the OP `human_preference_annotation_mapper`, and then you can find a new project on the "Projects" page of the label-studio server.
 
-<img src="../../assets/data-projects.png" width="300">
+![]("../../assets/data-projects.png")
 
 You can click and enter into this project, and all the samples that need to be annotated are listed on the page.
 

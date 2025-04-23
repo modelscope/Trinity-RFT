@@ -12,7 +12,6 @@ model:
   max_prompt_tokens: 4096
   max_response_tokens: 16384
   checkpoint_path: 'checkpoints/ALFWORLD_RFT'
-  load_checkpoint: true
 cluster:
   node_num: 1
   gpu_per_node: 8

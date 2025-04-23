@@ -35,7 +35,7 @@ Each `Task` is a Python dictionary (`Dict[str, Any]`), containing various parame
 
 In the math problem scenario, the `Task` dataset can be a `jsonl` file, where each line’s JSON contains `question` and `answer` fields representing the problem description and standard answer, respectively.
 
-```jsonl
+```json
 {"question": "1+1=", "answer": "2"}
 {"question": "2+2=", "answer": "4"}
 ...

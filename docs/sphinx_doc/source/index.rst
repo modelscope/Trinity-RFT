@@ -6,7 +6,7 @@
 Welcome to Trinity-RFT's documentation!
 =======================================
 
-.. include:: tutorial/main.md
+.. include:: main.md
    :parser: myst_parser.sphinx_
 
 
@@ -25,31 +25,13 @@ Welcome to Trinity-RFT's documentation!
    tutorial/trinity_programming_guide.md
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :glob:
    :caption: API Reference
 
-   example.md
-
-   trinity.buffer.reader
-   trinity.buffer
-   trinity.buffer.schema
-   trinity.buffer.writer
-   trinity.common.models
-   trinity.common.rewards
-   trinity.common
-   trinity.common.workflows
-   trinity.explorer
-   trinity.manager
-   trinity
-   trinity.trainer
-   trinity.trainer.verl
-   trinity.utils
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   build_api/trinity.buffer
+   build_api/trinity.explorer
+   build_api/trinity.trainer
+   build_api/trinity.manager
+   build_api/trinity.common
+   build_api/trinity.utils

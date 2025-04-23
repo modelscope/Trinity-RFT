@@ -268,6 +268,7 @@ class veRLConfig:
         self.trainer.nnodes = config.cluster.node_num - rollout_node_num
         self.actor_rollout_ref.model.path = config.model.model_path
         self.critic.model.path = config.model.critic_model_path
+        self.critic.model.tokenizer_path = config.model.critic_model_path
 
         if config.cluster.node_num == 1:
             # for single node scenarios, rollout and training are on the same node
