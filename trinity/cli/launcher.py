@@ -100,16 +100,32 @@ def both(config: Config) -> None:
 
 def activate_data_module(config_path: str):
     """Check whether to activate data module and preprocess datasets."""
-    from trinity.data.client import LOCAL_SERVER_URL, request
+    from trinity.cli.client import LOCAL_DATA_WORKFLOW_SERVER_URL, request
 
     logger.info("Activating data module...")
     res = request(
-        url=LOCAL_SERVER_URL,
+        url=LOCAL_DATA_WORKFLOW_SERVER_URL,
         configPath=config_path,
     )
     if res["return_code"] != 0:
         logger.error(f"Failed to activate data module: {res['return_msg']}.")
         return
+
+def run(config_path: str):
+    # TODO: support parse all args from command line
+    config = load_config(config_path)
+    config.check_and_update()
+    # try to activate data module
+    data_config = config.data
+    if data_config.dj_config_path or data_config.dj_process_desc:
+        activate_data_module(config_path)
+    ray.init()
+    if config.mode == "explore":
+        explore(config)
+    elif config.mode == "train":
+        train(config)
+    elif config.mode == "both":
+        both(config)
 
 
 def main() -> None:
@@ -126,19 +142,7 @@ def main() -> None:
     args = parser.parse_args()
     if args.command == "run":
         # TODO: support parse all args from command line
-        config = load_config(args.config)
-        config.check_and_update()
-        # try to activate data module
-        data_config = config.data
-        if data_config.dj_config_path or data_config.dj_process_desc:
-            activate_data_module(args.config)
-        ray.init()
-        if config.mode == "explore":
-            explore(config)
-        elif config.mode == "train":
-            train(config)
-        elif config.mode == "both":
-            both(config)
+        run(args.config)
 
 
 if __name__ == "__main__":

@@ -1,13 +1,15 @@
 from flask import Flask, jsonify, request
 
-from trinity.common.config import load_config
-from trinity.data.controllers.active_iterator import DataActiveIterator
-
 app = Flask(__name__)
 
+APP_NAME = 'data_workflow'
+PORT = 5005
 
-@app.route("/data_workflow", methods=["GET"])
+@app.route(f"/{APP_NAME}", methods=["GET"])
 def data_workflow():
+    from trinity.common.config import load_config
+    from trinity.data.controllers.active_iterator import DataActiveIterator
+
     config_path = request.args.get("configPath")
     config = load_config(config_path)
 
@@ -17,4 +19,4 @@ def data_workflow():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(port=PORT, debug=True)

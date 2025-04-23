@@ -92,10 +92,10 @@ synth_data = synthesizer.process(clean_data)
   - Request using our simple client:
 
   ```python
-  from trinity.data.client import request
+  from trinity.cli.client import request
 
   res = request(
-    url="http://127.0.0.1:5000/data_workflow",
+    url="http://127.0.0.1:5005/data_workflow",
     configPath="tests/test_configs/active_iterator_test_cfg.yaml"
   )
 
