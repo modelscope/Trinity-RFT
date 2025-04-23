@@ -111,6 +111,7 @@ def activate_data_module(config_path: str):
         logger.error(f"Failed to activate data module: {res['return_msg']}.")
         return
 
+
 def run(config_path: str):
     # TODO: support parse all args from command line
     config = load_config(config_path)

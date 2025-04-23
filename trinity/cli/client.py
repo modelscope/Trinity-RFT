@@ -39,4 +39,4 @@ if __name__ == "__main__":
     )
     if res:
         print(res)
-        print(res['message'])
+        print(res["message"])

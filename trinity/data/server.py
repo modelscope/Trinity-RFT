@@ -2,8 +2,9 @@ from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
-APP_NAME = 'data_workflow'
+APP_NAME = "data_workflow"
 PORT = 5005
+
 
 @app.route(f"/{APP_NAME}", methods=["GET"])
 def data_workflow():

@@ -1,10 +1,12 @@
 import traceback
+
 from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
-APP_NAME = 'trinity_training'
+APP_NAME = "trinity_training"
 PORT = 5006
+
 
 @app.route(f"/{APP_NAME}", methods=["GET"])
 def trinity_training():
@@ -15,7 +17,7 @@ def trinity_training():
         run(config_path)
         ret = 0
         msg = "Training Success."
-    except:
+    except:  # noqa: E722
         traceback.print_exc()
         msg = traceback.format_exc()
         ret = 1

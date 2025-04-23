@@ -5,10 +5,10 @@ from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import NullPool
 
+from trinity.buffer.utils import retry_session
 from trinity.common.config import DataConfig
 from trinity.common.schema import Base, RftDatasetModel
 from trinity.data.core.dataset import RftDataset
-from trinity.buffer.utils import retry_session
 from trinity.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -55,7 +55,9 @@ class RftDatasetDB:
         self.session = sessionmaker(bind=self.engine)
 
     def add_entries(self, dataset: RftDataset):
-        with retry_session(self) as session:
+        with retry_session(
+            self, self.config.max_retry_times, self.config.max_retry_interval
+        ) as session:
             session.add_all(rft_dataset_to_model(dataset))
 
     def get_entries(self, num_entries: int, order_by: str = None, ascending: bool = False):
@@ -65,7 +67,9 @@ class RftDatasetDB:
             order_by_key = asc(order_by_key) if ascending else desc(order_by_key)
         else:
             order_by_key = None
-        with retry_session(self) as session:
+        with retry_session(
+            self, self.config.max_retry_times, self.config.max_retry_interval
+        ) as session:
             entries = (
                 session.query(RftDatasetModel)
                 .order_by(order_by_key)
