@@ -8,7 +8,7 @@ from sqlalchemy.pool import NullPool
 from trinity.common.config import DataConfig
 from trinity.common.schema import Base, RftDatasetModel
 from trinity.data.core.dataset import RftDataset
-from trinity.manager.sql_storage import retry_session
+from trinity.buffer.utils import retry_session
 from trinity.utils.log import get_logger
 
 logger = get_logger(__name__)
