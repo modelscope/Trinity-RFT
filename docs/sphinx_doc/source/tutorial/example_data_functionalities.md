@@ -137,8 +137,9 @@ All config items in the `data` section can be found [here](trinity_configs.md). 
 
 
 
-> [!NOTE]
-> Only when one of `dj_process_desc` and `dj_config_path` is provided, the data module and the data active iterator will be activated. Otherwise, this part will be skipped and it will enter into the exploring stage directly.
+```{note}
+Only when one of `dj_process_desc` and `dj_config_path` is provided, the data module and the data active iterator will be activated. Otherwise, this part will be skipped and it will enter into the exploring stage directly.
+```
 
 ### Exploring & Training
 After preparing the config files of Trinity-RFT, you can start your ray cluster and run the RFT process including the data active iterator part with the following commands:

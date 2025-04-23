@@ -48,4 +48,4 @@ To run this mode, the explorer and trainer need to be launched separately, with 
 
 
 
-We are still testing this mode more thoroughly. A concrete example is coming soon!
+*We are still testing this mode more thoroughly. A concrete example is coming soon!*

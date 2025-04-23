@@ -27,8 +27,9 @@ class CaseInsensitiveEnum(Enum, metaclass=CaseInsensitiveEnumMeta):
 class PromptType(CaseInsensitiveEnum):
     """Prompt Type."""
 
-    MESSAGES = "messages"
-    PLAINTEXT = "plaintext"
+    MESSAGES = "messages"  # prompt+response: message list
+    CHATPAIR = "chatpair"  # prompt: message list, response: message list
+    PLAINTEXT = "plaintext"  # prompt: plaintext, response: plaintext
 
 
 class TaskType(Enum):
