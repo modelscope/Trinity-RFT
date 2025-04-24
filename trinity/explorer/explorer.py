@@ -214,7 +214,7 @@ class Explorer:
         self.logger.info("Explore step finished.")
         return True, self.iteration
 
-    def eval(self, step) -> bool:
+    def eval(self) -> bool:
         """Evaluation on all evaluation data samples."""
         self.logger.info("Evaluation started.")
         st = time.time()
@@ -237,7 +237,7 @@ class Explorer:
 
         log_metrics = self.monitor.calculate_metrics(all_metrics, prefix="eval")  # type: ignore
         log_metrics["eval/total_time"] = time.time() - st
-        self.monitor.log(log_metrics, step=step)  # type: ignore
+        self.monitor.log(log_metrics, step=self.iteration)  # type: ignore
         return True
 
     def sync_weight(self) -> None:

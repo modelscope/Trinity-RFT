@@ -1,7 +1,7 @@
 data:
   dataset_path: ''
+  batch_size: 32
 model:
-  model_path: '/nas/checkpoints/Qwen25-7B-Instruct'
   max_prompt_tokens: 2048
   max_response_tokens: 2048
   checkpoint_path: ''
@@ -9,8 +9,6 @@ cluster:
   node_num: 1
   gpu_per_node: 8
 buffer:
-  storage_type: dict
-  db_url: ''
   read_batch_size: 32
   max_retry_times: 3
   max_retry_interval: 1

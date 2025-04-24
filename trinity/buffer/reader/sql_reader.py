@@ -74,6 +74,6 @@ class SQLReader(BufferReader):
                 exp_list.extend([self.table_model_cls.to_experience(exp) for exp in experiences])
         logger.info(f"get {len(exp_list)} experiences:")
         logger.info(f"reward = {[exp.reward for exp in exp_list]}")
-        logger.info(f"fisrt prompt_text = {exp_list[0].prompt_text}")
+        logger.info(f"first prompt_text = {exp_list[0].prompt_text}")
         logger.info(f"first response_text = {exp_list[0].response_text}")
         return exp_list

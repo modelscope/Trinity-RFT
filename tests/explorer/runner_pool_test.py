@@ -6,13 +6,14 @@ from typing import List
 import ray
 import torch
 
-from trinity.common.config import load_config
+from trinity.buffer.reader.queue_reader import QueueReader
+from trinity.common.config import DatasetConfig, load_config
+from trinity.common.constants import AlgorithmType, StorageType
 from trinity.common.experience import Experience
 from trinity.common.models.model import InferenceModel
 from trinity.common.task import Task
 from trinity.common.workflows.workflow import WORKFLOWS, Workflow
 from trinity.explorer.runner_pool import RunnerPool
-from trinity.manager.queue_storage import QueueStorage
 
 config_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_data", "template.yaml")
 
@@ -62,13 +63,16 @@ class RunnerPoolTest(unittest.TestCase):
         ray.init(ignore_reinit_error=True)
         self.config = load_config(config_dir)
         self.config.explorer.runner_num = 2
-        self.config.buffer.storage_type = "queue"
-        self.config.buffer.db_url = None
         self.config.explorer.max_retry_times = 0
         self.config.explorer.max_timeout = 5
         self.config.buffer.read_batch_size = 2
         self.config.buffer.pad_token_id = 0
-        self.queue = QueueStorage(self.config.buffer)
+        self.config.buffer.train_dataset = DatasetConfig(
+            name="test",
+            storage_type=StorageType.QUEUE,
+            algorithm_type=AlgorithmType.PPO,
+        )
+        self.queue = QueueReader(self.config.buffer.train_dataset, self.config.buffer)
 
     def test_runner_pool(self):
         pool = RunnerPool(self.config, [DummyModel.remote(), DummyModel.remote()])
@@ -111,18 +115,18 @@ class RunnerPoolTest(unittest.TestCase):
         self.assertTrue(et - st < 5)
         self.assertEqual(len(status), 1)
         self.assertFalse(status[0].ok)
-        # 2. `timeout_5
+        # 2. `timeout_2
         st = time.time()
         status = pool.get_next_unorder()
         et = time.time()
-        self.assertTrue(et - st < 5)
+        self.assertTrue(et - st < 3)
         self.assertEqual(len(status), 1)
         self.assertTrue(status[0].ok)
         # 3. `success`
         st = time.time()
         status = pool.get_next_unorder()
         et = time.time()
-        self.assertTrue(et - st < 5)
+        self.assertTrue(et - st < 1)
         self.assertEqual(len(status), 1)
         self.assertTrue(status[0].ok)
         # 4. `timeout_100`and `timeout_101`
@@ -135,13 +139,10 @@ class RunnerPoolTest(unittest.TestCase):
         self.assertFalse(status[1].ok)
 
         # 5.`exit`
-        st = time.time()
         status = pool.get_next_unorder()
-        et = time.time()
-        self.assertTrue(et - st < 5)
         self.assertEqual(len(status), 1)
         self.assertFalse(status[0].ok)
 
-        exps = self.queue.get_experiences()
-        self.assertEqual(exps.batch_size, 2)  # `timeout_2` and `success`
+        exps = self.queue.read()
+        self.assertEqual(len(exps), 2)  # `timeout_2` and `success`
         self.assertEqual(len(pool._idle_actors), self.config.explorer.runner_num)

@@ -20,7 +20,7 @@ class TestExperienceConversion(unittest.TestCase):
         tokens = torch.tensor([1, 2, 3], dtype=torch.int32)
         reward = 0.6
         prompt_length = 2
-        logprobs = torch.tensor([0.1], dtype=torch.float32)
+        logprobs = torch.tensor([0, 0, 0.1], dtype=torch.float32)
         action_mask = torch.tensor([1, 0, 1], dtype=torch.bool)
         experience = Experience(
             tokens=tokens,
@@ -44,28 +44,28 @@ class TestExperienceConversion(unittest.TestCase):
                 tokens=torch.tensor([1, 2]),
                 prompt_length=1,
                 reward=float(0.1),
-                logprobs=torch.tensor([0.1]),
+                logprobs=torch.tensor([0, 0.1]),
                 action_mask=torch.tensor([1, 0]),
             ),
             Experience(
                 tokens=torch.tensor([1, 2, 3]),
                 prompt_length=2,
                 reward=float(0.2),
-                logprobs=torch.tensor([0.1]),
+                logprobs=torch.tensor([0, 0, 0.1]),
                 action_mask=torch.tensor([1, 0, 1]),
             ),
             Experience(
                 tokens=torch.tensor([1, 2, 3, 4]),
                 prompt_length=2,
                 reward=float(0.3),
-                logprobs=torch.tensor([0.1, 0.2]),
+                logprobs=torch.tensor([0, 0, 0.1, 0.2]),
                 action_mask=torch.tensor([1, 0, 1, 0]),
             ),
             Experience(
                 tokens=torch.tensor([1, 2, 3, 4]),
                 prompt_length=3,
                 reward=float(0.4),
-                logprobs=torch.tensor([0.1]),
+                logprobs=torch.tensor([0, 0, 0, 0.1]),
                 action_mask=torch.tensor([1, 0, 1, 0]),
             ),
         ]
@@ -89,7 +89,8 @@ class TestExperienceConversion(unittest.TestCase):
             self.assertTrue(
                 torch.all(
                     batch.logprobs[i][
-                        prompt_length : prompt_length
+                        prompt_length
+                        - exps[i].prompt_length : prompt_length
                         + exps[i].tokens.size(0)
                         - exps[i].prompt_length
                     ]

@@ -18,7 +18,6 @@ model:
   max_prompt_tokens: 1024
   max_response_tokens: 3072
   checkpoint_path: /PATH/TO/CHECKPOINT/
-  load_checkpoint: true
 cluster:
   node_num: 1
   gpu_per_node: 8

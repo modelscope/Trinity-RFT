@@ -175,7 +175,7 @@ class TaskSet:
     @property
     def epoch(self) -> int:
         """Get the current epoch."""
-        return self._index
+        return self._epoch
 
     def __next__(self) -> Task:
         """Iterate through the tasks in the taskset."""

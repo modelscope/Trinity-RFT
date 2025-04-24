@@ -13,7 +13,16 @@ from trinity.common.models.utils import (
     tokenize_and_mask_messages_hf,
 )
 
-config_dir = os.path.join(os.path.dirname(__file__), "test_data", "template.yaml")
+config_dir = os.path.join(os.path.dirname(__file__), "tmp", "template_config.yaml")
+
+
+def get_model_path() -> str:
+    path = os.environ.get("MODEL_PATH")
+    if not path:
+        raise EnvironmentError(
+            "Please set `export MODEL_PATH=<your_model_checkpoint_dir>` before running this test."
+        )
+    return path
 
 
 CHAT_TEMPLATE = r"""
@@ -76,129 +85,11 @@ CHAT_TEMPLATE = r"""
 """
 
 
-@unittest.skip("Skip VLLM test")
-class TestSyncvLLMModel(unittest.TestCase):
-    def setUp(self):
-        ray.init(ignore_reinit_error=True)
-        self.config = load_config(config_dir)
-        self.engines = create_rollout_models(self.config)
-        self.assertEqual(len(self.engines), self.config.explorer.engine_num)
-
-    def test_generate(self):
-        prompts = [
-            "Hello, world!",
-            "Hello, my name is",
-        ]
-        cluster_results = []
-        for engine in self.engines:
-            cluster_results.extend(ray.get(engine.generate.remote(prompts)))
-
-        self.assertEqual(
-            len(cluster_results),
-            len(self.engines) * len(prompts) * self.config.explorer.repeat_times,
-        )
-        for i in range(len(self.engines)):
-            for j in range(len(prompts)):
-                for k in range(self.config.explorer.repeat_times):
-                    self.assertEqual(
-                        cluster_results[
-                            i * len(prompts) * self.config.explorer.repeat_times
-                            + j * self.config.explorer.repeat_times
-                            + k
-                        ].prompt_text,
-                        prompts[j],
-                    )
-
-    def test_chat_and_logprobs(self):
-        messages = [
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": "Hello, world!"},
-        ]
-        cluster_results = []
-        for engine in self.engines:
-            cluster_results.extend(ray.get(engine.chat.remote(messages)))
-        self.assertEqual(
-            len(cluster_results), len(self.engines) * self.config.explorer.repeat_times
-        )
-        for i in range(len(self.engines)):
-            for k in range(self.config.explorer.repeat_times):
-                self.assertIn(
-                    "Hello, world!",
-                    cluster_results[i * self.config.explorer.repeat_times + k].prompt_text,
-                )
-                self.assertIn(
-                    "You are a helpful assistant.",
-                    cluster_results[i * self.config.explorer.repeat_times + k].prompt_text,
-                )
-        logprobs = ray.get(self.engines[0].logprobs.remote(cluster_results[0].tokens))
-        self.assertEqual(logprobs.shape[0], cluster_results[0][0].tokens.shape[0] - 1)
-
-
-@unittest.skip("Skip VLLM test")
-class TestAsyncvLLMModel(unittest.TestCase):
-    def setUp(self):
-        ray.init(ignore_reinit_error=True)
-        self.config = load_config(config_dir)
-        self.config.explorer.engine_type = "vllm_async"
-        self.engines = create_rollout_models(self.config)
-        self.assertEqual(len(self.engines), self.config.explorer.engine_num)
-
-    def test_generate(self):
-        prompts = ["Hello, world!", "Hi, my name is", "How are you?", "What's up?"]
-        cluster_results = []
-        refs = []
-        for engine in self.engines:
-            for prompt in prompts:
-                refs.append(engine.generate_async.remote(prompt))
-        cluster_results = ray.get(refs)
-
-        self.assertEqual(
-            len(cluster_results),
-            len(self.engines) * self.config.explorer.repeat_times * len(prompts),
-        )
-
-    def test_chat_and_logprobs(self):
-        messages = [
-            [
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": "Hello, world!"},
-            ],
-            [
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": "Please tell me about yourself."},
-            ],
-            [
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": "Please tell me a joke."},
-            ],
-        ]
-        cluster_results = []
-        refs = []
-        for engine in self.engines:
-            for message in messages:
-                refs.append(engine.chat_async.remote(message))
-        cluster_results = ray.get(refs)
-
-        self.assertEqual(
-            len(cluster_results),
-            len(self.engines) * self.config.explorer.repeat_times * len(messages),
-        )
-        logprobs_refs = []
-        for i, messages in enumerate(messages):
-            token_ids = cluster_results[i][0].tokens.tolist()
-            logprobs_refs.append(self.engines[0].logprobs_async.remote(token_ids))
-        logprobs = ray.get(logprobs_refs)
-        for i, messages in enumerate(messages):
-            self.assertEqual(logprobs[i].shape[0], cluster_results[i][0].tokens.shape[0])
-
-
-class TestModelWrapper:
+class BaseTestModelWrapper:
     def test_generate(self):
         prompts = ["Hello, world!", "Hello, my name is"]
         results = self.model_wrapper.generate(prompts)
         self.assertEqual(len(results), len(prompts) * self.config.explorer.repeat_times)
-
-    def test_chat_and_logprobs(self):
         messages = [
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": "What's the weather like today?"},
@@ -235,11 +126,11 @@ class TestModelWrapper:
         self.assertTrue(torch.equal(result_dict["input_ids"][0], exp.tokens))
 
 
-# @unittest.skip("Skip VLLM test")
-class TestModelWrapperSync(TestModelWrapper, unittest.TestCase):
+class TestModelWrapperSync(BaseTestModelWrapper, unittest.TestCase):
     def setUp(self):
         ray.init(ignore_reinit_error=True)
         self.config = load_config(config_dir)
+        self.config.model.model_path = get_model_path()
         self.config.explorer.engine_type = "vllm"
         self.config.explorer.engine_num = 1
         self.config.explorer.chat_template = CHAT_TEMPLATE
@@ -247,11 +138,11 @@ class TestModelWrapperSync(TestModelWrapper, unittest.TestCase):
         self.model_wrapper = ModelWrapper(self.engines[0], model_type="vllm")
 
 
-# @unittest.skip("Skip VLLM test")
-class TestModelWrapperAsync(TestModelWrapper, unittest.TestCase):
+class TestModelWrapperAsync(BaseTestModelWrapper, unittest.TestCase):
     def setUp(self):
         ray.init(ignore_reinit_error=True)
         self.config = load_config(config_dir)
+        self.config.model.model_path = get_model_path()
         self.config.explorer.engine_type = "vllm_async"
         self.config.explorer.engine_num = 1
         self.config.explorer.chat_template = CHAT_TEMPLATE
@@ -274,7 +165,7 @@ class TestTokenizer(unittest.TestCase):
                 "content": "You're welcome! If you have any other questions, feel free to ask.",
             },
         ]
-        tokenizer = AutoTokenizer.from_pretrained("/nas/checkpoints/Qwen25-1.5B-instruct")
+        tokenizer = AutoTokenizer.from_pretrained(get_model_path())
         token_ids, action_mask = tokenize_and_mask_messages_default(
             tokenizer=tokenizer,
             messages=messages,
