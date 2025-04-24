@@ -133,9 +133,9 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>HumanLLMs
 <h2>Step 2: Setup Configuration and Run Experiment<a class="headerlink" href="#step-2-setup-configuration-and-run-experiment" title="Link to this heading"></a></h2>
 <section id="configuration">
 <h3>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h3>
-<p>We use the configurations in <code class="docutils literal notranslate"><span class="pre">scripts/config/dpo.yaml</span></code>and <code class="docutils literal notranslate"><span class="pre">scripts/config/train_dpo.yaml</span></code> for this experiment. Some important setups are listed in the following:</p>
+<p>We use the configurations in <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/dpo_humanlike/dpo.yaml"><code class="docutils literal notranslate"><span class="pre">dpo.yaml</span></code></a> and <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/dpo_humanlike/train_dpo.yaml"><code class="docutils literal notranslate"><span class="pre">train_dpo.yaml</span></code></a> for this experiment. Some important setups are listed in the following:</p>
 <p>We run the experiment in a train mode, as there is no Explorer. To enable this mode, we config <code class="docutils literal notranslate"><span class="pre">mode</span></code> to <code class="docutils literal notranslate"><span class="pre">train</span></code> and set <code class="docutils literal notranslate"><span class="pre">sync_method</span></code> to <code class="docutils literal notranslate"><span class="pre">offline</span></code>. The value of <code class="docutils literal notranslate"><span class="pre">sync_iteration_interval</span></code> can be set as same of the value of <code class="docutils literal notranslate"><span class="pre">save_freq</span></code>.</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># scripts/config/dpo.yaml</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># In dpo.yaml</span>
 <span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">train</span>
 <span class="nt">synchronizer</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">sync_method</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;offline&#39;</span>
@@ -152,7 +152,7 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>HumanLLMs
 <span class="nt">trainer</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">algorithm_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dpo</span>
 
-<span class="c1"># scripts/config/train_dpo.yaml</span>
+<span class="c1"># In train_dpo.yaml</span>
 <span class="nt">actor_rollout_ref</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">actor</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">alg_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dpo</span>
@@ -164,7 +164,7 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>HumanLLMs
 <section id="run-the-experiment">
 <h3>Run the Experiment<a class="headerlink" href="#run-the-experiment" title="Link to this heading"></a></h3>
 <p>Run RFT process with the following command:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>scripts/config/dpo.yaml
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>examples/dpo_humanlike/dpo.yaml
 </pre></div>
 </div>
 </section>

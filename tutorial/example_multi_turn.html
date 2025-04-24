@@ -136,13 +136,13 @@ python<span class="w"> </span>scripts/data_prepare/get_webshop_data.py
 </section>
 <section id="step-2-config-preparation-and-run-the-experiment">
 <h2>Step 2: Config preparation and run the experiment<a class="headerlink" href="#step-2-config-preparation-and-run-the-experiment" title="Link to this heading"></a></h2>
-<p>You can refer to <code class="docutils literal notranslate"><span class="pre">example_reasoning_basic</span></code> to setup the config and others. The default config files are <code class="docutils literal notranslate"><span class="pre">scripts/config/alfworld.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">scripts/config/webshop.yaml</span></code>, respectively.
+<p>You can refer to <code class="docutils literal notranslate"><span class="pre">example_reasoning_basic</span></code> to setup the config and others. The default config files are <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_alfworld/alfworld.yaml"><code class="docutils literal notranslate"><span class="pre">alfworld.yaml</span></code></a> and <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_webshop/webshop.yaml"><code class="docutils literal notranslate"><span class="pre">webshop.yaml</span></code></a>, respectively.
 You may revise the configurations properly and run the experiment!</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># For ALFworld env</span>
-trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>scripts/config/alfworld.yaml
+trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>examples/grpo_alfworld/alfworld.yaml
 
 <span class="c1"># For WebShop env</span>
-trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>scripts/config/webshop.yaml
+trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>examples/grpo_webshop/webshop.yaml
 </pre></div>
 </div>
 </section>

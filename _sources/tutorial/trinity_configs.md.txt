@@ -1,6 +1,6 @@
 # Trinity-RFT Configuration
 
-The following is the main config file for Trinity-RFT. Take `scripts/config/countdown.yaml` as an example.
+The following is the main config file for Trinity-RFT. Take `countdown.yaml` as an example.
 
 
 ## Monitor
@@ -165,7 +165,7 @@ synchronizer:
 trainer:
   trainer_type: 'verl'
   algorithm_type: ppo
-  trainer_config_path: 'scripts/config/train_countdown.yaml'
+  trainer_config_path: 'examples/ppo_countdown/train_countdown.yaml'
   sft_warmup_iteration: 0
   eval_interval: 1000
 ```

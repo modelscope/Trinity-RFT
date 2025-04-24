@@ -201,18 +201,15 @@ modelscope<span class="w"> </span>download<span class="w"> </span>--dataset<span
 </section>
 <section id="step-3-configurations">
 <h3>Step 3: configurations<a class="headerlink" href="#step-3-configurations" title="Link to this heading"></a></h3>
-<p>You may customize the configurations in <code class="docutils literal notranslate"><span class="pre">scripts/config/{config_name}.yaml</span></code>and <code class="docutils literal notranslate"><span class="pre">scripts/config/{train_config_name}.yaml</span></code>. For example, the model and dataset are specified as:</p>
+<p>You may customize the configurations in <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/"><code class="docutils literal notranslate"><span class="pre">examples</span></code></a>. For example, the model and dataset are specified as:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">model_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">$MODEL_PATH/{model_name}</span>
 
 <span class="nt">data</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">dataset_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">$DATASET_PATH/{dataset_name}</span>
-
-<span class="nt">trainer</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">trainer_config_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">scripts/config/{train_config_name}.yaml</span>
 </pre></div>
 </div>
-<p>You may use the default configurations located in the directory <code class="docutils literal notranslate"><span class="pre">scripts/config</span></code>. Please refer to <code class="docutils literal notranslate"><span class="pre">examples</span></code> for more details.</p>
+<p>Please refer to <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/"><code class="docutils literal notranslate"><span class="pre">examples</span></code></a> for more details.</p>
 </section>
 <section id="step-4-run-the-rft-process">
 <h3>Step 4: run the RFT process<a class="headerlink" href="#step-4-run-the-rft-process" title="Link to this heading"></a></h3>
@@ -234,10 +231,10 @@ wandb<span class="w"> </span>login
 </pre></div>
 </div>
 <p>For example, below is the command for fine-tuning Qwen-2.5-1B-Instruct on GSM8k dataset using GRPO algorithm:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>scripts/config/gsm8k.yaml
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>examples/grpo_gsm8k/gsm8k.yaml
 </pre></div>
 </div>
-<p>More example config files can be found in <code class="docutils literal notranslate"><span class="pre">scripts/config</span></code>.</p>
+<p>More example config files can be found in <code class="docutils literal notranslate"><span class="pre">examples</span></code>.</p>
 <p>For more detailed examples about how to use Trinity-RFT, please refer to the following documents:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="tutorial/example_reasoning_basic.html"><span class="std std-doc">A quick example with GSM8k</span></a>;</p></li>
