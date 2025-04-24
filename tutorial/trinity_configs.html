@@ -406,7 +406,6 @@
 <span class="w">  </span><span class="nt">ppo_mini_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${actor_rollout_ref.actor.ppo_mini_batch_size}</span>
 <span class="w">  </span><span class="c1"># ppo_micro_batch_size: 8 # will be deprecated, use ppo_micro_batch_size_per_gpu</span>
 <span class="w">  </span><span class="nt">ppo_micro_batch_size_per_gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
-<span class="w">  </span><span class="nt">forward_micro_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${critic.ppo_micro_batch_size}</span>
 <span class="w">  </span><span class="nt">forward_micro_batch_size_per_gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${critic.ppo_micro_batch_size_per_gpu}</span>
 <span class="w">  </span><span class="nt">use_dynamic_bsz</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${actor_rollout_ref.actor.use_dynamic_bsz}</span>
 <span class="w">  </span><span class="nt">ppo_max_token_len_per_gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32768</span><span class="w"> </span><span class="c1"># (${actor_rollout_ref.actor.ppo_max_token_len_per_gpu}) * 2</span>
