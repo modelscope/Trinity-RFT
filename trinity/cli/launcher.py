@@ -123,7 +123,9 @@ def run(config_path: str):
     config.check_and_update()
     # try to activate data module
     data_config = config.data
-    if data_config.data_workflow_url and (data_config.dj_config_path or data_config.dj_process_desc):
+    if data_config.data_workflow_url and (
+        data_config.dj_config_path or data_config.dj_process_desc
+    ):
         activate_data_module(data_config.data_workflow_url, config_path)
     ray.init()
     if config.mode == "explore":

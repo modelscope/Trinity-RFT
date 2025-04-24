@@ -1,6 +1,6 @@
 import traceback
-import fire
 
+import fire
 from flask import Flask, jsonify, request
 
 app = Flask(__name__)
@@ -22,6 +22,7 @@ def trinity_training():
         msg = traceback.format_exc()
         ret = 1
     return jsonify({"return_code": ret, "message": msg})
+
 
 def main(port=5006):
     app.run(port=port, debug=True)

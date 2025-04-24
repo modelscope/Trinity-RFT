@@ -1,5 +1,4 @@
 import fire
-
 from flask import Flask, jsonify, request
 
 app = Flask(__name__)
@@ -18,6 +17,7 @@ def data_workflow():
     iterator = DataActiveIterator(config)
     ret, msg = iterator.run()
     return jsonify({"return_code": ret, "message": msg})
+
 
 def main(port=5005):
     app.run(port=port, debug=True)

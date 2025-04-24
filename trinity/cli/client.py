@@ -1,5 +1,6 @@
 import requests
 
+
 def send_get_request(url: str, params: dict):
     """
     Send GET request with parameters.
