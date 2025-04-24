@@ -1,9 +1,10 @@
+import fire
+
 from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
 APP_NAME = "data_workflow"
-PORT = 5005
 
 
 @app.route(f"/{APP_NAME}", methods=["GET"])
@@ -18,6 +19,9 @@ def data_workflow():
     ret, msg = iterator.run()
     return jsonify({"return_code": ret, "message": msg})
 
+def main(port=5005):
+    app.run(port=port, debug=True)
+
 
 if __name__ == "__main__":
-    app.run(port=PORT, debug=True)
+    fire.Fire(main)

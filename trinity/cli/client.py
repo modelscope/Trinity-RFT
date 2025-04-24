@@ -1,9 +1,5 @@
 import requests
 
-LOCAL_DATA_WORKFLOW_SERVER_URL = "http://127.0.0.1:5005/data_workflow"
-LOCAL_TRINITY_TRAINING_SERVER_URL = "http://127.0.0.1:5006/trinity_training"
-
-
 def send_get_request(url: str, params: dict):
     """
     Send GET request with parameters.
@@ -33,6 +29,11 @@ def request(url, **kwargs):
 
 
 if __name__ == "__main__":
+    # --- only for local testing
+    LOCAL_DATA_WORKFLOW_SERVER_URL = "http://127.0.0.1:5005/data_workflow"
+    LOCAL_TRINITY_TRAINING_SERVER_URL = "http://127.0.0.1:5006/trinity_rft"
+    # --- only for local testing
+
     res = request(
         url=LOCAL_DATA_WORKFLOW_SERVER_URL,
         configPath="examples/grpo_gsm8k/gsm8k.yaml",

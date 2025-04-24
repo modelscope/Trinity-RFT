@@ -41,7 +41,8 @@ class FormatConfig:
 class DataConfig:
     """Data config"""
 
-    # TODO: add more
+    data_workflow_url: Optional[str] = None
+
     dataset_path: str = ""
     train_split: str = "train"
     eval_split: Optional[str] = None  # TODO: check data format

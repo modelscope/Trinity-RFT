@@ -33,6 +33,7 @@ dependencies = [
     "ninja",
     "fire",
     "flask",
+    "requests",
 ]
 
 [project.scripts]

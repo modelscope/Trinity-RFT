@@ -104,13 +104,13 @@ def both(config: Config) -> None:
                 raise e
 
 
-def activate_data_module(config_path: str):
+def activate_data_module(data_workflow_url: str, config_path: str):
     """Check whether to activate data module and preprocess datasets."""
-    from trinity.cli.client import LOCAL_DATA_WORKFLOW_SERVER_URL, request
+    from trinity.cli.client import request
 
     logger.info("Activating data module...")
     res = request(
-        url=LOCAL_DATA_WORKFLOW_SERVER_URL,
+        url=data_workflow_url,
         configPath=config_path,
     )
     if res["return_code"] != 0:
@@ -119,13 +119,12 @@ def activate_data_module(config_path: str):
 
 
 def run(config_path: str):
-    # TODO: support parse all args from command line
     config = load_config(config_path)
     config.check_and_update()
     # try to activate data module
     data_config = config.data
-    if data_config.dj_config_path or data_config.dj_process_desc:
-        activate_data_module(config_path)
+    if data_config.data_workflow_url and (data_config.dj_config_path or data_config.dj_process_desc):
+        activate_data_module(data_config.data_workflow_url, config_path)
     ray.init()
     if config.mode == "explore":
         explore(config)
