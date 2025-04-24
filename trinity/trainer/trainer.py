@@ -105,6 +105,10 @@ class Trainer:
         if self.config.synchronizer.sync_method == "online":
             self.engine.sync_weight()
 
+    def log_finalize(self, step: int) -> None:
+        """Commit the logging results to wandb"""
+        self.engine.logger.log({"dummy_log_trainer": step}, step=step, commit=True)
+
 
 class TrainEngineWrapper(ABC):
     """A wrapper class to wrap various training engines."""

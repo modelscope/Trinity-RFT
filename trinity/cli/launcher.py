@@ -103,6 +103,10 @@ def both(config: Config) -> None:
                 logger.error("Evaluation failed.")
                 raise e
 
+        # a trick to update wandb timely
+        ray.get(explorer.log_finalize.remote(step=train_iter_num))
+        ray.get(trainer.log_finalize.remote(step=train_iter_num))
+
 
 def activate_data_module(config_path: str):
     """Check whether to activate data module and preprocess datasets."""

@@ -247,3 +247,7 @@ class Explorer:
             self._offline_weights_update()
         else:  # online weights update
             self._online_weights_update()
+
+    def log_finalize(self, step: int) -> None:
+        """Commit the logging results to wandb"""
+        self.monitor.log({"dummy_log_explorer": step}, step=step, commit=True)

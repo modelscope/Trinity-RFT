@@ -52,9 +52,9 @@ class Monitor:
                 metrics[key] = val
         return metrics
 
-    def log(self, data: dict, step: int) -> None:
+    def log(self, data: dict, step: int, commit: bool = False) -> None:
         """Log metrics."""
-        self.logger.log(data, step=step)
+        self.logger.log(data, step=step, commit=commit)
         self.console_logger.info(f"Step {step}: {data}")
 
     def __del__(self) -> None:
