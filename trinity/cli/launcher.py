@@ -103,8 +103,7 @@ def both(config: Config) -> None:
                 logger.error("Evaluation failed.")
                 raise e
 
-        # a trick to update wandb timely
-        ray.get(explorer.log_finalize.remote(step=train_iter_num))
+        ray.get(explorer.log_finalize.remote(step=explore_iter_num))
         ray.get(trainer.log_finalize.remote(step=train_iter_num))
 
 
