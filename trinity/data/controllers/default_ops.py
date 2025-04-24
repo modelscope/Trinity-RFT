@@ -56,6 +56,7 @@ DEFAULT_OP_ARGS = {
     },
     "llm_quality_score_filter": {
         "api_or_hf_model": "qwen2.5-72b-instruct",
+        "min_score": 0.0,
         "enable_vllm": False,
     },
     "perplexity_filter": {
@@ -66,6 +67,7 @@ DEFAULT_OP_ARGS = {
     },
     "llm_difficulty_score_filter": {
         "api_or_hf_model": "qwen2.5-72b-instruct",
+        "min_score": 0.0,
         "enable_vllm": False,
     },
     # human annotators
