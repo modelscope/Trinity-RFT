@@ -68,7 +68,7 @@ class Checkpoint:
 class Actor:
     strategy: str = "fsdp"
     ppo_mini_batch_size: int = 256
-    ppo_micro_batch_size: Any = None
+    ppo_micro_batch_size: Optional[int] = None
     ppo_micro_batch_size_per_gpu: int = 1
     use_dynamic_bsz: bool = False
     ppo_max_token_len_per_gpu: int = (
@@ -95,7 +95,7 @@ class Actor:
 @dataclass
 class Ref:
     fsdp_config: FSDPConfig = field(default_factory=FSDPConfig)
-    log_prob_micro_batch_size: Any = None
+    log_prob_micro_batch_size: Optional[int] = None
     log_prob_micro_batch_size_per_gpu: int = 1
     log_prob_use_dynamic_bsz: bool = False
     log_prob_max_token_len_per_gpu: int = 0
@@ -121,7 +121,7 @@ class Rollout:
     max_num_batched_tokens: int = 8192
     max_model_len: Optional[int] = None
     max_num_seqs: int = 1024
-    log_prob_micro_batch_size: Any = None
+    log_prob_micro_batch_size: Optional[int] = None
     log_prob_micro_batch_size_per_gpu: int = 1
     log_prob_use_dynamic_bsz: bool = False
     log_prob_max_token_len_per_gpu: int = 0
@@ -158,7 +158,7 @@ class Critic:
     optim: Optim = field(default_factory=Optim)
     model: CriticModel = field(default_factory=CriticModel)
     ppo_mini_batch_size: int = 0
-    ppo_micro_batch_size: Any = None
+    ppo_micro_batch_size: Optional[int] = None
     ppo_micro_batch_size_per_gpu: int = 1
     forward_micro_batch_size: Optional[int] = None
     forward_micro_batch_size_per_gpu: Optional[int] = None
