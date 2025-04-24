@@ -29,10 +29,16 @@ def explore(config: Config) -> None:
 def train(config: Config) -> None:
     """Run trainer."""
 
-    algo_type = config.trainer.algorithm_type
     trainer = Trainer.remote(config)
+    ray.get(trainer.prepare.remote())
+
+    if config.trainer.sft_warmup_iteration > 0:
+        for step in range(config.trainer.sft_warmup_iteration):
+            ray.get(trainer.train_step.remote(AlgorithmType.SFT))
+            logger.info(f"SFT warmup step {step} finished.")
+
+    algo_type = config.trainer.algorithm_type
     try:
-        ray.get(trainer.prepare.remote())
         ray.get(trainer.train.remote(algo_type))
         logger.info("Train finished.")
     except Exception as e:

@@ -38,12 +38,12 @@ Note that the dataset has the keys `prompt`, `chosen` and `rejected`. If not, pa
 
 ### Configuration
 
-We use the configurations in `scripts/config/dpo.yaml`and `scripts/config/train_dpo.yaml` for this experiment. Some important setups are listed in the following:
+We use the configurations in [`dpo.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/dpo_humanlike/dpo.yaml) and [`train_dpo.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/dpo_humanlike/train_dpo.yaml) for this experiment. Some important setups are listed in the following:
 
 We run the experiment in a train mode, as there is no Explorer. To enable this mode, we config `mode` to `train` and set `sync_method` to `offline`. The value of `sync_iteration_interval` can be set as same of the value of `save_freq`.
 
 ```yaml
-# scripts/config/dpo.yaml
+# In dpo.yaml
 mode: train
 synchronizer:
   sync_method: 'offline'
@@ -60,7 +60,7 @@ buffer:
 trainer:
   algorithm_type: dpo
 
-# scripts/config/train_dpo.yaml
+# In train_dpo.yaml
 actor_rollout_ref:
   actor:
     alg_type: dpo
@@ -73,5 +73,5 @@ actor_rollout_ref:
 Run RFT process with the following command:
 
 ```shell
-trinity run --config scripts/config/dpo.yaml
+trinity run --config examples/dpo_humanlike/dpo.yaml
 ```

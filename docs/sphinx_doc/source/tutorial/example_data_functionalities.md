@@ -133,12 +133,13 @@ And you can set the `clean_strategy` to 'iterative' to get a better dataset.
 
 
 
-All config items in the `data` section can be found [here](trinity_configs.md). A prepared config file for this example of GSM-8K can be found in [the config file of gsm8k](../../../../scripts/config/gsm8k.yaml).
+All config items in the `data` section can be found [here](trinity_configs.md). A prepared config file for this example of GSM-8K can be found in [the config file of gsm8k](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k/gsm8k.yaml).
 
 
 
-> [!NOTE]
-> Only when one of `dj_process_desc` and `dj_config_path` is provided, the data module and the data active iterator will be activated. Otherwise, this part will be skipped and it will enter into the exploring stage directly.
+```{note}
+Only when one of `dj_process_desc` and `dj_config_path` is provided, the data module and the data active iterator will be activated. Otherwise, this part will be skipped and it will enter into the exploring stage directly.
+```
 
 ### Exploring & Training
 After preparing the config files of Trinity-RFT, you can start your ray cluster and run the RFT process including the data active iterator part with the following commands:

@@ -36,15 +36,15 @@ The task is described as an environment instead of a single prompt.
 
 ## Step 2: Config preparation and run the experiment
 
-You can refer to `example_reasoning_basic` to setup the config and others. The default config files are `scripts/config/alfworld.yaml` and `scripts/config/webshop.yaml`, respectively.
+You can refer to `example_reasoning_basic` to setup the config and others. The default config files are [`alfworld.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_alfworld/alfworld.yaml) and [`webshop.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_webshop/webshop.yaml), respectively.
 You may revise the configurations properly and run the experiment!
 
 ```bash
 # For ALFworld env
-trinity run --config scripts/config/alfworld.yaml
+trinity run --config examples/grpo_alfworld/alfworld.yaml
 
 # For WebShop env
-trinity run --config scripts/config/webshop.yaml
+trinity run --config examples/grpo_webshop/webshop.yaml
 ```
 
 ## Advance: How to build your own environment

@@ -511,7 +511,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
 
     def set_mode(self, algorithm_type: AlgorithmType = AlgorithmType.PPO) -> None:
         self.actor_rollout_wg.set_mode(algorithm_type)
-        if algorithm_type.is_rft() and self.algorithm_type.is_sft():
+        if self.algorithm_type.is_sft() and (not algorithm_type.is_sft()):
             self.sft_to_rft()
         self.algorithm_type = algorithm_type
 

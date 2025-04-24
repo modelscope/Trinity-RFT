@@ -1,17 +1,17 @@
 data:
   total_epoch: 20
   batch_size: 4
-  dataset_path: 'scripts/data_prepare/alfworld_data'
-  default_workflow_type: 'alfworld_workflow'
+  dataset_path: 'scripts/data_prepare/webshop_data'
+  default_workflow_type: 'webshop_workflow'
   train_split: 'train'
   eval_split: ''
   format_config:
-    prompt_key: 'game_file'
+    prompt_key: 'task_id'
 model:
   model_path: '/PATH/TO/MODEL/CHECKPOINT/'
   max_prompt_tokens: 4096
   max_response_tokens: 16384
-  checkpoint_path: 'checkpoints/ALFWORLD_RFT'
+  checkpoint_path: 'checkpoints/WEBSHOP_RFT'
 cluster:
   node_num: 1
   gpu_per_node: 8
@@ -19,14 +19,14 @@ buffer:
   max_retry_times: 3
   max_retry_interval: 1
   train_dataset:
-    name: alfworld_buffer
+    name: webshop_buffer
     storage_type: queue
     algorithm_type: ppo
-    path: 'sqlite:///alfworld.db'
+    path: 'sqlite:///webshop.db'
 explorer:
   engine_type: vllm_async
   engine_num: 2
-  runner_num: 32
+  runner_num: 8
   tensor_parallel_size: 2
   enable_prefix_caching: false
   enforce_eager: true
@@ -49,8 +49,8 @@ synchronizer:
 trainer:
   trainer_type: 'verl'
   algorithm_type: ppo
-  trainer_config_path: 'scripts/config/train_alfworld.yaml'
+  trainer_config_path: 'examples/grpo_webshop/train_webshop.yaml'
 monitor:
   cache_root_dir: ""
-  project: "ALFWORLD"
-  name: "ALFWORLD_RFT"
+  project: "WEBSHOP"
+  name: "WEBSHOP_RFT"

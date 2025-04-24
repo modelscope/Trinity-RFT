@@ -1,17 +1,17 @@
 data:
   total_epoch: 20
   batch_size: 4
-  dataset_path: 'scripts/data_prepare/webshop_data'
-  default_workflow_type: 'webshop_workflow'
+  dataset_path: 'scripts/data_prepare/sciworld_data'
+  default_workflow_type: 'sciworld_workflow'
   train_split: 'train'
   eval_split: ''
   format_config:
-    prompt_key: 'task_id'
+    prompt_key: 'game_file'
 model:
   model_path: '/PATH/TO/MODEL/CHECKPOINT/'
   max_prompt_tokens: 4096
   max_response_tokens: 16384
-  checkpoint_path: 'checkpoints/WEBSHOP_RFT'
+  checkpoint_path: 'checkpoints/sciworld_RFT'
 cluster:
   node_num: 1
   gpu_per_node: 8
@@ -19,14 +19,14 @@ buffer:
   max_retry_times: 3
   max_retry_interval: 1
   train_dataset:
-    name: webshop_buffer
+    name: sciworld_buffer
     storage_type: queue
     algorithm_type: ppo
-    path: 'sqlite:///webshop.db'
+    path: 'sqlite:///sciworld.db'
 explorer:
   engine_type: vllm_async
   engine_num: 2
-  runner_num: 8
+  runner_num: 32
   tensor_parallel_size: 2
   enable_prefix_caching: false
   enforce_eager: true
@@ -49,8 +49,8 @@ synchronizer:
 trainer:
   trainer_type: 'verl'
   algorithm_type: ppo
-  trainer_config_path: 'scripts/config/train_webshop.yaml'
+  trainer_config_path: 'examples/grpo_sciworld/train_sciworld.yaml'
 monitor:
   cache_root_dir: ""
-  project: "WEBSHOP"
-  name: "WEBSHOP_RFT"
+  project: "sciworld"
+  name: "sciworld_RFT"

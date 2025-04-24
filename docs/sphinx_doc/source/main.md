@@ -180,7 +180,7 @@ For more details about dataset downloading, please refer to [Huggingface](https:
 ### Step 3: configurations
 
 
-You may customize the configurations in `scripts/config/{config_name}.yaml`and `scripts/config/{train_config_name}.yaml`. For example, the model and dataset are specified as:
+You may customize the configurations in [`examples`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/). For example, the model and dataset are specified as:
 
 ```yaml
 model:
@@ -188,12 +188,9 @@ model:
 
 data:
   dataset_path: $DATASET_PATH/{dataset_name}
-
-trainer:
-  trainer_config_path: scripts/config/{train_config_name}.yaml
 ```
 
-You may use the default configurations located in the directory `scripts/config`. Please refer to `examples` for more details.
+Please refer to [`examples`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/) for more details.
 
 
 
@@ -232,12 +229,12 @@ trinity run --config <config_path>
 For example, below is the command for fine-tuning Qwen-2.5-1B-Instruct on GSM8k dataset using GRPO algorithm:
 
 ```shell
-trinity run --config scripts/config/gsm8k.yaml
+trinity run --config examples/grpo_gsm8k/gsm8k.yaml
 ```
 
 
 
-More example config files can be found in `scripts/config`.
+More example config files can be found in `examples`.
 
 
 
