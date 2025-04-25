@@ -36,15 +36,19 @@ class ConfigManager:
             "_init_config_manager": True,
             "project": "Trinity-RFT",
             "exp_name": "qwen2.5-1.5B",
+            # Model Configs
             "model_path": "",
             "critic_model_path": "",
             "checkpoint_path": "",
             "node_num": 1,
             "gpu_per_node": 8,
+            "total_gpu_num": 8,
+            "trainer_gpu_num": 6,
             "max_prompt_tokens": 1024,
             "max_response_tokens": 1024,
+            # Data and Buffer Configs
             "total_epoch": 20,
-            "batch_size_per_gpu": 1,
+            "task_num_per_batch": 6,
             "dataset_path": "",
             "train_split": "train",
             "eval_split": "",
@@ -61,6 +65,7 @@ class ConfigManager:
             "sft_warmup_eval_split": "",
             "sft_warmup_prompt_key": "question",
             "sft_warmup_response_key": "answer",
+            # Explorer and Sync Configs
             "engine_type": "vllm_async",
             "engine_num": 2,
             "tensor_parallel_size": 1,
@@ -79,11 +84,13 @@ class ConfigManager:
             "logprobs": None,
             "enable_prefix_caching": False,
             "enforce_eager": True,
+            # Trainer Configs
             "trainer_type": "verl",
             "algorithm_type": AlgorithmType.PPO.value,
             "sft_warmup_iteration": 0,
             "eval_interval": 1000,
             "trainer_config_path": "",
+            # veRL Trainer Configs
             "training_args": [
                 "balance_batch",
                 "gradient_checkpointing",
@@ -168,10 +175,29 @@ class ConfigManager:
             st.warning("Please input checkpoint path")
 
     def _set_node_num(self):
-        st.number_input("Node Num", key="node_num", min_value=1)
+        st.number_input("Node Num", key="node_num", min_value=1, on_change=self._set_total_gpu_num)
 
     def _set_gpu_per_node(self):
-        st.number_input("GPU Per Node", key="gpu_per_node", min_value=1, max_value=8)
+        st.number_input(
+            "GPU Per Node",
+            key="gpu_per_node",
+            min_value=1,
+            max_value=8,
+            on_change=self._set_total_gpu_num,
+        )
+
+    def _set_total_gpu_num(self):
+        st.session_state["total_gpu_num"] = (
+            st.session_state["gpu_per_node"] * st.session_state["node_num"]
+        )
+        self._set_trainer_gpu_num()
+
+    def _set_trainer_gpu_num(self):
+        st.session_state["trainer_gpu_num"] = (
+            st.session_state["total_gpu_num"]
+            - st.session_state["engine_num"] * st.session_state["tensor_parallel_size"]
+        )
+        print(f'{st.session_state["trainer_gpu_num"]=}')
 
     def _set_max_prompt_tokens(self):
         st.number_input("Max Prompt Tokens", key="max_prompt_tokens", min_value=1)
@@ -182,8 +208,26 @@ class ConfigManager:
     def _set_total_epoch(self):
         st.number_input("Total Epoch", key="total_epoch", min_value=1)
 
-    def _set_batch_size_per_gpu(self):  # TODO: rename
-        st.number_input("Batch Size Per GPU", key="batch_size_per_gpu", min_value=1)
+    @property
+    def _str_for_task_num_per_batch(self):
+        return f"`task_num_per_batch` must be an multiple of `gpu_per_node * node_num - engine_num * tensor_parallel_size` = {st.session_state['trainer_gpu_num']}"
+
+    def _set_task_num_per_batch(self):
+        trainer_gpu_num = st.session_state["trainer_gpu_num"]
+        if st.session_state["task_num_per_batch"] < trainer_gpu_num:
+            st.session_state["task_num_per_batch"] = trainer_gpu_num
+        st.number_input(
+            "Task Num Per Batch",
+            key="task_num_per_batch",
+            min_value=trainer_gpu_num,
+            step=trainer_gpu_num,
+            help=self._str_for_task_num_per_batch,
+        )
+
+    def _check_task_num_per_batch(self):
+        if st.session_state["task_num_per_batch"] % st.session_state["trainer_gpu_num"] != 0:
+            self.unfinished_fields.add("task_num_per_batch")
+            st.warning(self._str_for_task_num_per_batch)
 
     def _set_dataset_path(self):
         st.text_input("Dataset Path", key="dataset_path")
@@ -266,25 +310,61 @@ class ConfigManager:
     def _set_engine_type(self):
         st.selectbox("Explorer Engine Type", ["vllm_async", "vllm"], key="engine_type")
 
+    @property
+    def _str_for_engine_num_and_tp_size(self):
+        return r"""```python
+assert engine_num * tensor_parallel_size < gpu_per_node * node_num
+if node_num > 1:
+    assert gpu_per_node % tensor_parallel_size == 0
+    assert engine_num * tensor_parallel_size % gpu_per_node == 0
+```"""
+
     def _set_engine_num(self):
-        if "engine_num" not in st.session_state:
-            st.session_state.engine_num = 2
-        st.session_state["engine_num"] = min(
-            st.session_state["engine_num"],
-            st.session_state["gpu_per_node"] * st.session_state["node_num"],
-        )
+        total_gpu_num = st.session_state["gpu_per_node"] * st.session_state["node_num"]
+        max_engine_num = (total_gpu_num - 1) // st.session_state["tensor_parallel_size"]
+        if st.session_state["engine_num"] > max_engine_num:
+            st.session_state["engine_num"] = max_engine_num
+            self._set_trainer_gpu_num()
         st.number_input(
-            "Engine Num",
+            "Inference Engine Num",
             key="engine_num",
             min_value=1,
-            max_value=st.session_state["gpu_per_node"] * st.session_state["node_num"],
-            help="cannot exceed `gpu_per_node` * `node_num`",
+            max_value=max_engine_num,
+            help=f"`engine_num` must meet the following constraints:\n{self._str_for_engine_num_and_tp_size}",
+            on_change=self._set_trainer_gpu_num,
         )
 
     def _set_tensor_parallel_size(self):
+        total_gpu_num = st.session_state["gpu_per_node"] * st.session_state["node_num"]
+        max_tensor_parallel_size = (total_gpu_num - 1) // st.session_state["engine_num"]
+        if st.session_state["tensor_parallel_size"] > max_tensor_parallel_size:
+            st.session_state["tensor_parallel_size"] = max_tensor_parallel_size
+            self._set_trainer_gpu_num()
         st.number_input(
-            "Tensor Parallel Size", key="tensor_parallel_size", min_value=1, max_value=8
+            "Tensor Parallel Size",
+            key="tensor_parallel_size",
+            min_value=1,
+            max_value=max_tensor_parallel_size,
+            help=f"`tensor_parallel_size` must meet the following constraints:\n{self._str_for_engine_num_and_tp_size}",
+            on_change=self._set_trainer_gpu_num,
         )
+
+    def _check_engine_num_and_tp_size(self):
+        node_num = st.session_state["node_num"]
+        gpu_per_node = st.session_state["gpu_per_node"]
+        engine_num = st.session_state["engine_num"]
+        tensor_parallel_size = st.session_state["tensor_parallel_size"]
+        if node_num > 1:
+            if gpu_per_node % tensor_parallel_size != 0:
+                self.unfinished_fields.add("tensor_parallel_size")
+                st.warning(
+                    "Please ensure that `tensor_parallel_size` is a factor of `gpu_per_node` when `node_num > 1`."
+                )
+            if engine_num * tensor_parallel_size % gpu_per_node != 0:
+                self.unfinished_fields.add("engine_num")
+                st.warning(
+                    "Please ensure that `engine_num * tensor_parallel_size` can be divided by `gpu_per_node` when `node_num > 1`."
+                )
 
     def _set_repeat_times(self):
         st.number_input("Repeat Times", key="repeat_times", min_value=1)
@@ -663,10 +743,14 @@ class ConfigManager:
 
         st.header("Important Configs")
         self._set_configs_with_st_columns(
-            ["node_num", "gpu_per_node", "max_prompt_tokens", "max_response_tokens"]
+            ["node_num", "gpu_per_node", "engine_num", "tensor_parallel_size"]
         )
+        self._check_engine_num_and_tp_size()
 
-        self._set_configs_with_st_columns(["total_epoch", "batch_size_per_gpu"])
+        self._set_configs_with_st_columns(
+            ["total_epoch", "task_num_per_batch", "max_prompt_tokens", "max_response_tokens"]
+        )
+        self._check_task_num_per_batch()
 
         self._set_dataset_args()
 
@@ -708,7 +792,8 @@ class ConfigManager:
         )
 
     def _expert_buffer_part(self):
-        self._set_configs_with_st_columns(["total_epoch", "batch_size_per_gpu"])
+        self._set_configs_with_st_columns(["total_epoch", "task_num_per_batch"])
+        self._check_task_num_per_batch()
 
         self._set_dataset_path()
 
@@ -731,6 +816,7 @@ class ConfigManager:
         self._set_configs_with_st_columns(
             ["engine_type", "engine_num", "tensor_parallel_size", "repeat_times"]
         )
+        self._check_engine_num_and_tp_size()
 
         self._set_configs_with_st_columns(["sync_method", "sync_iteration_interval"])
 
@@ -849,16 +935,17 @@ class ConfigManager:
             self._expert_trainer_part()
 
     def generate_config(self):
-        gpu_num = (
-            st.session_state["gpu_per_node"] * st.session_state["node_num"]
+        # rollout_node_num = (
+        #     st.session_state["engine_num"]
+        #     * st.session_state["tensor_parallel_size"]
+        #     // st.session_state["gpu_per_node"]
+        # )
+        trainer_nnodes = (
+            st.session_state["node_num"]
             - st.session_state["engine_num"]
-        )
-        rollout_node_num = (
-            st.session_state["engine_num"]
             * st.session_state["tensor_parallel_size"]
             // st.session_state["gpu_per_node"]
         )
-        trainer_nnodes = st.session_state["node_num"] - rollout_node_num
         if st.session_state["node_num"] == 1:
             trainer_n_gpus_per_node = (
                 st.session_state["gpu_per_node"]
@@ -892,8 +979,7 @@ class ConfigManager:
                     "prompt_key": "placeholder",
                     "max_prompt_length": st.session_state["max_prompt_tokens"],
                     "max_response_length": st.session_state["max_response_tokens"],
-                    "train_batch_size": st.session_state["batch_size_per_gpu"]
-                    * gpu_num
+                    "train_batch_size": st.session_state["task_num_per_batch"]
                     * st.session_state["repeat_times"],
                     "val_batch_size": None,
                     "return_raw_input_ids": False,
@@ -914,7 +1000,7 @@ class ConfigManager:
                     },
                     "actor": {
                         "strategy": st.session_state["training_strategy"],
-                        "ppo_mini_batch_size": st.session_state["batch_size_per_gpu"] * gpu_num,
+                        "ppo_mini_batch_size": st.session_state["task_num_per_batch"],
                         "ppo_micro_batch_size_per_gpu": st.session_state[
                             "actor_ppo_micro_batch_size_per_gpu"
                         ],
@@ -1091,7 +1177,9 @@ class ConfigManager:
 
         if len(self.unfinished_fields) > 0:
             disable_generate = True
-            help_messages = f"Please set following fields: `{'`, `'.join(self.unfinished_fields)}`"
+            help_messages = (
+                f"Please check following fields: `{'`, `'.join(self.unfinished_fields)}`"
+            )
         else:
             disable_generate = False
             help_messages = None
@@ -1103,7 +1191,7 @@ class ConfigManager:
             config = {
                 "data": {
                     "total_epochs": st.session_state["total_epoch"],
-                    "batch_size": st.session_state["batch_size_per_gpu"] * gpu_num,
+                    "batch_size": st.session_state["task_num_per_batch"],
                     "dataset_path": st.session_state["dataset_path"],
                     "default_workflow_type": st.session_state["default_workflow_type"],
                     "default_reward_fn_type": st.session_state["default_reward_fn_type"],
@@ -1129,8 +1217,7 @@ class ConfigManager:
                     "db_url": st.session_state["db_url"]
                     if st.session_state["db_url"].strip()
                     else f"sqlite:///{os.path.join(st.session_state['checkpoint_path'], '.cache', st.session_state['project'], st.session_state['exp_name'])}/data.db",
-                    "read_batch_size": st.session_state["batch_size_per_gpu"]
-                    * gpu_num
+                    "read_batch_size": st.session_state["task_num_per_batch"]
                     * st.session_state["repeat_times"],
                     "max_retry_times": st.session_state["max_retry_times"],
                     "max_retry_interval": st.session_state["max_retry_interval"],
