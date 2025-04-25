@@ -5,7 +5,7 @@ import torch
 import torch.distributed
 from vllm.worker.worker import Worker
 
-from trinity.utils.distributed import init_process_group
+from trinity.utils.distributed import init_process_group, is_ipv6_address
 from trinity.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -43,9 +43,15 @@ class VLLMWorker(Worker):
             )
             self._weight_update_rank = torch.distributed.get_rank() + rank_offset
 
+        if is_ipv6_address(master_address):
+            # using tcp://ipv6:port will lead to ValueError
+            init_method = f"tcp://[{master_address}]:{master_port}"
+        else:
+            init_method = f"tcp://{master_address}:{master_port}"
+
         self._model_update_group = init_process_group(
             backend=backend,
-            init_method=f"tcp://{master_address}:{master_port}",
+            init_method=init_method,
             world_size=world_size,
             rank=self._weight_update_rank,
             group_name=group_name,

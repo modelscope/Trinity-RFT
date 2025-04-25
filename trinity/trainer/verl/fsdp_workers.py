@@ -51,7 +51,7 @@ from verl.utils.model import compute_position_id_with_mask
 from verl.workers.sharding_manager.fsdp_ulysses import FSDPUlyssesShardingManager
 
 from trinity.common.constants import AlgorithmType
-from trinity.utils.distributed import init_process_group
+from trinity.utils.distributed import init_process_group, is_ipv6_address
 
 logger = logging.getLogger(__file__)
 logger.setLevel(os.getenv("VERL_PPO_LOGGING_LEVEL", "WARN"))
@@ -592,9 +592,15 @@ class ActorRolloutRefWorker(Worker):
                 setup_ref = explorer.setup_weight_sync_group.remote(
                     master_address, master_port, self.state_dict_meta
                 )
+                if is_ipv6_address(master_address):
+                    # using tcp://ipv6:port will lead to ValueError
+                    init_method = f"tcp://[{master_address}]:{master_port}"
+                else:
+                    init_method = f"tcp://{master_address}:{master_port}"
+
                 self._model_update_group = init_process_group(
                     backend=backend,
-                    init_method=f"tcp://{master_address}:{master_port}",
+                    init_method=init_method,
                     world_size=world_size,
                     rank=0,
                     group_name=group_name,
