@@ -6,7 +6,7 @@ This example describes DPO based on the Qwen-2.5-1.5B-Instruct model and [Human-
 
 ### Model Preparation
 
-Download the Qwen-2.5-1B-Instruct model to the local directory `$MODEL_PATH/Qwen2.5-1.5B-Instruct`:
+Download the Qwen-2.5-1.5B-Instruct model to the local directory `$MODEL_PATH/Qwen2.5-1.5B-Instruct`:
 
 ```shell
 # Using Modelscope

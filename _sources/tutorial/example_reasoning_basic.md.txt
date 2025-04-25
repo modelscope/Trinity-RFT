@@ -7,7 +7,7 @@ This example shows how to run RFT with the Qwen-2.5-1.5B-Instruct model and GSM8
 
 **Model Preparation.**
 
-Download the Qwen-2.5-1B-Instruct model to the local directory `$MODEL_PATH/Qwen2.5-1.5B-Instruct`:
+Download the Qwen-2.5-1.5B-Instruct model to the local directory `$MODEL_PATH/Qwen2.5-1.5B-Instruct`:
 
 ```bash
 # Using Modelscope

@@ -226,7 +226,7 @@ trinity run --config <config_path>
 
 
 
-For example, below is the command for fine-tuning Qwen-2.5-1B-Instruct on GSM8k dataset using GRPO algorithm:
+For example, below is the command for fine-tuning Qwen-2.5-1.5B-Instruct on GSM8k dataset using GRPO algorithm:
 
 ```shell
 trinity run --config examples/grpo_gsm8k/gsm8k.yaml

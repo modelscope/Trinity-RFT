@@ -68,7 +68,10 @@
 <li class="toctree-l3"><a class="reference internal" href="#trinity.trainer.trainer.get_trainer_wrapper"><code class="docutils literal notranslate"><span class="pre">get_trainer_wrapper()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#trinity-trainer-verl-trainer-module">trinity.trainer.verl_trainer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-trinity.trainer.verl_trainer">trinity.trainer.verl_trainer module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper"><code class="docutils literal notranslate"><span class="pre">VerlPPOTrainerWrapper</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#module-trinity.trainer">Module contents</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#trinity.trainer.Trainer"><code class="docutils literal notranslate"><span class="pre">Trainer</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#trinity.trainer.TrainEngineWrapper"><code class="docutils literal notranslate"><span class="pre">TrainEngineWrapper</span></code></a></li>
@@ -278,8 +281,8 @@ And is a reproduction code of Jiayi-Pan/TinyZero.</p>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="trinity.trainer.trainer.Trainer.log_finalize">
-<span class="sig-name descname"><span class="pre">log_finalize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.trainer.trainer.Trainer.log_finalize" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="trinity.trainer.trainer.Trainer.flush_log">
+<span class="sig-name descname"><span class="pre">flush_log</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.trainer.trainer.Trainer.flush_log" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -346,8 +349,80 @@ And is a reproduction code of Jiayi-Pan/TinyZero.</p>
 </dd></dl>
 
 </section>
-<section id="trinity-trainer-verl-trainer-module">
-<h2>trinity.trainer.verl_trainer module<a class="headerlink" href="#trinity-trainer-verl-trainer-module" title="Link to this heading"></a></h2>
+<section id="module-trinity.trainer.verl_trainer">
+<span id="trinity-trainer-verl-trainer-module"></span><h2>trinity.trainer.verl_trainer module<a class="headerlink" href="#module-trinity.trainer.verl_trainer" title="Link to this heading"></a></h2>
+<p>veRL Trainer Class</p>
+<p>Modified from verl/trainer/ppo/ray_trainer.py</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="trinity.trainer.verl_trainer.VerlPPOTrainerWrapper">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.trainer.verl_trainer.</span></span><span class="sig-name descname"><span class="pre">VerlPPOTrainerWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">global_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/trainer/verl_trainer.html#VerlPPOTrainerWrapper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="trinity.trainer.verl.html#trinity.trainer.verl.ray_trainer.RayPPOTrainer" title="trinity.trainer.verl.ray_trainer.RayPPOTrainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">RayPPOTrainer</span></code></a>, <a class="reference internal" href="trinity.manager.html#trinity.manager.TrainEngineWrapper" title="trinity.trainer.trainer.TrainEngineWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrainEngineWrapper</span></code></a></p>
+<p>A wrapper for verl.trainer.ppo.RayPPOTrainer.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">global_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/trainer/verl_trainer.html#VerlPPOTrainerWrapper.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.reset_experiences_example_table">
+<span class="sig-name descname"><span class="pre">reset_experiences_example_table</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/trainer/verl_trainer.html#VerlPPOTrainerWrapper.reset_experiences_example_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.reset_experiences_example_table" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.prepare">
+<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/trainer/verl_trainer.html#VerlPPOTrainerWrapper.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.prepare" title="Link to this definition"></a></dt>
+<dd><p>Do some preparation before training started.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.train_dpo_iteration">
+<span class="sig-name descname"><span class="pre">train_dpo_iteration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiences</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experiences" title="trinity.common.experience.Experiences"><span class="pre">Experiences</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/trainer/verl_trainer.html#VerlPPOTrainerWrapper.train_dpo_iteration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.train_dpo_iteration" title="Link to this definition"></a></dt>
+<dd><p>Train on the DPO data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.train_sft_iteration">
+<span class="sig-name descname"><span class="pre">train_sft_iteration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiences</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experiences" title="trinity.common.experience.Experiences"><span class="pre">Experiences</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/trainer/verl_trainer.html#VerlPPOTrainerWrapper.train_sft_iteration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.train_sft_iteration" title="Link to this definition"></a></dt>
+<dd><p>Train on the SFT data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.train_rft_iteration">
+<span class="sig-name descname"><span class="pre">train_rft_iteration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiences</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experiences" title="trinity.common.experience.Experiences"><span class="pre">Experiences</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/trainer/verl_trainer.html#VerlPPOTrainerWrapper.train_rft_iteration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.train_rft_iteration" title="Link to this definition"></a></dt>
+<dd><p>Train on the RFT data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.save_checkpoint">
+<span class="sig-name descname"><span class="pre">save_checkpoint</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/trainer/verl_trainer.html#VerlPPOTrainerWrapper.save_checkpoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.save_checkpoint" title="Link to this definition"></a></dt>
+<dd><p>Save the checkpoint.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.sync_weight">
+<span class="sig-name descname"><span class="pre">sync_weight</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/trainer/verl_trainer.html#VerlPPOTrainerWrapper.sync_weight"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.sync_weight" title="Link to this definition"></a></dt>
+<dd><p>Sync the model weight.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.set_mode">
+<span class="sig-name descname"><span class="pre">set_mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.constants.AlgorithmType" title="trinity.common.constants.AlgorithmType"><span class="pre">AlgorithmType</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">AlgorithmType.PPO</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/trainer/verl_trainer.html#VerlPPOTrainerWrapper.set_mode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.set_mode" title="Link to this definition"></a></dt>
+<dd><p>Set training mode.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.sft_to_rft">
+<span class="sig-name descname"><span class="pre">sft_to_rft</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/trainer/verl_trainer.html#VerlPPOTrainerWrapper.sft_to_rft"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.sft_to_rft" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.shutdown">
+<span class="sig-name descname"><span class="pre">shutdown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/trainer/verl_trainer.html#VerlPPOTrainerWrapper.shutdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.shutdown" title="Link to this definition"></a></dt>
+<dd><p>Shutdown the engine.</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 <section id="module-trinity.trainer">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-trinity.trainer" title="Link to this heading"></a></h2>
@@ -387,8 +462,8 @@ And is a reproduction code of Jiayi-Pan/TinyZero.</p>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="trinity.trainer.Trainer.log_finalize">
-<span class="sig-name descname"><span class="pre">log_finalize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.trainer.Trainer.log_finalize" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="trinity.trainer.Trainer.flush_log">
+<span class="sig-name descname"><span class="pre">flush_log</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.trainer.Trainer.flush_log" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
