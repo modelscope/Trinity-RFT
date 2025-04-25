@@ -1,0 +1,56 @@
+data:
+  total_epoch: 20
+  batch_size: 4
+  dataset_path: 'scripts/data_prepare/sciworld_data'
+  default_workflow_type: 'sciworld_workflow'
+  train_split: 'train'
+  eval_split: ''
+  format_config:
+    prompt_key: 'game_file'
+model:
+  model_path: '/PATH/TO/MODEL/CHECKPOINT/'
+  max_prompt_tokens: 4096
+  max_response_tokens: 16384
+  checkpoint_path: 'checkpoints/sciworld_RFT'
+cluster:
+  node_num: 1
+  gpu_per_node: 8
+buffer:
+  max_retry_times: 3
+  max_retry_interval: 1
+  train_dataset:
+    name: sciworld_buffer
+    storage_type: queue
+    algorithm_type: ppo
+    path: 'sqlite:///sciworld.db'
+explorer:
+  engine_type: vllm_async
+  engine_num: 2
+  runner_num: 32
+  tensor_parallel_size: 2
+  enable_prefix_caching: false
+  enforce_eager: true
+  dtype: bfloat16
+  temperature: 1.0
+  top_p: 1.0
+  top_k: -1
+  seed: 42
+  logprobs: 0
+  repeat_times: 8
+  use_ray: false
+  backend: 'nccl'
+  max_pending_requests: 32
+  max_waiting_steps: 4
+  gpu_memory_utilization: 0.7
+  enable_chunked_prefil: true
+synchronizer:
+  sync_method: 'online'
+  sync_iteration_interval: 8
+trainer:
+  trainer_type: 'verl'
+  algorithm_type: ppo
+  trainer_config_path: 'examples/grpo_sciworld/train_sciworld.yaml'
+monitor:
+  cache_root_dir: ""
+  project: "sciworld"
+  name: "sciworld_RFT"

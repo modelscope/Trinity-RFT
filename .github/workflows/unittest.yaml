@@ -1,0 +1,70 @@
+name: unittest
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  checks: write
+  pull-requests: write
+
+jobs:
+  unittest:
+    # only run on pull request
+    if: ${{ github.event.issue.pull_request && startsWith(github.event.comment.body, '/run-unittest') && github.event.comment.author_association == 'COLLABORATOR' }}
+    runs-on: self-hosted
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        path: trinity-${{ github.run_id }}
+        fetch-depth: 0
+
+    - name: Setup docker compose
+      working-directory: trinity-${{ github.run_id }}/.github/workflows/docker
+      run: |
+        docker compose up -d
+        sleep 15s
+
+    - name: Check ray status
+      working-directory: trinity-${{ github.run_id }}/.github/workflows/docker
+      run: |
+        docker compose exec trinity-node-1 ray status
+        docker compose exec trinity-node-2 ray status
+
+    - name: Run unittest
+      working-directory: trinity-${{ github.run_id }}/.github/workflows/docker
+      run: |
+        docker compose exec trinity-node-1 pytest tests --ignore=tests/data --ctrf report.json
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      with:
+        name: pytest-results
+        path: trinity-${{ github.run_id }}/report.json
+
+    - name: Publish Test Report
+      uses: ctrf-io/github-test-reporter@v1
+      with:
+        report-path: trinity-${{ github.run_id }}/report.json
+        summary: true
+        pull-request: false
+        issue: ${{ github.event.issue.number }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      if: always()
+
+    - name: Remove docker compose
+      working-directory: trinity-${{ github.run_id }}/.github/workflows/docker
+      if: always()
+      run: |
+        docker compose down --remove-orphans
+
+    - name: Cleanup workspace
+      if: always()
+      run: |
+        rm -rf trinity-${{ github.run_id }} 2>/dev/null
+      continue-on-error: true
+
+# TODO: run data tests after the dependency conflict is resolved

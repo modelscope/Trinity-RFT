@@ -11,6 +11,8 @@ config_yaml_path = os.path.join(os.path.dirname(__file__), "tmp", "template_conf
 class TestConfig(unittest.TestCase):
     def test_load_default_config(self):
         config = load_config(config_yaml_path)
+        print(config.data)
+        config.check_and_update()
         self.assertIsNotNone(config.trainer.trainer_config)
         self.assertEqual(config.trainer.trainer_config.trainer.n_gpus_per_node, 4)
         self.assertEqual(config.trainer.trainer_config.trainer.nnodes, 1)
@@ -23,13 +25,14 @@ class TestConfig(unittest.TestCase):
         )
 
     def test_all_examples_are_valid(self):
-        # ../../scripts/config
-        example_dir = os.path.join(os.path.dirname(__file__), "..", "..", "scripts", "config")
-        for filename in ["countdown", "gsm8k"]:
-            if filename.endswith(".yaml"):
-                config_path = os.path.join(example_dir, filename)
-                try:
-                    load_config(config_path)
-                except Exception as e:
-                    print(f"Error loading config {config_path}: {e}")
-                    raise e
+        example_dir = os.path.join(os.path.dirname(__file__), "..", "..", "examples")
+        for example_name in os.listdir(example_dir):
+            for filename in os.listdir(os.path.join(example_dir, example_name)):
+                if filename.endswith(".yaml") and not filename.startswith("train"):
+                    print(f"Checking config: {filename}")
+                    config_path = os.path.join(example_dir, example_name, filename)
+                    try:
+                        load_config(config_path)
+                    except Exception as e:
+                        print(f"Error loading config {config_path}: {e}")
+                        raise e

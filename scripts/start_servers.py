@@ -28,7 +28,7 @@ def main():
         env_mapping = json.load(f)
     for env_path, env_config in env_mapping.items():
         env_name = env_config["env_name"]
-        print(f"Starting server for module {env_name}...")
+        print(f"Starting server for module [{env_name}]...")
         timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
         with open(os.path.join(args.log_dir, f"{env_name}_{timestamp}_log.txt"), "w") as log_file:
             server = subprocess.Popen(
@@ -38,7 +38,7 @@ def main():
                 shell=True,
             )
             servers.append(server)
-            print(f"Server of module {env_name} is started with PID {server.pid}")
+            print(f"Server of module [{env_name}] is started with PID {server.pid}")
     for server in servers:
         server.wait()
 

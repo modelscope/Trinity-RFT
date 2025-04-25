@@ -91,3 +91,6 @@ runs/
 # docs
 trinity*.rst
 modules.rst
+
+# wandb
+wandb/

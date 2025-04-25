@@ -17,7 +17,7 @@ from trinity.common.experience import Experience
 
 
 class FileReader(BufferReader):
-    """Reader of the Queue buffer."""
+    """Reader of the File buffer."""
 
     def __init__(self, meta: DatasetConfig, config: BufferConfig) -> None:
         assert meta.storage_type == StorageType.FILE
@@ -71,6 +71,27 @@ class SFTDataReader:
                     prompt_length=len(prompt_tokens),
                 )
                 exp_list.append(experience)
+
+        elif self.prompt_type == PromptType.CHATPAIR:
+            for prompt_messages, response_messages in zip(
+                batch_data[self.prompt_key], batch_data[self.response_key]
+            ):
+                full_messages = prompt_messages + response_messages
+
+                tokens = self.tokenizer.apply_chat_template(
+                    full_messages, add_generation_prompt=False, return_tensors="pt"
+                )[0]
+
+                prompt_tokens = self.tokenizer.apply_chat_template(
+                    prompt_messages, add_generation_prompt=True, return_tensors="pt"
+                )[0]
+
+                experience = Experience(
+                    tokens=tokens,
+                    prompt_length=len(prompt_tokens),
+                )
+                exp_list.append(experience)
+
         elif self.prompt_type == PromptType.PLAINTEXT:
             # TODO: support HF format without chat template
             for prompt, response in zip(batch_data[self.prompt_key], batch_data[self.response_key]):

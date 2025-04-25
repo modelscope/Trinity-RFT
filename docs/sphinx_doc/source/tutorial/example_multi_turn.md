@@ -21,7 +21,7 @@ You may refer to their original environment to complete the setup.
 ### Data Preparation
 Our dataset follows the format in Huggingface datasets library, so we should correspondingly convert our env dataset.
 
-Just run the following command.
+Just check the data preparation scripts and run the following command.
 ```bash
 # For ALFworld env
 python scripts/data_prepare/get_alfworld_data.py
@@ -36,15 +36,15 @@ The task is described as an environment instead of a single prompt.
 
 ## Step 2: Config preparation and run the experiment
 
-You can refer to `example_reasoning_basic` to setup the config and others. The default config files are `scripts/config/alfworld.yaml` and `scripts/config/webshop.yaml`, respectively.
+You can refer to `example_reasoning_basic` to setup the config and others. The default config files are [`alfworld.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_alfworld/alfworld.yaml) and [`webshop.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_webshop/webshop.yaml), respectively.
 You may revise the configurations properly and run the experiment!
 
 ```bash
 # For ALFworld env
-trinity run --config scripts/config/alfworld.yaml
+trinity run --config examples/grpo_alfworld/alfworld.yaml
 
 # For WebShop env
-trinity run --config scripts/config/webshop.yaml
+trinity run --config examples/grpo_webshop/webshop.yaml
 ```
 
 ## Advance: How to build your own environment
@@ -53,18 +53,16 @@ We provide an easy way to allow you build your own environment pipeline by creat
 
 See the `trinity/common/workflows/envs/alfworld/alfworld_workflow.py` as an example on how to construct a multi-round workflow.
 
-You can interact with environment using the messages format, and call the `self.process_batch_messages` function to transform the messages and rewards into the `experience` we need, and send them to buffer.
+You can interact with environment using the messages format, and call the `self.process_messages_to_experience` function to transform the messages and rewards into the `experience` we need, and send them to buffer.
 
 ```python
-class AlfworldWorkflow(Workflow):
+class AlfworldWorkflow(MultiTurnWorkflow):
     """A workflow for alfworld task."""
     ...
 
     def generate_env_inference_samples(self, env, rollout_num) -> List[Experience]:
         print("Generating env inference samples...")
-        all_messages = []
-        all_rewards = []
-        all_infos = []
+        experience_list = []
         for i in range(rollout_num):
             observation, info = env.reset()
             final_reward = -0.1
@@ -80,14 +78,13 @@ class AlfworldWorkflow(Workflow):
                 if done:
                     final_reward = reward
                     break
-            all_infos.append(
-                {"env_rounds": r, "env_done": 1 if done else 0}
+            experience = self.process_messages_to_experience(
+                memory, final_reward, {"env_rounds": r, "env_done": 1 if done else 0}
             )
-            all_messages.append(memory)
-            all_rewards.append(final_reward)
+            experience_list.append(experience)
         # Close the env to save cpu memory
         env.close()
-        return self.process_batch_messages(all_messages, all_rewards, all_infos=all_infos)
+        return experience_list
 
 
     def run(self) -> List[Experience]:
@@ -102,7 +99,7 @@ class AlfworldWorkflow(Workflow):
 Also, remember to register your workflow:
 ```python
 @WORKFLOWS.register_module("alfworld_workflow")
-class AlfworldWorkflow(Workflow):
+class AlfworldWorkflow(MultiTurnWorkflow):
     """A workflow for alfworld task."""
     ...
 ```
@@ -125,5 +122,5 @@ and include them in the init files in `trinity/common/workflows/__init__.py`
 
 Then you are all set! It should be pretty simple😄, and both environments converge.
 
-<img src="../../assets/alfworld_reward_curve.png" width="300" height="150">
-<img src="../../assets/webshop_reward_curve.png" width="300" height="150">
+![]("../../assets/alfworld_reward_curve.png")
+![]("../../assets/webshop_reward_curve.png")

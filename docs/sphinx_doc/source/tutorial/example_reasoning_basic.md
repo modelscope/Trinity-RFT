@@ -7,7 +7,7 @@ This example shows how to run RFT with the Qwen-2.5-1.5B-Instruct model and GSM8
 
 **Model Preparation.**
 
-Download the Qwen-2.5-1B-Instruct model to the local directory `$MODEL_PATH/Qwen2.5-1.5B-Instruct`:
+Download the Qwen-2.5-1.5B-Instruct model to the local directory `$MODEL_PATH/Qwen2.5-1.5B-Instruct`:
 
 ```bash
 # Using Modelscope
@@ -48,15 +48,15 @@ synchronizer:
 
 ### Use GRPO or PPO Algorithm
 
-We use the configurations in `scripts/config/gsm8k.yaml`and `scripts/config/train_gsm8k.yaml` for this experiment. Some important setups are listed in the following:
+We use the configurations in [`gsm8k.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k/gsm8k.yaml) and [`train_gsm8k.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k/train_gsm8k.yaml) for this experiment. Some important setups are listed in the following:
 
 
 ```yaml
-# scripts/config/gsm8k.yaml
+# In gsm8k.yaml
 explorer:
   repeat_times: {number of rollouts for each task}
 
-# scripts/config/train_gsm8k.yaml
+# In train_gsm8k.yaml
 actor_rollout_ref:
   actor:
     use_kl_loss: True (fro GRPO) / False (for PPO)
@@ -69,7 +69,7 @@ algorithm:
 
 Run the RFT process with the following command:
 ```bash
-trinity run --config scripts/config/gsm8k.yaml
+trinity run --config examples/grpo_gsm8k/gsm8k.yaml
 ```
 
 
@@ -79,14 +79,14 @@ trinity run --config scripts/config/gsm8k.yaml
 Before RFT, we may use SFT as a warmup step. We need to set `trainer.sft_warmup_iteration > 0` and prepare the SFT data to `buffer.train_dataset.path=$DATASET_PATH/{sft_data}`.
 
 ```yaml
-# Properly set the following configs in scripts/config/gsm8k.yaml
+# Properly set the following configs in gsm8k.yaml
 buffer:
   sft_warmup_dataset:
     storage_type: file
     algorithm_type: sft
     path: <$DATASET_PATH/{sft_data}>
     kwargs:
-      prompt_type: <prompt_type> # messages/plaintext
+      prompt_type: <prompt_type> # messages/plaintext/chatpair
       prompt_key: <prompt_key>
       response_key: <response_key>
 trainer:
@@ -95,5 +95,5 @@ trainer:
 
 The following command runs SFT and RFT in sequence:
 ```bash
-trinity run --config scripts/config/gsm8k.yaml
+trinity run --config examples/grpo_gsm8k/gsm8k.yaml
 ```

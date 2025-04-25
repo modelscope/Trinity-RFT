@@ -1,6 +1,18 @@
 # Trinity-RFT Configuration
 
-The following is the main config file for Trinity-RFT. Take `scripts/config/countdown.yaml` as an example.
+The following is the main config file for Trinity-RFT. Take `countdown.yaml` as an example.
+
+
+## Monitor
+
+```yaml
+monitor:
+  project: "Trinity-RFT-countdown"
+  name: "qwen2.5-1.5B-countdown"
+```
+
+- `monitor.project`: The project name. It must be set manually.
+- `monitor.name`: The name of the experiment. It must be set manually.
 
 
 ## Monitor
@@ -165,7 +177,7 @@ synchronizer:
 trainer:
   trainer_type: 'verl'
   algorithm_type: ppo
-  trainer_config_path: 'scripts/config/train_countdown.yaml'
+  trainer_config_path: 'examples/ppo_countdown/train_countdown.yaml'
   sft_warmup_iteration: 0
   eval_interval: 1000
 ```
@@ -307,7 +319,6 @@ critic:
   ppo_mini_batch_size: ${actor_rollout_ref.actor.ppo_mini_batch_size}
   # ppo_micro_batch_size: 8 # will be deprecated, use ppo_micro_batch_size_per_gpu
   ppo_micro_batch_size_per_gpu: 8
-  forward_micro_batch_size: ${critic.ppo_micro_batch_size}
   forward_micro_batch_size_per_gpu: ${critic.ppo_micro_batch_size_per_gpu}
   use_dynamic_bsz: ${actor_rollout_ref.actor.use_dynamic_bsz}
   ppo_max_token_len_per_gpu: 32768 # (${actor_rollout_ref.actor.ppo_max_token_len_per_gpu}) * 2

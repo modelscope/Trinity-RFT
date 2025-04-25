@@ -39,7 +39,6 @@ def create_dataset_files(output_dir, train_size=1024, test_size=100):
     # create dataset_dict
     dataset_dict = {"train": train_data, "test": test_data}
 
-    # 保存为jsonl格式
     for split, data in dataset_dict.items():
         output_file = os.path.join(output_dir, f"{split}.jsonl")
         with open(output_file, "w") as f:

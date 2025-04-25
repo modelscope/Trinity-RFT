@@ -8,7 +8,6 @@ from dataclasses import dataclass
 from typing import List, Optional
 
 import ray
-from transformers import AutoTokenizer
 
 from trinity.buffer import get_buffer_writer
 from trinity.common.config import Config
@@ -38,7 +37,6 @@ class WorkflowRunner:
             self.config.buffer.train_dataset,  # type: ignore
             self.config.buffer,
         )
-        self.tokenizer = AutoTokenizer.from_pretrained(config.model.model_path)
         self.model = model
         self.model_wrapper = ModelWrapper(model, config.explorer.engine_type)
         self.logger = get_logger(__name__)

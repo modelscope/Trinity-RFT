@@ -1,0 +1,59 @@
+services:
+  trinity-node-1:
+    image: trinity-rft:latest-unittest
+    pull_policy: never
+    command: sh -c "pip install -e .[dev] && ray start --head --dashboard-host 0.0.0.0 --include-dashboard true --block"
+    environment:
+      - HF_ENDPOINT=https://hf-mirror.com
+      - RAY_ADDRESS=auto
+      - CHECKPOINT_ROOT_DIR=/mnt/checkpoints
+      - DATA_ROOT_DIR=/mnt/data
+      - MODEL_PATH=/mnt/checkpoints/Qwen2.5-1.5B-Instruct
+    working_dir: /workspace
+    networks:
+      - trinity-network
+    volumes:
+      - trinity-volume:/mnt
+      - ../../..:/workspace
+    shm_size: "64G"
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            device_ids: ['4', '5']
+            capabilities: [gpu]
+
+  trinity-node-2:
+    image: trinity-rft:latest-unittest
+    pull_policy: never
+    command: sh -c "pip install -e .[dev] && ray start --address=trinity-node-1:6379 --block"
+    environment:
+      - HF_ENDPOINT=https://hf-mirror.com
+      - CHECKPOINT_ROOT_DIR=/mnt/checkpoints
+      - DATA_ROOT_DIR=/mnt/data
+      - MODEL_PATH=/mnt/checkpoints/Qwen2.5-1.5B-Instruct
+    working_dir: /workspace
+    volumes:
+      - trinity-volume:/mnt
+      - ../../..:/workspace
+    depends_on:
+      - trinity-node-1
+    networks:
+      - trinity-network
+    shm_size: "64G"
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            device_ids: ['6', '7']
+            capabilities: [gpu]
+
+networks:
+  trinity-network:
+    driver: bridge
+
+volumes:
+  trinity-volume:
+    external: true

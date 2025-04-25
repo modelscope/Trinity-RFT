@@ -6,7 +6,7 @@ from typing import Any, Dict, Optional
 
 from omegaconf import OmegaConf
 
-from trinity.common.constants import AlgorithmType, PromptType, StorageType
+from trinity.common.constants import AlgorithmType, MonitorType, PromptType, StorageType
 from trinity.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -41,7 +41,8 @@ class FormatConfig:
 class DataConfig:
     """Data config"""
 
-    # TODO: add more
+    data_workflow_url: Optional[str] = None
+
     dataset_path: str = ""
     train_split: str = "train"
     eval_split: Optional[str] = None  # TODO: check data format
@@ -172,8 +173,7 @@ class ExplorerConfig:
 @dataclass
 class TrainerConfig:
     trainer_type: str = "verl"
-    trainer_data_type: str = "RFT"
-    trainer_config_path: str = "scripts/config/train_countdown.yaml"
+    trainer_config_path: str = ""
     eval_interval: int = 100
     enable_preview: bool = True  # enable rollout preview in wandb
     trainer_config: Any = None
@@ -184,22 +184,13 @@ class TrainerConfig:
     # warmup config
     sft_warmup_iteration: int = 0
 
-    def __post_init__(self):
-        if self.trainer_type == "verl":
-            from trinity.common.verl_config import load_config
-
-            if not os.path.isfile(self.trainer_config_path):
-                raise ValueError(f"Invalid trainer config path: {self.trainer_config_path}")
-            self.trainer_config = load_config(self.trainer_config_path)
-        else:
-            raise ValueError(f"Invalid trainer type: {self.trainer_type}")
-
 
 @dataclass
 class MonitorConfig:
     # TODO: add more
     project: str = "trinity"
     name: str = "rft"
+    monitor_type: MonitorType = MonitorType.WANDB
 
     # ! DO NOT SET
     # the root directory for cache and meta files, automatically generated
@@ -281,6 +272,15 @@ class Config:
 
     def check_and_update(self) -> None:
         """Check and update the config."""
+        if self.trainer.trainer_type == "verl":
+            from trinity.common.verl_config import load_config
+
+            if not os.path.isfile(self.trainer.trainer_config_path):
+                raise ValueError(f"Invalid trainer config path: {self.trainer.trainer_config_path}")
+            self.trainer.trainer_config = load_config(self.trainer.trainer_config_path)
+        else:
+            raise ValueError(f"Invalid trainer type: {self.trainer_type}")
+
         # check mode
         if self.mode not in ["explore", "train", "both"]:
             raise ValueError(f"Invalid mode: {self.mode}")
@@ -301,6 +301,16 @@ class Config:
         self.synchronizer.backend = self.explorer.backend
         if self.synchronizer.sync_method == "online" and self.mode != "both":
             raise ValueError("Online synchronization is only supported in both mode")
+
+        # check eval_interval
+        if self.trainer.eval_interval % self.synchronizer.sync_iteration_interval != 0:
+            self.trainer.eval_interval = (
+                max(self.trainer.eval_interval // self.synchronizer.sync_iteration_interval, 1)
+            ) * self.synchronizer.sync_iteration_interval
+            print(
+                f"Warning: eval_interval is not a multiple of sync_iteration_interval; adjusted to the nearest integer={self.trainer.eval_interval}."
+            )
+
         # check monitor
         if not self.monitor.cache_root_dir:
             # create a cache dir in <checkpoint_path>/.cache

@@ -3,5 +3,10 @@
     "env_name": "trinity_data",
     "env_yaml": "environments/data.yaml",
     "env_entry": "trinity/data/server.py"
+  },
+  "trinity.training": {
+    "env_name": "trinity",
+    "env_yaml": "environments/training.yaml",
+    "env_entry": "trinity/cli/server.py"
   }
 }

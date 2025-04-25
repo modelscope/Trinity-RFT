@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
-import uuid
 from typing import List
-
-import torch
 
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
-from trinity.common.workflows.workflow import WORKFLOWS, Workflow
+from trinity.common.workflows.workflow import WORKFLOWS, MultiTurnWorkflow
 
 EXAMPLE_PROMPT = """
 Observation：
@@ -96,13 +93,13 @@ def parse_action(response):
 
 
 @WORKFLOWS.register_module("alfworld_workflow")
-class AlfworldWorkflow(Workflow):
+class AlfworldWorkflow(MultiTurnWorkflow):
     """A workflow for alfworld task."""
 
     def __init__(self, model: ModelWrapper, **kwargs):
         super().__init__(model)
         self.system_prompt = kwargs.get("system_prompt", None)  # Unuse here
-        self.task_desc: str = kwargs.get("task_desc", "0")
+        self.task_desc: str = kwargs.get("task_desc")
         self.truth = kwargs.get("truth")  # Unuse here
         self.reward_fn = kwargs.get("reward_fn")  # Unuse here
         self.repeat_times = kwargs.get("repeat_times", 1)
@@ -118,9 +115,7 @@ class AlfworldWorkflow(Workflow):
     def generate_env_inference_samples(self, env, rollout_num) -> List[Experience]:
         # TODO: Make this parallel
         print("Generating env inference samples...")
-        all_messages = []
-        all_rewards = []
-        all_infos = []
+        experience_list = []
         for i in range(rollout_num):
             observation, info = env.reset()
             final_reward = -0.1
@@ -136,50 +131,12 @@ class AlfworldWorkflow(Workflow):
                 if done:
                     final_reward = reward
                     break
-            all_infos.append({"env_rounds": r, "env_done": 1 if done else 0})
-            all_messages.append(memory)
-            all_rewards.append(final_reward)
-        # Close the env to save cpu memory
-        env.close()
-        return self.process_batch_messages(all_messages, all_rewards, all_infos=all_infos)
-
-    def process_batch_messages(self, all_messages, all_rewards, all_infos) -> List[Experience]:
-        # TODO: What about the max_length for training here? Should we process here?
-        new_uid = str(
-            uuid.uuid4()
-        )  # the new_uid might be redundant here, as we have set the run_id in workflow_runner.run_task()
-        batch_tokens = []
-        batch_generation_masks = []
-        batch_log_probs_tensor = []
-        for i, messages in enumerate(all_messages):
-            converted_experience = self.model.convert_messages_to_experience(messages)
-            tokens = converted_experience.tokens
-            log_probs = converted_experience.logprobs
-            generation_mask = converted_experience.action_mask
-            assert log_probs.shape == generation_mask.shape
-            log_probs = log_probs * generation_mask  # type: ignore
-
-            batch_tokens.append(tokens)
-            batch_generation_masks.append(generation_mask)
-            batch_log_probs_tensor.append(log_probs)
-        # actually, we donot need to perform any padding here
-        experience_list = []
-        for i, (tokens, gen_mask, log_probs) in enumerate(
-            zip(batch_tokens, batch_generation_masks, batch_log_probs_tensor)
-        ):
-            assert tokens.shape == log_probs.shape
-            # set prompt length to the first 1 in the gen_mask
-            prompt_length = torch.where(gen_mask == 1)[0][0].item()
-            experience = Experience(
-                run_id=new_uid,
-                tokens=tokens,
-                prompt_length=prompt_length,
-                action_mask=gen_mask,
-                reward=all_rewards[i],
-                logprobs=log_probs,
-                info=all_infos[i],
+            experience = self.process_messages_to_experience(
+                memory, final_reward, {"env_rounds": r, "env_done": 1 if done else 0}
             )
             experience_list.append(experience)
+        # Close the env to save cpu memory
+        env.close()
         return experience_list
 
     def run(self) -> List[Experience]:

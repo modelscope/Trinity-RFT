@@ -24,13 +24,13 @@ def main():
         env_mapping = json.load(f)
     for env_path, env_config in env_mapping.items():
         env_name = env_config["env_name"]
-        print(f"Installing dependencies for module {env_name}...")
+        print(f"Installing dependencies for module [{env_name}]...")
         # check if it's existing
         res = subprocess.run(
             f"{env_mng} env list | grep {env_name}", shell=True, text=True, stdout=subprocess.PIPE
         )
         if res.returncode == 0 and env_name in res.stdout:
-            print(f"Environment {env_name} already exists. Skipping...")
+            print(f"Environment [{env_name}] already exists. Skipping...")
         else:
             res = subprocess.run(
                 f'{env_mng} env create -f {env_config["env_yaml"]}'
@@ -39,9 +39,9 @@ def main():
                 shell=True,
             )
             if res.returncode == 0:
-                print(f"Environment {env_name} created successfully.")
+                print(f"Environment [{env_name}] created successfully.")
             else:
-                print(f"Failed to create environment {env_name} with exit code {res.returncode}.")
+                print(f"Failed to create environment [{env_name}] with exit code {res.returncode}.")
 
 
 if __name__ == "__main__":

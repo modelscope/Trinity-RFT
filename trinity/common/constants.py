@@ -27,8 +27,9 @@ class CaseInsensitiveEnum(Enum, metaclass=CaseInsensitiveEnumMeta):
 class PromptType(CaseInsensitiveEnum):
     """Prompt Type."""
 
-    MESSAGES = "messages"
-    PLAINTEXT = "plaintext"
+    MESSAGES = "messages"  # prompt+response: message list
+    CHATPAIR = "chatpair"  # prompt: message list, response: message list
+    PLAINTEXT = "plaintext"  # prompt: plaintext, response: plaintext
 
 
 class TaskType(Enum):
@@ -86,3 +87,10 @@ class AlgorithmType(CaseInsensitiveEnum):
     def is_dpo(self) -> bool:
         """Check if the algorithm is DPO."""
         return self == AlgorithmType.DPO
+
+
+class MonitorType(CaseInsensitiveEnum):
+    """Monitor Type."""
+
+    WANDB = "wandb"
+    TENSORBOARD = "tensorboard"

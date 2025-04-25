@@ -11,17 +11,17 @@ Let's continue with the [previous GSM8k example](./example_reasoning_basic.md) a
 
 
 As an experimental feature of Trinity-RFT, we develop an embarrasingly simple off-policy RL algorithm, termed as OPMD (Online Policy Mirror Descent, inspired by [Kimi k1.5](https://arxiv.org/abs/2501.12599)).
-The algorithm design and analysis can be found in this [technical report](./opmd.pdf).
+The algorithm design and analysis can be found in this [technical report](../../assets/opmd.pdf).
 
 
 
 To try out the OPMD algorithm:
 ```shell
-as-rft run --config scripts/config/gsm8k_opmd.yaml
+trinity run --config examples/opmd_gsm8k/opmd_gsm8k.yaml
 ```
 
 Note that in this config file, `sync_iteration_interval` is set to 10, i.e., the model weights of explorer and trainer are synchronized only once every 10 training steps, which leads to a challenging off-policy scenario (potentially with abrupt distribution shift during the RFT process).
-Other configurations of particular interest are explained at the beginning of `scripts/config/train_gsm8k_opmd.yaml`.
+Other configurations of particular interest are explained at the beginning of [`train_opmd_gsm8k.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/opmd_gsm8k/train_opmd_gsm8k.yaml).
 
 
 
@@ -48,4 +48,4 @@ To run this mode, the explorer and trainer need to be launched separately, with 
 
 
 
-We are still testing this mode more thoroughly. A concrete example is coming soon!
+*We are still testing this mode more thoroughly. A concrete example is coming soon!*

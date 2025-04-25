@@ -2,26 +2,11 @@ mode: both
 data:
   dataset_path: ''
   total_epoch: 1
-  batch_size: 1
-  split: train
+  batch_size: 32
+  train_split: 'train'
+  eval_split: ''
   default_workflow_type: ''
   default_reward_fn_type: ''
-  dataset_config: {}
-  format_config:
-    prompt_key: ''
-    response_key: ''
-    chat_template: ''
-    reward_fn_key: ''
-    workflow_key: ''
-    solution_key: ''
-    reward_key: ''
-    chosen_key: ''
-    rejected_key: ''
-    label_key: ''
-  dj_config_path: null
-  dj_process_desc: null
-  clean_strategy: iterative
-  min_size_ratio: null
 model:
   model_path: ''
   max_prompt_tokens: 2048
@@ -31,8 +16,6 @@ cluster:
   node_num: 1
   gpu_per_node: 8
 buffer:
-  storage_type: sql
-  db_url: ''
   read_batch_size: 32
   max_retry_times: 3
   max_retry_interval: 1
@@ -45,8 +28,8 @@ explorer:
   enable_prefix_caching: false
   enforce_eager: true
   dtype: bfloat16
-  temperature: 0.0
-  top_p: 1.0
+  temperature: 0.2
+  top_p: 0.95
   top_k: -1
   seed: 42
   logprobs: 0

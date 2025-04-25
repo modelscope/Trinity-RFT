@@ -19,8 +19,7 @@ def explore(config: Config) -> None:
     try:
         ray.get(explorer.prepare.remote())
         ray.get(explorer.sync_weight.remote())
-        ref, _ = ray.wait([explorer.explore.remote()])
-        ray.get(ref)
+        ray.get(explorer.explore.remote())
         logger.info("Explore finished.")
     except Exception as e:
         logger.error(f"Explore failed: {e}")
@@ -30,12 +29,17 @@ def explore(config: Config) -> None:
 def train(config: Config) -> None:
     """Run trainer."""
 
-    algo_type = config.trainer.algorithm_type
     trainer = Trainer.remote(config)
+    ray.get(trainer.prepare.remote())
+
+    if config.trainer.sft_warmup_iteration > 0:
+        for step in range(config.trainer.sft_warmup_iteration):
+            ray.get(trainer.train_step.remote(AlgorithmType.SFT))
+            logger.info(f"SFT warmup step {step} finished.")
+
+    algo_type = config.trainer.algorithm_type
     try:
-        ray.get(trainer.prepare.remote())
-        ref, _ = ray.wait([trainer.train.remote(algo_type)])
-        ray.get(ref)
+        ray.get(trainer.train.remote(algo_type))
         logger.info("Train finished.")
     except Exception as e:
         logger.error(f"Train failed {e}.")
@@ -67,20 +71,21 @@ def both(config: Config) -> None:
 
     if config.trainer.sft_warmup_iteration > 0:
         for step in range(config.trainer.sft_warmup_iteration):
-            ray.get([trainer.train_step.remote(AlgorithmType.SFT)])
+            ray.get(trainer.train_step.remote(AlgorithmType.SFT))
             logger.info(f"SFT warmup step {step} finished.")
         ray.get([explorer.sync_weight.remote(), trainer.sync_weight.remote()])
 
     algo_type = config.trainer.algorithm_type
-    global_iter_num = 0
     while True:
         try:
-            explore_continue = explorer.explore_step.remote()
-            train_continue = trainer.train_step.remote(algo_type)
-            if not ray.get(explore_continue):
+            ref_explore = explorer.explore_step.remote()
+            ref_train = trainer.train_step.remote(algo_type)
+            explore_continue, explore_iter_num = ray.get(ref_explore)
+            train_continue, train_iter_num = ray.get(ref_train)
+            if not explore_continue:
                 logger.info("Explorer finished, stopping...")
                 break
-            if not ray.get(train_continue):
+            if not train_continue:
                 logger.info("Trainer finished, stopping...")
                 break
             ray.get([explorer.sync_weight.remote(), trainer.sync_weight.remote()])
@@ -89,10 +94,48 @@ def both(config: Config) -> None:
             logger.error(e)
             logger.error("Training stopped due to exception.")
             raise e
-        global_iter_num += 1
-        if global_iter_num % config.trainer.eval_interval == 0:
-            ray.wait([explorer.eval.remote()])
-            logger.info("Eval step finished.")
+        if train_iter_num % config.trainer.eval_interval == 0:
+            try:
+                ray.get(explorer.eval.remote())
+                logger.info("Evaluation finished.")
+            except Exception as e:
+                logger.error(e)
+                logger.error("Evaluation failed.")
+                raise e
+        ray.get(explorer.flush_log.remote(step=explore_iter_num))
+        ray.get(trainer.flush_log.remote(step=train_iter_num))
+
+
+def activate_data_module(data_workflow_url: str, config_path: str):
+    """Check whether to activate data module and preprocess datasets."""
+    from trinity.cli.client import request
+
+    logger.info("Activating data module...")
+    res = request(
+        url=data_workflow_url,
+        configPath=config_path,
+    )
+    if res["return_code"] != 0:
+        logger.error(f"Failed to activate data module: {res['return_msg']}.")
+        return
+
+
+def run(config_path: str):
+    config = load_config(config_path)
+    config.check_and_update()
+    # try to activate data module
+    data_config = config.data
+    if data_config.data_workflow_url and (
+        data_config.dj_config_path or data_config.dj_process_desc
+    ):
+        activate_data_module(data_config.data_workflow_url, config_path)
+    ray.init()
+    if config.mode == "explore":
+        explore(config)
+    elif config.mode == "train":
+        train(config)
+    elif config.mode == "both":
+        both(config)
 
 
 def main() -> None:
@@ -109,15 +152,7 @@ def main() -> None:
     args = parser.parse_args()
     if args.command == "run":
         # TODO: support parse all args from command line
-        config = load_config(args.config)
-        config.check_and_update()
-        ray.init()
-        if config.mode == "explore":
-            explore(config)
-        elif config.mode == "train":
-            train(config)
-        elif config.mode == "both":
-            both(config)
+        run(args.config)
 
 
 if __name__ == "__main__":

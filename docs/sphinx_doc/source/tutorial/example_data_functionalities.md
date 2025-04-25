@@ -8,7 +8,7 @@ In this example, you will learn how to apply the data module of Trinity-RFT to p
 2. how to configure the data module
 3. what the data module can do
 
-Before getting started, you need to prepare the main environment of Trinity-RFT according to the [installation section of the README file](main.md#getting-started), and you need to install [postgresql](https://www.postgresql.org/docs/current/tutorial-install.html) as well.
+Before getting started, you need to prepare the main environment of Trinity-RFT according to the [installation section of the README file](../main.md), and you need to install [postgresql](https://www.postgresql.org/docs/current/tutorial-install.html) as well.
 
 ### Data Preparation
 
@@ -133,12 +133,13 @@ And you can set the `clean_strategy` to 'iterative' to get a better dataset.
 
 
 
-All config items in the `data` section can be found [here](trinity_configs.md). A prepared config file for this example of GSM-8K can be found in [the config file of gsm8k](../../../../scripts/config/gsm8k.yaml).
+All config items in the `data` section can be found [here](trinity_configs.md). A prepared config file for this example of GSM-8K can be found in [the config file of gsm8k](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k/gsm8k.yaml).
 
 
 
-> [!NOTE]
-> Only when one of `dj_process_desc` and `dj_config_path` is provided, the data module and the data active iterator will be activated. Otherwise, this part will be skipped and it will enter into the exploring stage directly.
+```{note}
+Only when one of `dj_process_desc` and `dj_config_path` is provided, the data module and the data active iterator will be activated. Otherwise, this part will be skipped and it will enter into the exploring stage directly.
+```
 
 ### Exploring & Training
 After preparing the config files of Trinity-RFT, you can start your ray cluster and run the RFT process including the data active iterator part with the following commands:
@@ -151,7 +152,7 @@ ray start --head
 ray start --address=<master_address>
 
 # run RFT
-as-rft run --config <Trinity-RFT_config_path>
+trinity run --config <Trinity-RFT_config_path>
 ```
 
 If you follow the steps above, Trinity-RFT will send a request to the data module server, the data active iterator will be activated and compute difficulty scores for each sample in the raw dataset. After that, the data module server stores the result dataset into the database, when exploring begins, it will load the prepared dataset and continue the downstream steps.
@@ -243,7 +244,7 @@ You can set more config items for this OP (e.g. notification when annotation is 
 
 When you start running with the RFT config, the data module will start the OP `human_preference_annotation_mapper`, and then you can find a new project on the "Projects" page of the label-studio server.
 
-<img src="../../assets/data-projects.png" width="300">
+![]("../../assets/data-projects.png")
 
 You can click and enter into this project, and all the samples that need to be annotated are listed on the page.
 

@@ -69,7 +69,7 @@ class Actor:
     strategy: str = "fsdp"
     ppo_mini_batch_size: int = 256
     ppo_micro_batch_size: Optional[int] = None
-    ppo_micro_batch_size_per_gpu: Optional[int] = None
+    ppo_micro_batch_size_per_gpu: int = 1
     use_dynamic_bsz: bool = False
     ppo_max_token_len_per_gpu: int = (
         16384  # n * ${data.max_prompt_length} + ${data.max_response_length}
@@ -96,7 +96,7 @@ class Actor:
 class Ref:
     fsdp_config: FSDPConfig = field(default_factory=FSDPConfig)
     log_prob_micro_batch_size: Optional[int] = None
-    log_prob_micro_batch_size_per_gpu: Optional[int] = None
+    log_prob_micro_batch_size_per_gpu: int = 1
     log_prob_use_dynamic_bsz: bool = False
     log_prob_max_token_len_per_gpu: int = 0
     ulysses_sequence_parallel_size: int = 1
@@ -122,7 +122,7 @@ class Rollout:
     max_model_len: Optional[int] = None
     max_num_seqs: int = 1024
     log_prob_micro_batch_size: Optional[int] = None
-    log_prob_micro_batch_size_per_gpu: Optional[int] = None
+    log_prob_micro_batch_size_per_gpu: int = 1
     log_prob_use_dynamic_bsz: bool = False
     log_prob_max_token_len_per_gpu: int = 0
     disable_log_stats: bool = True
@@ -159,7 +159,7 @@ class Critic:
     model: CriticModel = field(default_factory=CriticModel)
     ppo_mini_batch_size: int = 0
     ppo_micro_batch_size: Optional[int] = None
-    ppo_micro_batch_size_per_gpu: Optional[int] = None
+    ppo_micro_batch_size_per_gpu: int = 1
     forward_micro_batch_size: Optional[int] = None
     forward_micro_batch_size_per_gpu: Optional[int] = None
     use_dynamic_bsz: bool = False
@@ -187,8 +187,7 @@ class RewardModel:
     enable: bool = False
     strategy: str = "fsdp"
     model: _RewardModel = field(default_factory=_RewardModel)
-    micro_batch_size: Optional[int] = None
-    micro_batch_size_per_gpu: Optional[int] = None
+    micro_batch_size_per_gpu: int = 1
     max_length: Optional[int] = None
     ulysses_sequence_parallel_size: int = 1
     use_dynamic_bsz: bool = False
@@ -268,6 +267,7 @@ class veRLConfig:
         self.trainer.nnodes = config.cluster.node_num - rollout_node_num
         self.actor_rollout_ref.model.path = config.model.model_path
         self.critic.model.path = config.model.critic_model_path
+        self.critic.model.tokenizer_path = config.model.critic_model_path
 
         if config.cluster.node_num == 1:
             # for single node scenarios, rollout and training are on the same node
@@ -321,26 +321,6 @@ class veRLConfig:
             raise ValueError(
                 f"batch_size_per_gpu ({batch_size_per_gpu}) must be divisible by "
                 f"critic.ppo_micro_batch_size_per_gpu ({self.critic.ppo_micro_batch_size_per_gpu})"
-            )
-        if self.actor_rollout_ref.actor.ppo_micro_batch_size is not None:
-            raise ValueError(
-                "`actor_rollout_ref.actor.ppo_micro_batch_size` will be deprecated, "
-                "please use `actor_rollout_ref.`actor.ppo_micro_batch_size_per_gpu` instead."
-            )
-        if self.actor_rollout_ref.ref.log_prob_micro_batch_size is not None:
-            raise ValueError(
-                "`actor_rollout_ref.ref.log_prob_micro_batch_size` will be deprecated,"
-                "please use `actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu` instead."
-            )
-        if self.critic.ppo_micro_batch_size is not None:
-            raise ValueError(
-                "`critic.ppo_micro_batch_size` will be deprecated, "
-                "please use `critic.ppo_micro_batch_size_per_gpu` instead."
-            )
-        if self.reward_model.enable and self.reward_model.micro_batch_size is not None:
-            raise ValueError(
-                "`reward_model.micro_batch_size` will be deprecated, "
-                "please use `reward_model.micro_batch_size_per_gpu` instead."
             )
         # TODO: check other fields
         self.enable_preview = config.trainer.enable_preview

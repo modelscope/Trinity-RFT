@@ -1,0 +1,59 @@
+mode: train
+data:
+  total_epoch: 20
+  batch_size: 32 # NOTE
+  train_split: "train"
+  dataset_path: ''
+  default_workflow_type: 'math_workflow'
+  format_config:
+    prompt_key: ''
+    response_key: ''
+model:
+  model_path: '/PATH/TO/MODEL/CHECKPOINT/' # NOTE
+  max_prompt_tokens: 1792
+  max_response_tokens: 256
+  checkpoint_path: 'checkpoints/trinity_dpo'
+cluster:
+  node_num: 1
+  gpu_per_node: 8
+buffer:
+  max_retry_times: 3
+  max_retry_interval: 1
+  train_dataset:
+    name: dpo_buffer
+    storage_type: file
+    path: '/PATH/TO/DATASET/'
+    kwargs:
+      prompt_type: plaintext # plaintext/messages
+      prompt_key: prompt
+      chosen_key: chosen
+      rejected_key: rejected
+explorer:
+  engine_type: vllm_async
+  engine_num: 0
+  runner_num: 32
+  tensor_parallel_size: 1
+  enable_prefix_caching: false
+  enforce_eager: true
+  dtype: bfloat16
+  temperature: 1.0
+  top_p: 1.0
+  top_k: -1
+  seed: 42
+  logprobs: 0
+  repeat_times: 1 # NOTE
+  use_ray: false
+  backend: 'nccl'
+  max_pending_requests: 32
+  max_waiting_steps: 4
+synchronizer:
+  sync_method: 'offline'
+  sync_iteration_interval: 30
+trainer:
+  trainer_type: 'verl'
+  algorithm_type: dpo
+  trainer_config_path: 'examples/dpo_humanlike/train_dpo.yaml'
+monitor:
+  cache_root_dir: ""
+  project: "dpo_example"
+  name: "trinity_dpo"

@@ -3,7 +3,7 @@
 import os
 import time
 from collections import defaultdict
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import ray
 import torch
@@ -149,16 +149,20 @@ class Explorer:
 
     def explore(self) -> None:
         """Explore the entire dataset."""
-        while self.explore_step():
+        explore_status, _ = self.explore_step()
+        while explore_status:
             self.sync_weight()
         self.logger.info("Explorer finished.")
 
-    def explore_step(self) -> bool:
+    def explore_step(self) -> Tuple[bool, int]:
         """Explore for one step.
 
         Different from `explore()` which consumes all tasks in the task set,
         `explore_step()` only consume `sync_iteration_interval * batch_size`
         number of tasks.
+        explore_status:
+            explore_status: whether there are more tasks to explore.
+            explore_iter_num: the number of explore iterations
         """
         if self.task_iter is None:
             self.task_iter = iter(self.taskset)
@@ -175,7 +179,7 @@ class Explorer:
             self.runner_pool.run_tasks(tasks)
         except StopIteration:
             self.logger.warning("No more tasks in the task set. Stop exploring.")
-            return False
+            return False, self.iteration
 
         # wait for all tasks of this step to finish
         while self.runner_pool.has_next():
@@ -190,7 +194,7 @@ class Explorer:
                         self.runner_pool.run_tasks(next(self.task_iter))  # type: ignore
                     except StopIteration:
                         self.logger.warning("No more tasks in the task set. Stop exploring.")
-                        return False
+                        return False, self.iteration
                 else:
                     for metric_name, metric_value in status.metric.items():
                         all_metrics[metric_name].append(metric_value)
@@ -208,11 +212,14 @@ class Explorer:
         )
 
         self.logger.info("Explore step finished.")
-        return True
+        return True, self.iteration
 
     def eval(self) -> bool:
         """Evaluation on all evaluation data samples."""
-        self.logger.info("\n\nEvaluation started.\n\n")
+        if self.eval_taskset is None:
+            self.logger.warning("No evaluation data samples. Skip evaluation.")
+            return True
+        self.logger.info("Evaluation started.")
         st = time.time()
         all_metrics = defaultdict(list)
 
@@ -231,8 +238,6 @@ class Explorer:
                     for metric_name, metric_value in status.metric.items():
                         all_metrics[metric_name].append(metric_value)
 
-        self.logger.info("Evaluation finished.")
-
         log_metrics = self.monitor.calculate_metrics(all_metrics, prefix="eval")  # type: ignore
         log_metrics["eval/total_time"] = time.time() - st
         self.monitor.log(log_metrics, step=self.iteration)  # type: ignore
@@ -245,3 +250,7 @@ class Explorer:
             self._offline_weights_update()
         else:  # online weights update
             self._online_weights_update()
+
+    def flush_log(self, step: int) -> None:
+        """Flush the log of the current step."""
+        self.monitor.log({}, step=step, commit=True)

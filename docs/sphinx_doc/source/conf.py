@@ -5,8 +5,6 @@
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
-import sphinx_rtd_theme
-
 from trinity import __version__ as version
 
 project = "Trinity-RFT"
@@ -36,32 +34,28 @@ myst_enable_extensions = ["colon_fence"]
 autosectionlabel_prefix_document = True
 autosummary_generate = True
 autosummary_ignore_module_all = False
+napoleon_google_docstring = True
 
 autodoc_member_order = "bysource"
 
 templates_path = ["_templates"]
 exclude_patterns = ["build"]
+autodoc_mock_imports = ["ray"]
+
+autodoc_default_options = {
+    "members": True,
+    "special-members": "__init__",
+}
 
 # -- Options for HTML output -------------------------------------------------
 
 html_theme = "sphinx_rtd_theme"
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 html_theme_options = {
-    "navigation_depth": 2,
+    "navigation_depth": 3,
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
-
-
-def skip(app, what, name, obj, would_skip, options):
-    if name == "__init__":
-        return False
-    return would_skip
-
-
-def setup(app):
-    app.connect("autodoc-skip-member", skip)

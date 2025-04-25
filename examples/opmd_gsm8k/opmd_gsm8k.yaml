@@ -1,0 +1,53 @@
+data:
+  total_epoch: 1
+  batch_size: 96
+  dataset_path: '{path to datasets}/gsm8k'
+  default_workflow_type: 'math_workflow'
+  format_config:
+    prompt_key: 'question'
+    response_key: 'answer'
+model:
+  model_path: '{path to models}/Qwen2.5-1.5B-Inst'
+  max_prompt_tokens: 256
+  max_response_tokens: 1024
+  checkpoint_path: '{path to checkpoints}/test-opmd-gsm8k/qwen2.5-1.5B-gsm8k-opmd-kl_0.001-entropy_0-tau_4-beta1_0.0-beta2_0.95-lr_2e-6-sync10'
+cluster:
+  node_num: 1
+  gpu_per_node: 8
+buffer:
+  max_retry_times: 3
+  max_retry_interval: 1
+  train_dataset:
+    name: gsm8k_buffer
+    storage_type: queue
+    path: 'sqlite:///gsm8k_opmd.db'
+explorer:
+  engine_type: vllm_async
+  engine_num: 2
+  runner_num: 32
+  tensor_parallel_size: 1
+  enable_prefix_caching: false
+  enforce_eager: true
+  dtype: bfloat16
+  temperature: 1.0
+  top_p: 1.0
+  top_k: -1
+  seed: 42
+  logprobs: 0
+  repeat_times: 8
+  use_ray: false
+  backend: 'nccl'
+  max_pending_requests: 32
+  max_waiting_steps: 4
+synchronizer:
+  sync_method: 'online'
+  sync_iteration_interval: 10
+trainer:
+  trainer_type: 'verl'
+  algorithm_type: opmd
+  trainer_config_path: 'examples/opmd_gsm8k/train_opmd_gsm8k.yaml'
+  sft_warmup_iteration: 0
+monitor:
+  cache_root_dir: ""
+  project: "Trinity-RFT-gsm8k-test-opmd"
+  name: "qwen2.5-1.5B-gsm8k-opmd-kl_0.001-entropy_0-tau_4-beta1_0.0-beta2_0.95-lr_2e-6-sync10"

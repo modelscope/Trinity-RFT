@@ -48,16 +48,16 @@ class Experience:
 class Experiences:
     """A container for a batch of experiences, for high performance communication usage.
 
-    Structure:
+    Example:
 
-                    |<- prompt_length ->|               |
-        tokens: ('P' represents prompt, 'O' represents output)
-        exp1:       |........PPPPPPPPPPP|OOOOOOOOOO.....|
-        exp2:       |......PPPPPPPPPPPPP|OOOOOOO........|
-
-        attention_masks: ('.' represents False and '1' represents True)
-        exp1:       |........11111111111|1111111111.....|
-        exp2:       |......1111111111111|1111111........|
+        >>>             |<- prompt_length ->|               |
+        >>> tokens: ('P' represents prompt, 'O' represents output)
+        >>> exp1:       |........PPPPPPPPPPP|OOOOOOOOOO.....|
+        >>> exp2:       |......PPPPPPPPPPPPP|OOOOOOO........|
+        >>>
+        >>> attention_masks: ('.' represents False and '1' represents True)
+        >>> exp1:       |........11111111111|1111111111.....|
+        >>> exp2:       |......1111111111111|1111111........|
     """
 
     tokens: Tensor
