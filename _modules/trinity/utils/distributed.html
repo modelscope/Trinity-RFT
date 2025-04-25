@@ -86,6 +86,7 @@
   <h1>Source code for trinity.utils.distributed</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;For distributed training with multiple process groups.&quot;&quot;&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ipaddress</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">timedelta</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
@@ -99,6 +100,17 @@
     <span class="n">default_pg_timeout</span><span class="p">,</span>
     <span class="n">rendezvous</span><span class="p">,</span>
 <span class="p">)</span>
+
+
+<div class="viewcode-block" id="is_ipv6_address">
+<a class="viewcode-back" href="../../../build_api/trinity.utils.html#trinity.utils.distributed.is_ipv6_address">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_ipv6_address</span><span class="p">(</span><span class="n">ip_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ip</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ip_str</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
 
 
 <div class="viewcode-block" id="init_process_group">

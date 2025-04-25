@@ -137,7 +137,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">verl.workers.sharding_manager.fsdp_ulysses</span><span class="w"> </span><span class="kn">import</span> <span class="n">FSDPUlyssesShardingManager</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">AlgorithmType</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.distributed</span><span class="w"> </span><span class="kn">import</span> <span class="n">init_process_group</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.distributed</span><span class="w"> </span><span class="kn">import</span> <span class="n">init_process_group</span><span class="p">,</span> <span class="n">is_ipv6_address</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
 <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;VERL_PPO_LOGGING_LEVEL&quot;</span><span class="p">,</span> <span class="s2">&quot;WARN&quot;</span><span class="p">))</span>
@@ -694,9 +694,15 @@
                 <span class="n">setup_ref</span> <span class="o">=</span> <span class="n">explorer</span><span class="o">.</span><span class="n">setup_weight_sync_group</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span>
                     <span class="n">master_address</span><span class="p">,</span> <span class="n">master_port</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_dict_meta</span>
                 <span class="p">)</span>
+                <span class="k">if</span> <span class="n">is_ipv6_address</span><span class="p">(</span><span class="n">master_address</span><span class="p">):</span>
+                    <span class="c1"># using tcp://ipv6:port will lead to ValueError</span>
+                    <span class="n">init_method</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;tcp://[</span><span class="si">{</span><span class="n">master_address</span><span class="si">}</span><span class="s2">]:</span><span class="si">{</span><span class="n">master_port</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">init_method</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;tcp://</span><span class="si">{</span><span class="n">master_address</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">master_port</span><span class="si">}</span><span class="s2">&quot;</span>
+
                 <span class="bp">self</span><span class="o">.</span><span class="n">_model_update_group</span> <span class="o">=</span> <span class="n">init_process_group</span><span class="p">(</span>
                     <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">,</span>
-                    <span class="n">init_method</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;tcp://</span><span class="si">{</span><span class="n">master_address</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">master_port</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">init_method</span><span class="o">=</span><span class="n">init_method</span><span class="p">,</span>
                     <span class="n">world_size</span><span class="o">=</span><span class="n">world_size</span><span class="p">,</span>
                     <span class="n">rank</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                     <span class="n">group_name</span><span class="o">=</span><span class="n">group_name</span><span class="p">,</span>
