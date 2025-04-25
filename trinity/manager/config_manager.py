@@ -299,12 +299,15 @@ Other workflows: conduct multi-turn task for the given dataset.
         st.number_input("Max Retry Interval", key="max_retry_interval", min_value=1)
 
     def _check_sft_warmup_dataset_path(self):
-        if (
-            st.session_state["sft_warmup_iteration"]
-            and not st.session_state["sft_warmup_dataset_path"].strip()
-        ):
-            self.unfinished_fields.add("sft_warmup_dataset_path")
-            st.warning("Please input SFT warmup dataset path when `sft_warmup_iteration` is not 0")
+        if st.session_state["sft_warmup_iteration"]:
+            if not st.session_state["sft_warmup_dataset_path"].strip():
+                self.unfinished_fields.add("sft_warmup_dataset_path")
+                st.warning(
+                    "Please input SFT warmup dataset path when `sft_warmup_iteration` is not 0"
+                )
+            elif not os.path.isabs(st.session_state["sft_warmup_dataset_path"].strip()):
+                self.unfinished_fields.add("sft_warmup_dataset_path")
+                st.warning("Please input an absolute path.")
 
     def _set_sft_warmup_dataset_path(self):
         st.text_input("SFT Warmup Dataset Path", key="sft_warmup_dataset_path")
