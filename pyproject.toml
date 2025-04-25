@@ -33,6 +33,7 @@ dependencies = [
     "math_verify",
     "ninja",
     "fire",
+    "streamlit",
 ]
 
 [project.scripts]

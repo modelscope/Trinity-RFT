@@ -141,7 +141,7 @@ class ExplorerConfig:
     # For async engine (vllm_async), it can be larger than `engine_num`, e.g. 16 * `engine_num`
     runner_num: int = 1
 
-    # repeat each task for `repeat_times` times (for GPRO-like algrorithms)
+    # repeat each task for `repeat_times` times (for GPRO-like algorithms)
     repeat_times: int = 1
 
     # for rollout tokneize
@@ -274,11 +274,9 @@ class Config:
         else:
             if self.buffer.train_dataset is None:
                 raise ValueError("buffer.train_dataset is required when mode is not 'both'")
-            if self.buffer.train_dataset.algorithm_type != self.trainer.algorithm_type:
-                raise ValueError(
-                    f"buffer.train_dataset.algorithm_type ({self.buffer.train_dataset.algorithm_type}) "
-                    f"is not consistent with trainer.algorithm_type ({self.trainer.algorithm_type})"
-                )
+            self.buffer.train_dataset.algorithm_type = self.trainer.algorithm_type
+        if self.buffer.sft_warmup_dataset is not None:
+            self.buffer.sft_warmup_dataset.algorithm_type = AlgorithmType.SFT
         self.buffer.read_batch_size = self.data.batch_size * self.explorer.repeat_times
 
     def check_and_update(self) -> None:

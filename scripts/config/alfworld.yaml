@@ -21,7 +21,6 @@ buffer:
   train_dataset:
     name: alfworld_buffer
     storage_type: queue
-    algorithm_type: ppo
     path: 'sqlite:///alfworld.db'
 explorer:
   engine_type: vllm_async

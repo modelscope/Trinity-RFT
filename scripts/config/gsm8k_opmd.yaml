@@ -20,7 +20,6 @@ buffer:
   train_dataset:
     name: gsm8k_buffer
     storage_type: queue
-    algorithm_type: opmd
     path: 'sqlite:///gsm8k_opmd.db'
 explorer:
   engine_type: vllm_async

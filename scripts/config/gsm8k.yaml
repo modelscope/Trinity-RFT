@@ -34,12 +34,10 @@ buffer:
   train_dataset:
     name: gsm8k_buffer
     storage_type: queue
-    algorithm_type: ppo
     path: 'sqlite:////gsm8k.db'
   # sft_warmup_dataset: # Uncomment these to enable sft warmup
   #   name: warmup_data
   #   storage_type: file
-  #   algorithm_type: sft
   #   path: '/PATH/TO/WARMUP_DATA/'
   #   kwargs:
   #     prompt_type: plaintext
