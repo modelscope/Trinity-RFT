@@ -1,8 +1,9 @@
 data:
   # basic info
-  dataset_path: '/PATH/TO/DATASET/'
+  dataset_path: 'openai/gsm8k'
+  config_name: "main"
   train_split: 'train'
-  eval_split: ''
+  eval_split: 'test'
   format_config:
     prompt_key: 'question'
     response_key: 'answer'
@@ -24,7 +25,7 @@ model:
   model_path: '/PATH/TO/MODEL/'
   max_prompt_tokens: 256
   max_response_tokens: 1024
-  checkpoint_path: '/PATH/TO/CHECKPOINT/'
+  checkpoint_path: ""
 cluster:
   node_num: 1
   gpu_per_node: 8
@@ -35,7 +36,7 @@ buffer:
     name: gsm8k_buffer
     storage_type: queue
     algorithm_type: ppo
-    path: 'sqlite:////gsm8k.db'
+    path: 'sqlite:///gsm8k.db'
   # sft_warmup_dataset: # Uncomment these to enable sft warmup
   #   name: warmup_data
   #   storage_type: file
