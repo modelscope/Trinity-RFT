@@ -160,7 +160,10 @@ class ConfigManager:
         st.text_input("Model Path", key="model_path")
         if not st.session_state["model_path"].strip():
             self.unfinished_fields.add("model_path")
-            st.warning("Please input model path")
+            st.warning("Please input model path.")
+        elif not os.path.isabs(st.session_state["model_path"].strip()):
+            self.unfinished_fields.add("model_path")
+            st.warning("Please input an absolute path.")
 
     def _set_critic_model_path(self):
         st.text_input(
@@ -172,7 +175,10 @@ class ConfigManager:
         st.text_input("Checkpoint Path", key="checkpoint_path")
         if not st.session_state["checkpoint_path"].strip():  # TODO: may auto generate
             self.unfinished_fields.add("checkpoint_path")
-            st.warning("Please input checkpoint path")
+            st.warning("Please input checkpoint path.")
+        elif not os.path.isabs(st.session_state["checkpoint_path"].strip()):
+            self.unfinished_fields.add("checkpoint_path")
+            st.warning("Please input an absolute path.")
 
     def _set_node_num(self):
         st.number_input("Node Num", key="node_num", min_value=1, on_change=self._set_total_gpu_num)
@@ -233,7 +239,10 @@ class ConfigManager:
         st.text_input("Dataset Path", key="dataset_path")
         if not st.session_state["dataset_path"].strip():
             self.unfinished_fields.add("dataset_path")
-            st.warning("Please input dataset path")
+            st.warning("Please input dataset path.")
+        elif not os.path.isabs(st.session_state["dataset_path"].strip()):
+            self.unfinished_fields.add("dataset_path")
+            st.warning("Please input an absolute path.")
 
     def _set_dataset_args(self):
         if st.session_state["dataset_path"] and "://" not in st.session_state["dataset_path"]:
@@ -248,6 +257,12 @@ class ConfigManager:
             "Default Workflow Type",
             WORKFLOWS.modules.keys(),
             key="default_workflow_type",
+            help=r"""`simple_workflow`: call 'model.chat()' to get responses.
+
+`math_workflow`: call 'model.chat()' with a pre-defined system prompt to get responses.
+
+Other workflows: conduct multi-turn task for the given dataset.
+""",
         )
 
     def _set_default_reward_fn_type(self):  # TODO: add help messages
@@ -255,6 +270,12 @@ class ConfigManager:
             "Default Reward Fn Type",
             REWARD_FUNCTIONS.modules.keys(),
             key="default_reward_fn_type",
+            help=r"""`accuracy_reward`: check the accuracy for math problems.
+
+`format_reward`: check if the response matches the format (default: `<think>*</think>* <answer>*</answer>`).
+
+`math_reward`: `accuracy_reward` (1 or 0) + `format_reward` (+0.1 or -0.1).
+""",
         )
 
     def _set_storage_type(self):
@@ -373,7 +394,12 @@ if node_num > 1:
         st.selectbox("Sync Method", ["online", "offline"], key="sync_method")
 
     def _set_sync_iteration_interval(self):
-        st.number_input("Sync Iteration Interval", key="sync_iteration_interval", min_value=1)
+        st.number_input(
+            "Sync Iteration Interval",
+            key="sync_iteration_interval",
+            min_value=1,
+            help="""The iteration interval at which the `explorer` and `trainer` synchronize and switch.""",
+        )
 
     def _set_runner_num(self):
         st.number_input("Runner Num", key="runner_num", min_value=1)
@@ -438,6 +464,9 @@ if node_num > 1:
         if not st.session_state["trainer_config_path"].strip():
             self.unfinished_fields.add("trainer_config_path")
             st.warning("Please input trainer config path")
+        elif not os.path.isabs(st.session_state["trainer_config_path"].strip()):
+            self.unfinished_fields.add("trainer_config_path")
+            st.warning("Please input an absolute path.")
 
     def _set_training_args(self):
         st.multiselect(
@@ -935,11 +964,6 @@ if node_num > 1:
             self._expert_trainer_part()
 
     def generate_config(self):
-        # rollout_node_num = (
-        #     st.session_state["engine_num"]
-        #     * st.session_state["tensor_parallel_size"]
-        #     // st.session_state["gpu_per_node"]
-        # )
         trainer_nnodes = (
             st.session_state["node_num"]
             - st.session_state["engine_num"]
