@@ -1,4 +1,5 @@
 import os
+from typing import List
 
 import streamlit as st
 import yaml
@@ -12,9 +13,10 @@ from trinity.trainer.verl.ray_trainer import AdvantageEstimator
 class ConfigManager:
     def __init__(self):
         self._init_default_config()
+        self.unfinished_fields = set()
         st.set_page_config(page_title="Trainer Config Generator", page_icon=":robot:")
         st.title("Trainer Config Generator")
-        if "unfinished_flag" not in st.session_state:
+        if "_init_config_manager" not in st.session_state:
             self.reset_session_state()
         self.maintain_session_state()
         mode = st.pills(
@@ -31,7 +33,7 @@ class ConfigManager:
 
     def _init_default_config(self):
         self.default_config = {
-            "unfinished_flag": False,
+            "_init_config_manager": True,
             "project": "Trinity-RFT",
             "exp_name": "qwen2.5-1.5B",
             "model_path": "",
@@ -150,7 +152,7 @@ class ConfigManager:
     def _set_model_path(self):
         st.text_input("Model Path", key="model_path")
         if not st.session_state["model_path"].strip():
-            st.session_state["unfinished_flag"] = True
+            self.unfinished_fields.add("model_path")
             st.warning("Please input model path")
 
     def _set_critic_model_path(self):
@@ -162,7 +164,7 @@ class ConfigManager:
     def _set_checkpoint_path(self):
         st.text_input("Checkpoint Path", key="checkpoint_path")
         if not st.session_state["checkpoint_path"].strip():  # TODO: may auto generate
-            st.session_state["unfinished_flag"] = True
+            self.unfinished_fields.add("checkpoint_path")
             st.warning("Please input checkpoint path")
 
     def _set_node_num(self):
@@ -186,7 +188,7 @@ class ConfigManager:
     def _set_dataset_path(self):
         st.text_input("Dataset Path", key="dataset_path")
         if not st.session_state["dataset_path"].strip():
-            st.session_state["unfinished_flag"] = True
+            self.unfinished_fields.add("dataset_path")
             st.warning("Please input dataset path")
 
     def _set_dataset_args(self):
@@ -197,14 +199,14 @@ class ConfigManager:
             prompt_key_col.text_input("Prompt Key", key="prompt_key")
             response_key_col.text_input("Response Key", key="response_key")
 
-    def _set_default_workflow_type(self):
+    def _set_default_workflow_type(self):  # TODO: add help messages
         st.selectbox(
             "Default Workflow Type",
             WORKFLOWS.modules.keys(),
             key="default_workflow_type",
         )
 
-    def _set_default_reward_fn_type(self):
+    def _set_default_reward_fn_type(self):  # TODO: add help messages
         st.selectbox(
             "Default Reward Fn Type",
             REWARD_FUNCTIONS.modules.keys(),
@@ -231,8 +233,17 @@ class ConfigManager:
     def _set_max_retry_interval(self):
         st.number_input("Max Retry Interval", key="max_retry_interval", min_value=1)
 
+    def _check_sft_warmup_dataset_path(self):
+        if (
+            st.session_state["sft_warmup_iteration"]
+            and not st.session_state["sft_warmup_dataset_path"].strip()
+        ):
+            self.unfinished_fields.add("sft_warmup_dataset_path")
+            st.warning("Please input SFT warmup dataset path when `sft_warmup_iteration` is not 0")
+
     def _set_sft_warmup_dataset_path(self):
         st.text_input("SFT Warmup Dataset Path", key="sft_warmup_dataset_path")
+        self._check_sft_warmup_dataset_path()
 
     def _set_sft_warmup_dataset_args(self):
         if (
@@ -336,19 +347,8 @@ class ConfigManager:
             key="algorithm_type",
         )
 
-    def _set_sft_warmup_iteration(self, buffer_advanced_tab=None):
+    def _set_sft_warmup_iteration(self):
         st.number_input("SFT Warmup Iteration", key="sft_warmup_iteration", min_value=0)
-        if (
-            st.session_state["sft_warmup_iteration"]
-            and not st.session_state["sft_warmup_dataset_path"].strip()
-        ):
-            st.session_state["unfinished_flag"] = True
-            st.warning("Please input SFT warmup dataset path when `sft_warmup_iteration` is not 0")
-            if buffer_advanced_tab is not None:
-                with self.buffer_advanced_tab:
-                    st.warning(
-                        "Please input SFT warmup dataset path when `sft_warmup_iteration` is not 0"
-                    )
 
     def _set_eval_interval(self):
         st.number_input("Eval Interval", key="eval_interval", min_value=1)
@@ -356,7 +356,7 @@ class ConfigManager:
     def _set_trainer_config_path(self):
         st.text_input("Trainer Config Path", key="trainer_config_path")
         if not st.session_state["trainer_config_path"].strip():
-            st.session_state["unfinished_flag"] = True
+            self.unfinished_fields.add("trainer_config_path")
             st.warning("Please input trainer config path")
 
     def _set_training_args(self):
@@ -409,8 +409,8 @@ class ConfigManager:
                 not st.session_state["resume_from_path"].strip()
                 or "global_step_" not in st.session_state["resume_from_path"]
             ):
-                st.session_state["unfinished_flag"] = True
-                st.warning("Please input a valid resume path when `resume_mode` is `resume_path`")
+                self.unfinished_fields.add("resume_from_path")
+                st.warning("Please input a valid resume path when `resume_mode == resume_path`")
 
     def _set_critic_warmup(self):
         st.number_input("Critic Warmup Iteration", key="critic_warmup", min_value=0)
@@ -520,7 +520,7 @@ class ConfigManager:
         st.session_state["actor_use_kl_loss"] = (
             st.session_state["algorithm_type"] == "ppo"
             and st.session_state["adv_estimator"] == "grpo"
-        )  # TODO: check
+        )  # TODO: check it
 
     def _set_actor_kl_loss_coef(self):
         st.number_input(
@@ -637,13 +637,19 @@ class ConfigManager:
             st.session_state["algorithm_type"] = AlgorithmType.OPMD.value
             st.session_state["adv_estimator"] = "grpo"
 
+    def _set_configs_with_st_columns(
+        self, config_names: List[str], columns_config: List[int] = None
+    ):
+        if columns_config is None:
+            columns_config = len(config_names)
+        columns = st.columns(columns_config)
+        for col, config_name in zip(columns, config_names):
+            with col:
+                getattr(self, f"_set_{config_name}")()
+
     def beginner_mode(self):
         st.header("Essential Configs")
-        project_col, name_col = st.columns([1, 3])
-        with project_col:
-            self._set_project()
-        with name_col:
-            self._set_name()
+        self._set_configs_with_st_columns(["project", "name"], columns_config=[1, 3])
 
         self._set_model_path()
 
@@ -651,221 +657,99 @@ class ConfigManager:
 
         self._set_dataset_path()
 
-        training_mode_col, sft_warmup_iteration_col = st.columns(2)
-        with training_mode_col:
-            self._set_training_mode()
-
-        with sft_warmup_iteration_col:
-            self._set_sft_warmup_iteration()
+        self._set_configs_with_st_columns(["training_mode", "sft_warmup_iteration"])
+        if st.session_state["sft_warmup_iteration"] > 0:
+            self._set_sft_warmup_dataset_path()
 
         st.header("Important Configs")
-        (
-            node_num_col,
-            gpu_per_node_col,
-            max_prompt_tokens_col,
-            max_response_tokens_col,
-        ) = st.columns(4)
-        with node_num_col:
-            self._set_node_num()
-        with gpu_per_node_col:
-            self._set_gpu_per_node()
-        with max_prompt_tokens_col:
-            self._set_max_prompt_tokens()
-        with max_response_tokens_col:
-            self._set_max_response_tokens()
+        self._set_configs_with_st_columns(
+            ["node_num", "gpu_per_node", "max_prompt_tokens", "max_response_tokens"]
+        )
 
-        total_epoch_col, batch_size_per_gpu_col = st.columns(2)
-        with total_epoch_col:
-            self._set_total_epoch()
-        with batch_size_per_gpu_col:
-            self._set_batch_size_per_gpu()
+        self._set_configs_with_st_columns(["total_epoch", "batch_size_per_gpu"])
 
         self._set_dataset_args()
 
-        default_workflow_type_col, default_reward_fn_type_col = st.columns(2)
-        with default_workflow_type_col:
-            self._set_default_workflow_type()
-        with default_reward_fn_type_col:
-            self._set_default_reward_fn_type()
+        if st.session_state["sft_warmup_iteration"] > 0:
+            self._set_sft_warmup_dataset_args()
 
-        sync_iteration_interval_col, eval_interval_col, save_freq_col = st.columns(3)
-        with sync_iteration_interval_col:
-            self._set_sync_iteration_interval()
-        with eval_interval_col:
-            self._set_eval_interval()
-        with save_freq_col:
-            self._set_save_freq()
+        self._set_configs_with_st_columns(["default_workflow_type", "default_reward_fn_type"])
+
+        self._set_configs_with_st_columns(["sync_iteration_interval", "eval_interval", "save_freq"])
 
         self._set_actor_use_kl_loss()
         if st.session_state["actor_use_kl_loss"]:
-            actor_kl_loss_coef_col, actor_kl_loss_type_col = st.columns(2)
-            with actor_kl_loss_coef_col:
-                self._set_actor_kl_loss_coef()
-            with actor_kl_loss_type_col:
-                self._set_actor_kl_loss_type()
+            self._set_configs_with_st_columns(["actor_kl_loss_coef", "actor_kl_loss_type"])
 
-        (
-            actor_ppo_micro_batch_size_per_gpu_col,
-            actor_lr_col,
-            ref_log_prob_micro_batch_size_per_gpu_col,
-        ) = st.columns(3)
-        with actor_ppo_micro_batch_size_per_gpu_col:
-            self._set_actor_ppo_micro_batch_size_per_gpu()
-        with actor_lr_col:
-            self._set_actor_lr()
-        with ref_log_prob_micro_batch_size_per_gpu_col:
-            self._set_ref_log_prob_micro_batch_size_per_gpu()
+        self._set_configs_with_st_columns(
+            [
+                "actor_ppo_micro_batch_size_per_gpu",
+                "actor_lr",
+                "ref_log_prob_micro_batch_size_per_gpu",
+            ]
+        )
 
-        use_critic = st.session_state["adv_estimator"] == "gae"  # TODO
+        use_critic = (
+            st.session_state["adv_estimator"] == "gae"
+        )  # TODO: check it and may apply to expert mode
         if use_critic:
-            (
-                critic_ppo_micro_batch_size_per_gpu_col,
-                critic_lr_col,
-            ) = st.columns(2)
-            with critic_ppo_micro_batch_size_per_gpu_col:
-                self._set_critic_ppo_micro_batch_size_per_gpu()
-            with critic_lr_col:
-                self._set_critic_lr()
+            self._set_configs_with_st_columns(["critic_ppo_micro_batch_size_per_gpu", "critic_lr"])
 
     def _expert_model_part(self):
-        project_col, name_col = st.columns([1, 3])
-        with project_col:
-            self._set_project()
-        with name_col:
-            self._set_name()
+        self._set_configs_with_st_columns(["project", "name"], columns_config=[1, 3])
 
         self._set_model_path()
         self._set_critic_model_path()
 
         self._set_checkpoint_path()
 
-        (
-            node_num_col,
-            gpu_per_node_col,
-            max_prompt_tokens_col,
-            max_response_tokens_col,
-        ) = st.columns(4)
-        with node_num_col:
-            self._set_node_num()
-        with gpu_per_node_col:
-            self._set_gpu_per_node()
-        with max_prompt_tokens_col:
-            self._set_max_prompt_tokens()
-        with max_response_tokens_col:
-            self._set_max_response_tokens()
+        self._set_configs_with_st_columns(
+            ["node_num", "gpu_per_node", "max_prompt_tokens", "max_response_tokens"]
+        )
 
     def _expert_buffer_part(self):
-        total_epoch_col, batch_size_per_gpu_col = st.columns(2)
-        with total_epoch_col:
-            self._set_total_epoch()
-        with batch_size_per_gpu_col:
-            self._set_batch_size_per_gpu()
+        self._set_configs_with_st_columns(["total_epoch", "batch_size_per_gpu"])
 
         self._set_dataset_path()
 
         self._set_dataset_args()
 
-        default_workflow_type_col, default_reward_fn_type_col, storage_type_col = st.columns(3)
-        with default_workflow_type_col:
-            self._set_default_workflow_type()
-        with default_reward_fn_type_col:
-            self._set_default_reward_fn_type()
-        with storage_type_col:
-            self._set_storage_type()
+        self._set_configs_with_st_columns(
+            ["default_workflow_type", "default_reward_fn_type", "storage_type"]
+        )
 
         self.buffer_advanced_tab = st.expander("Advanced Config")
         with self.buffer_advanced_tab:
             self._set_db_url()
 
-            max_retry_times_col, max_retry_interval_col = st.columns(2)
-            with max_retry_times_col:
-                self._set_max_retry_times()
-            with max_retry_interval_col:
-                self._set_max_retry_interval()
+            self._set_configs_with_st_columns(["max_retry_times", "max_retry_interval"])
 
             self._set_sft_warmup_dataset_path()
             self._set_sft_warmup_dataset_args()
 
     def _expert_connector_part(self):
-        (
-            engine_type_col,
-            engine_num_col,
-            tensor_parallel_size_col,
-            repeat_times_col,
-        ) = st.columns(4)
-        with engine_type_col:
-            self._set_engine_type()
-        with engine_num_col:
-            self._set_engine_num()
-        with tensor_parallel_size_col:
-            self._set_tensor_parallel_size()
-        with repeat_times_col:
-            self._set_repeat_times()
+        self._set_configs_with_st_columns(
+            ["engine_type", "engine_num", "tensor_parallel_size", "repeat_times"]
+        )
 
-        sync_method_col, sync_iteration_interval_col = st.columns(2)
-        with sync_method_col:
-            self._set_sync_method()
-        with sync_iteration_interval_col:
-            self._set_sync_iteration_interval()
+        self._set_configs_with_st_columns(["sync_method", "sync_iteration_interval"])
 
         with st.expander("Advanced Config"):
-            (
-                runner_num_col,
-                max_pending_requests_col,
-                max_waiting_steps_col,
-                dtype_col,
-            ) = st.columns(4)
-            with runner_num_col:
-                self._set_runner_num()
-            with max_pending_requests_col:
-                self._set_max_pending_requests()
-            with max_waiting_steps_col:
-                self._set_max_waiting_steps()
-            with dtype_col:
-                self._set_dtype()
+            self._set_configs_with_st_columns(
+                ["runner_num", "max_pending_requests", "max_waiting_steps", "dtype"]
+            )
 
-            (
-                backend_col,
-                temperature_col,
-                top_p_col,
-                top_k_col,
-                seed_col,
-                logprobs_col,
-            ) = st.columns(6)
-            with backend_col:
-                self._set_backend()
-            with temperature_col:
-                self._set_temperature()
-            with top_p_col:
-                self._set_top_p()
-            with top_k_col:
-                self._set_top_k()
-            with seed_col:
-                self._set_seed()
-            with logprobs_col:
-                self._set_logprobs()
+            self._set_configs_with_st_columns(
+                ["backend", "temperature", "top_p", "top_k", "seed", "logprobs"]
+            )
 
-            enable_prefix_caching_col, enforce_eager_col = st.columns(2)
-            with enable_prefix_caching_col:
-                self._set_enable_prefix_caching()
-            with enforce_eager_col:
-                self._set_enforce_eager()
+            self._set_configs_with_st_columns(["enable_prefix_caching", "enforce_eager"])
 
     def _expert_trainer_part(self):
-        (
-            trainer_type_col,
-            algorithm_type_col,
-            sft_warmup_iteration_col,
-            eval_interval_col,
-        ) = st.columns(4)
-        with trainer_type_col:
-            self._set_trainer_type()
-        with algorithm_type_col:
-            self._set_algorithm_type()
-        with sft_warmup_iteration_col:
-            self._set_sft_warmup_iteration(self.buffer_advanced_tab)
-        with eval_interval_col:
-            self._set_eval_interval()
+        self._set_configs_with_st_columns(
+            ["trainer_type", "algorithm_type", "sft_warmup_iteration", "eval_interval"]
+        )
+        self._check_sft_warmup_dataset_path()
 
         if st.session_state["trainer_type"] == "verl":
             self._set_trainer_config_path()
@@ -882,157 +766,71 @@ class ConfigManager:
                 st.subheader("RL Training Config")
                 self._set_training_args()
 
-                (
-                    save_freq_col,
-                    training_strategy_col,
-                    resume_mode_col,
-                ) = st.columns(3)
-                with save_freq_col:
-                    self._set_save_freq()
+                self._set_configs_with_st_columns(["save_freq", "training_strategy", "resume_mode"])
 
-                with training_strategy_col:
-                    self._set_training_strategy()
                 if st.session_state["training_strategy"] == "fsdp":
-                    param_offload_col, optimizer_offload_col = st.columns(2)
-                    with param_offload_col:
-                        self._set_param_offload()
-                    with optimizer_offload_col:
-                        self._set_optimizer_offload()
-
-                with resume_mode_col:
-                    self._set_resume_mode()
-                    self._set_resume_from_path()
+                    self._set_configs_with_st_columns(["param_offload", "optimizer_offload"])
+                self._set_resume_from_path()
 
                 with st.expander("Advanced Config"):
-                    critic_warmup_col, total_training_steps_col = st.columns(2)
-                    with critic_warmup_col:
-                        self._set_critic_warmup()
-                    with total_training_steps_col:
-                        self._set_total_training_steps()
+                    self._set_configs_with_st_columns(["critic_warmup", "total_training_steps"])
 
                     self._set_default_hdfs_dir()
 
-                    (
-                        remove_previous_ckpt_in_save_col,
-                        del_local_ckpt_after_load_col,
-                    ) = st.columns(2)
-                    with remove_previous_ckpt_in_save_col:
-                        self._set_remove_previous_ckpt_in_save()
-                    with del_local_ckpt_after_load_col:
-                        self._set_del_local_ckpt_after_load()
+                    self._set_configs_with_st_columns(
+                        ["remove_previous_ckpt_in_save", "del_local_ckpt_after_load"]
+                    )
 
-                    max_actor_ckpt_to_keep_col, max_critic_ckpt_to_keep_col = st.columns(2)
-                    with max_actor_ckpt_to_keep_col:
-                        self._set_max_actor_ckpt_to_keep()
-                    with max_critic_ckpt_to_keep_col:
-                        self._set_max_critic_ckpt_to_keep()
+                    self._set_configs_with_st_columns(
+                        ["max_actor_ckpt_to_keep", "max_critic_ckpt_to_keep"]
+                    )
 
             with rl_algorithm_tab:
                 st.subheader("RL Algorithm Config")
-                gamma_col, lam_col, adv_estimator_col = st.columns(3)
-                with gamma_col:
-                    self._set_gamma()
-                with lam_col:
-                    self._set_lam()
-                with adv_estimator_col:
-                    self._set_adv_estimator()
+                self._set_configs_with_st_columns(["gamma", "lam", "adv_estimator"])
 
-                kl_penalty_col, kl_ctrl_type_col, kl_ctrl_coef_col = st.columns(3)
-                with kl_penalty_col:
-                    self._set_kl_penalty()
-                with kl_ctrl_type_col:
-                    self._set_kl_ctrl_type()
-                with kl_ctrl_coef_col:
-                    self._set_kl_ctrl_coef()
+                self._set_configs_with_st_columns(["kl_penalty", "kl_ctrl_type", "kl_ctrl_coef"])
 
             with actor_ref_tab:
                 st.subheader("Actor Model Config")
-                (
-                    actor_ppo_micro_batch_size_per_gpu_col,
-                    ref_log_prob_micro_batch_size_per_gpu_col,
-                    actor_ulysses_sequence_parallel_size_col,
-                ) = st.columns(3)
-                with actor_ppo_micro_batch_size_per_gpu_col:
-                    self._set_actor_ppo_micro_batch_size_per_gpu()
-                with ref_log_prob_micro_batch_size_per_gpu_col:
-                    self._set_ref_log_prob_micro_batch_size_per_gpu()
-                with actor_ulysses_sequence_parallel_size_col:
-                    self._set_actor_ulysses_sequence_parallel_size()
+                self._set_configs_with_st_columns(
+                    [
+                        "actor_ppo_micro_batch_size_per_gpu",
+                        "ref_log_prob_micro_batch_size_per_gpu",
+                        "actor_ulysses_sequence_parallel_size",
+                    ]
+                )
 
-                (
-                    actor_lr_col,
-                    actor_warmup_style_col,
-                    actor_lr_warmup_steps_ratio_col,
-                ) = st.columns(3)
-                with actor_lr_col:
-                    self._set_actor_lr()
-                with actor_warmup_style_col:
-                    self._set_actor_warmup_style()
-                with actor_lr_warmup_steps_ratio_col:
-                    self._set_actor_lr_warmup_steps_ratio()
+                self._set_configs_with_st_columns(
+                    ["actor_lr", "actor_warmup_style", "actor_lr_warmup_steps_ratio"]
+                )
 
-                (
-                    actor_grad_clip_col,
-                    actor_clip_ratio_col,
-                    actor_entropy_coeff_col,
-                ) = st.columns(3)
-                with actor_grad_clip_col:
-                    self._set_actor_grad_clip()
-                with actor_clip_ratio_col:
-                    self._set_actor_clip_ratio()
-                with actor_entropy_coeff_col:
-                    self._set_actor_entropy_coeff()
+                self._set_configs_with_st_columns(
+                    ["actor_grad_clip", "actor_clip_ratio", "actor_entropy_coeff"]
+                )
 
                 self._set_actor_use_kl_loss()
                 if st.session_state["actor_use_kl_loss"]:
-                    actor_kl_loss_coef_col, actor_kl_loss_type_col = st.columns(2)
-                    with actor_kl_loss_coef_col:
-                        self._set_actor_kl_loss_coef()
-                    with actor_kl_loss_type_col:
-                        self._set_actor_kl_loss_type()
+                    self._set_configs_with_st_columns(["actor_kl_loss_coef", "actor_kl_loss_type"])
 
-                if st.session_state["algorithm_type"] != "ppo":
-                    actor_tau_col, actor_opmd_baseline_col, actor_use_uid_col = st.columns(3)
-                    with actor_tau_col:
-                        self._set_actor_tau()
-                    with actor_opmd_baseline_col:
-                        self._set_actor_opmd_baseline()
-                    with actor_use_uid_col:
-                        self._set_actor_use_uid()
+                if st.session_state["algorithm_type"] == "opmd":
+                    self._set_configs_with_st_columns(
+                        ["actor_tau", "actor_opmd_baseline", "actor_use_uid"]
+                    )
 
                 self._set_actor_checkpoint()
 
             with critic_tab:
                 st.subheader("Critic Model Config")
-                (
-                    critic_ppo_micro_batch_size_per_gpu_col,
-                    critic_ulysses_sequence_parallel_size_col,
-                ) = st.columns(2)
-                with critic_ppo_micro_batch_size_per_gpu_col:
-                    self._set_critic_ppo_micro_batch_size_per_gpu()
-                with critic_ulysses_sequence_parallel_size_col:
-                    self._set_critic_ulysses_sequence_parallel_size()
+                self._set_configs_with_st_columns(
+                    ["critic_ppo_micro_batch_size_per_gpu", "critic_ulysses_sequence_parallel_size"]
+                )
 
-                (
-                    critic_lr_col,
-                    critic_warmup_style_col,
-                    critic_lr_warmup_steps_ratio_col,
-                ) = st.columns(3)
-                with critic_lr_col:
-                    self._set_critic_lr()
-                with critic_warmup_style_col:
-                    self._set_critic_warmup_style()
-                with critic_lr_warmup_steps_ratio_col:
-                    self._set_critic_lr_warmup_steps_ratio()
+                self._set_configs_with_st_columns(
+                    ["critic_lr", "critic_warmup_style", "critic_lr_warmup_steps_ratio"]
+                )
 
-                (
-                    critic_grad_clip_col,
-                    critic_cliprange_value_col,
-                ) = st.columns(2)
-                with critic_grad_clip_col:
-                    self._set_critic_grad_clip()
-                with critic_cliprange_value_col:
-                    self._set_critic_cliprange_value()
+                self._set_configs_with_st_columns(["critic_grad_clip", "critic_cliprange_value"])
 
     def expert_mode(self):
         model_tab, buffer_tab, connector_tab, trainer_tab = st.tabs(
@@ -1291,7 +1089,17 @@ class ConfigManager:
         else:
             raise ValueError(f"Invalid trainer type: {st.session_state['trainer_type']}")
 
-        if st.button("Generate Config", disabled=st.session_state["unfinished_flag"]):
+        if len(self.unfinished_fields) > 0:
+            disable_generate = True
+            help_messages = f"Please set following fields: `{'`, `'.join(self.unfinished_fields)}`"
+        else:
+            disable_generate = False
+            help_messages = None
+        if st.button(
+            "Generate Config",
+            disabled=disable_generate,
+            help=help_messages,
+        ):
             config = {
                 "data": {
                     "total_epochs": st.session_state["total_epoch"],
