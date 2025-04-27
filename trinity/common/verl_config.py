@@ -307,7 +307,7 @@ class veRLConfig:
         self.actor_rollout_ref.actor.alg_type = (
             config.trainer.algorithm_type.value
         )  # TODO: refactor `alg_type`
-        print(f"using algorithm type: {self.actor_rollout_ref.actor.alg_type}")
+        # print(f"using algorithm type: {self.actor_rollout_ref.actor.alg_type}")
 
         if self.actor_rollout_ref.actor.alg_type == "dpo":  # for DPO
             print("Warning: DPO micro batch size is doubled for computing loss.")

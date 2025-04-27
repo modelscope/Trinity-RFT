@@ -1,5 +1,5 @@
 data:
-  total_epoch: 20
+  total_epochs: 20
   batch_size: 96
   dataset_path: 'countdown_dataset/oneshot-split'
   default_workflow_type: 'math_workflow'

@@ -1,7 +1,7 @@
 mode: both
 data:
   dataset_path: ''
-  total_epoch: 1
+  total_epochs: 1
   batch_size: 32
   train_split: 'train'
   eval_split: ''

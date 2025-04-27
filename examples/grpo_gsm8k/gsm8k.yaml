@@ -18,7 +18,7 @@ data:
   # db related
   db_url: ''
   # downstream loading related
-  total_epoch: 1
+  total_epochs: 1
   batch_size: 96
   default_workflow_type: 'math_workflow'
 model:

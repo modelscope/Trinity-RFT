@@ -45,7 +45,7 @@ data:
   max_retry_times: 3
   max_retry_interval: 1
 
-  total_epoch: 20
+  total_epochs: 20
   batch_size: 96
   default_workflow_type: 'math_workflow'
   default_reward_fn_type: 'countdown_reward'
@@ -59,7 +59,7 @@ data:
 - `data.db_url`: The URL of the database.
 - `data.max_retry_times`: The maximum number of retries when loading the dataset from database.
 - `data.max_retry_interval`: The maximum interval between retries when loading the dataset from database.
-- `data.total_epoch`: The total number of epochs to explore the dataset. Default is `1`. It should be set manually.
+- `data.total_epochs`: The total number of epochs to explore the dataset. Default is `1`. It should be set manually.
 - `data.batch_size`: The number of `Task` in one training batch. The real batch size used in training is `data.batch_size` * `actor_rollout_ref.rollout.n` Default is `1`. It should be set manually.
 - `data.default_workflow_type`: The default workflow type used for training.
 - `data.default_reward_fn_type`: The default reward function type used for training.
@@ -357,10 +357,14 @@ algorithm:
   gamma: 1.0
   lam: 1.0
   adv_estimator: gae
+  norm_adv_by_std_in_grpo: True
+  use_kl_in_reward: False
   kl_penalty: kl  # how to estimate kl divergence
   kl_ctrl:
     type: fixed
     kl_coef: 0.001
+    horizon: 10000
+    target_kl: 0.1
 
 trainer:
   balance_batch: True

@@ -47,7 +47,7 @@ class ConfigManager:
             "max_prompt_tokens": 1024,
             "max_response_tokens": 1024,
             # Data and Buffer Configs
-            "total_epoch": 20,
+            "total_epochs": 20,
             "task_num_per_batch": 6,
             "dataset_path": "",
             "subset_name": None,
@@ -113,9 +113,13 @@ class ConfigManager:
             "gamma": 1.0,
             "lam": 1.0,
             "adv_estimator": "gae",
+            "norm_adv_by_std_in_grpo": True,
+            "use_kl_in_reward": False,
             "kl_penalty": "low_var_kl",
             "kl_ctrl_type": "fixed",
             "kl_ctrl_coef": 0.001,
+            "horizon": 10000,
+            "target_kl": 0.1,
             "actor_ppo_micro_batch_size_per_gpu": 4,
             "ref_log_prob_micro_batch_size_per_gpu": 8,
             "actor_ulysses_sequence_parallel_size": 1,
@@ -208,8 +212,8 @@ class ConfigManager:
     def _set_max_response_tokens(self):
         st.number_input("Max Response Tokens", key="max_response_tokens", min_value=1)
 
-    def _set_total_epoch(self):
-        st.number_input("Total Epoch", key="total_epoch", min_value=1)
+    def _set_total_epochs(self):
+        st.number_input("Total Epochs", key="total_epochs", min_value=1)
 
     @property
     def _str_for_task_num_per_batch(self):
@@ -415,9 +419,9 @@ if node_num > 1:
             "Sync Method",
             ["online", "offline"],
             key="sync_method",
-            help="""`online`: the explorer and trainer sync model weights once every sync_iter_interval steps.
+            help="""`online`: the explorer and trainer sync model weights once every `sync_iteration_interval` steps.
 
-`offline`: the trainer saves the model checkpoint, and the explorer loads it at sync_iter_interval.""",
+`offline`: the trainer saves the model checkpoint, and the explorer loads it at `sync_iteration_interval`.""",
         )
 
     def _set_sync_iteration_interval(self):
@@ -425,7 +429,7 @@ if node_num > 1:
             "Sync Iteration Interval",
             key="sync_iteration_interval",
             min_value=1,
-            help="""The iteration interval at which the `explorer` and `trainer` synchronize and switch.""",
+            help="""The iteration interval at which the `explorer` and `trainer` synchronize model weight.""",
         )
 
     def _set_runner_num(self):
@@ -564,7 +568,7 @@ if node_num > 1:
         st.number_input("Gamma", key="gamma")
 
     def _set_lam(self):
-        st.number_input("lam", key="lam")
+        st.number_input("lambda", key="lam")
 
     def _set_adv_estimator(self):
         st.selectbox(
@@ -572,6 +576,12 @@ if node_num > 1:
             [member.value for member in AdvantageEstimator],
             key="adv_estimator",
         )
+
+    def _set_norm_adv_by_std_in_grpo(self):
+        st.checkbox("Norm Adv by Std in GRPO", key="norm_adv_by_std_in_grpo")
+
+    def _set_use_kl_in_reward(self):
+        st.checkbox("Use KL in Reward", key="use_kl_in_reward")
 
     def _set_kl_penalty(self):
         st.selectbox("KL Penalty", ["kl", "abs", "mse", "low_var_kl"], key="kl_penalty")
@@ -581,6 +591,12 @@ if node_num > 1:
 
     def _set_kl_ctrl_coef(self):
         st.number_input("KL Ctrl Coef", key="kl_ctrl_coef", format="%.1e")
+
+    def _set_horizon(self):
+        st.number_input("Horizon", key="horizon", min_value=1.0)
+
+    def _set_target_kl(self):
+        st.number_input("Target KL", key="target_kl", format="%.1e")
 
     def _set_actor_ppo_micro_batch_size_per_gpu(self):
         st.number_input(
@@ -667,7 +683,6 @@ if node_num > 1:
             "Tau for OPMD",
             key="actor_tau",
             min_value=0.0,
-            max_value=1.0,
             format="%.1e",
         )
 
@@ -790,7 +805,7 @@ if node_num > 1:
         self._check_engine_num_and_tp_size()
 
         self._set_configs_with_st_columns(
-            ["total_epoch", "task_num_per_batch", "max_prompt_tokens", "max_response_tokens"]
+            ["total_epochs", "task_num_per_batch", "max_prompt_tokens", "max_response_tokens"]
         )
         self._check_task_num_per_batch()
 
@@ -836,7 +851,7 @@ if node_num > 1:
         )
 
     def _expert_buffer_part(self):
-        self._set_configs_with_st_columns(["total_epoch", "task_num_per_batch"])
+        self._set_configs_with_st_columns(["total_epochs", "task_num_per_batch"])
         self._check_task_num_per_batch()
 
         self._set_dataset_path()
@@ -919,8 +934,9 @@ if node_num > 1:
         with rl_algorithm_tab:
             st.subheader("RL Algorithm Config")
             self._set_configs_with_st_columns(["gamma", "lam", "adv_estimator"])
-
+            self._set_configs_with_st_columns(["norm_adv_by_std_in_grpo", "use_kl_in_reward"])
             self._set_configs_with_st_columns(["kl_penalty", "kl_ctrl_type", "kl_ctrl_coef"])
+            self._set_configs_with_st_columns(["horizon", "target_kl"])
 
         with actor_ref_tab:
             st.subheader("Actor Model Config")
@@ -1175,7 +1191,7 @@ if node_num > 1:
             },
             "trainer": {
                 "balance_batch": balance_batch,
-                "total_epochs": st.session_state["total_epoch"],
+                "total_epochs": st.session_state["total_epochs"],
                 "project_name": st.session_state["project"],
                 "experiment_name": st.session_state["exp_name"],
                 "logger": ["wandb"],
@@ -1236,7 +1252,7 @@ if node_num > 1:
         ):
             config = {
                 "data": {
-                    "total_epoch": st.session_state["total_epoch"],
+                    "total_epochs": st.session_state["total_epochs"],
                     "batch_size": st.session_state["task_num_per_batch"],
                     "dataset_path": st.session_state["dataset_path"],
                     "default_workflow_type": st.session_state["default_workflow_type"],

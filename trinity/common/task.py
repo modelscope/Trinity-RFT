@@ -121,7 +121,7 @@ class TaskSet:
     task_type: Optional[TaskType] = None
     default_index: int = 0
     default_epoch: int = 0
-    total_epoch: int = 1
+    total_epochs: int = 1
     _tasks: Iterator[Task] = None
     _index: int = 0
     _epoch: int = 0
@@ -160,7 +160,7 @@ class TaskSet:
             task_type=task_type,
             default_index=latest_task_index % dataset_len,
             default_epoch=latest_task_index // dataset_len,
-            total_epoch=config.total_epoch if task_type == TaskType.EXPLORE else 1,
+            total_epochs=config.total_epochs if task_type == TaskType.EXPLORE else 1,
         )
 
     def __iter__(self) -> Iterator[Task]:
@@ -189,7 +189,7 @@ class TaskSet:
 
     def __next__(self) -> Task:
         """Iterate through the tasks in the taskset."""
-        if self._epoch >= self.total_epoch:
+        if self._epoch >= self.total_epochs:
             raise StopIteration
 
         try:
@@ -204,7 +204,7 @@ class TaskSet:
             # Reset the task generator and increment the epoch
             self._epoch += 1
             self._index += 1
-            if self._epoch >= self.total_epoch:
+            if self._epoch >= self.total_epochs:
                 raise StopIteration
             self._tasks = task_generator(
                 self.dataset,

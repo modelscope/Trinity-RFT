@@ -69,7 +69,7 @@ class DataConfig:
     max_retry_interval: int = 1
 
     # downstream loading related
-    total_epoch: int = 1
+    total_epochs: int = 1
     batch_size: int = 1
     default_workflow_type: str = ""
     default_reward_fn_type: str = ""

@@ -42,7 +42,7 @@ data:
   # database related. The result dataset will be stored in the database.
   db_url: 'postgresql://{user_name}@localhost:5432/{db_name}'
   # downstream loading related
-  total_epoch: 1
+  total_epochs: 1
   batch_size: 96
   default_workflow_type: 'math_workflow'
 ```
@@ -53,7 +53,7 @@ Here you can set the basic information for the GSM-8K dataset, database informat
 + `dataset_config`: extra config arguments for loading the raw dataset. Mainly for the `load_dataset` method in HuggingFace `datasets` library.
 + `format_config`: some dataset format config items, which are used to map original data field names to unified ones.
 + `db_url`: the URL of the postgresql database to store the result dataset.
-+ `total_epoch`: the total number of epochs to train on this dataset.
++ `total_epochs`: the total number of epochs to train on this dataset.
 + `batch_size`: the training batch size.
 + `default_workflow_type`: the default exploring workflow type. Please refer to [programming guide](trinity_programming_guide.md) for more details.
 
@@ -74,7 +74,7 @@ data:
   # database related. The result dataset will be stored in the database.
   db_url: 'postgresql://{user_name}@localhost:5432/{db_name}'
   # downstream loading related
-  total_epoch: 1
+  total_epochs: 1
   batch_size: 96
   default_workflow_type: 'math_workflow'
 
@@ -120,7 +120,7 @@ data:
   # database related. The result dataset will be stored in the database.
   db_url: 'postgresql://{user_name}@localhost:5432/{db_name}'
   # downstream loading related
-  total_epoch: 1
+  total_epochs: 1
   batch_size: 96
   default_workflow_type: 'math_workflow'
 
@@ -199,7 +199,7 @@ data:
   # database related. The result dataset will be stored in the database.
   db_url: 'postgresql://{user_name}@localhost:5432/{db_name}'
   # downstream loading related
-  total_epoch: 20
+  total_epochs: 20
   batch_size: 32
   default_workflow_type: 'math_workflow'
 ```

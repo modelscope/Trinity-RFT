@@ -1,5 +1,5 @@
 data:
-  total_epoch: 20
+  total_epochs: 20
   batch_size: 4
   dataset_path: 'scripts/data_prepare/alfworld_data'
   default_workflow_type: 'alfworld_workflow'

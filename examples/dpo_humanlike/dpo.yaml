@@ -1,6 +1,6 @@
 mode: train
 data:
-  total_epoch: 20
+  total_epochs: 20
   batch_size: 32 # NOTE
   train_split: "train"
   dataset_path: ''
