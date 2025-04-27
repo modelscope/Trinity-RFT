@@ -83,13 +83,13 @@ class Actor:
     ppo_epochs: int = 1
     shuffle: bool = False
     ulysses_sequence_parallel_size: int = 1
+    checkpoint: Checkpoint = field(default_factory=Checkpoint)
     optim: Optim = field(default_factory=Optim)
     fsdp_config: FSDPConfig = field(default_factory=FSDPConfig)
     alg_type: str = "ppo"  # ppo / opmd / pairwise_opmd
     tau: float = 0.001  # strength of regularization w.r.t. old / ref policy
     opmd_baseline: str = "mean"  # mean / logavgexp, applicable to opmd
     use_uid: bool = False  # True / False, applicable to pairwise_opmd
-    checkpoint: Checkpoint = field(default_factory=Checkpoint)
 
 
 @dataclass
@@ -205,6 +205,8 @@ class CustomRewardFunction:
 class KL_Ctrl:
     type: str = "fixed"
     kl_coef: float = 0.001
+    horizon: float = 10000
+    target_kl: float = 0.1
 
 
 @dataclass
@@ -212,6 +214,8 @@ class Algorithm:
     gamma: float = 1.0
     lam: float = 1.0
     adv_estimator: str = "gae"
+    norm_adv_by_std_in_grpo: bool = True
+    use_kl_in_reward: bool = False
     kl_penalty: str = "kl"
     kl_ctrl: KL_Ctrl = field(default_factory=KL_Ctrl)
 
@@ -300,7 +304,9 @@ class veRLConfig:
         self.actor_rollout_ref.rollout.temperature = config.explorer.temperature
         self.actor_rollout_ref.rollout.n = config.explorer.repeat_times
         batch_size_per_gpu = self.buffer.read_batch_size // world_size
-        self.actor_rollout_ref.actor.alg_type = config.trainer.algorithm_type.value
+        self.actor_rollout_ref.actor.alg_type = (
+            config.trainer.algorithm_type.value
+        )  # TODO: refactor `alg_type`
         print(f"using algorithm type: {self.actor_rollout_ref.actor.alg_type}")
 
         if self.actor_rollout_ref.actor.alg_type == "dpo":  # for DPO

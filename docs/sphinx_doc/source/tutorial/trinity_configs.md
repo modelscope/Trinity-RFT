@@ -375,7 +375,7 @@ trainer:
   save_freq: 100
   # auto: find the last ckpt to resume. If can't find, start from scratch
   resume_mode: auto # or auto or resume_path if
-  resume_from_path: False
+  resume_from_path: ""
   test_freq: 100
   critic_warmup: 0
   default_hdfs_dir: null
@@ -395,8 +395,9 @@ trainer:
 - `actor_rollout_ref.actor.grad_clip`: Gradient clip for actor model training.
 - `actor_rollout_ref.actor.clip_ratio`: Used for compute policy loss.
 - `actor_rollout_ref.actor.entropy_coeff`: Used for compute policy loss.
-- `actor_rollout_ref.actor.use_kl_loss`: True for GRPO.
-- `actor_rollout_ref.actor.kl_loss_coef`: Used for GRPO, optional value is `kl`, `abs`, `mse` or `low_var_kl`.
+- `actor_rollout_ref.actor.use_kl_loss`: Whether to enable kl loss.
+- `actor_rollout_ref.actor.kl_loss_coef`: The coefficient of kl loss.
+- `actor_rollout_ref.actor.kl_loss_type`: How to compute kl loss, optional value is `kl`, `abs`, `mse` or `low_var_kl`.
 - `actor_rollout_ref.actor.ulysses_sequence_parallel_size`: Ulysses sequence parallel size.
 - `actor_rollout_ref.actor.alg_type`: Used for OPMD, optional value is `ppo`, `opmd` or `pairwise_opmd`.
 - `actor_rollout_ref.actor.tau`: strength of regularization w.r.t. old / ref policy.

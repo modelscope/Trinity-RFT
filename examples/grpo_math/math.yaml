@@ -27,7 +27,6 @@ buffer:
   train_dataset:
     name: math_buffer
     storage_type: queue
-    algorithm_type: ppo
     path: 'sqlite:////math.db'
 explorer:
   engine_type: vllm_async

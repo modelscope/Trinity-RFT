@@ -177,7 +177,6 @@ trainer:
   save_freq: 100
   # auto: find the last ckpt to resume. If can't find, start from scratch
   resume_mode: auto # or auto or resume_path if
-  resume_from_path: False
   test_freq: 5
   critic_warmup: 0
   default_hdfs_dir: null

@@ -82,7 +82,7 @@ class ConfigManager:
             "top_p": 1.0,
             "top_k": -1,
             "seed": 42,
-            "logprobs": None,
+            "logprobs": 0,
             "enable_prefix_caching": False,
             "enforce_eager": True,
             # Trainer Configs
@@ -128,7 +128,7 @@ class ConfigManager:
             "actor_grad_clip": 1.0,
             "actor_clip_ratio": 0.2,
             "actor_entropy_coeff": 0.001,
-            "actor_use_kl_loss": False,
+            "actor_use_kl_loss": True,
             "actor_kl_loss_coef": 0.001,
             "actor_kl_loss_type": "low_var_kl",
             "actor_checkpoint": ["model", "hf_model", "optimizer", "extra"],
@@ -161,9 +161,6 @@ class ConfigManager:
         if not st.session_state["model_path"].strip():
             self.unfinished_fields.add("model_path")
             st.warning("Please input model path.")
-        elif not os.path.isabs(st.session_state["model_path"].strip()):
-            self.unfinished_fields.add("model_path")
-            st.warning("Please input an absolute path.")
 
     def _set_critic_model_path(self):
         st.text_input(
@@ -308,9 +305,6 @@ Other workflows: conduct multi-turn task for the given dataset.
                 st.warning(
                     "Please input SFT warmup dataset path when `sft_warmup_iteration` is not 0"
                 )
-            elif not os.path.isabs(st.session_state["sft_warmup_dataset_path"].strip()):
-                self.unfinished_fields.add("sft_warmup_dataset_path")
-                st.warning("Please input an absolute path.")
 
     def _set_sft_warmup_dataset_path(self):
         st.text_input("SFT Warmup Dataset Path", key="sft_warmup_dataset_path")
@@ -397,14 +391,31 @@ if node_num > 1:
                 )
 
     def _set_repeat_times(self):
-        st.number_input("Repeat Times", key="repeat_times", min_value=1)
+        if st.session_state["algorithm_type"] == AlgorithmType.OPMD.value or st.session_state[
+            "adv_estimator"
+        ] in [
+            AdvantageEstimator.GRPO.value,
+            AdvantageEstimator.RLOO.value,
+        ]:
+            min_repeat_times = 2
+        else:
+            min_repeat_times = 1
+        if st.session_state["repeat_times"] < min_repeat_times:
+            st.session_state["repeat_times"] = min_repeat_times
+        st.number_input(
+            "Repeat Times",
+            key="repeat_times",
+            min_value=min_repeat_times,
+            help="`repeat_times` is used to set how many experiences each task can generate, "
+            "and it must be greater than `1` when `algorithm_type` is `opmd` or `grpo`.",
+        )
 
     def _set_sync_method(self):
         st.selectbox(
             "Sync Method",
             ["online", "offline"],
             key="sync_method",
-            help="""`online`: the explorer and trainer switch at sync_iter_interval.
+            help="""`online`: the explorer and trainer sync model weights once every sync_iter_interval steps.
 
 `offline`: the trainer saves the model checkpoint, and the explorer loads it at sync_iter_interval.""",
         )
@@ -633,10 +644,7 @@ if node_num > 1:
         )
 
     def _set_actor_use_kl_loss(self):
-        st.session_state["actor_use_kl_loss"] = (
-            st.session_state["algorithm_type"] == "ppo"
-            and st.session_state["adv_estimator"] == "grpo"
-        )  # TODO: check it
+        st.checkbox("Use KL Loss", key="actor_use_kl_loss")
 
     def _set_actor_kl_loss_coef(self):
         st.number_input(
@@ -645,7 +653,6 @@ if node_num > 1:
             min_value=0.0,
             max_value=1.0,
             format="%.1e",
-            help="Used in advantage calcuation for GRPO",
         )
 
     def _set_actor_kl_loss_type(self):
@@ -653,7 +660,6 @@ if node_num > 1:
             "KL Loss Type",
             ["kl", "abs", "mse", "low_var_kl"],
             key="actor_kl_loss_type",
-            help="Used in advantage calcuation for GRPO",
         )
 
     def _set_actor_tau(self):
@@ -793,7 +799,9 @@ if node_num > 1:
         if st.session_state["sft_warmup_iteration"] > 0:
             self._set_sft_warmup_dataset_args()
 
-        self._set_configs_with_st_columns(["default_workflow_type", "default_reward_fn_type"])
+        self._set_configs_with_st_columns(
+            ["default_workflow_type", "default_reward_fn_type", "repeat_times"]
+        )
 
         self._set_configs_with_st_columns(["sync_iteration_interval", "eval_interval", "save_freq"])
 
@@ -1102,8 +1110,8 @@ if node_num > 1:
                 "strategy": st.session_state["training_strategy"],
                 "optim": {
                     "lr": st.session_state["critic_lr"],
-                    "lr_warmup_steps_ratio": st.session_state["critic_warmup_style"],
-                    "warmup_style": st.session_state["critic_lr_warmup_steps_ratio"],
+                    "lr_warmup_steps_ratio": st.session_state["critic_lr_warmup_steps_ratio"],
+                    "warmup_style": st.session_state["critic_warmup_style"],
                     "total_training_steps": -1
                     if st.session_state["total_training_steps"] is None
                     else st.session_state["total_training_steps"],
@@ -1228,7 +1236,7 @@ if node_num > 1:
         ):
             config = {
                 "data": {
-                    "total_epochs": st.session_state["total_epoch"],
+                    "total_epoch": st.session_state["total_epoch"],
                     "batch_size": st.session_state["task_num_per_batch"],
                     "dataset_path": st.session_state["dataset_path"],
                     "default_workflow_type": st.session_state["default_workflow_type"],
