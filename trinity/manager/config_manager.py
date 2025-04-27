@@ -1,10 +1,11 @@
+import copy
 import os
 from typing import List
 
 import streamlit as st
 import yaml
 
-from trinity.common.constants import AlgorithmType
+from trinity.common.constants import AlgorithmType, MonitorType, StorageType
 from trinity.common.rewards import REWARD_FUNCTIONS
 from trinity.common.workflows.workflow import WORKFLOWS
 from trinity.trainer.verl.ray_trainer import AdvantageEstimator
@@ -36,6 +37,7 @@ class ConfigManager:
             "_init_config_manager": True,
             "project": "Trinity-RFT",
             "exp_name": "qwen2.5-1.5B",
+            "monitor_type": MonitorType.WANDB.value,
             # Model Configs
             "model_path": "",
             "critic_model_path": "",
@@ -57,7 +59,7 @@ class ConfigManager:
             "response_key": "answer",
             "default_workflow_type": "math_workflow",
             "default_reward_fn_type": "math_reward",
-            "storage_type": "queue",
+            "storage_type": StorageType.QUEUE.value,
             "db_url": "",
             "max_retry_times": 3,
             "max_retry_interval": 1,
@@ -159,6 +161,13 @@ class ConfigManager:
 
     def _set_name(self):
         st.text_input("Experiment Name", key="exp_name")
+
+    def _set_monitor_type(self):
+        st.selectbox(
+            "Monitor Type",
+            options=[monitor_type.value for monitor_type in MonitorType],
+            key="monitor_type",
+        )
 
     def _set_model_path(self):
         st.text_input("Model Path", key="model_path")
@@ -285,7 +294,7 @@ Other workflows: conduct multi-turn task for the given dataset.
     def _set_storage_type(self):
         st.selectbox(
             "Storage Type",
-            ["sql", "redis", "queue"],
+            [storage_type.value for storage_type in StorageType],
             key="storage_type",
         )
 
@@ -794,7 +803,7 @@ if node_num > 1:
 
         self._set_dataset_path()
 
-        self._set_configs_with_st_columns(["training_mode", "sft_warmup_iteration"])
+        self._set_configs_with_st_columns(["training_mode", "sft_warmup_iteration", "monitor_type"])
         if st.session_state["sft_warmup_iteration"] > 0:
             self._set_sft_warmup_dataset_path()
 
@@ -844,9 +853,8 @@ if node_num > 1:
 
         self._set_checkpoint_path()
 
-        self._set_configs_with_st_columns(
-            ["node_num", "gpu_per_node", "max_prompt_tokens", "max_response_tokens"]
-        )
+        self._set_configs_with_st_columns(["monitor_type", "node_num", "gpu_per_node"])
+        self._set_configs_with_st_columns(["max_prompt_tokens", "max_response_tokens"])
 
     def _expert_buffer_part(self):
         self._set_configs_with_st_columns(["total_epochs", "task_num_per_batch"])
@@ -1076,14 +1084,14 @@ if node_num > 1:
                         if st.session_state["total_training_steps"] is None
                         else st.session_state["total_training_steps"],
                     },
-                    "fsdp_config": fsdp_config,
+                    "fsdp_config": copy.deepcopy(fsdp_config),
                     "alg_type": st.session_state["algorithm_type"],
                     "tau": st.session_state["actor_tau"],
                     "opmd_baseline": st.session_state["actor_opmd_baseline"],
                     "use_uid": st.session_state["actor_use_uid"],
                 },
                 "ref": {
-                    "fsdp_config": fsdp_config,
+                    "fsdp_config": copy.deepcopy(fsdp_config),
                     "log_prob_micro_batch_size_per_gpu": st.session_state[
                         "ref_log_prob_micro_batch_size_per_gpu"
                     ],
@@ -1137,7 +1145,7 @@ if node_num > 1:
                     "external_lib": None,
                     "enable_gradient_checkpointing": enable_gradient_checkpointing,
                     "use_remove_padding": use_remove_padding,
-                    "fsdp_config": fsdp_config,
+                    "fsdp_config": copy.deepcopy(fsdp_config),
                 },
                 "ppo_mini_batch_size": st.session_state["task_num_per_batch"],
                 "ppo_micro_batch_size_per_gpu": st.session_state[
@@ -1228,6 +1236,16 @@ if node_num > 1:
         else:
             trainer_n_gpus_per_node = st.session_state["gpu_per_node"]
 
+        db_url = (
+            st.session_state["db_url"]
+            if st.session_state["db_url"].strip()
+            else f"sqlite:///{os.path.join(st.session_state['checkpoint_path'], '.cache', st.session_state['project'], st.session_state['exp_name'])}/data.db"
+        )
+        sft_storage_type = (
+            StorageType.SQL.value
+            if "://" in st.session_state["sft_warmup_dataset_path"]
+            else StorageType.FILE.value
+        )  # TODO
         if st.session_state["trainer_type"] == "verl":
             trainer_config = self._generate_verl_config(
                 trainer_nnodes=trainer_nnodes, trainer_n_gpus_per_node=trainer_n_gpus_per_node
@@ -1273,14 +1291,23 @@ if node_num > 1:
                     "gpu_per_node": st.session_state["gpu_per_node"],
                 },
                 "buffer": {
-                    "storage_type": st.session_state["storage_type"],
-                    "db_url": st.session_state["db_url"]
-                    if st.session_state["db_url"].strip()
-                    else f"sqlite:///{os.path.join(st.session_state['checkpoint_path'], '.cache', st.session_state['project'], st.session_state['exp_name'])}/data.db",
+                    "db_url": db_url,
                     "read_batch_size": st.session_state["task_num_per_batch"]
                     * st.session_state["repeat_times"],
                     "max_retry_times": st.session_state["max_retry_times"],
                     "max_retry_interval": st.session_state["max_retry_interval"],
+                    "train_dataset": {
+                        "name": "experience_buffer",  # TODO
+                        "storage_type": st.session_state["storage_type"],
+                        "algorithm_type": st.session_state["algorithm_type"],
+                        "path": db_url,
+                    },
+                    "sft_warmup_dataset": {
+                        "name": "sft_warmup_dataset",
+                        "storage_type": sft_storage_type,
+                        "algorithm_type": AlgorithmType.SFT.value,
+                        "path": st.session_state["sft_warmup_dataset_path"],
+                    },
                 },
                 "explorer": {
                     "engine_type": st.session_state["engine_type"],
@@ -1314,6 +1341,7 @@ if node_num > 1:
                 "monitor": {
                     "project": st.session_state["project"],
                     "name": st.session_state["exp_name"],
+                    "monitor_type": st.session_state["monitor_type"],
                 },
             }
             st.header("Generated Config File")

@@ -233,7 +233,7 @@ class Trainer:
     n_gpus_per_node: int = 0
     save_freq: int = 0
     resume_mode: str = "auto"
-    resume_from_path: bool = False
+    resume_from_path: str = ""
     test_freq: int = 0
     critic_warmup: int = 0
     default_hdfs_dir: Optional[str] = None
