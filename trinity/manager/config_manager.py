@@ -89,7 +89,6 @@ class ConfigManager:
             "algorithm_type": AlgorithmType.PPO.value,
             "sft_warmup_iteration": 0,
             "eval_interval": 1000,
-            "trainer_config_path": "",
             # veRL Trainer Configs
             "training_args": [
                 "balance_batch",
@@ -216,7 +215,11 @@ class ConfigManager:
 
     @property
     def _str_for_task_num_per_batch(self):
-        return f"`task_num_per_batch` must be an multiple of `gpu_per_node * node_num - engine_num * tensor_parallel_size` = {st.session_state['trainer_gpu_num']}"
+        return (
+            f"Please ensure that `task_num_per_batch` can be divided by "
+            f"`gpu_per_node * node_num - engine_num * tensor_parallel_size` "
+            f"= {st.session_state['trainer_gpu_num']}"
+        )
 
     def _set_task_num_per_batch(self):
         trainer_gpu_num = st.session_state["trainer_gpu_num"]
@@ -336,7 +339,8 @@ Other workflows: conduct multi-turn task for the given dataset.
 
     @property
     def _str_for_engine_num_and_tp_size(self):
-        return r"""```python
+        return r"""and it must meet the following constraints:
+```python
 assert engine_num * tensor_parallel_size < gpu_per_node * node_num
 if node_num > 1:
     assert gpu_per_node % tensor_parallel_size == 0
@@ -350,11 +354,12 @@ if node_num > 1:
             st.session_state["engine_num"] = max_engine_num
             self._set_trainer_gpu_num()
         st.number_input(
-            "Inference Engine Num",
+            "Engine Num",
             key="engine_num",
             min_value=1,
             max_value=max_engine_num,
-            help=f"`engine_num` must meet the following constraints:\n{self._str_for_engine_num_and_tp_size}",
+            help=f"`engine_num` is used to set the quantity of inference engines, "
+            f"{self._str_for_engine_num_and_tp_size}",
             on_change=self._set_trainer_gpu_num,
         )
 
@@ -369,7 +374,8 @@ if node_num > 1:
             key="tensor_parallel_size",
             min_value=1,
             max_value=max_tensor_parallel_size,
-            help=f"`tensor_parallel_size` must meet the following constraints:\n{self._str_for_engine_num_and_tp_size}",
+            help=f"`tensor_parallel_size` is used to set the tensor parallel size of inference engines, "
+            f"{self._str_for_engine_num_and_tp_size}",
             on_change=self._set_trainer_gpu_num,
         )
 
@@ -394,7 +400,14 @@ if node_num > 1:
         st.number_input("Repeat Times", key="repeat_times", min_value=1)
 
     def _set_sync_method(self):
-        st.selectbox("Sync Method", ["online", "offline"], key="sync_method")
+        st.selectbox(
+            "Sync Method",
+            ["online", "offline"],
+            key="sync_method",
+            help="""`online`: the explorer and trainer switch at sync_iter_interval.
+
+`offline`: the trainer saves the model checkpoint, and the explorer loads it at sync_iter_interval.""",
+        )
 
     def _set_sync_iteration_interval(self):
         st.number_input(
@@ -423,11 +436,11 @@ if node_num > 1:
         st.number_input("Temperature", key="temperature", min_value=0.0, max_value=2.0)
 
     def _set_top_p(self):
-        st.number_input("Top P", key="top_p", min_value=0.0, max_value=1.0)
+        st.number_input("Top-p", key="top_p", min_value=0.0, max_value=1.0)
 
     def _set_top_k(self):
         st.number_input(
-            "Top K",
+            "Top-k",
             key="top_k",
             min_value=-1,
             max_value=512,
@@ -461,15 +474,6 @@ if node_num > 1:
 
     def _set_eval_interval(self):
         st.number_input("Eval Interval", key="eval_interval", min_value=1)
-
-    def _set_trainer_config_path(self):
-        st.text_input("Trainer Config Path", key="trainer_config_path")
-        if not st.session_state["trainer_config_path"].strip():
-            self.unfinished_fields.add("trainer_config_path")
-            st.warning("Please input trainer config path")
-        elif not os.path.isabs(st.session_state["trainer_config_path"].strip()):
-            self.unfinished_fields.add("trainer_config_path")
-            st.warning("Please input an absolute path.")
 
     def _set_training_args(self):
         st.multiselect(
@@ -870,85 +874,86 @@ if node_num > 1:
         self._check_sft_warmup_dataset_path()
 
         if st.session_state["trainer_type"] == "verl":
-            self._set_trainer_config_path()
+            self._expert_verl_trainer_part()
 
-            rl_training_tab, rl_algorithm_tab, actor_ref_tab, critic_tab = st.tabs(
+    def _expert_verl_trainer_part(self):
+        rl_training_tab, rl_algorithm_tab, actor_ref_tab, critic_tab = st.tabs(
+            [
+                "RL Training Config",
+                "RL Algorithm Config",
+                "Actor and Ref Config",
+                "Critic Config",
+            ]
+        )
+        with rl_training_tab:
+            st.subheader("RL Training Config")
+            self._set_training_args()
+
+            self._set_configs_with_st_columns(["save_freq", "training_strategy", "resume_mode"])
+
+            if st.session_state["training_strategy"] == "fsdp":
+                self._set_configs_with_st_columns(["param_offload", "optimizer_offload"])
+            self._set_resume_from_path()
+
+            with st.expander("Advanced Config"):
+                self._set_configs_with_st_columns(["critic_warmup", "total_training_steps"])
+
+                self._set_default_hdfs_dir()
+
+                self._set_configs_with_st_columns(
+                    ["remove_previous_ckpt_in_save", "del_local_ckpt_after_load"]
+                )
+
+                self._set_configs_with_st_columns(
+                    ["max_actor_ckpt_to_keep", "max_critic_ckpt_to_keep"]
+                )
+
+        with rl_algorithm_tab:
+            st.subheader("RL Algorithm Config")
+            self._set_configs_with_st_columns(["gamma", "lam", "adv_estimator"])
+
+            self._set_configs_with_st_columns(["kl_penalty", "kl_ctrl_type", "kl_ctrl_coef"])
+
+        with actor_ref_tab:
+            st.subheader("Actor Model Config")
+            self._set_configs_with_st_columns(
                 [
-                    "RL Training Config",
-                    "RL Algorithm Config",
-                    "Actor and Ref Config",
-                    "Critic Config",
+                    "actor_ppo_micro_batch_size_per_gpu",
+                    "ref_log_prob_micro_batch_size_per_gpu",
+                    "actor_ulysses_sequence_parallel_size",
                 ]
             )
-            with rl_training_tab:
-                st.subheader("RL Training Config")
-                self._set_training_args()
 
-                self._set_configs_with_st_columns(["save_freq", "training_strategy", "resume_mode"])
+            self._set_configs_with_st_columns(
+                ["actor_lr", "actor_warmup_style", "actor_lr_warmup_steps_ratio"]
+            )
 
-                if st.session_state["training_strategy"] == "fsdp":
-                    self._set_configs_with_st_columns(["param_offload", "optimizer_offload"])
-                self._set_resume_from_path()
+            self._set_configs_with_st_columns(
+                ["actor_grad_clip", "actor_clip_ratio", "actor_entropy_coeff"]
+            )
 
-                with st.expander("Advanced Config"):
-                    self._set_configs_with_st_columns(["critic_warmup", "total_training_steps"])
+            self._set_actor_use_kl_loss()
+            if st.session_state["actor_use_kl_loss"]:
+                self._set_configs_with_st_columns(["actor_kl_loss_coef", "actor_kl_loss_type"])
 
-                    self._set_default_hdfs_dir()
-
-                    self._set_configs_with_st_columns(
-                        ["remove_previous_ckpt_in_save", "del_local_ckpt_after_load"]
-                    )
-
-                    self._set_configs_with_st_columns(
-                        ["max_actor_ckpt_to_keep", "max_critic_ckpt_to_keep"]
-                    )
-
-            with rl_algorithm_tab:
-                st.subheader("RL Algorithm Config")
-                self._set_configs_with_st_columns(["gamma", "lam", "adv_estimator"])
-
-                self._set_configs_with_st_columns(["kl_penalty", "kl_ctrl_type", "kl_ctrl_coef"])
-
-            with actor_ref_tab:
-                st.subheader("Actor Model Config")
+            if st.session_state["algorithm_type"] == "opmd":
                 self._set_configs_with_st_columns(
-                    [
-                        "actor_ppo_micro_batch_size_per_gpu",
-                        "ref_log_prob_micro_batch_size_per_gpu",
-                        "actor_ulysses_sequence_parallel_size",
-                    ]
+                    ["actor_tau", "actor_opmd_baseline", "actor_use_uid"]
                 )
 
-                self._set_configs_with_st_columns(
-                    ["actor_lr", "actor_warmup_style", "actor_lr_warmup_steps_ratio"]
-                )
+            self._set_actor_checkpoint()
 
-                self._set_configs_with_st_columns(
-                    ["actor_grad_clip", "actor_clip_ratio", "actor_entropy_coeff"]
-                )
+        with critic_tab:
+            st.subheader("Critic Model Config")
+            self._set_configs_with_st_columns(
+                ["critic_ppo_micro_batch_size_per_gpu", "critic_ulysses_sequence_parallel_size"]
+            )
 
-                self._set_actor_use_kl_loss()
-                if st.session_state["actor_use_kl_loss"]:
-                    self._set_configs_with_st_columns(["actor_kl_loss_coef", "actor_kl_loss_type"])
+            self._set_configs_with_st_columns(
+                ["critic_lr", "critic_warmup_style", "critic_lr_warmup_steps_ratio"]
+            )
 
-                if st.session_state["algorithm_type"] == "opmd":
-                    self._set_configs_with_st_columns(
-                        ["actor_tau", "actor_opmd_baseline", "actor_use_uid"]
-                    )
-
-                self._set_actor_checkpoint()
-
-            with critic_tab:
-                st.subheader("Critic Model Config")
-                self._set_configs_with_st_columns(
-                    ["critic_ppo_micro_batch_size_per_gpu", "critic_ulysses_sequence_parallel_size"]
-                )
-
-                self._set_configs_with_st_columns(
-                    ["critic_lr", "critic_warmup_style", "critic_lr_warmup_steps_ratio"]
-                )
-
-                self._set_configs_with_st_columns(["critic_grad_clip", "critic_cliprange_value"])
+            self._set_configs_with_st_columns(["critic_grad_clip", "critic_cliprange_value"])
 
     def expert_mode(self):
         model_tab, buffer_tab, connector_tab, trainer_tab = st.tabs(
@@ -966,6 +971,226 @@ if node_num > 1:
         with trainer_tab:
             self._expert_trainer_part()
 
+    def _generate_verl_config(self, trainer_nnodes: int = 1, trainer_n_gpus_per_node: int = 8):
+        balance_batch = "balance_batch" in st.session_state["training_args"]
+        enable_gradient_checkpointing = (
+            "gradient_checkpointing" in st.session_state["training_args"]
+        )
+        use_remove_padding = "remove_padding" in st.session_state["training_args"]
+        use_dynamic_bsz = "dynamic_bsz" in st.session_state["training_args"]
+
+        if st.session_state["training_strategy"] == "fsdp":
+            fsdp_config = {
+                "wrap_policy": {"min_num_params": 0},
+                "param_offload": st.session_state["param_offload"],
+                "optimizer_offload": st.session_state["optimizer_offload"],
+                "fsdp_size": -1,
+            }
+        else:
+            fsdp_config = {}
+
+        ppo_epochs = 1  # TODO
+        ppo_max_token_len_per_gpu = st.session_state["repeat_times"] * (
+            st.session_state["max_prompt_tokens"] + st.session_state["max_response_tokens"]
+        )
+
+        critic_model_path = (
+            st.session_state["critic_model_path"].strip()
+            if st.session_state["critic_model_path"].strip()
+            else st.session_state["model_path"]
+        )
+        trainer_config = {
+            "data": {
+                "tokenizer": None,
+                "train_files": "placeholder",
+                "val_files": "placeholder",
+                "prompt_key": "placeholder",
+                "max_prompt_length": st.session_state["max_prompt_tokens"],
+                "max_response_length": st.session_state["max_response_tokens"],
+                "train_batch_size": st.session_state["task_num_per_batch"]
+                * st.session_state["repeat_times"],
+                "val_batch_size": None,
+                "return_raw_input_ids": False,
+                "return_raw_chat": False,
+                "shuffle": True,
+                "filter_overlong_prompts": False,
+                "truncation": "error",
+                "image_key": "images",
+            },
+            "actor_rollout_ref": {
+                "hybrid_engine": True,
+                "model": {
+                    "path": st.session_state["model_path"],
+                    "external_lib": None,
+                    "override_config": {},
+                    "enable_gradient_checkpointing": enable_gradient_checkpointing,
+                    "use_remove_padding": use_remove_padding,
+                },
+                "actor": {
+                    "strategy": st.session_state["training_strategy"],
+                    "ppo_mini_batch_size": st.session_state["task_num_per_batch"],
+                    "ppo_micro_batch_size_per_gpu": st.session_state[
+                        "actor_ppo_micro_batch_size_per_gpu"
+                    ],
+                    "use_dynamic_bsz": use_dynamic_bsz,
+                    "ppo_max_token_len_per_gpu": ppo_max_token_len_per_gpu,
+                    "grad_clip": st.session_state["actor_grad_clip"],
+                    "clip_ratio": st.session_state["actor_clip_ratio"],
+                    "entropy_coeff": st.session_state["actor_entropy_coeff"],
+                    "use_kl_loss": st.session_state["actor_use_kl_loss"],
+                    "kl_loss_coef": st.session_state["actor_kl_loss_coef"],
+                    "kl_loss_type": st.session_state["actor_kl_loss_type"],
+                    "ppo_epochs": ppo_epochs,
+                    "shuffle": False,
+                    "ulysses_sequence_parallel_size": st.session_state[
+                        "actor_ulysses_sequence_parallel_size"
+                    ],
+                    "checkpoint": {"contents": st.session_state["actor_checkpoint"]},
+                    "optim": {
+                        "lr": st.session_state["actor_lr"],
+                        "lr_warmup_steps_ratio": st.session_state["actor_lr_warmup_steps_ratio"],
+                        "warmup_style": st.session_state["actor_warmup_style"],
+                        "total_training_steps": -1
+                        if st.session_state["total_training_steps"] is None
+                        else st.session_state["total_training_steps"],
+                    },
+                    "fsdp_config": fsdp_config,
+                    "alg_type": st.session_state["algorithm_type"],
+                    "tau": st.session_state["actor_tau"],
+                    "opmd_baseline": st.session_state["actor_opmd_baseline"],
+                    "use_uid": st.session_state["actor_use_uid"],
+                },
+                "ref": {
+                    "fsdp_config": fsdp_config,
+                    "log_prob_micro_batch_size_per_gpu": st.session_state[
+                        "ref_log_prob_micro_batch_size_per_gpu"
+                    ],
+                    "log_prob_use_dynamic_bsz": use_dynamic_bsz,
+                    "log_prob_max_token_len_per_gpu": ppo_max_token_len_per_gpu,
+                    "ulysses_sequence_parallel_size": st.session_state[
+                        "actor_ulysses_sequence_parallel_size"
+                    ],
+                },
+                "rollout": {
+                    "name": "vllm",
+                    "temperature": st.session_state["temperature"],
+                    "top_k": -1,
+                    "top_p": 1,
+                    "use_fire_sampling": False,
+                    "prompt_length": st.session_state["max_prompt_tokens"],
+                    "response_length": st.session_state["max_response_tokens"],
+                    "dtype": "bfloat16",
+                    "gpu_memory_utilization": 0.4,
+                    "ignore_eos": False,
+                    "enforce_eager": True,
+                    "free_cache_engine": True,
+                    "load_format": "dummy_dtensor",
+                    "tensor_model_parallel_size": 2,
+                    "max_num_batched_tokens": 8192,
+                    "max_model_len": None,
+                    "max_num_seqs": 1024,
+                    "log_prob_micro_batch_size_per_gpu": 4,
+                    "log_prob_use_dynamic_bsz": use_dynamic_bsz,
+                    "log_prob_max_token_len_per_gpu": ppo_max_token_len_per_gpu,
+                    "disable_log_stats": True,
+                    "enable_chunked_prefill": True,
+                    "do_sample": True,
+                    "n": st.session_state["repeat_times"],
+                },
+            },
+            "critic": {
+                "strategy": st.session_state["training_strategy"],
+                "optim": {
+                    "lr": st.session_state["critic_lr"],
+                    "lr_warmup_steps_ratio": st.session_state["critic_warmup_style"],
+                    "warmup_style": st.session_state["critic_lr_warmup_steps_ratio"],
+                    "total_training_steps": -1
+                    if st.session_state["total_training_steps"] is None
+                    else st.session_state["total_training_steps"],
+                },
+                "model": {
+                    "path": critic_model_path,
+                    "tokenizer_path": critic_model_path,
+                    "override_config": {},
+                    "external_lib": None,
+                    "enable_gradient_checkpointing": enable_gradient_checkpointing,
+                    "use_remove_padding": use_remove_padding,
+                    "fsdp_config": fsdp_config,
+                },
+                "ppo_mini_batch_size": st.session_state["task_num_per_batch"],
+                "ppo_micro_batch_size_per_gpu": st.session_state[
+                    "critic_ppo_micro_batch_size_per_gpu"
+                ],
+                "forward_micro_batch_size_per_gpu": st.session_state[
+                    "critic_ppo_micro_batch_size_per_gpu"
+                ],
+                "use_dynamic_bsz": use_dynamic_bsz,
+                "ppo_max_token_len_per_gpu": ppo_max_token_len_per_gpu * 2,
+                "forward_max_token_len_per_gpu": ppo_max_token_len_per_gpu * 2,
+                "ulysses_sequence_parallel_size": st.session_state[
+                    "critic_ulysses_sequence_parallel_size"
+                ],
+                "ppo_epochs": ppo_epochs,
+                "shuffle": False,
+                "grad_clip": st.session_state["critic_grad_clip"],
+                "cliprange_value": st.session_state["critic_cliprange_value"],
+            },
+            "reward_model": {
+                "enable": False,
+                "strategy": "fsdp",
+                "model": {
+                    "input_tokenizer": st.session_state["model_path"],
+                    "path": "~/models/FsfairX-LLaMA3-RM-v0.1",
+                    "external_lib": None,
+                    "use_remove_padding": False,
+                    "fsdp_config": {
+                        "min_num_params": 0,
+                        "param_offload": False,
+                        "fsdp_size": -1,
+                    },
+                },
+                "ulysses_sequence_parallel_size": 1,
+                "use_dynamic_bsz": use_dynamic_bsz,
+                "forward_max_token_len_per_gpu": ppo_max_token_len_per_gpu * 2,
+                "reward_manager": "naive",
+            },
+            "custom_reward_function": {"path": None, "name": "compute_score"},
+            "algorithm": {
+                "gamma": st.session_state["gamma"],
+                "lam": st.session_state["lam"],
+                "adv_estimator": st.session_state["adv_estimator"],
+                "kl_penalty": st.session_state["kl_penalty"],
+                "kl_ctrl": {
+                    "type": st.session_state["kl_ctrl_type"],
+                    "kl_coef": st.session_state["kl_ctrl_coef"],
+                },
+            },
+            "trainer": {
+                "balance_batch": balance_batch,
+                "total_epochs": st.session_state["total_epoch"],
+                "project_name": st.session_state["project"],
+                "experiment_name": st.session_state["exp_name"],
+                "logger": ["wandb"],
+                "val_generations_to_log_to_wandb": 0,
+                "nnodes": trainer_nnodes,
+                "n_gpus_per_node": trainer_n_gpus_per_node,
+                "save_freq": st.session_state["save_freq"],
+                "resume_mode": st.session_state["resume_mode"],
+                "resume_from_path": st.session_state["resume_from_path"],
+                "test_freq": 100,
+                "critic_warmup": st.session_state["critic_warmup"],
+                "default_hdfs_dir": st.session_state["default_hdfs_dir"],
+                "remove_previous_ckpt_in_save": st.session_state["remove_previous_ckpt_in_save"],
+                "del_local_ckpt_after_load": st.session_state["del_local_ckpt_after_load"],
+                "default_local_dir": st.session_state["checkpoint_path"],
+                "val_before_train": False,
+                "sync_freq": st.session_state["sync_iteration_interval"],
+                "max_actor_ckpt_to_keep": st.session_state["max_actor_ckpt_to_keep"],
+                "max_critic_ckpt_to_keep": st.session_state["max_critic_ckpt_to_keep"],
+            },
+        }
+        return trainer_config
+
     def generate_config(self):
         trainer_nnodes = (
             st.session_state["node_num"]
@@ -982,223 +1207,9 @@ if node_num > 1:
             trainer_n_gpus_per_node = st.session_state["gpu_per_node"]
 
         if st.session_state["trainer_type"] == "verl":
-            balance_batch = "balance_batch" in st.session_state["training_args"]
-            enable_gradient_checkpointing = (
-                "gradient_checkpointing" in st.session_state["training_args"]
+            trainer_config = self._generate_verl_config(
+                trainer_nnodes=trainer_nnodes, trainer_n_gpus_per_node=trainer_n_gpus_per_node
             )
-            use_remove_padding = "remove_padding" in st.session_state["training_args"]
-            use_dynamic_bsz = "dynamic_bsz" in st.session_state["training_args"]
-
-            if st.session_state["training_strategy"] == "fsdp":
-                fsdp_config = {
-                    "wrap_policy": {"min_num_params": 0},
-                    "param_offload": st.session_state["param_offload"],
-                    "optimizer_offload": st.session_state["optimizer_offload"],
-                    "fsdp_size": -1,
-                }
-            else:
-                fsdp_config = {}
-            trainer_config = {
-                "data": {
-                    "tokenizer": None,
-                    "train_files": "placeholder",
-                    "val_files": "placeholder",
-                    "prompt_key": "placeholder",
-                    "max_prompt_length": st.session_state["max_prompt_tokens"],
-                    "max_response_length": st.session_state["max_response_tokens"],
-                    "train_batch_size": st.session_state["task_num_per_batch"]
-                    * st.session_state["repeat_times"],
-                    "val_batch_size": None,
-                    "return_raw_input_ids": False,
-                    "return_raw_chat": False,
-                    "shuffle": True,
-                    "filter_overlong_prompts": False,
-                    "truncation": "error",
-                    "image_key": "images",
-                },
-                "actor_rollout_ref": {
-                    "hybrid_engine": True,
-                    "model": {
-                        "path": st.session_state["model_path"],
-                        "external_lib": None,
-                        "override_config": {},
-                        "enable_gradient_checkpointing": enable_gradient_checkpointing,
-                        "use_remove_padding": use_remove_padding,
-                    },
-                    "actor": {
-                        "strategy": st.session_state["training_strategy"],
-                        "ppo_mini_batch_size": st.session_state["task_num_per_batch"],
-                        "ppo_micro_batch_size_per_gpu": st.session_state[
-                            "actor_ppo_micro_batch_size_per_gpu"
-                        ],
-                        "use_dynamic_bsz": use_dynamic_bsz,
-                        "ppo_max_token_len_per_gpu": st.session_state["repeat_times"]
-                        * (
-                            st.session_state["max_prompt_tokens"]
-                            + st.session_state["max_response_tokens"]
-                        ),
-                        "grad_clip": st.session_state["actor_grad_clip"],
-                        "clip_ratio": st.session_state["actor_clip_ratio"],
-                        "entropy_coeff": st.session_state["actor_entropy_coeff"],
-                        "use_kl_loss": st.session_state["actor_use_kl_loss"],
-                        "kl_loss_coef": st.session_state["actor_kl_loss_coef"],
-                        "kl_loss_type": st.session_state["actor_kl_loss_type"],
-                        "ppo_epochs": 1,  # TODO
-                        "shuffle": False,
-                        "ulysses_sequence_parallel_size": st.session_state[
-                            "actor_ulysses_sequence_parallel_size"
-                        ],
-                        "checkpoint": {"contents": st.session_state["actor_checkpoint"]},
-                        "optim": {
-                            "lr": st.session_state["actor_lr"],
-                            "lr_warmup_steps_ratio": st.session_state[
-                                "actor_lr_warmup_steps_ratio"
-                            ],
-                            "warmup_style": st.session_state["actor_warmup_style"],
-                            "total_training_steps": -1
-                            if st.session_state["total_training_steps"] is None
-                            else st.session_state["total_training_steps"],
-                        },
-                        "fsdp_config": fsdp_config,
-                        "alg_type": st.session_state["algorithm_type"],
-                        "tau": st.session_state["actor_tau"],
-                        "opmd_baseline": st.session_state["actor_opmd_baseline"],
-                        "use_uid": st.session_state["actor_use_uid"],
-                    },
-                    "ref": {
-                        "fsdp_config": fsdp_config,
-                        "log_prob_micro_batch_size_per_gpu": st.session_state[
-                            "ref_log_prob_micro_batch_size_per_gpu"
-                        ],
-                        "log_prob_use_dynamic_bsz": "${actor_rollout_ref.actor.use_dynamic_bsz}",
-                        "log_prob_max_token_len_per_gpu": "${actor_rollout_ref.actor.ppo_max_token_len_per_gpu}",
-                        "ulysses_sequence_parallel_size": "${actor_rollout_ref.actor.ulysses_sequence_parallel_size}",
-                    },
-                    "rollout": {
-                        "name": "vllm",
-                        "temperature": st.session_state["temperature"],
-                        "top_k": -1,
-                        "top_p": 1,
-                        "use_fire_sampling": False,
-                        "prompt_length": "${data.max_prompt_length}",
-                        "response_length": "${data.max_response_length}",
-                        "dtype": "bfloat16",
-                        "gpu_memory_utilization": 0.4,
-                        "ignore_eos": False,
-                        "enforce_eager": True,
-                        "free_cache_engine": True,
-                        "load_format": "dummy_dtensor",
-                        "tensor_model_parallel_size": 2,
-                        "max_num_batched_tokens": 8192,
-                        "max_model_len": None,
-                        "max_num_seqs": 1024,
-                        "log_prob_micro_batch_size_per_gpu": 4,
-                        "log_prob_use_dynamic_bsz": "${actor_rollout_ref.actor.use_dynamic_bsz}",
-                        "log_prob_max_token_len_per_gpu": "${actor_rollout_ref.actor.ppo_max_token_len_per_gpu}",
-                        "disable_log_stats": True,
-                        "enable_chunked_prefill": True,
-                        "do_sample": True,
-                        "n": st.session_state["repeat_times"],
-                    },
-                },
-                "critic": {
-                    "strategy": st.session_state["training_strategy"],
-                    "optim": {
-                        "lr": st.session_state["critic_lr"],
-                        "lr_warmup_steps_ratio": st.session_state["critic_warmup_style"],
-                        "warmup_style": st.session_state["critic_lr_warmup_steps_ratio"],
-                        "total_training_steps": -1
-                        if st.session_state["total_training_steps"] is None
-                        else st.session_state["total_training_steps"],
-                    },
-                    "model": {
-                        "path": st.session_state["critic_model_path"]
-                        if st.session_state["critic_model_path"].strip()
-                        else st.session_state["model_path"],
-                        "tokenizer_path": "${actor_rollout_ref.model.path}",
-                        "override_config": {},
-                        "external_lib": "${actor_rollout_ref.model.external_lib}",
-                        "enable_gradient_checkpointing": enable_gradient_checkpointing,
-                        "use_remove_padding": use_remove_padding,
-                        "fsdp_config": fsdp_config,
-                    },
-                    "ppo_mini_batch_size": "${actor_rollout_ref.actor.ppo_mini_batch_size}",
-                    "ppo_micro_batch_size_per_gpu": st.session_state[
-                        "critic_ppo_micro_batch_size_per_gpu"
-                    ],
-                    "forward_micro_batch_size_per_gpu": "${critic.ppo_micro_batch_size_per_gpu}",
-                    "use_dynamic_bsz": use_dynamic_bsz,
-                    "ppo_max_token_len_per_gpu": st.session_state["repeat_times"]
-                    * (
-                        st.session_state["max_prompt_tokens"]
-                        + st.session_state["max_response_tokens"]
-                    )
-                    * 2,
-                    "forward_max_token_len_per_gpu": "${critic.ppo_max_token_len_per_gpu}",
-                    "ulysses_sequence_parallel_size": st.session_state[
-                        "critic_ulysses_sequence_parallel_size"
-                    ],
-                    "ppo_epochs": "${actor_rollout_ref.actor.ppo_epochs}",
-                    "shuffle": "${actor_rollout_ref.actor.shuffle}",
-                    "grad_clip": st.session_state["critic_grad_clip"],
-                    "cliprange_value": st.session_state["critic_cliprange_value"],
-                },
-                "reward_model": {
-                    "enable": False,
-                    "strategy": "fsdp",
-                    "model": {
-                        "input_tokenizer": "${actor_rollout_ref.model.path}",
-                        "path": "~/models/FsfairX-LLaMA3-RM-v0.1",
-                        "external_lib": "${actor_rollout_ref.model.external_lib}",
-                        "use_remove_padding": False,
-                        "fsdp_config": {
-                            "min_num_params": 0,
-                            "param_offload": False,
-                            "fsdp_size": -1,
-                        },
-                    },
-                    "ulysses_sequence_parallel_size": 1,
-                    "use_dynamic_bsz": "${critic.use_dynamic_bsz}",
-                    "forward_max_token_len_per_gpu": "${critic.forward_max_token_len_per_gpu}",
-                    "reward_manager": "naive",
-                },
-                "custom_reward_function": {"path": None, "name": "compute_score"},
-                "algorithm": {
-                    "gamma": st.session_state["gamma"],
-                    "lam": st.session_state["lam"],
-                    "adv_estimator": st.session_state["adv_estimator"],
-                    "kl_penalty": st.session_state["kl_penalty"],
-                    "kl_ctrl": {
-                        "type": st.session_state["kl_ctrl_type"],
-                        "kl_coef": st.session_state["kl_ctrl_coef"],
-                    },
-                },
-                "trainer": {
-                    "balance_batch": balance_batch,
-                    "total_epochs": st.session_state["total_epoch"],
-                    "project_name": st.session_state["project"],
-                    "experiment_name": st.session_state["exp_name"],
-                    "logger": ["wandb"],
-                    "val_generations_to_log_to_wandb": 0,
-                    "nnodes": trainer_nnodes,
-                    "n_gpus_per_node": trainer_n_gpus_per_node,
-                    "save_freq": st.session_state["save_freq"],
-                    "resume_mode": st.session_state["resume_mode"],
-                    "resume_from_path": st.session_state["resume_from_path"],
-                    "test_freq": 100,
-                    "critic_warmup": st.session_state["critic_warmup"],
-                    "default_hdfs_dir": st.session_state["default_hdfs_dir"],
-                    "remove_previous_ckpt_in_save": st.session_state[
-                        "remove_previous_ckpt_in_save"
-                    ],
-                    "del_local_ckpt_after_load": st.session_state["del_local_ckpt_after_load"],
-                    "default_local_dir": st.session_state["checkpoint_path"],
-                    "val_before_train": False,
-                    "sync_freq": st.session_state["sync_iteration_interval"],
-                    "max_actor_ckpt_to_keep": st.session_state["max_actor_ckpt_to_keep"],
-                    "max_critic_ckpt_to_keep": st.session_state["max_critic_ckpt_to_keep"],
-                },
-            }
         else:
             raise ValueError(f"Invalid trainer type: {st.session_state['trainer_type']}")
 
@@ -1274,7 +1285,7 @@ if node_num > 1:
                 "trainer": {
                     "trainer_type": st.session_state["trainer_type"],
                     "algorithm_type": st.session_state["algorithm_type"],
-                    "trainer_config_path": st.session_state["trainer_config_path"],
+                    "trainer_config": trainer_config,
                     "sft_warmup_iteration": st.session_state["sft_warmup_iteration"],
                     "eval_interval": st.session_state["eval_interval"],
                 },
@@ -1284,12 +1295,9 @@ if node_num > 1:
                 },
             }
             st.header("Generated Config File")
-            st.subheader("Overall Config File")
+            st.subheader("Config File")
             yaml_config = yaml.dump(config, allow_unicode=True, sort_keys=False)
             st.code(yaml_config, language="yaml")
-            st.subheader("Trainer Config File")
-            trainer_config = yaml.dump(trainer_config, allow_unicode=True, sort_keys=False)
-            st.code(trainer_config, language="yaml")
 
 
 if __name__ == "__main__":

@@ -100,7 +100,7 @@ class DatasetConfig:
 
     name: str
     storage_type: StorageType
-    algorithm_type: AlgorithmType
+    algorithm_type: AlgorithmType = AlgorithmType.PPO
     path: Optional[str] = None
     kwargs: Dict[str, Any] = field(default_factory=dict)
 
@@ -176,7 +176,7 @@ class TrainerConfig:
     trainer_config_path: str = ""
     eval_interval: int = 100
     enable_preview: bool = True  # enable rollout preview in wandb
-    trainer_config: Any = None
+    trainer_config: Any = field(default_factory=dict)
 
     # train algorithm
     algorithm_type: AlgorithmType = AlgorithmType.PPO
@@ -273,11 +273,21 @@ class Config:
     def check_and_update(self) -> None:
         """Check and update the config."""
         if self.trainer.trainer_type == "verl":
-            from trinity.common.verl_config import load_config
+            if self.trainer.trainer_config:
+                from trinity.common.verl_config import veRLConfig
 
-            if not os.path.isfile(self.trainer.trainer_config_path):
-                raise ValueError(f"Invalid trainer config path: {self.trainer.trainer_config_path}")
-            self.trainer.trainer_config = load_config(self.trainer.trainer_config_path)
+                trainer_config_schema = OmegaConf.structured(veRLConfig)
+                trainer_config = OmegaConf.merge(trainer_config_schema, self.trainer.trainer_config)
+                self.trainer.trainer_config = OmegaConf.to_object(trainer_config)
+            else:
+                if os.path.isfile(self.trainer.trainer_config_path):
+                    from trinity.common.verl_config import load_config
+
+                    self.trainer.trainer_config = load_config(self.trainer.trainer_config_path)
+                else:
+                    raise ValueError(
+                        f"Invalid trainer config path: {self.trainer.trainer_config_path}"
+                    )
         else:
             raise ValueError(f"Invalid trainer type: {self.trainer_type}")
 
