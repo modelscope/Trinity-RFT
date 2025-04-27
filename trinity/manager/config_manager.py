@@ -50,6 +50,7 @@ class ConfigManager:
             "total_epoch": 20,
             "task_num_per_batch": 6,
             "dataset_path": "",
+            "subset_name": None,
             "train_split": "train",
             "eval_split": "",
             "prompt_key": "question",
@@ -243,15 +244,14 @@ class ConfigManager:
         if not st.session_state["dataset_path"].strip():
             self.unfinished_fields.add("dataset_path")
             st.warning("Please input dataset path.")
-        elif not os.path.isabs(st.session_state["dataset_path"].strip()):
-            self.unfinished_fields.add("dataset_path")
-            st.warning("Please input an absolute path.")
 
     def _set_dataset_args(self):
         if st.session_state["dataset_path"] and "://" not in st.session_state["dataset_path"]:
-            train_split_col, eval_split_col, prompt_key_col, response_key_col = st.columns(4)
+            subset_name_col, train_split_col, eval_split_col = st.columns(3)
+            subset_name_col.text_input("Subset Name", key="subset_name")
             train_split_col.text_input("Train Split", key="train_split")
             eval_split_col.text_input("Eval Split", key="eval_split")
+            prompt_key_col, response_key_col = st.columns(2)
             prompt_key_col.text_input("Prompt Key", key="prompt_key")
             response_key_col.text_input("Response Key", key="response_key")
 
