@@ -196,6 +196,18 @@
 
 
 
+<div class="viewcode-block" id="load_hf_dataset">
+<a class="viewcode-back" href="../../../build_api/trinity.common.html#trinity.common.task.load_hf_dataset">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_hf_dataset</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">DataConfig</span><span class="p">,</span> <span class="n">split</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load a Hugging Face dataset with optional configuration name.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">subset_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">hf_dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">dataset_path</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">subset_name</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="n">split</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">hf_dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">dataset_path</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="n">split</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">hf_dataset</span></div>
+
+
+
 <div class="viewcode-block" id="TaskSet">
 <a class="viewcode-back" href="../../../build_api/trinity.common.html#trinity.common.task.TaskSet">[docs]</a>
 <span class="nd">@dataclass</span>
@@ -224,7 +236,8 @@
         <span class="c1"># disable datasets caching to avoid reuse old-version dataset</span>
         <span class="n">datasets</span><span class="o">.</span><span class="n">disable_caching</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">task_type</span> <span class="o">==</span> <span class="n">TaskType</span><span class="o">.</span><span class="n">EVAL</span><span class="p">:</span>
-            <span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">dataset_path</span><span class="p">)[</span><span class="n">config</span><span class="o">.</span><span class="n">eval_split</span><span class="p">]</span>
+            <span class="k">assert</span> <span class="n">config</span><span class="o">.</span><span class="n">eval_split</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;eval_split must be provided for eval taskset.&quot;</span>
+            <span class="n">dataset</span> <span class="o">=</span> <span class="n">load_hf_dataset</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">eval_split</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>  <span class="c1"># default</span>
             <span class="k">if</span> <span class="n">task_type</span> <span class="o">!=</span> <span class="n">TaskType</span><span class="o">.</span><span class="n">EVAL</span> <span class="ow">and</span> <span class="n">config</span><span class="o">.</span><span class="n">db_url</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loading dataset from database with url: </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">db_url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -233,7 +246,7 @@
                 <span class="n">dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="o">.</span><span class="n">from_sql</span><span class="p">(</span><span class="n">RftDatasetModel</span><span class="o">.</span><span class="n">__tablename__</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">db_type</span><span class="si">}</span><span class="s2">:///</span><span class="si">{</span><span class="n">db_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">config</span><span class="o">.</span><span class="n">dataset_path</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loading dataset from local file with path: </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">dataset_path</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
-                <span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">dataset_path</span><span class="p">)[</span><span class="n">config</span><span class="o">.</span><span class="n">train_split</span><span class="p">]</span>
+                <span class="n">dataset</span> <span class="o">=</span> <span class="n">load_hf_dataset</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">train_split</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No dataset path or db url provided.&quot;</span><span class="p">)</span>
         <span class="n">datasets</span><span class="o">.</span><span class="n">enable_caching</span><span class="p">()</span>
