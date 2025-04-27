@@ -213,7 +213,6 @@ class ConfigManager:
             st.session_state["total_gpu_num"]
             - st.session_state["engine_num"] * st.session_state["tensor_parallel_size"]
         )
-        print(f'{st.session_state["trainer_gpu_num"]=}')
 
     def _set_max_prompt_tokens(self):
         st.number_input("Max Prompt Tokens", key="max_prompt_tokens", min_value=1)
