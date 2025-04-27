@@ -256,7 +256,7 @@ class ConfigManager:
             prompt_key_col.text_input("Prompt Key", key="prompt_key")
             response_key_col.text_input("Response Key", key="response_key")
 
-    def _set_default_workflow_type(self):  # TODO: add help messages
+    def _set_default_workflow_type(self):
         st.selectbox(
             "Default Workflow Type",
             WORKFLOWS.modules.keys(),
@@ -269,7 +269,7 @@ Other workflows: conduct multi-turn task for the given dataset.
 """,
         )
 
-    def _set_default_reward_fn_type(self):  # TODO: add help messages
+    def _set_default_reward_fn_type(self):
         st.selectbox(
             "Default Reward Fn Type",
             REWARD_FUNCTIONS.modules.keys(),
@@ -832,9 +832,7 @@ if node_num > 1:
             ]
         )
 
-        use_critic = (
-            st.session_state["adv_estimator"] == "gae"
-        )  # TODO: check it and may apply to expert mode
+        use_critic = st.session_state["adv_estimator"] == "gae"  # TODO: may apply to expert mode
         if use_critic:
             self._set_configs_with_st_columns(["critic_ppo_micro_batch_size_per_gpu", "critic_lr"])
 

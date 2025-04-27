@@ -23,7 +23,7 @@ buffer:
   train_dataset:
     name: countdown_buffer
     storage_type: queue
-    path: 'sqlite:////countdown.db'
+    path: 'sqlite:///countdown.db'
 explorer:
   engine_type: vllm_async
   engine_num: 2
