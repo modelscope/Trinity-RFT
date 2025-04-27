@@ -1,7 +1,7 @@
 data:
   # basic info
   dataset_path: 'openai/gsm8k'
-  config_name: "main"
+  subset_name: "main" 
   train_split: 'train'
   eval_split: 'test'
   format_config:
