@@ -103,7 +103,7 @@ def task_generator(
 
 def load_hf_dataset(config: DataConfig, split: str):
     """Load a Hugging Face dataset with optional configuration name."""
-    if config.config_name is not None:
+    if config.subset_name is not None:
         hf_dataset = load_dataset(config.dataset_path, config.subset_name, split=split)
     else:
         hf_dataset = load_dataset(config.dataset_path, split=split)
