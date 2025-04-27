@@ -45,7 +45,7 @@ class DataConfig:
 
     dataset_path: str = ""
     train_split: str = "train"
-    config_name: Optional[str] = None
+    subset_name: Optional[str] = None
     eval_split: Optional[str] = None  # TODO: check data format
     format_config: FormatConfig = field(default_factory=FormatConfig)
 
