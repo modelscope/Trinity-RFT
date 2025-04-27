@@ -129,7 +129,8 @@ def run(config_path: str):
         data_config.dj_config_path or data_config.dj_process_desc
     ):
         activate_data_module(data_config.data_workflow_url, config_path)
-    ray.init()
+    if not ray.is_initialized():
+        ray.init()
     if config.mode == "explore":
         explore(config)
     elif config.mode == "train":

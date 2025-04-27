@@ -101,6 +101,15 @@ def task_generator(
         yield task
 
 
+def load_hf_dataset(config: DataConfig, split: str):
+    """Load a Hugging Face dataset with optional configuration name."""
+    if config.subset_name is not None:
+        hf_dataset = load_dataset(config.dataset_path, config.subset_name, split=split)
+    else:
+        hf_dataset = load_dataset(config.dataset_path, split=split)
+    return hf_dataset
+
+
 @dataclass
 class TaskSet:
     """A TaskSet class that defines a set of tasks and their associated reward functions."""
@@ -125,7 +134,8 @@ class TaskSet:
         # disable datasets caching to avoid reuse old-version dataset
         datasets.disable_caching()
         if task_type == TaskType.EVAL:
-            dataset = load_dataset(config.dataset_path)[config.eval_split]
+            assert config.eval_split is not None, "eval_split must be provided for eval taskset."
+            dataset = load_hf_dataset(config, config.eval_split)
         else:  # default
             if task_type != TaskType.EVAL and config.db_url != "":
                 logger.info(f"Loading dataset from database with url: {config.db_url}")
@@ -134,7 +144,7 @@ class TaskSet:
                 dataset = Dataset.from_sql(RftDatasetModel.__tablename__, f"{db_type}:///{db_name}")
             elif config.dataset_path != "":
                 logger.info(f"Loading dataset from local file with path: {config.dataset_path}.")
-                dataset = load_dataset(config.dataset_path)[config.train_split]
+                dataset = load_hf_dataset(config, config.train_split)
             else:
                 raise ValueError("No dataset path or db url provided.")
         datasets.enable_caching()

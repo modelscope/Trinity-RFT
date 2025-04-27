@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """For distributed training with multiple process groups."""
+import ipaddress
 from datetime import timedelta
 from typing import Any, Optional, Union
 
@@ -13,6 +14,14 @@ from torch.distributed.distributed_c10d import (
     default_pg_timeout,
     rendezvous,
 )
+
+
+def is_ipv6_address(ip_str: str) -> bool:
+    try:
+        ip = ipaddress.ip_address(ip_str)
+        return isinstance(ip, ipaddress.IPv6Address)
+    except ValueError:
+        return False
 
 
 def init_process_group(
