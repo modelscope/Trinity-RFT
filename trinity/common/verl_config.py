@@ -244,7 +244,6 @@ class Trainer:
     training_rollout_mode: str = "parallel"
     enable_exp_buffer: bool = True
     steps_per_epoch: int = 1280
-    get_exp_strategy: Optional[str] = None
     sync_freq: int = 0
     sft_warmup_iteration: int = 0
     max_actor_ckpt_to_keep: Optional[int] = None

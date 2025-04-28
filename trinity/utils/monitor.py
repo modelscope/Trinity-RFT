@@ -4,9 +4,9 @@ from typing import Any, List, Optional, Union
 
 import numpy as np
 import pandas as pd
-import wandb
 from torch.utils.tensorboard import SummaryWriter
 
+import wandb
 from trinity.common.constants import MonitorType
 from trinity.utils.log import get_logger
 

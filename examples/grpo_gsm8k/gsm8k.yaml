@@ -69,6 +69,7 @@ trainer:
   trainer_config_path: 'examples/grpo_gsm8k/train_gsm8k.yaml'
   sft_warmup_iteration: 0 # Set to integer to enable sft warmup
   eval_interval: 50
+  # get_exp_strategy: 'LFU'
 monitor:
   cache_root_dir: ""
   project: "Trinity-RFT-gsm8k"

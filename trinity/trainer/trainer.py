@@ -13,7 +13,7 @@ import ray
 
 from trinity.buffer import get_buffer_reader
 from trinity.common.config import Config
-from trinity.common.constants import AlgorithmType
+from trinity.common.constants import AlgorithmType, ReadStrategy
 from trinity.common.experience import Experiences
 from trinity.utils.log import get_logger
 
@@ -82,7 +82,11 @@ class Trainer:
                 )
             )
         else:
-            exps = self.train_buffer.read()
+            if self.config.trainer.get_exp_strategy:
+                strategy = ReadStrategy(self.config.trainer.get_exp_strategy)
+            else:
+                strategy = None
+            exps = self.train_buffer.read(strategy=strategy)
             if algo_type.is_rft():
                 return self.engine.train_rft_iteration(
                     Experiences.gather_experiences(
