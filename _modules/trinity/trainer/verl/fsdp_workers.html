@@ -1064,17 +1064,6 @@
         <span class="p">)</span>
         <span class="n">critic_model_config</span><span class="o">.</span><span class="n">num_labels</span> <span class="o">=</span> <span class="mi">1</span>
 
-        <span class="n">use_remove_padding</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;use_remove_padding&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">use_remove_padding</span><span class="p">:</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">verl.models.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_model_support_rmpad</span>
-
-            <span class="n">check_model_support_rmpad</span><span class="p">(</span><span class="n">critic_model_config</span><span class="o">.</span><span class="n">model_type</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">use_remove_padding</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">ulysses_sequence_parallel_size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">verl.models.transformers.monkey_patch</span><span class="w"> </span><span class="kn">import</span> <span class="n">apply_monkey_patch</span>
-
-            <span class="n">apply_monkey_patch</span><span class="p">(</span><span class="n">critic_model_config</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
         <span class="n">init_context</span> <span class="o">=</span> <span class="n">get_init_weight_context_manager</span><span class="p">(</span>
             <span class="n">use_meta_tensor</span><span class="o">=</span><span class="ow">not</span> <span class="n">critic_model_config</span><span class="o">.</span><span class="n">tie_word_embeddings</span><span class="p">,</span> <span class="n">mesh</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device_mesh</span>
         <span class="p">)</span>

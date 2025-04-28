@@ -51,6 +51,7 @@
 <li class="toctree-l1"><a class="reference internal" href="example_data_functionalities.html">Data processing functionalities</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Trinity-RFT Configuration</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#monitor">Monitor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id1">Monitor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#data">Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#model">Model</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#cluster">Cluster</a></li>
@@ -114,6 +115,18 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">monitor.name</span></code>: The name of the experiment. It must be set manually.</p></li>
 </ul>
 </section>
+<section id="id1">
+<h2>Monitor<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">monitor</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Trinity-RFT-countdown&quot;</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;qwen2.5-1.5B-countdown&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">monitor.project</span></code>: The project name. It must be set manually.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">monitor.name</span></code>: The name of the experiment. It must be set manually.</p></li>
+</ul>
+</section>
 <section id="data">
 <h2>Data<a class="headerlink" href="#data" title="Link to this heading"></a></h2>
 <!-- The `data` configuration specifies the data used for training. It includes the total number of epochs, the batch size, the path to the dataset, the default workflow type, the default reward function type, and the format configuration. -->
@@ -131,7 +144,7 @@
 <span class="w">  </span><span class="nt">max_retry_times</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
 <span class="w">  </span><span class="nt">max_retry_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 
-<span class="w">  </span><span class="nt">total_epoch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<span class="w">  </span><span class="nt">total_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
 <span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">96</span>
 <span class="w">  </span><span class="nt">default_workflow_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;math_workflow&#39;</span>
 <span class="w">  </span><span class="nt">default_reward_fn_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;countdown_reward&#39;</span>
@@ -146,7 +159,7 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">data.db_url</span></code>: The URL of the database.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">data.max_retry_times</span></code>: The maximum number of retries when loading the dataset from database.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">data.max_retry_interval</span></code>: The maximum interval between retries when loading the dataset from database.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">data.total_epoch</span></code>: The total number of epochs to explore the dataset. Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>. It should be set manually.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">data.total_epochs</span></code>: The total number of epochs to explore the dataset. Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>. It should be set manually.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">data.batch_size</span></code>: The number of <code class="docutils literal notranslate"><span class="pre">Task</span></code> in one training batch. The real batch size used in training is <code class="docutils literal notranslate"><span class="pre">data.batch_size</span></code> * <code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.rollout.n</span></code> Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>. It should be set manually.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">data.default_workflow_type</span></code>: The default workflow type used for training.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">data.default_reward_fn_type</span></code>: The default reward function type used for training.</p></li>
@@ -444,10 +457,14 @@
 <span class="w">  </span><span class="nt">gamma</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
 <span class="w">  </span><span class="nt">lam</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
 <span class="w">  </span><span class="nt">adv_estimator</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gae</span>
+<span class="w">  </span><span class="nt">norm_adv_by_std_in_grpo</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">  </span><span class="nt">use_kl_in_reward</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
 <span class="w">  </span><span class="nt">kl_penalty</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kl</span><span class="w">  </span><span class="c1"># how to estimate kl divergence</span>
 <span class="w">  </span><span class="nt">kl_ctrl</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fixed</span>
 <span class="w">    </span><span class="nt">kl_coef</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.001</span>
+<span class="w">    </span><span class="nt">horizon</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10000</span>
+<span class="w">    </span><span class="nt">target_kl</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
 
 <span class="nt">trainer</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">balance_batch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
@@ -462,7 +479,7 @@
 <span class="w">  </span><span class="nt">save_freq</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
 <span class="w">  </span><span class="c1"># auto: find the last ckpt to resume. If can&#39;t find, start from scratch</span>
 <span class="w">  </span><span class="nt">resume_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auto</span><span class="w"> </span><span class="c1"># or auto or resume_path if</span>
-<span class="w">  </span><span class="nt">resume_from_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">  </span><span class="nt">resume_from_path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
 <span class="w">  </span><span class="nt">test_freq</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
 <span class="w">  </span><span class="nt">critic_warmup</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
 <span class="w">  </span><span class="nt">default_hdfs_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
@@ -482,8 +499,9 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.grad_clip</span></code>: Gradient clip for actor model training.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.clip_ratio</span></code>: Used for compute policy loss.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.entropy_coeff</span></code>: Used for compute policy loss.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.use_kl_loss</span></code>: True for GRPO.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.kl_loss_coef</span></code>: Used for GRPO, optional value is <code class="docutils literal notranslate"><span class="pre">kl</span></code>, <code class="docutils literal notranslate"><span class="pre">abs</span></code>, <code class="docutils literal notranslate"><span class="pre">mse</span></code> or <code class="docutils literal notranslate"><span class="pre">low_var_kl</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.use_kl_loss</span></code>: Whether to enable kl loss.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.kl_loss_coef</span></code>: The coefficient of kl loss.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.kl_loss_type</span></code>: How to compute kl loss, optional value is <code class="docutils literal notranslate"><span class="pre">kl</span></code>, <code class="docutils literal notranslate"><span class="pre">abs</span></code>, <code class="docutils literal notranslate"><span class="pre">mse</span></code> or <code class="docutils literal notranslate"><span class="pre">low_var_kl</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.ulysses_sequence_parallel_size</span></code>: Ulysses sequence parallel size.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.alg_type</span></code>: Used for OPMD, optional value is <code class="docutils literal notranslate"><span class="pre">ppo</span></code>, <code class="docutils literal notranslate"><span class="pre">opmd</span></code> or <code class="docutils literal notranslate"><span class="pre">pairwise_opmd</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.tau</span></code>: strength of regularization w.r.t. old / ref policy.</p></li>

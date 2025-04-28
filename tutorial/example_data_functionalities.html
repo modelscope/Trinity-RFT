@@ -140,7 +140,7 @@ python<span class="w"> </span>scripts/start_servers.py
 <span class="w">  </span><span class="c1"># database related. The result dataset will be stored in the database.</span>
 <span class="w">  </span><span class="nt">db_url</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;postgresql://{user_name}@localhost:5432/{db_name}&#39;</span>
 <span class="w">  </span><span class="c1"># downstream loading related</span>
-<span class="w">  </span><span class="nt">total_epoch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">  </span><span class="nt">total_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">96</span>
 <span class="w">  </span><span class="nt">default_workflow_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;math_workflow&#39;</span>
 </pre></div>
@@ -151,7 +151,7 @@ python<span class="w"> </span>scripts/start_servers.py
 <li><p><code class="docutils literal notranslate"><span class="pre">dataset_config</span></code>: extra config arguments for loading the raw dataset. Mainly for the <code class="docutils literal notranslate"><span class="pre">load_dataset</span></code> method in HuggingFace <code class="docutils literal notranslate"><span class="pre">datasets</span></code> library.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">format_config</span></code>: some dataset format config items, which are used to map original data field names to unified ones.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">db_url</span></code>: the URL of the postgresql database to store the result dataset.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">total_epoch</span></code>: the total number of epochs to train on this dataset.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">total_epochs</span></code>: the total number of epochs to train on this dataset.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">batch_size</span></code>: the training batch size.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">default_workflow_type</span></code>: the default exploring workflow type. Please refer to <a class="reference internal" href="trinity_programming_guide.html"><span class="std std-doc">programming guide</span></a> for more details.</p></li>
 </ul>
@@ -170,7 +170,7 @@ python<span class="w"> </span>scripts/start_servers.py
 <span class="w">  </span><span class="c1"># database related. The result dataset will be stored in the database.</span>
 <span class="w">  </span><span class="nt">db_url</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;postgresql://{user_name}@localhost:5432/{db_name}&#39;</span>
 <span class="w">  </span><span class="c1"># downstream loading related</span>
-<span class="w">  </span><span class="nt">total_epoch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">  </span><span class="nt">total_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">96</span>
 <span class="w">  </span><span class="nt">default_workflow_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;math_workflow&#39;</span>
 
@@ -213,7 +213,7 @@ python<span class="w"> </span>scripts/start_servers.py
 <span class="w">  </span><span class="c1"># database related. The result dataset will be stored in the database.</span>
 <span class="w">  </span><span class="nt">db_url</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;postgresql://{user_name}@localhost:5432/{db_name}&#39;</span>
 <span class="w">  </span><span class="c1"># downstream loading related</span>
-<span class="w">  </span><span class="nt">total_epoch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">  </span><span class="nt">total_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">96</span>
 <span class="w">  </span><span class="nt">default_workflow_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;math_workflow&#39;</span>
 
@@ -282,7 +282,7 @@ python<span class="w"> </span>scripts/start_servers.py
 <span class="w">  </span><span class="c1"># database related. The result dataset will be stored in the database.</span>
 <span class="w">  </span><span class="nt">db_url</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;postgresql://{user_name}@localhost:5432/{db_name}&#39;</span>
 <span class="w">  </span><span class="c1"># downstream loading related</span>
-<span class="w">  </span><span class="nt">total_epoch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<span class="w">  </span><span class="nt">total_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
 <span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32</span>
 <span class="w">  </span><span class="nt">default_workflow_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;math_workflow&#39;</span>
 </pre></div>
