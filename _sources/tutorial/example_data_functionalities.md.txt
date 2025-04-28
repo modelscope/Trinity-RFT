@@ -244,7 +244,7 @@ You can set more config items for this OP (e.g. notification when annotation is 
 
 When you start running with the RFT config, the data module will start the OP `human_preference_annotation_mapper`, and then you can find a new project on the "Projects" page of the label-studio server.
 
-![]("../../assets/data-projects.png")
+![](../../assets/data-projects.png)
 
 You can click and enter into this project, and all the samples that need to be annotated are listed on the page.
 

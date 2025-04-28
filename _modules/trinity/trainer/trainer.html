@@ -99,7 +99,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_buffer_reader</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">AlgorithmType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">AlgorithmType</span><span class="p">,</span> <span class="n">ReadStrategy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experiences</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
@@ -167,24 +167,28 @@
                     <span class="n">pad_token_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">pad_token_id</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
                 <span class="p">)</span>
             <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">exps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_buffer</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">algo_type</span><span class="o">.</span><span class="n">is_rft</span><span class="p">():</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">train_rft_iteration</span><span class="p">(</span>
-                    <span class="n">Experiences</span><span class="o">.</span><span class="n">gather_experiences</span><span class="p">(</span>
-                        <span class="n">exps</span><span class="p">,</span>
-                        <span class="n">pad_token_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">pad_token_id</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
-            <span class="k">elif</span> <span class="n">algo_type</span><span class="o">.</span><span class="n">is_dpo</span><span class="p">():</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">train_dpo_iteration</span><span class="p">(</span>
-                    <span class="n">Experiences</span><span class="o">.</span><span class="n">gather_dpo_experiences</span><span class="p">(</span>
-                        <span class="n">exps</span><span class="p">,</span>
-                        <span class="n">pad_token_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">pad_token_id</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">algo_type</span><span class="o">.</span><span class="n">is_rft</span><span class="p">():</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">get_exp_strategy</span><span class="p">:</span>
+                <span class="n">strategy</span> <span class="o">=</span> <span class="n">ReadStrategy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">get_exp_strategy</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported algorithm type: </span><span class="si">{</span><span class="n">algo_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">strategy</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">exps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_buffer</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="n">strategy</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">train_rft_iteration</span><span class="p">(</span>
+                <span class="n">Experiences</span><span class="o">.</span><span class="n">gather_experiences</span><span class="p">(</span>
+                    <span class="n">exps</span><span class="p">,</span>
+                    <span class="n">pad_token_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">pad_token_id</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">algo_type</span><span class="o">.</span><span class="n">is_dpo</span><span class="p">():</span>
+            <span class="n">exps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_buffer</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">train_dpo_iteration</span><span class="p">(</span>
+                <span class="n">Experiences</span><span class="o">.</span><span class="n">gather_dpo_experiences</span><span class="p">(</span>
+                    <span class="n">exps</span><span class="p">,</span>
+                    <span class="n">pad_token_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">pad_token_id</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported algorithm type: </span><span class="si">{</span><span class="n">algo_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">sync_weight</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sync the model weight.&quot;&quot;&quot;</span>
