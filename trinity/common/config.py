@@ -6,7 +6,13 @@ from typing import Any, Dict, Optional
 
 from omegaconf import OmegaConf
 
-from trinity.common.constants import AlgorithmType, MonitorType, PromptType, StorageType
+from trinity.common.constants import (
+    AlgorithmType,
+    MonitorType,
+    PromptType,
+    StorageType,
+    SyncMethod,
+)
 from trinity.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -116,7 +122,6 @@ class BufferConfig:
     max_retry_interval: int = 1
     tokenizer_path: Optional[str] = None
     pad_token_id: Optional[int] = None
-    reset_consumed: Optional[bool] = False
 
     train_dataset: Optional[DatasetConfig] = None
     sft_warmup_dataset: Optional[DatasetConfig] = None
@@ -176,6 +181,7 @@ class TrainerConfig:
     trainer_type: str = "verl"
     trainer_config_path: str = ""
     eval_interval: int = 100
+    save_interval: int = 0
     enable_preview: bool = True  # enable rollout preview in wandb
     trainer_config: Any = field(default_factory=dict)
 
@@ -204,11 +210,11 @@ class MonitorConfig:
 class SynchronizerConfig:
     """Configs for model weight synchronization"""
 
-    # only support `offline` for now
     # TODO: rename to "checkpoint", "nccl", "ipc"
-    sync_method: str = "offline"
+    sync_method: SyncMethod = SyncMethod.NCCL
     # sync weights every `sync_iteration_interval` iterations
     sync_iteration_interval: int = 1
+    sync_timeout: int = 1200
     # wait for the lastest checkpoint to be ready
     wait_for_checkpoint: bool = False
     master_address: Optional[str] = None
@@ -273,28 +279,11 @@ class Config:
 
     def check_and_update(self) -> None:
         """Check and update the config."""
-        if self.trainer.trainer_type == "verl":
-            if self.trainer.trainer_config:
-                from trinity.common.verl_config import veRLConfig
-
-                trainer_config_schema = OmegaConf.structured(veRLConfig)
-                trainer_config = OmegaConf.merge(trainer_config_schema, self.trainer.trainer_config)
-                self.trainer.trainer_config = OmegaConf.to_object(trainer_config)
-            else:
-                if os.path.isfile(self.trainer.trainer_config_path):
-                    from trinity.common.verl_config import load_config
-
-                    self.trainer.trainer_config = load_config(self.trainer.trainer_config_path)
-                else:
-                    raise ValueError(
-                        f"Invalid trainer config path: {self.trainer.trainer_config_path}"
-                    )
-        else:
-            raise ValueError(f"Invalid trainer type: {self.trainer_type}")
-
         # check mode
         if self.mode not in ["explore", "train", "both"]:
             raise ValueError(f"Invalid mode: {self.mode}")
+        if self.trainer.algorithm_type == AlgorithmType.DPO and self.mode == "both":
+            raise ValueError("DPO does not support `both` mode")
 
         # check model path
         if not os.path.isabs(self.model.model_path):
@@ -310,8 +299,8 @@ class Config:
             self.explorer.engine_num * self.explorer.tensor_parallel_size
         )
         self.synchronizer.backend = self.explorer.backend
-        if self.synchronizer.sync_method == "online" and self.mode != "both":
-            raise ValueError("Online synchronization is only supported in both mode")
+        if self.synchronizer.sync_method == SyncMethod.NCCL and self.mode != "both":
+            raise ValueError("`nccl` synchronization is only supported in both mode.")
 
         # check eval_interval
         if self.trainer.eval_interval % self.synchronizer.sync_iteration_interval != 0:
@@ -342,6 +331,26 @@ class Config:
         self._check_buffer()
         # check and update trainer
         if self.mode != "explore":
+            if self.trainer.trainer_type == "verl":
+                if self.trainer.trainer_config:
+                    from trinity.common.verl_config import veRLConfig
+
+                    trainer_config_schema = OmegaConf.structured(veRLConfig)
+                    trainer_config = OmegaConf.merge(
+                        trainer_config_schema, self.trainer.trainer_config
+                    )
+                    self.trainer.trainer_config = OmegaConf.to_object(trainer_config)
+                else:
+                    if os.path.isfile(self.trainer.trainer_config_path):
+                        from trinity.common.verl_config import load_config
+
+                        self.trainer.trainer_config = load_config(self.trainer.trainer_config_path)
+                    else:
+                        raise ValueError(
+                            f"Invalid trainer config path: {self.trainer.trainer_config_path}"
+                        )
+            else:
+                raise ValueError(f"Invalid trainer type: {self.trainer_type}")
             self.trainer.trainer_config.synchronize_config(self)
         else:
             self.trainer.trainer_config = None

@@ -63,7 +63,8 @@ class InferenceModel(ABC):
         world_size: int,
         group_name: str,
         backend: str = "nccl",
-        offline_update: bool = True,
+        timeout: int = 1200,
+        update_with_checkpoint: bool = True,
     ) -> None:
         """Init the process group for model weights sync."""
 

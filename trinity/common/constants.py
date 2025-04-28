@@ -94,3 +94,10 @@ class MonitorType(CaseInsensitiveEnum):
 
     WANDB = "wandb"
     TENSORBOARD = "tensorboard"
+
+
+class SyncMethod(CaseInsensitiveEnum):
+    """Sync Method."""
+
+    NCCL = "nccl"
+    CHECKPOINT = "checkpoint"

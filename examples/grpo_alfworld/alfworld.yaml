@@ -43,7 +43,7 @@ explorer:
   gpu_memory_utilization: 0.7
   enable_chunked_prefil: true
 synchronizer:
-  sync_method: 'online'
+  sync_method: 'nccl'
   sync_iteration_interval: 8
 trainer:
   trainer_type: 'verl'

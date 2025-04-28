@@ -40,7 +40,6 @@ from trinity.utils.monitor import Monitor
 class _InternalDataLoader:
     def __init__(self, config):
         self.config = config
-        self.length = config.trainer.steps_per_epoch
         self.dataset = None
         self.index = 0
         self.experience_buffer = None
@@ -428,7 +427,6 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                 #     val_metrics: dict = self._validate()
                 # metrics.update(val_metrics)
 
-            # TODO save_checkpoint too frequently, a method for updating parameters online needs to be added
             if (
                 self.config.trainer.save_freq > 0
                 and self.global_steps % self.config.trainer.save_freq == 0

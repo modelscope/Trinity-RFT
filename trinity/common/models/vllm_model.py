@@ -89,7 +89,8 @@ class vLLMRolloutModel(InferenceModel):
         world_size: int,
         group_name: str,
         backend: str = "nccl",
-        offline_update: bool = True,
+        timeout: int = 1200,
+        update_with_checkpoint: bool = True,
     ):
         return self.llm.collective_rpc(
             "init_process_group",
@@ -100,7 +101,8 @@ class vLLMRolloutModel(InferenceModel):
                 world_size,
                 group_name,
                 backend,
-                offline_update,
+                timeout,
+                update_with_checkpoint,
             ),
         )
 

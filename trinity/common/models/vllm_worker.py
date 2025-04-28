@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """Custom vLLM Worker."""
+from datetime import timedelta
+
 import ray
 import torch
 import torch.distributed
@@ -26,20 +28,21 @@ class VLLMWorker(Worker):
         world_size: int,
         group_name: str,
         backend: str = "nccl",
-        offline_update: bool = True,
+        timeout: int = 1200,
+        update_with_checkpoint: bool = True,
     ):
         """Init torch process group for model weights update"""
         assert torch.distributed.is_initialized(), "default torch process group must be initialized"
         assert group_name != "", "group name must not be empty"
-        self._offline_update = offline_update
-        if self._offline_update:
+        self._update_with_checkpoint = update_with_checkpoint
+        if self._update_with_checkpoint:
             logger.info(
-                f"init_process_group (offline): address={master_address}:{master_port}, rank={torch.distributed.get_rank()}, rank_offset={rank_offset}, world_size={world_size}"
+                f"init_process_group (checkpoint): address={master_address}:{master_port}, rank={torch.distributed.get_rank()}, rank_offset={rank_offset}, world_size={world_size}"
             )
             self._weight_update_rank = torch.distributed.get_rank() + rank_offset
         else:
             logger.info(
-                f"init_process_group (online): rank={torch.distributed.get_rank()}, rank_offset={rank_offset}, world_size={world_size}"
+                f"init_process_group (nccl): rank={torch.distributed.get_rank()}, rank_offset={rank_offset}, world_size={world_size}"
             )
             self._weight_update_rank = torch.distributed.get_rank() + rank_offset
 
@@ -52,6 +55,7 @@ class VLLMWorker(Worker):
         self._model_update_group = init_process_group(
             backend=backend,
             init_method=init_method,
+            timeout=timedelta(seconds=timeout),
             world_size=world_size,
             rank=self._weight_update_rank,
             group_name=group_name,

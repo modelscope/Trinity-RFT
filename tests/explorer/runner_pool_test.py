@@ -53,7 +53,8 @@ class DummyModel(InferenceModel):
         world_size: int,
         group_name: str,
         backend: str = "nccl",
-        offline_update: bool = True,
+        timeout: int = 1200,
+        update_with_checkpoint: bool = True,
     ) -> None:
         pass
 

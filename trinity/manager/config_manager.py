@@ -5,7 +5,7 @@ from typing import List
 import streamlit as st
 import yaml
 
-from trinity.common.constants import AlgorithmType, MonitorType, StorageType
+from trinity.common.constants import AlgorithmType, MonitorType, StorageType, SyncMethod
 from trinity.common.rewards import REWARD_FUNCTIONS
 from trinity.common.workflows.workflow import WORKFLOWS
 from trinity.trainer.verl.ray_trainer import AdvantageEstimator
@@ -73,8 +73,9 @@ class ConfigManager:
             "engine_num": 2,
             "tensor_parallel_size": 1,
             "repeat_times": 1,
-            "sync_method": "online",
+            "sync_method": SyncMethod.NCCL.value,
             "sync_iteration_interval": 10,
+            "sync_timeout": 1200,
             "runner_num": 32,
             "max_pending_requests": 32,
             "max_waiting_steps": 4,
@@ -92,6 +93,7 @@ class ConfigManager:
             "algorithm_type": AlgorithmType.PPO.value,
             "sft_warmup_iteration": 0,
             "eval_interval": 1000,
+            "save_interval": 100,
             # veRL Trainer Configs
             "training_args": [
                 "balance_batch",
@@ -99,7 +101,6 @@ class ConfigManager:
                 "remove_padding",
                 "dynamic_bsz",
             ],
-            "save_freq": 100,
             "training_strategy": "fsdp",
             "param_offload": False,
             "optimizer_offload": False,
@@ -145,6 +146,7 @@ class ConfigManager:
             "critic_cliprange_value": 0.5,
             "critic_ppo_micro_batch_size_per_gpu": 8,
             "critic_ulysses_sequence_parallel_size": 1,
+            "critic_checkpoint": ["model", "optimizer", "extra"],
             "training_mode": "PPO",
         }
 
@@ -423,13 +425,19 @@ if node_num > 1:
         )
 
     def _set_sync_method(self):
+        if st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
+            st.session_state["sync_method"] = SyncMethod.CHECKPOINT.value
+            disabled = True
+        else:
+            disabled = False
         st.selectbox(
             "Sync Method",
-            ["online", "offline"],
+            [sync_method.value for sync_method in SyncMethod],
             key="sync_method",
-            help="""`online`: the explorer and trainer sync model weights once every `sync_iteration_interval` steps.
+            help="""`nccl`: the explorer and trainer sync model weights once every `sync_iteration_interval` steps.
 
-`offline`: the trainer saves the model checkpoint, and the explorer loads it at `sync_iteration_interval`.""",
+`checkpoint`: the trainer saves the model checkpoint, and the explorer loads it at `sync_iteration_interval`.""",
+            disabled=disabled,
         )
 
     def _set_sync_iteration_interval(self):
@@ -438,6 +446,14 @@ if node_num > 1:
             key="sync_iteration_interval",
             min_value=1,
             help="""The iteration interval at which the `explorer` and `trainer` synchronize model weight.""",
+        )
+
+    def _set_sync_timeout(self):
+        st.number_input(
+            "Sync Timeout",
+            key="sync_timeout",
+            min_value=1,
+            help="The timeout value for the synchronization operation.",
         )
 
     def _set_runner_num(self):
@@ -510,18 +526,18 @@ if node_num > 1:
             key="training_args",
         )
 
-    def _set_save_freq(self):
-        if st.session_state["sync_method"] == "online":
-            freeze_save_freq = False
+    def _set_save_interval(self):
+        if st.session_state["sync_method"] == SyncMethod.NCCL.value:
+            freeze_save_interval = False
         else:
-            st.session_state["save_freq"] = st.session_state["sync_iteration_interval"]
-            freeze_save_freq = True
+            st.session_state["save_interval"] = st.session_state["sync_iteration_interval"]
+            freeze_save_interval = True
         st.number_input(
-            "Save Freq",
-            key="save_freq",
+            "Save Interval",
+            key="save_interval",
             min_value=1,
-            help="Set to `sync_iteration_interval` when `sync_method` is `offline`",
-            disabled=freeze_save_freq,
+            help="Set to `sync_iteration_interval` when `sync_method` is `checkpoint`",
+            disabled=freeze_save_interval,
         )
 
     def _set_training_strategy(self):
@@ -766,6 +782,13 @@ if node_num > 1:
             max_value=1.0,
         )
 
+    def _set_critic_checkpoint(self):
+        st.multiselect(
+            "Checkpoint",
+            ["model", "hf_model", "optimizer", "extra"],
+            key="critic_checkpoint",
+        )
+
     def _set_training_mode(self):
         st.selectbox("Training Mode", ["PPO", "GRPO", "DPO", "OPMD"], key="training_mode")
 
@@ -826,7 +849,9 @@ if node_num > 1:
             ["default_workflow_type", "default_reward_fn_type", "repeat_times"]
         )
 
-        self._set_configs_with_st_columns(["sync_iteration_interval", "eval_interval", "save_freq"])
+        self._set_configs_with_st_columns(
+            ["sync_iteration_interval", "eval_interval", "save_interval"]
+        )
 
         self._set_actor_use_kl_loss()
         if st.session_state["actor_use_kl_loss"]:
@@ -882,7 +907,9 @@ if node_num > 1:
         )
         self._check_engine_num_and_tp_size()
 
-        self._set_configs_with_st_columns(["sync_method", "sync_iteration_interval"])
+        self._set_configs_with_st_columns(
+            ["sync_method", "sync_iteration_interval", "sync_timeout"]
+        )
 
         with st.expander("Advanced Config"):
             self._set_configs_with_st_columns(
@@ -896,8 +923,9 @@ if node_num > 1:
             self._set_configs_with_st_columns(["enable_prefix_caching", "enforce_eager"])
 
     def _expert_trainer_part(self):
+        self._set_configs_with_st_columns(["trainer_type", "algorithm_type"])
         self._set_configs_with_st_columns(
-            ["trainer_type", "algorithm_type", "sft_warmup_iteration", "eval_interval"]
+            ["sft_warmup_iteration", "eval_interval", "save_interval"]
         )
         self._check_sft_warmup_dataset_path()
 
@@ -917,7 +945,7 @@ if node_num > 1:
             st.subheader("RL Training Config")
             self._set_training_args()
 
-            self._set_configs_with_st_columns(["save_freq", "training_strategy", "resume_mode"])
+            self._set_configs_with_st_columns(["training_strategy", "resume_mode"])
 
             if st.session_state["training_strategy"] == "fsdp":
                 self._set_configs_with_st_columns(["param_offload", "optimizer_offload"])
@@ -983,6 +1011,7 @@ if node_num > 1:
             )
 
             self._set_configs_with_st_columns(["critic_grad_clip", "critic_cliprange_value"])
+            self._set_critic_checkpoint()
 
     def expert_mode(self):
         model_tab, buffer_tab, connector_tab, trainer_tab = st.tabs(
@@ -1163,6 +1192,7 @@ if node_num > 1:
                 "shuffle": False,
                 "grad_clip": st.session_state["critic_grad_clip"],
                 "cliprange_value": st.session_state["critic_cliprange_value"],
+                "checkpoint": {"contents": st.session_state["critic_checkpoint"]},
             },
             "reward_model": {
                 "enable": False,
@@ -1203,7 +1233,7 @@ if node_num > 1:
                 "val_generations_to_log_to_wandb": 0,
                 "nnodes": trainer_nnodes,
                 "n_gpus_per_node": trainer_n_gpus_per_node,
-                "save_freq": st.session_state["save_freq"],
+                "save_freq": st.session_state["save_interval"],
                 "resume_mode": st.session_state["resume_mode"],
                 "resume_from_path": st.session_state["resume_from_path"],
                 "test_freq": 100,
@@ -1329,6 +1359,7 @@ if node_num > 1:
                 "synchronizer": {
                     "sync_method": st.session_state["sync_method"],
                     "sync_iteration_interval": st.session_state["sync_iteration_interval"],
+                    "sync_timeout": st.session_state["sync_timeout"],
                 },
                 "trainer": {
                     "trainer_type": st.session_state["trainer_type"],
@@ -1336,6 +1367,7 @@ if node_num > 1:
                     "trainer_config": trainer_config,
                     "sft_warmup_iteration": st.session_state["sft_warmup_iteration"],
                     "eval_interval": st.session_state["eval_interval"],
+                    "save_interval": st.session_state["save_interval"],
                 },
                 "monitor": {
                     "project": st.session_state["project"],

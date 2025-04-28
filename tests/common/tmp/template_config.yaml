@@ -44,6 +44,6 @@ monitor:
   project: unittest
   name: test
 synchronizer:
-  sync_method: offline
+  sync_method: checkpoint
   sync_iteration_interval: 10
   wait_for_checkpoint: false

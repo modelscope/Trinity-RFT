@@ -164,12 +164,16 @@ explorer:
 
 ```yaml
 synchronizer:
-  sync_method: 'online'
+  sync_method: 'nccl'
   sync_iteration_interval: 10
+  sync_timeout: 1200
 ```
 
-- `synchronizer.sync_method`: The synchronization method, Support `online` and `offline`. Default is `online`.
+- `synchronizer.sync_method`: The synchronization method between `trainer` and `explorer`.
+Support `nccl` and `checkpoint`, `nccl` represents that model weights in `explorer` will be synchronized from `trainer` through `nccl`,
+`checkpoint` represents that `explorer` will load the newest checkpoints saved by `trainer` then update its model weights. Default is `nccl`.
 - `synchronizer.sync_iteration_interval`: The interval between two synchronizations. Default is `10`. It should be set manually.
+- `synchronizer.sync_timeout`: The timeout of the synchronization. Default is `1200`.
 
 ## Trainer
 

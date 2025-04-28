@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional
 from omegaconf import OmegaConf
 
 from trinity.common.config import BufferConfig, Config, SynchronizerConfig
+from trinity.common.constants import SyncMethod
 
 
 @dataclass
@@ -243,8 +244,7 @@ class Trainer:
     val_before_train: bool = False
     training_rollout_mode: str = "parallel"
     enable_exp_buffer: bool = True
-    steps_per_epoch: int = 1280
-    get_exp_strategy: Optional[str] = None
+    get_exp_strategy: Optional[str] = None  # TODO
     sync_freq: int = 0
     sft_warmup_iteration: int = 0
     max_actor_ckpt_to_keep: Optional[int] = None
@@ -280,10 +280,12 @@ class veRLConfig:
             # for multi-node scenarios, some nodes for rollout, others for training
             self.trainer.n_gpus_per_node = config.cluster.gpu_per_node
         self.trainer.sync_freq = config.synchronizer.sync_iteration_interval
-        if config.synchronizer.sync_method == "offline":
+        if config.synchronizer.sync_method == SyncMethod.CHECKPOINT:
             self.trainer.save_freq = (
                 config.synchronizer.sync_iteration_interval
             )  # TODO: not proper for DPO
+        else:
+            self.trainer.save_freq = config.trainer.save_interval
         self.synchronizer = config.synchronizer
         self.actor_rollout_ref.synchronizer = config.synchronizer
         self.buffer = config.buffer
