@@ -81,28 +81,28 @@ class Trainer:
                     pad_token_id=self.config.buffer.pad_token_id,  # type: ignore
                 )
             )
-        else:
+        elif algo_type.is_rft():
             if self.config.trainer.get_exp_strategy:
                 strategy = ReadStrategy(self.config.trainer.get_exp_strategy)
             else:
                 strategy = None
             exps = self.train_buffer.read(strategy=strategy)
-            if algo_type.is_rft():
-                return self.engine.train_rft_iteration(
-                    Experiences.gather_experiences(
-                        exps,
-                        pad_token_id=self.config.buffer.pad_token_id,  # type: ignore
-                    )
+            return self.engine.train_rft_iteration(
+                Experiences.gather_experiences(
+                    exps,
+                    pad_token_id=self.config.buffer.pad_token_id,  # type: ignore
                 )
-            elif algo_type.is_dpo():
-                return self.engine.train_dpo_iteration(
-                    Experiences.gather_dpo_experiences(
-                        exps,
-                        pad_token_id=self.config.buffer.pad_token_id,  # type: ignore
-                    )
+            )
+        elif algo_type.is_dpo():
+            exps = self.train_buffer.read()
+            return self.engine.train_dpo_iteration(
+                Experiences.gather_dpo_experiences(
+                    exps,
+                    pad_token_id=self.config.buffer.pad_token_id,  # type: ignore
                 )
-            else:
-                raise ValueError(f"Unsupported algorithm type: {algo_type}")
+            )
+        else:
+            raise ValueError(f"Unsupported algorithm type: {algo_type}")
 
     def sync_weight(self) -> None:
         """Sync the model weight."""
