@@ -576,7 +576,7 @@ if node_num > 1:
         st.number_input("Gamma", key="gamma")
 
     def _set_lam(self):
-        st.number_input("lambda", key="lam")
+        st.number_input("Lambda", key="lam")
 
     def _set_adv_estimator(self):
         st.selectbox(
