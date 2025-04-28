@@ -277,7 +277,7 @@ class Config:
             self.buffer.sft_warmup_dataset.algorithm_type = AlgorithmType.SFT
         self.buffer.read_batch_size = self.data.batch_size * self.explorer.repeat_times
 
-    def check_and_update(self) -> None:
+    def check_and_update(self) -> None:  # noqa: C901
         """Check and update the config."""
         # check mode
         if self.mode not in ["explore", "train", "both"]:
@@ -310,6 +310,12 @@ class Config:
             print(
                 f"Warning: eval_interval is not a multiple of sync_iteration_interval; adjusted to the nearest integer={self.trainer.eval_interval}."
             )
+
+        # check save_interval
+        if self.synchronizer.sync_method == SyncMethod.CHECKPOINT:
+            self.trainer.save_interval = (
+                self.synchronizer.sync_iteration_interval
+            )  # TODO: not proper for DPO
 
         # check monitor
         if not self.monitor.cache_root_dir:

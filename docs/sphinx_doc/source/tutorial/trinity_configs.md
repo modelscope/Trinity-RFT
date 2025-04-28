@@ -184,6 +184,7 @@ trainer:
   trainer_config_path: 'examples/ppo_countdown/train_countdown.yaml'
   sft_warmup_iteration: 0
   eval_interval: 1000
+  save_interval: 100
 ```
 
 - `trainer.trainer_type`: The backend of the trainer, Only `verl` is supported.
@@ -191,6 +192,7 @@ trainer:
 - `trainer.trainer_config_path`: The path to the trainer configuration file. It must be set manually.
 - `trainer.sft_warmup_iteration`: The number of iterations to warm up the model. Default is `0`.
 - `trainer.eval_interval`: The interval between two evaluations. Default is `1000`.
+- `trainer.save_interval`: The interval between two checkpoints. Default is `100`.
 
 ### veRL Trainer Configuration
 
@@ -431,7 +433,6 @@ trainer:
 - `algorithm`: Training algorithm settings.
 
 - `trainer.balance_batch`: Whether to balance batch size between GPUs during training.
-- `trainer.save_freq`: Frequency of saving checkpoints.
 - `trainer.resume_mode`: Resume mode for training. Support `disable`, `auto` and `resume_path`.
 - `trainer.resume_from_path`: Path to resume from.
 - `trainer.critic_warmup`: The number of iteration to train the critic model before actual policy learning.

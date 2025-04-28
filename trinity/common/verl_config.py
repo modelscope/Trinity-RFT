@@ -4,7 +4,6 @@ from typing import Any, Dict, List, Optional
 from omegaconf import OmegaConf
 
 from trinity.common.config import BufferConfig, Config, SynchronizerConfig
-from trinity.common.constants import SyncMethod
 
 
 @dataclass
@@ -280,12 +279,7 @@ class veRLConfig:
             # for multi-node scenarios, some nodes for rollout, others for training
             self.trainer.n_gpus_per_node = config.cluster.gpu_per_node
         self.trainer.sync_freq = config.synchronizer.sync_iteration_interval
-        if config.synchronizer.sync_method == SyncMethod.CHECKPOINT:
-            self.trainer.save_freq = (
-                config.synchronizer.sync_iteration_interval
-            )  # TODO: not proper for DPO
-        else:
-            self.trainer.save_freq = config.trainer.save_interval
+        self.trainer.save_freq = config.trainer.save_interval
         self.synchronizer = config.synchronizer
         self.actor_rollout_ref.synchronizer = config.synchronizer
         self.buffer = config.buffer

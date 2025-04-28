@@ -40,10 +40,14 @@ explorer:
 trainer:
   trainer_type: verl
   trainer_config_path: tests/common/tmp/template_verl_config.yaml
+  sft_warmup_iteration: 0
+  eval_interval: 1000
+  save_interval: 100
 monitor:
   project: unittest
   name: test
 synchronizer:
   sync_method: checkpoint
   sync_iteration_interval: 10
+  sync_timeout: 1200
   wait_for_checkpoint: false

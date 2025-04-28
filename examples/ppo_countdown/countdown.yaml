@@ -45,12 +45,14 @@ explorer:
 synchronizer:
   sync_method: 'nccl'
   sync_iteration_interval: 10
+  sync_timeout: 1200
 trainer:
   trainer_type: 'verl'
   algorithm_type: ppo
   trainer_config_path: 'examples/ppo_countdown/train_countdown.yaml'
   sft_warmup_iteration: 0
   eval_interval: 1000
+  save_interval: 100
 monitor:
   cache_root_dir: ""
   project: "Trinity-RFT-countdown"
