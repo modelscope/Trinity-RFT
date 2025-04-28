@@ -122,5 +122,5 @@ and include them in the init files in `trinity/common/workflows/__init__.py`
 
 Then you are all set! It should be pretty simple😄, and both environments converge.
 
-![]("../../assets/alfworld_reward_curve.png")
-![]("../../assets/webshop_reward_curve.png")
+![](../../assets/alfworld_reward_curve.png)
+![](../../assets/webshop_reward_curve.png)
