@@ -1,28 +1,19 @@
+mode: train
 data:
   # basic info
-  dataset_path: 'openai/gsm8k'
-  subset_name: "main"
+  dataset_path: /PATH/TO/DATASET/
+  subset_name: ''
   train_split: 'train'
   eval_split: 'test'
   format_config:
     prompt_key: 'question'
     response_key: 'answer'
-  # data active iterator related
-  dj_process_desc: 'Please compute difficulty scores for these math questions.'
-  agent_model_name: 'qwen-max'
-  agent_model_config:
-    config_name: 'my-qwen-instruction'
-    model_type: 'dashscope_chat'
-    model_name: 'qwen2.5-72b-instruct'
-  clean_strategy: 'iterative'
-  # db related
-  db_url: ''
   # downstream loading related
-  total_epochs: 1
+  total_epochs: 20
   batch_size: 96
   default_workflow_type: 'math_workflow'
 model:
-  model_path: '/PATH/TO/MODEL/'
+  model_path: /PATH/TO/MODEL/
   max_prompt_tokens: 256
   max_response_tokens: 1024
   checkpoint_path: ""
@@ -36,12 +27,6 @@ buffer:
     name: gsm8k_buffer
     storage_type: queue
     path: 'sqlite:////gsm8k.db'
-  # sft_warmup_dataset: # Uncomment these to enable sft warmup
-  #   name: warmup_data
-  #   storage_type: file
-  #   path: '/PATH/TO/WARMUP_DATA/'
-  #   kwargs:
-  #     prompt_type: plaintext
 explorer:
   engine_type: vllm_async
   engine_num: 2
@@ -61,15 +46,15 @@ explorer:
   max_pending_requests: 32
   max_waiting_steps: 4
 synchronizer:
-  sync_method: 'online'
-  sync_iteration_interval: 2
+  sync_method: 'offline'
+  sync_iteration_interval: 10
 trainer:
   trainer_type: 'verl'
   algorithm_type: ppo
-  trainer_config_path: 'examples/grpo_gsm8k/train_gsm8k.yaml'
+  trainer_config_path: examples/async_gsm8k/verl_config.yaml
   sft_warmup_iteration: 0 # Set to integer to enable sft warmup
-  eval_interval: 50
+  eval_interval: 10
 monitor:
   cache_root_dir: ""
   project: "Trinity-RFT-gsm8k"
-  name: "qwen2.5-1.5B-gsm8k"
+  name: "async-qwen2.5-1.5B-gsm8k"
