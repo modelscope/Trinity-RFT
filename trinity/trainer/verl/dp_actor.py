@@ -309,7 +309,7 @@ class DataParallelPPOActor(BasePPOActor):
             "temperature"
         ]  # temperature must be in the data.meta_info to avoid slient error
 
-        alg_type = self.config.get("alg_type", "ppo")
+        algorithm_type: AlgorithmType = self.config.get("algorithm_type", AlgorithmType.PPO)
         if self.algorithm_type.is_rft():
             select_keys = [
                 "responses",
@@ -323,7 +323,7 @@ class DataParallelPPOActor(BasePPOActor):
             if self.config.use_kl_loss:
                 select_keys.append("ref_log_prob")
 
-            if alg_type == "pairwise_opmd":
+            if algorithm_type == AlgorithmType.PAIRWISE_OPMD:
                 select_keys.append("token_level_scores")
         elif self.algorithm_type.is_dpo():
             select_keys = [
@@ -349,15 +349,15 @@ class DataParallelPPOActor(BasePPOActor):
 
         # Split to make minibatch iterator for updating the actor
         # See PPO paper for details. https://arxiv.org/abs/1707.06347
-        if has_multi_modal_inputs or ((alg_type == "pairwise_opmd") and use_uid):
-            # TODO: for now, we treat alg_type == "pairwise_opmd" in the same way that
+        if has_multi_modal_inputs or ((algorithm_type == AlgorithmType.PAIRWISE_OPMD) and use_uid):
+            # TODO: for now, we treat algorithm_type == AlgorithmType.PAIRWISE_OPMD in the same way that
             # has_multi_modal_inputs was treated originally (to handle non_tensor_select_keys);
             # need to double check if this is the best approach.
             num_mini_batches = data.batch.batch_size[0] // self.config.ppo_mini_batch_size
             non_tensor_select_keys = []
             if has_multi_modal_inputs:
                 non_tensor_select_keys.append("multi_modal_inputs")
-            if (alg_type == "pairwise_opmd") and use_uid:
+            if (algorithm_type == AlgorithmType.PAIRWISE_OPMD) and use_uid:
                 non_tensor_select_keys.append("uid")
             dataloader = data.select(select_keys, non_tensor_select_keys).chunk(num_mini_batches)
         else:
@@ -373,7 +373,9 @@ class DataParallelPPOActor(BasePPOActor):
             for batch_idx, data in enumerate(dataloader):
                 # split batch into micro_batches
                 mini_batch = data
-                if has_multi_modal_inputs or ((alg_type == "pairwise_opmd") and use_uid):
+                if has_multi_modal_inputs or (
+                    (algorithm_type == AlgorithmType.PAIRWISE_OPMD) and use_uid
+                ):
                     self.gradient_accumulation = (
                         self.config.ppo_mini_batch_size // self.config.ppo_micro_batch_size_per_gpu
                     )
@@ -456,7 +458,7 @@ class DataParallelPPOActor(BasePPOActor):
                         tau = self.config.get("tau", 1.0)
                         token_level_scores = None
                         index = None
-                        if alg_type == "pairwise_opmd":
+                        if algorithm_type == AlgorithmType.PAIRWISE_OPMD:
                             token_level_scores = data["token_level_scores"]
                             if use_uid:
                                 index = data["uid"]
@@ -470,7 +472,7 @@ class DataParallelPPOActor(BasePPOActor):
                             old_log_prob=old_log_prob,
                             log_prob=log_prob,
                             eos_mask=response_mask,
-                            alg_type=alg_type,
+                            algorithm_type=algorithm_type,
                             advantages=advantages,
                             cliprange=clip_ratio,
                             # for opmd / pairwise_opmd

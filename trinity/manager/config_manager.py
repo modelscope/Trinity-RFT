@@ -147,7 +147,6 @@ class ConfigManager:
             "critic_ppo_micro_batch_size_per_gpu": 8,
             "critic_ulysses_sequence_parallel_size": 1,
             "critic_checkpoint": ["model", "optimizer", "extra"],
-            "training_mode": "PPO",
         }
 
     def reset_session_state(self):
@@ -504,8 +503,14 @@ if node_num > 1:
     def _set_algorithm_type(self):
         st.selectbox(
             "Algorithm Type",
-            [AlgorithmType.PPO.value, AlgorithmType.DPO.value, AlgorithmType.OPMD.value],
+            [
+                AlgorithmType.PPO.value,
+                AlgorithmType.GRPO.value,
+                AlgorithmType.DPO.value,
+                AlgorithmType.OPMD.value,
+            ],
             key="algorithm_type",
+            on_change=self._set_adv_estimator,
         )
 
     def _set_sft_warmup_iteration(self):
@@ -595,11 +600,16 @@ if node_num > 1:
         st.number_input("Lambda", key="lam")
 
     def _set_adv_estimator(self):
-        st.selectbox(
-            "Advantage Estimator",
-            [member.value for member in AdvantageEstimator],
-            key="adv_estimator",
-        )
+        if st.session_state["algorithm_type"] == AlgorithmType.PPO.value:
+            st.session_state["adv_estimator"] = AdvantageEstimator.GAE.value
+        elif st.session_state["algorithm_type"] == AlgorithmType.GRPO.value:
+            st.session_state["adv_estimator"] = AdvantageEstimator.GRPO.value
+        elif st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
+            st.session_state["adv_estimator"] = AdvantageEstimator.GRPO.value
+        elif st.session_state["algorithm_type"] == AlgorithmType.OPMD.value:
+            st.session_state["adv_estimator"] = AdvantageEstimator.GRPO.value
+        else:  # TODO: add more algorithms
+            pass
 
     def _set_norm_adv_by_std_in_grpo(self):
         st.checkbox("Norm Adv by Std in GRPO", key="norm_adv_by_std_in_grpo")
@@ -789,22 +799,6 @@ if node_num > 1:
             key="critic_checkpoint",
         )
 
-    def _set_training_mode(self):
-        st.selectbox("Training Mode", ["PPO", "GRPO", "DPO", "OPMD"], key="training_mode")
-
-        if st.session_state["training_mode"] == "PPO":
-            st.session_state["algorithm_type"] = AlgorithmType.PPO.value
-            st.session_state["adv_estimator"] = "gae"
-        elif st.session_state["training_mode"] == "GRPO":
-            st.session_state["algorithm_type"] = AlgorithmType.PPO.value
-            st.session_state["adv_estimator"] = "grpo"
-        elif st.session_state["training_mode"] == "DPO":
-            st.session_state["algorithm_type"] = AlgorithmType.DPO.value
-            st.session_state["adv_estimator"] = "grpo"
-        elif st.session_state["training_mode"] == "OPMD":
-            st.session_state["algorithm_type"] = AlgorithmType.OPMD.value
-            st.session_state["adv_estimator"] = "grpo"
-
     def _set_configs_with_st_columns(
         self, config_names: List[str], columns_config: List[int] = None
     ):
@@ -825,7 +819,9 @@ if node_num > 1:
 
         self._set_dataset_path()
 
-        self._set_configs_with_st_columns(["training_mode", "sft_warmup_iteration", "monitor_type"])
+        self._set_configs_with_st_columns(
+            ["algorithm_type", "sft_warmup_iteration", "monitor_type"]
+        )
         if st.session_state["sft_warmup_iteration"] > 0:
             self._set_sft_warmup_dataset_path()
 
@@ -865,7 +861,9 @@ if node_num > 1:
             ]
         )
 
-        use_critic = st.session_state["adv_estimator"] == "gae"  # TODO: may apply to expert mode
+        use_critic = (
+            st.session_state["adv_estimator"] == AdvantageEstimator.GAE.value
+        )  # TODO: may apply to expert mode
         if use_critic:
             self._set_configs_with_st_columns(["critic_ppo_micro_batch_size_per_gpu", "critic_lr"])
 
@@ -921,9 +919,8 @@ if node_num > 1:
             self._set_configs_with_st_columns(["enable_prefix_caching", "enforce_eager"])
 
     def _expert_trainer_part(self):
-        self._set_configs_with_st_columns(["trainer_type", "algorithm_type"])
-        self._set_configs_with_st_columns(
-            ["sft_warmup_iteration", "eval_interval", "save_interval"]
+        self._set_configs_with_st_columns(  # TODO: may add `trainer_type`
+            ["algorithm_type", "sft_warmup_iteration", "eval_interval", "save_interval"]
         )
         self._check_sft_warmup_dataset_path()
 
@@ -964,7 +961,7 @@ if node_num > 1:
 
         with rl_algorithm_tab:
             st.subheader("RL Algorithm Config")
-            self._set_configs_with_st_columns(["gamma", "lam", "adv_estimator"])
+            self._set_configs_with_st_columns(["gamma", "lam"])
             self._set_configs_with_st_columns(["norm_adv_by_std_in_grpo", "use_kl_in_reward"])
             self._set_configs_with_st_columns(["kl_penalty", "kl_ctrl_type", "kl_ctrl_coef"])
             self._set_configs_with_st_columns(["horizon", "target_kl"])
@@ -1111,7 +1108,6 @@ if node_num > 1:
                         else st.session_state["total_training_steps"],
                     },
                     "fsdp_config": copy.deepcopy(fsdp_config),
-                    "alg_type": st.session_state["algorithm_type"],
                     "tau": st.session_state["actor_tau"],
                     "opmd_baseline": st.session_state["actor_opmd_baseline"],
                     "use_uid": st.session_state["actor_use_uid"],

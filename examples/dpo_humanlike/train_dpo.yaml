@@ -23,7 +23,6 @@ actor_rollout_ref:
     enable_gradient_checkpointing: True
     use_remove_padding: False
   actor:
-    alg_type: dpo
     strategy: fsdp  # This is for backward-compatibility
     ppo_mini_batch_size: 32
     # ppo_micro_batch_size: 8 # will be deprecated, use ppo_micro_batch_size_per_gpu

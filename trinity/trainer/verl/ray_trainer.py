@@ -56,6 +56,7 @@ from verl.utils.seqlen_balancing import (
 from verl.utils.torch_functional import masked_mean
 from verl.utils.tracking import ValidationGenerationsLogger
 
+from trinity.common.constants import AlgorithmType
 from trinity.trainer.verl import core_algos
 
 WorkerType = Type[Worker]
@@ -208,9 +209,24 @@ def compute_response_mask(data: DataProto):
 def compute_advantage(data: DataProto, **kwargs):
     """Extend verl's original compute_advantage with OPMD"""
 
-    alg_type = kwargs.get("alg_type", "ppo")
+    algorithm_type: AlgorithmType = kwargs.get("algorithm_type", AlgorithmType.PPO)
 
-    if alg_type == "ppo":
+    if algorithm_type == AlgorithmType.OPMD:
+        tau = kwargs.get("tau", 1.0)
+        opmd_baseline = kwargs.get("opmd_baseline", "mean")
+
+        return compute_advantage_opmd(
+            data=data,
+            tau=tau,
+            opmd_baseline=opmd_baseline,
+        )
+
+    elif algorithm_type == AlgorithmType.PAIRWISE_OPMD:
+        data.batch["advantages"] = None
+        data.batch["returns"] = None
+        return data
+
+    elif algorithm_type.is_rft():
         adv_estimator = kwargs.get("adv_estimator", None)
         gamma = kwargs.get("gamma", 1.0)
         lam = kwargs.get("lam", 1.0)
@@ -224,23 +240,8 @@ def compute_advantage(data: DataProto, **kwargs):
             num_repeat=num_repeat,
         )
 
-    elif alg_type == "opmd":
-        tau = kwargs.get("tau", 1.0)
-        opmd_baseline = kwargs.get("opmd_baseline", "mean")
-
-        return compute_advantage_opmd(
-            data=data,
-            tau=tau,
-            opmd_baseline=opmd_baseline,
-        )
-
-    elif alg_type == "pairwise_opmd":
-        data.batch["advantages"] = None
-        data.batch["returns"] = None
-        return data
-
     else:
-        raise ValueError(f"alg_type must be 'ppo' or 'opmd', get '{alg_type}'.")
+        raise ValueError(f"Get invalid algorithm_type '{algorithm_type}'.")
 
 
 def compute_advantage_opmd(data: DataProto, tau=1.0, opmd_baseline="mean"):
@@ -367,7 +368,10 @@ class RayPPOTrainer(object):
         else:
             self.kl_ctrl = core_algos.FixedKLController(kl_coef=0.0)
 
-        if self.config.actor_rollout_ref.actor.get("alg_type", "ppo") != "ppo":
+        if (
+            self.config.actor_rollout_ref.actor.get("algorithm_type", AlgorithmType.PPO)
+            != AlgorithmType.PPO
+        ):
             self.use_critic = False
         elif self.config.algorithm.adv_estimator == AdvantageEstimator.GAE:
             self.use_critic = True
@@ -1082,14 +1086,16 @@ class RayPPOTrainer(object):
                             batch.batch["token_level_rewards"] = batch.batch["token_level_scores"]
 
                         # compute advantages, executed on the driver process
-                        alg_type = self.config.actor_rollout_ref.actor.get("alg_type", "ppo")
+                        algorithm_type = self.config.actor_rollout_ref.actor.get(
+                            "algorithm_type", AlgorithmType.PPO
+                        )
                         tau = self.config.actor_rollout_ref.actor.get("tau", 1.0)
                         opmd_baseline = self.config.actor_rollout_ref.actor.get(
                             "opmd_baseline", "mean"
                         )
                         batch = compute_advantage(
                             batch,
-                            alg_type=alg_type,
+                            algorithm_type=algorithm_type,
                             adv_estimator=self.config.algorithm.adv_estimator,
                             gamma=self.config.algorithm.gamma,
                             lam=self.config.algorithm.lam,

@@ -76,6 +76,10 @@ class SFTDataReader:
             for prompt_messages, response_messages in zip(
                 batch_data[self.prompt_key], batch_data[self.response_key]
             ):
+                if not isinstance(prompt_messages, list):
+                    prompt_messages = [prompt_messages]
+                if not isinstance(response_messages, list):
+                    response_messages = [response_messages]
                 full_messages = prompt_messages + response_messages
 
                 tokens = self.tokenizer.apply_chat_template(

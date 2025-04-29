@@ -251,7 +251,6 @@ actor_rollout_ref:
       optimizer_offload: False
       fsdp_size: -1
     # --- below: opmd ---
-    alg_type: ppo  # ppo / opmd / pairwise_opmd
     tau: 0.000  # strength of regularization w.r.t. old / ref policy
     opmd_baseline: mean  # mean / logavgexp, applicable to opmd
     use_uid: False  # True / False, applicable to pairwise_opmd
@@ -405,7 +404,6 @@ trainer:
 - `actor_rollout_ref.actor.kl_loss_coef`: The coefficient of kl loss.
 - `actor_rollout_ref.actor.kl_loss_type`: How to compute kl loss, optional value is `kl`, `abs`, `mse` or `low_var_kl`.
 - `actor_rollout_ref.actor.ulysses_sequence_parallel_size`: Ulysses sequence parallel size.
-- `actor_rollout_ref.actor.alg_type`: Used for OPMD, optional value is `ppo`, `opmd` or `pairwise_opmd`.
 - `actor_rollout_ref.actor.tau`: strength of regularization w.r.t. old / ref policy.
 - `actor_rollout_ref.actor.opmd_baseline`: mean / logavgexp, applicable to opmd.
 - `actor_rollout_ref.actor.use_uid`: True / False, applicable to pairwise_opmd.

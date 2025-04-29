@@ -382,12 +382,14 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
 
                 # compute advantages, executed on the driver process
                 kwargs = {}
-                alg_type = self.config.actor_rollout_ref.actor.get("alg_type", "ppo")
-                if alg_type == "opmd":
+                algorithm_type = self.config.actor_rollout_ref.actor.get(
+                    "algorithm_type", AlgorithmType.PPO
+                )
+                if algorithm_type == AlgorithmType.OPMD:
                     tau = self.config.actor_rollout_ref.actor.get("tau", 0.0)
                     opmd_baseline = self.config.actor_rollout_ref.actor.get("opmd_baseline", "mean")
                     kwargs = {
-                        "alg_type": alg_type,
+                        "algorithm_type": algorithm_type,
                         "tau": tau,
                         "opmd_baseline": opmd_baseline,
                     }

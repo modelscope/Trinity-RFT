@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional
 from omegaconf import OmegaConf
 
 from trinity.common.config import BufferConfig, Config, SynchronizerConfig
+from trinity.common.constants import AlgorithmType
 
 
 @dataclass
@@ -86,7 +87,7 @@ class Actor:
     checkpoint: Checkpoint = field(default_factory=Checkpoint)
     optim: Optim = field(default_factory=Optim)
     fsdp_config: FSDPConfig = field(default_factory=FSDPConfig)
-    alg_type: str = "ppo"  # ppo / opmd / pairwise_opmd
+    algorithm_type: AlgorithmType = AlgorithmType.PPO
     tau: float = 0.001  # strength of regularization w.r.t. old / ref policy
     opmd_baseline: str = "mean"  # mean / logavgexp, applicable to opmd
     use_uid: bool = False  # True / False, applicable to pairwise_opmd
@@ -300,12 +301,9 @@ class veRLConfig:
         self.actor_rollout_ref.rollout.temperature = config.explorer.temperature
         self.actor_rollout_ref.rollout.n = config.explorer.repeat_times
         batch_size_per_gpu = self.buffer.read_batch_size // world_size
-        self.actor_rollout_ref.actor.alg_type = (
-            config.trainer.algorithm_type.value
-        )  # TODO: refactor `alg_type`
-        # print(f"using algorithm type: {self.actor_rollout_ref.actor.alg_type}")
+        self.actor_rollout_ref.actor.algorithm_type = config.trainer.algorithm_type
 
-        if self.actor_rollout_ref.actor.alg_type == "dpo":  # for DPO
+        if self.actor_rollout_ref.actor.algorithm_type.is_dpo():  # for DPO
             print("Warning: DPO micro batch size is doubled for computing loss.")
             self.actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu *= 2  # type: ignore
             self.actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu *= 2  # type: ignore

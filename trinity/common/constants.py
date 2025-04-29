@@ -66,6 +66,7 @@ class AlgorithmType(CaseInsensitiveEnum):
     PPO = "ppo"
     GRPO = "grpo"
     OPMD = "opmd"
+    PAIRWISE_OPMD = "pairwise_opmd"
     DPO = "dpo"
 
     def is_rft(self) -> bool:
@@ -74,6 +75,7 @@ class AlgorithmType(CaseInsensitiveEnum):
             AlgorithmType.PPO,
             AlgorithmType.GRPO,
             AlgorithmType.OPMD,
+            AlgorithmType.PAIRWISE_OPMD,
         ]
 
     def is_sft(self) -> bool:

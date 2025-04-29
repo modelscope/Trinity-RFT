@@ -24,6 +24,8 @@ import torch
 import torch.nn.functional as F
 import verl.utils.torch_functional as verl_F
 
+from trinity.common.constants import AlgorithmType
+
 
 class KLController(ABC):
     @abstractmethod
@@ -353,20 +355,9 @@ def compute_rewards(token_level_scores, old_log_prob, ref_log_prob, kl_ratio):
 def compute_policy_loss(old_log_prob, log_prob, eos_mask, **kwargs):
     """Compute policy loss for PPO / OPMD / pairwise OPMD"""
 
-    alg_type = kwargs.get("alg_type", "ppo")
+    algorithm_type: AlgorithmType = kwargs.get("algorithm_type", AlgorithmType.PPO)
 
-    if alg_type == "ppo":
-        advantages = kwargs.get("advantages")
-        cliprange = kwargs.get("cliprange")
-        return compute_policy_loss_ppo(
-            old_log_prob=old_log_prob,
-            log_prob=log_prob,
-            advantages=advantages,
-            eos_mask=eos_mask,
-            cliprange=cliprange,
-        )
-
-    elif alg_type == "opmd":
+    if algorithm_type == AlgorithmType.OPMD:
         advantages = kwargs.get("advantages")
         tau = kwargs.get("tau")
         return compute_policy_loss_opmd(
@@ -377,7 +368,7 @@ def compute_policy_loss(old_log_prob, log_prob, eos_mask, **kwargs):
             tau=tau,
         )
 
-    elif alg_type == "pairwise_opmd":
+    elif algorithm_type == AlgorithmType.PAIRWISE_OPMD:
         token_level_scores = kwargs.get("token_level_scores")
         index = kwargs.get("index")
         tau = kwargs.get("tau")
@@ -390,8 +381,19 @@ def compute_policy_loss(old_log_prob, log_prob, eos_mask, **kwargs):
             tau=tau,
         )
 
+    elif algorithm_type.is_rft():
+        advantages = kwargs.get("advantages")
+        cliprange = kwargs.get("cliprange")
+        return compute_policy_loss_ppo(
+            old_log_prob=old_log_prob,
+            log_prob=log_prob,
+            advantages=advantages,
+            eos_mask=eos_mask,
+            cliprange=cliprange,
+        )
+
     else:
-        raise NotImplementedError(f"Get invalid alg_type '{alg_type}'.")
+        raise NotImplementedError(f"Get invalid algorithm_type '{algorithm_type}'.")
 
 
 def compute_policy_loss_dpo(

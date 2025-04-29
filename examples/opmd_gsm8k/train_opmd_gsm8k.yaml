@@ -1,7 +1,6 @@
 # Configs of particular interest for min-opmd and off-policy scenarios:
 #
 #   parameters specific to min-opmd
-#     alg_type: opmd
 #     tau: 1.0             # strength of regularization w.r.t. ref policy
 #     opmd_baseline: mean  # must be "mean" for min-opmd
 #     use_uid: False       # applicable to pairwise-opmd, not min-opmd
@@ -20,7 +19,7 @@
 #     lr: set smaller to account for beta1 = 0.0
 #
 #   misc:
-#     adv_estimator: grpo  # merely to disable critic model, doesn't affect adv compute when alg_type is opmd
+#     adv_estimator: grpo  # merely to disable critic model, doesn't affect adv compute when algorithm_type is opmd
 
 
 data:
@@ -79,7 +78,6 @@ actor_rollout_ref:
       optimizer_offload: False
       fsdp_size: -1
     # --- below: opmd ---
-    alg_type: opmd  # ppo / opmd / pairwise_opmd
     tau: 4.0        # strength of regularization w.r.t. old / ref policy
     opmd_baseline: mean  # mean / logavgexp, applicable to opmd
     use_uid: False  # True / False, applicable to pairwise_opmd

@@ -51,7 +51,6 @@ actor_rollout_ref:
       optimizer_offload: False
       fsdp_size: -1
     # --- below: opmd ---
-    alg_type: ppo  # ppo / opmd / pairwise_opmd
     tau: 0.000  # strength of regularization w.r.t. old / ref policy
     opmd_baseline: mean  # mean / logavgexp, applicable to opmd
     use_uid: False  # True / False, applicable to pairwise_opmd

@@ -63,7 +63,6 @@ trainer:
 # In train_dpo.yaml
 actor_rollout_ref:
   actor:
-    alg_type: dpo
     use_kl_loss: True
     kl_loss_coef: 0.1  # value of beta in DPO
 ```
