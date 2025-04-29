@@ -69,6 +69,7 @@ trainer:
   sft_warmup_iteration: 0 # Set to integer to enable sft warmup
   eval_interval: 50
   save_interval: 100
+  # get_exp_strategy: 'LFU'
 monitor:
   cache_root_dir: ""
   project: "Trinity-RFT-gsm8k"

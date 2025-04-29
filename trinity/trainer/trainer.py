@@ -13,7 +13,7 @@ import ray
 
 from trinity.buffer import get_buffer_reader
 from trinity.common.config import Config
-from trinity.common.constants import AlgorithmType, SyncMethod
+from trinity.common.constants import AlgorithmType, SyncMethod, ReadStrategy
 from trinity.common.experience import Experiences
 from trinity.utils.log import get_logger
 
@@ -81,24 +81,28 @@ class Trainer:
                     pad_token_id=self.config.buffer.pad_token_id,  # type: ignore
                 )
             )
-        else:
-            exps = self.train_buffer.read()
-            if algo_type.is_rft():
-                return self.engine.train_rft_iteration(
-                    Experiences.gather_experiences(
-                        exps,
-                        pad_token_id=self.config.buffer.pad_token_id,  # type: ignore
-                    )
-                )
-            elif algo_type.is_dpo():
-                return self.engine.train_dpo_iteration(
-                    Experiences.gather_dpo_experiences(
-                        exps,
-                        pad_token_id=self.config.buffer.pad_token_id,  # type: ignore
-                    )
-                )
+        elif algo_type.is_rft():
+            if self.config.trainer.get_exp_strategy:
+                strategy = ReadStrategy(self.config.trainer.get_exp_strategy)
             else:
-                raise ValueError(f"Unsupported algorithm type: {algo_type}")
+                strategy = None
+            exps = self.train_buffer.read(strategy=strategy)
+            return self.engine.train_rft_iteration(
+                Experiences.gather_experiences(
+                    exps,
+                    pad_token_id=self.config.buffer.pad_token_id,  # type: ignore
+                )
+            )
+        elif algo_type.is_dpo():
+            exps = self.train_buffer.read()
+            return self.engine.train_dpo_iteration(
+                Experiences.gather_dpo_experiences(
+                    exps,
+                    pad_token_id=self.config.buffer.pad_token_id,  # type: ignore
+                )
+            )
+        else:
+            raise ValueError(f"Unsupported algorithm type: {algo_type}")
 
     def sync_weight(self) -> None:
         """Sync the model weight."""

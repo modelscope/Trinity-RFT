@@ -156,8 +156,10 @@ class Explorer:
 
     def explore(self) -> None:
         """Explore the entire dataset."""
-        explore_status, _ = self.explore_step()
-        while explore_status:
+        while True:
+            explore_status, _ = self.explore_step()
+            if not explore_status:
+                break
             self.sync_weight()
         self.logger.info("Explorer finished.")
 

@@ -187,6 +187,7 @@ class TrainerConfig:
 
     # train algorithm
     algorithm_type: AlgorithmType = AlgorithmType.PPO
+    get_exp_strategy: Optional[str] = None
 
     # warmup config
     sft_warmup_iteration: int = 0

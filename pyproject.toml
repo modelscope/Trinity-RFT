@@ -93,3 +93,6 @@ exclude = '''
     | dist
 )/
 '''
+
+[tool.isort]
+known_third_party = ["wandb"]

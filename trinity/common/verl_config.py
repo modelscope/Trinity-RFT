@@ -244,7 +244,6 @@ class Trainer:
     val_before_train: bool = False
     training_rollout_mode: str = "parallel"
     enable_exp_buffer: bool = True
-    get_exp_strategy: Optional[str] = None  # TODO
     sync_freq: int = 0
     sft_warmup_iteration: int = 0
     max_actor_ckpt_to_keep: Optional[int] = None
