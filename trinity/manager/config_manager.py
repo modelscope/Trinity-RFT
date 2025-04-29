@@ -50,7 +50,7 @@ class ConfigManager:
             "max_response_tokens": 1024,
             # Data and Buffer Configs
             "total_epochs": 20,
-            "task_num_per_batch": 6,
+            "train_batch_size": 6,
             "dataset_path": "",
             "subset_name": None,
             "train_split": "train",
@@ -226,29 +226,29 @@ class ConfigManager:
         st.number_input("Total Epochs", key="total_epochs", min_value=1)
 
     @property
-    def _str_for_task_num_per_batch(self):
+    def _str_for_train_batch_size(self):
         return (
-            f"Please ensure that `task_num_per_batch` can be divided by "
+            f"Please ensure that `train_batch_size` can be divided by "
             f"`gpu_per_node * node_num - engine_num * tensor_parallel_size` "
             f"= {st.session_state['trainer_gpu_num']}"
         )
 
-    def _set_task_num_per_batch(self):
+    def _set_train_batch_size(self):
         trainer_gpu_num = st.session_state["trainer_gpu_num"]
-        if st.session_state["task_num_per_batch"] < trainer_gpu_num:
-            st.session_state["task_num_per_batch"] = trainer_gpu_num
+        if st.session_state["train_batch_size"] < trainer_gpu_num:
+            st.session_state["train_batch_size"] = trainer_gpu_num
         st.number_input(
-            "Task Num Per Batch",
-            key="task_num_per_batch",
+            "Train Batch Size",
+            key="train_batch_size",
             min_value=trainer_gpu_num,
             step=trainer_gpu_num,
-            help=self._str_for_task_num_per_batch,
+            help=self._str_for_train_batch_size,
         )
 
-    def _check_task_num_per_batch(self):
-        if st.session_state["task_num_per_batch"] % st.session_state["trainer_gpu_num"] != 0:
-            self.unfinished_fields.add("task_num_per_batch")
-            st.warning(self._str_for_task_num_per_batch)
+    def _check_train_batch_size(self):
+        if st.session_state["train_batch_size"] % st.session_state["trainer_gpu_num"] != 0:
+            self.unfinished_fields.add("train_batch_size")
+            st.warning(self._str_for_train_batch_size)
 
     def _set_dataset_path(self):
         st.text_input("Dataset Path", key="dataset_path")
@@ -836,9 +836,9 @@ if node_num > 1:
         self._check_engine_num_and_tp_size()
 
         self._set_configs_with_st_columns(
-            ["total_epochs", "task_num_per_batch", "max_prompt_tokens", "max_response_tokens"]
+            ["total_epochs", "train_batch_size", "max_prompt_tokens", "max_response_tokens"]
         )
-        self._check_task_num_per_batch()
+        self._check_train_batch_size()
 
         self._set_dataset_args()
 
@@ -881,8 +881,8 @@ if node_num > 1:
         self._set_configs_with_st_columns(["max_prompt_tokens", "max_response_tokens"])
 
     def _expert_buffer_part(self):
-        self._set_configs_with_st_columns(["total_epochs", "task_num_per_batch"])
-        self._check_task_num_per_batch()
+        self._set_configs_with_st_columns(["total_epochs", "train_batch_size"])
+        self._check_train_batch_size()
 
         self._set_dataset_path()
 
@@ -916,9 +916,7 @@ if node_num > 1:
                 ["runner_num", "max_pending_requests", "max_waiting_steps", "dtype"]
             )
 
-            self._set_configs_with_st_columns(
-                ["backend", "temperature", "top_p", "top_k", "seed", "logprobs"]
-            )
+            self._set_configs_with_st_columns(["backend", "temperature", "seed", "logprobs"])
 
             self._set_configs_with_st_columns(["enable_prefix_caching", "enforce_eager"])
 
@@ -1065,7 +1063,7 @@ if node_num > 1:
                 "prompt_key": "placeholder",
                 "max_prompt_length": st.session_state["max_prompt_tokens"],
                 "max_response_length": st.session_state["max_response_tokens"],
-                "train_batch_size": st.session_state["task_num_per_batch"]
+                "train_batch_size": st.session_state["train_batch_size"]
                 * st.session_state["repeat_times"],
                 "val_batch_size": None,
                 "return_raw_input_ids": False,
@@ -1086,7 +1084,7 @@ if node_num > 1:
                 },
                 "actor": {
                     "strategy": st.session_state["training_strategy"],
-                    "ppo_mini_batch_size": st.session_state["task_num_per_batch"],
+                    "ppo_mini_batch_size": st.session_state["train_batch_size"],
                     "ppo_micro_batch_size_per_gpu": st.session_state[
                         "actor_ppo_micro_batch_size_per_gpu"
                     ],
@@ -1175,7 +1173,7 @@ if node_num > 1:
                     "use_remove_padding": use_remove_padding,
                     "fsdp_config": copy.deepcopy(fsdp_config),
                 },
-                "ppo_mini_batch_size": st.session_state["task_num_per_batch"],
+                "ppo_mini_batch_size": st.session_state["train_batch_size"],
                 "ppo_micro_batch_size_per_gpu": st.session_state[
                     "critic_ppo_micro_batch_size_per_gpu"
                 ],
@@ -1298,7 +1296,7 @@ if node_num > 1:
             config = {
                 "data": {
                     "total_epochs": st.session_state["total_epochs"],
-                    "batch_size": st.session_state["task_num_per_batch"],
+                    "batch_size": st.session_state["train_batch_size"],
                     "dataset_path": st.session_state["dataset_path"],
                     "default_workflow_type": st.session_state["default_workflow_type"],
                     "default_reward_fn_type": st.session_state["default_reward_fn_type"],
@@ -1321,8 +1319,6 @@ if node_num > 1:
                 },
                 "buffer": {
                     "db_url": db_url,
-                    "read_batch_size": st.session_state["task_num_per_batch"]
-                    * st.session_state["repeat_times"],
                     "max_retry_times": st.session_state["max_retry_times"],
                     "max_retry_interval": st.session_state["max_retry_interval"],
                     "train_dataset": {
@@ -1347,8 +1343,6 @@ if node_num > 1:
                     "enforce_eager": st.session_state["enforce_eager"],
                     "dtype": st.session_state["dtype"],
                     "temperature": st.session_state["temperature"],
-                    "top_p": st.session_state["top_p"],
-                    "top_k": st.session_state["top_k"],
                     "seed": st.session_state["seed"],
                     "logprobs": st.session_state["logprobs"],
                     "repeat_times": st.session_state["repeat_times"],

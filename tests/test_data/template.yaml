@@ -9,7 +9,6 @@ cluster:
   node_num: 1
   gpu_per_node: 8
 buffer:
-  read_batch_size: 32
   max_retry_times: 3
   max_retry_interval: 1
 explorer:
@@ -21,7 +20,5 @@ explorer:
   enforce_eager: true
   dtype: bfloat16
   temperature: 1.0
-  top_p: 1.0
-  top_k: -1
   seed: 42
   logprobs: 0

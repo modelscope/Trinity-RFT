@@ -47,8 +47,6 @@ class vLLMAysncRolloutModel(InferenceModel):
         self.default_sampling_params = vllm.SamplingParams(
             n=config.explorer.repeat_times,
             temperature=config.explorer.temperature,
-            top_p=config.explorer.top_p,
-            top_k=config.explorer.top_k,
             max_tokens=config.model.max_response_tokens,
             min_tokens=1,
             truncate_prompt_tokens=config.model.max_prompt_tokens,

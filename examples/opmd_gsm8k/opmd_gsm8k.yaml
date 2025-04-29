@@ -30,8 +30,6 @@ explorer:
   enforce_eager: true
   dtype: bfloat16
   temperature: 1.0
-  top_p: 1.0
-  top_k: -1
   seed: 42
   logprobs: 0
   repeat_times: 8

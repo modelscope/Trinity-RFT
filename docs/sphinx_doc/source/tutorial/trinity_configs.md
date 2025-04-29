@@ -131,8 +131,6 @@ explorer:
   enforce_eager: true
   dtype: bfloat16
   temperature: 1.0
-  top_p: 1.0
-  top_k: -1
   seed: 42
   logprobs: 0
   repeat_times: 5
@@ -150,8 +148,6 @@ explorer:
 - `explorer.enforce_eager`: Whether to enforce eager mode. Default is `True`.
 - `explorer.dtype`: The data type used in vLLM. Default is `bfloat16`.
 - `explorer.temperature`: The temperature used in vLLM. Default is `1.0`.
-- `explorer.top_p`: The top-p used in vLLM. Default is `1.0`.
-- `explorer.top_k`: The top-k used in vLLM. Default is `-1`.
 - `explorer.seed`: The seed used in vLLM. Default is `42`.
 - `explorer.logprobs`: The logprobs used in vLLM. Default is `0`.
 - `explorer.repeat_times`: The number of times to repeat each task, used for GRPO-like algorithms. Default is `5`.
