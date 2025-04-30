@@ -18,7 +18,6 @@ The main entry point to run the PPO algorithm
 import logging
 import os
 import warnings
-from datetime import timedelta
 
 import psutil
 import torch
@@ -598,7 +597,7 @@ class ActorRolloutRefWorker(Worker):
                     init_method = f"tcp://[{master_address}]:{master_port}"
                 else:
                     init_method = f"tcp://{master_address}:{master_port}"
-                timeout = timedelta(seconds=self.config.synchronizer.sync_timeout)
+                timeout = self.config.synchronizer.sync_timeout
 
                 self._model_update_group = init_process_group(
                     backend=backend,

@@ -15,17 +15,6 @@ monitor:
 - `monitor.name`: The name of the experiment. It must be set manually.
 
 
-## Monitor
-
-```yaml
-monitor:
-  project: "Trinity-RFT-countdown"
-  name: "qwen2.5-1.5B-countdown"
-```
-
-- `monitor.project`: The project name. It must be set manually.
-- `monitor.name`: The name of the experiment. It must be set manually.
-
 ## Data
 
 <!-- The `data` configuration specifies the data used for training. It includes the total number of epochs, the batch size, the path to the dataset, the default workflow type, the default reward function type, and the format configuration. -->

@@ -293,34 +293,19 @@ class veRLConfig:
         self.buffer.pad_token_id = config.buffer.pad_token_id
         self.trainer.project_name = config.monitor.project
         self.trainer.experiment_name = config.monitor.name
-        self.data.train_batch_size = self.buffer.read_batch_size
+        self.data.train_batch_size = config.data.batch_size
         self.trainer.default_local_dir = config.model.checkpoint_path
         self.trainer.sft_warmup_iteration = config.trainer.sft_warmup_iteration
         self.actor_rollout_ref.actor.ppo_mini_batch_size = config.data.batch_size
         self.actor_rollout_ref.rollout.temperature = config.explorer.temperature
         self.actor_rollout_ref.rollout.n = config.explorer.repeat_times
-        batch_size_per_gpu = self.buffer.read_batch_size // world_size
         self.actor_rollout_ref.actor.algorithm_type = config.trainer.algorithm_type
 
         if self.actor_rollout_ref.actor.algorithm_type.is_dpo():  # for DPO
             print("Warning: DPO micro batch size is doubled for computing loss.")
+            self.actor_rollout_ref.actor.ppo_mini_batch_size *= 2
             self.actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu *= 2  # type: ignore
             self.actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu *= 2  # type: ignore
-        if batch_size_per_gpu % self.actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu != 0:  # type: ignore
-            raise ValueError(
-                f"batch_size_per_gpu ({batch_size_per_gpu}) must be divisible by "
-                f"actor.ppo_micro_batch_size_per_gpu ({self.actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu})"
-            )
-        if batch_size_per_gpu % self.actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu != 0:  # type: ignore
-            raise ValueError(
-                f"batch_size_per_gpu ({batch_size_per_gpu}) must be divisible by "
-                f"ref.log_prob_micro_batch_size_per_gpu ({self.actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu})"
-            )
-        if batch_size_per_gpu % self.critic.ppo_micro_batch_size_per_gpu != 0:  # type: ignore
-            raise ValueError(
-                f"batch_size_per_gpu ({batch_size_per_gpu}) must be divisible by "
-                f"critic.ppo_micro_batch_size_per_gpu ({self.critic.ppo_micro_batch_size_per_gpu})"
-            )
         # TODO: check other fields
         self.enable_preview = config.trainer.enable_preview
 

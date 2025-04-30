@@ -27,7 +27,7 @@ def is_ipv6_address(ip_str: str) -> bool:
 def init_process_group(
     backend: Union[str, Backend] = None,
     init_method: Optional[str] = None,
-    timeout: Optional[timedelta] = None,
+    timeout: Optional[float] = None,
     world_size: int = -1,
     rank: int = -1,
     store: Optional[Store] = None,
@@ -49,6 +49,8 @@ def init_process_group(
 
     if timeout is None:
         timeout = default_pg_timeout
+    else:
+        timeout = timedelta(seconds=timeout)
 
     # backward compatible API
     if store is None:

@@ -48,7 +48,7 @@ trainer:
   trainer_type: 'verl'
   algorithm_type: ppo
   trainer_config_path: 'examples/grpo_alfworld/train_alfworld.yaml'
-  save_interval: 1
+  save_interval: 10
 monitor:
   cache_root_dir: ""
   project: "ALFWORLD"

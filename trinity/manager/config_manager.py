@@ -56,7 +56,8 @@ class ConfigManager:
             "max_response_tokens": 1024,
             # Data Configs
             "total_epochs": 20,
-            "train_batch_size": 6,
+            "_train_batch_size_per_gpu": 16,
+            "train_batch_size": 96,
             "dataset_path": "",
             "subset_name": None,
             "train_split": "train",
@@ -253,14 +254,22 @@ class ConfigManager:
 
     def _set_train_batch_size(self):
         trainer_gpu_num = st.session_state["trainer_gpu_num"]
-        if st.session_state["train_batch_size"] < trainer_gpu_num:
-            st.session_state["train_batch_size"] = trainer_gpu_num
+        st.session_state["train_batch_size"] = (
+            st.session_state["_train_batch_size_per_gpu"] * st.session_state["trainer_gpu_num"]
+        )
+
+        def on_change():
+            st.session_state["_train_batch_size_per_gpu"] = max(
+                st.session_state["train_batch_size"] // st.session_state["trainer_gpu_num"], 1
+            )
+
         st.number_input(
             "Train Batch Size",
             key="train_batch_size",
             min_value=trainer_gpu_num,
             step=trainer_gpu_num,
             help=self._str_for_train_batch_size,
+            on_change=on_change,
         )
 
     def _check_train_batch_size(self):
@@ -730,17 +739,27 @@ if node_num > 1:
         st.number_input("Target KL", key="target_kl", format="%.1e")
 
     def _set_actor_ppo_micro_batch_size_per_gpu(self):
+        st.session_state["actor_ppo_micro_batch_size_per_gpu"] = min(
+            st.session_state["actor_ppo_micro_batch_size_per_gpu"],
+            st.session_state["_train_batch_size_per_gpu"],
+        )
         st.number_input(
             "Micro Batch Size Per GPU for Actor",
             key="actor_ppo_micro_batch_size_per_gpu",
             min_value=1,
+            max_value=st.session_state["_train_batch_size_per_gpu"],
         )
 
     def _set_ref_log_prob_micro_batch_size_per_gpu(self):
+        st.session_state["ref_log_prob_micro_batch_size_per_gpu"] = min(
+            st.session_state["ref_log_prob_micro_batch_size_per_gpu"],
+            st.session_state["_train_batch_size_per_gpu"],
+        )
         st.number_input(
             "Micro Batch Size Per GPU for Ref",
             key="ref_log_prob_micro_batch_size_per_gpu",
             min_value=1,
+            max_value=st.session_state["_train_batch_size_per_gpu"],
         )
 
     def _set_actor_ulysses_sequence_parallel_size(self):
@@ -835,10 +854,15 @@ if node_num > 1:
         )
 
     def _set_critic_ppo_micro_batch_size_per_gpu(self):
+        st.session_state["critic_ppo_micro_batch_size_per_gpu"] = min(
+            st.session_state["critic_ppo_micro_batch_size_per_gpu"],
+            st.session_state["_train_batch_size_per_gpu"],
+        )
         st.number_input(
             "Micro Batch Size Per GPU for Critic",
             key="critic_ppo_micro_batch_size_per_gpu",
             min_value=1,
+            max_value=st.session_state["_train_batch_size_per_gpu"],
         )
 
     def _set_critic_ulysses_sequence_parallel_size(self):

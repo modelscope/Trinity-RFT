@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 """Custom vLLM Worker."""
-from datetime import timedelta
-
 import ray
 import torch
 import torch.distributed
@@ -55,7 +53,7 @@ class VLLMWorker(Worker):
         self._model_update_group = init_process_group(
             backend=backend,
             init_method=init_method,
-            timeout=timedelta(seconds=timeout),
+            timeout=timeout,
             world_size=world_size,
             rank=self._weight_update_rank,
             group_name=group_name,
