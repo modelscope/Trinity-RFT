@@ -98,7 +98,22 @@ class MonitorType(CaseInsensitiveEnum):
     TENSORBOARD = "tensorboard"
 
 
-class SyncMethod(CaseInsensitiveEnum):
+class SyncMethodEnumMeta(CaseInsensitiveEnumMeta):
+    def __call__(cls, value, *args, **kwargs):
+        if value == "online":
+            print("SyncMethod `online` is deprecated, use `nccl` instead.")
+            value = "nccl"
+        elif value == "offline":
+            print("SyncMethod `offline` is deprecated, use `checkpoint` instead.")
+            value = "checkpoint"
+        try:
+            return super().__call__(value, *args, **kwargs)
+        except Exception as e:
+            print("Error parsing SyncMethod:", e)
+            raise ValueError(f"Invalid SyncMethod: {value}")
+
+
+class SyncMethod(CaseInsensitiveEnum, metaclass=SyncMethodEnumMeta):
     """Sync Method."""
 
     NCCL = "nccl"
