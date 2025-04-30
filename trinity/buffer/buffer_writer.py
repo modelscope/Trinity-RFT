@@ -9,3 +9,7 @@ class BufferWriter(ABC):
     @abstractmethod
     def write(self, data: List) -> None:
         """Write to buffer."""
+
+    @abstractmethod
+    def finish(self) -> None:
+        """Finish writing."""

@@ -1,6 +1,7 @@
 """Writer of the Queue buffer."""
-
 from typing import List
+
+import ray
 
 from trinity.buffer.buffer_writer import BufferWriter
 from trinity.buffer.queue import QueueActor
@@ -23,4 +24,7 @@ class QueueWriter(BufferWriter):
         ).remote(meta, config)
 
     def write(self, data: List) -> None:
-        self.queue.put_batch.remote(data)
+        ray.get(self.queue.put_batch.remote(data))
+
+    def finish(self):
+        ray.get(self.queue.finish.remote())

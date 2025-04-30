@@ -203,10 +203,7 @@ class vLLMAysncRolloutModel(InferenceModel):
                 # request_output.prompt = request.prompt
                 return request_output
 
-        raise RuntimeError(
-            "[vLLM] The request is not finished. This should not happen. "
-            "Please report this issue to the Ray team."
-        )
+        raise RuntimeError("[vLLM] The request is not finished. This should not happen.")
 
     async def convert_messages_to_experience_async(self, messages: List[dict]) -> Experience:
         """Convert a list of messages into an experience."""
@@ -217,7 +214,7 @@ class vLLMAysncRolloutModel(InferenceModel):
         token_ids, action_mask = self.action_mask_method(
             self.tokenizer, messages, self.chat_template
         )
-        logprobs = await self.logprobs_async(token_ids=token_ids)
+        logprobs = await self.logprobs_async(token_ids=token_ids.tolist())
         return Experience(
             tokens=token_ids,
             prompt_length=len(token_ids),

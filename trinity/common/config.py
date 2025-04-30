@@ -154,6 +154,10 @@ class ExplorerConfig:
     # for rollout tokneize
     chat_template: Optional[str] = None
 
+    # for evaluation
+    # TODO: remove trainer.eval_interval
+    eval_interval: int = 100
+
     # for vLLM
     tensor_parallel_size: int = 1
     enable_prefix_caching: bool = False
@@ -321,6 +325,11 @@ class Config:
             ) * self.synchronizer.sync_iteration_interval
             print(
                 f"Warning: eval_interval is not a multiple of sync_iteration_interval; adjusted to the nearest integer={self.trainer.eval_interval}."
+            )
+        if self.explorer.eval_interval != self.trainer.eval_interval:
+            self.explorer.eval_interval = self.trainer.eval_interval
+            print(
+                f"Warning: explorer.eval_interval is not equal to trainer.eval_interval; adjusted to the same value={self.trainer.eval_interval}."
             )
 
         # check save_interval

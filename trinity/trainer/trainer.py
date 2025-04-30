@@ -59,7 +59,7 @@ class Trainer:
             train_status, train_iter_num = self.train_iteration(algo_type)
             if not train_status:
                 return False, train_iter_num
-        self.logger.info("Trainer finished.")
+        self.logger.info(f"Trainer iteration {train_iter_num} finished.")
         return True, train_iter_num
 
     def train_iteration(self, algo_type: AlgorithmType = AlgorithmType.PPO) -> Tuple[bool, int]:
@@ -86,7 +86,11 @@ class Trainer:
                 strategy = ReadStrategy(self.config.trainer.get_exp_strategy)
             else:
                 strategy = None
-            exps = self.train_buffer.read(strategy=strategy)
+            try:
+                exps = self.train_buffer.read(strategy=strategy)
+            except StopIteration:
+                self.logger.warning("No more data to train. Stop training.")
+                return False, 0  # TODO: get the actual iteration number
             return self.engine.train_rft_iteration(
                 Experiences.gather_experiences(
                     exps,

@@ -83,6 +83,10 @@ def both(config: Config) -> None:
             explore_continue, explore_iter_num = ray.get(ref_explore)
             train_continue, train_iter_num = ray.get(ref_train)
             if not explore_continue:
+                # If explore finished, the trainer may not have enough experiences to continue,
+                # which will cause the trainer be blocked. So we stop the training process
+                # immediately.
+                # TODO: use a more elegant way to stop the training process.
                 logger.info("Explorer finished, stopping...")
                 break
             if not train_continue:

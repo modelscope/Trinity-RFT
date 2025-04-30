@@ -36,7 +36,7 @@ jobs:
     - name: Run unittest
       working-directory: trinity-${{ github.run_id }}/.github/workflows/docker
       run: |
-        docker compose exec trinity-node-1 pytest tests --ignore=tests/data --ctrf report.json
+        docker compose exec trinity-node-1 pytest tests -v -s --ignore=tests/data --ctrf report.json
 
     - name: Upload test results
       uses: actions/upload-artifact@v4

@@ -8,6 +8,7 @@ from typing import List, Optional, Tuple
 import ray
 import torch
 
+from trinity.buffer import get_buffer_writer
 from trinity.common.config import Config
 from trinity.common.constants import (
     ROLLOUT_WEIGHT_SYNC_GROUP_NAME,
@@ -37,6 +38,10 @@ class Explorer:
         self.iteration = explorer_meta.get("latest_iteration", 0)
         self.config = config
         self.models = create_rollout_models(config)
+        self.experience_buffer = get_buffer_writer(
+            self.config.buffer.train_dataset,  # type: ignore
+            self.config.buffer,
+        )
         self.taskset = TaskSet.load(
             self.config.data, explorer_meta.get("latest_task_index", 0), TaskType.EXPLORE
         )
@@ -157,10 +162,13 @@ class Explorer:
     def explore(self) -> None:
         """Explore the entire dataset."""
         while True:
-            explore_status, _ = self.explore_step()
+            explore_status, explore_iter = self.explore_step()
             if not explore_status:
                 break
             self.sync_weight()
+            if explore_iter % self.config.explorer.eval_interval == 0:
+                self.eval()
+                self.logger.info("Evaluation finished.")
         self.logger.info("Explorer finished.")
 
     def explore_step(self) -> Tuple[bool, int]:
@@ -187,6 +195,7 @@ class Explorer:
             tasks = [next(self.task_iter) for _ in range(task_num_per_step)]  # type: ignore
             self.runner_pool.run_tasks(tasks)
         except StopIteration:
+            self.experience_buffer.finish()
             self.logger.warning("No more tasks in the task set. Stop exploring.")
             return False, self.iteration
 
@@ -220,7 +229,7 @@ class Explorer:
             current_task_index=self.taskset.index,
         )
 
-        self.logger.info("Explore step finished.")
+        self.logger.info(f"Explore iteration {self.iteration} finished.")
         return True, self.iteration
 
     def eval(self) -> bool:

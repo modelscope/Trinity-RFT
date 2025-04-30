@@ -252,7 +252,7 @@ class vLLMRolloutModel(InferenceModel):
         token_ids, action_mask = self.action_mask_method(
             self.tokenizer, messages, self.chat_template
         )
-        logprobs = self.logprobs(token_ids=token_ids)
+        logprobs = self.logprobs(token_ids=token_ids.tolist())
         return Experience(
             tokens=token_ids,
             prompt_length=len(token_ids),

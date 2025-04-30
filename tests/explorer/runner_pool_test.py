@@ -31,7 +31,7 @@ class DummyWorkflow(Workflow):
         if "timeout" in self.error_type:
             time.sleep(self.seconds)
         elif self.error_type == "exception":
-            raise RuntimeError("Exception occurred")
+            raise ValueError("Exception occurred")
         elif self.error_type == "exit":
             exit(1)
         return [Experience(tokens=torch.zeros(5), prompt_length=2, prompt_text=self.error_type)]
@@ -108,19 +108,20 @@ class RunnerPoolTest(unittest.TestCase):
             tasks=tasks,
         )
 
-        # The excepted return order is: `exception` -> `timeout_5` -> `success` -> (`timeout_100`and `timeout_101`) -> `exit`
+        # The excepted return order is: `exception` -> `timeout_2` -> `success` -> (`timeout_100`and `timeout_101`) -> `exit`
         # 1. `exception`
         st = time.time()
         status = pool.get_next_unorder()
         et = time.time()
-        self.assertTrue(et - st < 5)
+        self.assertTrue(et - st < 2)
+        print(f"First task use time: {et - st}")
         self.assertEqual(len(status), 1)
         self.assertFalse(status[0].ok)
         # 2. `timeout_2
         st = time.time()
         status = pool.get_next_unorder()
         et = time.time()
-        self.assertTrue(et - st < 3)
+        self.assertTrue(et - st > 2)
         self.assertEqual(len(status), 1)
         self.assertTrue(status[0].ok)
         # 3. `success`

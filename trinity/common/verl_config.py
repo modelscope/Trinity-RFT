@@ -134,7 +134,7 @@ class Rollout:
 
 @dataclass
 class ActorRolloutRef:
-    hybrid_engine: bool = False
+    hybrid_engine: bool = True
     model: ActorModel = field(default_factory=ActorModel)
     actor: Actor = field(default_factory=Actor)
     ref: Ref = field(default_factory=Ref)
@@ -166,7 +166,7 @@ class Critic:
     use_dynamic_bsz: bool = False
     ppo_max_token_len_per_gpu: int = 0
     forward_max_token_len_per_gpu: int = 0
-    ulysses_sequence_parallel_size: int = 0
+    ulysses_sequence_parallel_size: int = 1
     ppo_epochs: int = 0
     shuffle: bool = False
     grad_clip: float = 0.0
