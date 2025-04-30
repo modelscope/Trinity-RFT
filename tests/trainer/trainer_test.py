@@ -15,7 +15,7 @@ from tests.tools import (
     get_unittest_dataset_config,
 )
 from trinity.cli.launcher import both
-from trinity.common.constants import MonitorType
+from trinity.common.constants import MonitorType, SyncMethod
 
 
 class BaseTrainerCase(RayUnittestBase):
@@ -30,7 +30,7 @@ class BaseTrainerCase(RayUnittestBase):
             get_checkpoint_path(), f"train-{datetime.now().strftime('%Y%m%d%H%M%S')}"
         )
         self.config.synchronizer.sync_iteration_interval = 2
-        self.config.synchronizer.sync_method = "online"
+        self.config.synchronizer.sync_method = SyncMethod.NCCL
         self.config.explorer.eval_interval = 4
         self.config.trainer.eval_interval = 4
 
