@@ -110,6 +110,8 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn.functional</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">F</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">verl.utils.torch_functional</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">verl_F</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">AlgorithmType</span>
+
 
 <div class="viewcode-block" id="KLController">
 <a class="viewcode-back" href="../../../../build_api/trinity.trainer.verl.html#trinity.trainer.verl.core_algos.KLController">[docs]</a>
@@ -489,20 +491,9 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_policy_loss</span><span class="p">(</span><span class="n">old_log_prob</span><span class="p">,</span> <span class="n">log_prob</span><span class="p">,</span> <span class="n">eos_mask</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute policy loss for PPO / OPMD / pairwise OPMD&quot;&quot;&quot;</span>
 
-    <span class="n">alg_type</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;alg_type&quot;</span><span class="p">,</span> <span class="s2">&quot;ppo&quot;</span><span class="p">)</span>
+    <span class="n">algorithm_type</span><span class="p">:</span> <span class="n">AlgorithmType</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">,</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">PPO</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">alg_type</span> <span class="o">==</span> <span class="s2">&quot;ppo&quot;</span><span class="p">:</span>
-        <span class="n">advantages</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;advantages&quot;</span><span class="p">)</span>
-        <span class="n">cliprange</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cliprange&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">compute_policy_loss_ppo</span><span class="p">(</span>
-            <span class="n">old_log_prob</span><span class="o">=</span><span class="n">old_log_prob</span><span class="p">,</span>
-            <span class="n">log_prob</span><span class="o">=</span><span class="n">log_prob</span><span class="p">,</span>
-            <span class="n">advantages</span><span class="o">=</span><span class="n">advantages</span><span class="p">,</span>
-            <span class="n">eos_mask</span><span class="o">=</span><span class="n">eos_mask</span><span class="p">,</span>
-            <span class="n">cliprange</span><span class="o">=</span><span class="n">cliprange</span><span class="p">,</span>
-        <span class="p">)</span>
-
-    <span class="k">elif</span> <span class="n">alg_type</span> <span class="o">==</span> <span class="s2">&quot;opmd&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">algorithm_type</span> <span class="o">==</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">OPMD</span><span class="p">:</span>
         <span class="n">advantages</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;advantages&quot;</span><span class="p">)</span>
         <span class="n">tau</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tau&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">compute_policy_loss_opmd</span><span class="p">(</span>
@@ -513,7 +504,7 @@
             <span class="n">tau</span><span class="o">=</span><span class="n">tau</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">elif</span> <span class="n">alg_type</span> <span class="o">==</span> <span class="s2">&quot;pairwise_opmd&quot;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">algorithm_type</span> <span class="o">==</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">PAIRWISE_OPMD</span><span class="p">:</span>
         <span class="n">token_level_scores</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;token_level_scores&quot;</span><span class="p">)</span>
         <span class="n">index</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;index&quot;</span><span class="p">)</span>
         <span class="n">tau</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tau&quot;</span><span class="p">)</span>
@@ -526,8 +517,19 @@
             <span class="n">tau</span><span class="o">=</span><span class="n">tau</span><span class="p">,</span>
         <span class="p">)</span>
 
+    <span class="k">elif</span> <span class="n">algorithm_type</span><span class="o">.</span><span class="n">is_rft</span><span class="p">():</span>
+        <span class="n">advantages</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;advantages&quot;</span><span class="p">)</span>
+        <span class="n">cliprange</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cliprange&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">compute_policy_loss_ppo</span><span class="p">(</span>
+            <span class="n">old_log_prob</span><span class="o">=</span><span class="n">old_log_prob</span><span class="p">,</span>
+            <span class="n">log_prob</span><span class="o">=</span><span class="n">log_prob</span><span class="p">,</span>
+            <span class="n">advantages</span><span class="o">=</span><span class="n">advantages</span><span class="p">,</span>
+            <span class="n">eos_mask</span><span class="o">=</span><span class="n">eos_mask</span><span class="p">,</span>
+            <span class="n">cliprange</span><span class="o">=</span><span class="n">cliprange</span><span class="p">,</span>
+        <span class="p">)</span>
+
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Get invalid alg_type &#39;</span><span class="si">{</span><span class="n">alg_type</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Get invalid algorithm_type &#39;</span><span class="si">{</span><span class="n">algorithm_type</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span></div>
 
 
 

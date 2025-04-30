@@ -68,7 +68,6 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-trinity.manager">Module contents</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.manager.Trainer"><code class="docutils literal notranslate"><span class="pre">Trainer</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#trinity.manager.TrainEngineWrapper"><code class="docutils literal notranslate"><span class="pre">TrainEngineWrapper</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#trinity.manager.get_trainer_wrapper"><code class="docutils literal notranslate"><span class="pre">get_trainer_wrapper()</span></code></a></li>
 </ul>
@@ -185,48 +184,6 @@
 </section>
 <section id="module-trinity.manager">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-trinity.manager" title="Link to this heading"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="trinity.manager.Trainer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.manager.</span></span><span class="sig-name descname"><span class="pre">Trainer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.Trainer" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Consume the experience and train the model.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.manager.Trainer.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#trinity.manager.Trainer.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.manager.Trainer.prepare">
-<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.Trainer.prepare" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.manager.Trainer.train">
-<span class="sig-name descname"><span class="pre">train</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.Trainer.train" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.manager.Trainer.train_step">
-<span class="sig-name descname"><span class="pre">train_step</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.Trainer.train_step" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.manager.Trainer.train_iteration">
-<span class="sig-name descname"><span class="pre">train_iteration</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.Trainer.train_iteration" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.manager.Trainer.sync_weight">
-<span class="sig-name descname"><span class="pre">sync_weight</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.Trainer.sync_weight" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.manager.Trainer.flush_log">
-<span class="sig-name descname"><span class="pre">flush_log</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.Trainer.flush_log" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.manager.TrainEngineWrapper">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.manager.</span></span><span class="sig-name descname"><span class="pre">TrainEngineWrapper</span></span><a class="reference internal" href="../_modules/trinity/trainer/trainer.html#TrainEngineWrapper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.manager.TrainEngineWrapper" title="Link to this definition"></a></dt>

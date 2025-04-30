@@ -129,7 +129,7 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>openai/gs
 <p>We run the experiment in a synchronous mode where the Explorer and Trainer operate in turn. To enable this mode, we config <code class="docutils literal notranslate"><span class="pre">mode</span></code> to <code class="docutils literal notranslate"><span class="pre">both</span></code> (default) and set <code class="docutils literal notranslate"><span class="pre">sync_iteration_interval</span></code> properly. A smaller value of <code class="docutils literal notranslate"><span class="pre">sync_iteration_interval</span></code> makes the training closer to an on-policy setup.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">both</span>
 <span class="nt">synchronizer</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">sync_method</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;online&#39;</span>
+<span class="w">  </span><span class="nt">sync_method</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;nccl&#39;</span>
 <span class="w">  </span><span class="nt">sync_iteration_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
 </pre></div>
 </div>

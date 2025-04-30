@@ -133,6 +133,13 @@
         <span class="k">with</span> <span class="n">retry_session</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_retry_times</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_retry_interval</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
             <span class="n">experience_models</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">table_model_cls</span><span class="o">.</span><span class="n">from_experience</span><span class="p">(</span><span class="n">exp</span><span class="p">)</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
             <span class="n">session</span><span class="o">.</span><span class="n">add_all</span><span class="p">(</span><span class="n">experience_models</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SQLWriter.finish">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.writer.html#trinity.buffer.writer.sql_writer.SQLWriter.finish">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">finish</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># TODO: implement this</span>
+        <span class="k">pass</span></div>
 </div>
 
 </pre></div>

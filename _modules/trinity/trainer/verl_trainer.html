@@ -126,7 +126,6 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">_InternalDataLoader</span><span class="p">:</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">steps_per_epoch</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">experience_buffer</span> <span class="o">=</span> <span class="kc">None</span>
@@ -488,12 +487,14 @@
 
                 <span class="c1"># compute advantages, executed on the driver process</span>
                 <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
-                <span class="n">alg_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;alg_type&quot;</span><span class="p">,</span> <span class="s2">&quot;ppo&quot;</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">alg_type</span> <span class="o">==</span> <span class="s2">&quot;opmd&quot;</span><span class="p">:</span>
+                <span class="n">algorithm_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                    <span class="s2">&quot;algorithm_type&quot;</span><span class="p">,</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">PPO</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">algorithm_type</span> <span class="o">==</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">OPMD</span><span class="p">:</span>
                     <span class="n">tau</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tau&quot;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
                     <span class="n">opmd_baseline</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;opmd_baseline&quot;</span><span class="p">,</span> <span class="s2">&quot;mean&quot;</span><span class="p">)</span>
                     <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
-                        <span class="s2">&quot;alg_type&quot;</span><span class="p">:</span> <span class="n">alg_type</span><span class="p">,</span>
+                        <span class="s2">&quot;algorithm_type&quot;</span><span class="p">:</span> <span class="n">algorithm_type</span><span class="p">,</span>
                         <span class="s2">&quot;tau&quot;</span><span class="p">:</span> <span class="n">tau</span><span class="p">,</span>
                         <span class="s2">&quot;opmd_baseline&quot;</span><span class="p">:</span> <span class="n">opmd_baseline</span><span class="p">,</span>
                     <span class="p">}</span>
@@ -533,7 +534,6 @@
                 <span class="c1">#     val_metrics: dict = self._validate()</span>
                 <span class="c1"># metrics.update(val_metrics)</span>
 
-            <span class="c1"># TODO save_checkpoint too frequently, a method for updating parameters online needs to be added</span>
             <span class="k">if</span> <span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">save_freq</span> <span class="o">&gt;</span> <span class="mi">0</span>
                 <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">save_freq</span> <span class="o">==</span> <span class="mi">0</span>

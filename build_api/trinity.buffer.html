@@ -63,7 +63,6 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-trinity.buffer.buffer">trinity.buffer.buffer module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.buffer.buffer.Buffer"><code class="docutils literal notranslate"><span class="pre">Buffer</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#trinity.buffer.buffer.get_buffer_reader"><code class="docutils literal notranslate"><span class="pre">get_buffer_reader()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#trinity.buffer.buffer.get_buffer_writer"><code class="docutils literal notranslate"><span class="pre">get_buffer_writer()</span></code></a></li>
 </ul>
@@ -76,16 +75,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#trinity.buffer.buffer_writer.BufferWriter"><code class="docutils literal notranslate"><span class="pre">BufferWriter</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#module-trinity.buffer.queue">trinity.buffer.queue module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.buffer.queue.QueueActor"><code class="docutils literal notranslate"><span class="pre">QueueActor</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-trinity.buffer.queue">trinity.buffer.queue module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-trinity.buffer.utils">trinity.buffer.utils module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#trinity.buffer.utils.retry_session"><code class="docutils literal notranslate"><span class="pre">retry_session()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-trinity.buffer">Module contents</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.buffer.Buffer"><code class="docutils literal notranslate"><span class="pre">Buffer</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#trinity.buffer.get_buffer_reader"><code class="docutils literal notranslate"><span class="pre">get_buffer_reader()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#trinity.buffer.get_buffer_writer"><code class="docutils literal notranslate"><span class="pre">get_buffer_writer()</span></code></a></li>
 </ul>
@@ -229,6 +224,7 @@
 <li class="toctree-l3"><a class="reference internal" href="trinity.buffer.writer.html#trinity.buffer.writer.queue_writer.QueueWriter"><code class="docutils literal notranslate"><span class="pre">QueueWriter</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="trinity.buffer.writer.html#trinity.buffer.writer.queue_writer.QueueWriter.__init__"><code class="docutils literal notranslate"><span class="pre">QueueWriter.__init__()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.buffer.writer.html#trinity.buffer.writer.queue_writer.QueueWriter.write"><code class="docutils literal notranslate"><span class="pre">QueueWriter.write()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.buffer.writer.html#trinity.buffer.writer.queue_writer.QueueWriter.finish"><code class="docutils literal notranslate"><span class="pre">QueueWriter.finish()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -237,6 +233,7 @@
 <li class="toctree-l3"><a class="reference internal" href="trinity.buffer.writer.html#trinity.buffer.writer.sql_writer.SQLWriter"><code class="docutils literal notranslate"><span class="pre">SQLWriter</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="trinity.buffer.writer.html#trinity.buffer.writer.sql_writer.SQLWriter.__init__"><code class="docutils literal notranslate"><span class="pre">SQLWriter.__init__()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.buffer.writer.html#trinity.buffer.writer.sql_writer.SQLWriter.write"><code class="docutils literal notranslate"><span class="pre">SQLWriter.write()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.buffer.writer.html#trinity.buffer.writer.sql_writer.SQLWriter.finish"><code class="docutils literal notranslate"><span class="pre">SQLWriter.finish()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -253,28 +250,6 @@
 <section id="module-trinity.buffer.buffer">
 <span id="trinity-buffer-buffer-module"></span><h2>trinity.buffer.buffer module<a class="headerlink" href="#module-trinity.buffer.buffer" title="Link to this heading"></a></h2>
 <p>The buffer module</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="trinity.buffer.buffer.Buffer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.buffer.buffer.</span></span><span class="sig-name descname"><span class="pre">Buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.buffer.buffer.Buffer" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Responsible for storing experiences.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.buffer.buffer.Buffer.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#trinity.buffer.buffer.Buffer.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.buffer.buffer.Buffer.get_dataset_info">
-<span class="sig-name descname"><span class="pre">get_dataset_info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.buffer.buffer.Buffer.get_dataset_info" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.buffer.buffer.Buffer.register_dataset">
-<span class="sig-name descname"><span class="pre">register_dataset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.buffer.buffer.Buffer.register_dataset" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
 <dl class="py function">
 <dt class="sig sig-object py" id="trinity.buffer.buffer.get_buffer_reader">
 <span class="sig-prename descclassname"><span class="pre">trinity.buffer.buffer.</span></span><span class="sig-name descname"><span class="pre">get_buffer_reader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.config.DatasetConfig" title="trinity.common.config.DatasetConfig"><span class="pre">DatasetConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.config.BufferConfig" title="trinity.common.config.BufferConfig"><span class="pre">BufferConfig</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#trinity.buffer.buffer_reader.BufferReader" title="trinity.buffer.buffer_reader.BufferReader"><span class="pre">BufferReader</span></a></span></span><a class="reference internal" href="../_modules/trinity/buffer/buffer.html#get_buffer_reader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.buffer.get_buffer_reader" title="Link to this definition"></a></dt>
@@ -319,39 +294,18 @@
 <dd><p>Write to buffer.</p>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.buffer.buffer_writer.BufferWriter.finish">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">finish</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/buffer_writer.html#BufferWriter.finish"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.buffer_writer.BufferWriter.finish" title="Link to this definition"></a></dt>
+<dd><p>Finish writing.</p>
+</dd></dl>
+
 </dd></dl>
 
 </section>
 <section id="module-trinity.buffer.queue">
 <span id="trinity-buffer-queue-module"></span><h2>trinity.buffer.queue module<a class="headerlink" href="#module-trinity.buffer.queue" title="Link to this heading"></a></h2>
 <p>A queue implemented by Ray Actor.</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="trinity.buffer.queue.QueueActor">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.buffer.queue.</span></span><span class="sig-name descname"><span class="pre">QueueActor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.config.DatasetConfig" title="trinity.common.config.DatasetConfig"><span class="pre">DatasetConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.config.BufferConfig" title="trinity.common.config.BufferConfig"><span class="pre">BufferConfig</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.buffer.queue.QueueActor" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>An asyncio.Queue based queue actor.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.buffer.queue.QueueActor.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#trinity.buffer.queue.QueueActor.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.buffer.queue.QueueActor.length">
-<span class="sig-name descname"><span class="pre">length</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.buffer.queue.QueueActor.length" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.buffer.queue.QueueActor.put_batch">
-<span class="sig-name descname"><span class="pre">put_batch</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.buffer.queue.QueueActor.put_batch" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.buffer.queue.QueueActor.get_batch">
-<span class="sig-name descname"><span class="pre">get_batch</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.buffer.queue.QueueActor.get_batch" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
 </section>
 <section id="module-trinity.buffer.utils">
 <span id="trinity-buffer-utils-module"></span><h2>trinity.buffer.utils module<a class="headerlink" href="#module-trinity.buffer.utils" title="Link to this heading"></a></h2>
@@ -364,28 +318,6 @@
 </section>
 <section id="module-trinity.buffer">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-trinity.buffer" title="Link to this heading"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="trinity.buffer.Buffer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.buffer.</span></span><span class="sig-name descname"><span class="pre">Buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.buffer.Buffer" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Responsible for storing experiences.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.buffer.Buffer.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#trinity.buffer.Buffer.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.buffer.Buffer.get_dataset_info">
-<span class="sig-name descname"><span class="pre">get_dataset_info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.buffer.Buffer.get_dataset_info" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.buffer.Buffer.register_dataset">
-<span class="sig-name descname"><span class="pre">register_dataset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.buffer.Buffer.register_dataset" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
 <dl class="py function">
 <dt class="sig sig-object py" id="trinity.buffer.get_buffer_reader">
 <span class="sig-prename descclassname"><span class="pre">trinity.buffer.</span></span><span class="sig-name descname"><span class="pre">get_buffer_reader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.config.DatasetConfig" title="trinity.common.config.DatasetConfig"><span class="pre">DatasetConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.config.BufferConfig" title="trinity.common.config.BufferConfig"><span class="pre">BufferConfig</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#trinity.buffer.buffer_reader.BufferReader" title="trinity.buffer.buffer_reader.BufferReader"><span class="pre">BufferReader</span></a></span></span><a class="reference internal" href="../_modules/trinity/buffer/buffer.html#get_buffer_reader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.get_buffer_reader" title="Link to this definition"></a></dt>

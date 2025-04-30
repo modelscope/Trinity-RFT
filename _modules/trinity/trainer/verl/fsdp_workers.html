@@ -136,7 +136,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_position_id_with_mask</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">verl.workers.sharding_manager.fsdp_ulysses</span><span class="w"> </span><span class="kn">import</span> <span class="n">FSDPUlyssesShardingManager</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">AlgorithmType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">AlgorithmType</span><span class="p">,</span> <span class="n">SyncMethod</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.distributed</span><span class="w"> </span><span class="kn">import</span> <span class="n">init_process_group</span><span class="p">,</span> <span class="n">is_ipv6_address</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
@@ -662,7 +662,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">setup_weight_sync_group</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="s2">&quot;synchronizer&quot;</span><span class="p">)</span>
-            <span class="ow">and</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">synchronizer</span><span class="p">,</span> <span class="s2">&quot;sync_method&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;online&quot;</span>
+            <span class="ow">and</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">synchronizer</span><span class="p">,</span> <span class="s2">&quot;sync_method&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="n">SyncMethod</span><span class="o">.</span><span class="n">NCCL</span>
         <span class="p">):</span>
             <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor_module_fsdp</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">named_modules</span> <span class="o">=</span> <span class="p">[]</span>
@@ -699,10 +699,12 @@
                     <span class="n">init_method</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;tcp://[</span><span class="si">{</span><span class="n">master_address</span><span class="si">}</span><span class="s2">]:</span><span class="si">{</span><span class="n">master_port</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">init_method</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;tcp://</span><span class="si">{</span><span class="n">master_address</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">master_port</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">timeout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_timeout</span>
 
                 <span class="bp">self</span><span class="o">.</span><span class="n">_model_update_group</span> <span class="o">=</span> <span class="n">init_process_group</span><span class="p">(</span>
                     <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">,</span>
                     <span class="n">init_method</span><span class="o">=</span><span class="n">init_method</span><span class="p">,</span>
+                    <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
                     <span class="n">world_size</span><span class="o">=</span><span class="n">world_size</span><span class="p">,</span>
                     <span class="n">rank</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                     <span class="n">group_name</span><span class="o">=</span><span class="n">group_name</span><span class="p">,</span>

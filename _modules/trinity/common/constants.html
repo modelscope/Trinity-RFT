@@ -172,6 +172,7 @@
     <span class="n">PPO</span> <span class="o">=</span> <span class="s2">&quot;ppo&quot;</span>
     <span class="n">GRPO</span> <span class="o">=</span> <span class="s2">&quot;grpo&quot;</span>
     <span class="n">OPMD</span> <span class="o">=</span> <span class="s2">&quot;opmd&quot;</span>
+    <span class="n">PAIRWISE_OPMD</span> <span class="o">=</span> <span class="s2">&quot;pairwise_opmd&quot;</span>
     <span class="n">DPO</span> <span class="o">=</span> <span class="s2">&quot;dpo&quot;</span>
 
 <div class="viewcode-block" id="AlgorithmType.is_rft">
@@ -182,6 +183,7 @@
             <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">PPO</span><span class="p">,</span>
             <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">GRPO</span><span class="p">,</span>
             <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">OPMD</span><span class="p">,</span>
+            <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">PAIRWISE_OPMD</span><span class="p">,</span>
         <span class="p">]</span></div>
 
 
@@ -215,6 +217,34 @@
 
     <span class="n">WANDB</span> <span class="o">=</span> <span class="s2">&quot;wandb&quot;</span>
     <span class="n">TENSORBOARD</span> <span class="o">=</span> <span class="s2">&quot;tensorboard&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="SyncMethodEnumMeta">
+<a class="viewcode-back" href="../../../build_api/trinity.common.html#trinity.common.config.SyncMethodEnumMeta">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SyncMethodEnumMeta</span><span class="p">(</span><span class="n">CaseInsensitiveEnumMeta</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;online&quot;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SyncMethod `online` is deprecated, use `nccl` instead.&quot;</span><span class="p">)</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;nccl&quot;</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;offline&quot;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SyncMethod `offline` is deprecated, use `checkpoint` instead.&quot;</span><span class="p">)</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;checkpoint&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error parsing SyncMethod:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid SyncMethod: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="SyncMethod">
+<a class="viewcode-back" href="../../../build_api/trinity.common.html#trinity.common.config.SyncMethod">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SyncMethod</span><span class="p">(</span><span class="n">CaseInsensitiveEnum</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">SyncMethodEnumMeta</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sync Method.&quot;&quot;&quot;</span>
+
+    <span class="n">NCCL</span> <span class="o">=</span> <span class="s2">&quot;nccl&quot;</span>
+    <span class="n">CHECKPOINT</span> <span class="o">=</span> <span class="s2">&quot;checkpoint&quot;</span></div>
 
 </pre></div>
 

@@ -57,21 +57,16 @@
 <li class="toctree-l1"><a class="reference internal" href="trinity.buffer.html">trinity.buffer</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">trinity.explorer</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-trinity.explorer.explorer">trinity.explorer.explorer module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.explorer.explorer.Explorer"><code class="docutils literal notranslate"><span class="pre">Explorer</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-trinity.explorer.explorer">trinity.explorer.explorer module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-trinity.explorer.runner_pool">trinity.explorer.runner_pool module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#trinity.explorer.runner_pool.RunnerPool"><code class="docutils literal notranslate"><span class="pre">RunnerPool</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-trinity.explorer.workflow_runner">trinity.explorer.workflow_runner module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#trinity.explorer.workflow_runner.Status"><code class="docutils literal notranslate"><span class="pre">Status</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.explorer.workflow_runner.WorkflowRunner"><code class="docutils literal notranslate"><span class="pre">WorkflowRunner</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-trinity.explorer">Module contents</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.explorer.Explorer"><code class="docutils literal notranslate"><span class="pre">Explorer</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#trinity.explorer.RunnerPool"><code class="docutils literal notranslate"><span class="pre">RunnerPool</span></code></a></li>
 </ul>
 </li>
@@ -115,58 +110,6 @@
 <section id="module-trinity.explorer.explorer">
 <span id="trinity-explorer-explorer-module"></span><h2>trinity.explorer.explorer module<a class="headerlink" href="#module-trinity.explorer.explorer" title="Link to this heading"></a></h2>
 <p>The explorer module</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="trinity.explorer.explorer.Explorer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.explorer.explorer.</span></span><span class="sig-name descname"><span class="pre">Explorer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.explorer.explorer.Explorer" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Responsible for exploring the taskset.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.explorer.Explorer.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#trinity.explorer.explorer.Explorer.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.explorer.Explorer.setup_weight_sync_group">
-<span class="sig-name descname"><span class="pre">setup_weight_sync_group</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.explorer.explorer.Explorer.setup_weight_sync_group" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.explorer.Explorer.prepare">
-<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.explorer.explorer.Explorer.prepare" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.explorer.Explorer.get_weight">
-<span class="sig-name descname"><span class="pre">get_weight</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.explorer.explorer.Explorer.get_weight" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.explorer.Explorer.explore">
-<span class="sig-name descname"><span class="pre">explore</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.explorer.explorer.Explorer.explore" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.explorer.Explorer.explore_step">
-<span class="sig-name descname"><span class="pre">explore_step</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.explorer.explorer.Explorer.explore_step" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.explorer.Explorer.eval">
-<span class="sig-name descname"><span class="pre">eval</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.explorer.explorer.Explorer.eval" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.explorer.Explorer.sync_weight">
-<span class="sig-name descname"><span class="pre">sync_weight</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.explorer.explorer.Explorer.sync_weight" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.explorer.Explorer.flush_log">
-<span class="sig-name descname"><span class="pre">flush_log</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.explorer.explorer.Explorer.flush_log" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
 </section>
 <section id="module-trinity.explorer.runner_pool">
 <span id="trinity-explorer-runner-pool-module"></span><h2>trinity.explorer.runner_pool module<a class="headerlink" href="#module-trinity.explorer.runner_pool" title="Link to this heading"></a></h2>
@@ -287,83 +230,9 @@ None if no actor was free to be removed.</p>
 
 </dd></dl>
 
-<dl class="py class">
-<dt class="sig sig-object py" id="trinity.explorer.workflow_runner.WorkflowRunner">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.explorer.workflow_runner.</span></span><span class="sig-name descname"><span class="pre">WorkflowRunner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.models.html#trinity.common.models.model.InferenceModel" title="trinity.common.models.model.InferenceModel"><span class="pre">InferenceModel</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.explorer.workflow_runner.WorkflowRunner" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>A Ray remote actor to run the workflow and put the returned experiences into the buffer.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.workflow_runner.WorkflowRunner.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#trinity.explorer.workflow_runner.WorkflowRunner.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.workflow_runner.WorkflowRunner.is_alive">
-<span class="sig-name descname"><span class="pre">is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.explorer.workflow_runner.WorkflowRunner.is_alive" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.workflow_runner.WorkflowRunner.run_task">
-<span class="sig-name descname"><span class="pre">run_task</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.explorer.workflow_runner.WorkflowRunner.run_task" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
 </section>
 <section id="module-trinity.explorer">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-trinity.explorer" title="Link to this heading"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="trinity.explorer.Explorer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.explorer.</span></span><span class="sig-name descname"><span class="pre">Explorer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.explorer.Explorer" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Responsible for exploring the taskset.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.Explorer.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#trinity.explorer.Explorer.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.Explorer.setup_weight_sync_group">
-<span class="sig-name descname"><span class="pre">setup_weight_sync_group</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.explorer.Explorer.setup_weight_sync_group" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.Explorer.prepare">
-<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.explorer.Explorer.prepare" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.Explorer.get_weight">
-<span class="sig-name descname"><span class="pre">get_weight</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.explorer.Explorer.get_weight" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.Explorer.explore">
-<span class="sig-name descname"><span class="pre">explore</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.explorer.Explorer.explore" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.Explorer.explore_step">
-<span class="sig-name descname"><span class="pre">explore_step</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.explorer.Explorer.explore_step" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.Explorer.eval">
-<span class="sig-name descname"><span class="pre">eval</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.explorer.Explorer.eval" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.Explorer.sync_weight">
-<span class="sig-name descname"><span class="pre">sync_weight</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.explorer.Explorer.sync_weight" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.Explorer.flush_log">
-<span class="sig-name descname"><span class="pre">flush_log</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.explorer.Explorer.flush_log" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.explorer.RunnerPool">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.explorer.</span></span><span class="sig-name descname"><span class="pre">RunnerPool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/runner_pool.html#RunnerPool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.RunnerPool" title="Link to this definition"></a></dt>

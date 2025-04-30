@@ -42,7 +42,7 @@ We run the experiment in a synchronous mode where the Explorer and Trainer opera
 ```yaml
 mode: both
 synchronizer:
-  sync_method: 'online'
+  sync_method: 'nccl'
   sync_iteration_interval: 2
 ```
 

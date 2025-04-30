@@ -118,49 +118,49 @@
 <p>A model for high performance for rollout inference.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.common.models.model.InferenceModel.generate">
-<span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prompts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/models/model.html#InferenceModel.generate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.model.InferenceModel.generate" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prompts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_ray_trace_ctx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/models/model.html#InferenceModel.generate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.model.InferenceModel.generate" title="Link to this definition"></a></dt>
 <dd><p>Generate a batch of responses from a batch of prompts.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.common.models.model.InferenceModel.chat">
-<span class="sig-name descname"><span class="pre">chat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">messages</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/models/model.html#InferenceModel.chat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.model.InferenceModel.chat" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">chat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">messages</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_ray_trace_ctx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/models/model.html#InferenceModel.chat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.model.InferenceModel.chat" title="Link to this definition"></a></dt>
 <dd><p>Generate experiences from a list of history chat messages.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.common.models.model.InferenceModel.logprobs">
-<span class="sig-name descname"><span class="pre">logprobs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/model.html#InferenceModel.logprobs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.model.InferenceModel.logprobs" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">logprobs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_ray_trace_ctx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/model.html#InferenceModel.logprobs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.model.InferenceModel.logprobs" title="Link to this definition"></a></dt>
 <dd><p>Generate logprobs for a list of tokens.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.common.models.model.InferenceModel.convert_messages_to_experience">
-<span class="sig-name descname"><span class="pre">convert_messages_to_experience</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">messages</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a></span></span><a class="reference internal" href="../_modules/trinity/common/models/model.html#InferenceModel.convert_messages_to_experience"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.model.InferenceModel.convert_messages_to_experience" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">convert_messages_to_experience</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">messages</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_ray_trace_ctx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a></span></span><a class="reference internal" href="../_modules/trinity/common/models/model.html#InferenceModel.convert_messages_to_experience"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.model.InferenceModel.convert_messages_to_experience" title="Link to this definition"></a></dt>
 <dd><p>Convert a list of messages into an experience.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.common.models.model.InferenceModel.generate_async">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">generate_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prompt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/models/model.html#InferenceModel.generate_async"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.model.InferenceModel.generate_async" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">generate_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prompt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_ray_trace_ctx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/models/model.html#InferenceModel.generate_async"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.model.InferenceModel.generate_async" title="Link to this definition"></a></dt>
 <dd><p>Generate a responses from a prompt in async.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.common.models.model.InferenceModel.chat_async">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">chat_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">messages</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/models/model.html#InferenceModel.chat_async"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.model.InferenceModel.chat_async" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">chat_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">messages</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_ray_trace_ctx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/models/model.html#InferenceModel.chat_async"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.model.InferenceModel.chat_async" title="Link to this definition"></a></dt>
 <dd><p>Generate experiences from a list of history chat messages in async.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.common.models.model.InferenceModel.logprobs_async">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logprobs_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tokens</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/model.html#InferenceModel.logprobs_async"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.model.InferenceModel.logprobs_async" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logprobs_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tokens</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_ray_trace_ctx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/model.html#InferenceModel.logprobs_async"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.model.InferenceModel.logprobs_async" title="Link to this definition"></a></dt>
 <dd><p>Generate logprobs for a list of tokens in async.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.common.models.model.InferenceModel.convert_messages_to_experience_async">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_messages_to_experience_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">messages</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a></span></span><a class="reference internal" href="../_modules/trinity/common/models/model.html#InferenceModel.convert_messages_to_experience_async"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.model.InferenceModel.convert_messages_to_experience_async" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert_messages_to_experience_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">messages</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_ray_trace_ctx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a></span></span><a class="reference internal" href="../_modules/trinity/common/models/model.html#InferenceModel.convert_messages_to_experience_async"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.model.InferenceModel.convert_messages_to_experience_async" title="Link to this definition"></a></dt>
 <dd><p>Convert a list of messages into an experience in async.</p>
 </dd></dl>
 
@@ -178,13 +178,13 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.common.models.model.InferenceModel.init_process_group">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">init_process_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">master_address</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">master_port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rank_offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">world_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'nccl'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offline_update</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/model.html#InferenceModel.init_process_group"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.model.InferenceModel.init_process_group" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">init_process_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">master_address</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">master_port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rank_offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">world_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'nccl'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_with_checkpoint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/model.html#InferenceModel.init_process_group"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.model.InferenceModel.init_process_group" title="Link to this definition"></a></dt>
 <dd><p>Init the process group for model weights sync.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.common.models.model.InferenceModel.get_address">
-<span class="sig-name descname"><span class="pre">get_address</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/models/model.html#InferenceModel.get_address"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.model.InferenceModel.get_address" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_address</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_ray_trace_ctx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/models/model.html#InferenceModel.get_address"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.model.InferenceModel.get_address" title="Link to this definition"></a></dt>
 <dd><p>Get the address of the actor.</p>
 </dd></dl>
 
@@ -333,168 +333,11 @@ Please check the chat template before using this method.</p>
 <span id="trinity-common-models-vllm-async-model-module"></span><h2>trinity.common.models.vllm_async_model module<a class="headerlink" href="#module-trinity.common.models.vllm_async_model" title="Link to this heading"></a></h2>
 <p>vLLM AsyncEngine wrapper.</p>
 <p>Modified from Ray python/ray/llm/_internal/batch/stages/vllm_engine_stage.py</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_async_model.vLLMAysncRolloutModel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.common.models.vllm_async_model.</span></span><span class="sig-name descname"><span class="pre">vLLMAysncRolloutModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#trinity.common.models.model.InferenceModel" title="trinity.common.models.model.InferenceModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">InferenceModel</span></code></a></p>
-<p>Wrapper around the vLLM engine to handle async requests.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>config</strong> (<a class="reference internal" href="trinity.common.html#trinity.common.config.Config" title="trinity.common.config.Config"><em>Config</em></a>) – The config.</p></li>
-<li><p><strong>kwargs</strong> (<em>dict</em>) – The keyword arguments for the engine.</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.chat_async">
-<span class="sig-name descname"><span class="pre">chat_async</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.chat_async" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.generate_async">
-<span class="sig-name descname"><span class="pre">generate_async</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.generate_async" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.logprobs_async">
-<span class="sig-name descname"><span class="pre">logprobs_async</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.logprobs_async" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.convert_messages_to_experience_async">
-<span class="sig-name descname"><span class="pre">convert_messages_to_experience_async</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.convert_messages_to_experience_async" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.shutdown">
-<span class="sig-name descname"><span class="pre">shutdown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.shutdown" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.sync_model">
-<span class="sig-name descname"><span class="pre">sync_model</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.sync_model" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.init_process_group">
-<span class="sig-name descname"><span class="pre">init_process_group</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.init_process_group" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.update_weight">
-<span class="sig-name descname"><span class="pre">update_weight</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.update_weight" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.update_weight_cuda_ipc">
-<span class="sig-name descname"><span class="pre">update_weight_cuda_ipc</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.update_weight_cuda_ipc" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.reset_prefix_cache">
-<span class="sig-name descname"><span class="pre">reset_prefix_cache</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.reset_prefix_cache" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.get_ckp_version">
-<span class="sig-name descname"><span class="pre">get_ckp_version</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.get_ckp_version" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.sleep">
-<span class="sig-name descname"><span class="pre">sleep</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.sleep" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.wake_up">
-<span class="sig-name descname"><span class="pre">wake_up</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.wake_up" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
 </section>
 <section id="module-trinity.common.models.vllm_model">
 <span id="trinity-common-models-vllm-model-module"></span><h2>trinity.common.models.vllm_model module<a class="headerlink" href="#module-trinity.common.models.vllm_model" title="Link to this heading"></a></h2>
 <p>vLLM related modules.</p>
 <p>Modified from OpenRLHF openrlhf/trainer/ray/vllm_engine.py</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_model.vLLMRolloutModel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.common.models.vllm_model.</span></span><span class="sig-name descname"><span class="pre">vLLMRolloutModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.common.models.vllm_model.vLLMRolloutModel" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#trinity.common.models.model.InferenceModel" title="trinity.common.models.model.InferenceModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">InferenceModel</span></code></a></p>
-<p>Actor for vLLM.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_model.vLLMRolloutModel.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#trinity.common.models.vllm_model.vLLMRolloutModel.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_model.vLLMRolloutModel.init_process_group">
-<span class="sig-name descname"><span class="pre">init_process_group</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.common.models.vllm_model.vLLMRolloutModel.init_process_group" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_model.vLLMRolloutModel.update_weight">
-<span class="sig-name descname"><span class="pre">update_weight</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.common.models.vllm_model.vLLMRolloutModel.update_weight" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_model.vLLMRolloutModel.update_weight_cuda_ipc">
-<span class="sig-name descname"><span class="pre">update_weight_cuda_ipc</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.common.models.vllm_model.vLLMRolloutModel.update_weight_cuda_ipc" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_model.vLLMRolloutModel.reset_prefix_cache">
-<span class="sig-name descname"><span class="pre">reset_prefix_cache</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.common.models.vllm_model.vLLMRolloutModel.reset_prefix_cache" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_model.vLLMRolloutModel.sleep">
-<span class="sig-name descname"><span class="pre">sleep</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.common.models.vllm_model.vLLMRolloutModel.sleep" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_model.vLLMRolloutModel.wake_up">
-<span class="sig-name descname"><span class="pre">wake_up</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.common.models.vllm_model.vLLMRolloutModel.wake_up" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_model.vLLMRolloutModel.generate">
-<span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.common.models.vllm_model.vLLMRolloutModel.generate" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_model.vLLMRolloutModel.chat">
-<span class="sig-name descname"><span class="pre">chat</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.common.models.vllm_model.vLLMRolloutModel.chat" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_model.vLLMRolloutModel.logprobs">
-<span class="sig-name descname"><span class="pre">logprobs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.common.models.vllm_model.vLLMRolloutModel.logprobs" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_model.vLLMRolloutModel.convert_messages_to_experience">
-<span class="sig-name descname"><span class="pre">convert_messages_to_experience</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.common.models.vllm_model.vLLMRolloutModel.convert_messages_to_experience" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_model.vLLMRolloutModel.sync_model">
-<span class="sig-name descname"><span class="pre">sync_model</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.common.models.vllm_model.vLLMRolloutModel.sync_model" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_model.vLLMRolloutModel.get_ckp_version">
-<span class="sig-name descname"><span class="pre">get_ckp_version</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trinity.common.models.vllm_model.vLLMRolloutModel.get_ckp_version" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
 </section>
 <section id="trinity-common-models-vllm-worker-module">
 <h2>trinity.common.models.vllm_worker module<a class="headerlink" href="#trinity-common-models-vllm-worker-module" title="Link to this heading"></a></h2>

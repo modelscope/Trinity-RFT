@@ -92,7 +92,13 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">omegaconf</span><span class="w"> </span><span class="kn">import</span> <span class="n">OmegaConf</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">AlgorithmType</span><span class="p">,</span> <span class="n">MonitorType</span><span class="p">,</span> <span class="n">PromptType</span><span class="p">,</span> <span class="n">StorageType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AlgorithmType</span><span class="p">,</span>
+    <span class="n">MonitorType</span><span class="p">,</span>
+    <span class="n">PromptType</span><span class="p">,</span>
+    <span class="n">StorageType</span><span class="p">,</span>
+    <span class="n">SyncMethod</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
@@ -213,13 +219,12 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">BufferConfig</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Config for experience buffer.&quot;&quot;&quot;</span>
 
-    <span class="n">db_url</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">db_url</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Is deprecated, please set `buffer.train_dataset.path` instead.</span>
     <span class="n">read_batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span>
     <span class="n">max_retry_times</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span>
     <span class="n">max_retry_interval</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">tokenizer_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">pad_token_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">reset_consumed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="n">train_dataset</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DatasetConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">sft_warmup_dataset</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DatasetConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -255,6 +260,10 @@
     <span class="c1"># for rollout tokneize</span>
     <span class="n">chat_template</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
+    <span class="c1"># for evaluation</span>
+    <span class="c1"># TODO: remove trainer.eval_interval</span>
+    <span class="n">eval_interval</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span>
+
     <span class="c1"># for vLLM</span>
     <span class="n">tensor_parallel_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">enable_prefix_caching</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
@@ -285,6 +294,7 @@
     <span class="n">trainer_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;verl&quot;</span>
     <span class="n">trainer_config_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="n">eval_interval</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="n">save_interval</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">enable_preview</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># enable rollout preview in wandb</span>
     <span class="n">trainer_config</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
 
@@ -320,11 +330,11 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">SynchronizerConfig</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Configs for model weight synchronization&quot;&quot;&quot;</span>
 
-    <span class="c1"># only support `offline` for now</span>
     <span class="c1"># TODO: rename to &quot;checkpoint&quot;, &quot;nccl&quot;, &quot;ipc&quot;</span>
-    <span class="n">sync_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;offline&quot;</span>
+    <span class="n">sync_method</span><span class="p">:</span> <span class="n">SyncMethod</span> <span class="o">=</span> <span class="n">SyncMethod</span><span class="o">.</span><span class="n">NCCL</span>
     <span class="c1"># sync weights every `sync_iteration_interval` iterations</span>
     <span class="n">sync_iteration_interval</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">sync_timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1200</span>
     <span class="c1"># wait for the lastest checkpoint to be ready</span>
     <span class="n">wait_for_checkpoint</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">master_address</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -363,6 +373,10 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s2">&quot;buffer.sft_warmup_dataset is required when trainer.sft_warmup_iteration &gt; 0&quot;</span>
             <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">db_url</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`buffer.db_url` is deprecated, please set `buffer.train_dataset.path` instead.&quot;</span>
+            <span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">pad_token_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoTokenizer</span>
@@ -382,10 +396,17 @@
                     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;experience_buffer&quot;</span><span class="p">,</span>
                     <span class="n">storage_type</span><span class="o">=</span><span class="n">StorageType</span><span class="o">.</span><span class="n">QUEUE</span><span class="p">,</span>
                     <span class="n">algorithm_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">algorithm_type</span><span class="p">,</span>
-                    <span class="n">path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">db_url</span><span class="p">,</span>
                 <span class="p">)</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Auto set buffer.train_dataset to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">train_dataset</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Auto set `buffer.train_dataset` to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">train_dataset</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># TODO: to be check</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;train&quot;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">algorithm_type</span> <span class="o">==</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">DPO</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">train_dataset</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dataset_path</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">train_dataset</span> <span class="o">=</span> <span class="n">DatasetConfig</span><span class="p">(</span>
+                        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;dpo_train_dataset&quot;</span><span class="p">,</span>
+                        <span class="n">storage_type</span><span class="o">=</span><span class="n">StorageType</span><span class="o">.</span><span class="n">FILE</span><span class="p">,</span>
+                        <span class="n">algorithm_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">algorithm_type</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Auto set `buffer.train_dataset` to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">train_dataset</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">train_dataset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;buffer.train_dataset is required when mode is not &#39;both&#39;&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">train_dataset</span><span class="o">.</span><span class="n">algorithm_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">algorithm_type</span>
@@ -395,30 +416,13 @@
 
 <div class="viewcode-block" id="Config.check_and_update">
 <a class="viewcode-back" href="../../../build_api/trinity.common.html#trinity.common.config.Config.check_and_update">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">check_and_update</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_and_update</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># noqa: C901</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check and update the config.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_type</span> <span class="o">==</span> <span class="s2">&quot;verl&quot;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config</span><span class="p">:</span>
-                <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.verl_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">veRLConfig</span>
-
-                <span class="n">trainer_config_schema</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">structured</span><span class="p">(</span><span class="n">veRLConfig</span><span class="p">)</span>
-                <span class="n">trainer_config</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">trainer_config_schema</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">to_object</span><span class="p">(</span><span class="n">trainer_config</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config_path</span><span class="p">):</span>
-                    <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.verl_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_config</span>
-
-                    <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config_path</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;Invalid trainer config path: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config_path</span><span class="si">}</span><span class="s2">&quot;</span>
-                    <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid trainer type: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
         <span class="c1"># check mode</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;explore&quot;</span><span class="p">,</span> <span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="s2">&quot;both&quot;</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid mode: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">algorithm_type</span> <span class="o">==</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">DPO</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;both&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;DPO does not support `both` mode&quot;</span><span class="p">)</span>
 
         <span class="c1"># check model path</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">model_path</span><span class="p">):</span>
@@ -434,8 +438,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">engine_num</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">tensor_parallel_size</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">backend</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">backend</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_method</span> <span class="o">==</span> <span class="s2">&quot;online&quot;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">!=</span> <span class="s2">&quot;both&quot;</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Online synchronization is only supported in both mode&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_method</span> <span class="o">==</span> <span class="n">SyncMethod</span><span class="o">.</span><span class="n">NCCL</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">!=</span> <span class="s2">&quot;both&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;`nccl` synchronization is only supported in both mode.&quot;</span><span class="p">)</span>
 
         <span class="c1"># check eval_interval</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">eval_interval</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_iteration_interval</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
@@ -445,6 +449,17 @@
             <span class="nb">print</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Warning: eval_interval is not a multiple of sync_iteration_interval; adjusted to the nearest integer=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">eval_interval</span><span class="si">}</span><span class="s2">.&quot;</span>
             <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">eval_interval</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">eval_interval</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">eval_interval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">eval_interval</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Warning: explorer.eval_interval is not equal to trainer.eval_interval; adjusted to the same value=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">eval_interval</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># check save_interval</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_method</span> <span class="o">==</span> <span class="n">SyncMethod</span><span class="o">.</span><span class="n">CHECKPOINT</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">save_interval</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_iteration_interval</span>
+            <span class="p">)</span>  <span class="c1"># TODO: not proper for DPO</span>
 
         <span class="c1"># check monitor</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">cache_root_dir</span><span class="p">:</span>
@@ -466,6 +481,26 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_buffer</span><span class="p">()</span>
         <span class="c1"># check and update trainer</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">!=</span> <span class="s2">&quot;explore&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_type</span> <span class="o">==</span> <span class="s2">&quot;verl&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config</span><span class="p">:</span>
+                    <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.verl_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">veRLConfig</span>
+
+                    <span class="n">trainer_config_schema</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">structured</span><span class="p">(</span><span class="n">veRLConfig</span><span class="p">)</span>
+                    <span class="n">trainer_config</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+                        <span class="n">trainer_config_schema</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config</span>
+                    <span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">to_object</span><span class="p">(</span><span class="n">trainer_config</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config_path</span><span class="p">):</span>
+                        <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.verl_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_config</span>
+
+                        <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config_path</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;Invalid trainer config path: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config_path</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid trainer type: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config</span><span class="o">.</span><span class="n">synchronize_config</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config</span> <span class="o">=</span> <span class="kc">None</span></div>

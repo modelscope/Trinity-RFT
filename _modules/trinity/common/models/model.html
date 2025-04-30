@@ -184,7 +184,8 @@
         <span class="n">world_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">group_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">backend</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;nccl&quot;</span><span class="p">,</span>
-        <span class="n">offline_update</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1200</span><span class="p">,</span>
+        <span class="n">update_with_checkpoint</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Init the process group for model weights sync.&quot;&quot;&quot;</span></div>
 
