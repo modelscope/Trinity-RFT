@@ -116,7 +116,7 @@ class DatasetConfig:
 class BufferConfig:
     """Config for experience buffer."""
 
-    db_url: Optional[str] = None
+    db_url: Optional[str] = None  # Is deprecated, please set `buffer.train_dataset.path` instead.
     read_batch_size: int = 32
     max_retry_times: int = 3
     max_retry_interval: int = 1
@@ -248,6 +248,10 @@ class Config:
             raise ValueError(
                 "buffer.sft_warmup_dataset is required when trainer.sft_warmup_iteration > 0"
             )
+        if self.buffer.db_url:
+            raise ValueError(
+                "`buffer.db_url` is deprecated, please set `buffer.train_dataset.path` instead."
+            )
 
         if self.buffer.pad_token_id is None:
             from transformers import AutoTokenizer
@@ -267,10 +271,17 @@ class Config:
                     name="experience_buffer",
                     storage_type=StorageType.QUEUE,
                     algorithm_type=self.trainer.algorithm_type,
-                    path=self.buffer.db_url,
                 )
-                logger.info(f"Auto set buffer.train_dataset to {self.buffer.train_dataset}")
-        else:
+                logger.info(f"Auto set `buffer.train_dataset` to {self.buffer.train_dataset}")
+        else:  # TODO: to be check
+            if self.mode == "train" and self.trainer.algorithm_type == AlgorithmType.DPO:
+                if self.buffer.train_dataset is None and self.data.dataset_path.strip():
+                    self.buffer.train_dataset = DatasetConfig(
+                        name="dpo_train_dataset",
+                        storage_type=StorageType.FILE,
+                        algorithm_type=self.trainer.algorithm_type,
+                    )
+                    logger.info(f"Auto set `buffer.train_dataset` to {self.buffer.train_dataset}")
             if self.buffer.train_dataset is None:
                 raise ValueError("buffer.train_dataset is required when mode is not 'both'")
             self.buffer.train_dataset.algorithm_type = self.trainer.algorithm_type

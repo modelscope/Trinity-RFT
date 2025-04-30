@@ -13,7 +13,7 @@ import ray
 
 from trinity.buffer import get_buffer_reader
 from trinity.common.config import Config
-from trinity.common.constants import AlgorithmType, SyncMethod, ReadStrategy
+from trinity.common.constants import AlgorithmType, ReadStrategy, SyncMethod
 from trinity.common.experience import Experiences
 from trinity.utils.log import get_logger
 

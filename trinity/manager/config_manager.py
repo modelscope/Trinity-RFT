@@ -5,7 +5,13 @@ from typing import List
 import streamlit as st
 import yaml
 
-from trinity.common.constants import AlgorithmType, MonitorType, StorageType, SyncMethod
+from trinity.common.constants import (
+    AlgorithmType,
+    MonitorType,
+    PromptType,
+    StorageType,
+    SyncMethod,
+)
 from trinity.common.rewards import REWARD_FUNCTIONS
 from trinity.common.workflows.workflow import WORKFLOWS
 from trinity.trainer.verl.ray_trainer import AdvantageEstimator
@@ -48,7 +54,7 @@ class ConfigManager:
             "trainer_gpu_num": 6,
             "max_prompt_tokens": 1024,
             "max_response_tokens": 1024,
-            # Data and Buffer Configs
+            # Data Configs
             "total_epochs": 20,
             "train_batch_size": 6,
             "dataset_path": "",
@@ -59,20 +65,32 @@ class ConfigManager:
             "response_key": "answer",
             "default_workflow_type": "math_workflow",
             "default_reward_fn_type": "math_reward",
+            # Buffer Configs
+            "_is_dpo_storage_type": StorageType.FILE.value,
+            "_not_dpo_storage_type": StorageType.QUEUE.value,
             "storage_type": StorageType.QUEUE.value,
-            "db_url": "",
+            "train_dataset_path": "",
             "max_retry_times": 3,
             "max_retry_interval": 1,
+            "dpo_dataset_train_split": "train",
+            "dpo_dataset_prompt_type": PromptType.MESSAGES.value,
+            "dpo_dataset_prompt_key": "prompt",
+            "dpo_dataset_chosen_key": "chosen",
+            "dpo_dataset_rejected_key": "rejected",
             "sft_warmup_dataset_path": "",
             "sft_warmup_train_split": "train",
-            "sft_warmup_eval_split": "",
-            "sft_warmup_prompt_key": "question",
-            "sft_warmup_response_key": "answer",
+            "sft_warmup_prompt_type": PromptType.MESSAGES.value,
+            "sft_warmup_messages_key": "messages",
+            "sft_warmup_prompt_key": "prompt",
+            "sft_warmup_response_key": "response",
             # Explorer and Sync Configs
             "engine_type": "vllm_async",
             "engine_num": 2,
             "tensor_parallel_size": 1,
+            "_grouped_adv_repeat_times": 2,
+            "_not_grouped_adv_repeat_times": 1,
             "repeat_times": 1,
+            "_not_dpo_sync_method": SyncMethod.NCCL.value,
             "sync_method": SyncMethod.NCCL.value,
             "sync_iteration_interval": 10,
             "sync_timeout": 1200,
@@ -93,6 +111,7 @@ class ConfigManager:
             "algorithm_type": AlgorithmType.PPO.value,
             "sft_warmup_iteration": 0,
             "eval_interval": 1000,
+            "_nccl_save_interval": 100,
             "save_interval": 100,
             # veRL Trainer Configs
             "training_args": [
@@ -292,24 +311,71 @@ Other workflows: conduct multi-turn task for the given dataset.
         )
 
     def _set_storage_type(self):
+        if st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
+            st.session_state["storage_type"] = st.session_state["_is_dpo_storage_type"]
+            storage_candidates = [StorageType.FILE.value, StorageType.SQL.value]
+        else:
+            st.session_state["storage_type"] = st.session_state["_not_dpo_storage_type"]
+            storage_candidates = [StorageType.QUEUE.value, StorageType.SQL.value]
+
+        def on_change():
+            if st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
+                st.session_state["_is_dpo_storage_type"] = st.session_state["storage_type"]
+            else:
+                st.session_state["_not_dpo_storage_type"] = st.session_state["storage_type"]
+
         st.selectbox(
             "Storage Type",
-            [storage_type.value for storage_type in StorageType],
+            storage_candidates,
             key="storage_type",
+            on_change=on_change,
         )
 
-    def _set_db_url(self):
+    def _set_train_dataset_path(self):  # TODO
         st.text_input(
-            "DB URL",
-            key="db_url",
-            help=r"Default to `sqlite:///{os.path.join(checkpoint_path, '.cache', project_name, experiment_name)}/data.db`",
+            "Train Dataset Path",
+            key="train_dataset_path",
+            help=r"This path is used for `trainer`, "
+            r"if `storage_type == StorageType.QUEUE`, default to `None`, "
+            r"if `storage_type == StorageType.FILE`, this should be a path to a file, "
+            r"if `storage_type == StorageType.SQL`, default to `sqlite:///{os.path.join(checkpoint_path, '.cache', project_name, experiment_name)}/data.db`.",
         )
+        if st.session_state["storage_type"] == StorageType.FILE.value:
+            if not st.session_state["train_dataset_path"].strip():
+                self.unfinished_fields.add("train_dataset_path")
+                st.warning("Please input train dataset path.")
 
     def _set_max_retry_times(self):
         st.number_input("Max Retry Times", key="max_retry_times", min_value=1)
 
     def _set_max_retry_interval(self):
         st.number_input("Max Retry Interval", key="max_retry_interval", min_value=1)
+
+    def _set_dpo_dataset_kwargs(self):
+        dpo_dataset_train_split_col, dpo_dataset_prompt_type_col = st.columns(2)
+        dpo_dataset_train_split_col.text_input(
+            "DPO Dataset Train Split", key="dpo_dataset_train_split"
+        )
+        dpo_dataset_prompt_type_col.selectbox(
+            "DPO Dataset Prompt Type",
+            [prompt_type.value for prompt_type in PromptType],
+            key="dpo_dataset_prompt_type",
+        )
+
+        (
+            dpo_dataset_prompt_key_col,
+            dpo_dataset_chosen_key_col,
+            dpo_dataset_rejected_key_col,
+        ) = st.columns(3)
+        dpo_dataset_prompt_key_col.text_input(
+            "DPO Dataset Prompt Key", key="dpo_dataset_prompt_key"
+        )
+        dpo_dataset_chosen_key_col.text_input(
+            "DPO Dataset Chosen Key", key="dpo_dataset_chosen_key"
+        )
+        dpo_dataset_rejected_key_col.text_input(
+            "DPO Dataset Rejected Key", key="dpo_dataset_rejected_key"
+        )
 
     def _check_sft_warmup_dataset_path(self):
         if st.session_state["sft_warmup_iteration"]:
@@ -330,12 +396,22 @@ Other workflows: conduct multi-turn task for the given dataset.
         ):  # TODO
             (
                 sft_warmup_train_split_col,
-                sft_warmup_eval_split_col,
+                sft_warmup_prompt_type_col,
+            ) = st.columns(2)
+            sft_warmup_train_split_col.text_input("SFT Train Split", key="sft_warmup_train_split")
+            sft_warmup_prompt_type_col.selectbox(
+                "SFT Prompt Type",
+                [prompt_type.value for prompt_type in PromptType],
+                key="sft_warmup_prompt_type",
+            )
+            (
+                sft_warmup_messages_key_col,
                 sft_warmup_prompt_key_col,
                 sft_warmup_response_key_col,
-            ) = st.columns(4)
-            sft_warmup_train_split_col.text_input("SFT Train Split", key="sft_warmup_train_split")
-            sft_warmup_eval_split_col.text_input("SFT Eval Split", key="sft_warmup_eval_split")
+            ) = st.columns(3)
+            sft_warmup_messages_key_col.text_input(
+                "SFT Messages Key", key="sft_warmup_messages_key"
+            )
             sft_warmup_prompt_key_col.text_input("SFT Prompt Key", key="sft_warmup_prompt_key")
             sft_warmup_response_key_col.text_input(
                 "SFT Response Key", key="sft_warmup_response_key"
@@ -403,24 +479,31 @@ if node_num > 1:
                     "Please ensure that `engine_num * tensor_parallel_size` can be divided by `gpu_per_node` when `node_num > 1`."
                 )
 
-    def _set_repeat_times(self):
-        if st.session_state["algorithm_type"] == AlgorithmType.OPMD.value or st.session_state[
-            "adv_estimator"
-        ] in [
-            AdvantageEstimator.GRPO.value,
-            AdvantageEstimator.RLOO.value,
-        ]:
+    def _set_repeat_times(self):  # TODO
+        grouped_adv_algorithms = [
+            AlgorithmType.GRPO.value,
+            AlgorithmType.OPMD.value,  # TODO: may add rloo
+        ]
+        if st.session_state["algorithm_type"] in grouped_adv_algorithms:
             min_repeat_times = 2
+            st.session_state["repeat_times"] = st.session_state["_grouped_adv_repeat_times"]
         else:
             min_repeat_times = 1
-        if st.session_state["repeat_times"] < min_repeat_times:
-            st.session_state["repeat_times"] = min_repeat_times
+            st.session_state["repeat_times"] = st.session_state["_not_grouped_adv_repeat_times"]
+
+        def on_change():
+            if st.session_state["algorithm_type"] in grouped_adv_algorithms:
+                st.session_state["_grouped_adv_repeat_times"] = st.session_state["repeat_times"]
+            else:
+                st.session_state["_not_grouped_adv_repeat_times"] = st.session_state["repeat_times"]
+
         st.number_input(
             "Repeat Times",
             key="repeat_times",
             min_value=min_repeat_times,
             help="`repeat_times` is used to set how many experiences each task can generate, "
             "and it must be greater than `1` when `algorithm_type` is `opmd` or `grpo`.",
+            on_change=on_change,
         )
 
     def _set_sync_method(self):
@@ -428,7 +511,13 @@ if node_num > 1:
             st.session_state["sync_method"] = SyncMethod.CHECKPOINT.value
             disabled = True
         else:
+            st.session_state["sync_method"] = st.session_state["_not_dpo_sync_method"]
             disabled = False
+
+        def on_change():
+            if st.session_state["algorithm_type"] != AlgorithmType.DPO.value:
+                st.session_state["_not_dpo_sync_method"] = st.session_state["sync_method"]
+
         st.selectbox(
             "Sync Method",
             [sync_method.value for sync_method in SyncMethod],
@@ -437,6 +526,7 @@ if node_num > 1:
 
 `checkpoint`: the trainer saves the model checkpoint, and the explorer loads it at `sync_iteration_interval`.""",
             disabled=disabled,
+            on_change=on_change,
         )
 
     def _set_sync_iteration_interval(self):
@@ -533,16 +623,23 @@ if node_num > 1:
 
     def _set_save_interval(self):
         if st.session_state["sync_method"] == SyncMethod.NCCL.value:
+            st.session_state["save_interval"] = st.session_state["_nccl_save_interval"]
             freeze_save_interval = False
         else:
             st.session_state["save_interval"] = st.session_state["sync_iteration_interval"]
             freeze_save_interval = True
+
+        def on_change():
+            if st.session_state["sync_method"] == SyncMethod.NCCL.value:
+                st.session_state["_nccl_save_interval"] = st.session_state["save_interval"]
+
         st.number_input(
             "Save Interval",
             key="save_interval",
             min_value=1,
             help="Set to `sync_iteration_interval` when `sync_method` is `checkpoint`",
             disabled=freeze_save_interval,
+            on_change=on_change,
         )
 
     def _set_training_strategy(self):
@@ -836,7 +933,10 @@ if node_num > 1:
         )
         self._check_train_batch_size()
 
-        self._set_dataset_args()
+        if st.session_state["algorithm_type"] != AlgorithmType.DPO.value:
+            self._set_dataset_args()
+        else:
+            self._set_dpo_dataset_kwargs()
 
         if st.session_state["sft_warmup_iteration"] > 0:
             self._set_sft_warmup_dataset_args()
@@ -884,7 +984,10 @@ if node_num > 1:
 
         self._set_dataset_path()
 
-        self._set_dataset_args()
+        if st.session_state["algorithm_type"] != AlgorithmType.DPO.value:
+            self._set_dataset_args()
+        else:
+            self._set_dpo_dataset_kwargs()
 
         self._set_configs_with_st_columns(
             ["default_workflow_type", "default_reward_fn_type", "storage_type"]
@@ -892,8 +995,6 @@ if node_num > 1:
 
         self.buffer_advanced_tab = st.expander("Advanced Config")
         with self.buffer_advanced_tab:
-            self._set_db_url()
-
             self._set_configs_with_st_columns(["max_retry_times", "max_retry_interval"])
 
             self._set_sft_warmup_dataset_path()
@@ -1259,11 +1360,17 @@ if node_num > 1:
         else:
             trainer_n_gpus_per_node = st.session_state["gpu_per_node"]
 
-        db_url = (
-            st.session_state["db_url"]
-            if st.session_state["db_url"].strip()
-            else f"sqlite:///{os.path.join(st.session_state['checkpoint_path'], '.cache', st.session_state['project'], st.session_state['exp_name'])}/data.db"
-        )
+        if st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
+            train_dataset_path = (
+                st.session_state["train_dataset_path"].strip()
+                if st.session_state["train_dataset_path"].strip()
+                else st.session_state["dataset_path"].strip()
+            )
+        else:  # not dpo algorithms
+            train_dataset_path = st.session_state["train_dataset_path"].strip()
+            if not train_dataset_path and st.session_state["storage_type"] == StorageType.SQL.value:
+                train_dataset_path = f"sqlite:///{os.path.join(st.session_state['checkpoint_path'], '.cache', st.session_state['project'], st.session_state['exp_name'])}/data.db"
+
         sft_storage_type = (
             StorageType.SQL.value
             if "://" in st.session_state["sft_warmup_dataset_path"]
@@ -1314,20 +1421,26 @@ if node_num > 1:
                     "gpu_per_node": st.session_state["gpu_per_node"],
                 },
                 "buffer": {
-                    "db_url": db_url,
                     "max_retry_times": st.session_state["max_retry_times"],
                     "max_retry_interval": st.session_state["max_retry_interval"],
                     "train_dataset": {
                         "name": "experience_buffer",  # TODO
                         "storage_type": st.session_state["storage_type"],
                         "algorithm_type": st.session_state["algorithm_type"],
-                        "path": db_url,
+                        "path": train_dataset_path,
                     },
                     "sft_warmup_dataset": {
                         "name": "sft_warmup_dataset",
                         "storage_type": sft_storage_type,
                         "algorithm_type": AlgorithmType.SFT.value,
                         "path": st.session_state["sft_warmup_dataset_path"],
+                        "kwargs": {
+                            "train_split": st.session_state["sft_warmup_train_split"],
+                            "prompt_type": st.session_state["sft_warmup_prompt_type"],
+                            "messages_key": st.session_state["sft_warmup_messages_key"],
+                            "prompt_key": st.session_state["sft_warmup_prompt_key"],
+                            "response_key": st.session_state["sft_warmup_response_key"],
+                        },
                     },
                 },
                 "explorer": {
@@ -1365,6 +1478,15 @@ if node_num > 1:
                     "monitor_type": st.session_state["monitor_type"],
                 },
             }
+
+            if st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
+                config["buffer"]["train_dataset"]["kwargs"] = {
+                    "dpo_dataset_train_split": st.session_state["dpo_dataset_train_split"],
+                    "dpo_dataset_prompt_type": st.session_state["dpo_dataset_prompt_type"],
+                    "dpo_dataset_prompt_key": st.session_state["dpo_dataset_prompt_key"],
+                    "dpo_dataset_chosen_key": st.session_state["dpo_dataset_chosen_key"],
+                    "dpo_dataset_rejected_key": st.session_state["dpo_dataset_rejected_key"],
+                }
             st.header("Generated Config File")
             st.subheader("Config File")
             yaml_config = yaml.dump(config, allow_unicode=True, sort_keys=False)
