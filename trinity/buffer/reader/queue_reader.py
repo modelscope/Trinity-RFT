@@ -28,4 +28,8 @@ class QueueReader(BufferReader):
     def read(self, strategy: Optional[ReadStrategy] = None) -> List:
         if strategy is not None and strategy != ReadStrategy.FIFO:
             raise NotImplementedError(f"Read strategy {strategy} not supported for Queue Reader.")
-        return ray.get(self.queue.get_batch.remote(self.config.read_batch_size))
+        try:
+            exps = ray.get(self.queue.get_batch.remote(self.config.read_batch_size))
+        except StopAsyncIteration:
+            raise StopIteration()
+        return exps

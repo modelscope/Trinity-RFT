@@ -15,17 +15,6 @@ monitor:
 - `monitor.name`: The name of the experiment. It must be set manually.
 
 
-## Monitor
-
-```yaml
-monitor:
-  project: "Trinity-RFT-countdown"
-  name: "qwen2.5-1.5B-countdown"
-```
-
-- `monitor.project`: The project name. It must be set manually.
-- `monitor.name`: The name of the experiment. It must be set manually.
-
 ## Data
 
 <!-- The `data` configuration specifies the data used for training. It includes the total number of epochs, the batch size, the path to the dataset, the default workflow type, the default reward function type, and the format configuration. -->
@@ -131,8 +120,6 @@ explorer:
   enforce_eager: true
   dtype: bfloat16
   temperature: 1.0
-  top_p: 1.0
-  top_k: -1
   seed: 42
   logprobs: 0
   repeat_times: 5
@@ -150,8 +137,6 @@ explorer:
 - `explorer.enforce_eager`: Whether to enforce eager mode. Default is `True`.
 - `explorer.dtype`: The data type used in vLLM. Default is `bfloat16`.
 - `explorer.temperature`: The temperature used in vLLM. Default is `1.0`.
-- `explorer.top_p`: The top-p used in vLLM. Default is `1.0`.
-- `explorer.top_k`: The top-k used in vLLM. Default is `-1`.
 - `explorer.seed`: The seed used in vLLM. Default is `42`.
 - `explorer.logprobs`: The logprobs used in vLLM. Default is `0`.
 - `explorer.repeat_times`: The number of times to repeat each task, used for GRPO-like algorithms. Default is `5`.
@@ -164,12 +149,16 @@ explorer:
 
 ```yaml
 synchronizer:
-  sync_method: 'online'
+  sync_method: 'nccl'
   sync_iteration_interval: 10
+  sync_timeout: 1200
 ```
 
-- `synchronizer.sync_method`: The synchronization method, Support `online` and `offline`. Default is `online`.
+- `synchronizer.sync_method`: The synchronization method between `trainer` and `explorer`.
+Support `nccl` and `checkpoint`, `nccl` represents that model weights in `explorer` will be synchronized from `trainer` through `nccl`,
+`checkpoint` represents that `explorer` will load the newest checkpoints saved by `trainer` then update its model weights. Default is `nccl`.
 - `synchronizer.sync_iteration_interval`: The interval between two synchronizations. Default is `10`. It should be set manually.
+- `synchronizer.sync_timeout`: The timeout of the synchronization. Default is `1200`.
 
 ## Trainer
 
@@ -180,6 +169,7 @@ trainer:
   trainer_config_path: 'examples/ppo_countdown/train_countdown.yaml'
   sft_warmup_iteration: 0
   eval_interval: 1000
+  save_interval: 100
 ```
 
 - `trainer.trainer_type`: The backend of the trainer, Only `verl` is supported.
@@ -187,6 +177,7 @@ trainer:
 - `trainer.trainer_config_path`: The path to the trainer configuration file. It must be set manually.
 - `trainer.sft_warmup_iteration`: The number of iterations to warm up the model. Default is `0`.
 - `trainer.eval_interval`: The interval between two evaluations. Default is `1000`.
+- `trainer.save_interval`: The interval between two checkpoints. Default is `100`.
 
 ### veRL Trainer Configuration
 
@@ -249,7 +240,6 @@ actor_rollout_ref:
       optimizer_offload: False
       fsdp_size: -1
     # --- below: opmd ---
-    alg_type: ppo  # ppo / opmd / pairwise_opmd
     tau: 0.000  # strength of regularization w.r.t. old / ref policy
     opmd_baseline: mean  # mean / logavgexp, applicable to opmd
     use_uid: False  # True / False, applicable to pairwise_opmd
@@ -403,7 +393,6 @@ trainer:
 - `actor_rollout_ref.actor.kl_loss_coef`: The coefficient of kl loss.
 - `actor_rollout_ref.actor.kl_loss_type`: How to compute kl loss, optional value is `kl`, `abs`, `mse` or `low_var_kl`.
 - `actor_rollout_ref.actor.ulysses_sequence_parallel_size`: Ulysses sequence parallel size.
-- `actor_rollout_ref.actor.alg_type`: Used for OPMD, optional value is `ppo`, `opmd` or `pairwise_opmd`.
 - `actor_rollout_ref.actor.tau`: strength of regularization w.r.t. old / ref policy.
 - `actor_rollout_ref.actor.opmd_baseline`: mean / logavgexp, applicable to opmd.
 - `actor_rollout_ref.actor.use_uid`: True / False, applicable to pairwise_opmd.
@@ -427,7 +416,6 @@ trainer:
 - `algorithm`: Training algorithm settings.
 
 - `trainer.balance_batch`: Whether to balance batch size between GPUs during training.
-- `trainer.save_freq`: Frequency of saving checkpoints.
 - `trainer.resume_mode`: Resume mode for training. Support `disable`, `auto` and `resume_path`.
 - `trainer.resume_from_path`: Path to resume from.
 - `trainer.critic_warmup`: The number of iteration to train the critic model before actual policy learning.

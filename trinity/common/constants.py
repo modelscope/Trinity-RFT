@@ -66,6 +66,7 @@ class AlgorithmType(CaseInsensitiveEnum):
     PPO = "ppo"
     GRPO = "grpo"
     OPMD = "opmd"
+    PAIRWISE_OPMD = "pairwise_opmd"
     DPO = "dpo"
 
     def is_rft(self) -> bool:
@@ -74,6 +75,7 @@ class AlgorithmType(CaseInsensitiveEnum):
             AlgorithmType.PPO,
             AlgorithmType.GRPO,
             AlgorithmType.OPMD,
+            AlgorithmType.PAIRWISE_OPMD,
         ]
 
     def is_sft(self) -> bool:
@@ -94,3 +96,25 @@ class MonitorType(CaseInsensitiveEnum):
 
     WANDB = "wandb"
     TENSORBOARD = "tensorboard"
+
+
+class SyncMethodEnumMeta(CaseInsensitiveEnumMeta):
+    def __call__(cls, value, *args, **kwargs):
+        if value == "online":
+            print("SyncMethod `online` is deprecated, use `nccl` instead.")
+            value = "nccl"
+        elif value == "offline":
+            print("SyncMethod `offline` is deprecated, use `checkpoint` instead.")
+            value = "checkpoint"
+        try:
+            return super().__call__(value, *args, **kwargs)
+        except Exception as e:
+            print("Error parsing SyncMethod:", e)
+            raise ValueError(f"Invalid SyncMethod: {value}")
+
+
+class SyncMethod(CaseInsensitiveEnum, metaclass=SyncMethodEnumMeta):
+    """Sync Method."""
+
+    NCCL = "nccl"
+    CHECKPOINT = "checkpoint"

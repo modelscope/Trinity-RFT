@@ -8,8 +8,13 @@ from typing import List, Optional, Tuple
 import ray
 import torch
 
+from trinity.buffer import get_buffer_writer
 from trinity.common.config import Config
-from trinity.common.constants import ROLLOUT_WEIGHT_SYNC_GROUP_NAME, TaskType
+from trinity.common.constants import (
+    ROLLOUT_WEIGHT_SYNC_GROUP_NAME,
+    SyncMethod,
+    TaskType,
+)
 from trinity.common.models import create_rollout_models
 from trinity.common.models.utils import (
     get_checkpoint_dir_with_iteration,
@@ -33,6 +38,10 @@ class Explorer:
         self.iteration = explorer_meta.get("latest_iteration", 0)
         self.config = config
         self.models = create_rollout_models(config)
+        self.experience_buffer = get_buffer_writer(
+            self.config.buffer.train_dataset,  # type: ignore
+            self.config.buffer,
+        )
         self.taskset = TaskSet.load(
             self.config.data, explorer_meta.get("latest_task_index", 0), TaskType.EXPLORE
         )
@@ -54,15 +63,17 @@ class Explorer:
         self.update_interval = (
             self.config.synchronizer.sync_iteration_interval * self.config.data.batch_size
         )
-        self.use_offline_weights_update = self.config.synchronizer.sync_method == "offline"
+        self.use_checkpoint_weights_update = (
+            self.config.synchronizer.sync_method == SyncMethod.CHECKPOINT
+        )
 
-        # For offline weights update
+        # For checkpoint weights update
         # Use explorer to periodically load the latest model weights and
         # boradcast to all rollout models
-        if self.use_offline_weights_update:
+        if self.use_checkpoint_weights_update:
             self.old_checkpoint = None
             self.state_dict = {}
-        else:  # online mode
+        else:  # nccl mode
             self.state_dict_meta = []
         self.logger.info("Finished initializing Explorer.")
 
@@ -70,8 +81,8 @@ class Explorer:
     def setup_weight_sync_group(
         self, master_address: str, master_port: int, state_dict_meta: List = None
     ):
-        # In offline mode, we use explorer to store the model weights which has no rank
-        base_offset = 0 if self.use_offline_weights_update else 1
+        # In checkpoint mode, we use explorer to store the model weights which has no rank
+        base_offset = 0 if self.use_checkpoint_weights_update else 1
         world_size = len(self.models) * self.config.explorer.tensor_parallel_size + base_offset
         self.logger.info(
             f"Initialize process group for weight synchronization, "
@@ -87,7 +98,8 @@ class Explorer:
                 world_size=world_size,
                 group_name=ROLLOUT_WEIGHT_SYNC_GROUP_NAME,
                 backend=self.config.explorer.backend,
-                offline_update=self.use_offline_weights_update,
+                timeout=self.config.synchronizer.sync_timeout,
+                update_with_checkpoint=self.use_checkpoint_weights_update,
             )
             for i, model in enumerate(self.models)
         ]
@@ -117,7 +129,7 @@ class Explorer:
         ray.get([model.sync_model.remote(update_weight_args_list) for model in self.models])
         self.state_dict.clear()
 
-    def _offline_weights_update(self, iteration_num: Optional[int] = None) -> None:
+    def _checkpoint_weights_update(self, iteration_num: Optional[int] = None) -> None:
         # TODO: support more checkpoint types
         try:
             checkpoint_dir = get_checkpoint_dir_with_iteration(
@@ -133,25 +145,30 @@ class Explorer:
         except Exception as e:
             self.logger.error(f"Error when loading state_dict: {e}")
 
-    def _online_weights_update(self):
+    def _nccl_weights_update(self):
         ray.get([model.sync_model.remote(self.state_dict_meta) for model in self.models])
 
     def prepare(self) -> None:
         """Preparation before running."""
-        if self.use_offline_weights_update:
+        if self.use_checkpoint_weights_update:
             master_address, master_port = ray.get(self.models[0].get_address.remote())
             self.setup_weight_sync_group(master_address, master_port)
 
     @ray.method(concurrency_group="get_weight")
     def get_weight(self, name: str) -> torch.Tensor:
-        """Get the weight of the loaded model (For offline weights update)."""
+        """Get the weight of the loaded model (For checkpoint weights update)."""
         return self.state_dict[name]
 
     def explore(self) -> None:
         """Explore the entire dataset."""
-        explore_status, _ = self.explore_step()
-        while explore_status:
+        while True:
+            explore_status, explore_iter = self.explore_step()
+            if not explore_status:
+                break
             self.sync_weight()
+            if explore_iter % self.config.explorer.eval_interval == 0:
+                self.eval()
+                self.logger.info("Evaluation finished.")
         self.logger.info("Explorer finished.")
 
     def explore_step(self) -> Tuple[bool, int]:
@@ -178,6 +195,7 @@ class Explorer:
             tasks = [next(self.task_iter) for _ in range(task_num_per_step)]  # type: ignore
             self.runner_pool.run_tasks(tasks)
         except StopIteration:
+            self.experience_buffer.finish()
             self.logger.warning("No more tasks in the task set. Stop exploring.")
             return False, self.iteration
 
@@ -211,7 +229,7 @@ class Explorer:
             current_task_index=self.taskset.index,
         )
 
-        self.logger.info("Explore step finished.")
+        self.logger.info(f"Explore iteration {self.iteration} finished.")
         return True, self.iteration
 
     def eval(self) -> bool:
@@ -246,10 +264,10 @@ class Explorer:
     def sync_weight(self) -> None:
         """Synchronize model weights."""
         # call this method before training start to load the latest model weights
-        if self.use_offline_weights_update:
-            self._offline_weights_update()
-        else:  # online weights update
-            self._online_weights_update()
+        if self.use_checkpoint_weights_update:
+            self._checkpoint_weights_update()
+        else:  # nccl weights update
+            self._nccl_weights_update()
 
     def flush_log(self, step: int) -> None:
         """Flush the log of the current step."""

@@ -13,7 +13,7 @@ import ray
 
 from trinity.buffer import get_buffer_reader
 from trinity.common.config import Config
-from trinity.common.constants import AlgorithmType
+from trinity.common.constants import AlgorithmType, ReadStrategy, SyncMethod
 from trinity.common.experience import Experiences
 from trinity.utils.log import get_logger
 
@@ -59,7 +59,7 @@ class Trainer:
             train_status, train_iter_num = self.train_iteration(algo_type)
             if not train_status:
                 return False, train_iter_num
-        self.logger.info("Trainer finished.")
+        self.logger.info(f"Trainer iteration {train_iter_num} finished.")
         return True, train_iter_num
 
     def train_iteration(self, algo_type: AlgorithmType = AlgorithmType.PPO) -> Tuple[bool, int]:
@@ -81,28 +81,36 @@ class Trainer:
                     pad_token_id=self.config.buffer.pad_token_id,  # type: ignore
                 )
             )
-        else:
-            exps = self.train_buffer.read()
-            if algo_type.is_rft():
-                return self.engine.train_rft_iteration(
-                    Experiences.gather_experiences(
-                        exps,
-                        pad_token_id=self.config.buffer.pad_token_id,  # type: ignore
-                    )
-                )
-            elif algo_type.is_dpo():
-                return self.engine.train_dpo_iteration(
-                    Experiences.gather_dpo_experiences(
-                        exps,
-                        pad_token_id=self.config.buffer.pad_token_id,  # type: ignore
-                    )
-                )
+        elif algo_type.is_rft():
+            if self.config.trainer.get_exp_strategy:
+                strategy = ReadStrategy(self.config.trainer.get_exp_strategy)
             else:
-                raise ValueError(f"Unsupported algorithm type: {algo_type}")
+                strategy = None
+            try:
+                exps = self.train_buffer.read(strategy=strategy)
+            except StopIteration:
+                self.logger.warning("No more data to train. Stop training.")
+                return False, 0  # TODO: get the actual iteration number
+            return self.engine.train_rft_iteration(
+                Experiences.gather_experiences(
+                    exps,
+                    pad_token_id=self.config.buffer.pad_token_id,  # type: ignore
+                )
+            )
+        elif algo_type.is_dpo():
+            exps = self.train_buffer.read()
+            return self.engine.train_dpo_iteration(
+                Experiences.gather_dpo_experiences(
+                    exps,
+                    pad_token_id=self.config.buffer.pad_token_id,  # type: ignore
+                )
+            )
+        else:
+            raise ValueError(f"Unsupported algorithm type: {algo_type}")
 
     def sync_weight(self) -> None:
         """Sync the model weight."""
-        if self.config.synchronizer.sync_method == "online":
+        if self.config.synchronizer.sync_method == SyncMethod.NCCL:
             self.engine.sync_weight()
 
     def flush_log(self, step: int) -> None:

@@ -40,7 +40,6 @@ from trinity.utils.monitor import Monitor
 class _InternalDataLoader:
     def __init__(self, config):
         self.config = config
-        self.length = config.trainer.steps_per_epoch
         self.dataset = None
         self.index = 0
         self.experience_buffer = None
@@ -383,12 +382,14 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
 
                 # compute advantages, executed on the driver process
                 kwargs = {}
-                alg_type = self.config.actor_rollout_ref.actor.get("alg_type", "ppo")
-                if alg_type == "opmd":
+                algorithm_type = self.config.actor_rollout_ref.actor.get(
+                    "algorithm_type", AlgorithmType.PPO
+                )
+                if algorithm_type == AlgorithmType.OPMD:
                     tau = self.config.actor_rollout_ref.actor.get("tau", 0.0)
                     opmd_baseline = self.config.actor_rollout_ref.actor.get("opmd_baseline", "mean")
                     kwargs = {
-                        "alg_type": alg_type,
+                        "algorithm_type": algorithm_type,
                         "tau": tau,
                         "opmd_baseline": opmd_baseline,
                     }
@@ -428,7 +429,6 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                 #     val_metrics: dict = self._validate()
                 # metrics.update(val_metrics)
 
-            # TODO save_checkpoint too frequently, a method for updating parameters online needs to be added
             if (
                 self.config.trainer.save_freq > 0
                 and self.global_steps % self.config.trainer.save_freq == 0

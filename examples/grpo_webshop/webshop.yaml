@@ -31,8 +31,6 @@ explorer:
   enforce_eager: true
   dtype: bfloat16
   temperature: 1.0
-  top_p: 1.0
-  top_k: -1
   seed: 42
   logprobs: 0
   repeat_times: 8
@@ -43,12 +41,14 @@ explorer:
   gpu_memory_utilization: 0.7
   enable_chunked_prefil: true
 synchronizer:
-  sync_method: 'online'
+  sync_method: 'nccl'
   sync_iteration_interval: 8
+  sync_timeout: 1200
 trainer:
   trainer_type: 'verl'
   algorithm_type: ppo
   trainer_config_path: 'examples/grpo_webshop/train_webshop.yaml'
+  save_interval: 10
 monitor:
   cache_root_dir: ""
   project: "WEBSHOP"

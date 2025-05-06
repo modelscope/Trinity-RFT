@@ -49,7 +49,7 @@ class SQLReader(BufferReader):
             sortOrder = (desc(self.table_model_cls.priority), desc(self.table_model_cls.id))
 
         else:
-            raise NotImplementedError("Unsupported strategy by SQLStorage")
+            raise NotImplementedError(f"Unsupported strategy {strategy} by SQLStorage")
 
         exp_list = []
         while len(exp_list) < self.batch_size:

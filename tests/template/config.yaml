@@ -2,7 +2,7 @@ mode: both
 data:
   dataset_path: ''
   total_epochs: 1
-  batch_size: 32
+  batch_size: 4
   train_split: 'train'
   eval_split: ''
   default_workflow_type: ''
@@ -12,38 +12,37 @@ model:
   max_prompt_tokens: 2048
   max_response_tokens: 2048
   checkpoint_path: ''
-cluster:
+cluster:  # 2 for explorer, 2 for trainer
   node_num: 1
-  gpu_per_node: 8
+  gpu_per_node: 4
 buffer:
-  read_batch_size: 32
   max_retry_times: 3
   max_retry_interval: 1
 explorer:
   engine_type: vllm_async
   engine_num: 2
-  runner_num: 16
-  repeat_times: 2
-  tensor_parallel_size: 2
+  runner_num: 4
+  repeat_times: 1
+  tensor_parallel_size: 1
   enable_prefix_caching: false
   enforce_eager: true
   dtype: bfloat16
-  temperature: 0.2
-  top_p: 0.95
-  top_k: -1
+  temperature: 1.0
   seed: 42
   logprobs: 0
   backend: nccl
   use_ray: false
-  max_pending_requests: 5
-  max_waiting_steps: 1
 trainer:
   trainer_type: verl
-  trainer_config_path: tests/common/tmp/template_verl_config.yaml
+  trainer_config_path: tests/template/verl_config.yaml
+  sft_warmup_iteration: 0
+  eval_interval: 1000
+  save_interval: 100
 monitor:
   project: unittest
   name: test
 synchronizer:
-  sync_method: offline
+  sync_method: checkpoint
   sync_iteration_interval: 10
+  sync_timeout: 1200
   wait_for_checkpoint: false

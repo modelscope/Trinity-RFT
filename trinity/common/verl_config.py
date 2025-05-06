@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional
 from omegaconf import OmegaConf
 
 from trinity.common.config import BufferConfig, Config, SynchronizerConfig
+from trinity.common.constants import AlgorithmType
 
 
 @dataclass
@@ -86,7 +87,7 @@ class Actor:
     checkpoint: Checkpoint = field(default_factory=Checkpoint)
     optim: Optim = field(default_factory=Optim)
     fsdp_config: FSDPConfig = field(default_factory=FSDPConfig)
-    alg_type: str = "ppo"  # ppo / opmd / pairwise_opmd
+    algorithm_type: AlgorithmType = AlgorithmType.PPO
     tau: float = 0.001  # strength of regularization w.r.t. old / ref policy
     opmd_baseline: str = "mean"  # mean / logavgexp, applicable to opmd
     use_uid: bool = False  # True / False, applicable to pairwise_opmd
@@ -133,7 +134,7 @@ class Rollout:
 
 @dataclass
 class ActorRolloutRef:
-    hybrid_engine: bool = False
+    hybrid_engine: bool = True
     model: ActorModel = field(default_factory=ActorModel)
     actor: Actor = field(default_factory=Actor)
     ref: Ref = field(default_factory=Ref)
@@ -165,7 +166,7 @@ class Critic:
     use_dynamic_bsz: bool = False
     ppo_max_token_len_per_gpu: int = 0
     forward_max_token_len_per_gpu: int = 0
-    ulysses_sequence_parallel_size: int = 0
+    ulysses_sequence_parallel_size: int = 1
     ppo_epochs: int = 0
     shuffle: bool = False
     grad_clip: float = 0.0
@@ -243,8 +244,6 @@ class Trainer:
     val_before_train: bool = False
     training_rollout_mode: str = "parallel"
     enable_exp_buffer: bool = True
-    steps_per_epoch: int = 1280
-    get_exp_strategy: Optional[str] = None
     sync_freq: int = 0
     sft_warmup_iteration: int = 0
     max_actor_ckpt_to_keep: Optional[int] = None
@@ -280,10 +279,7 @@ class veRLConfig:
             # for multi-node scenarios, some nodes for rollout, others for training
             self.trainer.n_gpus_per_node = config.cluster.gpu_per_node
         self.trainer.sync_freq = config.synchronizer.sync_iteration_interval
-        if config.synchronizer.sync_method == "offline":
-            self.trainer.save_freq = (
-                config.synchronizer.sync_iteration_interval
-            )  # TODO: not proper for DPO
+        self.trainer.save_freq = config.trainer.save_interval
         self.synchronizer = config.synchronizer
         self.actor_rollout_ref.synchronizer = config.synchronizer
         self.buffer = config.buffer
@@ -297,37 +293,19 @@ class veRLConfig:
         self.buffer.pad_token_id = config.buffer.pad_token_id
         self.trainer.project_name = config.monitor.project
         self.trainer.experiment_name = config.monitor.name
-        self.data.train_batch_size = self.buffer.read_batch_size
+        self.data.train_batch_size = config.data.batch_size
         self.trainer.default_local_dir = config.model.checkpoint_path
         self.trainer.sft_warmup_iteration = config.trainer.sft_warmup_iteration
         self.actor_rollout_ref.actor.ppo_mini_batch_size = config.data.batch_size
         self.actor_rollout_ref.rollout.temperature = config.explorer.temperature
         self.actor_rollout_ref.rollout.n = config.explorer.repeat_times
-        batch_size_per_gpu = self.buffer.read_batch_size // world_size
-        self.actor_rollout_ref.actor.alg_type = (
-            config.trainer.algorithm_type.value
-        )  # TODO: refactor `alg_type`
-        # print(f"using algorithm type: {self.actor_rollout_ref.actor.alg_type}")
+        self.actor_rollout_ref.actor.algorithm_type = config.trainer.algorithm_type
 
-        if self.actor_rollout_ref.actor.alg_type == "dpo":  # for DPO
+        if self.actor_rollout_ref.actor.algorithm_type.is_dpo():  # for DPO
             print("Warning: DPO micro batch size is doubled for computing loss.")
+            self.actor_rollout_ref.actor.ppo_mini_batch_size *= 2
             self.actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu *= 2  # type: ignore
             self.actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu *= 2  # type: ignore
-        if batch_size_per_gpu % self.actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu != 0:  # type: ignore
-            raise ValueError(
-                f"batch_size_per_gpu ({batch_size_per_gpu}) must be divisible by "
-                f"actor.ppo_micro_batch_size_per_gpu ({self.actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu})"
-            )
-        if batch_size_per_gpu % self.actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu != 0:  # type: ignore
-            raise ValueError(
-                f"batch_size_per_gpu ({batch_size_per_gpu}) must be divisible by "
-                f"ref.log_prob_micro_batch_size_per_gpu ({self.actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu})"
-            )
-        if batch_size_per_gpu % self.critic.ppo_micro_batch_size_per_gpu != 0:  # type: ignore
-            raise ValueError(
-                f"batch_size_per_gpu ({batch_size_per_gpu}) must be divisible by "
-                f"critic.ppo_micro_batch_size_per_gpu ({self.critic.ppo_micro_batch_size_per_gpu})"
-            )
         # TODO: check other fields
         self.enable_preview = config.trainer.enable_preview
 

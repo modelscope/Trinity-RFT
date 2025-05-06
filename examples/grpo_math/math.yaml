@@ -37,8 +37,6 @@ explorer:
   enforce_eager: true
   dtype: bfloat16
   temperature: 1.0
-  top_p: 1.0
-  top_k: -1
   seed: 42
   logprobs: 0
   repeat_times: 8
@@ -47,14 +45,16 @@ explorer:
   max_pending_requests: 32
   max_waiting_steps: 4
 synchronizer:
-  sync_method: 'online'
+  sync_method: 'nccl'
   sync_iteration_interval: 2
+  sync_timeout: 1200
 trainer:
   trainer_type: 'verl'
   algorithm_type: ppo
   trainer_config_path: 'examples/grpo_math/train_math.yaml'
   sft_warmup_iteration: 0 # Set to integer to enable sft warmup
   eval_interval: 10
+  save_interval: 100
 monitor:
   cache_root_dir: ""
   project: grpo_math

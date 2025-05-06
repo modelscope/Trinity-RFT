@@ -52,6 +52,7 @@ class RunnerPool:
         for _ in range(num):
             engine_index = self.engine_status.index(min(self.engine_status))
             new_actor = WorkflowRunner.remote(self.config, self.models[engine_index])
+            ray.get(new_actor.__ray_ready__.remote())
             self.engine_status[engine_index] += 1
             self.actor_to_engine_index[new_actor] = engine_index
             self._return_actor(new_actor)

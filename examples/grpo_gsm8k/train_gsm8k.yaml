@@ -52,7 +52,6 @@ actor_rollout_ref:
       optimizer_offload: False
       fsdp_size: -1
     # --- below: opmd ---
-    alg_type: ppo  # ppo / opmd / pairwise_opmd
     tau: 0.000  # strength of regularization w.r.t. old / ref policy
     opmd_baseline: mean  # mean / logavgexp, applicable to opmd
     use_uid: False  # True / False, applicable to pairwise_opmd
@@ -174,7 +173,6 @@ trainer:
   val_generations_to_log_to_wandb: 0
   nnodes: 1
   n_gpus_per_node: 2
-  save_freq: 100
   # auto: find the last ckpt to resume. If can't find, start from scratch
   resume_mode: auto # or auto or resume_path if
   test_freq: 5

@@ -37,8 +37,6 @@ class vLLMRolloutModel(InferenceModel):
         self.default_sampling_params = SamplingParams(
             n=config.explorer.repeat_times,
             temperature=config.explorer.temperature,
-            top_p=config.explorer.top_p,
-            top_k=config.explorer.top_k,
             max_tokens=config.model.max_response_tokens,
             min_tokens=1,
             truncate_prompt_tokens=config.model.max_prompt_tokens,
@@ -89,7 +87,8 @@ class vLLMRolloutModel(InferenceModel):
         world_size: int,
         group_name: str,
         backend: str = "nccl",
-        offline_update: bool = True,
+        timeout: int = 1200,
+        update_with_checkpoint: bool = True,
     ):
         return self.llm.collective_rpc(
             "init_process_group",
@@ -100,7 +99,8 @@ class vLLMRolloutModel(InferenceModel):
                 world_size,
                 group_name,
                 backend,
-                offline_update,
+                timeout,
+                update_with_checkpoint,
             ),
         )
 
@@ -252,7 +252,7 @@ class vLLMRolloutModel(InferenceModel):
         token_ids, action_mask = self.action_mask_method(
             self.tokenizer, messages, self.chat_template
         )
-        logprobs = self.logprobs(token_ids=token_ids)
+        logprobs = self.logprobs(token_ids=token_ids.tolist())
         return Experience(
             tokens=token_ids,
             prompt_length=len(token_ids),

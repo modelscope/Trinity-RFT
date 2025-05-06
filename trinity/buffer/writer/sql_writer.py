@@ -40,3 +40,7 @@ class SQLWriter(BufferWriter):
         with retry_session(self.session, self.max_retry_times, self.max_retry_interval) as session:
             experience_models = [self.table_model_cls.from_experience(exp) for exp in data]
             session.add_all(experience_models)
+
+    def finish(self) -> None:
+        # TODO: implement this
+        pass

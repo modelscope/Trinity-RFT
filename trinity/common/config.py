@@ -6,7 +6,13 @@ from typing import Any, Dict, Optional
 
 from omegaconf import OmegaConf
 
-from trinity.common.constants import AlgorithmType, MonitorType, PromptType, StorageType
+from trinity.common.constants import (
+    AlgorithmType,
+    MonitorType,
+    PromptType,
+    StorageType,
+    SyncMethod,
+)
 from trinity.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -110,13 +116,12 @@ class DatasetConfig:
 class BufferConfig:
     """Config for experience buffer."""
 
-    db_url: Optional[str] = None
+    db_url: Optional[str] = None  # Is deprecated, please set `buffer.train_dataset.path` instead.
     read_batch_size: int = 32
     max_retry_times: int = 3
     max_retry_interval: int = 1
     tokenizer_path: Optional[str] = None
     pad_token_id: Optional[int] = None
-    reset_consumed: Optional[bool] = False
 
     train_dataset: Optional[DatasetConfig] = None
     sft_warmup_dataset: Optional[DatasetConfig] = None
@@ -149,6 +154,10 @@ class ExplorerConfig:
     # for rollout tokneize
     chat_template: Optional[str] = None
 
+    # for evaluation
+    # TODO: remove trainer.eval_interval
+    eval_interval: int = 100
+
     # for vLLM
     tensor_parallel_size: int = 1
     enable_prefix_caching: bool = False
@@ -176,11 +185,13 @@ class TrainerConfig:
     trainer_type: str = "verl"
     trainer_config_path: str = ""
     eval_interval: int = 100
+    save_interval: int = 0
     enable_preview: bool = True  # enable rollout preview in wandb
     trainer_config: Any = field(default_factory=dict)
 
     # train algorithm
     algorithm_type: AlgorithmType = AlgorithmType.PPO
+    get_exp_strategy: Optional[str] = None
 
     # warmup config
     sft_warmup_iteration: int = 0
@@ -204,11 +215,11 @@ class MonitorConfig:
 class SynchronizerConfig:
     """Configs for model weight synchronization"""
 
-    # only support `offline` for now
     # TODO: rename to "checkpoint", "nccl", "ipc"
-    sync_method: str = "offline"
+    sync_method: SyncMethod = SyncMethod.NCCL
     # sync weights every `sync_iteration_interval` iterations
     sync_iteration_interval: int = 1
+    sync_timeout: int = 1200
     # wait for the lastest checkpoint to be ready
     wait_for_checkpoint: bool = False
     master_address: Optional[str] = None
@@ -241,6 +252,10 @@ class Config:
             raise ValueError(
                 "buffer.sft_warmup_dataset is required when trainer.sft_warmup_iteration > 0"
             )
+        if self.buffer.db_url:
+            raise ValueError(
+                "`buffer.db_url` is deprecated, please set `buffer.train_dataset.path` instead."
+            )
 
         if self.buffer.pad_token_id is None:
             from transformers import AutoTokenizer
@@ -260,10 +275,17 @@ class Config:
                     name="experience_buffer",
                     storage_type=StorageType.QUEUE,
                     algorithm_type=self.trainer.algorithm_type,
-                    path=self.buffer.db_url,
                 )
-                logger.info(f"Auto set buffer.train_dataset to {self.buffer.train_dataset}")
-        else:
+                logger.info(f"Auto set `buffer.train_dataset` to {self.buffer.train_dataset}")
+        else:  # TODO: to be check
+            if self.mode == "train" and self.trainer.algorithm_type == AlgorithmType.DPO:
+                if self.buffer.train_dataset is None and self.data.dataset_path.strip():
+                    self.buffer.train_dataset = DatasetConfig(
+                        name="dpo_train_dataset",
+                        storage_type=StorageType.FILE,
+                        algorithm_type=self.trainer.algorithm_type,
+                    )
+                    logger.info(f"Auto set `buffer.train_dataset` to {self.buffer.train_dataset}")
             if self.buffer.train_dataset is None:
                 raise ValueError("buffer.train_dataset is required when mode is not 'both'")
             self.buffer.train_dataset.algorithm_type = self.trainer.algorithm_type
@@ -271,30 +293,13 @@ class Config:
             self.buffer.sft_warmup_dataset.algorithm_type = AlgorithmType.SFT
         self.buffer.read_batch_size = self.data.batch_size * self.explorer.repeat_times
 
-    def check_and_update(self) -> None:
+    def check_and_update(self) -> None:  # noqa: C901
         """Check and update the config."""
-        if self.trainer.trainer_type == "verl":
-            if self.trainer.trainer_config:
-                from trinity.common.verl_config import veRLConfig
-
-                trainer_config_schema = OmegaConf.structured(veRLConfig)
-                trainer_config = OmegaConf.merge(trainer_config_schema, self.trainer.trainer_config)
-                self.trainer.trainer_config = OmegaConf.to_object(trainer_config)
-            else:
-                if os.path.isfile(self.trainer.trainer_config_path):
-                    from trinity.common.verl_config import load_config
-
-                    self.trainer.trainer_config = load_config(self.trainer.trainer_config_path)
-                else:
-                    raise ValueError(
-                        f"Invalid trainer config path: {self.trainer.trainer_config_path}"
-                    )
-        else:
-            raise ValueError(f"Invalid trainer type: {self.trainer_type}")
-
         # check mode
         if self.mode not in ["explore", "train", "both"]:
             raise ValueError(f"Invalid mode: {self.mode}")
+        if self.trainer.algorithm_type == AlgorithmType.DPO and self.mode == "both":
+            raise ValueError("DPO does not support `both` mode")
 
         # check model path
         if not os.path.isabs(self.model.model_path):
@@ -310,8 +315,8 @@ class Config:
             self.explorer.engine_num * self.explorer.tensor_parallel_size
         )
         self.synchronizer.backend = self.explorer.backend
-        if self.synchronizer.sync_method == "online" and self.mode != "both":
-            raise ValueError("Online synchronization is only supported in both mode")
+        if self.synchronizer.sync_method == SyncMethod.NCCL and self.mode != "both":
+            raise ValueError("`nccl` synchronization is only supported in both mode.")
 
         # check eval_interval
         if self.trainer.eval_interval % self.synchronizer.sync_iteration_interval != 0:
@@ -321,6 +326,17 @@ class Config:
             print(
                 f"Warning: eval_interval is not a multiple of sync_iteration_interval; adjusted to the nearest integer={self.trainer.eval_interval}."
             )
+        if self.explorer.eval_interval != self.trainer.eval_interval:
+            self.explorer.eval_interval = self.trainer.eval_interval
+            print(
+                f"Warning: explorer.eval_interval is not equal to trainer.eval_interval; adjusted to the same value={self.trainer.eval_interval}."
+            )
+
+        # check save_interval
+        if self.synchronizer.sync_method == SyncMethod.CHECKPOINT:
+            self.trainer.save_interval = (
+                self.synchronizer.sync_iteration_interval
+            )  # TODO: not proper for DPO
 
         # check monitor
         if not self.monitor.cache_root_dir:
@@ -342,6 +358,26 @@ class Config:
         self._check_buffer()
         # check and update trainer
         if self.mode != "explore":
+            if self.trainer.trainer_type == "verl":
+                if self.trainer.trainer_config:
+                    from trinity.common.verl_config import veRLConfig
+
+                    trainer_config_schema = OmegaConf.structured(veRLConfig)
+                    trainer_config = OmegaConf.merge(
+                        trainer_config_schema, self.trainer.trainer_config
+                    )
+                    self.trainer.trainer_config = OmegaConf.to_object(trainer_config)
+                else:
+                    if os.path.isfile(self.trainer.trainer_config_path):
+                        from trinity.common.verl_config import load_config
+
+                        self.trainer.trainer_config = load_config(self.trainer.trainer_config_path)
+                    else:
+                        raise ValueError(
+                            f"Invalid trainer config path: {self.trainer.trainer_config_path}"
+                        )
+            else:
+                raise ValueError(f"Invalid trainer type: {self.trainer_type}")
             self.trainer.trainer_config.synchronize_config(self)
         else:
             self.trainer.trainer_config = None

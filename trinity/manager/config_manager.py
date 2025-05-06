@@ -5,7 +5,13 @@ from typing import List
 import streamlit as st
 import yaml
 
-from trinity.common.constants import AlgorithmType, MonitorType, StorageType
+from trinity.common.constants import (
+    AlgorithmType,
+    MonitorType,
+    PromptType,
+    StorageType,
+    SyncMethod,
+)
 from trinity.common.rewards import REWARD_FUNCTIONS
 from trinity.common.workflows.workflow import WORKFLOWS
 from trinity.trainer.verl.ray_trainer import AdvantageEstimator
@@ -48,9 +54,10 @@ class ConfigManager:
             "trainer_gpu_num": 6,
             "max_prompt_tokens": 1024,
             "max_response_tokens": 1024,
-            # Data and Buffer Configs
+            # Data Configs
             "total_epochs": 20,
-            "task_num_per_batch": 6,
+            "_train_batch_size_per_gpu": 16,
+            "train_batch_size": 96,
             "dataset_path": "",
             "subset_name": None,
             "train_split": "train",
@@ -59,22 +66,35 @@ class ConfigManager:
             "response_key": "answer",
             "default_workflow_type": "math_workflow",
             "default_reward_fn_type": "math_reward",
+            # Buffer Configs
+            "_is_dpo_storage_type": StorageType.FILE.value,
+            "_not_dpo_storage_type": StorageType.QUEUE.value,
             "storage_type": StorageType.QUEUE.value,
-            "db_url": "",
+            "train_dataset_path": "",
             "max_retry_times": 3,
             "max_retry_interval": 1,
+            "dpo_dataset_train_split": "train",
+            "dpo_dataset_prompt_type": PromptType.MESSAGES.value,
+            "dpo_dataset_prompt_key": "prompt",
+            "dpo_dataset_chosen_key": "chosen",
+            "dpo_dataset_rejected_key": "rejected",
             "sft_warmup_dataset_path": "",
             "sft_warmup_train_split": "train",
-            "sft_warmup_eval_split": "",
-            "sft_warmup_prompt_key": "question",
-            "sft_warmup_response_key": "answer",
+            "sft_warmup_prompt_type": PromptType.MESSAGES.value,
+            "sft_warmup_messages_key": "messages",
+            "sft_warmup_prompt_key": "prompt",
+            "sft_warmup_response_key": "response",
             # Explorer and Sync Configs
             "engine_type": "vllm_async",
             "engine_num": 2,
             "tensor_parallel_size": 1,
+            "_grouped_adv_repeat_times": 2,
+            "_not_grouped_adv_repeat_times": 1,
             "repeat_times": 1,
-            "sync_method": "online",
+            "_not_dpo_sync_method": SyncMethod.NCCL.value,
+            "sync_method": SyncMethod.NCCL.value,
             "sync_iteration_interval": 10,
+            "sync_timeout": 1200,
             "runner_num": 32,
             "max_pending_requests": 32,
             "max_waiting_steps": 4,
@@ -92,6 +112,8 @@ class ConfigManager:
             "algorithm_type": AlgorithmType.PPO.value,
             "sft_warmup_iteration": 0,
             "eval_interval": 1000,
+            "_nccl_save_interval": 100,
+            "save_interval": 100,
             # veRL Trainer Configs
             "training_args": [
                 "balance_batch",
@@ -99,7 +121,6 @@ class ConfigManager:
                 "remove_padding",
                 "dynamic_bsz",
             ],
-            "save_freq": 100,
             "training_strategy": "fsdp",
             "param_offload": False,
             "optimizer_offload": False,
@@ -145,7 +166,7 @@ class ConfigManager:
             "critic_cliprange_value": 0.5,
             "critic_ppo_micro_batch_size_per_gpu": 8,
             "critic_ulysses_sequence_parallel_size": 1,
-            "training_mode": "PPO",
+            "critic_checkpoint": ["model", "optimizer", "extra"],
         }
 
     def reset_session_state(self):
@@ -224,29 +245,37 @@ class ConfigManager:
         st.number_input("Total Epochs", key="total_epochs", min_value=1)
 
     @property
-    def _str_for_task_num_per_batch(self):
+    def _str_for_train_batch_size(self):
         return (
-            f"Please ensure that `task_num_per_batch` can be divided by "
+            f"Please ensure that `train_batch_size` can be divided by "
             f"`gpu_per_node * node_num - engine_num * tensor_parallel_size` "
             f"= {st.session_state['trainer_gpu_num']}"
         )
 
-    def _set_task_num_per_batch(self):
+    def _set_train_batch_size(self):
         trainer_gpu_num = st.session_state["trainer_gpu_num"]
-        if st.session_state["task_num_per_batch"] < trainer_gpu_num:
-            st.session_state["task_num_per_batch"] = trainer_gpu_num
-        st.number_input(
-            "Task Num Per Batch",
-            key="task_num_per_batch",
-            min_value=trainer_gpu_num,
-            step=trainer_gpu_num,
-            help=self._str_for_task_num_per_batch,
+        st.session_state["train_batch_size"] = (
+            st.session_state["_train_batch_size_per_gpu"] * st.session_state["trainer_gpu_num"]
         )
 
-    def _check_task_num_per_batch(self):
-        if st.session_state["task_num_per_batch"] % st.session_state["trainer_gpu_num"] != 0:
-            self.unfinished_fields.add("task_num_per_batch")
-            st.warning(self._str_for_task_num_per_batch)
+        def on_change():
+            st.session_state["_train_batch_size_per_gpu"] = max(
+                st.session_state["train_batch_size"] // st.session_state["trainer_gpu_num"], 1
+            )
+
+        st.number_input(
+            "Train Batch Size",
+            key="train_batch_size",
+            min_value=trainer_gpu_num,
+            step=trainer_gpu_num,
+            help=self._str_for_train_batch_size,
+            on_change=on_change,
+        )
+
+    def _check_train_batch_size(self):
+        if st.session_state["train_batch_size"] % st.session_state["trainer_gpu_num"] != 0:
+            self.unfinished_fields.add("train_batch_size")
+            st.warning(self._str_for_train_batch_size)
 
     def _set_dataset_path(self):
         st.text_input("Dataset Path", key="dataset_path")
@@ -291,24 +320,71 @@ Other workflows: conduct multi-turn task for the given dataset.
         )
 
     def _set_storage_type(self):
+        if st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
+            st.session_state["storage_type"] = st.session_state["_is_dpo_storage_type"]
+            storage_candidates = [StorageType.FILE.value, StorageType.SQL.value]
+        else:
+            st.session_state["storage_type"] = st.session_state["_not_dpo_storage_type"]
+            storage_candidates = [StorageType.QUEUE.value, StorageType.SQL.value]
+
+        def on_change():
+            if st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
+                st.session_state["_is_dpo_storage_type"] = st.session_state["storage_type"]
+            else:
+                st.session_state["_not_dpo_storage_type"] = st.session_state["storage_type"]
+
         st.selectbox(
             "Storage Type",
-            [storage_type.value for storage_type in StorageType],
+            storage_candidates,
             key="storage_type",
+            on_change=on_change,
         )
 
-    def _set_db_url(self):
+    def _set_train_dataset_path(self):  # TODO
         st.text_input(
-            "DB URL",
-            key="db_url",
-            help=r"Default to `sqlite:///{os.path.join(checkpoint_path, '.cache', project_name, experiment_name)}/data.db`",
+            "Train Dataset Path",
+            key="train_dataset_path",
+            help=r"This path is used for `trainer`, "
+            r"if `storage_type == StorageType.QUEUE`, default to `None`, "
+            r"if `storage_type == StorageType.FILE`, this should be a path to a file, "
+            r"if `storage_type == StorageType.SQL`, default to `sqlite:///{os.path.join(checkpoint_path, '.cache', project_name, experiment_name)}/data.db`.",
         )
+        if st.session_state["storage_type"] == StorageType.FILE.value:
+            if not st.session_state["train_dataset_path"].strip():
+                self.unfinished_fields.add("train_dataset_path")
+                st.warning("Please input train dataset path.")
 
     def _set_max_retry_times(self):
         st.number_input("Max Retry Times", key="max_retry_times", min_value=1)
 
     def _set_max_retry_interval(self):
         st.number_input("Max Retry Interval", key="max_retry_interval", min_value=1)
+
+    def _set_dpo_dataset_kwargs(self):
+        dpo_dataset_train_split_col, dpo_dataset_prompt_type_col = st.columns(2)
+        dpo_dataset_train_split_col.text_input(
+            "DPO Dataset Train Split", key="dpo_dataset_train_split"
+        )
+        dpo_dataset_prompt_type_col.selectbox(
+            "DPO Dataset Prompt Type",
+            [prompt_type.value for prompt_type in PromptType],
+            key="dpo_dataset_prompt_type",
+        )
+
+        (
+            dpo_dataset_prompt_key_col,
+            dpo_dataset_chosen_key_col,
+            dpo_dataset_rejected_key_col,
+        ) = st.columns(3)
+        dpo_dataset_prompt_key_col.text_input(
+            "DPO Dataset Prompt Key", key="dpo_dataset_prompt_key"
+        )
+        dpo_dataset_chosen_key_col.text_input(
+            "DPO Dataset Chosen Key", key="dpo_dataset_chosen_key"
+        )
+        dpo_dataset_rejected_key_col.text_input(
+            "DPO Dataset Rejected Key", key="dpo_dataset_rejected_key"
+        )
 
     def _check_sft_warmup_dataset_path(self):
         if st.session_state["sft_warmup_iteration"]:
@@ -329,12 +405,22 @@ Other workflows: conduct multi-turn task for the given dataset.
         ):  # TODO
             (
                 sft_warmup_train_split_col,
-                sft_warmup_eval_split_col,
+                sft_warmup_prompt_type_col,
+            ) = st.columns(2)
+            sft_warmup_train_split_col.text_input("SFT Train Split", key="sft_warmup_train_split")
+            sft_warmup_prompt_type_col.selectbox(
+                "SFT Prompt Type",
+                [prompt_type.value for prompt_type in PromptType],
+                key="sft_warmup_prompt_type",
+            )
+            (
+                sft_warmup_messages_key_col,
                 sft_warmup_prompt_key_col,
                 sft_warmup_response_key_col,
-            ) = st.columns(4)
-            sft_warmup_train_split_col.text_input("SFT Train Split", key="sft_warmup_train_split")
-            sft_warmup_eval_split_col.text_input("SFT Eval Split", key="sft_warmup_eval_split")
+            ) = st.columns(3)
+            sft_warmup_messages_key_col.text_input(
+                "SFT Messages Key", key="sft_warmup_messages_key"
+            )
             sft_warmup_prompt_key_col.text_input("SFT Prompt Key", key="sft_warmup_prompt_key")
             sft_warmup_response_key_col.text_input(
                 "SFT Response Key", key="sft_warmup_response_key"
@@ -402,34 +488,54 @@ if node_num > 1:
                     "Please ensure that `engine_num * tensor_parallel_size` can be divided by `gpu_per_node` when `node_num > 1`."
                 )
 
-    def _set_repeat_times(self):
-        if st.session_state["algorithm_type"] == AlgorithmType.OPMD.value or st.session_state[
-            "adv_estimator"
-        ] in [
-            AdvantageEstimator.GRPO.value,
-            AdvantageEstimator.RLOO.value,
-        ]:
+    def _set_repeat_times(self):  # TODO
+        grouped_adv_algorithms = [
+            AlgorithmType.GRPO.value,
+            AlgorithmType.OPMD.value,  # TODO: may add rloo
+        ]
+        if st.session_state["algorithm_type"] in grouped_adv_algorithms:
             min_repeat_times = 2
+            st.session_state["repeat_times"] = st.session_state["_grouped_adv_repeat_times"]
         else:
             min_repeat_times = 1
-        if st.session_state["repeat_times"] < min_repeat_times:
-            st.session_state["repeat_times"] = min_repeat_times
+            st.session_state["repeat_times"] = st.session_state["_not_grouped_adv_repeat_times"]
+
+        def on_change():
+            if st.session_state["algorithm_type"] in grouped_adv_algorithms:
+                st.session_state["_grouped_adv_repeat_times"] = st.session_state["repeat_times"]
+            else:
+                st.session_state["_not_grouped_adv_repeat_times"] = st.session_state["repeat_times"]
+
         st.number_input(
             "Repeat Times",
             key="repeat_times",
             min_value=min_repeat_times,
             help="`repeat_times` is used to set how many experiences each task can generate, "
             "and it must be greater than `1` when `algorithm_type` is `opmd` or `grpo`.",
+            on_change=on_change,
         )
 
     def _set_sync_method(self):
+        if st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
+            st.session_state["sync_method"] = SyncMethod.CHECKPOINT.value
+            disabled = True
+        else:
+            st.session_state["sync_method"] = st.session_state["_not_dpo_sync_method"]
+            disabled = False
+
+        def on_change():
+            if st.session_state["algorithm_type"] != AlgorithmType.DPO.value:
+                st.session_state["_not_dpo_sync_method"] = st.session_state["sync_method"]
+
         st.selectbox(
             "Sync Method",
-            ["online", "offline"],
+            [sync_method.value for sync_method in SyncMethod],
             key="sync_method",
-            help="""`online`: the explorer and trainer sync model weights once every `sync_iteration_interval` steps.
+            help="""`nccl`: the explorer and trainer sync model weights once every `sync_iteration_interval` steps.
 
-`offline`: the trainer saves the model checkpoint, and the explorer loads it at `sync_iteration_interval`.""",
+`checkpoint`: the trainer saves the model checkpoint, and the explorer loads it at `sync_iteration_interval`.""",
+            disabled=disabled,
+            on_change=on_change,
         )
 
     def _set_sync_iteration_interval(self):
@@ -438,6 +544,14 @@ if node_num > 1:
             key="sync_iteration_interval",
             min_value=1,
             help="""The iteration interval at which the `explorer` and `trainer` synchronize model weight.""",
+        )
+
+    def _set_sync_timeout(self):
+        st.number_input(
+            "Sync Timeout",
+            key="sync_timeout",
+            min_value=1,
+            help="The timeout value for the synchronization operation.",
         )
 
     def _set_runner_num(self):
@@ -488,8 +602,14 @@ if node_num > 1:
     def _set_algorithm_type(self):
         st.selectbox(
             "Algorithm Type",
-            [AlgorithmType.PPO.value, AlgorithmType.DPO.value, AlgorithmType.OPMD.value],
+            [
+                AlgorithmType.PPO.value,
+                AlgorithmType.GRPO.value,
+                AlgorithmType.DPO.value,
+                AlgorithmType.OPMD.value,
+            ],
             key="algorithm_type",
+            on_change=self._set_adv_estimator,
         )
 
     def _set_sft_warmup_iteration(self):
@@ -510,18 +630,25 @@ if node_num > 1:
             key="training_args",
         )
 
-    def _set_save_freq(self):
-        if st.session_state["sync_method"] == "online":
-            freeze_save_freq = False
+    def _set_save_interval(self):
+        if st.session_state["sync_method"] == SyncMethod.NCCL.value:
+            st.session_state["save_interval"] = st.session_state["_nccl_save_interval"]
+            freeze_save_interval = False
         else:
-            st.session_state["save_freq"] = st.session_state["sync_iteration_interval"]
-            freeze_save_freq = True
+            st.session_state["save_interval"] = st.session_state["sync_iteration_interval"]
+            freeze_save_interval = True
+
+        def on_change():
+            if st.session_state["sync_method"] == SyncMethod.NCCL.value:
+                st.session_state["_nccl_save_interval"] = st.session_state["save_interval"]
+
         st.number_input(
-            "Save Freq",
-            key="save_freq",
+            "Save Interval",
+            key="save_interval",
             min_value=1,
-            help="Set to `sync_iteration_interval` when `sync_method` is `offline`",
-            disabled=freeze_save_freq,
+            help="Set to `sync_iteration_interval` when `sync_method` is `checkpoint`",
+            disabled=freeze_save_interval,
+            on_change=on_change,
         )
 
     def _set_training_strategy(self):
@@ -579,11 +706,16 @@ if node_num > 1:
         st.number_input("Lambda", key="lam")
 
     def _set_adv_estimator(self):
-        st.selectbox(
-            "Advantage Estimator",
-            [member.value for member in AdvantageEstimator],
-            key="adv_estimator",
-        )
+        if st.session_state["algorithm_type"] == AlgorithmType.PPO.value:
+            st.session_state["adv_estimator"] = AdvantageEstimator.GAE.value
+        elif st.session_state["algorithm_type"] == AlgorithmType.GRPO.value:
+            st.session_state["adv_estimator"] = AdvantageEstimator.GRPO.value
+        elif st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
+            st.session_state["adv_estimator"] = AdvantageEstimator.GRPO.value
+        elif st.session_state["algorithm_type"] == AlgorithmType.OPMD.value:
+            st.session_state["adv_estimator"] = AdvantageEstimator.GRPO.value
+        else:  # TODO: add more algorithms
+            pass
 
     def _set_norm_adv_by_std_in_grpo(self):
         st.checkbox("Norm Adv by Std in GRPO", key="norm_adv_by_std_in_grpo")
@@ -607,17 +739,27 @@ if node_num > 1:
         st.number_input("Target KL", key="target_kl", format="%.1e")
 
     def _set_actor_ppo_micro_batch_size_per_gpu(self):
+        st.session_state["actor_ppo_micro_batch_size_per_gpu"] = min(
+            st.session_state["actor_ppo_micro_batch_size_per_gpu"],
+            st.session_state["_train_batch_size_per_gpu"],
+        )
         st.number_input(
             "Micro Batch Size Per GPU for Actor",
             key="actor_ppo_micro_batch_size_per_gpu",
             min_value=1,
+            max_value=st.session_state["_train_batch_size_per_gpu"],
         )
 
     def _set_ref_log_prob_micro_batch_size_per_gpu(self):
+        st.session_state["ref_log_prob_micro_batch_size_per_gpu"] = min(
+            st.session_state["ref_log_prob_micro_batch_size_per_gpu"],
+            st.session_state["_train_batch_size_per_gpu"],
+        )
         st.number_input(
             "Micro Batch Size Per GPU for Ref",
             key="ref_log_prob_micro_batch_size_per_gpu",
             min_value=1,
+            max_value=st.session_state["_train_batch_size_per_gpu"],
         )
 
     def _set_actor_ulysses_sequence_parallel_size(self):
@@ -712,10 +854,15 @@ if node_num > 1:
         )
 
     def _set_critic_ppo_micro_batch_size_per_gpu(self):
+        st.session_state["critic_ppo_micro_batch_size_per_gpu"] = min(
+            st.session_state["critic_ppo_micro_batch_size_per_gpu"],
+            st.session_state["_train_batch_size_per_gpu"],
+        )
         st.number_input(
             "Micro Batch Size Per GPU for Critic",
             key="critic_ppo_micro_batch_size_per_gpu",
             min_value=1,
+            max_value=st.session_state["_train_batch_size_per_gpu"],
         )
 
     def _set_critic_ulysses_sequence_parallel_size(self):
@@ -766,21 +913,12 @@ if node_num > 1:
             max_value=1.0,
         )
 
-    def _set_training_mode(self):
-        st.selectbox("Training Mode", ["PPO", "GRPO", "DPO", "OPMD"], key="training_mode")
-
-        if st.session_state["training_mode"] == "PPO":
-            st.session_state["algorithm_type"] = AlgorithmType.PPO.value
-            st.session_state["adv_estimator"] = "gae"
-        elif st.session_state["training_mode"] == "GRPO":
-            st.session_state["algorithm_type"] = AlgorithmType.PPO.value
-            st.session_state["adv_estimator"] = "grpo"
-        elif st.session_state["training_mode"] == "DPO":
-            st.session_state["algorithm_type"] = AlgorithmType.DPO.value
-            st.session_state["adv_estimator"] = "grpo"
-        elif st.session_state["training_mode"] == "OPMD":
-            st.session_state["algorithm_type"] = AlgorithmType.OPMD.value
-            st.session_state["adv_estimator"] = "grpo"
+    def _set_critic_checkpoint(self):
+        st.multiselect(
+            "Checkpoint",
+            ["model", "hf_model", "optimizer", "extra"],
+            key="critic_checkpoint",
+        )
 
     def _set_configs_with_st_columns(
         self, config_names: List[str], columns_config: List[int] = None
@@ -802,7 +940,9 @@ if node_num > 1:
 
         self._set_dataset_path()
 
-        self._set_configs_with_st_columns(["training_mode", "sft_warmup_iteration", "monitor_type"])
+        self._set_configs_with_st_columns(
+            ["algorithm_type", "sft_warmup_iteration", "monitor_type"]
+        )
         if st.session_state["sft_warmup_iteration"] > 0:
             self._set_sft_warmup_dataset_path()
 
@@ -813,11 +953,14 @@ if node_num > 1:
         self._check_engine_num_and_tp_size()
 
         self._set_configs_with_st_columns(
-            ["total_epochs", "task_num_per_batch", "max_prompt_tokens", "max_response_tokens"]
+            ["total_epochs", "train_batch_size", "max_prompt_tokens", "max_response_tokens"]
         )
-        self._check_task_num_per_batch()
+        self._check_train_batch_size()
 
-        self._set_dataset_args()
+        if st.session_state["algorithm_type"] != AlgorithmType.DPO.value:
+            self._set_dataset_args()
+        else:
+            self._set_dpo_dataset_kwargs()
 
         if st.session_state["sft_warmup_iteration"] > 0:
             self._set_sft_warmup_dataset_args()
@@ -826,7 +969,9 @@ if node_num > 1:
             ["default_workflow_type", "default_reward_fn_type", "repeat_times"]
         )
 
-        self._set_configs_with_st_columns(["sync_iteration_interval", "eval_interval", "save_freq"])
+        self._set_configs_with_st_columns(
+            ["sync_iteration_interval", "eval_interval", "save_interval"]
+        )
 
         self._set_actor_use_kl_loss()
         if st.session_state["actor_use_kl_loss"]:
@@ -840,7 +985,9 @@ if node_num > 1:
             ]
         )
 
-        use_critic = st.session_state["adv_estimator"] == "gae"  # TODO: may apply to expert mode
+        use_critic = (
+            st.session_state["adv_estimator"] == AdvantageEstimator.GAE.value
+        )  # TODO: may apply to expert mode
         if use_critic:
             self._set_configs_with_st_columns(["critic_ppo_micro_batch_size_per_gpu", "critic_lr"])
 
@@ -856,12 +1003,15 @@ if node_num > 1:
         self._set_configs_with_st_columns(["max_prompt_tokens", "max_response_tokens"])
 
     def _expert_buffer_part(self):
-        self._set_configs_with_st_columns(["total_epochs", "task_num_per_batch"])
-        self._check_task_num_per_batch()
+        self._set_configs_with_st_columns(["total_epochs", "train_batch_size"])
+        self._check_train_batch_size()
 
         self._set_dataset_path()
 
-        self._set_dataset_args()
+        if st.session_state["algorithm_type"] != AlgorithmType.DPO.value:
+            self._set_dataset_args()
+        else:
+            self._set_dpo_dataset_kwargs()
 
         self._set_configs_with_st_columns(
             ["default_workflow_type", "default_reward_fn_type", "storage_type"]
@@ -869,8 +1019,6 @@ if node_num > 1:
 
         self.buffer_advanced_tab = st.expander("Advanced Config")
         with self.buffer_advanced_tab:
-            self._set_db_url()
-
             self._set_configs_with_st_columns(["max_retry_times", "max_retry_interval"])
 
             self._set_sft_warmup_dataset_path()
@@ -882,22 +1030,22 @@ if node_num > 1:
         )
         self._check_engine_num_and_tp_size()
 
-        self._set_configs_with_st_columns(["sync_method", "sync_iteration_interval"])
+        self._set_configs_with_st_columns(
+            ["sync_method", "sync_iteration_interval", "sync_timeout"]
+        )
 
         with st.expander("Advanced Config"):
             self._set_configs_with_st_columns(
                 ["runner_num", "max_pending_requests", "max_waiting_steps", "dtype"]
             )
 
-            self._set_configs_with_st_columns(
-                ["backend", "temperature", "top_p", "top_k", "seed", "logprobs"]
-            )
+            self._set_configs_with_st_columns(["backend", "temperature", "seed", "logprobs"])
 
             self._set_configs_with_st_columns(["enable_prefix_caching", "enforce_eager"])
 
     def _expert_trainer_part(self):
-        self._set_configs_with_st_columns(
-            ["trainer_type", "algorithm_type", "sft_warmup_iteration", "eval_interval"]
+        self._set_configs_with_st_columns(  # TODO: may add `trainer_type`
+            ["algorithm_type", "sft_warmup_iteration", "eval_interval", "save_interval"]
         )
         self._check_sft_warmup_dataset_path()
 
@@ -917,7 +1065,7 @@ if node_num > 1:
             st.subheader("RL Training Config")
             self._set_training_args()
 
-            self._set_configs_with_st_columns(["save_freq", "training_strategy", "resume_mode"])
+            self._set_configs_with_st_columns(["training_strategy", "resume_mode"])
 
             if st.session_state["training_strategy"] == "fsdp":
                 self._set_configs_with_st_columns(["param_offload", "optimizer_offload"])
@@ -938,7 +1086,7 @@ if node_num > 1:
 
         with rl_algorithm_tab:
             st.subheader("RL Algorithm Config")
-            self._set_configs_with_st_columns(["gamma", "lam", "adv_estimator"])
+            self._set_configs_with_st_columns(["gamma", "lam"])
             self._set_configs_with_st_columns(["norm_adv_by_std_in_grpo", "use_kl_in_reward"])
             self._set_configs_with_st_columns(["kl_penalty", "kl_ctrl_type", "kl_ctrl_coef"])
             self._set_configs_with_st_columns(["horizon", "target_kl"])
@@ -983,6 +1131,7 @@ if node_num > 1:
             )
 
             self._set_configs_with_st_columns(["critic_grad_clip", "critic_cliprange_value"])
+            self._set_critic_checkpoint()
 
     def expert_mode(self):
         model_tab, buffer_tab, connector_tab, trainer_tab = st.tabs(
@@ -1036,7 +1185,7 @@ if node_num > 1:
                 "prompt_key": "placeholder",
                 "max_prompt_length": st.session_state["max_prompt_tokens"],
                 "max_response_length": st.session_state["max_response_tokens"],
-                "train_batch_size": st.session_state["task_num_per_batch"]
+                "train_batch_size": st.session_state["train_batch_size"]
                 * st.session_state["repeat_times"],
                 "val_batch_size": None,
                 "return_raw_input_ids": False,
@@ -1057,7 +1206,7 @@ if node_num > 1:
                 },
                 "actor": {
                     "strategy": st.session_state["training_strategy"],
-                    "ppo_mini_batch_size": st.session_state["task_num_per_batch"],
+                    "ppo_mini_batch_size": st.session_state["train_batch_size"],
                     "ppo_micro_batch_size_per_gpu": st.session_state[
                         "actor_ppo_micro_batch_size_per_gpu"
                     ],
@@ -1084,7 +1233,6 @@ if node_num > 1:
                         else st.session_state["total_training_steps"],
                     },
                     "fsdp_config": copy.deepcopy(fsdp_config),
-                    "alg_type": st.session_state["algorithm_type"],
                     "tau": st.session_state["actor_tau"],
                     "opmd_baseline": st.session_state["actor_opmd_baseline"],
                     "use_uid": st.session_state["actor_use_uid"],
@@ -1146,7 +1294,7 @@ if node_num > 1:
                     "use_remove_padding": use_remove_padding,
                     "fsdp_config": copy.deepcopy(fsdp_config),
                 },
-                "ppo_mini_batch_size": st.session_state["task_num_per_batch"],
+                "ppo_mini_batch_size": st.session_state["train_batch_size"],
                 "ppo_micro_batch_size_per_gpu": st.session_state[
                     "critic_ppo_micro_batch_size_per_gpu"
                 ],
@@ -1163,6 +1311,7 @@ if node_num > 1:
                 "shuffle": False,
                 "grad_clip": st.session_state["critic_grad_clip"],
                 "cliprange_value": st.session_state["critic_cliprange_value"],
+                "checkpoint": {"contents": st.session_state["critic_checkpoint"]},
             },
             "reward_model": {
                 "enable": False,
@@ -1203,7 +1352,7 @@ if node_num > 1:
                 "val_generations_to_log_to_wandb": 0,
                 "nnodes": trainer_nnodes,
                 "n_gpus_per_node": trainer_n_gpus_per_node,
-                "save_freq": st.session_state["save_freq"],
+                "save_freq": st.session_state["save_interval"],
                 "resume_mode": st.session_state["resume_mode"],
                 "resume_from_path": st.session_state["resume_from_path"],
                 "test_freq": 100,
@@ -1235,11 +1384,17 @@ if node_num > 1:
         else:
             trainer_n_gpus_per_node = st.session_state["gpu_per_node"]
 
-        db_url = (
-            st.session_state["db_url"]
-            if st.session_state["db_url"].strip()
-            else f"sqlite:///{os.path.join(st.session_state['checkpoint_path'], '.cache', st.session_state['project'], st.session_state['exp_name'])}/data.db"
-        )
+        if st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
+            train_dataset_path = (
+                st.session_state["train_dataset_path"].strip()
+                if st.session_state["train_dataset_path"].strip()
+                else st.session_state["dataset_path"].strip()
+            )
+        else:  # not dpo algorithms
+            train_dataset_path = st.session_state["train_dataset_path"].strip()
+            if not train_dataset_path and st.session_state["storage_type"] == StorageType.SQL.value:
+                train_dataset_path = f"sqlite:///{os.path.join(st.session_state['checkpoint_path'], '.cache', st.session_state['project'], st.session_state['exp_name'])}/data.db"
+
         sft_storage_type = (
             StorageType.SQL.value
             if "://" in st.session_state["sft_warmup_dataset_path"]
@@ -1268,7 +1423,7 @@ if node_num > 1:
             config = {
                 "data": {
                     "total_epochs": st.session_state["total_epochs"],
-                    "batch_size": st.session_state["task_num_per_batch"],
+                    "batch_size": st.session_state["train_batch_size"],
                     "dataset_path": st.session_state["dataset_path"],
                     "default_workflow_type": st.session_state["default_workflow_type"],
                     "default_reward_fn_type": st.session_state["default_reward_fn_type"],
@@ -1290,22 +1445,26 @@ if node_num > 1:
                     "gpu_per_node": st.session_state["gpu_per_node"],
                 },
                 "buffer": {
-                    "db_url": db_url,
-                    "read_batch_size": st.session_state["task_num_per_batch"]
-                    * st.session_state["repeat_times"],
                     "max_retry_times": st.session_state["max_retry_times"],
                     "max_retry_interval": st.session_state["max_retry_interval"],
                     "train_dataset": {
                         "name": "experience_buffer",  # TODO
                         "storage_type": st.session_state["storage_type"],
                         "algorithm_type": st.session_state["algorithm_type"],
-                        "path": db_url,
+                        "path": train_dataset_path,
                     },
                     "sft_warmup_dataset": {
                         "name": "sft_warmup_dataset",
                         "storage_type": sft_storage_type,
                         "algorithm_type": AlgorithmType.SFT.value,
                         "path": st.session_state["sft_warmup_dataset_path"],
+                        "kwargs": {
+                            "train_split": st.session_state["sft_warmup_train_split"],
+                            "prompt_type": st.session_state["sft_warmup_prompt_type"],
+                            "messages_key": st.session_state["sft_warmup_messages_key"],
+                            "prompt_key": st.session_state["sft_warmup_prompt_key"],
+                            "response_key": st.session_state["sft_warmup_response_key"],
+                        },
                     },
                 },
                 "explorer": {
@@ -1317,8 +1476,6 @@ if node_num > 1:
                     "enforce_eager": st.session_state["enforce_eager"],
                     "dtype": st.session_state["dtype"],
                     "temperature": st.session_state["temperature"],
-                    "top_p": st.session_state["top_p"],
-                    "top_k": st.session_state["top_k"],
                     "seed": st.session_state["seed"],
                     "logprobs": st.session_state["logprobs"],
                     "repeat_times": st.session_state["repeat_times"],
@@ -1329,6 +1486,7 @@ if node_num > 1:
                 "synchronizer": {
                     "sync_method": st.session_state["sync_method"],
                     "sync_iteration_interval": st.session_state["sync_iteration_interval"],
+                    "sync_timeout": st.session_state["sync_timeout"],
                 },
                 "trainer": {
                     "trainer_type": st.session_state["trainer_type"],
@@ -1336,6 +1494,7 @@ if node_num > 1:
                     "trainer_config": trainer_config,
                     "sft_warmup_iteration": st.session_state["sft_warmup_iteration"],
                     "eval_interval": st.session_state["eval_interval"],
+                    "save_interval": st.session_state["save_interval"],
                 },
                 "monitor": {
                     "project": st.session_state["project"],
@@ -1343,6 +1502,15 @@ if node_num > 1:
                     "monitor_type": st.session_state["monitor_type"],
                 },
             }
+
+            if st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
+                config["buffer"]["train_dataset"]["kwargs"] = {
+                    "dpo_dataset_train_split": st.session_state["dpo_dataset_train_split"],
+                    "dpo_dataset_prompt_type": st.session_state["dpo_dataset_prompt_type"],
+                    "dpo_dataset_prompt_key": st.session_state["dpo_dataset_prompt_key"],
+                    "dpo_dataset_chosen_key": st.session_state["dpo_dataset_chosen_key"],
+                    "dpo_dataset_rejected_key": st.session_state["dpo_dataset_rejected_key"],
+                }
             st.header("Generated Config File")
             st.subheader("Config File")
             yaml_config = yaml.dump(config, allow_unicode=True, sort_keys=False)

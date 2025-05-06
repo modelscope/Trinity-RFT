@@ -5,15 +5,13 @@ import ray
 import torch
 from transformers import AutoTokenizer
 
-from trinity.common.config import load_config
+from tests.tools import RayUnittestBase, get_template_config
 from trinity.common.models import create_rollout_models
 from trinity.common.models.model import ModelWrapper
 from trinity.common.models.utils import (
     tokenize_and_mask_messages_default,
     tokenize_and_mask_messages_hf,
 )
-
-config_dir = os.path.join(os.path.dirname(__file__), "tmp", "template_config.yaml")
 
 
 def get_model_path() -> str:
@@ -101,7 +99,12 @@ class BaseTestModelWrapper:
         ]
         results = self.model_wrapper.chat(messages)
         self.assertEqual(len(results), self.config.explorer.repeat_times)
-        logprobs = self.model_wrapper.logprobs(results[0].tokens)
+        for result in results:
+            input_logprobs = result.logprobs[: result.prompt_length]
+            output_logprobs = result.logprobs[result.prompt_length :]
+            self.assertTrue(torch.all(input_logprobs == 0))
+            self.assertTrue(torch.any(output_logprobs != 0))
+        logprobs = self.model_wrapper.logprobs(results[0].tokens.tolist())
         self.assertEqual(logprobs.shape[0], results[0].tokens.shape[0])
         messages.append(
             {
@@ -126,10 +129,10 @@ class BaseTestModelWrapper:
         self.assertTrue(torch.equal(result_dict["input_ids"][0], exp.tokens))
 
 
-class TestModelWrapperSync(BaseTestModelWrapper, unittest.TestCase):
+class TestModelWrapperSync(BaseTestModelWrapper, RayUnittestBase):
     def setUp(self):
         ray.init(ignore_reinit_error=True)
-        self.config = load_config(config_dir)
+        self.config = get_template_config()
         self.config.model.model_path = get_model_path()
         self.config.explorer.engine_type = "vllm"
         self.config.explorer.engine_num = 1
@@ -138,10 +141,18 @@ class TestModelWrapperSync(BaseTestModelWrapper, unittest.TestCase):
         self.model_wrapper = ModelWrapper(self.engines[0], model_type="vllm")
 
 
-class TestModelWrapperAsync(BaseTestModelWrapper, unittest.TestCase):
+class TestModelWrapperAsync(BaseTestModelWrapper, RayUnittestBase):
+    @classmethod
+    def setUpClass(cls):
+        ray.init(ignore_reinit_error=True)
+
+    @classmethod
+    def tearDownClass(cls):
+        ray.shutdown()
+
     def setUp(self):
         ray.init(ignore_reinit_error=True)
-        self.config = load_config(config_dir)
+        self.config = get_template_config()
         self.config.model.model_path = get_model_path()
         self.config.explorer.engine_type = "vllm_async"
         self.config.explorer.engine_num = 1
@@ -151,6 +162,14 @@ class TestModelWrapperAsync(BaseTestModelWrapper, unittest.TestCase):
 
 
 class TestTokenizer(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        ray.init(ignore_reinit_error=True)
+
+    @classmethod
+    def tearDownClass(cls):
+        ray.shutdown()
+
     def test_assistant_token_mask(self):
         messages = [
             {"role": "system", "content": "You are a helpful assistant."},

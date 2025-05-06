@@ -40,7 +40,6 @@ autodoc_member_order = "bysource"
 
 templates_path = ["_templates"]
 exclude_patterns = ["build"]
-autodoc_mock_imports = ["ray"]
 
 autodoc_default_options = {
     "members": True,

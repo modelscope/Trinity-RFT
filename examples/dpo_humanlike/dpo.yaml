@@ -37,8 +37,6 @@ explorer:
   enforce_eager: true
   dtype: bfloat16
   temperature: 1.0
-  top_p: 1.0
-  top_k: -1
   seed: 42
   logprobs: 0
   repeat_times: 1 # NOTE
@@ -47,12 +45,14 @@ explorer:
   max_pending_requests: 32
   max_waiting_steps: 4
 synchronizer:
-  sync_method: 'offline'
+  sync_method: 'checkpoint'
   sync_iteration_interval: 30
+  sync_timeout: 1200
 trainer:
   trainer_type: 'verl'
   algorithm_type: dpo
   trainer_config_path: 'examples/dpo_humanlike/train_dpo.yaml'
+  save_interval: 30
 monitor:
   cache_root_dir: ""
   project: "dpo_example"

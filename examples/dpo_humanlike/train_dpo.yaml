@@ -23,7 +23,6 @@ actor_rollout_ref:
     enable_gradient_checkpointing: True
     use_remove_padding: False
   actor:
-    alg_type: dpo
     strategy: fsdp  # This is for backward-compatibility
     ppo_mini_batch_size: 32
     # ppo_micro_batch_size: 8 # will be deprecated, use ppo_micro_batch_size_per_gpu
@@ -170,7 +169,6 @@ trainer:
   val_generations_to_log_to_wandb: 0
   nnodes: 1
   n_gpus_per_node: 2
-  save_freq: 30
   # auto: find the last ckpt to resume. If can't find, start from scratch
   resume_mode: auto # or auto or resume_path if
   test_freq: 5

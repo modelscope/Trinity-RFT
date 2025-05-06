@@ -1,75 +1,34 @@
-# Configs of particular interest for min-opmd and off-policy scenarios:
-#
-#   parameters specific to min-opmd
-#     tau: 1.0             # strength of regularization w.r.t. ref policy
-#     opmd_baseline: mean  # must be "mean" for min-opmd
-#     use_uid: False       # applicable to pairwise-opmd, not min-opmd
-#
-#   kl regularization (w.r.t. ref policy):
-#     use_kl_loss: True
-#     kl_loss_coef: 0.001
-#     kl_loss_type: mse
-#     (also set kl_coef = 0.000 to further ensure that kl penalty in reward doesn't take effect)
-#
-#   entropy regularization:
-#     entropy_coeff: default to 0.0 for now
-#
-#   optimizer:
-#     beta1, beta2: 0.0, 0.95  # smaller than default values (0.9, 0.999), as a remedy for abrupt distribution shift
-#     lr: set smaller to account for beta1 = 0.0
-#
-#   misc:
-#     adv_estimator: grpo  # merely to disable critic model, doesn't affect adv compute when algorithm_type is opmd
-
-
-data:
-  tokenizer: null
-  train_files: /train.jsonl
-  val_files: /test.jsonl
-  prompt_key: prompt
-  max_prompt_length: 256
-  max_response_length: 1024
-  train_batch_size: 256
-  val_batch_size: null
-  return_raw_input_ids: False  # This should be set to true when the tokenizer between policy and rm differs
-  return_raw_chat: False
-  shuffle: True
-  filter_overlong_prompts: False # for large-scale dataset, filtering overlong prompts could be timeconsuming. You should disable this and set `truncation='left'
-  truncation: error
-  image_key: images
-
 actor_rollout_ref:
   hybrid_engine: True
   model:
-    path: path_to_models/Qwen2.5-1.5B-Inst
     external_lib: null
     override_config: { }
     enable_gradient_checkpointing: True
     use_remove_padding: True
   actor:
     strategy: fsdp  # This is for backward-compatibility
-    ppo_mini_batch_size: 128
+    ppo_mini_batch_size: 4
     # ppo_micro_batch_size: 8 # will be deprecated, use ppo_micro_batch_size_per_gpu
-    ppo_micro_batch_size_per_gpu: 4
+    ppo_micro_batch_size_per_gpu: 1
     use_dynamic_bsz: True
     ppo_max_token_len_per_gpu: 16384 # n * ${data.max_prompt_length} + ${data.max_response_length}
     grad_clip: 1.0
     clip_ratio: 0.2
-    entropy_coeff: 0.000
-    use_kl_loss: True
-    kl_loss_coef: 0.001
-    kl_loss_type: mse
+    entropy_coeff: 0.001
+    use_kl_loss: False # True for GRPO
+    kl_loss_coef: 0.001 # for grpo
+    kl_loss_type: low_var_kl # for grpo
     ppo_epochs: 1
     shuffle: False
     ulysses_sequence_parallel_size: 1 # sp size
+    checkpoint:
+      contents: ['model', 'hf_model', 'optimizer', 'extra']  # with 'hf_model' you can save whole model as hf format, now only use sharded model checkpoint to save space
     optim:
-      lr: 2e-6  # default 1e-5
+      lr: 1e-6
       lr_warmup_steps_ratio: 0.  # the total steps will be injected during runtime
       # min_lr_ratio: null   # only useful for warmup with cosine
       warmup_style: constant  # select from constant/cosine
       total_training_steps: -1  # must be override by program
-      beta1: 0.0  # set to smaller value for scenarios with abrupt distribution shift (e.g., large sync_iteration_interval)
-      beta2: 0.95  # set to smaller value for scenarios with abrupt distribution shift (e.g., large sync_iteration_interval)
     fsdp_config:
       wrap_policy:
         # transformer_layer_cls_to_wrap: None
@@ -78,7 +37,7 @@ actor_rollout_ref:
       optimizer_offload: False
       fsdp_size: -1
     # --- below: opmd ---
-    tau: 4.0        # strength of regularization w.r.t. old / ref policy
+    tau: 0.000  # strength of regularization w.r.t. old / ref policy
     opmd_baseline: mean  # mean / logavgexp, applicable to opmd
     use_uid: False  # True / False, applicable to pairwise_opmd
   ref:
@@ -88,15 +47,12 @@ actor_rollout_ref:
         # transformer_layer_cls_to_wrap: None
         min_num_params: 0
     # log_prob_micro_batch_size: 4 # will be deprecated, use log_prob_micro_batch_size_per_gpu
-    log_prob_micro_batch_size_per_gpu: 16
+    log_prob_micro_batch_size_per_gpu: 1
     log_prob_use_dynamic_bsz: ${actor_rollout_ref.actor.use_dynamic_bsz}
     log_prob_max_token_len_per_gpu: ${actor_rollout_ref.actor.ppo_max_token_len_per_gpu}
     ulysses_sequence_parallel_size: ${actor_rollout_ref.actor.ulysses_sequence_parallel_size} # sp size
   rollout:
     name: vllm
-    temperature: 1.0
-    top_k: -1 # 0 for hf rollout, -1 for vllm rollout
-    top_p: 1
     use_fire_sampling: False # https://arxiv.org/abs/2410.21236
     prompt_length: ${data.max_prompt_length}  # not use for opensource
     response_length: ${data.max_response_length}
@@ -112,7 +68,7 @@ actor_rollout_ref:
     max_model_len: null
     max_num_seqs: 1024
     # log_prob_micro_batch_size: 8 # will be deprecated, use log_prob_micro_batch_size_per_gpu
-    log_prob_micro_batch_size_per_gpu: 4
+    log_prob_micro_batch_size_per_gpu: 1
     log_prob_use_dynamic_bsz: ${actor_rollout_ref.actor.use_dynamic_bsz}
     log_prob_max_token_len_per_gpu: ${actor_rollout_ref.actor.ppo_max_token_len_per_gpu}
     disable_log_stats: True
@@ -120,7 +76,7 @@ actor_rollout_ref:
     # for hf rollout
     do_sample: True
     # number of responses (i.e. num sample times)
-    n: 8 # > 1 for grpo
+    n: 1 # > 1 for grpo
 
 critic:
   strategy: fsdp
@@ -131,7 +87,6 @@ critic:
     warmup_style: constant  # select from constant/cosine
     total_training_steps: -1  # must be override by program
   model:
-    path: path_to_models/Qwen2.5-1.5B-Inst
     tokenizer_path: ${actor_rollout_ref.model.path}
     override_config: { }
     external_lib: ${actor_rollout_ref.model.external_lib}
@@ -146,7 +101,7 @@ critic:
       fsdp_size: -1
   ppo_mini_batch_size: ${actor_rollout_ref.actor.ppo_mini_batch_size}
   # ppo_micro_batch_size: 8 # will be deprecated, use ppo_micro_batch_size_per_gpu
-  ppo_micro_batch_size_per_gpu: 64
+  ppo_micro_batch_size_per_gpu: 1
   forward_micro_batch_size_per_gpu: ${critic.ppo_micro_batch_size_per_gpu}
   use_dynamic_bsz: ${actor_rollout_ref.actor.use_dynamic_bsz}
   ppo_max_token_len_per_gpu: 32768 # (${actor_rollout_ref.actor.ppo_max_token_len_per_gpu}) * 2
@@ -157,56 +112,33 @@ critic:
   grad_clip: 1.0
   cliprange_value: 0.5
 
-reward_model:
-  enable: False
-  strategy: fsdp
-  model:
-    input_tokenizer: ${actor_rollout_ref.model.path}  # set this to null if the chat template is identical
-    path: ~/models/FsfairX-LLaMA3-RM-v0.1
-    external_lib: ${actor_rollout_ref.model.external_lib}
-    use_remove_padding: False
-    fsdp_config:
-      min_num_params: 0
-      param_offload: False
-      fsdp_size: -1
-  # micro_batch_size: null # will be deprecated, use micro_batch_size_per_gpu
-  # micro_batch_size_per_gpu: 2 # set a number
-  # max_length: null
-  ulysses_sequence_parallel_size: 1 # sp size
-  use_dynamic_bsz: ${critic.use_dynamic_bsz}
-  forward_max_token_len_per_gpu: ${critic.forward_max_token_len_per_gpu}
-
-custom_reward_function:
-  path: null
-  name: compute_score
-
 algorithm:
   gamma: 1.0
   lam: 1.0
-  adv_estimator: grpo
+  adv_estimator: gae
   kl_penalty: kl  # how to estimate kl divergence
   kl_ctrl:
     type: fixed
-    kl_coef: 0.000
+    kl_coef: 0.001
 
 trainer:
   balance_batch: True
   total_epochs: 10
   # total_training_steps: null
-  project_name: Trinity-RFT-gsm8k-test-opmd
-  experiment_name: qwen2.5-1.5B-gsm8k-opmd-kl_0.001-entropy_0-tau_4-beta1_0.0-beta2_0.95-lr_2e-6-sync10
-  logger: [ 'console','wandb' ]
+  project_name: TinyZero
+  experiment_name: trinity-qwen2.5-1.5b
+  logger: [ 'wandb' ]
   val_generations_to_log_to_wandb: 0
   nnodes: 1
   n_gpus_per_node: 2
+  save_freq: 20
   # auto: find the last ckpt to resume. If can't find, start from scratch
   resume_mode: auto # or auto or resume_path if
-  test_freq: 100
   critic_warmup: 0
   default_hdfs_dir: null
   remove_previous_ckpt_in_save: False
   del_local_ckpt_after_load: False
   default_local_dir: checkpoints/${trainer.project_name}/${trainer.experiment_name}
   val_before_train: False
-  max_actor_ckpt_to_keep: 5
-  max_critic_ckpt_to_keep: 5
+  max_actor_ckpt_to_keep: 1
+  max_critic_ckpt_to_keep: 1

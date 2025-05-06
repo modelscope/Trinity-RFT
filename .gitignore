@@ -94,3 +94,6 @@ modules.rst
 
 # wandb
 wandb/
+
+# checkpoints
+checkpoints/

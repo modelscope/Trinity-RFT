@@ -47,8 +47,6 @@ class vLLMAysncRolloutModel(InferenceModel):
         self.default_sampling_params = vllm.SamplingParams(
             n=config.explorer.repeat_times,
             temperature=config.explorer.temperature,
-            top_p=config.explorer.top_p,
-            top_k=config.explorer.top_k,
             max_tokens=config.model.max_response_tokens,
             min_tokens=1,
             truncate_prompt_tokens=config.model.max_prompt_tokens,
@@ -205,10 +203,7 @@ class vLLMAysncRolloutModel(InferenceModel):
                 # request_output.prompt = request.prompt
                 return request_output
 
-        raise RuntimeError(
-            "[vLLM] The request is not finished. This should not happen. "
-            "Please report this issue to the Ray team."
-        )
+        raise RuntimeError("[vLLM] The request is not finished. This should not happen.")
 
     async def convert_messages_to_experience_async(self, messages: List[dict]) -> Experience:
         """Convert a list of messages into an experience."""
@@ -219,7 +214,7 @@ class vLLMAysncRolloutModel(InferenceModel):
         token_ids, action_mask = self.action_mask_method(
             self.tokenizer, messages, self.chat_template
         )
-        logprobs = await self.logprobs_async(token_ids=token_ids)
+        logprobs = await self.logprobs_async(token_ids=token_ids.tolist())
         return Experience(
             tokens=token_ids,
             prompt_length=len(token_ids),
@@ -263,7 +258,8 @@ class vLLMAysncRolloutModel(InferenceModel):
         world_size: int,
         group_name: str,
         backend: str = "nccl",
-        offline_update: bool = True,
+        timeout: int = 1200,
+        update_with_checkpoint: bool = True,
     ):
         return self.async_llm.engine.model_executor.collective_rpc(
             "init_process_group",
@@ -274,7 +270,8 @@ class vLLMAysncRolloutModel(InferenceModel):
                 world_size,
                 group_name,
                 backend,
-                offline_update,
+                timeout,
+                update_with_checkpoint,
             ),
         )
 

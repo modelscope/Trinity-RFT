@@ -14,6 +14,8 @@ from trinity.common.constants import StorageType
 class QueueActor:
     """An asyncio.Queue based queue actor."""
 
+    FINISH_MESSAGE = "$FINISH$"
+
     def __init__(self, dataset_config: DatasetConfig, config: BufferConfig) -> None:
         self.config = config
         self.capacity = getattr(config, "capacity", 10000)
@@ -35,11 +37,17 @@ class QueueActor:
         if self.sql_writer is not None:
             self.sql_writer.write(exp_list)
 
+    async def finish(self) -> None:
+        """Stop the queue."""
+        await self.queue.put(self.FINISH_MESSAGE)
+
     async def get_batch(self, batch_size: int) -> List:
         """Get batch of experience."""
         batch = []
         while True:
             exp_list = await self.queue.get()
+            if exp_list == self.FINISH_MESSAGE:
+                raise StopAsyncIteration()
             batch.extend(exp_list)
             if len(batch) >= batch_size:
                 break
