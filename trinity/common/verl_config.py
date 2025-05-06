@@ -300,6 +300,7 @@ class veRLConfig:
         self.actor_rollout_ref.rollout.temperature = config.explorer.temperature
         self.actor_rollout_ref.rollout.n = config.explorer.repeat_times
         self.actor_rollout_ref.actor.algorithm_type = config.trainer.algorithm_type
+        self.critic.ppo_mini_batch_size = config.data.batch_size
 
         if self.actor_rollout_ref.actor.algorithm_type.is_dpo():  # for DPO
             print("Warning: DPO micro batch size is doubled for computing loss.")

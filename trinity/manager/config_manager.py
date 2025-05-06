@@ -121,6 +121,7 @@ class ConfigManager:
                 "remove_padding",
                 "dynamic_bsz",
             ],
+            "ppo_epochs": 1,
             "training_strategy": "fsdp",
             "param_offload": False,
             "optimizer_offload": False,
@@ -286,16 +287,22 @@ class ConfigManager:
     def _set_dataset_args(self):
         if st.session_state["dataset_path"] and "://" not in st.session_state["dataset_path"]:
             subset_name_col, train_split_col, eval_split_col = st.columns(3)
-            subset_name_col.text_input("Subset Name", key="subset_name")
-            train_split_col.text_input("Train Split", key="train_split")
-            eval_split_col.text_input("Eval Split", key="eval_split")
+            subset_name_col.text_input(
+                "Subset Name :orange-badge[(Needs review)]", key="subset_name"
+            )
+            train_split_col.text_input(
+                "Train Split :orange-badge[(Needs review)]", key="train_split"
+            )
+            eval_split_col.text_input("Eval Split :orange-badge[(Needs review)]", key="eval_split")
             prompt_key_col, response_key_col = st.columns(2)
-            prompt_key_col.text_input("Prompt Key", key="prompt_key")
-            response_key_col.text_input("Response Key", key="response_key")
+            prompt_key_col.text_input("Prompt Key :orange-badge[(Needs review)]", key="prompt_key")
+            response_key_col.text_input(
+                "Response Key :orange-badge[(Needs review)]", key="response_key"
+            )
 
     def _set_default_workflow_type(self):
         st.selectbox(
-            "Default Workflow Type",
+            "Default Workflow Type :orange-badge[(Needs review)]",
             WORKFLOWS.modules.keys(),
             key="default_workflow_type",
             help=r"""`simple_workflow`: call 'model.chat()' to get responses.
@@ -308,7 +315,7 @@ Other workflows: conduct multi-turn task for the given dataset.
 
     def _set_default_reward_fn_type(self):
         st.selectbox(
-            "Default Reward Fn Type",
+            "Default Reward Fn Type :orange-badge[(Needs review)]",
             REWARD_FUNCTIONS.modules.keys(),
             key="default_reward_fn_type",
             help=r"""`accuracy_reward`: check the accuracy for math problems.
@@ -363,10 +370,10 @@ Other workflows: conduct multi-turn task for the given dataset.
     def _set_dpo_dataset_kwargs(self):
         dpo_dataset_train_split_col, dpo_dataset_prompt_type_col = st.columns(2)
         dpo_dataset_train_split_col.text_input(
-            "DPO Dataset Train Split", key="dpo_dataset_train_split"
+            "DPO Dataset Train Split :orange-badge[(Needs review)]", key="dpo_dataset_train_split"
         )
         dpo_dataset_prompt_type_col.selectbox(
-            "DPO Dataset Prompt Type",
+            "DPO Dataset Prompt Type :orange-badge[(Needs review)]",
             [prompt_type.value for prompt_type in PromptType],
             key="dpo_dataset_prompt_type",
         )
@@ -377,13 +384,14 @@ Other workflows: conduct multi-turn task for the given dataset.
             dpo_dataset_rejected_key_col,
         ) = st.columns(3)
         dpo_dataset_prompt_key_col.text_input(
-            "DPO Dataset Prompt Key", key="dpo_dataset_prompt_key"
+            "DPO Dataset Prompt Key :orange-badge[(Needs review)]", key="dpo_dataset_prompt_key"
         )
         dpo_dataset_chosen_key_col.text_input(
-            "DPO Dataset Chosen Key", key="dpo_dataset_chosen_key"
+            "DPO Dataset Chosen Key :orange-badge[(Needs review)]", key="dpo_dataset_chosen_key"
         )
         dpo_dataset_rejected_key_col.text_input(
-            "DPO Dataset Rejected Key", key="dpo_dataset_rejected_key"
+            "DPO Dataset Rejected Key :orange-badge[(Needs review)]",
+            key="dpo_dataset_rejected_key",
         )
 
     def _check_sft_warmup_dataset_path(self):
@@ -407,9 +415,12 @@ Other workflows: conduct multi-turn task for the given dataset.
                 sft_warmup_train_split_col,
                 sft_warmup_prompt_type_col,
             ) = st.columns(2)
-            sft_warmup_train_split_col.text_input("SFT Train Split", key="sft_warmup_train_split")
+            sft_warmup_train_split_col.text_input(
+                "SFT Dataset Train Split :orange-badge[(Needs review)]",
+                key="sft_warmup_train_split",
+            )
             sft_warmup_prompt_type_col.selectbox(
-                "SFT Prompt Type",
+                "SFT Dataset Prompt Type :orange-badge[(Needs review)]",
                 [prompt_type.value for prompt_type in PromptType],
                 key="sft_warmup_prompt_type",
             )
@@ -419,11 +430,15 @@ Other workflows: conduct multi-turn task for the given dataset.
                 sft_warmup_response_key_col,
             ) = st.columns(3)
             sft_warmup_messages_key_col.text_input(
-                "SFT Messages Key", key="sft_warmup_messages_key"
+                "SFT Dataset Messages Key :orange-badge[(Needs review)]",
+                key="sft_warmup_messages_key",
             )
-            sft_warmup_prompt_key_col.text_input("SFT Prompt Key", key="sft_warmup_prompt_key")
+            sft_warmup_prompt_key_col.text_input(
+                "SFT Dataset Prompt Key :orange-badge[(Needs review)]", key="sft_warmup_prompt_key"
+            )
             sft_warmup_response_key_col.text_input(
-                "SFT Response Key", key="sft_warmup_response_key"
+                "SFT Dataset Response Key :orange-badge[(Needs review)]",
+                key="sft_warmup_response_key",
             )
 
     def _set_engine_type(self):
@@ -651,6 +666,9 @@ if node_num > 1:
             on_change=on_change,
         )
 
+    def _set_ppo_epochs(self):
+        st.number_input("PPO Epochs", key="ppo_epochs", min_value=1)
+
     def _set_training_strategy(self):
         st.selectbox(
             "Training Strategy",
@@ -700,10 +718,10 @@ if node_num > 1:
         st.number_input("Max Critic Checkpoint to Keep", key="max_critic_ckpt_to_keep", min_value=1)
 
     def _set_gamma(self):
-        st.number_input("Gamma", key="gamma")
+        st.number_input(r"Gamma :blue-badge[$\gamma$]", key="gamma")
 
     def _set_lam(self):
-        st.number_input("Lambda", key="lam")
+        st.number_input(r"Lambda :blue-badge[$\lambda$]", key="lam")
 
     def _set_adv_estimator(self):
         if st.session_state["algorithm_type"] == AlgorithmType.PPO.value:
@@ -744,7 +762,7 @@ if node_num > 1:
             st.session_state["_train_batch_size_per_gpu"],
         )
         st.number_input(
-            "Micro Batch Size Per GPU for Actor",
+            "Micro Batch Size Per GPU :blue-badge[(Actor)]",
             key="actor_ppo_micro_batch_size_per_gpu",
             min_value=1,
             max_value=st.session_state["_train_batch_size_per_gpu"],
@@ -756,7 +774,7 @@ if node_num > 1:
             st.session_state["_train_batch_size_per_gpu"],
         )
         st.number_input(
-            "Micro Batch Size Per GPU for Ref",
+            "Micro Batch Size Per GPU :blue-badge[(Ref)]",
             key="ref_log_prob_micro_batch_size_per_gpu",
             min_value=1,
             max_value=st.session_state["_train_batch_size_per_gpu"],
@@ -772,7 +790,7 @@ if node_num > 1:
 
     def _set_actor_lr(self):
         st.number_input(
-            "Learning Rate for Actor",
+            "Learning Rate :blue-badge[(Actor)]",
             key="actor_lr",
             min_value=1e-7,
             max_value=1e-3,
@@ -781,24 +799,35 @@ if node_num > 1:
 
     def _set_actor_warmup_style(self):
         st.selectbox(
-            "LR Warmup Style for Actor",
+            "LR Warmup Style :blue-badge[(Actor)]",
             ["constant", "cosine"],
             key="actor_warmup_style",
         )
 
     def _set_actor_lr_warmup_steps_ratio(self):
         st.number_input(
-            "LR Warmup Steps Ratio for Actor",
+            "LR Warmup Steps Ratio :blue-badge[(Actor)]",
             key="actor_lr_warmup_steps_ratio",
             min_value=0.0,
             max_value=1.0,
         )
 
     def _set_actor_grad_clip(self):
-        st.number_input("Grad Clip", key="actor_grad_clip", min_value=0.0, max_value=1.0)
+        st.number_input(
+            "Grad Clip :blue-badge[(Actor)]",
+            key="actor_grad_clip",
+            min_value=0.0,
+            max_value=1.0,
+            help="Clipping by Norm",
+        )
 
     def _set_actor_clip_ratio(self):
-        st.number_input("Clip Ratio", key="actor_clip_ratio", min_value=0.0, max_value=1.0)
+        st.number_input(
+            r"Clip Ratio :blue-badge[$\epsilon$]",
+            key="actor_clip_ratio",
+            min_value=0.0,
+            max_value=1.0,
+        )
 
     def _set_actor_entropy_coeff(self):
         st.number_input(
@@ -814,7 +843,7 @@ if node_num > 1:
 
     def _set_actor_kl_loss_coef(self):
         st.number_input(
-            "KL Loss Coef",
+            r"KL Loss Coef :blue-badge[$\beta$]",
             key="actor_kl_loss_coef",
             min_value=0.0,
             max_value=1.0,
@@ -859,7 +888,7 @@ if node_num > 1:
             st.session_state["_train_batch_size_per_gpu"],
         )
         st.number_input(
-            "Micro Batch Size Per GPU for Critic",
+            "Micro Batch Size Per GPU :blue-badge[(Critic)]",
             key="critic_ppo_micro_batch_size_per_gpu",
             min_value=1,
             max_value=st.session_state["_train_batch_size_per_gpu"],
@@ -875,7 +904,7 @@ if node_num > 1:
 
     def _set_critic_lr(self):
         st.number_input(
-            "Learning Rate for Critic",
+            "Learning Rate :blue-badge[(Critic)]",
             key="critic_lr",
             min_value=1e-7,
             max_value=1e-3,
@@ -884,14 +913,14 @@ if node_num > 1:
 
     def _set_critic_warmup_style(self):
         st.selectbox(
-            "LR Warmup Style for Critic",
+            "LR Warmup Style :blue-badge[(Critic)]",
             ["constant", "cosine"],
             key="critic_warmup_style",
         )
 
     def _set_critic_lr_warmup_steps_ratio(self):
         st.number_input(
-            "LR Warmup Steps Ratio for Critic",
+            "LR Warmup Steps Ratio :blue-badge[(Critic)]",
             key="critic_lr_warmup_steps_ratio",
             min_value=0.0,
             max_value=1.0,
@@ -899,10 +928,11 @@ if node_num > 1:
 
     def _set_critic_grad_clip(self):
         st.number_input(
-            "Grad Clip for Critic",
+            "Grad Clip :blue-badge[(Critic)]",
             key="critic_grad_clip",
             min_value=0.0,
             max_value=1.0,
+            help="Clipping by Norm",
         )
 
     def _set_critic_cliprange_value(self):
@@ -953,9 +983,15 @@ if node_num > 1:
         self._check_engine_num_and_tp_size()
 
         self._set_configs_with_st_columns(
-            ["total_epochs", "train_batch_size", "max_prompt_tokens", "max_response_tokens"]
+            ["total_epochs", "train_batch_size", "ppo_epochs", "repeat_times"]
         )
         self._check_train_batch_size()
+
+        self._set_configs_with_st_columns(["max_prompt_tokens", "max_response_tokens"])
+
+        self._set_configs_with_st_columns(
+            ["sync_iteration_interval", "eval_interval", "save_interval"]
+        )
 
         if st.session_state["algorithm_type"] != AlgorithmType.DPO.value:
             self._set_dataset_args()
@@ -965,13 +1001,7 @@ if node_num > 1:
         if st.session_state["sft_warmup_iteration"] > 0:
             self._set_sft_warmup_dataset_args()
 
-        self._set_configs_with_st_columns(
-            ["default_workflow_type", "default_reward_fn_type", "repeat_times"]
-        )
-
-        self._set_configs_with_st_columns(
-            ["sync_iteration_interval", "eval_interval", "save_interval"]
-        )
+        self._set_configs_with_st_columns(["default_workflow_type", "default_reward_fn_type"])
 
         self._set_actor_use_kl_loss()
         if st.session_state["actor_use_kl_loss"]:
@@ -1003,7 +1033,7 @@ if node_num > 1:
         self._set_configs_with_st_columns(["max_prompt_tokens", "max_response_tokens"])
 
     def _expert_buffer_part(self):
-        self._set_configs_with_st_columns(["total_epochs", "train_batch_size"])
+        self._set_configs_with_st_columns(["total_epochs", "train_batch_size", "storage_type"])
         self._check_train_batch_size()
 
         self._set_dataset_path()
@@ -1013,9 +1043,7 @@ if node_num > 1:
         else:
             self._set_dpo_dataset_kwargs()
 
-        self._set_configs_with_st_columns(
-            ["default_workflow_type", "default_reward_fn_type", "storage_type"]
-        )
+        self._set_configs_with_st_columns(["default_workflow_type", "default_reward_fn_type"])
 
         self.buffer_advanced_tab = st.expander("Advanced Config")
         with self.buffer_advanced_tab:
@@ -1065,7 +1093,7 @@ if node_num > 1:
             st.subheader("RL Training Config")
             self._set_training_args()
 
-            self._set_configs_with_st_columns(["training_strategy", "resume_mode"])
+            self._set_configs_with_st_columns(["ppo_epochs", "training_strategy", "resume_mode"])
 
             if st.session_state["training_strategy"] == "fsdp":
                 self._set_configs_with_st_columns(["param_offload", "optimizer_offload"])
@@ -1167,7 +1195,7 @@ if node_num > 1:
         else:
             fsdp_config = {}
 
-        ppo_epochs = 1  # TODO
+        # ppo_epochs = 1  # TODO
         ppo_max_token_len_per_gpu = st.session_state["repeat_times"] * (
             st.session_state["max_prompt_tokens"] + st.session_state["max_response_tokens"]
         )
@@ -1218,7 +1246,7 @@ if node_num > 1:
                     "use_kl_loss": st.session_state["actor_use_kl_loss"],
                     "kl_loss_coef": st.session_state["actor_kl_loss_coef"],
                     "kl_loss_type": st.session_state["actor_kl_loss_type"],
-                    "ppo_epochs": ppo_epochs,
+                    "ppo_epochs": st.session_state["ppo_epochs"],
                     "shuffle": False,
                     "ulysses_sequence_parallel_size": st.session_state[
                         "actor_ulysses_sequence_parallel_size"
@@ -1307,7 +1335,7 @@ if node_num > 1:
                 "ulysses_sequence_parallel_size": st.session_state[
                     "critic_ulysses_sequence_parallel_size"
                 ],
-                "ppo_epochs": ppo_epochs,
+                "ppo_epochs": st.session_state["ppo_epochs"],
                 "shuffle": False,
                 "grad_clip": st.session_state["critic_grad_clip"],
                 "cliprange_value": st.session_state["critic_cliprange_value"],
