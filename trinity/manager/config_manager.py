@@ -41,6 +41,7 @@ class ConfigManager:
     def _init_default_config(self):
         self.default_config = {
             "_init_config_manager": True,
+            "mode": "both",
             "project": "Trinity-RFT",
             "exp_name": "qwen2.5-1.5B",
             "monitor_type": MonitorType.WANDB.value,
@@ -156,6 +157,7 @@ class ConfigManager:
             "actor_grad_clip": 1.0,
             "actor_clip_ratio": 0.2,
             "actor_entropy_coeff": 0.001,
+            "_not_dpo_actor_use_kl_loss": True,
             "actor_use_kl_loss": True,
             "actor_kl_loss_coef": 0.001,
             "actor_kl_loss_type": "low_var_kl",
@@ -231,10 +233,13 @@ class ConfigManager:
         self._set_trainer_gpu_num()
 
     def _set_trainer_gpu_num(self):
-        st.session_state["trainer_gpu_num"] = (
-            st.session_state["total_gpu_num"]
-            - st.session_state["engine_num"] * st.session_state["tensor_parallel_size"]
-        )
+        if st.session_state["mode"] == "both":
+            st.session_state["trainer_gpu_num"] = (
+                st.session_state["total_gpu_num"]
+                - st.session_state["engine_num"] * st.session_state["tensor_parallel_size"]
+            )
+        else:  # model == train
+            st.session_state["trainer_gpu_num"] = st.session_state["total_gpu_num"]
 
     def _set_max_prompt_tokens(self):
         st.number_input("Max Prompt Tokens", key="max_prompt_tokens", min_value=1)
@@ -247,10 +252,14 @@ class ConfigManager:
 
     @property
     def _str_for_train_batch_size(self):
+        trainer_gpu_num_str = (
+            "`gpu_per_node * node_num - engine_num * tensor_parallel_size`"
+            if st.session_state["mode"] == "both"
+            else "`gpu_per_node * node_num`"
+        )
         return (
             f"Please ensure that `train_batch_size` can be divided by "
-            f"`gpu_per_node * node_num - engine_num * tensor_parallel_size` "
-            f"= {st.session_state['trainer_gpu_num']}"
+            f"{trainer_gpu_num_str} = {st.session_state['trainer_gpu_num']}."
         )
 
     def _set_train_batch_size(self):
@@ -615,6 +624,23 @@ if node_num > 1:
         st.selectbox("Trainer Type", ["verl"], key="trainer_type")
 
     def _set_algorithm_type(self):
+        def on_change():
+            if st.session_state["algorithm_type"] == AlgorithmType.PPO.value:
+                st.session_state["mode"] = "both"
+                st.session_state["adv_estimator"] = AdvantageEstimator.GAE.value
+            elif st.session_state["algorithm_type"] == AlgorithmType.GRPO.value:
+                st.session_state["mode"] = "both"
+                st.session_state["adv_estimator"] = AdvantageEstimator.GRPO.value
+            elif st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
+                st.session_state["mode"] = "train"
+                st.session_state["adv_estimator"] = AdvantageEstimator.GRPO.value
+            elif st.session_state["algorithm_type"] == AlgorithmType.OPMD.value:
+                st.session_state["mode"] = "both"
+                st.session_state["adv_estimator"] = AdvantageEstimator.GRPO.value
+            else:  # TODO: add more algorithms
+                pass
+            self._set_trainer_gpu_num()
+
         st.selectbox(
             "Algorithm Type",
             [
@@ -624,7 +650,7 @@ if node_num > 1:
                 AlgorithmType.OPMD.value,
             ],
             key="algorithm_type",
-            on_change=self._set_adv_estimator,
+            on_change=on_change,
         )
 
     def _set_sft_warmup_iteration(self):
@@ -646,7 +672,10 @@ if node_num > 1:
         )
 
     def _set_save_interval(self):
-        if st.session_state["sync_method"] == SyncMethod.NCCL.value:
+        if (
+            st.session_state["algorithm_type"] == AlgorithmType.DPO.value
+            or st.session_state["sync_method"] == SyncMethod.NCCL.value
+        ):
             st.session_state["save_interval"] = st.session_state["_nccl_save_interval"]
             freeze_save_interval = False
         else:
@@ -654,14 +683,17 @@ if node_num > 1:
             freeze_save_interval = True
 
         def on_change():
-            if st.session_state["sync_method"] == SyncMethod.NCCL.value:
+            if (
+                st.session_state["algorithm_type"] == AlgorithmType.DPO.value
+                or st.session_state["sync_method"] == SyncMethod.NCCL.value
+            ):
                 st.session_state["_nccl_save_interval"] = st.session_state["save_interval"]
 
         st.number_input(
             "Save Interval",
             key="save_interval",
             min_value=1,
-            help="Set to `sync_iteration_interval` when `sync_method` is `checkpoint`",
+            help="Set to `sync_iteration_interval` when `algorithm_type != DPO && sync_method == checkpoint`",
             disabled=freeze_save_interval,
             on_change=on_change,
         )
@@ -722,18 +754,6 @@ if node_num > 1:
 
     def _set_lam(self):
         st.number_input(r"Lambda :blue-badge[$\lambda$]", key="lam")
-
-    def _set_adv_estimator(self):
-        if st.session_state["algorithm_type"] == AlgorithmType.PPO.value:
-            st.session_state["adv_estimator"] = AdvantageEstimator.GAE.value
-        elif st.session_state["algorithm_type"] == AlgorithmType.GRPO.value:
-            st.session_state["adv_estimator"] = AdvantageEstimator.GRPO.value
-        elif st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
-            st.session_state["adv_estimator"] = AdvantageEstimator.GRPO.value
-        elif st.session_state["algorithm_type"] == AlgorithmType.OPMD.value:
-            st.session_state["adv_estimator"] = AdvantageEstimator.GRPO.value
-        else:  # TODO: add more algorithms
-            pass
 
     def _set_norm_adv_by_std_in_grpo(self):
         st.checkbox("Norm Adv by Std in GRPO", key="norm_adv_by_std_in_grpo")
@@ -839,7 +859,17 @@ if node_num > 1:
         )
 
     def _set_actor_use_kl_loss(self):
-        st.checkbox("Use KL Loss", key="actor_use_kl_loss")
+        if st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
+            st.session_state["actor_use_kl_loss"] = True
+        else:
+            st.session_state["actor_use_kl_loss"] = st.session_state["_not_dpo_actor_use_kl_loss"]
+
+            def on_change():
+                st.session_state["_not_dpo_actor_use_kl_loss"] = st.session_state[
+                    "actor_use_kl_loss"
+                ]
+
+            st.checkbox("Use KL Loss", key="actor_use_kl_loss", on_change=on_change)
 
     def _set_actor_kl_loss_coef(self):
         st.number_input(
@@ -979,11 +1009,15 @@ if node_num > 1:
         st.header("Important Configs")
         self._set_configs_with_st_columns(
             ["node_num", "gpu_per_node", "engine_num", "tensor_parallel_size"]
+            if st.session_state["mode"] == "both"
+            else ["node_num", "gpu_per_node"]
         )
         self._check_engine_num_and_tp_size()
 
         self._set_configs_with_st_columns(
             ["total_epochs", "train_batch_size", "ppo_epochs", "repeat_times"]
+            if st.session_state["mode"] == "both"
+            else ["total_epochs", "train_batch_size", "ppo_epochs"]
         )
         self._check_train_batch_size()
 
@@ -991,6 +1025,8 @@ if node_num > 1:
 
         self._set_configs_with_st_columns(
             ["sync_iteration_interval", "eval_interval", "save_interval"]
+            if st.session_state["mode"] == "both"
+            else ["eval_interval", "save_interval"]
         )
 
         if st.session_state["algorithm_type"] != AlgorithmType.DPO.value:
@@ -1052,7 +1088,7 @@ if node_num > 1:
             self._set_sft_warmup_dataset_path()
             self._set_sft_warmup_dataset_args()
 
-    def _expert_connector_part(self):
+    def _expert_explorer_part(self):
         self._set_configs_with_st_columns(
             ["engine_type", "engine_num", "tensor_parallel_size", "repeat_times"]
         )
@@ -1162,20 +1198,18 @@ if node_num > 1:
             self._set_critic_checkpoint()
 
     def expert_mode(self):
-        model_tab, buffer_tab, connector_tab, trainer_tab = st.tabs(
-            ["Model", "Data", "Explorer and Synchronizer", "Trainer"]
-        )
-        with model_tab:
-            self._expert_model_part()
-
-        with buffer_tab:
-            self._expert_buffer_part()
-
-        with connector_tab:
-            self._expert_connector_part()
-
-        with trainer_tab:
-            self._expert_trainer_part()
+        tab2func = {
+            "Model": self._expert_model_part,
+            "Data": self._expert_buffer_part,
+            "Explorer and Synchronizer": self._expert_explorer_part,
+            "Trainer": self._expert_trainer_part,
+        }
+        if st.session_state["mode"] == "train":
+            del tab2func["Explorer and Synchronizer"]
+        tabs = st.tabs(list(tab2func.keys()))
+        for tab, func in zip(tabs, tab2func.values()):
+            with tab:
+                func()
 
     def _generate_verl_config(self, trainer_nnodes: int = 1, trainer_n_gpus_per_node: int = 8):
         balance_batch = "balance_batch" in st.session_state["training_args"]
@@ -1449,6 +1483,7 @@ if node_num > 1:
             help=help_messages,
         ):
             config = {
+                "mode": st.session_state["mode"],
                 "data": {
                     "total_epochs": st.session_state["total_epochs"],
                     "batch_size": st.session_state["train_batch_size"],
@@ -1499,6 +1534,7 @@ if node_num > 1:
                     "engine_type": st.session_state["engine_type"],
                     "engine_num": st.session_state["engine_num"],
                     "runner_num": st.session_state["runner_num"],
+                    "eval_interval": st.session_state["eval_interval"],
                     "tensor_parallel_size": st.session_state["tensor_parallel_size"],
                     "enable_prefix_caching": st.session_state["enable_prefix_caching"],
                     "enforce_eager": st.session_state["enforce_eager"],

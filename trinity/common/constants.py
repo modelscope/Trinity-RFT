@@ -2,6 +2,10 @@
 """Constants."""
 from enum import Enum, EnumMeta
 
+from trinity.utils.log import get_logger
+
+logger = get_logger(__name__)
+
 # names
 
 ROLLOUT_WEIGHT_SYNC_GROUP_NAME = "rollout_weight_sync"
@@ -101,15 +105,15 @@ class MonitorType(CaseInsensitiveEnum):
 class SyncMethodEnumMeta(CaseInsensitiveEnumMeta):
     def __call__(cls, value, *args, **kwargs):
         if value == "online":
-            print("SyncMethod `online` is deprecated, use `nccl` instead.")
+            logger.warning("SyncMethod `online` is deprecated, use `nccl` instead.")
             value = "nccl"
         elif value == "offline":
-            print("SyncMethod `offline` is deprecated, use `checkpoint` instead.")
+            logger.warning("SyncMethod `offline` is deprecated, use `checkpoint` instead.")
             value = "checkpoint"
         try:
             return super().__call__(value, *args, **kwargs)
         except Exception as e:
-            print("Error parsing SyncMethod:", e)
+            logger.warning("Error parsing SyncMethod:", e)
             raise ValueError(f"Invalid SyncMethod: {value}")
 
 

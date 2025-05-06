@@ -5,6 +5,9 @@ from omegaconf import OmegaConf
 
 from trinity.common.config import BufferConfig, Config, SynchronizerConfig
 from trinity.common.constants import AlgorithmType
+from trinity.utils.log import get_logger
+
+logger = get_logger(__name__)
 
 
 @dataclass
@@ -303,7 +306,10 @@ class veRLConfig:
         self.critic.ppo_mini_batch_size = config.data.batch_size
 
         if self.actor_rollout_ref.actor.algorithm_type.is_dpo():  # for DPO
-            print("Warning: DPO micro batch size is doubled for computing loss.")
+            if not self.actor_rollout_ref.actor.use_kl_loss:
+                self.actor_rollout_ref.actor.use_kl_loss = True
+                logger.warning("DPO must use KL loss.")
+            logger.warning("DPO micro batch size is doubled for computing loss.")
             self.actor_rollout_ref.actor.ppo_mini_batch_size *= 2
             self.actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu *= 2  # type: ignore
             self.actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu *= 2  # type: ignore

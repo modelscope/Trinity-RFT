@@ -315,28 +315,46 @@ class Config:
             self.explorer.engine_num * self.explorer.tensor_parallel_size
         )
         self.synchronizer.backend = self.explorer.backend
+        if (
+            self.trainer.algorithm_type == AlgorithmType.DPO
+            and self.synchronizer.sync_method != SyncMethod.CHECKPOINT
+        ):
+            self.synchronizer.sync_method = SyncMethod.CHECKPOINT
+            logger.warning(
+                "DPO only supports checkpoint synchronization, set `synchronizer.sync_method` to `checkpoint`."
+            )
         if self.synchronizer.sync_method == SyncMethod.NCCL and self.mode != "both":
             raise ValueError("`nccl` synchronization is only supported in both mode.")
 
         # check eval_interval
-        if self.trainer.eval_interval % self.synchronizer.sync_iteration_interval != 0:
+        if (
+            self.trainer.algorithm_type != AlgorithmType.DPO
+            and self.trainer.eval_interval % self.synchronizer.sync_iteration_interval != 0
+        ):
             self.trainer.eval_interval = (
                 max(self.trainer.eval_interval // self.synchronizer.sync_iteration_interval, 1)
             ) * self.synchronizer.sync_iteration_interval
-            print(
-                f"Warning: eval_interval is not a multiple of sync_iteration_interval; adjusted to the nearest integer={self.trainer.eval_interval}."
+            logger.warning(
+                f"`eval_interval` is not a multiple of `sync_iteration_interval`; adjusted to the nearest integer={self.trainer.eval_interval}."
             )
         if self.explorer.eval_interval != self.trainer.eval_interval:
             self.explorer.eval_interval = self.trainer.eval_interval
-            print(
-                f"Warning: explorer.eval_interval is not equal to trainer.eval_interval; adjusted to the same value={self.trainer.eval_interval}."
+            logger.warning(
+                f"`explorer.eval_interval` is not equal to `trainer.eval_interval`; adjusted to the same value={self.trainer.eval_interval}."
             )
 
         # check save_interval
-        if self.synchronizer.sync_method == SyncMethod.CHECKPOINT:
-            self.trainer.save_interval = (
-                self.synchronizer.sync_iteration_interval
-            )  # TODO: not proper for DPO
+        if (
+            self.trainer.algorithm_type != AlgorithmType.DPO
+            and self.synchronizer.sync_method == SyncMethod.CHECKPOINT
+        ):
+            if self.trainer.save_interval != self.synchronizer.sync_iteration_interval:
+                logger.warning(
+                    f"When `trainer.algorithm_type != DPO` and `synchronizer.sync_method == checkpoint`, "
+                    f"`trainer.save_interval` will be set to "
+                    f"`synchronizer.sync_iteration_interval = {self.synchronizer.sync_iteration_interval}`."
+                )
+            self.trainer.save_interval = self.synchronizer.sync_iteration_interval
 
         # check monitor
         if not self.monitor.cache_root_dir:
