@@ -35,7 +35,7 @@ buffer:
   train_dataset:
     name: gsm8k_buffer
     storage_type: queue
-    path: 'sqlite:////gsm8k.db'
+    path: 'sqlite:///gsm8k.db'
   # sft_warmup_dataset: # Uncomment these to enable sft warmup
   #   name: warmup_data
   #   storage_type: file

@@ -21,7 +21,7 @@ buffer:
   train_dataset:
     name: gsm8k_buffer
     storage_type: queue
-    path: 'sqlite:////gsm8k.db'
+    path: 'sqlite:///gsm8k.db'
 
 synchronizer:
   sync_method: 'offline'

@@ -26,7 +26,7 @@ buffer:
   train_dataset:
     name: gsm8k_buffer
     storage_type: queue
-    path: 'sqlite:////gsm8k.db'
+    path: 'sqlite:///gsm8k.db'
 explorer:
   engine_type: vllm_async
   engine_num: 2
