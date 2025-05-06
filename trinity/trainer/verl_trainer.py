@@ -298,11 +298,9 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         # TODO: log as sft metrics
         self.sft_iter_num += 1
         self.logger.log(data=metrics, step=self.global_steps)
-        # print(f'{self.sft_iter_num=}, {self.config.synchronizer.sync_iteration_interval * self.config.trainer.sft_warmup_iteration=}')
         if (
             self.sft_iter_num
-            == self.config.synchronizer.sync_iteration_interval
-            * self.config.trainer.sft_warmup_iteration
+            == self.config.synchronizer.sync_interval * self.config.trainer.sft_warmup_iteration
         ):
             self.logger.log(
                 data={"sft_warmup_iteration": self.sft_iter_num},

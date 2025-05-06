@@ -60,7 +60,7 @@ explorer:
   max_waiting_steps: 4
 synchronizer:
   sync_method: 'nccl'
-  sync_iteration_interval: 2
+  sync_interval: 2
   sync_timeout: 1200
 trainer:
   trainer_type: 'verl'

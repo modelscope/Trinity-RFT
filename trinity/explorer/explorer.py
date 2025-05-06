@@ -60,9 +60,7 @@ class Explorer:
         self.max_pending_task_num = self.config.explorer.runner_num
         self.max_waiting_steps = max(1, int(self.config.explorer.max_waiting_steps))
         self.batch_size = config.data.batch_size
-        self.update_interval = (
-            self.config.synchronizer.sync_iteration_interval * self.config.data.batch_size
-        )
+        self.update_interval = self.config.synchronizer.sync_interval * self.config.data.batch_size
         self.use_checkpoint_weights_update = (
             self.config.synchronizer.sync_method == SyncMethod.CHECKPOINT
         )
@@ -175,7 +173,7 @@ class Explorer:
         """Explore for one step.
 
         Different from `explore()` which consumes all tasks in the task set,
-        `explore_step()` only consume `sync_iteration_interval * batch_size`
+        `explore_step()` only consume `sync_interval * batch_size`
         number of tasks.
         explore_status:
             explore_status: whether there are more tasks to explore.
@@ -183,9 +181,7 @@ class Explorer:
         """
         if self.task_iter is None:
             self.task_iter = iter(self.taskset)
-        task_num_per_step = (
-            self.config.synchronizer.sync_iteration_interval * self.config.data.batch_size
-        )
+        task_num_per_step = self.config.synchronizer.sync_interval * self.config.data.batch_size
 
         st = time.time()
         all_metrics = defaultdict(list)
@@ -220,7 +216,7 @@ class Explorer:
         # calculate metrics
         log_metrics = self.monitor.calculate_metrics(all_metrics, prefix="rollout")  # type: ignore
         log_metrics["rollout/step_time"] = time.time() - st
-        self.iteration += self.config.synchronizer.sync_iteration_interval
+        self.iteration += self.config.synchronizer.sync_interval
         self.monitor.log(log_metrics, step=self.iteration)
 
         # save explore checkpoint

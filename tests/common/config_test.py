@@ -19,7 +19,7 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(config.trainer.trainer_config.trainer.project_name, config.monitor.project)
         self.assertEqual(
             config.trainer.trainer_config.trainer.save_freq,
-            config.synchronizer.sync_iteration_interval,
+            config.synchronizer.sync_interval,
         )
 
     def test_all_examples_are_valid(self):

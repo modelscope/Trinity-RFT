@@ -42,7 +42,7 @@ explorer:
   enable_chunked_prefil: true
 synchronizer:
   sync_method: 'nccl'
-  sync_iteration_interval: 8
+  sync_interval: 8
   sync_timeout: 1200
 trainer:
   trainer_type: 'verl'

@@ -94,7 +94,7 @@ class ConfigManager:
             "repeat_times": 1,
             "_not_dpo_sync_method": SyncMethod.NCCL.value,
             "sync_method": SyncMethod.NCCL.value,
-            "sync_iteration_interval": 10,
+            "sync_interval": 10,
             "sync_timeout": 1200,
             "runner_num": 32,
             "max_pending_requests": 32,
@@ -555,17 +555,17 @@ if node_num > 1:
             "Sync Method",
             [sync_method.value for sync_method in SyncMethod],
             key="sync_method",
-            help="""`nccl`: the explorer and trainer sync model weights once every `sync_iteration_interval` steps.
+            help="""`nccl`: the explorer and trainer sync model weights once every `sync_interval` steps.
 
-`checkpoint`: the trainer saves the model checkpoint, and the explorer loads it at `sync_iteration_interval`.""",
+`checkpoint`: the trainer saves the model checkpoint, and the explorer loads it at `sync_interval`.""",
             disabled=disabled,
             on_change=on_change,
         )
 
-    def _set_sync_iteration_interval(self):
+    def _set_sync_interval(self):
         st.number_input(
-            "Sync Iteration Interval",
-            key="sync_iteration_interval",
+            "Sync Interval",
+            key="sync_interval",
             min_value=1,
             help="""The iteration interval at which the `explorer` and `trainer` synchronize model weight.""",
         )
@@ -679,7 +679,7 @@ if node_num > 1:
             st.session_state["save_interval"] = st.session_state["_nccl_save_interval"]
             freeze_save_interval = False
         else:
-            st.session_state["save_interval"] = st.session_state["sync_iteration_interval"]
+            st.session_state["save_interval"] = st.session_state["sync_interval"]
             freeze_save_interval = True
 
         def on_change():
@@ -693,7 +693,7 @@ if node_num > 1:
             "Save Interval",
             key="save_interval",
             min_value=1,
-            help="Set to `sync_iteration_interval` when `algorithm_type != DPO && sync_method == checkpoint`",
+            help="Set to `sync_interval` when `algorithm_type != DPO && sync_method == checkpoint`",
             disabled=freeze_save_interval,
             on_change=on_change,
         )
@@ -1024,7 +1024,7 @@ if node_num > 1:
         self._set_configs_with_st_columns(["max_prompt_tokens", "max_response_tokens"])
 
         self._set_configs_with_st_columns(
-            ["sync_iteration_interval", "eval_interval", "save_interval"]
+            ["sync_interval", "eval_interval", "save_interval"]
             if st.session_state["mode"] == "both"
             else ["eval_interval", "save_interval"]
         )
@@ -1094,9 +1094,7 @@ if node_num > 1:
         )
         self._check_engine_num_and_tp_size()
 
-        self._set_configs_with_st_columns(
-            ["sync_method", "sync_iteration_interval", "sync_timeout"]
-        )
+        self._set_configs_with_st_columns(["sync_method", "sync_interval", "sync_timeout"])
 
         with st.expander("Advanced Config"):
             self._set_configs_with_st_columns(
@@ -1229,7 +1227,6 @@ if node_num > 1:
         else:
             fsdp_config = {}
 
-        # ppo_epochs = 1  # TODO
         ppo_max_token_len_per_gpu = st.session_state["repeat_times"] * (
             st.session_state["max_prompt_tokens"] + st.session_state["max_response_tokens"]
         )
@@ -1424,7 +1421,7 @@ if node_num > 1:
                 "del_local_ckpt_after_load": st.session_state["del_local_ckpt_after_load"],
                 "default_local_dir": st.session_state["checkpoint_path"],
                 "val_before_train": False,
-                "sync_freq": st.session_state["sync_iteration_interval"],
+                "sync_freq": st.session_state["sync_interval"],
                 "max_actor_ckpt_to_keep": st.session_state["max_actor_ckpt_to_keep"],
                 "max_critic_ckpt_to_keep": st.session_state["max_critic_ckpt_to_keep"],
             },
@@ -1549,7 +1546,7 @@ if node_num > 1:
                 },
                 "synchronizer": {
                     "sync_method": st.session_state["sync_method"],
-                    "sync_iteration_interval": st.session_state["sync_iteration_interval"],
+                    "sync_interval": st.session_state["sync_interval"],
                     "sync_timeout": st.session_state["sync_timeout"],
                 },
                 "trainer": {

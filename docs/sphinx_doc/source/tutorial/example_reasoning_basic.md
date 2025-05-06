@@ -37,13 +37,13 @@ More details on dataset downloading are referred to [ModelScope](https://modelsc
 
 ### Synchronous Mode of Trinity-RFT
 
-We run the experiment in a synchronous mode where the Explorer and Trainer operate in turn. To enable this mode, we config `mode` to `both` (default) and set `sync_iteration_interval` properly. A smaller value of `sync_iteration_interval` makes the training closer to an on-policy setup.
+We run the experiment in a synchronous mode where the Explorer and Trainer operate in turn. To enable this mode, we config `mode` to `both` (default) and set `sync_interval` properly. A smaller value of `sync_interval` makes the training closer to an on-policy setup.
 
 ```yaml
 mode: both
 synchronizer:
   sync_method: 'nccl'
-  sync_iteration_interval: 2
+  sync_interval: 2
 ```
 
 ### Use GRPO or PPO Algorithm

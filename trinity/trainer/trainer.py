@@ -51,11 +51,11 @@ class Trainer:
                 break
 
     def train_step(self, algo_type: AlgorithmType = AlgorithmType.PPO) -> Tuple[bool, int]:
-        """Train one step. Each step contains `sync_iteration_interval` iteration.
+        """Train one step. Each step contains `sync_interval` iteration.
         Returns:
             train_status: Whether to continue training.
             train_iter_num: The number of training iterations"""
-        for _ in range(self.config.synchronizer.sync_iteration_interval):
+        for _ in range(self.config.synchronizer.sync_interval):
             train_status, train_iter_num = self.train_iteration(algo_type)
             if not train_status:
                 return False, train_iter_num

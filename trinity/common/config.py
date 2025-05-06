@@ -217,8 +217,10 @@ class SynchronizerConfig:
 
     # TODO: rename to "checkpoint", "nccl", "ipc"
     sync_method: SyncMethod = SyncMethod.NCCL
-    # sync weights every `sync_iteration_interval` iterations
-    sync_iteration_interval: int = 1
+    # sync weights every `sync_interval` iterations
+    sync_interval: int = 1
+    # `sync_iteration_interval` is deprecated, use `sync_interval` instead
+    sync_iteration_interval: Optional[int] = None
     sync_timeout: int = 1200
     # wait for the lastest checkpoint to be ready
     wait_for_checkpoint: bool = False
@@ -310,7 +312,13 @@ class Config:
             self.model.critic_model_path = self.model.model_path
 
         # check synchronizer
-        assert self.synchronizer.sync_iteration_interval > 0
+        if self.synchronizer.sync_iteration_interval is not None:
+            logger.warning(
+                f"`synchronizer.sync_iteration_interval` is deprecated, please use `synchronizer.sync_interval` instead. "
+                f"And `synchronizer.sync_interval` will set to {self.synchronizer.sync_iteration_interval} instead."
+            )
+            self.synchronizer.sync_interval = self.synchronizer.sync_iteration_interval
+        assert self.synchronizer.sync_interval > 0
         self.synchronizer.explorer_world_size = (
             self.explorer.engine_num * self.explorer.tensor_parallel_size
         )
@@ -329,13 +337,13 @@ class Config:
         # check eval_interval
         if (
             self.trainer.algorithm_type != AlgorithmType.DPO
-            and self.trainer.eval_interval % self.synchronizer.sync_iteration_interval != 0
+            and self.trainer.eval_interval % self.synchronizer.sync_interval != 0
         ):
             self.trainer.eval_interval = (
-                max(self.trainer.eval_interval // self.synchronizer.sync_iteration_interval, 1)
-            ) * self.synchronizer.sync_iteration_interval
+                max(self.trainer.eval_interval // self.synchronizer.sync_interval, 1)
+            ) * self.synchronizer.sync_interval
             logger.warning(
-                f"`eval_interval` is not a multiple of `sync_iteration_interval`; adjusted to the nearest integer={self.trainer.eval_interval}."
+                f"`eval_interval` is not a multiple of `sync_interval`; adjusted to the nearest integer={self.trainer.eval_interval}."
             )
         if self.explorer.eval_interval != self.trainer.eval_interval:
             self.explorer.eval_interval = self.trainer.eval_interval
@@ -348,13 +356,13 @@ class Config:
             self.trainer.algorithm_type != AlgorithmType.DPO
             and self.synchronizer.sync_method == SyncMethod.CHECKPOINT
         ):
-            if self.trainer.save_interval != self.synchronizer.sync_iteration_interval:
+            if self.trainer.save_interval != self.synchronizer.sync_interval:
                 logger.warning(
                     f"When `trainer.algorithm_type != DPO` and `synchronizer.sync_method == checkpoint`, "
                     f"`trainer.save_interval` will be set to "
-                    f"`synchronizer.sync_iteration_interval = {self.synchronizer.sync_iteration_interval}`."
+                    f"`synchronizer.sync_interval = {self.synchronizer.sync_interval}`."
                 )
-            self.trainer.save_interval = self.synchronizer.sync_iteration_interval
+            self.trainer.save_interval = self.synchronizer.sync_interval
 
         # check monitor
         if not self.monitor.cache_root_dir:

@@ -281,7 +281,7 @@ class veRLConfig:
         else:
             # for multi-node scenarios, some nodes for rollout, others for training
             self.trainer.n_gpus_per_node = config.cluster.gpu_per_node
-        self.trainer.sync_freq = config.synchronizer.sync_iteration_interval
+        self.trainer.sync_freq = config.synchronizer.sync_interval
         self.trainer.save_freq = config.trainer.save_interval
         self.synchronizer = config.synchronizer
         self.actor_rollout_ref.synchronizer = config.synchronizer
