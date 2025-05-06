@@ -1,4 +1,4 @@
-# Example: off-policy / asynchronous RFT mode
+# Example: off-policy RFT mode
 
 
 Let's continue with the [previous GSM8k example](./example_reasoning_basic.md) and show some advanced features provided by Trinity-RFT, namely, off-policy or asynchronous RFT mode.
@@ -35,17 +35,3 @@ A similar performance boost is shown at step 21, which leads to a converged scor
 
 
 ![opmd](../../assets/opmd-curve.png)
-
-
-
-
-
-## Asynchronous mode
-
-
-Trinity-RFT supports the asynchronous and decoupled mode of RFT, where explorer and trainer act independently and asynchronously.
-To run this mode, the explorer and trainer need to be launched separately, with the `mode` parameter in the config file set to `explore` and `train` respectively.
-
-
-
-*We are still testing this mode more thoroughly. A concrete example is coming soon!*

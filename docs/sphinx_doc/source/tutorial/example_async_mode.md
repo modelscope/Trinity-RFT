@@ -35,4 +35,5 @@ bash examples/async_gsm8k/run.sh
 ```
 
 In the following, we show the results of asynchronous mode in the following.
-# TODO
+
+![async](../../assets/async-curve.png)
