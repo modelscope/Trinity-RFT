@@ -83,7 +83,6 @@ Before RFT, we may use SFT as a warmup step. We need to set `trainer.sft_warmup_
 buffer:
   sft_warmup_dataset:
     storage_type: file
-    algorithm_type: sft
     path: <$DATASET_PATH/{sft_data}>
     kwargs:
       prompt_type: <prompt_type> # messages/plaintext/chatpair

@@ -219,12 +219,20 @@ class vLLMRolloutModel(InferenceModel):
             List[Experience]: A list of experiences containing the response text.
         """
         # TODO: support tools and other fields
-        prompt = self.tokenizer.apply_chat_template(
-            messages,
-            tokenize=False,
-            add_generation_prompt=True,
-            chat_template=self.chat_template,
-        )
+        if messages[-1]["role"] == "assistant":
+            prompt = self.tokenizer.apply_chat_template(
+                messages,
+                tokenize=False,
+                continue_final_message=True,
+                chat_template=self.chat_template,
+            )
+        else:
+            prompt = self.tokenizer.apply_chat_template(
+                messages,
+                tokenize=False,
+                add_generation_prompt=True,
+                chat_template=self.chat_template,
+            )
         return self.generate([prompt], **kwargs)
 
     def logprobs(self, token_ids: List[int]) -> torch.Tensor:

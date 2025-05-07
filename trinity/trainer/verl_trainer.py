@@ -118,7 +118,6 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             resource_pool_spec=resource_pool_spec, mapping=mapping
         )
 
-        self.sft_warmup_step_num = 0
         super().__init__(
             config,
             tokenizer,
@@ -147,6 +146,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         self.actor_rollout_wg.setup_weight_sync_group()
 
         self.global_steps = 0
+        self.sft_warmup_step_num = 0
 
         # load checkpoint before doing anything
         self._load_checkpoint()

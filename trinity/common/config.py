@@ -191,7 +191,7 @@ class TrainerConfig:
     trainer_config: Any = field(default_factory=dict)
 
     # train algorithm
-    algorithm_type: AlgorithmType = AlgorithmType.PPO
+    algorithm_type: AlgorithmType = AlgorithmType.PPO  # automatically set
     get_exp_strategy: Optional[str] = None
 
     # warmup config
@@ -277,7 +277,6 @@ class Config:
                 self.buffer.train_dataset = DatasetConfig(
                     name="experience_buffer",
                     storage_type=StorageType.QUEUE,
-                    algorithm_type=self.trainer.algorithm_type,
                 )
                 logger.info(f"Auto set `buffer.train_dataset` to {self.buffer.train_dataset}")
         else:  # TODO: to be check
@@ -286,12 +285,11 @@ class Config:
                     self.buffer.train_dataset = DatasetConfig(
                         name="dpo_train_dataset",
                         storage_type=StorageType.FILE,
-                        algorithm_type=self.trainer.algorithm_type,
                     )
                     logger.info(f"Auto set `buffer.train_dataset` to {self.buffer.train_dataset}")
             if self.buffer.train_dataset is None:
                 raise ValueError("buffer.train_dataset is required when mode is not 'both'")
-            self.buffer.train_dataset.algorithm_type = self.trainer.algorithm_type
+        self.buffer.train_dataset.algorithm_type = self.trainer.algorithm_type
         self.buffer.train_dataset.namespace = f"{self.monitor.project}-{self.monitor.name}"
         if self.buffer.sft_warmup_dataset is not None:
             self.buffer.sft_warmup_dataset.namespace = f"{self.monitor.project}-{self.monitor.name}"

@@ -85,6 +85,7 @@ class SimpleWorkflow(Workflow):
     ):
         super().__init__(model)
         self.system_prompt = kwargs.get("system_prompt", None)
+        self.reply_prefix = kwargs.get("reply_prefix", None)  # TODO: add reply_prefix
         self.task_desc = kwargs.get("task_desc")
         self.truth = kwargs.get("truth")
         self.reward_fn = kwargs.get("reward_fn")
@@ -94,13 +95,13 @@ class SimpleWorkflow(Workflow):
 
     def run(self) -> List[Experience]:
         # TODO: Optimize the generate function
+        messages = []
         if self.system_prompt:
-            messages = [
-                {"role": "system", "content": self.system_prompt},
-                {"role": "user", "content": self.task_desc},
-            ]
-        else:
-            messages = [{"role": "user", "content": self.task_desc}]
+            messages.append({"role": "system", "content": self.system_prompt})
+        messages.append({"role": "user", "content": self.task_desc})
+        if self.reply_prefix:
+            messages.append({"role": "assistant", "content": self.reply_prefix})
+
         logger.debug("start chat")
         n = 1 if self.is_eval else self.repeat_times
         responses = self.model.chat(messages, n=n)

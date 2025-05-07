@@ -113,12 +113,20 @@ class vLLMAysncRolloutModel(InferenceModel):
             self.tokenizer = await self.async_llm.get_tokenizer()
         if self.chat_template is None:
             self.chat_template = self.tokenizer.get_chat_template()
-        prompt = self.tokenizer.apply_chat_template(
-            messages,
-            chat_template=self.chat_template,
-            tokenize=False,
-            add_generation_prompt=True,
-        )
+        if messages[-1]["role"] == "assistant":
+            prompt = self.tokenizer.apply_chat_template(
+                messages,
+                tokenize=False,
+                continue_final_message=True,
+                chat_template=self.chat_template,
+            )
+        else:
+            prompt = self.tokenizer.apply_chat_template(
+                messages,
+                tokenize=False,
+                add_generation_prompt=True,
+                chat_template=self.chat_template,
+            )
         return await self.generate_async(prompt=prompt, **kwargs)
 
     async def generate_async(self, prompt: str, **kwargs) -> List[Experience]:

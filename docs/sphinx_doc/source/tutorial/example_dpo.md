@@ -50,7 +50,6 @@ synchronizer:
 buffer:
   train_dataset:
     storage_type: file
-    algorithm_type: dpo
     path: <$DATASET_PATH/human_like_dpo_dataset>
     kwargs:
       prompt_type: <prompt_type> # messages/plaintext
