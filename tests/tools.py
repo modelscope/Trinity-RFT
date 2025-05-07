@@ -33,7 +33,7 @@ def get_checkpoint_path() -> str:
 
 
 def get_unittest_dataset_config(dataset_name: str = "countdown") -> DataConfig:
-    """Countdown sample dataset for 8 iterations"""
+    """Countdown sample dataset for 8 steps"""
     if dataset_name == "countdown":
         return DataConfig(
             total_epochs=2,

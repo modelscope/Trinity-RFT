@@ -167,7 +167,7 @@ trainer:
   trainer_type: 'verl'
   algorithm_type: ppo
   trainer_config_path: 'examples/ppo_countdown/train_countdown.yaml'
-  sft_warmup_iteration: 0
+  sft_warmup_steps: 0
   eval_interval: 1000
   save_interval: 100
 ```
@@ -175,7 +175,7 @@ trainer:
 - `trainer.trainer_type`: The backend of the trainer, Only `verl` is supported.
 - `trainer.algorithm_type`: The type of the algorithm, Support `ppo`, `grpo`, `opmd` and `dpo`.
 - `trainer.trainer_config_path`: The path to the trainer configuration file. It must be set manually.
-- `trainer.sft_warmup_iteration`: The number of iterations to warm up the model. Default is `0`.
+- `trainer.sft_warmup_steps`: The number of steps to warm up the model. Default is `0`.
 - `trainer.eval_interval`: The interval between two evaluations. Default is `1000`.
 - `trainer.save_interval`: The interval between two checkpoints. Default is `100`.
 
@@ -418,7 +418,7 @@ trainer:
 - `trainer.balance_batch`: Whether to balance batch size between GPUs during training.
 - `trainer.resume_mode`: Resume mode for training. Support `disable`, `auto` and `resume_path`.
 - `trainer.resume_from_path`: Path to resume from.
-- `trainer.critic_warmup`: The number of iteration to train the critic model before actual policy learning.
+- `trainer.critic_warmup`: The number of steps to train the critic model before actual policy learning.
 - `trainer.default_hdfs_dir`: Default HDFS directory for saving checkpoints.
 - `trainer.remove_previous_ckpt_in_save`: Whether to remove previous checkpoints in save.
 - `trainer.del_local_ckpt_after_load`: Whether to delete local checkpoints after loading.

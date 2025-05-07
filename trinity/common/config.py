@@ -194,7 +194,7 @@ class TrainerConfig:
     get_exp_strategy: Optional[str] = None
 
     # warmup config
-    sft_warmup_iteration: int = 0
+    sft_warmup_steps: int = 0
 
 
 @dataclass
@@ -217,7 +217,7 @@ class SynchronizerConfig:
 
     # TODO: rename to "checkpoint", "nccl", "ipc"
     sync_method: SyncMethod = SyncMethod.NCCL
-    # sync weights every `sync_interval` iterations
+    # sync weights every `sync_interval` steps
     sync_interval: int = 1
     # `sync_iteration_interval` is deprecated, use `sync_interval` instead
     sync_iteration_interval: Optional[int] = None
@@ -250,9 +250,9 @@ class Config:
             OmegaConf.save(self, f)
 
     def _check_buffer(self) -> None:
-        if self.trainer.sft_warmup_iteration > 0 and self.buffer.sft_warmup_dataset is None:
+        if self.trainer.sft_warmup_steps > 0 and self.buffer.sft_warmup_dataset is None:
             raise ValueError(
-                "buffer.sft_warmup_dataset is required when trainer.sft_warmup_iteration > 0"
+                "buffer.sft_warmup_dataset is required when trainer.sft_warmup_steps > 0"
             )
         if self.buffer.db_url:
             raise ValueError(

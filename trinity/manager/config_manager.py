@@ -111,7 +111,7 @@ class ConfigManager:
             # Trainer Configs
             "trainer_type": "verl",
             "algorithm_type": AlgorithmType.PPO.value,
-            "sft_warmup_iteration": 0,
+            "sft_warmup_steps": 0,
             "eval_interval": 1000,
             "_nccl_save_interval": 100,
             "save_interval": 100,
@@ -404,12 +404,10 @@ Other workflows: conduct multi-turn task for the given dataset.
         )
 
     def _check_sft_warmup_dataset_path(self):
-        if st.session_state["sft_warmup_iteration"]:
+        if st.session_state["sft_warmup_steps"]:
             if not st.session_state["sft_warmup_dataset_path"].strip():
                 self.unfinished_fields.add("sft_warmup_dataset_path")
-                st.warning(
-                    "Please input SFT warmup dataset path when `sft_warmup_iteration` is not 0"
-                )
+                st.warning("Please input SFT warmup dataset path when `sft_warmup_steps` is not 0")
 
     def _set_sft_warmup_dataset_path(self):
         st.text_input("SFT Warmup Dataset Path", key="sft_warmup_dataset_path")
@@ -567,7 +565,7 @@ if node_num > 1:
             "Sync Interval",
             key="sync_interval",
             min_value=1,
-            help="""The iteration interval at which the `explorer` and `trainer` synchronize model weight.""",
+            help="""The step interval at which the `explorer` and `trainer` synchronize model weight.""",
         )
 
     def _set_sync_timeout(self):
@@ -653,8 +651,8 @@ if node_num > 1:
             on_change=on_change,
         )
 
-    def _set_sft_warmup_iteration(self):
-        st.number_input("SFT Warmup Iteration", key="sft_warmup_iteration", min_value=0)
+    def _set_sft_warmup_steps(self):
+        st.number_input("SFT Warmup Steps", key="sft_warmup_steps", min_value=0)
 
     def _set_eval_interval(self):
         st.number_input("Eval Interval", key="eval_interval", min_value=1)
@@ -729,7 +727,7 @@ if node_num > 1:
                 st.warning("Please input a valid resume path when `resume_mode == resume_path`")
 
     def _set_critic_warmup(self):
-        st.number_input("Critic Warmup Iteration", key="critic_warmup", min_value=0)
+        st.number_input("Critic Warmup Steps", key="critic_warmup", min_value=0)
 
     def _set_total_training_steps(self):
         st.number_input("Total Training Steps", key="total_training_steps", min_value=1)
@@ -1000,10 +998,8 @@ if node_num > 1:
 
         self._set_dataset_path()
 
-        self._set_configs_with_st_columns(
-            ["algorithm_type", "sft_warmup_iteration", "monitor_type"]
-        )
-        if st.session_state["sft_warmup_iteration"] > 0:
+        self._set_configs_with_st_columns(["algorithm_type", "sft_warmup_steps", "monitor_type"])
+        if st.session_state["sft_warmup_steps"] > 0:
             self._set_sft_warmup_dataset_path()
 
         st.header("Important Configs")
@@ -1034,7 +1030,7 @@ if node_num > 1:
         else:
             self._set_dpo_dataset_kwargs()
 
-        if st.session_state["sft_warmup_iteration"] > 0:
+        if st.session_state["sft_warmup_steps"] > 0:
             self._set_sft_warmup_dataset_args()
 
         self._set_configs_with_st_columns(["default_workflow_type", "default_reward_fn_type"])
@@ -1107,7 +1103,7 @@ if node_num > 1:
 
     def _expert_trainer_part(self):
         self._set_configs_with_st_columns(  # TODO: may add `trainer_type`
-            ["algorithm_type", "sft_warmup_iteration", "eval_interval", "save_interval"]
+            ["algorithm_type", "sft_warmup_steps", "eval_interval", "save_interval"]
         )
         self._check_sft_warmup_dataset_path()
 
@@ -1429,13 +1425,16 @@ if node_num > 1:
         return trainer_config
 
     def generate_config(self):
-        trainer_nnodes = (
-            st.session_state["node_num"]
-            - st.session_state["engine_num"]
-            * st.session_state["tensor_parallel_size"]
-            // st.session_state["gpu_per_node"]
-        )
-        if st.session_state["node_num"] == 1:
+        if st.session_state["mode"] == "both":
+            trainer_nnodes = (
+                st.session_state["node_num"]
+                - st.session_state["engine_num"]
+                * st.session_state["tensor_parallel_size"]
+                // st.session_state["gpu_per_node"]
+            )
+        else:
+            trainer_nnodes = st.session_state["node_num"]
+        if st.session_state["node_num"] == 1 and st.session_state["mode"] == "both":
             trainer_n_gpus_per_node = (
                 st.session_state["gpu_per_node"]
                 - st.session_state["engine_num"] * st.session_state["tensor_parallel_size"]
@@ -1553,7 +1552,7 @@ if node_num > 1:
                     "trainer_type": st.session_state["trainer_type"],
                     "algorithm_type": st.session_state["algorithm_type"],
                     "trainer_config": trainer_config,
-                    "sft_warmup_iteration": st.session_state["sft_warmup_iteration"],
+                    "sft_warmup_steps": st.session_state["sft_warmup_steps"],
                     "eval_interval": st.session_state["eval_interval"],
                     "save_interval": st.session_state["save_interval"],
                 },

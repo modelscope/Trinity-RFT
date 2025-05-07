@@ -248,7 +248,7 @@ class Trainer:
     training_rollout_mode: str = "parallel"
     enable_exp_buffer: bool = True
     sync_freq: int = 0
-    sft_warmup_iteration: int = 0
+    sft_warmup_steps: int = 0
     max_actor_ckpt_to_keep: Optional[int] = None
     max_critic_ckpt_to_keep: Optional[int] = None
 
@@ -292,13 +292,13 @@ class veRLConfig:
                 f"batch_size ({config.data.batch_size}) must be divisible by ({world_size})"
             )
         # TODO: use dynamic read_batch_size to support multi-round scenarios
-        # Get the experiences of one explore iteration
+        # Get the experiences of one explore step
         self.buffer.pad_token_id = config.buffer.pad_token_id
         self.trainer.project_name = config.monitor.project
         self.trainer.experiment_name = config.monitor.name
         self.data.train_batch_size = config.data.batch_size
         self.trainer.default_local_dir = config.model.checkpoint_path
-        self.trainer.sft_warmup_iteration = config.trainer.sft_warmup_iteration
+        self.trainer.sft_warmup_steps = config.trainer.sft_warmup_steps
         self.actor_rollout_ref.actor.ppo_mini_batch_size = config.data.batch_size
         self.actor_rollout_ref.rollout.temperature = config.explorer.temperature
         self.actor_rollout_ref.rollout.n = config.explorer.repeat_times

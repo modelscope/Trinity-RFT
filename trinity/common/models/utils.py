@@ -101,22 +101,20 @@ def tokenize_and_mask_messages_default(
     return (tokens[0], assistant_token_mask)
 
 
-def get_checkpoint_dir_with_iteration(
+def get_checkpoint_dir_with_step_num(
     checkpoint_root_path: str,
     trainer_type: str = "verl",
-    iteration_num: Optional[int] = None,
+    step_num: Optional[int] = None,
 ) -> str:
     """Get the checkpoint directory from a root checkpoint directory.
 
     Args:
         checkpoint_root_path (str): The root checkpoint directory.
         trainer_type (str): The trainer type. Only support "verl" for now.
-        iteration_num (Optional[int], optional): The iteration number. Defaults to None.
+        step_num (Optional[int], optional): The step number. Defaults to None.
     """
     if trainer_type == "verl":
-        return get_verl_checkpoint_dir(
-            checkpoint_path=checkpoint_root_path, iteration_num=iteration_num
-        )
+        return get_verl_checkpoint_dir(checkpoint_path=checkpoint_root_path, step_num=step_num)
     else:
         raise NotImplementedError(f"Unsupported trainer type {trainer_type}")
 
@@ -146,9 +144,9 @@ def merge_by_placement(tensors: List[torch.Tensor], placement: Placement):
         raise ValueError(f"Unsupported placement: {placement}")
 
 
-def get_verl_checkpoint_dir(checkpoint_path: str, iteration_num: Optional[int] = None) -> str:
+def get_verl_checkpoint_dir(checkpoint_path: str, step_num: Optional[int] = None) -> str:
     """Get the checkpoint directory from a Verl root checkpoint directory."""
-    if iteration_num is None:
+    if step_num is None:
         # load latest checkpoint
         iteration_file = os.path.join(checkpoint_path, "latest_checkpointed_iteration.txt")
         if os.path.exists(iteration_file):
@@ -162,7 +160,7 @@ def get_verl_checkpoint_dir(checkpoint_path: str, iteration_num: Optional[int] =
             raise FileNotFoundError(f"No iteration file found in {checkpoint_path}")
     else:
         # load specific iteration checkpoint
-        return os.path.join(checkpoint_path, f"global_step_{iteration_num}")
+        return os.path.join(checkpoint_path, f"global_step_{step_num}")
 
 
 # copy from verl/scripts/model_merger.py

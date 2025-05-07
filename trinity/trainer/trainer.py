@@ -34,7 +34,7 @@ class Trainer:
                 self.config.buffer.sft_warmup_dataset,  # type: ignore
                 self.config.buffer,
             )
-            if self.config.trainer.sft_warmup_iteration > 0
+            if self.config.trainer.sft_warmup_steps > 0
             else None
         )
         self.engine = get_trainer_wrapper(config)
@@ -46,24 +46,24 @@ class Trainer:
     def train(self, algo_type: AlgorithmType = AlgorithmType.PPO):
         """Train the model."""
         while True:
-            train_status, _ = self.train_iteration(algo_type)
+            train_status, _ = self.train_step(algo_type)
             if not train_status:
                 break
 
-    def train_step(self, algo_type: AlgorithmType = AlgorithmType.PPO) -> Tuple[bool, int]:
-        """Train one step. Each step contains `sync_interval` iteration.
+    def train_single_turn(self, algo_type: AlgorithmType = AlgorithmType.PPO) -> Tuple[bool, int]:
+        """Train one step. Each step contains `sync_interval` steps.
         Returns:
             train_status: Whether to continue training.
-            train_iter_num: The number of training iterations"""
+            train_steps: The number of training steps"""
         for _ in range(self.config.synchronizer.sync_interval):
-            train_status, train_iter_num = self.train_iteration(algo_type)
+            train_status, train_steps = self.train_step(algo_type)
             if not train_status:
-                return False, train_iter_num
-        self.logger.info(f"Trainer iteration {train_iter_num} finished.")
-        return True, train_iter_num
+                return False, train_steps
+        self.logger.info(f"Trainer steps {train_steps} finished.")
+        return True, train_steps
 
-    def train_iteration(self, algo_type: AlgorithmType = AlgorithmType.PPO) -> Tuple[bool, int]:
-        """Train one iteration.
+    def train_step(self, algo_type: AlgorithmType = AlgorithmType.PPO) -> Tuple[bool, int]:
+        """Train one step.
 
         Args:
             algo_type (AlgorithmType): The type of data to be used for training.
@@ -75,7 +75,7 @@ class Trainer:
         self.engine.set_mode(algo_type)
         if algo_type.is_sft():
             exps = self.sft_warmup_buffer.read()
-            return self.engine.train_sft_iteration(
+            return self.engine.train_sft_step(
                 Experiences.gather_experiences(
                     exps,
                     pad_token_id=self.config.buffer.pad_token_id,  # type: ignore
@@ -90,8 +90,8 @@ class Trainer:
                 exps = self.train_buffer.read(strategy=strategy)
             except StopIteration:
                 self.logger.warning("No more data to train. Stop training.")
-                return False, 0  # TODO: get the actual iteration number
-            return self.engine.train_rft_iteration(
+                return False, 0  # TODO: get the actual step number
+            return self.engine.train_rft_step(
                 Experiences.gather_experiences(
                     exps,
                     pad_token_id=self.config.buffer.pad_token_id,  # type: ignore
@@ -99,7 +99,7 @@ class Trainer:
             )
         elif algo_type.is_dpo():
             exps = self.train_buffer.read()
-            return self.engine.train_dpo_iteration(
+            return self.engine.train_dpo_step(
                 Experiences.gather_dpo_experiences(
                     exps,
                     pad_token_id=self.config.buffer.pad_token_id,  # type: ignore
@@ -126,15 +126,15 @@ class TrainEngineWrapper(ABC):
         """Do some preparation before training started."""
 
     @abstractmethod
-    def train_rft_iteration(self, experiences) -> Tuple[bool, int]:
+    def train_rft_step(self, experiences) -> Tuple[bool, int]:
         """Train on the RFT data."""
 
     @abstractmethod
-    def train_sft_iteration(self, experiences) -> Tuple[bool, int]:
+    def train_sft_step(self, experiences) -> Tuple[bool, int]:
         """Train on the SFT data."""
 
     @abstractmethod
-    def train_dpo_iteration(self, experiences) -> Tuple[bool, int]:
+    def train_dpo_step(self, experiences) -> Tuple[bool, int]:
         """Train on the DPO data."""
 
     @abstractmethod

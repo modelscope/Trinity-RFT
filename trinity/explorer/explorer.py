@@ -17,7 +17,7 @@ from trinity.common.constants import (
 )
 from trinity.common.models import create_rollout_models
 from trinity.common.models.utils import (
-    get_checkpoint_dir_with_iteration,
+    get_checkpoint_dir_with_step_num,
     load_state_dict,
 )
 from trinity.common.task import TaskSet
@@ -35,7 +35,7 @@ class Explorer:
         self.logger = get_logger(__name__)
         self.cache = CacheManager(config)
         explorer_meta = self.cache.load_explorer()
-        self.iteration = explorer_meta.get("latest_iteration", 0)
+        self.steps = explorer_meta.get("latest_iteration", 0)
         self.config = config
         self.models = create_rollout_models(config)
         self.experience_buffer = get_buffer_writer(
@@ -127,13 +127,13 @@ class Explorer:
         ray.get([model.sync_model.remote(update_weight_args_list) for model in self.models])
         self.state_dict.clear()
 
-    def _checkpoint_weights_update(self, iteration_num: Optional[int] = None) -> None:
+    def _checkpoint_weights_update(self, step_num: Optional[int] = None) -> None:
         # TODO: support more checkpoint types
         try:
-            checkpoint_dir = get_checkpoint_dir_with_iteration(
+            checkpoint_dir = get_checkpoint_dir_with_step_num(
                 checkpoint_root_path=self.config.model.checkpoint_path,
                 trainer_type=self.config.trainer.trainer_type,
-                iteration_num=iteration_num,
+                step_num=step_num,
             )
             if checkpoint_dir == self.old_checkpoint:
                 return
@@ -160,7 +160,7 @@ class Explorer:
     def explore(self) -> None:
         """Explore the entire dataset."""
         while True:
-            explore_status, explore_iter = self.explore_step()
+            explore_status, explore_iter = self.explore_single_turn()
             if not explore_status:
                 break
             self.sync_weight()
@@ -169,15 +169,15 @@ class Explorer:
                 self.logger.info("Evaluation finished.")
         self.logger.info("Explorer finished.")
 
-    def explore_step(self) -> Tuple[bool, int]:
+    def explore_single_turn(self) -> Tuple[bool, int]:
         """Explore for one step.
 
         Different from `explore()` which consumes all tasks in the task set,
-        `explore_step()` only consume `sync_interval * batch_size`
+        `explore_single_turn()` only consume `sync_interval * batch_size`
         number of tasks.
         explore_status:
             explore_status: whether there are more tasks to explore.
-            explore_iter_num: the number of explore iterations
+            explore_steps: the number of explore steps
         """
         if self.task_iter is None:
             self.task_iter = iter(self.taskset)
@@ -193,7 +193,7 @@ class Explorer:
         except StopIteration:
             self.experience_buffer.finish()
             self.logger.warning("No more tasks in the task set. Stop exploring.")
-            return False, self.iteration
+            return False, self.steps
 
         # wait for all tasks of this step to finish
         while self.runner_pool.has_next():
@@ -208,7 +208,7 @@ class Explorer:
                         self.runner_pool.run_tasks(next(self.task_iter))  # type: ignore
                     except StopIteration:
                         self.logger.warning("No more tasks in the task set. Stop exploring.")
-                        return False, self.iteration
+                        return False, self.steps
                 else:
                     for metric_name, metric_value in status.metric.items():
                         all_metrics[metric_name].append(metric_value)
@@ -216,17 +216,17 @@ class Explorer:
         # calculate metrics
         log_metrics = self.monitor.calculate_metrics(all_metrics, prefix="rollout")  # type: ignore
         log_metrics["rollout/step_time"] = time.time() - st
-        self.iteration += self.config.synchronizer.sync_interval
-        self.monitor.log(log_metrics, step=self.iteration)
+        self.steps += self.config.synchronizer.sync_interval
+        self.monitor.log(log_metrics, step=self.steps)
 
         # save explore checkpoint
         self.cache.save_explorer(
-            current_iteration=self.iteration,
+            current_step=self.steps,
             current_task_index=self.taskset.index,
         )
 
-        self.logger.info(f"Explore iteration {self.iteration} finished.")
-        return True, self.iteration
+        self.logger.info(f"Explore step {self.steps} finished.")
+        return True, self.steps
 
     def eval(self) -> bool:
         """Evaluation on all evaluation data samples."""
@@ -254,7 +254,7 @@ class Explorer:
 
         log_metrics = self.monitor.calculate_metrics(all_metrics, prefix="eval")  # type: ignore
         log_metrics["eval/total_time"] = time.time() - st
-        self.monitor.log(log_metrics, step=self.iteration)  # type: ignore
+        self.monitor.log(log_metrics, step=self.steps)  # type: ignore
         return True
 
     def sync_weight(self) -> None:

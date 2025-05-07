@@ -34,10 +34,10 @@ class CacheManager:
                     f"The current config is inconsistent with the backup config in {backup_config_path}."
                 )
 
-    def save_explorer(self, current_task_index: int, current_iteration: int) -> None:
+    def save_explorer(self, current_task_index: int, current_step: int) -> None:
         with open(self.explorer_meta_path, "w", encoding="utf-8") as f:
             json.dump(
-                {"latest_task_index": current_task_index, "latest_iteration": current_iteration},
+                {"latest_task_index": current_task_index, "latest_iteration": current_step},
                 f,
                 indent=2,
             )
@@ -53,9 +53,9 @@ class CacheManager:
                 logger.error(f"Failed to load explore meta file: {e}")
         return {}
 
-    def save_trainer(self, current_iteration: int) -> None:
+    def save_trainer(self, current_step: int) -> None:
         with open(self.trainer_meta_path, "w", encoding="utf-8") as f:
-            json.dump({"latest_iteration": current_iteration}, f, indent=2)
+            json.dump({"latest_iteration": current_step}, f, indent=2)
 
     def load_trainer(self) -> dict:
         if os.path.exists(self.trainer_meta_path):

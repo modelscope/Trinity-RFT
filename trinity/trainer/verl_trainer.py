@@ -183,7 +183,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         # else:
         self.total_training_steps = float("inf")
 
-    def train_dpo_iteration(self, experiences: Experiences) -> Tuple[bool, int]:
+    def train_dpo_step(self, experiences: Experiences) -> Tuple[bool, int]:
         metrics = {}
         timing_raw = {}
 
@@ -246,7 +246,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         self.global_steps += 1
         return True, self.global_steps - 1
 
-    def train_sft_iteration(self, experiences: Experiences) -> Tuple[bool, int]:
+    def train_sft_step(self, experiences: Experiences) -> Tuple[bool, int]:
         metrics = {}
         timing_raw = {}
 
@@ -296,22 +296,20 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         metrics.update(compute_timing_metrics(batch=batch, timing_raw=timing_raw))
 
         # TODO: log as sft metrics
-        self.sft_iter_num += 1
         self.logger.log(data=metrics, step=self.global_steps)
-        if (
-            self.sft_iter_num
-            == self.config.synchronizer.sync_interval * self.config.trainer.sft_warmup_iteration
-        ):
+        self.sft_iter_num += 1
+        self.global_steps += 1
+        if self.sft_iter_num == self.config.trainer.sft_warmup_steps:
             self.logger.log(
-                data={"sft_warmup_iteration": self.sft_iter_num},
+                data={"sft_warmup_steps": self.sft_iter_num},
                 step=self.global_steps,
             )
             with _timer("save_checkpoint", timing_raw):
                 self._save_checkpoint()
-        self.global_steps += 1
+            return False, self.global_steps - 1
         return True, self.global_steps - 1
 
-    def train_rft_iteration(self, experiences: Experiences) -> Tuple[bool, int]:
+    def train_rft_step(self, experiences: Experiences) -> Tuple[bool, int]:
         metrics = {}
         timing_raw = {}
 
