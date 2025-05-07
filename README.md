@@ -260,7 +260,8 @@ More example config files can be found in `examples`.
 
 For more detailed examples about how to use Trinity-RFT, please refer to the following tutorials:
 + [A quick example with GSM8k](./docs/sphinx_doc/source/tutorial/example_reasoning_basic.md);
-+ [Off-policy / asynchronous modes of RFT](./docs/sphinx_doc/source/tutorial/example_reasoning_advanced.md);
++ [Off-policy mode of RFT](./docs/sphinx_doc/source/tutorial/example_reasoning_advanced.md);
++ [Asynchronous mode of RFT](./docs/sphinx_doc/source/tutorial/example_async_mode.md);
 + [Multi-turn tasks](./docs/sphinx_doc/source/tutorial/example_multi_turn.md);
 + [Data processing pipelines](./docs/sphinx_doc/source/tutorial/example_data_functionalities.md);
 + [Offline learning by DPO](./docs/sphinx_doc/source/tutorial/example_dpo.md).
