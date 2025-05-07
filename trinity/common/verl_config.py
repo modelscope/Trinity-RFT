@@ -5,6 +5,7 @@ from omegaconf import OmegaConf
 
 from trinity.common.config import BufferConfig, Config, SynchronizerConfig
 from trinity.common.constants import AlgorithmType
+from trinity.trainer.verl.ray_trainer import AdvantageEstimator
 from trinity.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -302,8 +303,15 @@ class veRLConfig:
         self.actor_rollout_ref.actor.ppo_mini_batch_size = config.data.batch_size
         self.actor_rollout_ref.rollout.temperature = config.explorer.temperature
         self.actor_rollout_ref.rollout.n = config.explorer.repeat_times
-        self.actor_rollout_ref.actor.algorithm_type = config.trainer.algorithm_type
         self.critic.ppo_mini_batch_size = config.data.batch_size
+
+        self.actor_rollout_ref.actor.algorithm_type = config.trainer.algorithm_type
+        if config.trainer.algorithm_type == AlgorithmType.PPO:
+            logger.info("Using GAE `adv_estimator` for PPO")
+            self.algorithm.adv_estimator = AdvantageEstimator.GAE
+        elif config.trainer.algorithm_type == AlgorithmType.GRPO:
+            logger.info("Using GRPO `adv_estimator` for GRPO")
+            self.algorithm.adv_estimator = AdvantageEstimator.GRPO
 
         if self.actor_rollout_ref.actor.algorithm_type.is_dpo():  # for DPO
             if not self.actor_rollout_ref.actor.use_kl_loss:

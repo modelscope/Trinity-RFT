@@ -48,7 +48,7 @@ synchronizer:
   sync_iteration_interval: 10
 trainer:
   trainer_type: 'verl'
-  algorithm_type: ppo
+  algorithm_type: grpo
   trainer_config_path: examples/async_gsm8k/verl_config.yaml
   sft_warmup_iteration: 0 # Set to integer to enable sft warmup
   eval_interval: 10

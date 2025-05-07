@@ -49,7 +49,7 @@ data:
 - `data.max_retry_times`: The maximum number of retries when loading the dataset from database.
 - `data.max_retry_interval`: The maximum interval between retries when loading the dataset from database.
 - `data.total_epochs`: The total number of epochs to explore the dataset. Default is `1`. It should be set manually.
-- `data.batch_size`: The number of `Task` in one training batch. The real batch size used in training is `data.batch_size` * `actor_rollout_ref.rollout.n` Default is `1`. It should be set manually.
+- `data.batch_size`: The number of `Task` in one training batch. The real batch size used in training is `data.batch_size` * `explorer.repeat_times`. It should be set manually.
 - `data.default_workflow_type`: The default workflow type used for training.
 - `data.default_reward_fn_type`: The default reward function type used for training.
 

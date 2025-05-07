@@ -46,7 +46,7 @@ synchronizer:
   sync_timeout: 1200
 trainer:
   trainer_type: 'verl'
-  algorithm_type: ppo
+  algorithm_type: grpo
   trainer_config_path: 'examples/grpo_sciworld/train_sciworld.yaml'
   save_interval: 10
 monitor:
