@@ -34,10 +34,10 @@ def train(config: Config) -> None:
 
     if config.trainer.sft_warmup_steps > 0:
         while True:
-            train_continue, train_steps = ray.get(
-                trainer.train_single_turn.remote(AlgorithmType.SFT)
+            train_continue, train_step_num = ray.get(
+                trainer.train_one_period.remote(AlgorithmType.SFT)
             )
-            logger.info(f"SFT warmup step {train_steps} finished.")
+            logger.info(f"SFT warmup step {train_step_num} finished.")
             if not train_continue:
                 logger.info("SFT warmup finished.")
                 break
@@ -76,10 +76,10 @@ def both(config: Config) -> None:
 
     if config.trainer.sft_warmup_steps > 0:
         while True:
-            train_continue, train_steps = ray.get(
-                trainer.train_single_turn.remote(AlgorithmType.SFT)
+            train_continue, train_step_num = ray.get(
+                trainer.train_one_period.remote(AlgorithmType.SFT)
             )
-            logger.info(f"SFT warmup step {train_steps} finished.")
+            logger.info(f"SFT warmup step {train_step_num} finished.")
             if not train_continue:
                 logger.info("SFT warmup finished.")
                 break
@@ -88,10 +88,10 @@ def both(config: Config) -> None:
     algo_type = config.trainer.algorithm_type
     while True:
         try:
-            ref_explore = explorer.explore_single_turn.remote()
-            ref_train = trainer.train_single_turn.remote(algo_type)
-            explore_continue, explore_steps = ray.get(ref_explore)
-            train_continue, train_steps = ray.get(ref_train)
+            ref_explore = explorer.explore_one_period.remote()
+            ref_train = trainer.train_one_period.remote(algo_type)
+            explore_continue, explore_step_num = ray.get(ref_explore)
+            train_continue, train_step_num = ray.get(ref_train)
             if not explore_continue:
                 # If explore finished, the trainer may not have enough experiences to continue,
                 # which will cause the trainer be blocked. So we stop the training process
@@ -108,7 +108,7 @@ def both(config: Config) -> None:
             logger.error(e)
             logger.error("Training stopped due to exception.")
             raise e
-        if train_steps % config.trainer.eval_interval == 0:
+        if train_step_num % config.trainer.eval_interval == 0:
             try:
                 ray.get(explorer.eval.remote())
                 logger.info("Evaluation finished.")
@@ -116,8 +116,8 @@ def both(config: Config) -> None:
                 logger.error(e)
                 logger.error("Evaluation failed.")
                 raise e
-        ray.get(explorer.flush_log.remote(step=explore_steps))
-        ray.get(trainer.flush_log.remote(step=train_steps))
+        ray.get(explorer.flush_log.remote(step=explore_step_num))
+        ray.get(trainer.flush_log.remote(step=train_step_num))
 
 
 def activate_data_module(data_workflow_url: str, config_path: str):

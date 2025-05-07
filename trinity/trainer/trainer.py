@@ -50,17 +50,17 @@ class Trainer:
             if not train_status:
                 break
 
-    def train_single_turn(self, algo_type: AlgorithmType = AlgorithmType.PPO) -> Tuple[bool, int]:
-        """Train one step. Each step contains `sync_interval` steps.
+    def train_one_period(self, algo_type: AlgorithmType = AlgorithmType.PPO) -> Tuple[bool, int]:
+        """Train for one period. Each period contains `sync_interval` steps.
         Returns:
             train_status: Whether to continue training.
-            train_steps: The number of training steps"""
+            train_step_num: The number of training steps"""
         for _ in range(self.config.synchronizer.sync_interval):
-            train_status, train_steps = self.train_step(algo_type)
+            train_status, train_step_num = self.train_step(algo_type)
             if not train_status:
-                return False, train_steps
-        self.logger.info(f"Trainer steps {train_steps} finished.")
-        return True, train_steps
+                return False, train_step_num
+        self.logger.info(f"Trainer steps {train_step_num} finished.")
+        return True, train_step_num
 
     def train_step(self, algo_type: AlgorithmType = AlgorithmType.PPO) -> Tuple[bool, int]:
         """Train one step.

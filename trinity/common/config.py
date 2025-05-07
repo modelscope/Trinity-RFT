@@ -307,8 +307,6 @@ class Config:
             raise ValueError("DPO does not support `both` mode")
 
         # check model path
-        if not os.path.isabs(self.model.model_path):
-            self.model.model_path = os.path.join(os.getcwd(), self.model.model_path)
         if not os.path.isabs(self.model.checkpoint_path):
             self.model.checkpoint_path = os.path.join(os.getcwd(), self.model.checkpoint_path)
         if not self.model.critic_model_path:

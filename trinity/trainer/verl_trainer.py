@@ -118,7 +118,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             resource_pool_spec=resource_pool_spec, mapping=mapping
         )
 
-        self.sft_iter_num = 0
+        self.sft_warmup_step_num = 0
         super().__init__(
             config,
             tokenizer,
@@ -150,6 +150,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
 
         # load checkpoint before doing anything
         self._load_checkpoint()
+        self.sft_warmup_step_num = min(self.global_steps, self.config.trainer.sft_warmup_steps)
 
         # perform validation before training
         # currently, we only support validation using the reward_function.
@@ -247,6 +248,8 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         return True, self.global_steps - 1
 
     def train_sft_step(self, experiences: Experiences) -> Tuple[bool, int]:
+        if self.sft_warmup_step_num >= self.config.trainer.sft_warmup_steps:
+            return False, self.global_steps - 1
         metrics = {}
         timing_raw = {}
 
@@ -297,11 +300,11 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
 
         # TODO: log as sft metrics
         self.logger.log(data=metrics, step=self.global_steps)
-        self.sft_iter_num += 1
+        self.sft_warmup_step_num += 1
         self.global_steps += 1
-        if self.sft_iter_num == self.config.trainer.sft_warmup_steps:
+        if self.sft_warmup_step_num == self.config.trainer.sft_warmup_steps:
             self.logger.log(
-                data={"sft_warmup_steps": self.sft_iter_num},
+                data={"sft_warmup_steps": self.sft_warmup_step_num},
                 step=self.global_steps,
             )
             with _timer("save_checkpoint", timing_raw):

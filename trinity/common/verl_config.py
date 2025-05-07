@@ -308,10 +308,10 @@ class veRLConfig:
         self.actor_rollout_ref.actor.algorithm_type = config.trainer.algorithm_type
         if config.trainer.algorithm_type == AlgorithmType.PPO:
             logger.info("Using GAE `adv_estimator` for PPO")
-            self.algorithm.adv_estimator = AdvantageEstimator.GAE
+            self.algorithm.adv_estimator = AdvantageEstimator.GAE.value
         elif config.trainer.algorithm_type == AlgorithmType.GRPO:
             logger.info("Using GRPO `adv_estimator` for GRPO")
-            self.algorithm.adv_estimator = AdvantageEstimator.GRPO
+            self.algorithm.adv_estimator = AdvantageEstimator.GRPO.value
 
         if self.actor_rollout_ref.actor.algorithm_type.is_dpo():  # for DPO
             if not self.actor_rollout_ref.actor.use_kl_loss:
