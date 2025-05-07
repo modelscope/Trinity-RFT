@@ -24,7 +24,7 @@ buffer:
     path: 'sqlite:///gsm8k.db'
 
 synchronizer:
-  sync_method: 'offline'
+  sync_method: 'checkpoint'
   sync_iteration_interval: <sync_iteration_interval>
 ```
 

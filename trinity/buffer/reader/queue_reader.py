@@ -21,7 +21,7 @@ class QueueReader(BufferReader):
         self.config = config
         self.queue = QueueActor.options(
             name=f"queue-{meta.name}",
-            namespace="Trinity-RFT",
+            namespace=meta.namespace,
             get_if_exists=True,
         ).remote(meta, config)
 
