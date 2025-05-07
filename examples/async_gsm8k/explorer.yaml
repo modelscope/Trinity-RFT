@@ -1,0 +1,58 @@
+mode: explore
+data:
+  # basic info
+  dataset_path: /PATH/TO/DATASET/
+  subset_name: ''
+  train_split: 'train'
+  eval_split: 'test'
+  format_config:
+    prompt_key: 'question'
+    response_key: 'answer'
+  # downstream loading related
+  total_epochs: 20
+  batch_size: 96
+  default_workflow_type: 'math_workflow'
+model:
+  model_path: /PATH/TO/MODEL/
+  max_prompt_tokens: 256
+  max_response_tokens: 1024
+  checkpoint_path: 'checkpoints/qwen2.5-1.5B-gsm8k'
+cluster:
+  node_num: 1
+  gpu_per_node: 8
+buffer:
+  max_retry_times: 3
+  max_retry_interval: 1
+  train_dataset:
+    name: gsm8k_buffer
+    storage_type: queue
+    path: 'sqlite:///gsm8k.db'
+explorer:
+  engine_type: vllm_async
+  engine_num: 2
+  runner_num: 32
+  tensor_parallel_size: 1
+  enable_prefix_caching: false
+  enforce_eager: true
+  dtype: bfloat16
+  temperature: 1.0
+  seed: 42
+  logprobs: 0
+  repeat_times: 8
+  use_ray: false
+  backend: 'nccl'
+  max_pending_requests: 32
+  max_waiting_steps: 4
+synchronizer:
+  sync_method: 'checkpoint'
+  sync_iteration_interval: 10
+trainer:
+  trainer_type: 'verl'
+  algorithm_type: ppo
+  trainer_config_path: examples/async_gsm8k/verl_config.yaml
+  sft_warmup_iteration: 0 # Set to integer to enable sft warmup
+  eval_interval: 10
+monitor:
+  cache_root_dir: ""
+  project: "Trinity-RFT-gsm8k"
+  name: "async-qwen2.5-1.5B-gsm8k"

@@ -109,6 +109,7 @@ class DatasetConfig:
     storage_type: StorageType
     algorithm_type: AlgorithmType = AlgorithmType.PPO
     path: Optional[str] = None
+    namespace: str = ""  # automatically generated
     kwargs: Dict[str, Any] = field(default_factory=dict)
 
 
@@ -291,7 +292,9 @@ class Config:
             if self.buffer.train_dataset is None:
                 raise ValueError("buffer.train_dataset is required when mode is not 'both'")
             self.buffer.train_dataset.algorithm_type = self.trainer.algorithm_type
+        self.buffer.train_dataset.namespace = f"{self.monitor.project}-{self.monitor.name}"
         if self.buffer.sft_warmup_dataset is not None:
+            self.buffer.sft_warmup_dataset.namespace = f"{self.monitor.project}-{self.monitor.name}"
             self.buffer.sft_warmup_dataset.algorithm_type = AlgorithmType.SFT
         self.buffer.read_batch_size = self.data.batch_size * self.explorer.repeat_times
 
