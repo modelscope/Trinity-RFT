@@ -196,6 +196,7 @@ class TrainerConfig:
 
     # warmup config
     sft_warmup_steps: int = 0
+    sft_warmup_iteration: Optional[int] = None  # deprecated
 
 
 @dataclass
@@ -378,6 +379,13 @@ class Config:
                 "Failed to create cache dir, please check "
                 f"your checkpoint path: {self.model.checkpoint_path}"
             )
+
+        if self.trainer.sft_warmup_iteration is not None:
+            logger.warning(
+                f"`trainer.sft_warmup_iteration` is deprecated, please use `trainer.sft_warmup_steps` instead. "
+                f"And `trainer.sft_warmup_steps` will be set to {self.trainer.sft_warmup_iteration} instead."
+            )
+            self.trainer.sft_warmup_steps = self.trainer.sft_warmup_iteration
 
         # check buffer
         self._check_buffer()

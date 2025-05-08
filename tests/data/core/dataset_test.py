@@ -82,12 +82,12 @@ class TestRftDataset(unittest.TestCase):
     def test_to_taskset_with_global_settings(self):
         dataset = RftDataset(data_config=self.data_config, reward_schema="default")
         taskset = dataset.to_taskset(
-            reward_fn=AccuracyReward(),
+            reward_fn=AccuracyReward,
             workflow=SimpleWorkflow,
         )
         self.assertIsInstance(taskset, TaskSet)
         self.assertEqual(taskset.workflow, SimpleWorkflow)
-        self.assertIsInstance(taskset.reward_fn, AccuracyReward)
+        self.assertEqual(taskset.reward_fn, AccuracyReward)
 
     def test_to_taskset_with_sample_level_settings(self):
         dataset = RftDataset(
@@ -97,22 +97,22 @@ class TestRftDataset(unittest.TestCase):
         self.assertIsInstance(taskset, TaskSet)
         for task in taskset.tasks:
             self.assertEqual(task.workflow, MathWorkflow)
-            self.assertIsInstance(task.reward_fn, AccuracyReward)
+            self.assertEqual(task.reward_fn, AccuracyReward)
 
     def test_to_taskset_with_both_settings(self):
         dataset = RftDataset(
             data_config=self.data_config_sample_level_setting, reward_schema="default"
         )
         taskset = dataset.to_taskset(
-            reward_fn=AccuracyReward(),
+            reward_fn=AccuracyReward,
             workflow=SimpleWorkflow,
         )
         self.assertIsInstance(taskset, TaskSet)
         for task in taskset.tasks:
             self.assertEqual(task.workflow, MathWorkflow)
-            self.assertIsInstance(task.reward_fn, AccuracyReward)
+            self.assertEqual(task.reward_fn, AccuracyReward)
         self.assertEqual(taskset.workflow, SimpleWorkflow)
-        self.assertIsInstance(taskset.reward_fn, AccuracyReward)
+        self.assertEqual(taskset.reward_fn, AccuracyReward)
 
 
 if __name__ == "__main__":

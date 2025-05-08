@@ -68,12 +68,11 @@ class RftDataset:
     def to_taskset(self, **kwargs) -> TaskSet:
         default_workflow_cls = WORKFLOWS.get(self.config.default_workflow_type)
         default_reward_fn_cls = REWARD_FUNCTIONS.get(self.config.default_reward_fn_type)
-        default_reward_instance = default_reward_fn_cls() if default_reward_fn_cls else None
         return TaskSet(
             dataset=self.data,
             config=self.config,
             workflow=default_workflow_cls,
-            reward_fn=default_reward_instance,
+            reward_fn=default_reward_fn_cls,
         )
 
     def to_parquet(self, path: str):

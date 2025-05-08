@@ -8,7 +8,7 @@ import torch
 
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
-from trinity.common.rewards.reward_fn import MathRewardFn
+from trinity.common.rewards.reward_fn import MathRewardFn, RewardFn
 from trinity.utils.log import get_logger
 from trinity.utils.registry import Registry
 
@@ -89,6 +89,10 @@ class SimpleWorkflow(Workflow):
         self.task_desc = kwargs.get("task_desc")
         self.truth = kwargs.get("truth")
         self.reward_fn = kwargs.get("reward_fn")
+        if isinstance(self.reward_fn, type) and issubclass(self.reward_fn, RewardFn):
+            self.reward_fn = self.reward_fn()
+        else:
+            raise ValueError("`reward_fn` must be a subclass of `RewardFn`")
         # Rollout n times
         self.repeat_times = kwargs.get("repeat_times", 1)
         self.is_eval = kwargs.get("is_eval", False)
@@ -133,7 +137,7 @@ class MathWorkflow(SimpleWorkflow):
         **kwargs,
     ):
         if kwargs.get("reward_fn", None) is None:
-            kwargs["reward_fn"] = MathRewardFn()
+            kwargs["reward_fn"] = MathRewardFn
             kwargs[
                 "system_prompt"
             ] = """A conversation between User and Assistant. The user asks a question, and the Assistant solves it. The assistant first thinks about the reasoning process in the mind and then provides the user with the answer. The reasoning process and answer are enclosed within <think> </think> and <answer> </answer> tags, respectively, i.e.,

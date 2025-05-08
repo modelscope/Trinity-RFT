@@ -26,7 +26,7 @@ class Task:
 
     task_desc: str
     workflow: Type[Workflow]
-    reward_fn: Optional[RewardFn] = None
+    reward_fn: Optional[Type[RewardFn]] = None
     truth: Optional[str] = None
     raw: Optional[dict] = None  # The raw data sample
     task_type: Optional[TaskType] = None
@@ -62,7 +62,7 @@ def task_generator(
     start_index: int,
     config: DataConfig,
     default_workflow: Optional[Type[Workflow]],
-    default_reward_fn: Optional[RewardFn],
+    default_reward_fn: Optional[Type[RewardFn]],
     task_type: Optional[TaskType],
 ) -> Iterator[Task]:
     """Get a generator of tasks from the dataset."""
@@ -116,7 +116,7 @@ class TaskSet:
 
     dataset: Any  # the source huggingface dataset
     config: DataConfig
-    reward_fn: Optional[RewardFn] = None
+    reward_fn: Optional[Type[RewardFn]] = None
     workflow: Optional[Type[Workflow]] = None
     task_type: Optional[TaskType] = None
     default_index: int = 0
@@ -151,12 +151,11 @@ class TaskSet:
         dataset_len = len(dataset)
         default_workflow_cls = WORKFLOWS.get(config.default_workflow_type)
         default_reward_fn_cls = REWARD_FUNCTIONS.get(config.default_reward_fn_type)
-        default_reward_instance = default_reward_fn_cls() if default_reward_fn_cls else None
         return cls(
             dataset=dataset,
             config=config,
             workflow=default_workflow_cls,
-            reward_fn=default_reward_instance,
+            reward_fn=default_reward_fn_cls,
             task_type=task_type,
             default_index=latest_task_index % dataset_len,
             default_epoch=latest_task_index // dataset_len,

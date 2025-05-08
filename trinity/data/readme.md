@@ -53,7 +53,7 @@ dataset.format([
 
 # convert to a task set with global reward function and workflow
 task_set = dataset.to_taskset(
-  reward_fn=AccuracyReward(),
+  reward_fn=AccuracyReward,
   workflow=MathWorkflow,
 )
 

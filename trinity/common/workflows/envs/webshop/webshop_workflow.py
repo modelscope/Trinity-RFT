@@ -186,7 +186,7 @@ class WebShopWorkflow(MultiTurnWorkflow):
         self.system_prompt = kwargs.get("system_prompt", None)  # Unuse here
         self.task_desc: str = kwargs.get("task_desc", "0")
         self.truth = kwargs.get("truth")  # Unuse here
-        self.reward_fn = kwargs.get("reward_fn")  # Unuse here
+        self.reward_fn = None  # Unuse here
         self.repeat_times = kwargs.get("repeat_times", 1)
         self.max_env_steps = 15
 
