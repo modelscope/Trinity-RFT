@@ -158,36 +158,11 @@
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 
-<div class="viewcode-block" id="InferenceModel.sync_model">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.model.InferenceModel.sync_model">[docs]</a>
-    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">sync_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">update_weight_args_list</span><span class="p">:</span> <span class="n">List</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sync model weights.&quot;&quot;&quot;</span></div>
-
-        <span class="c1"># TODO: sync with high efficiency</span>
-
 <div class="viewcode-block" id="InferenceModel.get_ckp_version">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.model.InferenceModel.get_ckp_version">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_ckp_version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the checkpoint version.&quot;&quot;&quot;</span></div>
-
-
-<div class="viewcode-block" id="InferenceModel.init_process_group">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.model.InferenceModel.init_process_group">[docs]</a>
-    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">init_process_group</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">master_address</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">master_port</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">rank_offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">world_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">group_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">backend</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;nccl&quot;</span><span class="p">,</span>
-        <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1200</span><span class="p">,</span>
-        <span class="n">update_with_checkpoint</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Init the process group for model weights sync.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="InferenceModel.get_address">

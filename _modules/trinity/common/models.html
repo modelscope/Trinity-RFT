@@ -84,7 +84,8 @@
            <div itemprop="articleBody">
              
   <h1>Source code for trinity.common.models</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">InferenceModel</span>
@@ -100,20 +101,15 @@
 <span class="sd">    Each model has `tensor_parallel_size` workers.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">ray</span>
-    <span class="kn">import</span><span class="w"> </span><span class="nn">vllm</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">ray.util.placement_group</span><span class="w"> </span><span class="kn">import</span> <span class="n">placement_group</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ray.util.placement_group</span><span class="w"> </span><span class="kn">import</span> <span class="n">placement_group</span><span class="p">,</span> <span class="n">placement_group_table</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ray.util.scheduling_strategies</span><span class="w"> </span><span class="kn">import</span> <span class="n">PlacementGroupSchedulingStrategy</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.vllm_async_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">vLLMAysncRolloutModel</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.vllm_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">vLLMRolloutModel</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
-
-    <span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
-
-    <span class="k">assert</span> <span class="n">vllm</span><span class="o">.</span><span class="n">__version__</span> <span class="o">&gt;=</span> <span class="s2">&quot;0.7.3&quot;</span><span class="p">,</span> <span class="s2">&quot;Trinity-RFT only supports vllm &gt;= 0.7.3&quot;</span>
 
     <span class="n">engine_num</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">engine_num</span>
     <span class="n">tensor_parallel_size</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">tensor_parallel_size</span>
+    <span class="n">is_multi_process</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">tensor_parallel_size</span> <span class="o">&gt;</span> <span class="mi">1</span>
 
     <span class="n">vllm_engines</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -124,30 +120,41 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown engine type: </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">engine_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="n">bundles</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;GPU&quot;</span><span class="p">:</span> <span class="n">tensor_parallel_size</span><span class="p">,</span> <span class="s2">&quot;CPU&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">engine_num</span><span class="p">)]</span>
-    <span class="n">pg</span> <span class="o">=</span> <span class="n">placement_group</span><span class="p">(</span><span class="n">bundles</span><span class="p">)</span>
+    <span class="n">bundles</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;GPU&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">engine_num</span> <span class="o">*</span> <span class="n">tensor_parallel_size</span><span class="p">)]</span>
+    <span class="n">pg</span> <span class="o">=</span> <span class="n">placement_group</span><span class="p">(</span><span class="n">bundles</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;PACK&quot;</span><span class="p">)</span>
     <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">ready</span><span class="p">())</span>
 
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">engine_num</span><span class="p">):</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Creating vLLM engine </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">scheduling_strategy</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">vllm_engines</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="n">scheduling_strategy</span> <span class="o">=</span> <span class="n">PlacementGroupSchedulingStrategy</span><span class="p">(</span>
-            <span class="n">placement_group</span><span class="o">=</span><span class="n">pg</span><span class="p">,</span>
-            <span class="n">placement_group_capture_child_tasks</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">placement_group_bundle_index</span><span class="o">=</span><span class="n">i</span><span class="p">,</span>
+    <span class="c1"># to address https://github.com/ray-project/ray/issues/51117</span>
+    <span class="c1"># aggregate bundles belonging to the same node</span>
+    <span class="n">bundle_node_map</span> <span class="o">=</span> <span class="n">placement_group_table</span><span class="p">(</span><span class="n">pg</span><span class="p">)[</span><span class="s2">&quot;bundles_to_node_id&quot;</span><span class="p">]</span>
+    <span class="n">node_bundle_map</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">bundle_id</span><span class="p">,</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="n">bundle_node_map</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">node_bundle_map</span><span class="p">[</span><span class="n">node_id</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bundle_id</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">node_id</span><span class="p">,</span> <span class="n">bundle_ids</span> <span class="ow">in</span> <span class="n">node_bundle_map</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">bundle_ids</span><span class="p">)</span> <span class="o">%</span> <span class="n">tensor_parallel_size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Node </span><span class="si">{</span><span class="n">node_id</span><span class="si">}</span><span class="s2"> has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bundle_ids</span><span class="p">)</span><span class="si">}</span><span class="s2"> bundles, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;which is not divisible by tensor_parallel_size(</span><span class="si">{</span><span class="n">tensor_parallel_size</span><span class="si">}</span><span class="s2">)&quot;</span>
         <span class="p">)</span>
-
-        <span class="n">vllm_engines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="n">engine_cls</span><span class="o">.</span><span class="n">options</span><span class="p">(</span>  <span class="c1"># type: ignore [attr-defined]</span>
-                <span class="n">num_cpus</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                <span class="n">num_gpus</span><span class="o">=</span><span class="n">tensor_parallel_size</span><span class="p">,</span>
-                <span class="n">scheduling_strategy</span><span class="o">=</span><span class="n">scheduling_strategy</span><span class="p">,</span>
-            <span class="p">)</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span>
-                <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bundle_ids</span><span class="p">)</span> <span class="o">//</span> <span class="n">tensor_parallel_size</span><span class="p">):</span>
+            <span class="n">bundles_for_engine</span> <span class="o">=</span> <span class="n">bundle_ids</span><span class="p">[</span>
+                <span class="n">i</span> <span class="o">*</span> <span class="n">tensor_parallel_size</span> <span class="p">:</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">tensor_parallel_size</span>
+            <span class="p">]</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">bundle_indices</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">bid</span><span class="p">)</span> <span class="k">for</span> <span class="n">bid</span> <span class="ow">in</span> <span class="n">bundles_for_engine</span><span class="p">])</span>
+            <span class="n">vllm_engines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">engine_cls</span><span class="o">.</span><span class="n">options</span><span class="p">(</span>
+                    <span class="n">num_cpus</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                    <span class="n">num_gpus</span><span class="o">=</span><span class="mi">0</span> <span class="k">if</span> <span class="n">is_multi_process</span> <span class="k">else</span> <span class="mi">1</span><span class="p">,</span>
+                    <span class="n">scheduling_strategy</span><span class="o">=</span><span class="n">PlacementGroupSchedulingStrategy</span><span class="p">(</span>
+                        <span class="n">placement_group</span><span class="o">=</span><span class="n">pg</span><span class="p">,</span>
+                        <span class="n">placement_group_bundle_index</span><span class="o">=</span><span class="n">bundles_for_engine</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="p">),</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span>
+                    <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
+                <span class="p">)</span>
             <span class="p">)</span>
-        <span class="p">)</span>
-
     <span class="k">return</span> <span class="n">vllm_engines</span></div>
 
 </pre></div>
