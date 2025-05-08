@@ -100,12 +100,12 @@ The algorithm design and analysis can be found in this <a class="reference downl
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>examples/opmd_gsm8k/opmd_gsm8k.yaml
 </pre></div>
 </div>
-<p>Note that in this config file, <code class="docutils literal notranslate"><span class="pre">sync_iteration_interval</span></code> is set to 10, i.e., the model weights of explorer and trainer are synchronized only once every 10 training steps, which leads to a challenging off-policy scenario (potentially with abrupt distribution shift during the RFT process).
+<p>Note that in this config file, <code class="docutils literal notranslate"><span class="pre">sync_interval</span></code> is set to 10, i.e., the model weights of explorer and trainer are synchronized only once every 10 training steps, which leads to a challenging off-policy scenario (potentially with abrupt distribution shift during the RFT process).
 Other configurations of particular interest are explained at the beginning of <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/opmd_gsm8k/train_opmd_gsm8k.yaml"><code class="docutils literal notranslate"><span class="pre">train_opmd_gsm8k.yaml</span></code></a>.</p>
 <p>The red curve below shows an example of OPMD’s learning curves.
 Since the explorer’s model weights remain unchanged for the first 10 steps, its score remains flat.
 Then, after the model weights of explorer and trainer are synchronized at the end of step 10, we see an abrupt increase in score at step 11, which indicates effective off-policy learning in the first 10 steps.
-A similar performance boost is shown at step 21, which leads to a converged score matching what is achieved by GRPO in a mostly on-policy case (with <code class="docutils literal notranslate"><span class="pre">sync_iteration_interval=2</span></code>).</p>
+A similar performance boost is shown at step 21, which leads to a converged score matching what is achieved by GRPO in a mostly on-policy case (with <code class="docutils literal notranslate"><span class="pre">sync_interval=2</span></code>).</p>
 <p><img alt="opmd" src="../_images/opmd-curve.png" /></p>
 </section>
 </section>

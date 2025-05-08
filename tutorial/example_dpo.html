@@ -134,7 +134,7 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>HumanLLMs
 <section id="configuration">
 <h3>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h3>
 <p>We use the configurations in <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/dpo_humanlike/dpo.yaml"><code class="docutils literal notranslate"><span class="pre">dpo.yaml</span></code></a> and <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/dpo_humanlike/train_dpo.yaml"><code class="docutils literal notranslate"><span class="pre">train_dpo.yaml</span></code></a> for this experiment. Some important setups are listed in the following:</p>
-<p>We run the experiment in a train mode, as there is no Explorer. To enable this mode, we config <code class="docutils literal notranslate"><span class="pre">mode</span></code> to <code class="docutils literal notranslate"><span class="pre">train</span></code> and set <code class="docutils literal notranslate"><span class="pre">sync_method</span></code> to <code class="docutils literal notranslate"><span class="pre">checkpoint</span></code>. The value of <code class="docutils literal notranslate"><span class="pre">sync_iteration_interval</span></code> can be set as same of the value of <code class="docutils literal notranslate"><span class="pre">save_interval</span></code>.</p>
+<p>We run the experiment in a train mode, as there is no Explorer. To enable this mode, we config <code class="docutils literal notranslate"><span class="pre">mode</span></code> to <code class="docutils literal notranslate"><span class="pre">train</span></code> and set <code class="docutils literal notranslate"><span class="pre">sync_method</span></code> to <code class="docutils literal notranslate"><span class="pre">checkpoint</span></code>.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># In dpo.yaml</span>
 <span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">train</span>
 <span class="nt">synchronizer</span><span class="p">:</span>
@@ -142,7 +142,6 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>HumanLLMs
 <span class="nt">buffer</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">train_dataset</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">file</span>
-<span class="w">    </span><span class="nt">algorithm_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dpo</span>
 <span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;$DATASET_PATH/human_like_dpo_dataset&gt;</span>
 <span class="w">    </span><span class="nt">kwargs</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">prompt_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;prompt_type&gt;</span><span class="w"> </span><span class="c1"># messages/plaintext</span>

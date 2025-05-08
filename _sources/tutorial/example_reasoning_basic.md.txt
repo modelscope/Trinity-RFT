@@ -37,13 +37,13 @@ More details on dataset downloading are referred to [ModelScope](https://modelsc
 
 ### Synchronous Mode of Trinity-RFT
 
-We run the experiment in a synchronous mode where the Explorer and Trainer operate in turn. To enable this mode, we config `mode` to `both` (default) and set `sync_iteration_interval` properly. A smaller value of `sync_iteration_interval` makes the training closer to an on-policy setup.
+We run the experiment in a synchronous mode where the Explorer and Trainer operate in turn. To enable this mode, we config `mode` to `both` (default) and set `sync_interval` properly. A smaller value of `sync_interval` makes the training closer to an on-policy setup.
 
 ```yaml
 mode: both
 synchronizer:
   sync_method: 'nccl'
-  sync_iteration_interval: 2
+  sync_interval: 2
 ```
 
 ### Use GRPO or PPO Algorithm
@@ -76,21 +76,20 @@ trinity run --config examples/grpo_gsm8k/gsm8k.yaml
 
 ## Optional: RFT with SFT Warmup
 
-Before RFT, we may use SFT as a warmup step. We need to set `trainer.sft_warmup_iteration > 0` and prepare the SFT data to `buffer.train_dataset.path=$DATASET_PATH/{sft_data}`.
+Before RFT, we may use SFT as a warmup step. We need to set `trainer.sft_warmup_steps > 0` and prepare the SFT data to `buffer.train_dataset.path=$DATASET_PATH/{sft_data}`.
 
 ```yaml
 # Properly set the following configs in gsm8k.yaml
 buffer:
   sft_warmup_dataset:
     storage_type: file
-    algorithm_type: sft
     path: <$DATASET_PATH/{sft_data}>
     kwargs:
       prompt_type: <prompt_type> # messages/plaintext/chatpair
       prompt_key: <prompt_key>
       response_key: <response_key>
 trainer:
-  sft_warmup_iteration: 10
+  sft_warmup_steps: 10
 ```
 
 The following command runs SFT and RFT in sequence:

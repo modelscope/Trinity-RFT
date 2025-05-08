@@ -40,7 +40,7 @@ Note that the dataset has the keys `prompt`, `chosen` and `rejected`. If not, pa
 
 We use the configurations in [`dpo.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/dpo_humanlike/dpo.yaml) and [`train_dpo.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/dpo_humanlike/train_dpo.yaml) for this experiment. Some important setups are listed in the following:
 
-We run the experiment in a train mode, as there is no Explorer. To enable this mode, we config `mode` to `train` and set `sync_method` to `checkpoint`. The value of `sync_iteration_interval` can be set as same of the value of `save_interval`.
+We run the experiment in a train mode, as there is no Explorer. To enable this mode, we config `mode` to `train` and set `sync_method` to `checkpoint`.
 
 ```yaml
 # In dpo.yaml
@@ -50,7 +50,6 @@ synchronizer:
 buffer:
   train_dataset:
     storage_type: file
-    algorithm_type: dpo
     path: <$DATASET_PATH/human_like_dpo_dataset>
     kwargs:
       prompt_type: <prompt_type> # messages/plaintext

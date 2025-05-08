@@ -127,10 +127,10 @@
 
 <div class="viewcode-block" id="CacheManager.save_explorer">
 <a class="viewcode-back" href="../../../build_api/trinity.manager.html#trinity.manager.manager.CacheManager.save_explorer">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">save_explorer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_task_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">current_iteration</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_explorer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_task_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">current_step</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">explorer_meta_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span>
-                <span class="p">{</span><span class="s2">&quot;latest_task_index&quot;</span><span class="p">:</span> <span class="n">current_task_index</span><span class="p">,</span> <span class="s2">&quot;latest_iteration&quot;</span><span class="p">:</span> <span class="n">current_iteration</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">&quot;latest_task_index&quot;</span><span class="p">:</span> <span class="n">current_task_index</span><span class="p">,</span> <span class="s2">&quot;latest_iteration&quot;</span><span class="p">:</span> <span class="n">current_step</span><span class="p">},</span>
                 <span class="n">f</span><span class="p">,</span>
                 <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
             <span class="p">)</span></div>
@@ -152,9 +152,9 @@
 
 <div class="viewcode-block" id="CacheManager.save_trainer">
 <a class="viewcode-back" href="../../../build_api/trinity.manager.html#trinity.manager.manager.CacheManager.save_trainer">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">save_trainer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_iteration</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_trainer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_step</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer_meta_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">({</span><span class="s2">&quot;latest_iteration&quot;</span><span class="p">:</span> <span class="n">current_iteration</span><span class="p">},</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span></div>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">({</span><span class="s2">&quot;latest_iteration&quot;</span><span class="p">:</span> <span class="n">current_step</span><span class="p">},</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="CacheManager.load_trainer">

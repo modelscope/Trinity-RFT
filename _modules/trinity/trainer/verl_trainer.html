@@ -208,7 +208,6 @@
             <span class="n">resource_pool_spec</span><span class="o">=</span><span class="n">resource_pool_spec</span><span class="p">,</span> <span class="n">mapping</span><span class="o">=</span><span class="n">mapping</span>
         <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">sft_iter_num</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">config</span><span class="p">,</span>
             <span class="n">tokenizer</span><span class="p">,</span>
@@ -243,9 +242,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_wg</span><span class="o">.</span><span class="n">setup_weight_sync_group</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sft_warmup_step_num</span> <span class="o">=</span> <span class="mi">0</span>
 
         <span class="c1"># load checkpoint before doing anything</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_load_checkpoint</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sft_warmup_step_num</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">sft_warmup_steps</span><span class="p">)</span>
 
         <span class="c1"># perform validation before training</span>
         <span class="c1"># currently, we only support validation using the reward_function.</span>
@@ -280,9 +281,9 @@
         <span class="c1"># else:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">total_training_steps</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="VerlPPOTrainerWrapper.train_dpo_iteration">
-<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.train_dpo_iteration">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">train_dpo_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">experiences</span><span class="p">:</span> <span class="n">Experiences</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<div class="viewcode-block" id="VerlPPOTrainerWrapper.train_dpo_step">
+<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.train_dpo_step">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">train_dpo_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">experiences</span><span class="p">:</span> <span class="n">Experiences</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
         <span class="n">metrics</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">timing_raw</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -346,9 +347,11 @@
         <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">-</span> <span class="mi">1</span></div>
 
 
-<div class="viewcode-block" id="VerlPPOTrainerWrapper.train_sft_iteration">
-<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.train_sft_iteration">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">train_sft_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">experiences</span><span class="p">:</span> <span class="n">Experiences</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<div class="viewcode-block" id="VerlPPOTrainerWrapper.train_sft_step">
+<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.train_sft_step">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">train_sft_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">experiences</span><span class="p">:</span> <span class="n">Experiences</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sft_warmup_step_num</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">sft_warmup_steps</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">-</span> <span class="mi">1</span>
         <span class="n">metrics</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">timing_raw</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -398,27 +401,23 @@
         <span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">compute_timing_metrics</span><span class="p">(</span><span class="n">batch</span><span class="o">=</span><span class="n">batch</span><span class="p">,</span> <span class="n">timing_raw</span><span class="o">=</span><span class="n">timing_raw</span><span class="p">))</span>
 
         <span class="c1"># TODO: log as sft metrics</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sft_iter_num</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">metrics</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="p">)</span>
-        <span class="c1"># print(f&#39;{self.sft_iter_num=}, {self.config.synchronizer.sync_iteration_interval * self.config.trainer.sft_warmup_iteration=}&#39;)</span>
-        <span class="k">if</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">sft_iter_num</span>
-            <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_iteration_interval</span>
-            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">sft_warmup_iteration</span>
-        <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sft_warmup_step_num</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sft_warmup_step_num</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">sft_warmup_steps</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
-                <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;sft_warmup_iteration&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sft_iter_num</span><span class="p">},</span>
+                <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;sft_warmup_steps&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sft_warmup_step_num</span><span class="p">},</span>
                 <span class="n">step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">with</span> <span class="n">_timer</span><span class="p">(</span><span class="s2">&quot;save_checkpoint&quot;</span><span class="p">,</span> <span class="n">timing_raw</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_save_checkpoint</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">-</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">-</span> <span class="mi">1</span></div>
 
 
-<div class="viewcode-block" id="VerlPPOTrainerWrapper.train_rft_iteration">
-<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.train_rft_iteration">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">train_rft_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">experiences</span><span class="p">:</span> <span class="n">Experiences</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<div class="viewcode-block" id="VerlPPOTrainerWrapper.train_rft_step">
+<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.train_rft_step">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">train_rft_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">experiences</span><span class="p">:</span> <span class="n">Experiences</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
         <span class="n">metrics</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">timing_raw</span> <span class="o">=</span> <span class="p">{}</span>
 

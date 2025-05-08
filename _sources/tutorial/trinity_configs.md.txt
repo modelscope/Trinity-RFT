@@ -49,7 +49,7 @@ data:
 - `data.max_retry_times`: The maximum number of retries when loading the dataset from database.
 - `data.max_retry_interval`: The maximum interval between retries when loading the dataset from database.
 - `data.total_epochs`: The total number of epochs to explore the dataset. Default is `1`. It should be set manually.
-- `data.batch_size`: The number of `Task` in one training batch. The real batch size used in training is `data.batch_size` * `actor_rollout_ref.rollout.n` Default is `1`. It should be set manually.
+- `data.batch_size`: The number of `Task` in one training batch. The real batch size used in training is `data.batch_size` * `explorer.repeat_times`. It should be set manually.
 - `data.default_workflow_type`: The default workflow type used for training.
 - `data.default_reward_fn_type`: The default reward function type used for training.
 
@@ -150,14 +150,14 @@ explorer:
 ```yaml
 synchronizer:
   sync_method: 'nccl'
-  sync_iteration_interval: 10
+  sync_interval: 10
   sync_timeout: 1200
 ```
 
 - `synchronizer.sync_method`: The synchronization method between `trainer` and `explorer`.
 Support `nccl` and `checkpoint`, `nccl` represents that model weights in `explorer` will be synchronized from `trainer` through `nccl`,
 `checkpoint` represents that `explorer` will load the newest checkpoints saved by `trainer` then update its model weights. Default is `nccl`.
-- `synchronizer.sync_iteration_interval`: The interval between two synchronizations. Default is `10`. It should be set manually.
+- `synchronizer.sync_interval`: The interval between two synchronizations. Default is `10`. It should be set manually.
 - `synchronizer.sync_timeout`: The timeout of the synchronization. Default is `1200`.
 
 ## Trainer
@@ -167,7 +167,7 @@ trainer:
   trainer_type: 'verl'
   algorithm_type: ppo
   trainer_config_path: 'examples/ppo_countdown/train_countdown.yaml'
-  sft_warmup_iteration: 0
+  sft_warmup_steps: 0
   eval_interval: 1000
   save_interval: 100
 ```
@@ -175,7 +175,7 @@ trainer:
 - `trainer.trainer_type`: The backend of the trainer, Only `verl` is supported.
 - `trainer.algorithm_type`: The type of the algorithm, Support `ppo`, `grpo`, `opmd` and `dpo`.
 - `trainer.trainer_config_path`: The path to the trainer configuration file. It must be set manually.
-- `trainer.sft_warmup_iteration`: The number of iterations to warm up the model. Default is `0`.
+- `trainer.sft_warmup_steps`: The number of steps to warm up the model. Default is `0`.
 - `trainer.eval_interval`: The interval between two evaluations. Default is `1000`.
 - `trainer.save_interval`: The interval between two checkpoints. Default is `100`.
 
@@ -418,7 +418,7 @@ trainer:
 - `trainer.balance_batch`: Whether to balance batch size between GPUs during training.
 - `trainer.resume_mode`: Resume mode for training. Support `disable`, `auto` and `resume_path`.
 - `trainer.resume_from_path`: Path to resume from.
-- `trainer.critic_warmup`: The number of iteration to train the critic model before actual policy learning.
+- `trainer.critic_warmup`: The number of steps to train the critic model before actual policy learning.
 - `trainer.default_hdfs_dir`: Default HDFS directory for saving checkpoints.
 - `trainer.remove_previous_ckpt_in_save`: Whether to remove previous checkpoints in save.
 - `trainer.del_local_ckpt_after_load`: Whether to delete local checkpoints after loading.

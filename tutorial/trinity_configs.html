@@ -147,7 +147,7 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">data.max_retry_times</span></code>: The maximum number of retries when loading the dataset from database.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">data.max_retry_interval</span></code>: The maximum interval between retries when loading the dataset from database.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">data.total_epochs</span></code>: The total number of epochs to explore the dataset. Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>. It should be set manually.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">data.batch_size</span></code>: The number of <code class="docutils literal notranslate"><span class="pre">Task</span></code> in one training batch. The real batch size used in training is <code class="docutils literal notranslate"><span class="pre">data.batch_size</span></code> * <code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.rollout.n</span></code> Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>. It should be set manually.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">data.batch_size</span></code>: The number of <code class="docutils literal notranslate"><span class="pre">Task</span></code> in one training batch. The real batch size used in training is <code class="docutils literal notranslate"><span class="pre">data.batch_size</span></code> * <code class="docutils literal notranslate"><span class="pre">explorer.repeat_times</span></code>. It should be set manually.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">data.default_workflow_type</span></code>: The default workflow type used for training.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">data.default_reward_fn_type</span></code>: The default reward function type used for training.</p></li>
 </ul>
@@ -248,7 +248,7 @@
 <h2>Synchronizer<a class="headerlink" href="#synchronizer" title="Link to this heading"></a></h2>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">synchronizer</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">sync_method</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;nccl&#39;</span>
-<span class="w">  </span><span class="nt">sync_iteration_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">  </span><span class="nt">sync_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
 <span class="w">  </span><span class="nt">sync_timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1200</span>
 </pre></div>
 </div>
@@ -256,7 +256,7 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">synchronizer.sync_method</span></code>: The synchronization method between <code class="docutils literal notranslate"><span class="pre">trainer</span></code> and <code class="docutils literal notranslate"><span class="pre">explorer</span></code>.
 Support <code class="docutils literal notranslate"><span class="pre">nccl</span></code> and <code class="docutils literal notranslate"><span class="pre">checkpoint</span></code>, <code class="docutils literal notranslate"><span class="pre">nccl</span></code> represents that model weights in <code class="docutils literal notranslate"><span class="pre">explorer</span></code> will be synchronized from <code class="docutils literal notranslate"><span class="pre">trainer</span></code> through <code class="docutils literal notranslate"><span class="pre">nccl</span></code>,
 <code class="docutils literal notranslate"><span class="pre">checkpoint</span></code> represents that <code class="docutils literal notranslate"><span class="pre">explorer</span></code> will load the newest checkpoints saved by <code class="docutils literal notranslate"><span class="pre">trainer</span></code> then update its model weights. Default is <code class="docutils literal notranslate"><span class="pre">nccl</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">synchronizer.sync_iteration_interval</span></code>: The interval between two synchronizations. Default is <code class="docutils literal notranslate"><span class="pre">10</span></code>. It should be set manually.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">synchronizer.sync_interval</span></code>: The interval between two synchronizations. Default is <code class="docutils literal notranslate"><span class="pre">10</span></code>. It should be set manually.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">synchronizer.sync_timeout</span></code>: The timeout of the synchronization. Default is <code class="docutils literal notranslate"><span class="pre">1200</span></code>.</p></li>
 </ul>
 </section>
@@ -266,7 +266,7 @@ Support <code class="docutils literal notranslate"><span class="pre">nccl</span>
 <span class="w">  </span><span class="nt">trainer_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;verl&#39;</span>
 <span class="w">  </span><span class="nt">algorithm_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ppo</span>
 <span class="w">  </span><span class="nt">trainer_config_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;examples/ppo_countdown/train_countdown.yaml&#39;</span>
-<span class="w">  </span><span class="nt">sft_warmup_iteration</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">  </span><span class="nt">sft_warmup_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
 <span class="w">  </span><span class="nt">eval_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
 <span class="w">  </span><span class="nt">save_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
 </pre></div>
@@ -275,7 +275,7 @@ Support <code class="docutils literal notranslate"><span class="pre">nccl</span>
 <li><p><code class="docutils literal notranslate"><span class="pre">trainer.trainer_type</span></code>: The backend of the trainer, Only <code class="docutils literal notranslate"><span class="pre">verl</span></code> is supported.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">trainer.algorithm_type</span></code>: The type of the algorithm, Support <code class="docutils literal notranslate"><span class="pre">ppo</span></code>, <code class="docutils literal notranslate"><span class="pre">grpo</span></code>, <code class="docutils literal notranslate"><span class="pre">opmd</span></code> and <code class="docutils literal notranslate"><span class="pre">dpo</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">trainer.trainer_config_path</span></code>: The path to the trainer configuration file. It must be set manually.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">trainer.sft_warmup_iteration</span></code>: The number of iterations to warm up the model. Default is <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trainer.sft_warmup_steps</span></code>: The number of steps to warm up the model. Default is <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">trainer.eval_interval</span></code>: The interval between two evaluations. Default is <code class="docutils literal notranslate"><span class="pre">1000</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">trainer.save_interval</span></code>: The interval between two checkpoints. Default is <code class="docutils literal notranslate"><span class="pre">100</span></code>.</p></li>
 </ul>
@@ -513,7 +513,7 @@ Support <code class="docutils literal notranslate"><span class="pre">nccl</span>
 <li><p><code class="docutils literal notranslate"><span class="pre">trainer.balance_batch</span></code>: Whether to balance batch size between GPUs during training.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">trainer.resume_mode</span></code>: Resume mode for training. Support <code class="docutils literal notranslate"><span class="pre">disable</span></code>, <code class="docutils literal notranslate"><span class="pre">auto</span></code> and <code class="docutils literal notranslate"><span class="pre">resume_path</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">trainer.resume_from_path</span></code>: Path to resume from.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">trainer.critic_warmup</span></code>: The number of iteration to train the critic model before actual policy learning.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trainer.critic_warmup</span></code>: The number of steps to train the critic model before actual policy learning.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">trainer.default_hdfs_dir</span></code>: Default HDFS directory for saving checkpoints.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">trainer.remove_previous_ckpt_in_save</span></code>: Whether to remove previous checkpoints in save.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">trainer.del_local_ckpt_after_load</span></code>: Whether to delete local checkpoints after loading.</p></li>

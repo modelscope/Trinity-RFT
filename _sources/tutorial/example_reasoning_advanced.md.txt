@@ -20,7 +20,7 @@ To try out the OPMD algorithm:
 trinity run --config examples/opmd_gsm8k/opmd_gsm8k.yaml
 ```
 
-Note that in this config file, `sync_iteration_interval` is set to 10, i.e., the model weights of explorer and trainer are synchronized only once every 10 training steps, which leads to a challenging off-policy scenario (potentially with abrupt distribution shift during the RFT process).
+Note that in this config file, `sync_interval` is set to 10, i.e., the model weights of explorer and trainer are synchronized only once every 10 training steps, which leads to a challenging off-policy scenario (potentially with abrupt distribution shift during the RFT process).
 Other configurations of particular interest are explained at the beginning of [`train_opmd_gsm8k.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/opmd_gsm8k/train_opmd_gsm8k.yaml).
 
 
@@ -30,7 +30,7 @@ Other configurations of particular interest are explained at the beginning of [`
 The red curve below shows an example of OPMD's learning curves.
 Since the explorer's model weights remain unchanged for the first 10 steps, its score remains flat.
 Then, after the model weights of explorer and trainer are synchronized at the end of step 10, we see an abrupt increase in score at step 11, which indicates effective off-policy learning in the first 10 steps.
-A similar performance boost is shown at step 21, which leads to a converged score matching what is achieved by GRPO in a mostly on-policy case (with `sync_iteration_interval=2`).
+A similar performance boost is shown at step 21, which leads to a converged score matching what is achieved by GRPO in a mostly on-policy case (with `sync_interval=2`).
 
 
 

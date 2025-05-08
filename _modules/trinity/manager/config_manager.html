@@ -132,6 +132,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_init_default_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">default_config</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;_init_config_manager&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;both&quot;</span><span class="p">,</span>
             <span class="s2">&quot;project&quot;</span><span class="p">:</span> <span class="s2">&quot;Trinity-RFT&quot;</span><span class="p">,</span>
             <span class="s2">&quot;exp_name&quot;</span><span class="p">:</span> <span class="s2">&quot;qwen2.5-1.5B&quot;</span><span class="p">,</span>
             <span class="s2">&quot;monitor_type&quot;</span><span class="p">:</span> <span class="n">MonitorType</span><span class="o">.</span><span class="n">WANDB</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
@@ -162,7 +163,7 @@
             <span class="s2">&quot;_not_dpo_storage_type&quot;</span><span class="p">:</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">QUEUE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
             <span class="s2">&quot;storage_type&quot;</span><span class="p">:</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">QUEUE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
             <span class="s2">&quot;train_dataset_path&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;max_retry_times&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+            <span class="s2">&quot;buffer_max_retry_times&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
             <span class="s2">&quot;max_retry_interval&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
             <span class="s2">&quot;dpo_dataset_train_split&quot;</span><span class="p">:</span> <span class="s2">&quot;train&quot;</span><span class="p">,</span>
             <span class="s2">&quot;dpo_dataset_prompt_type&quot;</span><span class="p">:</span> <span class="n">PromptType</span><span class="o">.</span><span class="n">MESSAGES</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
@@ -178,31 +179,37 @@
             <span class="c1"># Explorer and Sync Configs</span>
             <span class="s2">&quot;engine_type&quot;</span><span class="p">:</span> <span class="s2">&quot;vllm_async&quot;</span><span class="p">,</span>
             <span class="s2">&quot;engine_num&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-            <span class="s2">&quot;tensor_parallel_size&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;runner_num&quot;</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
             <span class="s2">&quot;_grouped_adv_repeat_times&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
             <span class="s2">&quot;_not_grouped_adv_repeat_times&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
             <span class="s2">&quot;repeat_times&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-            <span class="s2">&quot;_not_dpo_sync_method&quot;</span><span class="p">:</span> <span class="n">SyncMethod</span><span class="o">.</span><span class="n">NCCL</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-            <span class="s2">&quot;sync_method&quot;</span><span class="p">:</span> <span class="n">SyncMethod</span><span class="o">.</span><span class="n">NCCL</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-            <span class="s2">&quot;sync_iteration_interval&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
-            <span class="s2">&quot;sync_timeout&quot;</span><span class="p">:</span> <span class="mi">1200</span><span class="p">,</span>
-            <span class="s2">&quot;runner_num&quot;</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
-            <span class="s2">&quot;max_pending_requests&quot;</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
-            <span class="s2">&quot;max_waiting_steps&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+            <span class="s2">&quot;eval_interval&quot;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+            <span class="s2">&quot;tensor_parallel_size&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;enable_prefix_caching&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;enforce_eager&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
             <span class="s2">&quot;dtype&quot;</span><span class="p">:</span> <span class="s2">&quot;bfloat16&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;backend&quot;</span><span class="p">:</span> <span class="s2">&quot;nccl&quot;</span><span class="p">,</span>
             <span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
             <span class="s2">&quot;top_p&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
             <span class="s2">&quot;top_k&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
             <span class="s2">&quot;seed&quot;</span><span class="p">:</span> <span class="mi">42</span><span class="p">,</span>
             <span class="s2">&quot;logprobs&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="s2">&quot;enable_prefix_caching&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;enforce_eager&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;backend&quot;</span><span class="p">:</span> <span class="s2">&quot;nccl&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;use_ray&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;gpu_memory_utilization&quot;</span><span class="p">:</span> <span class="mf">0.9</span><span class="p">,</span>
+            <span class="s2">&quot;enable_chunked_prefill&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;max_pending_requests&quot;</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
+            <span class="s2">&quot;max_waiting_steps&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+            <span class="s2">&quot;max_timeout&quot;</span><span class="p">:</span> <span class="mi">900</span><span class="p">,</span>
+            <span class="s2">&quot;explorer_max_retry_times&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="c1"># Synchronizer Configs</span>
+            <span class="s2">&quot;_not_dpo_sync_method&quot;</span><span class="p">:</span> <span class="n">SyncMethod</span><span class="o">.</span><span class="n">NCCL</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="s2">&quot;sync_method&quot;</span><span class="p">:</span> <span class="n">SyncMethod</span><span class="o">.</span><span class="n">NCCL</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="s2">&quot;sync_interval&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+            <span class="s2">&quot;sync_timeout&quot;</span><span class="p">:</span> <span class="mi">1200</span><span class="p">,</span>
             <span class="c1"># Trainer Configs</span>
             <span class="s2">&quot;trainer_type&quot;</span><span class="p">:</span> <span class="s2">&quot;verl&quot;</span><span class="p">,</span>
             <span class="s2">&quot;algorithm_type&quot;</span><span class="p">:</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">PPO</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-            <span class="s2">&quot;sft_warmup_iteration&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="s2">&quot;eval_interval&quot;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+            <span class="s2">&quot;sft_warmup_steps&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
             <span class="s2">&quot;_nccl_save_interval&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
             <span class="s2">&quot;save_interval&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
             <span class="c1"># veRL Trainer Configs</span>
@@ -212,6 +219,7 @@
                 <span class="s2">&quot;remove_padding&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;dynamic_bsz&quot;</span><span class="p">,</span>
             <span class="p">],</span>
+            <span class="s2">&quot;ppo_epochs&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
             <span class="s2">&quot;training_strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;fsdp&quot;</span><span class="p">,</span>
             <span class="s2">&quot;param_offload&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
             <span class="s2">&quot;optimizer_offload&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
@@ -246,6 +254,7 @@
             <span class="s2">&quot;actor_grad_clip&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
             <span class="s2">&quot;actor_clip_ratio&quot;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">,</span>
             <span class="s2">&quot;actor_entropy_coeff&quot;</span><span class="p">:</span> <span class="mf">0.001</span><span class="p">,</span>
+            <span class="s2">&quot;_not_dpo_actor_use_kl_loss&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
             <span class="s2">&quot;actor_use_kl_loss&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
             <span class="s2">&quot;actor_kl_loss_coef&quot;</span><span class="p">:</span> <span class="mf">0.001</span><span class="p">,</span>
             <span class="s2">&quot;actor_kl_loss_type&quot;</span><span class="p">:</span> <span class="s2">&quot;low_var_kl&quot;</span><span class="p">,</span>
@@ -327,10 +336,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_trainer_gpu_num</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_trainer_gpu_num</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;trainer_gpu_num&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;total_gpu_num&quot;</span><span class="p">]</span>
-            <span class="o">-</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;engine_num&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;tensor_parallel_size&quot;</span><span class="p">]</span>
-        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;mode&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;both&quot;</span><span class="p">:</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;trainer_gpu_num&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;total_gpu_num&quot;</span><span class="p">]</span>
+                <span class="o">-</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;engine_num&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;tensor_parallel_size&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># model == train</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;trainer_gpu_num&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;total_gpu_num&quot;</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_max_prompt_tokens</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span><span class="s2">&quot;Max Prompt Tokens&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;max_prompt_tokens&quot;</span><span class="p">,</span> <span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -343,10 +355,14 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_str_for_train_batch_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">trainer_gpu_num_str</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;`gpu_per_node * node_num - engine_num * tensor_parallel_size`&quot;</span>
+            <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;mode&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;both&quot;</span>
+            <span class="k">else</span> <span class="s2">&quot;`gpu_per_node * node_num`&quot;</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;Please ensure that `train_batch_size` can be divided by &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;`gpu_per_node * node_num - engine_num * tensor_parallel_size` &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;= </span><span class="si">{</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s1">&#39;trainer_gpu_num&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">trainer_gpu_num_str</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s1">&#39;trainer_gpu_num&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">.&quot;</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_train_batch_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -383,16 +399,22 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_dataset_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;dataset_path&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="s2">&quot;://&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;dataset_path&quot;</span><span class="p">]:</span>
             <span class="n">subset_name_col</span><span class="p">,</span> <span class="n">train_split_col</span><span class="p">,</span> <span class="n">eval_split_col</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">columns</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-            <span class="n">subset_name_col</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span><span class="s2">&quot;Subset Name&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;subset_name&quot;</span><span class="p">)</span>
-            <span class="n">train_split_col</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span><span class="s2">&quot;Train Split&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;train_split&quot;</span><span class="p">)</span>
-            <span class="n">eval_split_col</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span><span class="s2">&quot;Eval Split&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;eval_split&quot;</span><span class="p">)</span>
+            <span class="n">subset_name_col</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span>
+                <span class="s2">&quot;Subset Name :orange-badge[(Needs review)]&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;subset_name&quot;</span>
+            <span class="p">)</span>
+            <span class="n">train_split_col</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span>
+                <span class="s2">&quot;Train Split :orange-badge[(Needs review)]&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;train_split&quot;</span>
+            <span class="p">)</span>
+            <span class="n">eval_split_col</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span><span class="s2">&quot;Eval Split :orange-badge[(Needs review)]&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;eval_split&quot;</span><span class="p">)</span>
             <span class="n">prompt_key_col</span><span class="p">,</span> <span class="n">response_key_col</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">columns</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-            <span class="n">prompt_key_col</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span><span class="s2">&quot;Prompt Key&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;prompt_key&quot;</span><span class="p">)</span>
-            <span class="n">response_key_col</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span><span class="s2">&quot;Response Key&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;response_key&quot;</span><span class="p">)</span>
+            <span class="n">prompt_key_col</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span><span class="s2">&quot;Prompt Key :orange-badge[(Needs review)]&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;prompt_key&quot;</span><span class="p">)</span>
+            <span class="n">response_key_col</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span>
+                <span class="s2">&quot;Response Key :orange-badge[(Needs review)]&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;response_key&quot;</span>
+            <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_default_workflow_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">selectbox</span><span class="p">(</span>
-            <span class="s2">&quot;Default Workflow Type&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Default Workflow Type :orange-badge[(Needs review)]&quot;</span><span class="p">,</span>
             <span class="n">WORKFLOWS</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span>
             <span class="n">key</span><span class="o">=</span><span class="s2">&quot;default_workflow_type&quot;</span><span class="p">,</span>
             <span class="n">help</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;&quot;&quot;`simple_workflow`: call &#39;model.chat()&#39; to get responses.</span>
@@ -405,7 +427,7 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_default_reward_fn_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">selectbox</span><span class="p">(</span>
-            <span class="s2">&quot;Default Reward Fn Type&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Default Reward Fn Type :orange-badge[(Needs review)]&quot;</span><span class="p">,</span>
             <span class="n">REWARD_FUNCTIONS</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span>
             <span class="n">key</span><span class="o">=</span><span class="s2">&quot;default_reward_fn_type&quot;</span><span class="p">,</span>
             <span class="n">help</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;&quot;&quot;`accuracy_reward`: check the accuracy for math problems.</span>
@@ -451,8 +473,8 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">unfinished_fields</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;train_dataset_path&quot;</span><span class="p">)</span>
                 <span class="n">st</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Please input train dataset path.&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_set_max_retry_times</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span><span class="s2">&quot;Max Retry Times&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;max_retry_times&quot;</span><span class="p">,</span> <span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_buffer_max_retry_times</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span><span class="s2">&quot;Max Retry Times&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;buffer_max_retry_times&quot;</span><span class="p">,</span> <span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_max_retry_interval</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span><span class="s2">&quot;Max Retry Interval&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;max_retry_interval&quot;</span><span class="p">,</span> <span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -460,10 +482,10 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_dpo_dataset_kwargs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">dpo_dataset_train_split_col</span><span class="p">,</span> <span class="n">dpo_dataset_prompt_type_col</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">columns</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
         <span class="n">dpo_dataset_train_split_col</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span>
-            <span class="s2">&quot;DPO Dataset Train Split&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;dpo_dataset_train_split&quot;</span>
+            <span class="s2">&quot;DPO Dataset Train Split :orange-badge[(Needs review)]&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;dpo_dataset_train_split&quot;</span>
         <span class="p">)</span>
         <span class="n">dpo_dataset_prompt_type_col</span><span class="o">.</span><span class="n">selectbox</span><span class="p">(</span>
-            <span class="s2">&quot;DPO Dataset Prompt Type&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;DPO Dataset Prompt Type :orange-badge[(Needs review)]&quot;</span><span class="p">,</span>
             <span class="p">[</span><span class="n">prompt_type</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">prompt_type</span> <span class="ow">in</span> <span class="n">PromptType</span><span class="p">],</span>
             <span class="n">key</span><span class="o">=</span><span class="s2">&quot;dpo_dataset_prompt_type&quot;</span><span class="p">,</span>
         <span class="p">)</span>
@@ -474,22 +496,21 @@
             <span class="n">dpo_dataset_rejected_key_col</span><span class="p">,</span>
         <span class="p">)</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">columns</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
         <span class="n">dpo_dataset_prompt_key_col</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span>
-            <span class="s2">&quot;DPO Dataset Prompt Key&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;dpo_dataset_prompt_key&quot;</span>
+            <span class="s2">&quot;DPO Dataset Prompt Key :orange-badge[(Needs review)]&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;dpo_dataset_prompt_key&quot;</span>
         <span class="p">)</span>
         <span class="n">dpo_dataset_chosen_key_col</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span>
-            <span class="s2">&quot;DPO Dataset Chosen Key&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;dpo_dataset_chosen_key&quot;</span>
+            <span class="s2">&quot;DPO Dataset Chosen Key :orange-badge[(Needs review)]&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;dpo_dataset_chosen_key&quot;</span>
         <span class="p">)</span>
         <span class="n">dpo_dataset_rejected_key_col</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span>
-            <span class="s2">&quot;DPO Dataset Rejected Key&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;dpo_dataset_rejected_key&quot;</span>
+            <span class="s2">&quot;DPO Dataset Rejected Key :orange-badge[(Needs review)]&quot;</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="s2">&quot;dpo_dataset_rejected_key&quot;</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_check_sft_warmup_dataset_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_iteration&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_steps&quot;</span><span class="p">]:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_dataset_path&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">unfinished_fields</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;sft_warmup_dataset_path&quot;</span><span class="p">)</span>
-                <span class="n">st</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="s2">&quot;Please input SFT warmup dataset path when `sft_warmup_iteration` is not 0&quot;</span>
-                <span class="p">)</span>
+                <span class="n">st</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Please input SFT warmup dataset path when `sft_warmup_steps` is not 0&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_sft_warmup_dataset_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span><span class="s2">&quot;SFT Warmup Dataset Path&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;sft_warmup_dataset_path&quot;</span><span class="p">)</span>
@@ -504,9 +525,12 @@
                 <span class="n">sft_warmup_train_split_col</span><span class="p">,</span>
                 <span class="n">sft_warmup_prompt_type_col</span><span class="p">,</span>
             <span class="p">)</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">columns</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-            <span class="n">sft_warmup_train_split_col</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span><span class="s2">&quot;SFT Train Split&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;sft_warmup_train_split&quot;</span><span class="p">)</span>
+            <span class="n">sft_warmup_train_split_col</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span>
+                <span class="s2">&quot;SFT Dataset Train Split :orange-badge[(Needs review)]&quot;</span><span class="p">,</span>
+                <span class="n">key</span><span class="o">=</span><span class="s2">&quot;sft_warmup_train_split&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="n">sft_warmup_prompt_type_col</span><span class="o">.</span><span class="n">selectbox</span><span class="p">(</span>
-                <span class="s2">&quot;SFT Prompt Type&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;SFT Dataset Prompt Type :orange-badge[(Needs review)]&quot;</span><span class="p">,</span>
                 <span class="p">[</span><span class="n">prompt_type</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">prompt_type</span> <span class="ow">in</span> <span class="n">PromptType</span><span class="p">],</span>
                 <span class="n">key</span><span class="o">=</span><span class="s2">&quot;sft_warmup_prompt_type&quot;</span><span class="p">,</span>
             <span class="p">)</span>
@@ -516,11 +540,15 @@
                 <span class="n">sft_warmup_response_key_col</span><span class="p">,</span>
             <span class="p">)</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">columns</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
             <span class="n">sft_warmup_messages_key_col</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span>
-                <span class="s2">&quot;SFT Messages Key&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;sft_warmup_messages_key&quot;</span>
+                <span class="s2">&quot;SFT Dataset Messages Key :orange-badge[(Needs review)]&quot;</span><span class="p">,</span>
+                <span class="n">key</span><span class="o">=</span><span class="s2">&quot;sft_warmup_messages_key&quot;</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="n">sft_warmup_prompt_key_col</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span><span class="s2">&quot;SFT Prompt Key&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;sft_warmup_prompt_key&quot;</span><span class="p">)</span>
+            <span class="n">sft_warmup_prompt_key_col</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span>
+                <span class="s2">&quot;SFT Dataset Prompt Key :orange-badge[(Needs review)]&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;sft_warmup_prompt_key&quot;</span>
+            <span class="p">)</span>
             <span class="n">sft_warmup_response_key_col</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span>
-                <span class="s2">&quot;SFT Response Key&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;sft_warmup_response_key&quot;</span>
+                <span class="s2">&quot;SFT Dataset Response Key :orange-badge[(Needs review)]&quot;</span><span class="p">,</span>
+                <span class="n">key</span><span class="o">=</span><span class="s2">&quot;sft_warmup_response_key&quot;</span><span class="p">,</span>
             <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_engine_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -628,19 +656,19 @@
             <span class="s2">&quot;Sync Method&quot;</span><span class="p">,</span>
             <span class="p">[</span><span class="n">sync_method</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">sync_method</span> <span class="ow">in</span> <span class="n">SyncMethod</span><span class="p">],</span>
             <span class="n">key</span><span class="o">=</span><span class="s2">&quot;sync_method&quot;</span><span class="p">,</span>
-            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;`nccl`: the explorer and trainer sync model weights once every `sync_iteration_interval` steps.</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;`nccl`: the explorer and trainer sync model weights once every `sync_interval` steps.</span>
 
-<span class="s2">`checkpoint`: the trainer saves the model checkpoint, and the explorer loads it at `sync_iteration_interval`.&quot;&quot;&quot;</span><span class="p">,</span>
+<span class="s2">`checkpoint`: the trainer saves the model checkpoint, and the explorer loads it at `sync_interval`.&quot;&quot;&quot;</span><span class="p">,</span>
             <span class="n">disabled</span><span class="o">=</span><span class="n">disabled</span><span class="p">,</span>
             <span class="n">on_change</span><span class="o">=</span><span class="n">on_change</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_set_sync_iteration_interval</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_sync_interval</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span>
-            <span class="s2">&quot;Sync Iteration Interval&quot;</span><span class="p">,</span>
-            <span class="n">key</span><span class="o">=</span><span class="s2">&quot;sync_iteration_interval&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Sync Interval&quot;</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="s2">&quot;sync_interval&quot;</span><span class="p">,</span>
             <span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;The iteration interval at which the `explorer` and `trainer` synchronize model weight.&quot;&quot;&quot;</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;The step interval at which the `explorer` and `trainer` synchronize model weight.&quot;&quot;&quot;</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_sync_timeout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -688,15 +716,49 @@
         <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span><span class="s2">&quot;Logprobs&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;logprobs&quot;</span><span class="p">,</span> <span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_enable_prefix_caching</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">st</span><span class="o">.</span><span class="n">checkbox</span><span class="p">(</span><span class="s2">&quot;Enable Prefix Caching&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;enable_prefix_caching&quot;</span><span class="p">)</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">checkbox</span><span class="p">(</span><span class="s2">&quot;Prefix Caching&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;enable_prefix_caching&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_enforce_eager</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">checkbox</span><span class="p">(</span><span class="s2">&quot;Enforce Eager&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;enforce_eager&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_use_ray</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">checkbox</span><span class="p">(</span><span class="s2">&quot;Use Ray&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;use_ray&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_gpu_memory_utilization</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span>
+            <span class="s2">&quot;GPU Memory Utilization&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;gpu_memory_utilization&quot;</span><span class="p">,</span> <span class="n">min_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mf">1.0</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_enable_chunked_prefill</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">checkbox</span><span class="p">(</span><span class="s2">&quot;Chunked Prefill&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;enable_chunked_prefill&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_max_timeout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span><span class="s2">&quot;Max Timeout&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;max_timeout&quot;</span><span class="p">,</span> <span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_explorer_max_retry_times</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span><span class="s2">&quot;Explorer Max Retry Times&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;explorer_max_retry_times&quot;</span><span class="p">,</span> <span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_trainer_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">selectbox</span><span class="p">(</span><span class="s2">&quot;Trainer Type&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;verl&quot;</span><span class="p">],</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;trainer_type&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_algorithm_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">on_change</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">PPO</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;mode&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;both&quot;</span>
+                <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;adv_estimator&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">AdvantageEstimator</span><span class="o">.</span><span class="n">GAE</span><span class="o">.</span><span class="n">value</span>
+            <span class="k">elif</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">GRPO</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;mode&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;both&quot;</span>
+                <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;adv_estimator&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">AdvantageEstimator</span><span class="o">.</span><span class="n">GRPO</span><span class="o">.</span><span class="n">value</span>
+            <span class="k">elif</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">DPO</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;mode&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;train&quot;</span>
+                <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;adv_estimator&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">AdvantageEstimator</span><span class="o">.</span><span class="n">GRPO</span><span class="o">.</span><span class="n">value</span>
+            <span class="k">elif</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">OPMD</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;mode&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;both&quot;</span>
+                <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;adv_estimator&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">AdvantageEstimator</span><span class="o">.</span><span class="n">GRPO</span><span class="o">.</span><span class="n">value</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># TODO: add more algorithms</span>
+                <span class="k">pass</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_trainer_gpu_num</span><span class="p">()</span>
+
         <span class="n">st</span><span class="o">.</span><span class="n">selectbox</span><span class="p">(</span>
             <span class="s2">&quot;Algorithm Type&quot;</span><span class="p">,</span>
             <span class="p">[</span>
@@ -706,11 +768,11 @@
                 <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">OPMD</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
             <span class="p">],</span>
             <span class="n">key</span><span class="o">=</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">,</span>
-            <span class="n">on_change</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_set_adv_estimator</span><span class="p">,</span>
+            <span class="n">on_change</span><span class="o">=</span><span class="n">on_change</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_set_sft_warmup_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span><span class="s2">&quot;SFT Warmup Iteration&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;sft_warmup_iteration&quot;</span><span class="p">,</span> <span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_sft_warmup_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span><span class="s2">&quot;SFT Warmup Steps&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;sft_warmup_steps&quot;</span><span class="p">,</span> <span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_eval_interval</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span><span class="s2">&quot;Eval Interval&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;eval_interval&quot;</span><span class="p">,</span> <span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -728,25 +790,34 @@
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_save_interval</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sync_method&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">SyncMethod</span><span class="o">.</span><span class="n">NCCL</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">DPO</span><span class="o">.</span><span class="n">value</span>
+            <span class="ow">or</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sync_method&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">SyncMethod</span><span class="o">.</span><span class="n">NCCL</span><span class="o">.</span><span class="n">value</span>
+        <span class="p">):</span>
             <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;save_interval&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;_nccl_save_interval&quot;</span><span class="p">]</span>
             <span class="n">freeze_save_interval</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;save_interval&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sync_iteration_interval&quot;</span><span class="p">]</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;save_interval&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sync_interval&quot;</span><span class="p">]</span>
             <span class="n">freeze_save_interval</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">on_change</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sync_method&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">SyncMethod</span><span class="o">.</span><span class="n">NCCL</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">DPO</span><span class="o">.</span><span class="n">value</span>
+                <span class="ow">or</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sync_method&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">SyncMethod</span><span class="o">.</span><span class="n">NCCL</span><span class="o">.</span><span class="n">value</span>
+            <span class="p">):</span>
                 <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;_nccl_save_interval&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;save_interval&quot;</span><span class="p">]</span>
 
         <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span>
             <span class="s2">&quot;Save Interval&quot;</span><span class="p">,</span>
             <span class="n">key</span><span class="o">=</span><span class="s2">&quot;save_interval&quot;</span><span class="p">,</span>
             <span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Set to `sync_iteration_interval` when `sync_method` is `checkpoint`&quot;</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Set to `sync_interval` when `algorithm_type != DPO &amp;&amp; sync_method == checkpoint`&quot;</span><span class="p">,</span>
             <span class="n">disabled</span><span class="o">=</span><span class="n">freeze_save_interval</span><span class="p">,</span>
             <span class="n">on_change</span><span class="o">=</span><span class="n">on_change</span><span class="p">,</span>
         <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_ppo_epochs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span><span class="s2">&quot;PPO Epochs&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;ppo_epochs&quot;</span><span class="p">,</span> <span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_training_strategy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">selectbox</span><span class="p">(</span>
@@ -776,7 +847,7 @@
                 <span class="n">st</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Please input a valid resume path when `resume_mode == resume_path`&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_critic_warmup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span><span class="s2">&quot;Critic Warmup Iteration&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;critic_warmup&quot;</span><span class="p">,</span> <span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span><span class="s2">&quot;Critic Warmup Steps&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;critic_warmup&quot;</span><span class="p">,</span> <span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_total_training_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span><span class="s2">&quot;Total Training Steps&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;total_training_steps&quot;</span><span class="p">,</span> <span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -797,22 +868,10 @@
         <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span><span class="s2">&quot;Max Critic Checkpoint to Keep&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;max_critic_ckpt_to_keep&quot;</span><span class="p">,</span> <span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_gamma</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span><span class="s2">&quot;Gamma&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;gamma&quot;</span><span class="p">)</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Gamma :blue-badge[$\gamma$]&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;gamma&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_lam</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span><span class="s2">&quot;Lambda&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;lam&quot;</span><span class="p">)</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_set_adv_estimator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">PPO</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
-            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;adv_estimator&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">AdvantageEstimator</span><span class="o">.</span><span class="n">GAE</span><span class="o">.</span><span class="n">value</span>
-        <span class="k">elif</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">GRPO</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
-            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;adv_estimator&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">AdvantageEstimator</span><span class="o">.</span><span class="n">GRPO</span><span class="o">.</span><span class="n">value</span>
-        <span class="k">elif</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">DPO</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
-            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;adv_estimator&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">AdvantageEstimator</span><span class="o">.</span><span class="n">GRPO</span><span class="o">.</span><span class="n">value</span>
-        <span class="k">elif</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">OPMD</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
-            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;adv_estimator&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">AdvantageEstimator</span><span class="o">.</span><span class="n">GRPO</span><span class="o">.</span><span class="n">value</span>
-        <span class="k">else</span><span class="p">:</span>  <span class="c1"># TODO: add more algorithms</span>
-            <span class="k">pass</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Lambda :blue-badge[$\lambda$]&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;lam&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_norm_adv_by_std_in_grpo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">checkbox</span><span class="p">(</span><span class="s2">&quot;Norm Adv by Std in GRPO&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;norm_adv_by_std_in_grpo&quot;</span><span class="p">)</span>
@@ -841,7 +900,7 @@
             <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;_train_batch_size_per_gpu&quot;</span><span class="p">],</span>
         <span class="p">)</span>
         <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span>
-            <span class="s2">&quot;Micro Batch Size Per GPU for Actor&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Micro Batch Size Per GPU :blue-badge[(Actor)]&quot;</span><span class="p">,</span>
             <span class="n">key</span><span class="o">=</span><span class="s2">&quot;actor_ppo_micro_batch_size_per_gpu&quot;</span><span class="p">,</span>
             <span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">max_value</span><span class="o">=</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;_train_batch_size_per_gpu&quot;</span><span class="p">],</span>
@@ -853,7 +912,7 @@
             <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;_train_batch_size_per_gpu&quot;</span><span class="p">],</span>
         <span class="p">)</span>
         <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span>
-            <span class="s2">&quot;Micro Batch Size Per GPU for Ref&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Micro Batch Size Per GPU :blue-badge[(Ref)]&quot;</span><span class="p">,</span>
             <span class="n">key</span><span class="o">=</span><span class="s2">&quot;ref_log_prob_micro_batch_size_per_gpu&quot;</span><span class="p">,</span>
             <span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">max_value</span><span class="o">=</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;_train_batch_size_per_gpu&quot;</span><span class="p">],</span>
@@ -869,7 +928,7 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_actor_lr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span>
-            <span class="s2">&quot;Learning Rate for Actor&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Learning Rate :blue-badge[(Actor)]&quot;</span><span class="p">,</span>
             <span class="n">key</span><span class="o">=</span><span class="s2">&quot;actor_lr&quot;</span><span class="p">,</span>
             <span class="n">min_value</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">,</span>
             <span class="n">max_value</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span>
@@ -878,24 +937,35 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_actor_warmup_style</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">selectbox</span><span class="p">(</span>
-            <span class="s2">&quot;LR Warmup Style for Actor&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;LR Warmup Style :blue-badge[(Actor)]&quot;</span><span class="p">,</span>
             <span class="p">[</span><span class="s2">&quot;constant&quot;</span><span class="p">,</span> <span class="s2">&quot;cosine&quot;</span><span class="p">],</span>
             <span class="n">key</span><span class="o">=</span><span class="s2">&quot;actor_warmup_style&quot;</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_actor_lr_warmup_steps_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span>
-            <span class="s2">&quot;LR Warmup Steps Ratio for Actor&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;LR Warmup Steps Ratio :blue-badge[(Actor)]&quot;</span><span class="p">,</span>
             <span class="n">key</span><span class="o">=</span><span class="s2">&quot;actor_lr_warmup_steps_ratio&quot;</span><span class="p">,</span>
             <span class="n">min_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
             <span class="n">max_value</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_actor_grad_clip</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span><span class="s2">&quot;Grad Clip&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;actor_grad_clip&quot;</span><span class="p">,</span> <span class="n">min_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span>
+            <span class="s2">&quot;Grad Clip :blue-badge[(Actor)]&quot;</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="s2">&quot;actor_grad_clip&quot;</span><span class="p">,</span>
+            <span class="n">min_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">max_value</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Clipping by Norm&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_actor_clip_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span><span class="s2">&quot;Clip Ratio&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;actor_clip_ratio&quot;</span><span class="p">,</span> <span class="n">min_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span>
+            <span class="sa">r</span><span class="s2">&quot;Clip Ratio :blue-badge[$\epsilon$]&quot;</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="s2">&quot;actor_clip_ratio&quot;</span><span class="p">,</span>
+            <span class="n">min_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">max_value</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_actor_entropy_coeff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span>
@@ -907,11 +977,21 @@
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_actor_use_kl_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">st</span><span class="o">.</span><span class="n">checkbox</span><span class="p">(</span><span class="s2">&quot;Use KL Loss&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;actor_use_kl_loss&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">DPO</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_use_kl_loss&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_use_kl_loss&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;_not_dpo_actor_use_kl_loss&quot;</span><span class="p">]</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="nf">on_change</span><span class="p">():</span>
+                <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;_not_dpo_actor_use_kl_loss&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span>
+                    <span class="s2">&quot;actor_use_kl_loss&quot;</span>
+                <span class="p">]</span>
+
+            <span class="n">st</span><span class="o">.</span><span class="n">checkbox</span><span class="p">(</span><span class="s2">&quot;Use KL Loss&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;actor_use_kl_loss&quot;</span><span class="p">,</span> <span class="n">on_change</span><span class="o">=</span><span class="n">on_change</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_actor_kl_loss_coef</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span>
-            <span class="s2">&quot;KL Loss Coef&quot;</span><span class="p">,</span>
+            <span class="sa">r</span><span class="s2">&quot;KL Loss Coef :blue-badge[$\beta$]&quot;</span><span class="p">,</span>
             <span class="n">key</span><span class="o">=</span><span class="s2">&quot;actor_kl_loss_coef&quot;</span><span class="p">,</span>
             <span class="n">min_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
             <span class="n">max_value</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
@@ -956,7 +1036,7 @@
             <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;_train_batch_size_per_gpu&quot;</span><span class="p">],</span>
         <span class="p">)</span>
         <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span>
-            <span class="s2">&quot;Micro Batch Size Per GPU for Critic&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Micro Batch Size Per GPU :blue-badge[(Critic)]&quot;</span><span class="p">,</span>
             <span class="n">key</span><span class="o">=</span><span class="s2">&quot;critic_ppo_micro_batch_size_per_gpu&quot;</span><span class="p">,</span>
             <span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">max_value</span><span class="o">=</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;_train_batch_size_per_gpu&quot;</span><span class="p">],</span>
@@ -972,7 +1052,7 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_critic_lr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span>
-            <span class="s2">&quot;Learning Rate for Critic&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Learning Rate :blue-badge[(Critic)]&quot;</span><span class="p">,</span>
             <span class="n">key</span><span class="o">=</span><span class="s2">&quot;critic_lr&quot;</span><span class="p">,</span>
             <span class="n">min_value</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">,</span>
             <span class="n">max_value</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span>
@@ -981,14 +1061,14 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_critic_warmup_style</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">selectbox</span><span class="p">(</span>
-            <span class="s2">&quot;LR Warmup Style for Critic&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;LR Warmup Style :blue-badge[(Critic)]&quot;</span><span class="p">,</span>
             <span class="p">[</span><span class="s2">&quot;constant&quot;</span><span class="p">,</span> <span class="s2">&quot;cosine&quot;</span><span class="p">],</span>
             <span class="n">key</span><span class="o">=</span><span class="s2">&quot;critic_warmup_style&quot;</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_critic_lr_warmup_steps_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span>
-            <span class="s2">&quot;LR Warmup Steps Ratio for Critic&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;LR Warmup Steps Ratio :blue-badge[(Critic)]&quot;</span><span class="p">,</span>
             <span class="n">key</span><span class="o">=</span><span class="s2">&quot;critic_lr_warmup_steps_ratio&quot;</span><span class="p">,</span>
             <span class="n">min_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
             <span class="n">max_value</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
@@ -996,10 +1076,11 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_critic_grad_clip</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span>
-            <span class="s2">&quot;Grad Clip for Critic&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Grad Clip :blue-badge[(Critic)]&quot;</span><span class="p">,</span>
             <span class="n">key</span><span class="o">=</span><span class="s2">&quot;critic_grad_clip&quot;</span><span class="p">,</span>
             <span class="n">min_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
             <span class="n">max_value</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Clipping by Norm&quot;</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_critic_cliprange_value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1039,38 +1120,42 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_dataset_path</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">(</span>
-            <span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">,</span> <span class="s2">&quot;sft_warmup_iteration&quot;</span><span class="p">,</span> <span class="s2">&quot;monitor_type&quot;</span><span class="p">]</span>
-        <span class="p">)</span>
-        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_iteration&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">,</span> <span class="s2">&quot;sft_warmup_steps&quot;</span><span class="p">,</span> <span class="s2">&quot;monitor_type&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_steps&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_sft_warmup_dataset_path</span><span class="p">()</span>
 
         <span class="n">st</span><span class="o">.</span><span class="n">header</span><span class="p">(</span><span class="s2">&quot;Important Configs&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">(</span>
             <span class="p">[</span><span class="s2">&quot;node_num&quot;</span><span class="p">,</span> <span class="s2">&quot;gpu_per_node&quot;</span><span class="p">,</span> <span class="s2">&quot;engine_num&quot;</span><span class="p">,</span> <span class="s2">&quot;tensor_parallel_size&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;mode&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;both&quot;</span>
+            <span class="k">else</span> <span class="p">[</span><span class="s2">&quot;node_num&quot;</span><span class="p">,</span> <span class="s2">&quot;gpu_per_node&quot;</span><span class="p">]</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_engine_num_and_tp_size</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">(</span>
-            <span class="p">[</span><span class="s2">&quot;total_epochs&quot;</span><span class="p">,</span> <span class="s2">&quot;train_batch_size&quot;</span><span class="p">,</span> <span class="s2">&quot;max_prompt_tokens&quot;</span><span class="p">,</span> <span class="s2">&quot;max_response_tokens&quot;</span><span class="p">]</span>
+            <span class="p">[</span><span class="s2">&quot;total_epochs&quot;</span><span class="p">,</span> <span class="s2">&quot;train_batch_size&quot;</span><span class="p">,</span> <span class="s2">&quot;ppo_epochs&quot;</span><span class="p">,</span> <span class="s2">&quot;repeat_times&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;mode&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;both&quot;</span>
+            <span class="k">else</span> <span class="p">[</span><span class="s2">&quot;total_epochs&quot;</span><span class="p">,</span> <span class="s2">&quot;train_batch_size&quot;</span><span class="p">,</span> <span class="s2">&quot;ppo_epochs&quot;</span><span class="p">]</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_train_batch_size</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;max_prompt_tokens&quot;</span><span class="p">,</span> <span class="s2">&quot;max_response_tokens&quot;</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">(</span>
+            <span class="p">[</span><span class="s2">&quot;sync_interval&quot;</span><span class="p">,</span> <span class="s2">&quot;eval_interval&quot;</span><span class="p">,</span> <span class="s2">&quot;save_interval&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;mode&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;both&quot;</span>
+            <span class="k">else</span> <span class="p">[</span><span class="s2">&quot;eval_interval&quot;</span><span class="p">,</span> <span class="s2">&quot;save_interval&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">DPO</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_dataset_args</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_dpo_dataset_kwargs</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_iteration&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_steps&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_sft_warmup_dataset_args</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">(</span>
-            <span class="p">[</span><span class="s2">&quot;default_workflow_type&quot;</span><span class="p">,</span> <span class="s2">&quot;default_reward_fn_type&quot;</span><span class="p">,</span> <span class="s2">&quot;repeat_times&quot;</span><span class="p">]</span>
-        <span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">(</span>
-            <span class="p">[</span><span class="s2">&quot;sync_iteration_interval&quot;</span><span class="p">,</span> <span class="s2">&quot;eval_interval&quot;</span><span class="p">,</span> <span class="s2">&quot;save_interval&quot;</span><span class="p">]</span>
-        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;default_workflow_type&quot;</span><span class="p">,</span> <span class="s2">&quot;default_reward_fn_type&quot;</span><span class="p">])</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_actor_use_kl_loss</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_use_kl_loss&quot;</span><span class="p">]:</span>
@@ -1103,7 +1188,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;max_prompt_tokens&quot;</span><span class="p">,</span> <span class="s2">&quot;max_response_tokens&quot;</span><span class="p">])</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_expert_buffer_part</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;total_epochs&quot;</span><span class="p">,</span> <span class="s2">&quot;train_batch_size&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;total_epochs&quot;</span><span class="p">,</span> <span class="s2">&quot;train_batch_size&quot;</span><span class="p">,</span> <span class="s2">&quot;storage_type&quot;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_train_batch_size</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_dataset_path</span><span class="p">()</span>
@@ -1113,39 +1198,45 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_dpo_dataset_kwargs</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">(</span>
-            <span class="p">[</span><span class="s2">&quot;default_workflow_type&quot;</span><span class="p">,</span> <span class="s2">&quot;default_reward_fn_type&quot;</span><span class="p">,</span> <span class="s2">&quot;storage_type&quot;</span><span class="p">]</span>
-        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;default_workflow_type&quot;</span><span class="p">,</span> <span class="s2">&quot;default_reward_fn_type&quot;</span><span class="p">])</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">buffer_advanced_tab</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">expander</span><span class="p">(</span><span class="s2">&quot;Advanced Config&quot;</span><span class="p">)</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer_advanced_tab</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;max_retry_times&quot;</span><span class="p">,</span> <span class="s2">&quot;max_retry_interval&quot;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;buffer_max_retry_times&quot;</span><span class="p">,</span> <span class="s2">&quot;max_retry_interval&quot;</span><span class="p">])</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_sft_warmup_dataset_path</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_sft_warmup_dataset_args</span><span class="p">()</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_expert_connector_part</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_expert_explorer_part</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">(</span>
             <span class="p">[</span><span class="s2">&quot;engine_type&quot;</span><span class="p">,</span> <span class="s2">&quot;engine_num&quot;</span><span class="p">,</span> <span class="s2">&quot;tensor_parallel_size&quot;</span><span class="p">,</span> <span class="s2">&quot;repeat_times&quot;</span><span class="p">]</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_engine_num_and_tp_size</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">(</span>
-            <span class="p">[</span><span class="s2">&quot;sync_method&quot;</span><span class="p">,</span> <span class="s2">&quot;sync_iteration_interval&quot;</span><span class="p">,</span> <span class="s2">&quot;sync_timeout&quot;</span><span class="p">]</span>
-        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;sync_method&quot;</span><span class="p">,</span> <span class="s2">&quot;sync_interval&quot;</span><span class="p">,</span> <span class="s2">&quot;sync_timeout&quot;</span><span class="p">])</span>
 
         <span class="k">with</span> <span class="n">st</span><span class="o">.</span><span class="n">expander</span><span class="p">(</span><span class="s2">&quot;Advanced Config&quot;</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">(</span>
-                <span class="p">[</span><span class="s2">&quot;runner_num&quot;</span><span class="p">,</span> <span class="s2">&quot;max_pending_requests&quot;</span><span class="p">,</span> <span class="s2">&quot;max_waiting_steps&quot;</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">]</span>
+                <span class="p">[</span><span class="s2">&quot;runner_num&quot;</span><span class="p">,</span> <span class="s2">&quot;temperature&quot;</span><span class="p">,</span> <span class="s2">&quot;top_p&quot;</span><span class="p">,</span> <span class="s2">&quot;top_k&quot;</span><span class="p">,</span> <span class="s2">&quot;seed&quot;</span><span class="p">,</span> <span class="s2">&quot;logprobs&quot;</span><span class="p">]</span>
             <span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;backend&quot;</span><span class="p">,</span> <span class="s2">&quot;temperature&quot;</span><span class="p">,</span> <span class="s2">&quot;seed&quot;</span><span class="p">,</span> <span class="s2">&quot;logprobs&quot;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;dtype&quot;</span><span class="p">,</span> <span class="s2">&quot;backend&quot;</span><span class="p">,</span> <span class="s2">&quot;gpu_memory_utilization&quot;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="s2">&quot;max_pending_requests&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;max_waiting_steps&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;max_timeout&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;explorer_max_retry_times&quot;</span><span class="p">,</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;enable_prefix_caching&quot;</span><span class="p">,</span> <span class="s2">&quot;enforce_eager&quot;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">(</span>
+                <span class="p">[</span><span class="s2">&quot;enable_prefix_caching&quot;</span><span class="p">,</span> <span class="s2">&quot;enforce_eager&quot;</span><span class="p">,</span> <span class="s2">&quot;use_ray&quot;</span><span class="p">,</span> <span class="s2">&quot;enable_chunked_prefill&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_expert_trainer_part</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">(</span>  <span class="c1"># TODO: may add `trainer_type`</span>
-            <span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">,</span> <span class="s2">&quot;sft_warmup_iteration&quot;</span><span class="p">,</span> <span class="s2">&quot;eval_interval&quot;</span><span class="p">,</span> <span class="s2">&quot;save_interval&quot;</span><span class="p">]</span>
+            <span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">,</span> <span class="s2">&quot;sft_warmup_steps&quot;</span><span class="p">,</span> <span class="s2">&quot;eval_interval&quot;</span><span class="p">,</span> <span class="s2">&quot;save_interval&quot;</span><span class="p">]</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_sft_warmup_dataset_path</span><span class="p">()</span>
 
@@ -1165,7 +1256,7 @@
             <span class="n">st</span><span class="o">.</span><span class="n">subheader</span><span class="p">(</span><span class="s2">&quot;RL Training Config&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_training_args</span><span class="p">()</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;training_strategy&quot;</span><span class="p">,</span> <span class="s2">&quot;resume_mode&quot;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;ppo_epochs&quot;</span><span class="p">,</span> <span class="s2">&quot;training_strategy&quot;</span><span class="p">,</span> <span class="s2">&quot;resume_mode&quot;</span><span class="p">])</span>
 
             <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;training_strategy&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;fsdp&quot;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;param_offload&quot;</span><span class="p">,</span> <span class="s2">&quot;optimizer_offload&quot;</span><span class="p">])</span>
@@ -1236,20 +1327,18 @@
 <div class="viewcode-block" id="ConfigManager.expert_mode">
 <a class="viewcode-back" href="../../../build_api/trinity.manager.html#trinity.manager.config_manager.ConfigManager.expert_mode">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">expert_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">model_tab</span><span class="p">,</span> <span class="n">buffer_tab</span><span class="p">,</span> <span class="n">connector_tab</span><span class="p">,</span> <span class="n">trainer_tab</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">tabs</span><span class="p">(</span>
-            <span class="p">[</span><span class="s2">&quot;Model&quot;</span><span class="p">,</span> <span class="s2">&quot;Data&quot;</span><span class="p">,</span> <span class="s2">&quot;Explorer and Synchronizer&quot;</span><span class="p">,</span> <span class="s2">&quot;Trainer&quot;</span><span class="p">]</span>
-        <span class="p">)</span>
-        <span class="k">with</span> <span class="n">model_tab</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_expert_model_part</span><span class="p">()</span>
-
-        <span class="k">with</span> <span class="n">buffer_tab</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_expert_buffer_part</span><span class="p">()</span>
-
-        <span class="k">with</span> <span class="n">connector_tab</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_expert_connector_part</span><span class="p">()</span>
-
-        <span class="k">with</span> <span class="n">trainer_tab</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_expert_trainer_part</span><span class="p">()</span></div>
+        <span class="n">tab2func</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;Model&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expert_model_part</span><span class="p">,</span>
+            <span class="s2">&quot;Data&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expert_buffer_part</span><span class="p">,</span>
+            <span class="s2">&quot;Explorer and Synchronizer&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expert_explorer_part</span><span class="p">,</span>
+            <span class="s2">&quot;Trainer&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expert_trainer_part</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;mode&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;train&quot;</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">tab2func</span><span class="p">[</span><span class="s2">&quot;Explorer and Synchronizer&quot;</span><span class="p">]</span>
+        <span class="n">tabs</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">tabs</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">tab2func</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+        <span class="k">for</span> <span class="n">tab</span><span class="p">,</span> <span class="n">func</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">tabs</span><span class="p">,</span> <span class="n">tab2func</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+            <span class="k">with</span> <span class="n">tab</span><span class="p">:</span>
+                <span class="n">func</span><span class="p">()</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_generate_verl_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trainer_nnodes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">trainer_n_gpus_per_node</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8</span><span class="p">):</span>
@@ -1270,7 +1359,6 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">fsdp_config</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="n">ppo_epochs</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># TODO</span>
         <span class="n">ppo_max_token_len_per_gpu</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;repeat_times&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span>
             <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_prompt_tokens&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_response_tokens&quot;</span><span class="p">]</span>
         <span class="p">)</span>
@@ -1321,7 +1409,7 @@
                     <span class="s2">&quot;use_kl_loss&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_use_kl_loss&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;kl_loss_coef&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_kl_loss_coef&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;kl_loss_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_kl_loss_type&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;ppo_epochs&quot;</span><span class="p">:</span> <span class="n">ppo_epochs</span><span class="p">,</span>
+                    <span class="s2">&quot;ppo_epochs&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;ppo_epochs&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;shuffle&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
                     <span class="s2">&quot;ulysses_sequence_parallel_size&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span>
                         <span class="s2">&quot;actor_ulysses_sequence_parallel_size&quot;</span>
@@ -1410,7 +1498,7 @@
                 <span class="s2">&quot;ulysses_sequence_parallel_size&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span>
                     <span class="s2">&quot;critic_ulysses_sequence_parallel_size&quot;</span>
                 <span class="p">],</span>
-                <span class="s2">&quot;ppo_epochs&quot;</span><span class="p">:</span> <span class="n">ppo_epochs</span><span class="p">,</span>
+                <span class="s2">&quot;ppo_epochs&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;ppo_epochs&quot;</span><span class="p">],</span>
                 <span class="s2">&quot;shuffle&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
                 <span class="s2">&quot;grad_clip&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;critic_grad_clip&quot;</span><span class="p">],</span>
                 <span class="s2">&quot;cliprange_value&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;critic_cliprange_value&quot;</span><span class="p">],</span>
@@ -1465,7 +1553,7 @@
                 <span class="s2">&quot;del_local_ckpt_after_load&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;del_local_ckpt_after_load&quot;</span><span class="p">],</span>
                 <span class="s2">&quot;default_local_dir&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;checkpoint_path&quot;</span><span class="p">],</span>
                 <span class="s2">&quot;val_before_train&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-                <span class="s2">&quot;sync_freq&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sync_iteration_interval&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;sync_freq&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sync_interval&quot;</span><span class="p">],</span>
                 <span class="s2">&quot;max_actor_ckpt_to_keep&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_actor_ckpt_to_keep&quot;</span><span class="p">],</span>
                 <span class="s2">&quot;max_critic_ckpt_to_keep&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_critic_ckpt_to_keep&quot;</span><span class="p">],</span>
             <span class="p">},</span>
@@ -1475,19 +1563,28 @@
 <div class="viewcode-block" id="ConfigManager.generate_config">
 <a class="viewcode-back" href="../../../build_api/trinity.manager.html#trinity.manager.config_manager.ConfigManager.generate_config">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">generate_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">trainer_nnodes</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;node_num&quot;</span><span class="p">]</span>
-            <span class="o">-</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;engine_num&quot;</span><span class="p">]</span>
-            <span class="o">*</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;tensor_parallel_size&quot;</span><span class="p">]</span>
-            <span class="o">//</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;gpu_per_node&quot;</span><span class="p">]</span>
-        <span class="p">)</span>
-        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;node_num&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;mode&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;both&quot;</span><span class="p">:</span>
+            <span class="n">trainer_nnodes</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;node_num&quot;</span><span class="p">]</span>
+                <span class="o">-</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;engine_num&quot;</span><span class="p">]</span>
+                <span class="o">*</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;tensor_parallel_size&quot;</span><span class="p">]</span>
+                <span class="o">//</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;gpu_per_node&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">trainer_nnodes</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;node_num&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;node_num&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;mode&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;both&quot;</span><span class="p">:</span>
             <span class="n">trainer_n_gpus_per_node</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;gpu_per_node&quot;</span><span class="p">]</span>
                 <span class="o">-</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;engine_num&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;tensor_parallel_size&quot;</span><span class="p">]</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">trainer_n_gpus_per_node</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;gpu_per_node&quot;</span><span class="p">]</span>
+
+        <span class="n">critic_model_path</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;critic_model_path&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;critic_model_path&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">else</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;model_path&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">DPO</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
             <span class="n">train_dataset_path</span> <span class="o">=</span> <span class="p">(</span>
@@ -1526,6 +1623,7 @@
             <span class="n">help</span><span class="o">=</span><span class="n">help_messages</span><span class="p">,</span>
         <span class="p">):</span>
             <span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;mode&quot;</span><span class="p">],</span>
                 <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="s2">&quot;total_epochs&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;total_epochs&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;batch_size&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;train_batch_size&quot;</span><span class="p">],</span>
@@ -1541,6 +1639,7 @@
                 <span class="p">},</span>
                 <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="s2">&quot;model_path&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;model_path&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;critic_model_path&quot;</span><span class="p">:</span> <span class="n">critic_model_path</span><span class="p">,</span>
                     <span class="s2">&quot;max_prompt_tokens&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_prompt_tokens&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;max_response_tokens&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_response_tokens&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;checkpoint_path&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;checkpoint_path&quot;</span><span class="p">],</span>
@@ -1550,18 +1649,16 @@
                     <span class="s2">&quot;gpu_per_node&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;gpu_per_node&quot;</span><span class="p">],</span>
                 <span class="p">},</span>
                 <span class="s2">&quot;buffer&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;max_retry_times&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_retry_times&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;max_retry_times&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;buffer_max_retry_times&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;max_retry_interval&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_retry_interval&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;train_dataset&quot;</span><span class="p">:</span> <span class="p">{</span>
                         <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;experience_buffer&quot;</span><span class="p">,</span>  <span class="c1"># TODO</span>
                         <span class="s2">&quot;storage_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;storage_type&quot;</span><span class="p">],</span>
-                        <span class="s2">&quot;algorithm_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">],</span>
                         <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">train_dataset_path</span><span class="p">,</span>
                     <span class="p">},</span>
                     <span class="s2">&quot;sft_warmup_dataset&quot;</span><span class="p">:</span> <span class="p">{</span>
                         <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;sft_warmup_dataset&quot;</span><span class="p">,</span>
                         <span class="s2">&quot;storage_type&quot;</span><span class="p">:</span> <span class="n">sft_storage_type</span><span class="p">,</span>
-                        <span class="s2">&quot;algorithm_type&quot;</span><span class="p">:</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">SFT</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
                         <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_dataset_path&quot;</span><span class="p">],</span>
                         <span class="s2">&quot;kwargs&quot;</span><span class="p">:</span> <span class="p">{</span>
                             <span class="s2">&quot;train_split&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_train_split&quot;</span><span class="p">],</span>
@@ -1576,28 +1673,38 @@
                     <span class="s2">&quot;engine_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;engine_type&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;engine_num&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;engine_num&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;runner_num&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;runner_num&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;repeat_times&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;repeat_times&quot;</span><span class="p">],</span>
+                    <span class="c1"># &quot;chat_template&quot;: None,  # TODO: add chat template</span>
+                    <span class="s2">&quot;eval_interval&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;eval_interval&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;tensor_parallel_size&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;tensor_parallel_size&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;enable_prefix_caching&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;enable_prefix_caching&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;enforce_eager&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;enforce_eager&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;dtype&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;dtype&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;temperature&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;top_p&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;top_p&quot;</span><span class="p">],</span>  <span class="c1"># TODO</span>
+                    <span class="s2">&quot;top_k&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;top_k&quot;</span><span class="p">],</span>  <span class="c1"># TODO</span>
                     <span class="s2">&quot;seed&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;seed&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;logprobs&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;logprobs&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;repeat_times&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;repeat_times&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;backend&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;backend&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;use_ray&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;use_ray&quot;</span><span class="p">],</span>  <span class="c1"># TODO</span>
+                    <span class="s2">&quot;gpu_memory_utilization&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;gpu_memory_utilization&quot;</span><span class="p">],</span>  <span class="c1"># TODO</span>
+                    <span class="s2">&quot;enable_chunked_prefill&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;enable_chunked_prefill&quot;</span><span class="p">],</span>  <span class="c1"># TODO</span>
+                    <span class="s2">&quot;use_v1&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
                     <span class="s2">&quot;max_pending_requests&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_pending_requests&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;max_waiting_steps&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_waiting_steps&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;max_timeout&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_timeout&quot;</span><span class="p">],</span>  <span class="c1"># TODO</span>
+                    <span class="s2">&quot;max_retry_times&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;explorer_max_retry_times&quot;</span><span class="p">],</span>  <span class="c1"># TODO</span>
                 <span class="p">},</span>
                 <span class="s2">&quot;synchronizer&quot;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="s2">&quot;sync_method&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sync_method&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;sync_iteration_interval&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sync_iteration_interval&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;sync_interval&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sync_interval&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;sync_timeout&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sync_timeout&quot;</span><span class="p">],</span>
                 <span class="p">},</span>
                 <span class="s2">&quot;trainer&quot;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="s2">&quot;trainer_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;trainer_type&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;algorithm_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;trainer_config&quot;</span><span class="p">:</span> <span class="n">trainer_config</span><span class="p">,</span>
-                    <span class="s2">&quot;sft_warmup_iteration&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_iteration&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;sft_warmup_steps&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_steps&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;eval_interval&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;eval_interval&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;save_interval&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;save_interval&quot;</span><span class="p">],</span>
                 <span class="p">},</span>

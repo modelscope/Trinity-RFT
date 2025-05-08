@@ -126,11 +126,11 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>openai/gs
 <h2>Step 2: Set up Configuration and Run Experiment<a class="headerlink" href="#step-2-set-up-configuration-and-run-experiment" title="Link to this heading"></a></h2>
 <section id="synchronous-mode-of-trinity-rft">
 <h3>Synchronous Mode of Trinity-RFT<a class="headerlink" href="#synchronous-mode-of-trinity-rft" title="Link to this heading"></a></h3>
-<p>We run the experiment in a synchronous mode where the Explorer and Trainer operate in turn. To enable this mode, we config <code class="docutils literal notranslate"><span class="pre">mode</span></code> to <code class="docutils literal notranslate"><span class="pre">both</span></code> (default) and set <code class="docutils literal notranslate"><span class="pre">sync_iteration_interval</span></code> properly. A smaller value of <code class="docutils literal notranslate"><span class="pre">sync_iteration_interval</span></code> makes the training closer to an on-policy setup.</p>
+<p>We run the experiment in a synchronous mode where the Explorer and Trainer operate in turn. To enable this mode, we config <code class="docutils literal notranslate"><span class="pre">mode</span></code> to <code class="docutils literal notranslate"><span class="pre">both</span></code> (default) and set <code class="docutils literal notranslate"><span class="pre">sync_interval</span></code> properly. A smaller value of <code class="docutils literal notranslate"><span class="pre">sync_interval</span></code> makes the training closer to an on-policy setup.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">both</span>
 <span class="nt">synchronizer</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">sync_method</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;nccl&#39;</span>
-<span class="w">  </span><span class="nt">sync_iteration_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">  </span><span class="nt">sync_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
 </pre></div>
 </div>
 </section>
@@ -161,19 +161,18 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>openai/gs
 </section>
 <section id="optional-rft-with-sft-warmup">
 <h2>Optional: RFT with SFT Warmup<a class="headerlink" href="#optional-rft-with-sft-warmup" title="Link to this heading"></a></h2>
-<p>Before RFT, we may use SFT as a warmup step. We need to set <code class="docutils literal notranslate"><span class="pre">trainer.sft_warmup_iteration</span> <span class="pre">&gt;</span> <span class="pre">0</span></code> and prepare the SFT data to <code class="docutils literal notranslate"><span class="pre">buffer.train_dataset.path=$DATASET_PATH/{sft_data}</span></code>.</p>
+<p>Before RFT, we may use SFT as a warmup step. We need to set <code class="docutils literal notranslate"><span class="pre">trainer.sft_warmup_steps</span> <span class="pre">&gt;</span> <span class="pre">0</span></code> and prepare the SFT data to <code class="docutils literal notranslate"><span class="pre">buffer.train_dataset.path=$DATASET_PATH/{sft_data}</span></code>.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Properly set the following configs in gsm8k.yaml</span>
 <span class="nt">buffer</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">sft_warmup_dataset</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">file</span>
-<span class="w">    </span><span class="nt">algorithm_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sft</span>
 <span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;$DATASET_PATH/{sft_data}&gt;</span>
 <span class="w">    </span><span class="nt">kwargs</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">prompt_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;prompt_type&gt;</span><span class="w"> </span><span class="c1"># messages/plaintext/chatpair</span>
 <span class="w">      </span><span class="nt">prompt_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;prompt_key&gt;</span>
 <span class="w">      </span><span class="nt">response_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;response_key&gt;</span>
 <span class="nt">trainer</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">sft_warmup_iteration</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">  </span><span class="nt">sft_warmup_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
 </pre></div>
 </div>
 <p>The following command runs SFT and RFT in sequence:</p>

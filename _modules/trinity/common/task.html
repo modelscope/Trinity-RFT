@@ -114,7 +114,7 @@
 
     <span class="n">task_desc</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">workflow</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Workflow</span><span class="p">]</span>
-    <span class="n">reward_fn</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">RewardFn</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">reward_fn</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">RewardFn</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">truth</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">raw</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># The raw data sample</span>
     <span class="n">task_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TaskType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -156,7 +156,7 @@
     <span class="n">start_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">config</span><span class="p">:</span> <span class="n">DataConfig</span><span class="p">,</span>
     <span class="n">default_workflow</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Workflow</span><span class="p">]],</span>
-    <span class="n">default_reward_fn</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">RewardFn</span><span class="p">],</span>
+    <span class="n">default_reward_fn</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">RewardFn</span><span class="p">]],</span>
     <span class="n">task_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TaskType</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Task</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a generator of tasks from the dataset.&quot;&quot;&quot;</span>
@@ -216,7 +216,7 @@
 
     <span class="n">dataset</span><span class="p">:</span> <span class="n">Any</span>  <span class="c1"># the source huggingface dataset</span>
     <span class="n">config</span><span class="p">:</span> <span class="n">DataConfig</span>
-    <span class="n">reward_fn</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">RewardFn</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">reward_fn</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">RewardFn</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">workflow</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Workflow</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">task_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TaskType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">default_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
@@ -253,12 +253,11 @@
         <span class="n">dataset_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
         <span class="n">default_workflow_cls</span> <span class="o">=</span> <span class="n">WORKFLOWS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">default_workflow_type</span><span class="p">)</span>
         <span class="n">default_reward_fn_cls</span> <span class="o">=</span> <span class="n">REWARD_FUNCTIONS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">default_reward_fn_type</span><span class="p">)</span>
-        <span class="n">default_reward_instance</span> <span class="o">=</span> <span class="n">default_reward_fn_cls</span><span class="p">()</span> <span class="k">if</span> <span class="n">default_reward_fn_cls</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
             <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
             <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
             <span class="n">workflow</span><span class="o">=</span><span class="n">default_workflow_cls</span><span class="p">,</span>
-            <span class="n">reward_fn</span><span class="o">=</span><span class="n">default_reward_instance</span><span class="p">,</span>
+            <span class="n">reward_fn</span><span class="o">=</span><span class="n">default_reward_fn_cls</span><span class="p">,</span>
             <span class="n">task_type</span><span class="o">=</span><span class="n">task_type</span><span class="p">,</span>
             <span class="n">default_index</span><span class="o">=</span><span class="n">latest_task_index</span> <span class="o">%</span> <span class="n">dataset_len</span><span class="p">,</span>
             <span class="n">default_epoch</span><span class="o">=</span><span class="n">latest_task_index</span> <span class="o">//</span> <span class="n">dataset_len</span><span class="p">,</span>
