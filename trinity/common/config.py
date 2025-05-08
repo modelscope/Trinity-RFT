@@ -172,7 +172,7 @@ class ExplorerConfig:
     backend: str = "nccl"
     use_ray: bool = False
     gpu_memory_utilization: float = 0.9
-    enable_chunked_prefil: bool = False
+    enable_chunked_prefill: bool = False
     use_v1: bool = True
     bundle_indices: str = ""  # DO NOT SET this field
 

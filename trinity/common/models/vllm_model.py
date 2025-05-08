@@ -65,7 +65,7 @@ class vLLMRolloutModel(InferenceModel):
             dtype=config.explorer.dtype,
             trust_remote_code=True,
             gpu_memory_utilization=config.explorer.gpu_memory_utilization,
-            enable_chunked_prefill=config.explorer.enable_chunked_prefil,
+            enable_chunked_prefill=config.explorer.enable_chunked_prefill,
             # max_num_batched_tokens=256,
             **kwargs,
         )

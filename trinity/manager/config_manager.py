@@ -72,7 +72,7 @@ class ConfigManager:
             "_not_dpo_storage_type": StorageType.QUEUE.value,
             "storage_type": StorageType.QUEUE.value,
             "train_dataset_path": "",
-            "max_retry_times": 3,
+            "buffer_max_retry_times": 3,
             "max_retry_interval": 1,
             "dpo_dataset_train_split": "train",
             "dpo_dataset_prompt_type": PromptType.MESSAGES.value,
@@ -88,31 +88,37 @@ class ConfigManager:
             # Explorer and Sync Configs
             "engine_type": "vllm_async",
             "engine_num": 2,
-            "tensor_parallel_size": 1,
+            "runner_num": 32,
             "_grouped_adv_repeat_times": 2,
             "_not_grouped_adv_repeat_times": 1,
             "repeat_times": 1,
-            "_not_dpo_sync_method": SyncMethod.NCCL.value,
-            "sync_method": SyncMethod.NCCL.value,
-            "sync_interval": 10,
-            "sync_timeout": 1200,
-            "runner_num": 32,
-            "max_pending_requests": 32,
-            "max_waiting_steps": 4,
+            "eval_interval": 1000,
+            "tensor_parallel_size": 1,
+            "enable_prefix_caching": False,
+            "enforce_eager": True,
             "dtype": "bfloat16",
-            "backend": "nccl",
             "temperature": 1.0,
             "top_p": 1.0,
             "top_k": -1,
             "seed": 42,
             "logprobs": 0,
-            "enable_prefix_caching": False,
-            "enforce_eager": True,
+            "backend": "nccl",
+            "use_ray": False,
+            "gpu_memory_utilization": 0.9,
+            "enable_chunked_prefill": False,
+            "max_pending_requests": 32,
+            "max_waiting_steps": 4,
+            "max_timeout": 900,
+            "explorer_max_retry_times": 2,
+            # Synchronizer Configs
+            "_not_dpo_sync_method": SyncMethod.NCCL.value,
+            "sync_method": SyncMethod.NCCL.value,
+            "sync_interval": 10,
+            "sync_timeout": 1200,
             # Trainer Configs
             "trainer_type": "verl",
             "algorithm_type": AlgorithmType.PPO.value,
             "sft_warmup_steps": 0,
-            "eval_interval": 1000,
             "_nccl_save_interval": 100,
             "save_interval": 100,
             # veRL Trainer Configs
@@ -370,8 +376,8 @@ Other workflows: conduct multi-turn task for the given dataset.
                 self.unfinished_fields.add("train_dataset_path")
                 st.warning("Please input train dataset path.")
 
-    def _set_max_retry_times(self):
-        st.number_input("Max Retry Times", key="max_retry_times", min_value=1)
+    def _set_buffer_max_retry_times(self):
+        st.number_input("Max Retry Times", key="buffer_max_retry_times", min_value=1)
 
     def _set_max_retry_interval(self):
         st.number_input("Max Retry Interval", key="max_retry_interval", min_value=1)
@@ -613,10 +619,27 @@ if node_num > 1:
         st.number_input("Logprobs", key="logprobs", min_value=0, max_value=20)
 
     def _set_enable_prefix_caching(self):
-        st.checkbox("Enable Prefix Caching", key="enable_prefix_caching")
+        st.checkbox("Prefix Caching", key="enable_prefix_caching")
 
     def _set_enforce_eager(self):
         st.checkbox("Enforce Eager", key="enforce_eager")
+
+    def _set_use_ray(self):
+        st.checkbox("Use Ray", key="use_ray")
+
+    def _set_gpu_memory_utilization(self):
+        st.number_input(
+            "GPU Memory Utilization", key="gpu_memory_utilization", min_value=0.0, max_value=1.0
+        )
+
+    def _set_enable_chunked_prefill(self):
+        st.checkbox("Chunked Prefill", key="enable_chunked_prefill")
+
+    def _set_max_timeout(self):
+        st.number_input("Max Timeout", key="max_timeout", min_value=0)
+
+    def _set_explorer_max_retry_times(self):
+        st.number_input("Explorer Max Retry Times", key="explorer_max_retry_times", min_value=0)
 
     def _set_trainer_type(self):
         st.selectbox("Trainer Type", ["verl"], key="trainer_type")
@@ -1079,7 +1102,7 @@ if node_num > 1:
 
         self.buffer_advanced_tab = st.expander("Advanced Config")
         with self.buffer_advanced_tab:
-            self._set_configs_with_st_columns(["max_retry_times", "max_retry_interval"])
+            self._set_configs_with_st_columns(["buffer_max_retry_times", "max_retry_interval"])
 
             self._set_sft_warmup_dataset_path()
             self._set_sft_warmup_dataset_args()
@@ -1094,12 +1117,22 @@ if node_num > 1:
 
         with st.expander("Advanced Config"):
             self._set_configs_with_st_columns(
-                ["runner_num", "max_pending_requests", "max_waiting_steps", "dtype"]
+                ["runner_num", "temperature", "top_p", "top_k", "seed", "logprobs"]
             )
 
-            self._set_configs_with_st_columns(["backend", "temperature", "seed", "logprobs"])
+            self._set_configs_with_st_columns(["dtype", "backend", "gpu_memory_utilization"])
+            self._set_configs_with_st_columns(
+                [
+                    "max_pending_requests",
+                    "max_waiting_steps",
+                    "max_timeout",
+                    "explorer_max_retry_times",
+                ]
+            )
 
-            self._set_configs_with_st_columns(["enable_prefix_caching", "enforce_eager"])
+            self._set_configs_with_st_columns(
+                ["enable_prefix_caching", "enforce_eager", "use_ray", "enable_chunked_prefill"]
+            )
 
     def _expert_trainer_part(self):
         self._set_configs_with_st_columns(  # TODO: may add `trainer_type`
@@ -1442,6 +1475,12 @@ if node_num > 1:
         else:
             trainer_n_gpus_per_node = st.session_state["gpu_per_node"]
 
+        critic_model_path = (
+            st.session_state["critic_model_path"].strip()
+            if st.session_state["critic_model_path"].strip()
+            else st.session_state["model_path"]
+        )
+
         if st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
             train_dataset_path = (
                 st.session_state["train_dataset_path"].strip()
@@ -1495,6 +1534,7 @@ if node_num > 1:
                 },
                 "model": {
                     "model_path": st.session_state["model_path"],
+                    "critic_model_path": critic_model_path,
                     "max_prompt_tokens": st.session_state["max_prompt_tokens"],
                     "max_response_tokens": st.session_state["max_response_tokens"],
                     "checkpoint_path": st.session_state["checkpoint_path"],
@@ -1504,18 +1544,16 @@ if node_num > 1:
                     "gpu_per_node": st.session_state["gpu_per_node"],
                 },
                 "buffer": {
-                    "max_retry_times": st.session_state["max_retry_times"],
+                    "max_retry_times": st.session_state["buffer_max_retry_times"],
                     "max_retry_interval": st.session_state["max_retry_interval"],
                     "train_dataset": {
                         "name": "experience_buffer",  # TODO
                         "storage_type": st.session_state["storage_type"],
-                        "algorithm_type": st.session_state["algorithm_type"],
                         "path": train_dataset_path,
                     },
                     "sft_warmup_dataset": {
                         "name": "sft_warmup_dataset",
                         "storage_type": sft_storage_type,
-                        "algorithm_type": AlgorithmType.SFT.value,
                         "path": st.session_state["sft_warmup_dataset_path"],
                         "kwargs": {
                             "train_split": st.session_state["sft_warmup_train_split"],
@@ -1530,18 +1568,27 @@ if node_num > 1:
                     "engine_type": st.session_state["engine_type"],
                     "engine_num": st.session_state["engine_num"],
                     "runner_num": st.session_state["runner_num"],
+                    "repeat_times": st.session_state["repeat_times"],
+                    # "chat_template": None,  # TODO: add chat template
                     "eval_interval": st.session_state["eval_interval"],
                     "tensor_parallel_size": st.session_state["tensor_parallel_size"],
                     "enable_prefix_caching": st.session_state["enable_prefix_caching"],
                     "enforce_eager": st.session_state["enforce_eager"],
                     "dtype": st.session_state["dtype"],
                     "temperature": st.session_state["temperature"],
+                    "top_p": st.session_state["top_p"],  # TODO
+                    "top_k": st.session_state["top_k"],  # TODO
                     "seed": st.session_state["seed"],
                     "logprobs": st.session_state["logprobs"],
-                    "repeat_times": st.session_state["repeat_times"],
                     "backend": st.session_state["backend"],
+                    "use_ray": st.session_state["use_ray"],  # TODO
+                    "gpu_memory_utilization": st.session_state["gpu_memory_utilization"],  # TODO
+                    "enable_chunked_prefill": st.session_state["enable_chunked_prefill"],  # TODO
+                    "use_v1": True,
                     "max_pending_requests": st.session_state["max_pending_requests"],
                     "max_waiting_steps": st.session_state["max_waiting_steps"],
+                    "max_timeout": st.session_state["max_timeout"],  # TODO
+                    "max_retry_times": st.session_state["explorer_max_retry_times"],  # TODO
                 },
                 "synchronizer": {
                     "sync_method": st.session_state["sync_method"],
