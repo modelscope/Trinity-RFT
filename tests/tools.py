@@ -102,4 +102,4 @@ class RayUnittestBase(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        ray.shutdown()
+        ray.shutdown(_exiting_interpreter=True)

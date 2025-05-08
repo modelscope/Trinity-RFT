@@ -32,6 +32,7 @@ explorer:
   logprobs: 0
   backend: nccl
   use_ray: false
+  use_v1: true
 trainer:
   trainer_type: verl
   trainer_config_path: tests/template/verl_config.yaml

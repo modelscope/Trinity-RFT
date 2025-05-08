@@ -7,7 +7,7 @@ import asyncio
 import os
 import re
 from contextlib import nullcontext
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import ray
 import torch
@@ -26,6 +26,7 @@ logger = get_logger(__name__)
 
 
 # TODO: merge into vLLMRolloutModel
+# TODO: remove V0 when V1 is stable
 @ray.remote
 class vLLMAysncRolloutModel(InferenceModel):
     """Wrapper around the vLLM engine to handle async requests.
@@ -42,8 +43,16 @@ class vLLMAysncRolloutModel(InferenceModel):
     ) -> None:
         self.logger = get_logger(__name__)
         self.config = config
+        self.use_v1 = config.explorer.use_v1
         if config.explorer.tensor_parallel_size != 1:
             os.environ["VLLM_WORKER_MULTIPROC_METHOD"] = "spawn"
+        if not vllm.envs.is_set("VLLM_USE_V1"):
+            self.logger.info(f"Using vLLM v{int(config.explorer.use_v1)} engine")
+            os.environ["VLLM_USE_V1"] = str(int(config.explorer.use_v1))
+        if config.explorer.use_v1:
+            os.environ["VLLM_RAY_PER_WORKER_GPUS"] = str(int(config.explorer.use_v1))
+            os.environ["VLLM_WORKER_MULTIPROC_METHOD"] = "spawn"
+            os.environ["VLLM_ENABLE_V1_MULTIPROCESSING"] = "0"
         self.default_sampling_params = vllm.SamplingParams(
             n=config.explorer.repeat_times,
             temperature=config.explorer.temperature,
@@ -58,11 +67,11 @@ class vLLMAysncRolloutModel(InferenceModel):
         engine_args = vllm.AsyncEngineArgs(
             model=config.model.model_path,
             enforce_eager=config.explorer.enforce_eager,
-            worker_cls="trinity.common.models.vllm_worker.VLLMWorker",
+            worker_extension_cls="trinity.common.models.vllm_worker.WorkerExtension",
             tensor_parallel_size=config.explorer.tensor_parallel_size,
             seed=config.explorer.seed,
             distributed_executor_backend=(
-                "uni" if config.explorer.tensor_parallel_size == 1 else "mp"
+                "uni" if config.explorer.tensor_parallel_size == 1 else "ray"
             ),
             max_model_len=config.model.max_prompt_tokens + config.model.max_response_tokens,
             enable_prefix_caching=config.explorer.enable_prefix_caching,
@@ -250,15 +259,29 @@ class vLLMAysncRolloutModel(InferenceModel):
                 setattr(params, k, v)
         return params
 
-    def sync_model(self, update_weight_args_list) -> bool:
+    async def _collective_rpc(
+        self,
+        method: str,
+        timeout: Optional[float] = None,
+        args: tuple = (),
+        kwargs: Optional[dict] = None,
+    ):
+        if self.use_v1:
+            return await self.async_llm.collective_rpc(method, timeout, args, kwargs)
+        else:
+            return self.async_llm.engine.model_executor.collective_rpc(
+                method, timeout, args, kwargs
+            )
+
+    async def sync_model(self, update_weight_args_list) -> bool:
         """Sync model weights to vLLM."""
         for args in update_weight_args_list:
-            self.async_llm.engine.model_executor.collective_rpc("update_weight", args=args)
+            await self._collective_rpc("update_weight", args=args)
         self.logger.info("Sync model weights to vLLM successfully.")
         self.ckp_version += 1
         return True
 
-    def init_process_group(
+    async def init_process_group(
         self,
         master_address: str,
         master_port: int,
@@ -269,7 +292,7 @@ class vLLMAysncRolloutModel(InferenceModel):
         timeout: int = 1200,
         update_with_checkpoint: bool = True,
     ):
-        return self.async_llm.engine.model_executor.collective_rpc(
+        return await self._collective_rpc(
             "init_process_group",
             args=(
                 master_address,
@@ -283,24 +306,17 @@ class vLLMAysncRolloutModel(InferenceModel):
             ),
         )
 
-    def update_weight(self, name, dtype, shape, empty_cache=False):
-        return self.async_llm.engine.model_executor.collective_rpc(
-            "update_weight", args=(name, dtype, shape, empty_cache)
-        )
+    async def update_weight(self, name, dtype, shape, empty_cache=False):
+        return await self._collective_rpc("update_weight", args=(name, dtype, shape, empty_cache))
 
-    def update_weight_cuda_ipc(self, name, dtype, shape, ipc_handles, empty_cache=False):
-        return self.async_llm.engine.model_executor.collective_rpc(
-            "update_weight_cuda_ipc", args=(name, dtype, shape, ipc_handles, empty_cache)
-        )
-
-    def reset_prefix_cache(self):
-        self.async_llm.engine.reset_prefix_cache()
+    async def reset_prefix_cache(self) -> None:
+        await self.async_llm.reset_prefix_cache()
 
     def get_ckp_version(self) -> int:
         return self.ckp_version
 
-    async def sleep(self, level: int = 1):
+    async def sleep(self, level: int = 1) -> None:
         await self.async_llm.sleep(level=level)
 
-    async def wake_up(self):
+    async def wake_up(self) -> None:
         await self.async_llm.wake_up()

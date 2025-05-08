@@ -3,7 +3,6 @@
 import ray
 import torch
 import torch.distributed
-from vllm.worker.worker import Worker
 
 from trinity.utils.distributed import init_process_group, is_ipv6_address
 from trinity.utils.log import get_logger
@@ -11,13 +10,7 @@ from trinity.utils.log import get_logger
 logger = get_logger(__name__)
 
 
-def get_physical_gpu_id():
-    device = torch.cuda.current_device()
-    props = torch.cuda.get_device_properties(device)
-    return str(props.uuid)
-
-
-class VLLMWorker(Worker):
+class WorkerExtension:
     def init_process_group(
         self,
         master_address: str,
@@ -79,19 +72,3 @@ class VLLMWorker(Worker):
 
         self.model_runner.model.load_weights(weights=[(name, weight)])
         del weight
-
-    def update_weight_cuda_ipc(self, name, dtype, shape, ipc_handles=None, empty_cache=False):
-        assert (
-            dtype == self.model_config.dtype
-        ), f"mismatch dtype: src {dtype}, dst {self.model_config.dtype}"
-
-        handle = ipc_handles[get_physical_gpu_id()]
-        device_id = self.device.index
-        func, args = handle
-        list_args = list(args)
-        # the key is to change device id to the current device id
-        # in case two processes have different CUDA_VISIBLE_DEVICES
-        list_args[6] = device_id
-        weight = func(*list_args)
-        self.model_runner.model.load_weights(weights=[(name, weight)])
-        torch.cuda.synchronize()

@@ -37,6 +37,7 @@ class TestExplorerCountdownEval(BaseExplorerCase):
     def test_explorer(self):
         self.config.data = get_unittest_dataset_config("countdown")
         self.config.monitor.name = f"explore-eval-{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        self.config.explorer.use_v1 = True
         self.config.check_and_update()
         explore(self.config)
         parser = TensorBoardParser(os.path.join(self.config.monitor.job_dir, "tensorboard"))
@@ -53,6 +54,7 @@ class TestExplorerCountdownNoEval(BaseExplorerCase):
         self.config.data = get_unittest_dataset_config("countdown")
         self.config.monitor.name = f"explore-no-eval-{datetime.now().strftime('%Y%m%d%H%M%S')}"
         self.config.data.eval_split = None
+        self.config.explorer.use_v1 = False
         self.config.check_and_update()
         explore(self.config)
         parser = TensorBoardParser(os.path.join(self.config.monitor.job_dir, "tensorboard"))

@@ -70,6 +70,7 @@ class RunnerPoolTest(unittest.TestCase):
         self.config.buffer.pad_token_id = 0
         self.config.buffer.train_dataset = DatasetConfig(
             name="test",
+            namespace="test_runner_pool",
             storage_type=StorageType.QUEUE,
             algorithm_type=AlgorithmType.PPO,
         )

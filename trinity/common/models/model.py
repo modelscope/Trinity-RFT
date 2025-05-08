@@ -46,27 +46,8 @@ class InferenceModel(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def sync_model(self, update_weight_args_list: List) -> bool:
-        """Sync model weights."""
-        # TODO: sync with high efficiency
-
-    @abstractmethod
     def get_ckp_version(self) -> int:
         """Get the checkpoint version."""
-
-    @abstractmethod
-    def init_process_group(
-        self,
-        master_address: str,
-        master_port: int,
-        rank_offset: int,
-        world_size: int,
-        group_name: str,
-        backend: str = "nccl",
-        timeout: int = 1200,
-        update_with_checkpoint: bool = True,
-    ) -> None:
-        """Init the process group for model weights sync."""
 
     def get_address(self) -> Tuple[str, int]:
         """Get the address of the actor."""

@@ -12,6 +12,7 @@ from typing import List
 
 import ray
 import torch
+import vllm
 from vllm import LLM
 from vllm.sampling_params import SamplingParams
 
@@ -32,8 +33,13 @@ class vLLMRolloutModel(InferenceModel):
     def __init__(self, config: Config, **kwargs):
         self.logger = get_logger(__name__)
         self.config = config
-        if config.explorer.tensor_parallel_size != 1:
+        if not vllm.envs.is_set("VLLM_USE_V1"):
+            self.logger.info(f"Using vLLM v{int(config.explorer.use_v1)} engine")
+            os.environ["VLLM_USE_V1"] = str(int(config.explorer.use_v1))
+        if config.explorer.use_v1:
+            os.environ["VLLM_RAY_PER_WORKER_GPUS"] = str(int(config.explorer.use_v1))
             os.environ["VLLM_WORKER_MULTIPROC_METHOD"] = "spawn"
+            os.environ["VLLM_ENABLE_V1_MULTIPROCESSING"] = "0"
         self.default_sampling_params = SamplingParams(
             n=config.explorer.repeat_times,
             temperature=config.explorer.temperature,
@@ -48,11 +54,11 @@ class vLLMRolloutModel(InferenceModel):
             # TODO: check checkpoint path
             model=config.model.model_path,
             enforce_eager=config.explorer.enforce_eager,
-            worker_cls="trinity.common.models.vllm_worker.VLLMWorker",
+            worker_extension_cls="trinity.common.models.vllm_worker.WorkerExtension",
             tensor_parallel_size=config.explorer.tensor_parallel_size,
             seed=config.explorer.seed,
             distributed_executor_backend=(
-                "uni" if config.explorer.tensor_parallel_size == 1 else "mp"
+                "uni" if config.explorer.tensor_parallel_size == 1 else "ray"
             ),
             max_model_len=config.model.max_prompt_tokens + config.model.max_response_tokens,
             enable_prefix_caching=config.explorer.enable_prefix_caching,
@@ -106,11 +112,6 @@ class vLLMRolloutModel(InferenceModel):
 
     def update_weight(self, name, dtype, shape, empty_cache=False):
         return self.llm.collective_rpc("update_weight", args=(name, dtype, shape, empty_cache))
-
-    def update_weight_cuda_ipc(self, name, dtype, shape, ipc_handles, empty_cache=False):
-        return self.llm.collective_rpc(
-            "update_weight_cuda_ipc", args=(name, dtype, shape, ipc_handles, empty_cache)
-        )
 
     def reset_prefix_cache(self):
         self.llm.llm_engine.reset_prefix_cache()
