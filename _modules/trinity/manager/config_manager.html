@@ -86,6 +86,8 @@
   <h1>Source code for trinity.manager.config_manager</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">streamlit</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">st</span>
@@ -111,8 +113,8 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_init_default_config</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">unfinished_fields</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-        <span class="n">st</span><span class="o">.</span><span class="n">set_page_config</span><span class="p">(</span><span class="n">page_title</span><span class="o">=</span><span class="s2">&quot;Trainer Config Generator&quot;</span><span class="p">,</span> <span class="n">page_icon</span><span class="o">=</span><span class="s2">&quot;:robot:&quot;</span><span class="p">)</span>
-        <span class="n">st</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Trainer Config Generator&quot;</span><span class="p">)</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">set_page_config</span><span class="p">(</span><span class="n">page_title</span><span class="o">=</span><span class="s2">&quot;Trinity-RFT Config Generator&quot;</span><span class="p">,</span> <span class="n">page_icon</span><span class="o">=</span><span class="s2">&quot;:robot:&quot;</span><span class="p">)</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Trinity-RFT Config Generator&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="s2">&quot;_init_config_manager&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">reset_session_state</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">maintain_session_state</span><span class="p">()</span>
@@ -126,6 +128,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">beginner_mode</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">expert_mode</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s2">&quot;config_generated&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">:</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">config_generated</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="s2">&quot;is_running&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">:</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">is_running</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">generate_config</span><span class="p">()</span></div>
 
 
@@ -135,7 +141,7 @@
             <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;both&quot;</span><span class="p">,</span>
             <span class="s2">&quot;project&quot;</span><span class="p">:</span> <span class="s2">&quot;Trinity-RFT&quot;</span><span class="p">,</span>
             <span class="s2">&quot;exp_name&quot;</span><span class="p">:</span> <span class="s2">&quot;qwen2.5-1.5B&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;monitor_type&quot;</span><span class="p">:</span> <span class="n">MonitorType</span><span class="o">.</span><span class="n">WANDB</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="s2">&quot;monitor_type&quot;</span><span class="p">:</span> <span class="n">MonitorType</span><span class="o">.</span><span class="n">TENSORBOARD</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
             <span class="c1"># Model Configs</span>
             <span class="s2">&quot;model_path&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
             <span class="s2">&quot;critic_model_path&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
@@ -1419,9 +1425,11 @@
                         <span class="s2">&quot;lr&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_lr&quot;</span><span class="p">],</span>
                         <span class="s2">&quot;lr_warmup_steps_ratio&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_lr_warmup_steps_ratio&quot;</span><span class="p">],</span>
                         <span class="s2">&quot;warmup_style&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_warmup_style&quot;</span><span class="p">],</span>
-                        <span class="s2">&quot;total_training_steps&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span>
-                        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;total_training_steps&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span>
-                        <span class="k">else</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;total_training_steps&quot;</span><span class="p">],</span>
+                        <span class="s2">&quot;total_training_steps&quot;</span><span class="p">:</span> <span class="p">(</span>
+                            <span class="o">-</span><span class="mi">1</span>
+                            <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;total_training_steps&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span>
+                            <span class="k">else</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;total_training_steps&quot;</span><span class="p">]</span>
+                        <span class="p">),</span>
                     <span class="p">},</span>
                     <span class="s2">&quot;fsdp_config&quot;</span><span class="p">:</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">fsdp_config</span><span class="p">),</span>
                     <span class="s2">&quot;tau&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_tau&quot;</span><span class="p">],</span>
@@ -1472,9 +1480,11 @@
                     <span class="s2">&quot;lr&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;critic_lr&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;lr_warmup_steps_ratio&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;critic_lr_warmup_steps_ratio&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;warmup_style&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;critic_warmup_style&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;total_training_steps&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span>
-                    <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;total_training_steps&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span>
-                    <span class="k">else</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;total_training_steps&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;total_training_steps&quot;</span><span class="p">:</span> <span class="p">(</span>
+                        <span class="o">-</span><span class="mi">1</span>
+                        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;total_training_steps&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span>
+                        <span class="k">else</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;total_training_steps&quot;</span><span class="p">]</span>
+                    <span class="p">),</span>
                 <span class="p">},</span>
                 <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">critic_model_path</span><span class="p">,</span>
@@ -1539,7 +1549,7 @@
                 <span class="s2">&quot;total_epochs&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;total_epochs&quot;</span><span class="p">],</span>
                 <span class="s2">&quot;project_name&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;project&quot;</span><span class="p">],</span>
                 <span class="s2">&quot;experiment_name&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;exp_name&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;logger&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;wandb&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;logger&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;tensorboard&quot;</span><span class="p">],</span>
                 <span class="s2">&quot;val_generations_to_log_to_wandb&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
                 <span class="s2">&quot;nnodes&quot;</span><span class="p">:</span> <span class="n">trainer_nnodes</span><span class="p">,</span>
                 <span class="s2">&quot;n_gpus_per_node&quot;</span><span class="p">:</span> <span class="n">trainer_n_gpus_per_node</span><span class="p">,</span>
@@ -1621,7 +1631,12 @@
             <span class="s2">&quot;Generate Config&quot;</span><span class="p">,</span>
             <span class="n">disabled</span><span class="o">=</span><span class="n">disable_generate</span><span class="p">,</span>
             <span class="n">help</span><span class="o">=</span><span class="n">help_messages</span><span class="p">,</span>
+            <span class="n">use_container_width</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">icon</span><span class="o">=</span><span class="s2">&quot;:material/create_new_folder:&quot;</span><span class="p">,</span>
         <span class="p">):</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">config_generated</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">is_running</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">config_generated</span><span class="p">:</span>
             <span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;mode&quot;</span><span class="p">],</span>
                 <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -1723,10 +1738,88 @@
                     <span class="s2">&quot;dpo_dataset_chosen_key&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;dpo_dataset_chosen_key&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;dpo_dataset_rejected_key&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;dpo_dataset_rejected_key&quot;</span><span class="p">],</span>
                 <span class="p">}</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">config_generated</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">st</span><span class="o">.</span><span class="n">header</span><span class="p">(</span><span class="s2">&quot;Generated Config File&quot;</span><span class="p">)</span>
-            <span class="n">st</span><span class="o">.</span><span class="n">subheader</span><span class="p">(</span><span class="s2">&quot;Config File&quot;</span><span class="p">)</span>
+            <span class="n">buttons</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">container</span><span class="p">()</span>
+            <span class="n">save_btn</span><span class="p">,</span> <span class="n">run_btn</span> <span class="o">=</span> <span class="n">buttons</span><span class="o">.</span><span class="n">columns</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">vertical_alignment</span><span class="o">=</span><span class="s2">&quot;bottom&quot;</span><span class="p">)</span>
             <span class="n">yaml_config</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">allow_unicode</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">save_btn</span><span class="o">.</span><span class="n">download_button</span><span class="p">(</span>
+                <span class="s2">&quot;Save&quot;</span><span class="p">,</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">yaml_config</span><span class="p">,</span>
+                <span class="n">file_name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;monitor&#39;</span><span class="p">][</span><span class="s1">&#39;project&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;monitor&#39;</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">.yaml&quot;</span><span class="p">,</span>
+                <span class="n">mime</span><span class="o">=</span><span class="s2">&quot;text/plain&quot;</span><span class="p">,</span>
+                <span class="n">icon</span><span class="o">=</span><span class="s2">&quot;:material/download:&quot;</span><span class="p">,</span>
+                <span class="n">use_container_width</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">run_btn</span><span class="o">.</span><span class="n">button</span><span class="p">(</span>
+                <span class="s2">&quot;Run&quot;</span><span class="p">,</span>
+                <span class="n">on_click</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">run_config</span><span class="p">,</span>
+                <span class="n">args</span><span class="o">=</span><span class="p">(</span>
+                    <span class="n">buttons</span><span class="p">,</span>
+                    <span class="n">yaml_config</span><span class="p">,</span>
+                <span class="p">),</span>
+                <span class="n">icon</span><span class="o">=</span><span class="s2">&quot;:material/terminal:&quot;</span><span class="p">,</span>
+                <span class="n">use_container_width</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">disabled</span><span class="o">=</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">is_running</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="n">st</span><span class="o">.</span><span class="n">code</span><span class="p">(</span><span class="n">yaml_config</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="s2">&quot;yaml&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ConfigManager.run_config">
+<a class="viewcode-back" href="../../../build_api/trinity.manager.html#trinity.manager.config_manager.ConfigManager.run_config">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">yaml_config</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">is_running</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="kn">import</span><span class="w"> </span><span class="nn">ray</span>
+
+        <span class="c1"># first check if ray is running</span>
+        <span class="n">ray_status</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+            <span class="p">[</span><span class="s2">&quot;ray&quot;</span><span class="p">,</span> <span class="s2">&quot;status&quot;</span><span class="p">],</span>
+            <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+            <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+            <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">ray_status</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">parent</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Ray cluster is not running. Please start Ray first using `ray start --head`.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="n">ray</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">ignore_reinit_error</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">dashboard_url</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">dashboard_url</span>
+        <span class="c1"># save config to temp file</span>
+        <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.yaml&quot;</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">as</span> <span class="n">tmpfile</span><span class="p">:</span>
+            <span class="n">tmpfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">yaml_config</span><span class="p">)</span>
+            <span class="n">tmpfile_path</span> <span class="o">=</span> <span class="n">tmpfile</span><span class="o">.</span><span class="n">name</span>
+
+        <span class="c1"># submit ray job</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="s2">&quot;ray&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;job&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;submit&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;--no-wait&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;--&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;python&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;-m&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;trinity.cli.launcher&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;run&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;--config&quot;</span><span class="p">,</span>
+                    <span class="n">tmpfile_path</span><span class="p">,</span>
+                <span class="p">],</span>
+                <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">parent</span><span class="o">.</span><span class="n">success</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Job submitted successfully!</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;View progress in the Ray Dashboard: http://</span><span class="si">{</span><span class="n">dashboard_url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">icon</span><span class="o">=</span><span class="s2">&quot;✅&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CalledProcessError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">parent</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to submit job:</span><span class="se">\n\n</span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">stderr</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="s2">&quot;❌&quot;</span><span class="p">)</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">is_running</span> <span class="o">=</span> <span class="kc">False</span></div>
 </div>
 
 
