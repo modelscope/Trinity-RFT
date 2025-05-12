@@ -22,8 +22,8 @@ logger = get_logger(__name__)
 class FormatConfig:
     """Configuration for data formatting"""
 
-    prompt_key: str = ""
-    response_key: str = ""
+    prompt_key: str = "prompt"
+    response_key: str = "response"
     chat_template: str = ""
 
     # for sample-level task controlling
@@ -36,8 +36,8 @@ class FormatConfig:
     reward_key: str = ""
 
     # for dpo dataset
-    chosen_key: str = ""
-    rejected_key: str = ""
+    chosen_key: str = "chosen"
+    rejected_key: str = "rejected"
 
     # for unpaired preference dataset
     label_key: str = ""
@@ -110,6 +110,7 @@ class DatasetConfig:
     algorithm_type: AlgorithmType = AlgorithmType.PPO
     path: Optional[str] = None
     namespace: str = ""  # automatically generated
+    format_config: FormatConfig = field(default_factory=FormatConfig)
     kwargs: Dict[str, Any] = field(default_factory=dict)
 
 

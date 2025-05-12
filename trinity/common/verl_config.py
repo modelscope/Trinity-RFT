@@ -176,6 +176,7 @@ class Critic:
     grad_clip: float = 0.0
     cliprange_value: float = 0.0
     checkpoint: Checkpoint = field(default_factory=Checkpoint)
+    rollout_n: int = 1
 
 
 @dataclass
@@ -304,6 +305,7 @@ class veRLConfig:
         self.actor_rollout_ref.rollout.temperature = config.explorer.temperature
         self.actor_rollout_ref.rollout.n = config.explorer.repeat_times
         self.critic.ppo_mini_batch_size = config.data.batch_size
+        self.critic.rollout_n = config.explorer.repeat_times
 
         self.actor_rollout_ref.actor.algorithm_type = config.trainer.algorithm_type
         if config.trainer.algorithm_type == AlgorithmType.PPO:

@@ -39,9 +39,9 @@ def get_buffer_reader(dataset_config: DatasetConfig, buffer_config: BufferConfig
 
         return QueueReader(dataset_config, buffer_config)
     elif dataset_config.storage_type == StorageType.FILE:
-        from trinity.buffer.reader.file_reader import FileReader
+        from trinity.buffer.reader.file_reader import FileReaderManager
 
-        return FileReader(dataset_config, buffer_config)
+        return FileReaderManager.create_reader(dataset_config, buffer_config)
     else:
         raise ValueError(f"{dataset_config.storage_type} not supported.")
 

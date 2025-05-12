@@ -9,9 +9,12 @@ import ray
 import torch
 
 from trinity.buffer import get_buffer_writer
-from trinity.common.config import Config
+from trinity.buffer.buffer import get_buffer_reader
+from trinity.common.config import Config, DatasetConfig
 from trinity.common.constants import (
     ROLLOUT_WEIGHT_SYNC_GROUP_NAME,
+    AlgorithmType,
+    StorageType,
     SyncMethod,
     TaskType,
 )
@@ -20,7 +23,6 @@ from trinity.common.models.utils import (
     get_checkpoint_dir_with_step_num,
     load_state_dict,
 )
-from trinity.common.task import TaskSet
 from trinity.explorer.runner_pool import RunnerPool
 from trinity.manager.manager import CacheManager
 from trinity.utils.log import get_logger
@@ -42,14 +44,41 @@ class Explorer:
             self.config.buffer.train_dataset,  # type: ignore
             self.config.buffer,
         )
-        self.taskset = TaskSet.load(
-            self.config.data, explorer_meta.get("latest_task_index", 0), TaskType.EXPLORE
+        dataset_config = DatasetConfig(
+            name="taskset",
+            storage_type=StorageType.FILE,
+            algorithm_type=AlgorithmType.ROLLOUT,
+            path=self.config.data.dataset_path,
+            format_config=self.config.data.format_config,
+            kwargs={
+                "split": self.config.data.train_split,
+                "name": self.config.data.subset_name,
+                "index": explorer_meta.get("latest_task_index", 0),
+                "task_type": TaskType.EXPLORE,
+                "default_workflow_type": self.config.data.default_workflow_type,
+                "default_reward_fn_type": self.config.data.default_reward_fn_type,
+                "total_epochs": self.config.data.total_epochs,
+            },
         )
+        self.taskset = get_buffer_reader(dataset_config, self.config.buffer)
         if self.config.data.eval_split:
-            self.eval_taskset = TaskSet.load(self.config.data, task_type=TaskType.EVAL)
+            eval_dataset_config = DatasetConfig(
+                name="eval_taskset",
+                storage_type=StorageType.FILE,
+                algorithm_type=AlgorithmType.ROLLOUT,
+                path=self.config.data.dataset_path,
+                format_config=self.config.data.format_config,
+                kwargs={
+                    "split": self.config.data.eval_split,
+                    "name": self.config.data.subset_name,
+                    "task_type": TaskType.EVAL,
+                    "default_workflow_type": self.config.data.default_workflow_type,
+                    "default_reward_fn_type": self.config.data.default_reward_fn_type,
+                },
+            )
+            self.eval_taskset = get_buffer_reader(eval_dataset_config, self.config.buffer)
         else:
             self.eval_taskset = None
-        self.task_iter = None
         self.runner_pool = self._init_runner_pool()
         self.monitor = Monitor(
             project=self.config.monitor.project,
@@ -179,8 +208,6 @@ class Explorer:
             explore_status: whether there are more tasks to explore.
             explore_step_num: the number of explore steps
         """
-        if self.task_iter is None:
-            self.task_iter = iter(self.taskset)
         task_num_per_period = self.config.synchronizer.sync_interval * self.config.data.batch_size
 
         st = time.time()
@@ -188,8 +215,8 @@ class Explorer:
 
         # submit tasks of this step
         try:
-            tasks = [next(self.task_iter) for _ in range(task_num_per_period)]  # type: ignore
-            self.runner_pool.run_tasks(tasks)
+            tasks = [self.taskset.read() for _ in range(task_num_per_period)]
+            self.runner_pool.run_tasks(tasks)  # type: ignore
         except StopIteration:
             self.experience_buffer.finish()
             self.logger.warning("No more tasks in the task set. Stop exploring.")
@@ -205,7 +232,7 @@ class Explorer:
                     self.logger.error(f"Error when running task: {status.message}")
                     try:
                         # submit another task to replace the failed task
-                        self.runner_pool.run_tasks(next(self.task_iter))  # type: ignore
+                        self.runner_pool.run_tasks(self.taskset.read())
                     except StopIteration:
                         self.logger.warning("No more tasks in the task set. Stop exploring.")
                         return False, self.step_num
