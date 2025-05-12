@@ -13,8 +13,8 @@ from trinity.utils.log import get_logger
 logger = get_logger(__name__)
 
 
-def test(config: Config) -> None:
-    """Test model from checkpoint."""
+def bench(config: Config) -> None:
+    """Evaluate model."""
     explorer = Explorer.remote(config)
     try:
         ray.get(explorer.prepare.remote())
@@ -165,8 +165,8 @@ def run(config_path: str):
         train(config)
     elif config.mode == "both":
         both(config)
-    elif config.mode == "test":
-        test(config)
+    elif config.mode == "bench":
+        bench(config)
 
 
 def studio(port: int = 8501):
