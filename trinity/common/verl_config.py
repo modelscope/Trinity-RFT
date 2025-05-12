@@ -322,7 +322,6 @@ class veRLConfig:
             self.actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu *= 2  # type: ignore
             if self.actor_rollout_ref.rollout.n != 2:
                 self.actor_rollout_ref.rollout.n = 2
-                logger.warning("In DPO, actor_rollout_ref.rollout.n is set to 2.")
         # TODO: check other fields
         self.enable_preview = config.trainer.enable_preview
 
