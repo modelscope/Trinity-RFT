@@ -228,11 +228,11 @@ class Explorer:
         self.logger.info(f"Explore step {self.step_num} finished.")
         return True, self.step_num
 
-    def eval(self) -> bool:
+    def eval(self) -> Tuple[bool, int]:
         """Evaluation on all evaluation data samples."""
         if self.eval_taskset is None:
             self.logger.warning("No evaluation data samples. Skip evaluation.")
-            return True
+            return True, self.step_num
         self.logger.info("Evaluation started.")
         st = time.time()
         all_metrics = defaultdict(list)
@@ -255,7 +255,7 @@ class Explorer:
         log_metrics = self.monitor.calculate_metrics(all_metrics, prefix="eval")  # type: ignore
         log_metrics["eval/total_time"] = time.time() - st
         self.monitor.log(log_metrics, step=self.step_num)  # type: ignore
-        return True
+        return True, self.step_num
 
     def sync_weight(self) -> None:
         """Synchronize model weights."""
