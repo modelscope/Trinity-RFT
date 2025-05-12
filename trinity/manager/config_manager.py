@@ -1,5 +1,7 @@
 import copy
 import os
+import subprocess
+import tempfile
 from typing import List
 
 import streamlit as st
@@ -21,8 +23,8 @@ class ConfigManager:
     def __init__(self):
         self._init_default_config()
         self.unfinished_fields = set()
-        st.set_page_config(page_title="Trainer Config Generator", page_icon=":robot:")
-        st.title("Trainer Config Generator")
+        st.set_page_config(page_title="Trinity-RFT Config Generator", page_icon=":robot:")
+        st.title("Trinity-RFT Config Generator")
         if "_init_config_manager" not in st.session_state:
             self.reset_session_state()
         self.maintain_session_state()
@@ -36,6 +38,10 @@ class ConfigManager:
             self.beginner_mode()
         else:
             self.expert_mode()
+        if "config_generated" not in st.session_state:
+            st.session_state.config_generated = False
+        if "is_running" not in st.session_state:
+            st.session_state.is_running = False
         self.generate_config()
 
     def _init_default_config(self):
@@ -44,7 +50,7 @@ class ConfigManager:
             "mode": "both",
             "project": "Trinity-RFT",
             "exp_name": "qwen2.5-1.5B",
-            "monitor_type": MonitorType.WANDB.value,
+            "monitor_type": MonitorType.TENSORBOARD.value,
             # Model Configs
             "model_path": "",
             "critic_model_path": "",
@@ -1316,9 +1322,11 @@ if node_num > 1:
                         "lr": st.session_state["actor_lr"],
                         "lr_warmup_steps_ratio": st.session_state["actor_lr_warmup_steps_ratio"],
                         "warmup_style": st.session_state["actor_warmup_style"],
-                        "total_training_steps": -1
-                        if st.session_state["total_training_steps"] is None
-                        else st.session_state["total_training_steps"],
+                        "total_training_steps": (
+                            -1
+                            if st.session_state["total_training_steps"] is None
+                            else st.session_state["total_training_steps"]
+                        ),
                     },
                     "fsdp_config": copy.deepcopy(fsdp_config),
                     "tau": st.session_state["actor_tau"],
@@ -1369,9 +1377,11 @@ if node_num > 1:
                     "lr": st.session_state["critic_lr"],
                     "lr_warmup_steps_ratio": st.session_state["critic_lr_warmup_steps_ratio"],
                     "warmup_style": st.session_state["critic_warmup_style"],
-                    "total_training_steps": -1
-                    if st.session_state["total_training_steps"] is None
-                    else st.session_state["total_training_steps"],
+                    "total_training_steps": (
+                        -1
+                        if st.session_state["total_training_steps"] is None
+                        else st.session_state["total_training_steps"]
+                    ),
                 },
                 "model": {
                     "path": critic_model_path,
@@ -1436,7 +1446,7 @@ if node_num > 1:
                 "total_epochs": st.session_state["total_epochs"],
                 "project_name": st.session_state["project"],
                 "experiment_name": st.session_state["exp_name"],
-                "logger": ["wandb"],
+                "logger": ["tensorboard"],
                 "val_generations_to_log_to_wandb": 0,
                 "nnodes": trainer_nnodes,
                 "n_gpus_per_node": trainer_n_gpus_per_node,
@@ -1516,7 +1526,12 @@ if node_num > 1:
             "Generate Config",
             disabled=disable_generate,
             help=help_messages,
+            use_container_width=True,
+            icon=":material/create_new_folder:",
         ):
+            st.session_state.config_generated = True
+            st.session_state.is_running = False
+        if st.session_state.config_generated:
             config = {
                 "mode": st.session_state["mode"],
                 "data": {
@@ -1618,10 +1633,85 @@ if node_num > 1:
                     "dpo_dataset_chosen_key": st.session_state["dpo_dataset_chosen_key"],
                     "dpo_dataset_rejected_key": st.session_state["dpo_dataset_rejected_key"],
                 }
+            st.session_state.config_generated = True
             st.header("Generated Config File")
-            st.subheader("Config File")
+            buttons = st.container()
+            save_btn, run_btn = buttons.columns(2, vertical_alignment="bottom")
             yaml_config = yaml.dump(config, allow_unicode=True, sort_keys=False)
+            save_btn.download_button(
+                "Save",
+                data=yaml_config,
+                file_name=f"{config['monitor']['project']}-{config['monitor']['name']}.yaml",
+                mime="text/plain",
+                icon=":material/download:",
+                use_container_width=True,
+            )
+            run_btn.button(
+                "Run",
+                on_click=self.run_config,
+                args=(
+                    buttons,
+                    yaml_config,
+                ),
+                icon=":material/terminal:",
+                use_container_width=True,
+                disabled=st.session_state.is_running,
+            )
             st.code(yaml_config, language="yaml")
+
+    def run_config(self, parent, yaml_config: str) -> None:
+        st.session_state.is_running = True
+
+        import ray
+
+        # first check if ray is running
+        ray_status = subprocess.run(
+            ["ray", "status"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+
+        if ray_status.returncode != 0:
+            parent.warning(
+                "Ray cluster is not running. Please start Ray first using `ray start --head`."
+            )
+            return
+        context = ray.init(ignore_reinit_error=True)
+        dashboard_url = context.dashboard_url
+        # save config to temp file
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as tmpfile:
+            tmpfile.write(yaml_config)
+            tmpfile_path = tmpfile.name
+
+        # submit ray job
+        try:
+            subprocess.run(
+                [
+                    "ray",
+                    "job",
+                    "submit",
+                    "--no-wait",
+                    "--",
+                    "python",
+                    "-m",
+                    "trinity.cli.launcher",
+                    "run",
+                    "--config",
+                    tmpfile_path,
+                ],
+                text=True,
+                capture_output=True,
+                check=True,
+            )
+            parent.success(
+                f"Job submitted successfully!\n\n"
+                f"View progress in the Ray Dashboard: http://{dashboard_url}",
+                icon="✅",
+            )
+        except subprocess.CalledProcessError as e:
+            parent.error(f"Failed to submit job:\n\n{e.stderr}", icon="❌")
+            st.session_state.is_running = False
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 """Launch the trainer"""
-
 import argparse
+import sys
 
 import ray
 
@@ -153,6 +153,21 @@ def run(config_path: str):
         both(config)
 
 
+def studio(port: int = 8501):
+    from streamlit.web import cli as stcli
+
+    sys.argv = [
+        "streamlit",
+        "run",
+        "trinity/manager/config_manager.py",
+        "--server.port",
+        str(port),
+        "--server.fileWatcherType",
+        "none",
+    ]
+    sys.exit(stcli.main())
+
+
 def main() -> None:
     """The main entrypoint."""
     parser = argparse.ArgumentParser()
@@ -162,12 +177,18 @@ def main() -> None:
     run_parser = subparsers.add_parser("run", help="Run RFT process.")
     run_parser.add_argument("--config", type=str, required=True, help="config file path.")
 
+    # studio command
+    studio_parser = subparsers.add_parser("studio", help="Run studio.")
+    studio_parser.add_argument("--port", type=int, default=8501, help="studio port.")
+
     # TODO: add more commands like `monitor`, `label`
 
     args = parser.parse_args()
     if args.command == "run":
         # TODO: support parse all args from command line
         run(args.config)
+    elif args.command == "studio":
+        studio(args.port)
 
 
 if __name__ == "__main__":

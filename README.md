@@ -200,18 +200,22 @@ For more details about dataset downloading, please refer to [Huggingface](https:
 ### Step 3: configurations
 
 
-You may customize the configurations in [`examples`](examples/). For example, the model and dataset are specified as:
+For convenience, Trinity-RFT provides a web interface for configuring your RFT process.
 
-```yaml
-model:
-  model_path: $MODEL_PATH/{model_name}
+> [!NOTE]
+> This is a experimental feature. We will continue to improve it and make it more user-friendly.
 
-data:
-  dataset_path: $DATASET_PATH/{dataset_name}
+```bash
+trinity studio --port 8080
 ```
 
-Please refer to [`examples`](examples/) for more details.
 
+Then you can configure your RFT process in the web page and generate a config file.
+You can save the config for later use or run it directly as described in the following section.
+
+
+For advanced users, you can also manually configure your RFT process by editing the config file.
+We provide a set of example config files in [`examples`](examples/).
 
 
 ### Step 4: run the RFT process
@@ -227,8 +231,6 @@ ray start --head
 ray start --address=<master_address>
 ```
 
-
-
 Optionally, we can login into [wandb](https://docs.wandb.ai/quickstart/) to better monitor the RFT process:
 
 ```shell
@@ -236,26 +238,18 @@ export WANDB_API_KEY=<your_api_key>
 wandb login
 ```
 
-
-
-Then, run the RFT process with the following command:
+Then, for command-line users, run the RFT process with the following command:
 
 ```shell
 trinity run --config <config_path>
 ```
 
+> For example, below is the command for fine-tuning Qwen-2.5-1.5B-Instruct on GSM8k dataset using GRPO algorithm:
+> ```shell
+> trinity run --config examples/grpo_gsm8k/gsm8k.yaml
+> ```
 
-
-For example, below is the command for fine-tuning Qwen-2.5-1.5B-Instruct on GSM8k dataset using GRPO algorithm:
-
-```shell
-trinity run --config examples/grpo_gsm8k/gsm8k.yaml
-```
-
-
-
-More example config files can be found in `examples`.
-
+For studio users, just click the "Run" button in the web page.
 
 
 For more detailed examples about how to use Trinity-RFT, please refer to the following tutorials:
