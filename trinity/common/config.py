@@ -22,8 +22,11 @@ logger = get_logger(__name__)
 class FormatConfig:
     """Configuration for data formatting"""
 
+    prompt_type: PromptType = PromptType.MESSAGES
+
     prompt_key: str = "prompt"
     response_key: str = "response"
+    messages_key: str = "message"
     chat_template: str = ""
 
     # for sample-level task controlling
@@ -110,6 +113,8 @@ class DatasetConfig:
     algorithm_type: AlgorithmType = AlgorithmType.PPO
     path: Optional[str] = None
     namespace: str = ""  # automatically generated
+    split: str = "train"  # used for StorageType.FILE
+    subset_name: Optional[str] = None  # used for StorageType.FILE
     format_config: FormatConfig = field(default_factory=FormatConfig)
     kwargs: Dict[str, Any] = field(default_factory=dict)
 
@@ -254,7 +259,7 @@ class Config:
         with open(config_path, "w", encoding="utf-8") as f:
             OmegaConf.save(self, f)
 
-    def _check_buffer(self) -> None:
+    def _check_buffer(self) -> None:  # noqa: C901
         if self.trainer.sft_warmup_steps > 0 and self.buffer.sft_warmup_dataset is None:
             raise ValueError(
                 "buffer.sft_warmup_dataset is required when trainer.sft_warmup_steps > 0"
@@ -295,9 +300,35 @@ class Config:
                 raise ValueError("buffer.train_dataset is required when mode is not 'both'")
         self.buffer.train_dataset.algorithm_type = self.trainer.algorithm_type
         self.buffer.train_dataset.namespace = f"{self.monitor.project}-{self.monitor.name}"
+        for key, value in self.buffer.train_dataset.kwargs.items():
+            if hasattr(self.buffer.train_dataset.format_config, key):
+                setattr(self.buffer.train_dataset.format_config, key, value)
+                logger.warning(
+                    f"`buffer.train_dataset.kwargs.{key}` has been renamed to `buffer.train_dataset.format_config.{key}, "
+                    f"Override `buffer.train_dataset.format_config.{key}` with `{value}`."
+                )
+            elif key in {"train_split", "eval_split", "split"}:
+                self.buffer.train_dataset.split = value
+                logger.warning(
+                    f"`buffer.train_dataset.kwargs.{key}` has been renamed to `buffer.train_dataset.split`, "
+                    f"Override `buffer.train_dataset.split` with `{value}`."
+                )
         if self.buffer.sft_warmup_dataset is not None:
             self.buffer.sft_warmup_dataset.namespace = f"{self.monitor.project}-{self.monitor.name}"
             self.buffer.sft_warmup_dataset.algorithm_type = AlgorithmType.SFT
+            for key, value in self.buffer.sft_warmup_dataset.kwargs.items():
+                if hasattr(self.buffer.sft_warmup_dataset.format_config, key):
+                    setattr(self.buffer.sft_warmup_dataset.format_config, key, value)
+                    logger.warning(
+                        f"`buffer.sft_warmup_dataset.kwargs.{key}` has been renamed to `buffer.sft_warmup_dataset.format_config`, "
+                        f"Override `buffer.sft_warmup_dataset.format_config.{key}` with `{value}`."
+                    )
+                elif key in {"train_split", "eval_split", "split"}:
+                    self.buffer.sft_warmup_dataset.split = value
+                    logger.warning(
+                        f"`buffer.sft_warmup_dataset.kwargs.{key}` has been renamed to `buffer.sft_warmup_dataset.split`, "
+                        f"Override `buffer.sft_warmup_dataset.split` with `{value}`."
+                    )
         self.buffer.read_batch_size = self.data.batch_size * self.explorer.repeat_times
 
     def check_and_update(self) -> None:  # noqa: C901

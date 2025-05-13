@@ -1566,18 +1566,6 @@ if node_num > 1:
                         "storage_type": st.session_state["storage_type"],
                         "path": train_dataset_path,
                     },
-                    "sft_warmup_dataset": {
-                        "name": "sft_warmup_dataset",
-                        "storage_type": sft_storage_type,
-                        "path": st.session_state["sft_warmup_dataset_path"],
-                        "kwargs": {
-                            "train_split": st.session_state["sft_warmup_train_split"],
-                            "prompt_type": st.session_state["sft_warmup_prompt_type"],
-                            "messages_key": st.session_state["sft_warmup_messages_key"],
-                            "prompt_key": st.session_state["sft_warmup_prompt_key"],
-                            "response_key": st.session_state["sft_warmup_response_key"],
-                        },
-                    },
                 },
                 "explorer": {
                     "engine_type": st.session_state["engine_type"],
@@ -1626,12 +1614,29 @@ if node_num > 1:
             }
 
             if st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
-                config["buffer"]["train_dataset"]["kwargs"] = {
-                    "dpo_dataset_train_split": st.session_state["dpo_dataset_train_split"],
-                    "dpo_dataset_prompt_type": st.session_state["dpo_dataset_prompt_type"],
-                    "dpo_dataset_prompt_key": st.session_state["dpo_dataset_prompt_key"],
-                    "dpo_dataset_chosen_key": st.session_state["dpo_dataset_chosen_key"],
-                    "dpo_dataset_rejected_key": st.session_state["dpo_dataset_rejected_key"],
+                config["buffer"]["train_dataset"]["split"] = st.session_state[
+                    "dpo_dataset_train_split"
+                ]
+                config["buffer"]["train_dataset"]["format_config"] = {
+                    "prompt_type": st.session_state["dpo_dataset_prompt_type"],
+                    "prompt_key": st.session_state["dpo_dataset_prompt_key"],
+                    "chosen_key": st.session_state["dpo_dataset_chosen_key"],
+                    "rejected_key": st.session_state["dpo_dataset_rejected_key"],
+                }
+            if st.session_state["sft_warmup_dataset_path"].strip():
+                config["buffer"]["sft_warmup_dataset"]["split"] = st.session_state[
+                    "sft_warmup_train_split"
+                ]
+                config["buffer"]["sft_warmup_dataset"] = {
+                    "name": "sft_warmup_dataset",
+                    "storage_type": sft_storage_type,
+                    "path": st.session_state["sft_warmup_dataset_path"],
+                    "format_config": {
+                        "prompt_type": st.session_state["sft_warmup_prompt_type"],
+                        "messages_key": st.session_state["sft_warmup_messages_key"],
+                        "prompt_key": st.session_state["sft_warmup_prompt_key"],
+                        "response_key": st.session_state["sft_warmup_response_key"],
+                    },
                 }
             st.session_state.config_generated = True
             st.header("Generated Config File")

@@ -23,7 +23,7 @@ buffer:
     name: dpo_buffer
     storage_type: file
     path: '/PATH/TO/DATASET/'
-    kwargs:
+    format_config:
       prompt_type: plaintext # plaintext/messages
       prompt_key: prompt
       chosen_key: chosen

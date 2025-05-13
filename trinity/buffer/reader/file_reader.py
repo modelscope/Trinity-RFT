@@ -47,13 +47,16 @@ class SFTDataReader(BufferReader):
     """Reader for SFT file data."""
 
     def __init__(self, meta: DatasetConfig, config: BufferConfig):
-        self.train_split = meta.kwargs.get("train_split", "train")
-        self.prompt_type = PromptType(meta.kwargs.get("prompt_type", "messages"))
-        self.messages_key = meta.kwargs.get("messages_key", "messages")
-        self.prompt_key = meta.kwargs.get("prompt_key", "prompt")
-        self.response_key = meta.kwargs.get("response_key", "response")
+        self.train_split = meta.split
+        subset_name = meta.subset_name
+        self.prompt_type = meta.format_config.prompt_type
+        self.messages_key = meta.format_config.messages_key
+        self.prompt_key = meta.format_config.prompt_key
+        self.response_key = meta.format_config.response_key
         self.read_batch_size = config.read_batch_size
-        self.dataset = load_dataset(meta.path)[self.train_split]  # TODO: support resume
+        self.dataset = load_dataset(
+            meta.path, name=subset_name, split=self.train_split
+        )  # TODO: support resume
         self.data_iter = self.dataset.iter(self.read_batch_size, drop_last_batch=True)
         self.tokenizer = transformers.AutoTokenizer.from_pretrained(config.tokenizer_path)
 
@@ -121,13 +124,16 @@ class SFTDataReader(BufferReader):
 @FileReaderManager.register_subclass(AlgorithmType.DPO)
 class DPODataReader(BufferReader):
     def __init__(self, meta: DatasetConfig, config: BufferConfig):
-        self.train_split = meta.kwargs.get("train_split", "train")
-        self.prompt_type = PromptType(meta.kwargs.get("prompt_type", "messages"))
-        self.prompt_key = meta.kwargs.get("prompt_key", "prompt")
-        self.chosen_key = meta.kwargs.get("chosen_key", "chosen")
-        self.rejected_key = meta.kwargs.get("rejected_key", "rejected")
+        self.train_split = meta.split
+        subset_name = meta.subset_name
+        self.prompt_type = meta.format_config.prompt_type
+        self.prompt_key = meta.format_config.prompt_key
+        self.chosen_key = meta.format_config.chosen_key
+        self.rejected_key = meta.format_config.rejected_key
         self.read_batch_size = config.read_batch_size
-        self.dataset = load_dataset(meta.path)[self.train_split]  # TODO: support resume
+        self.dataset = load_dataset(
+            meta.path, name=subset_name, split=self.train_split
+        )  # TODO: support resume
         self.data_iter = self.dataset.iter(self.read_batch_size, drop_last_batch=True)
         self.tokenizer = transformers.AutoTokenizer.from_pretrained(config.tokenizer_path)
 
@@ -191,11 +197,13 @@ class DPODataReader(BufferReader):
 @FileReaderManager.register_subclass(AlgorithmType.ROLLOUT)
 class RolloutDataReader(BufferReader):
     def __init__(self, meta: DatasetConfig, config: BufferConfig):
-        self.split = meta.kwargs.get("split", "train")
-        name = meta.kwargs.get("name", None)
+        self.split = meta.split
+        subset_name = meta.subset_name
         # disable datasets caching to avoid reuse old-version dataset
         datasets.disable_caching()
-        self.dataset = load_dataset(meta.path, name=name, split=self.split)  # TODO: may from db_url
+        self.dataset = load_dataset(
+            meta.path, name=subset_name, split=self.split
+        )  # TODO: may from db_url
         # if task_type != TaskType.EVAL and config.db_url != "":
         #     logger.info(f"Loading dataset from database with url: {config.db_url}")
         #     db_type = config.db_url.split(":")[0]
