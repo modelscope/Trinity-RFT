@@ -244,7 +244,7 @@ class SynchronizerConfig:
 class Config:
     """Global Configuration"""
 
-    mode: str = "both"  # `explore`, `train` or `both`
+    mode: str = "both"  # `explore`, `train`, `both` or `bench`
     data: DataConfig = field(default_factory=DataConfig)
     model: ModelConfig = field(default_factory=ModelConfig)
     cluster: ClusterConfig = field(default_factory=ClusterConfig)
@@ -334,7 +334,7 @@ class Config:
     def check_and_update(self) -> None:  # noqa: C901
         """Check and update the config."""
         # check mode
-        if self.mode not in ["explore", "train", "both"]:
+        if self.mode not in ["explore", "train", "both", "bench"]:
             raise ValueError(f"Invalid mode: {self.mode}")
         if self.trainer.algorithm_type == AlgorithmType.DPO and self.mode == "both":
             raise ValueError("DPO does not support `both` mode")
@@ -357,6 +357,11 @@ class Config:
             self.explorer.engine_num * self.explorer.tensor_parallel_size
         )
         self.synchronizer.backend = self.explorer.backend
+        if self.mode == "bench" and self.synchronizer.sync_method != SyncMethod.CHECKPOINT:
+            self.synchronizer.sync_method = "checkpoint"
+            logger.warning(
+                "Bench mode only supports checkpoint synchronization, set `synchronizer.sync_method` to `checkpoint`."
+            )
         if (
             self.trainer.algorithm_type == AlgorithmType.DPO
             and self.synchronizer.sync_method != SyncMethod.CHECKPOINT

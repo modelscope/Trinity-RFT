@@ -73,8 +73,20 @@ class Trainer:
             bool: Whether to continue training.
         """
         self.engine.set_mode(algo_type)
+        if algo_type.is_rft() and self.config.trainer.get_exp_strategy:
+            strategy = ReadStrategy(self.config.trainer.get_exp_strategy)
+        else:
+            strategy = None
+        try:
+            if algo_type.is_sft():
+                exps = self.sft_warmup_buffer.read()
+            else:
+                exps = self.train_buffer.read(strategy=strategy)
+        except StopIteration:
+            self.logger.warning("No more data to train. Stop training.")
+            return False, 0  # TODO: get the actual step number
+
         if algo_type.is_sft():
-            exps = self.sft_warmup_buffer.read()
             return self.engine.train_sft_step(
                 Experiences.gather_experiences(
                     exps,
@@ -82,15 +94,6 @@ class Trainer:
                 )
             )
         elif algo_type.is_rft():
-            if self.config.trainer.get_exp_strategy:
-                strategy = ReadStrategy(self.config.trainer.get_exp_strategy)
-            else:
-                strategy = None
-            try:
-                exps = self.train_buffer.read(strategy=strategy)
-            except StopIteration:
-                self.logger.warning("No more data to train. Stop training.")
-                return False, 0  # TODO: get the actual step number
             return self.engine.train_rft_step(
                 Experiences.gather_experiences(
                     exps,
@@ -98,7 +101,6 @@ class Trainer:
                 )
             )
         elif algo_type.is_dpo():
-            exps = self.train_buffer.read()
             return self.engine.train_dpo_step(
                 Experiences.gather_dpo_experiences(
                     exps,

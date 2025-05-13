@@ -13,6 +13,20 @@ from trinity.utils.log import get_logger
 logger = get_logger(__name__)
 
 
+def bench(config: Config) -> None:
+    """Evaluate model."""
+    explorer = Explorer.remote(config)
+    try:
+        ray.get(explorer.prepare.remote())
+        ray.get(explorer.sync_weight.remote())
+        _, step = ray.get(explorer.eval.remote())
+        logger.info("Evaluation finished.")
+        ray.get(explorer.flush_log.remote(step=step))
+    except Exception as e:
+        logger.error(f"Evaluation failed: {e}")
+        raise e
+
+
 def explore(config: Config) -> None:
     """Run explorer."""
     explorer = Explorer.remote(config)
@@ -151,6 +165,8 @@ def run(config_path: str):
         train(config)
     elif config.mode == "both":
         both(config)
+    elif config.mode == "bench":
+        bench(config)
 
 
 def studio(port: int = 8501):
