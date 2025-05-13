@@ -12,6 +12,7 @@ from typing import Any, Dict, List, Optional
 import ray
 import torch
 import vllm
+from vllm.sampling_params import RequestOutputKind
 
 from trinity.common.config import Config
 from trinity.common.experience import Experience
@@ -61,6 +62,7 @@ class vLLMAysncRolloutModel(InferenceModel):
             truncate_prompt_tokens=config.model.max_prompt_tokens,
             skip_special_tokens=True,
             include_stop_str_in_output=False,
+            output_kind=RequestOutputKind.FINAL_ONLY,
             logprobs=config.explorer.logprobs,
         )
         self.request_id = 0
@@ -148,10 +150,8 @@ class vLLMAysncRolloutModel(InferenceModel):
         Returns:
             A list of experiences.
         """
-        request_id = self.request_id
-        self.request_id += 1
         async with self.semaphore:
-            output = await self._generate_internal(request_id=request_id, prompt=prompt, **kwargs)
+            output = await self._generate_internal(prompt=prompt, **kwargs)
         experiences = [
             Experience(
                 tokens=torch.cat(
@@ -186,11 +186,8 @@ class vLLMAysncRolloutModel(InferenceModel):
 
     async def logprobs_async(self, token_ids: List[int]) -> torch.Tensor:
         """Calculate the logprobs of the given tokens in async."""
-        request_id = self.request_id
-        self.request_id += 1
         async with self.semaphore:
             output = await self._generate_internal(
-                request_id=request_id,
                 prompt={"prompt_token_ids": token_ids},
                 n=1,
                 max_tokens=1,
@@ -205,10 +202,11 @@ class vLLMAysncRolloutModel(InferenceModel):
             dtype=torch.float32,
         )
 
-    async def _generate_internal(self, request_id: int, prompt: Any, **kwargs) -> Any:
+    async def _generate_internal(self, prompt: Any, **kwargs) -> Any:
         # Send the request to the LLM engine.
+        self.request_id += 1
         stream = self.async_llm.generate(
-            request_id=str(request_id),
+            request_id=str(self.request_id),
             prompt=prompt,
             sampling_params=self._create_sampling_params(**kwargs),
         )
