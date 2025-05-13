@@ -197,6 +197,7 @@ class DPODataReader(BufferReader):
 @FileReaderManager.register_subclass(AlgorithmType.ROLLOUT)
 class RolloutDataReader(BufferReader):
     def __init__(self, meta: DatasetConfig, config: BufferConfig):
+        self.name = meta.name
         self.split = meta.split
         subset_name = meta.subset_name
         # disable datasets caching to avoid reuse old-version dataset

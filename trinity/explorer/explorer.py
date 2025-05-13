@@ -76,9 +76,10 @@ class Explorer:
                     "default_reward_fn_type": self.config.data.default_reward_fn_type,
                 },
             )
-            self.eval_taskset = get_buffer_reader(eval_dataset_config, self.config.buffer)
-        else:
-            self.eval_taskset = None
+            self.config.data.eval_datasets.append(eval_dataset_config)
+        self.eval_tasksets = []
+        for eval_dataset_config in self.config.data.eval_datasets:
+            self.eval_tasksets.append(get_buffer_reader(eval_dataset_config, self.config.buffer))
         self.runner_pool = self._init_runner_pool()
         self.monitor = Monitor(
             project=self.config.monitor.project,
@@ -257,30 +258,35 @@ class Explorer:
 
     def eval(self) -> Tuple[bool, int]:
         """Evaluation on all evaluation data samples."""
-        if self.eval_taskset is None:
+        if len(self.eval_tasksets) == 0:
             self.logger.warning("No evaluation data samples. Skip evaluation.")
             return True, self.step_num
         self.logger.info("Evaluation started.")
-        st = time.time()
-        all_metrics = defaultdict(list)
+        all_st = time.time()
+        log_metrics = {}
+        for eval_taskset in self.eval_tasksets:
+            st = time.time()
+            all_metrics = defaultdict(list)
 
-        tasks = [task for task in self.eval_taskset]
-        self.runner_pool.run_tasks(tasks)
+            tasks = [task for task in eval_taskset]
+            self.runner_pool.run_tasks(tasks)
 
-        while self.runner_pool.has_next():
-            # TODO: use unordered queue to avoid blocking
-            status_list = self.runner_pool.get_next_unorder()
-            if not isinstance(status_list, list):
-                status_list = [status_list]
-            for status in status_list:
-                if not status.ok:
-                    self.logger.error(f"Error when running task: {status.message}")
-                else:
-                    for metric_name, metric_value in status.metric.items():
-                        all_metrics[metric_name].append(metric_value)
+            while self.runner_pool.has_next():
+                # TODO: use unordered queue to avoid blocking
+                status_list = self.runner_pool.get_next_unorder()
+                if not isinstance(status_list, list):
+                    status_list = [status_list]
+                for status in status_list:
+                    if not status.ok:
+                        self.logger.error(f"Error when running task: {status.message}")
+                    else:
+                        for metric_name, metric_value in status.metric.items():
+                            all_metrics[metric_name].append(metric_value)
 
-        log_metrics = self.monitor.calculate_metrics(all_metrics, prefix="eval")  # type: ignore
-        log_metrics["eval/total_time"] = time.time() - st
+            metrics = self.monitor.calculate_metrics(all_metrics, prefix=f"eval/{eval_taskset.name}")  # type: ignore
+            log_metrics.update(metrics)
+            log_metrics[f"eval/{eval_taskset.name}/time"] = time.time() - st
+        log_metrics["eval/total_time"] = time.time() - all_st
         self.monitor.log(log_metrics, step=self.step_num)  # type: ignore
         return True, self.step_num
 

@@ -2,7 +2,7 @@
 """Configs for RFT."""
 import os
 from dataclasses import dataclass, field
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from omegaconf import OmegaConf
 
@@ -47,6 +47,21 @@ class FormatConfig:
 
 
 @dataclass
+class DatasetConfig:
+    """The config for a dataset."""
+
+    name: str
+    storage_type: StorageType
+    algorithm_type: AlgorithmType = AlgorithmType.PPO
+    path: Optional[str] = None
+    namespace: str = ""  # automatically generated
+    split: str = "train"  # used for StorageType.FILE
+    subset_name: Optional[str] = None  # used for StorageType.FILE
+    format_config: FormatConfig = field(default_factory=FormatConfig)
+    kwargs: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
 class DataConfig:
     """Data config"""
 
@@ -83,6 +98,9 @@ class DataConfig:
     default_workflow_type: str = ""
     default_reward_fn_type: str = ""
 
+    # eval datasets
+    eval_datasets: List[DatasetConfig] = field(default_factory=list)
+
 
 @dataclass
 class ModelConfig:
@@ -102,21 +120,6 @@ class ClusterConfig:
 
     node_num: int = 1
     gpu_per_node: int = 8
-
-
-@dataclass
-class DatasetConfig:
-    """The config for a dataset."""
-
-    name: str
-    storage_type: StorageType
-    algorithm_type: AlgorithmType = AlgorithmType.PPO
-    path: Optional[str] = None
-    namespace: str = ""  # automatically generated
-    split: str = "train"  # used for StorageType.FILE
-    subset_name: Optional[str] = None  # used for StorageType.FILE
-    format_config: FormatConfig = field(default_factory=FormatConfig)
-    kwargs: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
