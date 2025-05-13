@@ -12,6 +12,7 @@ from trinity.common.constants import (
     PromptType,
     StorageType,
     SyncMethod,
+    TaskType,
 )
 from trinity.utils.log import get_logger
 
@@ -100,6 +101,11 @@ class DataConfig:
 
     # eval datasets
     eval_datasets: List[DatasetConfig] = field(default_factory=list)
+
+    def __post_init__(self):
+        for dataset in self.eval_datasets:
+            dataset.algorithm_type = AlgorithmType.ROLLOUT
+            dataset.kwargs["task_type"] = TaskType.EVAL
 
 
 @dataclass
@@ -432,7 +438,7 @@ class Config:
         # check buffer
         self._check_buffer()
         # check and update trainer
-        if self.mode != "explore":
+        if self.mode in {"both", "train"}:
             if self.trainer.trainer_type == "verl":
                 if self.trainer.trainer_config:
                     from trinity.common.verl_config import veRLConfig

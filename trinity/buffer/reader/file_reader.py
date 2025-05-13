@@ -227,6 +227,9 @@ class RolloutDataReader(BufferReader):
             meta.kwargs.get("total_epochs", 1) if self.task_type == TaskType.EXPLORE else 1
         )
 
+    def __len__(self):
+        return len(self.dataset)
+
     def read(self, strategy: Optional[ReadStrategy] = None):
         sample = self.dataset[self.index % len(self.dataset)]
         task_desc = sample[self.prompt_key] if self.prompt_key in sample else None

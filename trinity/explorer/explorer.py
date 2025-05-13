@@ -268,11 +268,7 @@ class Explorer:
             st = time.time()
             all_metrics = defaultdict(list)
 
-            tasks = [task for task in eval_taskset]
-            self.runner_pool.run_tasks(tasks)
-
-            while self.runner_pool.has_next():
-                # TODO: use unordered queue to avoid blocking
+            def wait():
                 status_list = self.runner_pool.get_next_unorder()
                 if not isinstance(status_list, list):
                     status_list = [status_list]
@@ -283,6 +279,12 @@ class Explorer:
                         for metric_name, metric_value in status.metric.items():
                             all_metrics[metric_name].append(metric_value)
 
+            for _ in range(len(eval_taskset)):  # type: ignore
+                if not self.runner_pool.has_free():
+                    wait()
+                self.runner_pool.run_tasks([eval_taskset.read()])  # type: ignore
+            while self.runner_pool.has_next():
+                wait()
             metrics = self.monitor.calculate_metrics(all_metrics, prefix=f"eval/{eval_taskset.name}")  # type: ignore
             log_metrics.update(metrics)
             log_metrics[f"eval/{eval_taskset.name}/time"] = time.time() - st
