@@ -35,11 +35,11 @@ A data processing engine designed for Reinforcement Fine-Tuning (RFT) of Large L
 ```python
 from trinity.common.rewards import AccuracyReward
 from trinity.common.workflows import MathWorkflow
-from trinity.common.config import DataConfig
+from trinity.common.config import DataProcessorConfig
 from trinity.data.core.dataset import RftDataset
 from trinity.data.core.formatter import BoxedMathAnswerFormatter, RLHFFormatter
 
-data_config: DataConfig = ...
+data_config: DataProcessorConfig = ...
 
 # initialize the dataset according to the data config
 dataset = RftDataset(data_config)

@@ -25,8 +25,7 @@ class BaseExplorerCase(RayUnittestBase):
         self.config.monitor.project = "Trinity-unittest"
         self.config.model.checkpoint_path = get_checkpoint_path()
         self.config.synchronizer.sync_interval = 2
-        self.config.explorer.eval_interval = 4
-        self.config.trainer.eval_interval = 4
+        self.config.global_config.eval_interval = 4
 
     @abstractmethod
     def test_explorer(self):

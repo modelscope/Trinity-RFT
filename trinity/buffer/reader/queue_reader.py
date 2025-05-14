@@ -6,7 +6,7 @@ import ray
 
 from trinity.buffer.buffer_reader import BufferReader
 from trinity.buffer.queue import QueueActor
-from trinity.common.config import BufferConfig, DatasetConfig
+from trinity.common.config import BufferConfig, StorageConfig
 from trinity.common.constants import ReadStrategy, StorageType
 from trinity.utils.log import get_logger
 
@@ -16,12 +16,12 @@ logger = get_logger(__name__)
 class QueueReader(BufferReader):
     """Reader of the Queue buffer."""
 
-    def __init__(self, meta: DatasetConfig, config: BufferConfig):
+    def __init__(self, meta: StorageConfig, config: BufferConfig):
         assert meta.storage_type == StorageType.QUEUE
         self.config = config
         self.queue = QueueActor.options(
             name=f"queue-{meta.name}",
-            namespace=meta.namespace,
+            # namespace=meta.namespace,
             get_if_exists=True,
         ).remote(meta, config)
 

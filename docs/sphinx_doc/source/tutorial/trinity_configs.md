@@ -38,7 +38,7 @@ data:
   default_reward_fn_type: 'countdown_reward'
 ```
 
-- `data.dataset_path`: The path to the dataset.
+<!-- - `data.dataset_path`: The path to the dataset. -->
 - `data.train_split`: The split name of the dataset used for training. Default is `train`.
 - `data.eval_split`: The split name of the dataset used for eval.
 <!-- - `data.dataset_config`: The configuration for the dataset. TODO: may only used in Data-Juicer -->

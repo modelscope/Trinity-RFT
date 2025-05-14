@@ -7,7 +7,7 @@ import ray
 import torch
 
 from trinity.buffer.reader.queue_reader import QueueReader
-from trinity.common.config import DatasetConfig, load_config
+from trinity.common.config import StorageConfig, load_config
 from trinity.common.constants import AlgorithmType, StorageType
 from trinity.common.experience import Experience
 from trinity.common.models.model import InferenceModel
@@ -68,7 +68,7 @@ class RunnerPoolTest(unittest.TestCase):
         self.config.explorer.max_timeout = 5
         self.config.buffer.read_batch_size = 2
         self.config.buffer.pad_token_id = 0
-        self.config.buffer.train_dataset = DatasetConfig(
+        self.config.buffer.train_dataset = StorageConfig(
             name="test",
             namespace="test_runner_pool",
             storage_type=StorageType.QUEUE,

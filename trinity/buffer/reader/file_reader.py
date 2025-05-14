@@ -7,7 +7,7 @@ import transformers
 from datasets import load_dataset
 
 from trinity.buffer.buffer_reader import BufferReader
-from trinity.common.config import BufferConfig, DatasetConfig
+from trinity.common.config import BufferConfig, StorageConfig
 from trinity.common.constants import AlgorithmType, PromptType, ReadStrategy, TaskType
 from trinity.common.experience import Experience
 from trinity.common.rewards import REWARD_FUNCTIONS
@@ -28,7 +28,7 @@ class FileReaderManager:
         return decorator
 
     @classmethod
-    def create_reader(cls, meta: DatasetConfig, config: BufferConfig) -> BufferReader:
+    def create_reader(cls, meta: StorageConfig, config: BufferConfig) -> BufferReader:
         def add_read_check(read_func):
             def wrapper(self, strategy: Optional[ReadStrategy] = None, *args, **kwargs):
                 if strategy is not None and strategy != ReadStrategy.FIFO:
@@ -46,8 +46,8 @@ class FileReaderManager:
 class SFTDataReader(BufferReader):
     """Reader for SFT file data."""
 
-    def __init__(self, meta: DatasetConfig, config: BufferConfig):
-        self.train_split = meta.split
+    def __init__(self, meta: StorageConfig, config: BufferConfig):
+        self.split = meta.split
         subset_name = meta.subset_name
         self.prompt_type = meta.format_config.prompt_type
         self.messages_key = meta.format_config.messages_key
@@ -55,7 +55,7 @@ class SFTDataReader(BufferReader):
         self.response_key = meta.format_config.response_key
         self.read_batch_size = config.read_batch_size
         self.dataset = load_dataset(
-            meta.path, name=subset_name, split=self.train_split
+            meta.path, name=subset_name, split=self.split
         )  # TODO: support resume
         self.data_iter = self.dataset.iter(self.read_batch_size, drop_last_batch=True)
         self.tokenizer = transformers.AutoTokenizer.from_pretrained(config.tokenizer_path)
@@ -123,8 +123,8 @@ class SFTDataReader(BufferReader):
 
 @FileReaderManager.register_subclass(AlgorithmType.DPO)
 class DPODataReader(BufferReader):
-    def __init__(self, meta: DatasetConfig, config: BufferConfig):
-        self.train_split = meta.split
+    def __init__(self, meta: StorageConfig, config: BufferConfig):
+        self.split = meta.split
         subset_name = meta.subset_name
         self.prompt_type = meta.format_config.prompt_type
         self.prompt_key = meta.format_config.prompt_key
@@ -132,7 +132,7 @@ class DPODataReader(BufferReader):
         self.rejected_key = meta.format_config.rejected_key
         self.read_batch_size = config.read_batch_size
         self.dataset = load_dataset(
-            meta.path, name=subset_name, split=self.train_split
+            meta.path, name=subset_name, split=self.split
         )  # TODO: support resume
         self.data_iter = self.dataset.iter(self.read_batch_size, drop_last_batch=True)
         self.tokenizer = transformers.AutoTokenizer.from_pretrained(config.tokenizer_path)
@@ -196,7 +196,7 @@ class DPODataReader(BufferReader):
 
 @FileReaderManager.register_subclass(AlgorithmType.ROLLOUT)
 class RolloutDataReader(BufferReader):
-    def __init__(self, meta: DatasetConfig, config: BufferConfig):
+    def __init__(self, meta: StorageConfig, config: BufferConfig):
         self.name = meta.name
         self.split = meta.split
         subset_name = meta.subset_name
@@ -211,21 +211,17 @@ class RolloutDataReader(BufferReader):
         #     db_name = config.db_url.split("/")[-1]
         #     dataset = Dataset.from_sql(RftDatasetModel.__tablename__, f"{db_type}:///{db_name}")
         datasets.enable_caching()
-        self.index = meta.kwargs.get("index", 0)  # TODO: apply shuffle
+        self.index = meta.index  # TODO: apply shuffle
 
         self.prompt_key = meta.format_config.prompt_key
         self.response_key = meta.format_config.response_key
         self.workflow_key = meta.format_config.workflow_key
         self.reward_fn_key = meta.format_config.reward_fn_key
 
-        self.task_type = meta.kwargs.get("task_type", TaskType.EXPLORE)
-        self.default_workflow_cls = WORKFLOWS.get(meta.kwargs.get("default_workflow_type", None))
-        self.default_reward_fn_cls = REWARD_FUNCTIONS.get(
-            meta.kwargs.get("default_reward_fn_type", None)
-        )
-        self.total_epochs = (
-            meta.kwargs.get("total_epochs", 1) if self.task_type == TaskType.EXPLORE else 1
-        )
+        self.task_type = meta.task_type
+        self.default_workflow_cls = WORKFLOWS.get(meta.default_workflow_type)
+        self.default_reward_fn_cls = REWARD_FUNCTIONS.get(meta.default_reward_fn_type)
+        self.total_epochs = meta.total_epochs if self.task_type == TaskType.EXPLORE else 1
 
     def __len__(self):
         return len(self.dataset)

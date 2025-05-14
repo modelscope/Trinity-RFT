@@ -122,7 +122,7 @@ def both(config: Config) -> None:
             logger.error(e)
             logger.error("Training stopped due to exception.")
             raise e
-        if train_step_num % config.trainer.eval_interval == 0:
+        if explore_step_num % config.global_config.eval_interval == 0:
             try:
                 ray.get(explorer.eval.remote())
                 logger.info("Evaluation finished.")
@@ -152,13 +152,13 @@ def run(config_path: str):
     config = load_config(config_path)
     config.check_and_update()
     # try to activate data module
-    data_config = config.data
-    if data_config.data_workflow_url and (
-        data_config.dj_config_path or data_config.dj_process_desc
+    data_juicer_config = config.data_juicer
+    if data_juicer_config.data_workflow_url and (
+        data_juicer_config.dj_config_path or data_juicer_config.dj_process_desc
     ):
-        activate_data_module(data_config.data_workflow_url, config_path)
+        activate_data_module(data_juicer_config.data_workflow_url, config_path)
     if not ray.is_initialized():
-        ray.init()
+        ray.init(namespace=f"{config.monitor.project}-{config.monitor.name}")
     if config.mode == "explore":
         explore(config)
     elif config.mode == "train":

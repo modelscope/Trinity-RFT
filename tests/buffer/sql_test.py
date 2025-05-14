@@ -5,7 +5,7 @@ import torch
 
 from trinity.buffer.reader.sql_reader import SQLReader
 from trinity.buffer.writer.sql_writer import SQLWriter
-from trinity.common.config import BufferConfig, DatasetConfig
+from trinity.common.config import BufferConfig, StorageConfig
 from trinity.common.constants import AlgorithmType, StorageType
 from trinity.common.experience import Experience
 
@@ -17,7 +17,7 @@ class TestSQLBuffer(unittest.TestCase):
         total_num = 8
         put_batch_size = 2
         read_batch_size = 4
-        meta = DatasetConfig(
+        meta = StorageConfig(
             name="test_buffer",
             algorithm_type=AlgorithmType.PPO,
             path=f"sqlite:///{db_path}",

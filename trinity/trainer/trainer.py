@@ -26,12 +26,12 @@ class Trainer:
         self.config = config
         self.logger = get_logger(__name__)
         self.train_buffer = get_buffer_reader(
-            self.config.buffer.train_dataset,  # type: ignore
+            self.config.buffer.trainer_input.experience_buffer,  # type: ignore
             self.config.buffer,
         )
         self.sft_warmup_buffer = (
             get_buffer_reader(
-                self.config.buffer.sft_warmup_dataset,  # type: ignore
+                self.config.buffer.trainer_input.sft_warmup_dataset,  # type: ignore
                 self.config.buffer,
             )
             if self.config.trainer.sft_warmup_steps > 0

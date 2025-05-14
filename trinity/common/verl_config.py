@@ -289,22 +289,21 @@ class veRLConfig:
         self.actor_rollout_ref.synchronizer = config.synchronizer
         self.buffer = config.buffer
         world_size = self.trainer.nnodes * self.trainer.n_gpus_per_node
-        if config.data.batch_size % world_size != 0:
+        if config.global_config.batch_size % world_size != 0:
             raise ValueError(
-                f"batch_size ({config.data.batch_size}) must be divisible by ({world_size})"
+                f"batch_size ({config.global_config.batch_size}) must be divisible by ({world_size})"
             )
         # TODO: use dynamic read_batch_size to support multi-round scenarios
         # Get the experiences of one explore step
-        self.buffer.pad_token_id = config.buffer.pad_token_id
         self.trainer.project_name = config.monitor.project
         self.trainer.experiment_name = config.monitor.name
-        self.data.train_batch_size = config.data.batch_size
+        self.data.train_batch_size = config.global_config.batch_size
         self.trainer.default_local_dir = config.model.checkpoint_path
         self.trainer.sft_warmup_steps = config.trainer.sft_warmup_steps
-        self.actor_rollout_ref.actor.ppo_mini_batch_size = config.data.batch_size
+        self.actor_rollout_ref.actor.ppo_mini_batch_size = config.global_config.batch_size
         self.actor_rollout_ref.rollout.temperature = config.explorer.temperature
         self.actor_rollout_ref.rollout.n = config.explorer.repeat_times
-        self.critic.ppo_mini_batch_size = config.data.batch_size
+        self.critic.ppo_mini_batch_size = config.global_config.batch_size
         self.critic.rollout_n = config.explorer.repeat_times
 
         self.actor_rollout_ref.actor.algorithm_type = config.trainer.algorithm_type

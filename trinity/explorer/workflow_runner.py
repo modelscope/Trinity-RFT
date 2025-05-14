@@ -34,7 +34,7 @@ class WorkflowRunner:
     def __init__(self, config: Config, model: InferenceModel) -> None:
         self.config = config
         self.experience_buffer = get_buffer_writer(
-            self.config.buffer.train_dataset,  # type: ignore
+            self.config.buffer.explorer_output,  # type: ignore
             self.config.buffer,
         )
         self.model = model

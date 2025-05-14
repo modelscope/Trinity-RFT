@@ -48,34 +48,41 @@ class FormatConfig:
 
 
 @dataclass
-class DatasetConfig:
+class StorageConfig:
     """The config for a dataset."""
 
-    name: str
-    storage_type: StorageType
+    name: str = ""
+    storage_type: StorageType = StorageType.FILE
     algorithm_type: AlgorithmType = AlgorithmType.PPO
     path: Optional[str] = None
-    namespace: str = ""  # automatically generated
-    split: str = "train"  # used for StorageType.FILE
-    subset_name: Optional[str] = None  # used for StorageType.FILE
+
+    # used for StorageType.FILE
+    split: str = "train"
+    subset_name: Optional[str] = None
     format_config: FormatConfig = field(default_factory=FormatConfig)
-    kwargs: Dict[str, Any] = field(default_factory=dict)
+    index: int = 0
+
+    # used for AlgorithmType.ROLLOUT
+    task_type: TaskType = TaskType.EXPLORE
+    default_workflow_type: Optional[str] = None
+    default_reward_fn_type: Optional[str] = None
+    total_epochs: int = 1
+    # used for AlgorithmType.ROLLOUT and TaskType.EVAL
+    eval_repeat_times: int = 1  # TODO
+    eval_temperature: float = 0.1  # TODO
 
 
 @dataclass
-class DataConfig:
-    """Data config"""
+class DataProcessorConfig:
+    """Data-Juicer config"""
 
     data_workflow_url: Optional[str] = None
 
-    dataset_path: str = ""
-    train_split: str = "train"
-    subset_name: Optional[str] = None
-    eval_split: Optional[str] = None  # TODO: check data format
+    raw_data_path: str = ""
     format_config: FormatConfig = field(default_factory=FormatConfig)
 
     # data active iterator related
-    dataset_config: Dict[str, Any] = field(default_factory=dict)
+    load_kwargs: Dict[str, Any] = field(default_factory=dict)
     dj_config_path: Optional[str] = None  # The path to Data-Juicer config file.
     dj_process_desc: Optional[
         str
@@ -93,19 +100,13 @@ class DataConfig:
     max_retry_times: int = 3
     max_retry_interval: int = 1
 
+
+@dataclass
+class GlobalConfig:
     # downstream loading related
     total_epochs: int = 1
     batch_size: int = 1
-    default_workflow_type: str = ""
-    default_reward_fn_type: str = ""
-
-    # eval datasets
-    eval_datasets: List[DatasetConfig] = field(default_factory=list)
-
-    def __post_init__(self):
-        for dataset in self.eval_datasets:
-            dataset.algorithm_type = AlgorithmType.ROLLOUT
-            dataset.kwargs["task_type"] = TaskType.EVAL
+    eval_interval: int = 100
 
 
 @dataclass
@@ -129,24 +130,36 @@ class ClusterConfig:
 
 
 @dataclass
+class ExplorerInput:
+    """Config for explorer input."""
+
+    taskset: StorageConfig = field(default_factory=StorageConfig)
+    eval_tasksets: List[StorageConfig] = field(default_factory=list)
+    default_workflow_type: str = ""
+    default_reward_fn_type: str = ""
+
+
+@dataclass
+class TrainerInput:
+    """Config for trainer input."""
+
+    experience_buffer: Optional[StorageConfig] = None
+    sft_warmup_dataset: Optional[StorageConfig] = None
+
+
+@dataclass
 class BufferConfig:
     """Config for experience buffer."""
 
-    db_url: Optional[str] = None  # Is deprecated, please set `buffer.train_dataset.path` instead.
     read_batch_size: int = 32
     max_retry_times: int = 3
     max_retry_interval: int = 1
-    tokenizer_path: Optional[str] = None
-    pad_token_id: Optional[int] = None
+    tokenizer_path: Optional[str] = None  # automatically set
+    pad_token_id: Optional[int] = None  # automatically set
 
-    train_dataset: Optional[DatasetConfig] = None
-    sft_warmup_dataset: Optional[DatasetConfig] = None
-
-    # remove in the future
-    prompt_type: PromptType = PromptType.MESSAGES
-    messages_key: str = "messages"
-    prompt_key: str = "prompt"
-    response_key: str = "response"
+    explorer_input: ExplorerInput = field(default_factory=ExplorerInput)
+    explorer_output: Optional[StorageConfig] = None  # currently do not set
+    trainer_input: TrainerInput = field(default_factory=TrainerInput)
 
 
 @dataclass
@@ -169,10 +182,6 @@ class ExplorerConfig:
 
     # for rollout tokneize
     chat_template: Optional[str] = None
-
-    # for evaluation
-    # TODO: remove trainer.eval_interval
-    eval_interval: int = 100
 
     # for vLLM
     tensor_parallel_size: int = 1
@@ -202,13 +211,12 @@ class ExplorerConfig:
 class TrainerConfig:
     trainer_type: str = "verl"
     trainer_config_path: str = ""
-    eval_interval: int = 100
     save_interval: int = 0
     enable_preview: bool = True  # enable rollout preview in wandb
     trainer_config: Any = field(default_factory=dict)
 
     # train algorithm
-    algorithm_type: AlgorithmType = AlgorithmType.PPO  # automatically set
+    algorithm_type: AlgorithmType = AlgorithmType.PPO
     get_exp_strategy: Optional[str] = None
 
     # warmup config
@@ -254,7 +262,8 @@ class Config:
     """Global Configuration"""
 
     mode: str = "both"  # `explore`, `train`, `both` or `bench`
-    data: DataConfig = field(default_factory=DataConfig)
+    data_juicer: DataProcessorConfig = field(default_factory=DataProcessorConfig)
+    global_config: GlobalConfig = field(default_factory=GlobalConfig)
     model: ModelConfig = field(default_factory=ModelConfig)
     cluster: ClusterConfig = field(default_factory=ClusterConfig)
     buffer: BufferConfig = field(default_factory=BufferConfig)
@@ -268,16 +277,112 @@ class Config:
         with open(config_path, "w", encoding="utf-8") as f:
             OmegaConf.save(self, f)
 
-    def _check_buffer(self) -> None:  # noqa: C901
-        if self.trainer.sft_warmup_steps > 0 and self.buffer.sft_warmup_dataset is None:
-            raise ValueError(
-                "buffer.sft_warmup_dataset is required when trainer.sft_warmup_steps > 0"
+    def _check_deprecated(self) -> None:
+        if self.synchronizer.sync_iteration_interval is not None:
+            logger.warning(
+                f"`synchronizer.sync_iteration_interval` is deprecated, please use `synchronizer.sync_interval` instead. "
+                f"And `synchronizer.sync_interval` will set to {self.synchronizer.sync_iteration_interval} instead."
             )
-        if self.buffer.db_url:
-            raise ValueError(
-                "`buffer.db_url` is deprecated, please set `buffer.train_dataset.path` instead."
+            self.synchronizer.sync_interval = self.synchronizer.sync_iteration_interval
+
+        if self.trainer.sft_warmup_iteration is not None:
+            logger.warning(
+                f"`trainer.sft_warmup_iteration` is deprecated, please use `trainer.sft_warmup_steps` instead. "
+                f"And `trainer.sft_warmup_steps` will be set to {self.trainer.sft_warmup_iteration} instead."
+            )
+            self.trainer.sft_warmup_steps = self.trainer.sft_warmup_iteration
+
+    def _check_interval(self) -> None:
+        assert self.synchronizer.sync_interval > 0
+
+        # check eval_interval
+        if (
+            self.trainer.algorithm_type != AlgorithmType.DPO
+            and self.global_config.eval_interval % self.synchronizer.sync_interval != 0
+        ):
+            self.global_config.eval_interval = (
+                max(self.global_config.eval_interval // self.synchronizer.sync_interval, 1)
+            ) * self.synchronizer.sync_interval
+            logger.warning(
+                f"`eval_interval` is not a multiple of `sync_interval`; adjusted to the nearest integer={self.global_config.eval_interval}."
             )
 
+        # check save_interval
+        if (
+            self.trainer.algorithm_type != AlgorithmType.DPO
+            and self.synchronizer.sync_method == SyncMethod.CHECKPOINT
+        ):
+            if self.trainer.save_interval != self.synchronizer.sync_interval:
+                logger.warning(
+                    f"When `trainer.algorithm_type != DPO` and `synchronizer.sync_method == checkpoint`, "
+                    f"`trainer.save_interval` will be set to "
+                    f"`synchronizer.sync_interval = {self.synchronizer.sync_interval}`."
+                )
+            self.trainer.save_interval = self.synchronizer.sync_interval
+
+    def _check_buffer(self) -> None:  # noqa: C901
+        # check explorer_input
+        if self.mode != "train" and self.buffer.explorer_input.taskset.path is None:
+            raise ValueError(
+                "`buffer.explorer_input.taskset.path` is required, please set it to the path of the taskset."
+            )
+        self.buffer.explorer_input.taskset.algorithm_type = AlgorithmType.ROLLOUT
+        self.buffer.explorer_input.taskset.task_type = TaskType.EXPLORE
+        if self.buffer.explorer_input.taskset.default_workflow_type is None:
+            self.buffer.explorer_input.taskset.default_workflow_type = (
+                self.buffer.explorer_input.default_workflow_type
+            )
+        if self.buffer.explorer_input.taskset.default_reward_fn_type is None:
+            self.buffer.explorer_input.taskset.default_reward_fn_type = (
+                self.buffer.explorer_input.default_reward_fn_type
+            )
+
+        for dataset in self.buffer.explorer_input.eval_tasksets:
+            dataset.algorithm_type = AlgorithmType.ROLLOUT
+            dataset.task_type = TaskType.EVAL
+            if dataset.default_workflow_type is None:
+                dataset.default_workflow_type = self.buffer.explorer_input.default_workflow_type
+            if dataset.default_reward_fn_type is None:
+                dataset.default_reward_fn_type = self.buffer.explorer_input.default_reward_fn_type
+
+        # check trainer_input.experience_buffer
+        if self.mode == "both":
+            if self.buffer.trainer_input.experience_buffer is None:
+                self.buffer.trainer_input.experience_buffer = StorageConfig(
+                    name="experience_buffer",
+                    storage_type=StorageType.QUEUE,
+                )
+                logger.info(
+                    f"Auto set `buffer.trainer_input.experience_buffer` to {self.buffer.trainer_input.experience_buffer}"
+                )
+        else:  # TODO: to be check
+            if self.trainer.algorithm_type.is_dpo():
+                if (
+                    self.buffer.trainer_input.experience_buffer is None
+                    or not self.buffer.trainer_input.experience_buffer.path
+                ):
+                    raise ValueError(
+                        "`buffer.trainer_input.experience_buffer.path` is required when `trainer.algorithm_type == AlgorithmType.DPO`"
+                    )
+        self.buffer.trainer_input.experience_buffer.algorithm_type = self.trainer.algorithm_type
+
+        # set buffer.explorer_output
+        if self.buffer.explorer_output is None:
+            self.buffer.explorer_output = self.buffer.trainer_input.experience_buffer
+
+        # check trainer_input.sft_warmup_dataset
+        if (
+            self.trainer.sft_warmup_steps > 0
+            and self.buffer.trainer_input.sft_warmup_dataset is None
+        ):
+            raise ValueError(
+                "buffer.trainer_input.sft_warmup_dataset is required when trainer.sft_warmup_steps > 0"
+            )
+        if self.buffer.trainer_input.sft_warmup_dataset is not None:
+            self.buffer.trainer_input.sft_warmup_dataset.algorithm_type = AlgorithmType.SFT
+
+        # set read_batch_size / pad_token_id / tokenizer_path
+        self.buffer.read_batch_size = self.global_config.batch_size * self.explorer.repeat_times
         if self.buffer.pad_token_id is None:
             from transformers import AutoTokenizer
 
@@ -290,58 +395,10 @@ class Config:
                 self.buffer.pad_token_id = 0
         self.buffer.tokenizer_path = self.model.model_path
 
-        if self.mode == "both":
-            if self.buffer.train_dataset is None:
-                self.buffer.train_dataset = DatasetConfig(
-                    name="experience_buffer",
-                    storage_type=StorageType.QUEUE,
-                )
-                logger.info(f"Auto set `buffer.train_dataset` to {self.buffer.train_dataset}")
-        else:  # TODO: to be check
-            if self.mode == "train" and self.trainer.algorithm_type == AlgorithmType.DPO:
-                if self.buffer.train_dataset is None and self.data.dataset_path.strip():
-                    self.buffer.train_dataset = DatasetConfig(
-                        name="dpo_train_dataset",
-                        storage_type=StorageType.FILE,
-                    )
-                    logger.info(f"Auto set `buffer.train_dataset` to {self.buffer.train_dataset}")
-            if self.buffer.train_dataset is None:
-                raise ValueError("buffer.train_dataset is required when mode is not 'both'")
-        self.buffer.train_dataset.algorithm_type = self.trainer.algorithm_type
-        self.buffer.train_dataset.namespace = f"{self.monitor.project}-{self.monitor.name}"
-        for key, value in self.buffer.train_dataset.kwargs.items():
-            if hasattr(self.buffer.train_dataset.format_config, key):
-                setattr(self.buffer.train_dataset.format_config, key, value)
-                logger.warning(
-                    f"`buffer.train_dataset.kwargs.{key}` has been renamed to `buffer.train_dataset.format_config.{key}, "
-                    f"Override `buffer.train_dataset.format_config.{key}` with `{value}`."
-                )
-            elif key in {"train_split", "eval_split", "split"}:
-                self.buffer.train_dataset.split = value
-                logger.warning(
-                    f"`buffer.train_dataset.kwargs.{key}` has been renamed to `buffer.train_dataset.split`, "
-                    f"Override `buffer.train_dataset.split` with `{value}`."
-                )
-        if self.buffer.sft_warmup_dataset is not None:
-            self.buffer.sft_warmup_dataset.namespace = f"{self.monitor.project}-{self.monitor.name}"
-            self.buffer.sft_warmup_dataset.algorithm_type = AlgorithmType.SFT
-            for key, value in self.buffer.sft_warmup_dataset.kwargs.items():
-                if hasattr(self.buffer.sft_warmup_dataset.format_config, key):
-                    setattr(self.buffer.sft_warmup_dataset.format_config, key, value)
-                    logger.warning(
-                        f"`buffer.sft_warmup_dataset.kwargs.{key}` has been renamed to `buffer.sft_warmup_dataset.format_config`, "
-                        f"Override `buffer.sft_warmup_dataset.format_config.{key}` with `{value}`."
-                    )
-                elif key in {"train_split", "eval_split", "split"}:
-                    self.buffer.sft_warmup_dataset.split = value
-                    logger.warning(
-                        f"`buffer.sft_warmup_dataset.kwargs.{key}` has been renamed to `buffer.sft_warmup_dataset.split`, "
-                        f"Override `buffer.sft_warmup_dataset.split` with `{value}`."
-                    )
-        self.buffer.read_batch_size = self.data.batch_size * self.explorer.repeat_times
-
     def check_and_update(self) -> None:  # noqa: C901
         """Check and update the config."""
+        self._check_deprecated()
+
         # check mode
         if self.mode not in ["explore", "train", "both", "bench"]:
             raise ValueError(f"Invalid mode: {self.mode}")
@@ -355,13 +412,6 @@ class Config:
             self.model.critic_model_path = self.model.model_path
 
         # check synchronizer
-        if self.synchronizer.sync_iteration_interval is not None:
-            logger.warning(
-                f"`synchronizer.sync_iteration_interval` is deprecated, please use `synchronizer.sync_interval` instead. "
-                f"And `synchronizer.sync_interval` will set to {self.synchronizer.sync_iteration_interval} instead."
-            )
-            self.synchronizer.sync_interval = self.synchronizer.sync_iteration_interval
-        assert self.synchronizer.sync_interval > 0
         self.synchronizer.explorer_world_size = (
             self.explorer.engine_num * self.explorer.tensor_parallel_size
         )
@@ -382,35 +432,7 @@ class Config:
         if self.synchronizer.sync_method == SyncMethod.NCCL and self.mode != "both":
             raise ValueError("`nccl` synchronization is only supported in both mode.")
 
-        # check eval_interval
-        if (
-            self.trainer.algorithm_type != AlgorithmType.DPO
-            and self.trainer.eval_interval % self.synchronizer.sync_interval != 0
-        ):
-            self.trainer.eval_interval = (
-                max(self.trainer.eval_interval // self.synchronizer.sync_interval, 1)
-            ) * self.synchronizer.sync_interval
-            logger.warning(
-                f"`eval_interval` is not a multiple of `sync_interval`; adjusted to the nearest integer={self.trainer.eval_interval}."
-            )
-        if self.explorer.eval_interval != self.trainer.eval_interval:
-            self.explorer.eval_interval = self.trainer.eval_interval
-            logger.warning(
-                f"`explorer.eval_interval` is not equal to `trainer.eval_interval`; adjusted to the same value={self.trainer.eval_interval}."
-            )
-
-        # check save_interval
-        if (
-            self.trainer.algorithm_type != AlgorithmType.DPO
-            and self.synchronizer.sync_method == SyncMethod.CHECKPOINT
-        ):
-            if self.trainer.save_interval != self.synchronizer.sync_interval:
-                logger.warning(
-                    f"When `trainer.algorithm_type != DPO` and `synchronizer.sync_method == checkpoint`, "
-                    f"`trainer.save_interval` will be set to "
-                    f"`synchronizer.sync_interval = {self.synchronizer.sync_interval}`."
-                )
-            self.trainer.save_interval = self.synchronizer.sync_interval
+        self._check_interval()
 
         # check monitor
         if not self.monitor.cache_root_dir:
@@ -427,13 +449,6 @@ class Config:
                 "Failed to create cache dir, please check "
                 f"your checkpoint path: {self.model.checkpoint_path}"
             )
-
-        if self.trainer.sft_warmup_iteration is not None:
-            logger.warning(
-                f"`trainer.sft_warmup_iteration` is deprecated, please use `trainer.sft_warmup_steps` instead. "
-                f"And `trainer.sft_warmup_steps` will be set to {self.trainer.sft_warmup_iteration} instead."
-            )
-            self.trainer.sft_warmup_steps = self.trainer.sft_warmup_iteration
 
         # check buffer
         self._check_buffer()

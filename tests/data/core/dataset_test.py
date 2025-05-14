@@ -3,7 +3,7 @@
 import os
 import unittest
 
-from trinity.common.config import DataConfig, FormatConfig
+from trinity.common.config import DataProcessorConfig, FormatConfig
 from trinity.common.rewards import AccuracyReward
 from trinity.common.task import TaskSet
 from trinity.common.workflows import MathWorkflow, SimpleWorkflow
@@ -15,30 +15,28 @@ class TestRftDataset(unittest.TestCase):
     """Test cases for RftDataset"""
 
     def setUp(self) -> None:
-        self.data_config = DataConfig(
-            dataset_path=os.path.join(
+        self.data_config = DataProcessorConfig(
+            raw_data_path=os.path.join(
                 os.path.dirname(os.path.realpath(__file__)),
                 "..",
                 "..",
                 "test_data",
                 "test_10",
             ),
-            dataset_config={"split": "train"},
             format_config=FormatConfig(
                 prompt_key="problem",
                 response_key="solution",
                 solution_key="solution",
             ),
         )
-        self.data_config_sample_level_setting = DataConfig(
-            dataset_path=os.path.join(
+        self.data_config_sample_level_setting = DataProcessorConfig(
+            raw_data_path=os.path.join(
                 os.path.dirname(os.path.realpath(__file__)),
                 "..",
                 "..",
                 "test_data",
                 "test_10_with_rewfn_workflow",
             ),
-            dataset_config={"split": "train"},
             format_config=FormatConfig(
                 prompt_key="problem",
                 response_key="solution",

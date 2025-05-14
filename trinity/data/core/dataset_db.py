@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import NullPool
 
 from trinity.buffer.utils import retry_session
-from trinity.common.config import DataConfig
+from trinity.common.config import DataProcessorConfig
 from trinity.common.schema import Base, RftDatasetModel
 from trinity.data.core.dataset import RftDataset
 from trinity.utils.log import get_logger
@@ -44,7 +44,7 @@ def rft_dataset_to_model(dataset: RftDataset) -> List[RftDatasetModel]:
 
 
 class RftDatasetDB:
-    def __init__(self, config: DataConfig) -> None:
+    def __init__(self, config: DataProcessorConfig) -> None:
         self.db_url = config.db_url
         self.engine = create_engine(self.db_url, poolclass=NullPool)
         self.config = config

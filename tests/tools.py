@@ -6,7 +6,7 @@ from typing import Dict, List
 import ray
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 
-from trinity.common.config import Config, DataConfig, FormatConfig, load_config
+from trinity.common.config import Config, DataProcessorConfig, FormatConfig, load_config
 
 
 def get_template_config() -> Config:
@@ -32,17 +32,11 @@ def get_checkpoint_path() -> str:
     return path
 
 
-def get_unittest_dataset_config(dataset_name: str = "countdown") -> DataConfig:
+def get_unittest_dataset_config(dataset_name: str = "countdown") -> DataProcessorConfig:
     """Countdown sample dataset for 8 steps"""
     if dataset_name == "countdown":
-        return DataConfig(
-            total_epochs=2,
-            batch_size=4,
-            default_workflow_type="math_workflow",
-            default_reward_fn_type="countdown_reward",
-            dataset_path=os.path.join(os.path.dirname(__file__), "template", "data", "countdown"),
-            train_split="train",
-            eval_split="test",
+        return DataProcessorConfig(
+            raw_data_path=os.path.join(os.path.dirname(__file__), "template", "data", "countdown"),
             format_config=FormatConfig(
                 prompt_key="question",
                 response_key="answer",

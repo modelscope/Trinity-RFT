@@ -6,7 +6,7 @@ from typing import List
 import ray
 
 from trinity.buffer.writer.sql_writer import SQLWriter
-from trinity.common.config import BufferConfig, DatasetConfig
+from trinity.common.config import BufferConfig, StorageConfig
 from trinity.common.constants import StorageType
 
 
@@ -16,7 +16,7 @@ class QueueActor:
 
     FINISH_MESSAGE = "$FINISH$"
 
-    def __init__(self, dataset_config: DatasetConfig, config: BufferConfig) -> None:
+    def __init__(self, dataset_config: StorageConfig, config: BufferConfig) -> None:
         self.config = config
         self.capacity = getattr(config, "capacity", 10000)
         self.queue = asyncio.Queue(self.capacity)

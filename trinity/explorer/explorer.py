@@ -10,14 +10,8 @@ import torch
 
 from trinity.buffer import get_buffer_writer
 from trinity.buffer.buffer import get_buffer_reader
-from trinity.common.config import Config, DatasetConfig
-from trinity.common.constants import (
-    ROLLOUT_WEIGHT_SYNC_GROUP_NAME,
-    AlgorithmType,
-    StorageType,
-    SyncMethod,
-    TaskType,
-)
+from trinity.common.config import Config
+from trinity.common.constants import ROLLOUT_WEIGHT_SYNC_GROUP_NAME, SyncMethod
 from trinity.common.models import create_rollout_models
 from trinity.common.models.utils import (
     get_checkpoint_dir_with_step_num,
@@ -41,45 +35,15 @@ class Explorer:
         self.config = config
         self.models = create_rollout_models(config)
         self.experience_buffer = get_buffer_writer(
-            self.config.buffer.train_dataset,  # type: ignore
+            self.config.buffer.explorer_output,  # type: ignore
             self.config.buffer,
         )
-        dataset_config = DatasetConfig(
-            name="taskset",
-            storage_type=StorageType.FILE,
-            algorithm_type=AlgorithmType.ROLLOUT,
-            path=self.config.data.dataset_path,
-            split=self.config.data.train_split,
-            subset_name=self.config.data.subset_name,
-            format_config=self.config.data.format_config,
-            kwargs={
-                "index": explorer_meta.get("latest_task_index", 0),
-                "task_type": TaskType.EXPLORE,
-                "default_workflow_type": self.config.data.default_workflow_type,
-                "default_reward_fn_type": self.config.data.default_reward_fn_type,
-                "total_epochs": self.config.data.total_epochs,
-            },
+        self.taskset = get_buffer_reader(
+            self.config.buffer.explorer_input.taskset, self.config.buffer
         )
-        self.taskset = get_buffer_reader(dataset_config, self.config.buffer)
-        if self.config.data.eval_split:
-            eval_dataset_config = DatasetConfig(
-                name="eval_taskset",
-                storage_type=StorageType.FILE,
-                algorithm_type=AlgorithmType.ROLLOUT,
-                path=self.config.data.dataset_path,
-                split=self.config.data.eval_split,
-                subset_name=self.config.data.subset_name,
-                format_config=self.config.data.format_config,
-                kwargs={
-                    "task_type": TaskType.EVAL,
-                    "default_workflow_type": self.config.data.default_workflow_type,
-                    "default_reward_fn_type": self.config.data.default_reward_fn_type,
-                },
-            )
-            self.config.data.eval_datasets.append(eval_dataset_config)
         self.eval_tasksets = []
-        for eval_dataset_config in self.config.data.eval_datasets:
-            self.eval_tasksets.append(get_buffer_reader(eval_dataset_config, self.config.buffer))
+        for eval_taskset_config in self.config.buffer.explorer_input.eval_tasksets:
+            self.eval_tasksets.append(get_buffer_reader(eval_taskset_config, self.config.buffer))
         self.runner_pool = self._init_runner_pool()
         self.monitor = Monitor(
             project=self.config.monitor.project,
@@ -89,8 +53,10 @@ class Explorer:
         )
         self.max_pending_task_num = self.config.explorer.runner_num
         self.max_waiting_steps = max(1, int(self.config.explorer.max_waiting_steps))
-        self.batch_size = config.data.batch_size
-        self.update_interval = self.config.synchronizer.sync_interval * self.config.data.batch_size
+        self.batch_size = config.global_config.batch_size
+        self.update_interval = (
+            self.config.synchronizer.sync_interval * self.config.global_config.batch_size
+        )
         self.use_checkpoint_weights_update = (
             self.config.synchronizer.sync_method == SyncMethod.CHECKPOINT
         )
@@ -194,7 +160,7 @@ class Explorer:
             if not explore_status:
                 break
             self.sync_weight()
-            if explore_iter % self.config.explorer.eval_interval == 0:
+            if explore_iter % self.config.global_config.eval_interval == 0:
                 self.eval()
                 self.logger.info("Evaluation finished.")
         self.logger.info("Explorer finished.")
@@ -209,7 +175,9 @@ class Explorer:
             explore_status: whether there are more tasks to explore.
             explore_step_num: the number of explore steps
         """
-        task_num_per_period = self.config.synchronizer.sync_interval * self.config.data.batch_size
+        task_num_per_period = (
+            self.config.synchronizer.sync_interval * self.config.global_config.batch_size
+        )
 
         st = time.time()
         all_metrics = defaultdict(list)

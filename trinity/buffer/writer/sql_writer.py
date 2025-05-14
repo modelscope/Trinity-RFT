@@ -8,7 +8,7 @@ from sqlalchemy.pool import NullPool
 from trinity.buffer.buffer_writer import BufferWriter
 from trinity.buffer.schema import Base, create_dynamic_table
 from trinity.buffer.utils import retry_session
-from trinity.common.config import BufferConfig, DatasetConfig
+from trinity.common.config import BufferConfig, StorageConfig
 from trinity.common.constants import StorageType
 from trinity.utils.log import get_logger
 
@@ -18,7 +18,7 @@ logger = get_logger(__name__)
 class SQLWriter(BufferWriter):
     """Writer of the SQL buffer."""
 
-    def __init__(self, meta: DatasetConfig, config: BufferConfig) -> None:
+    def __init__(self, meta: StorageConfig, config: BufferConfig) -> None:
         assert meta.storage_type == StorageType.SQL
         # we only support write RFT algorithm buffer for now
         # TODO: support other algorithms

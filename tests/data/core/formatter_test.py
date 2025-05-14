@@ -3,7 +3,7 @@
 import os
 import unittest
 
-from trinity.common.config import DataConfig, FormatConfig
+from trinity.common.config import DataProcessorConfig, FormatConfig
 from trinity.data.core.dataset import RftDataset
 from trinity.data.core.formatter import (
     BoxedMathAnswerFormatter,
@@ -18,15 +18,14 @@ class TestBoxedMathDataset(unittest.TestCase):
     """Test cases for RftDataset"""
 
     def setUp(self) -> None:
-        self.data_config = DataConfig(
-            dataset_path=os.path.join(
+        self.data_config = DataProcessorConfig(
+            raw_data_path=os.path.join(
                 os.path.dirname(os.path.realpath(__file__)),
                 "..",
                 "..",
                 "test_data",
                 "test_10",
             ),
-            dataset_config={"split": "train"},
             format_config=FormatConfig(
                 prompt_key="problem",
                 response_key="answer",
@@ -60,15 +59,14 @@ class TestRLHFFormatter(unittest.TestCase):
     """Test cases for RLHFFormatter"""
 
     def setUp(self) -> None:
-        self.data_config = DataConfig(
-            dataset_path=os.path.join(
+        self.data_config = DataProcessorConfig(
+            raw_data_path=os.path.join(
                 os.path.dirname(os.path.realpath(__file__)),
                 "..",
                 "..",
                 "test_data",
                 "test_10",
             ),
-            dataset_config={"split": "train"},
             format_config=FormatConfig(
                 prompt_key="problem",
                 chat_template="User: {}\nAssistant: ",
@@ -109,15 +107,14 @@ class TestRewardFormatter(unittest.TestCase):
     """Test cases for RewardFormatter"""
 
     def setUp(self) -> None:
-        self.data_config = DataConfig(
-            dataset_path=os.path.join(
+        self.data_config = DataProcessorConfig(
+            raw_data_path=os.path.join(
                 os.path.dirname(os.path.realpath(__file__)),
                 "..",
                 "..",
                 "test_data",
                 "test_10",
             ),
-            dataset_config={"split": "train"},
             format_config=FormatConfig(
                 prompt_key="problem",
                 chosen_key="chosen",
@@ -167,15 +164,14 @@ class TestSFTFormatter(unittest.TestCase):
     """Test cases for SFTFormatter"""
 
     def setUp(self) -> None:
-        self.data_config = DataConfig(
-            dataset_path=os.path.join(
+        self.data_config = DataProcessorConfig(
+            raw_data_path=os.path.join(
                 os.path.dirname(os.path.realpath(__file__)),
                 "..",
                 "..",
                 "test_data",
                 "test_10",
             ),
-            dataset_config={"split": "train"},
             format_config=FormatConfig(
                 prompt_key="problem",
                 response_key="answer",
@@ -221,15 +217,14 @@ class TestComposedFormatter(unittest.TestCase):
     """Test cases for ComposedFormatter"""
 
     def setUp(self) -> None:
-        self.data_config = DataConfig(
-            dataset_path=os.path.join(
+        self.data_config = DataProcessorConfig(
+            raw_data_path=os.path.join(
                 os.path.dirname(os.path.realpath(__file__)),
                 "..",
                 "..",
                 "test_data",
                 "test_10",
             ),
-            dataset_config={"split": "train"},
             format_config=FormatConfig(
                 prompt_key="problem",
                 response_key="answer",
