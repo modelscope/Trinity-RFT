@@ -6,7 +6,7 @@ data:
   train_split: 'train'
   eval_split: ''
   default_reward_fn_type: 'countdown_reward'
-  format_config:
+  format:
     prompt_key: 'question'
     response_key: 'answer'
 model:

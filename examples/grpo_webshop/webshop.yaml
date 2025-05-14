@@ -5,7 +5,7 @@ data:
   default_workflow_type: 'webshop_workflow'
   train_split: 'train'
   eval_split: ''
-  format_config:
+  format:
     prompt_key: 'task_id'
 model:
   model_path: '/PATH/TO/MODEL/CHECKPOINT/'

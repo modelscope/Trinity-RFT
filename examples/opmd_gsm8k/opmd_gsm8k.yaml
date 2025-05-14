@@ -3,7 +3,7 @@ data:
   batch_size: 96
   dataset_path: '{path to datasets}/gsm8k'
   default_workflow_type: 'math_workflow'
-  format_config:
+  format:
     prompt_key: 'question'
     response_key: 'answer'
 model:

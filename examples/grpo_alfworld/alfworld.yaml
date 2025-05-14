@@ -5,7 +5,7 @@ data:
   default_workflow_type: 'alfworld_workflow'
   train_split: 'train'
   eval_split: ''
-  format_config:
+  format:
     prompt_key: 'game_file'
 model:
   model_path: '/PATH/TO/MODEL/CHECKPOINT/'

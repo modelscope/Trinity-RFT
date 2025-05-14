@@ -67,17 +67,17 @@ class DataActiveIterator:
         #   2. input_keys: [prompt_key, response_key] if they are available
         #   3. field_names: [prompt_key, response_key] if they are available
         self.updated_op_args = {
-            "text_key": self.data_config.format_config.prompt_key,
+            "text_key": self.data_config.format.prompt_key,
             "input_keys": [
-                self.data_config.format_config.prompt_key,
+                self.data_config.format.prompt_key,
             ],
             "field_names": [
-                self.data_config.format_config.prompt_key,
+                self.data_config.format.prompt_key,
             ],
         }
-        if self.data_config.format_config.response_key != "":
-            self.updated_op_args["input_keys"].append(self.data_config.format_config.response_key)
-            self.updated_op_args["field_names"].append(self.data_config.format_config.response_key)
+        if self.data_config.format.response_key != "":
+            self.updated_op_args["input_keys"].append(self.data_config.format.response_key)
+            self.updated_op_args["field_names"].append(self.data_config.format.response_key)
 
     # flake8: noqa: C901
     def run(self):

@@ -16,28 +16,28 @@ class TestRftDataset(unittest.TestCase):
 
     def setUp(self) -> None:
         self.data_config = DataProcessorConfig(
-            raw_data_path=os.path.join(
+            source_data_path=os.path.join(
                 os.path.dirname(os.path.realpath(__file__)),
                 "..",
                 "..",
                 "test_data",
                 "test_10",
             ),
-            format_config=FormatConfig(
+            format=FormatConfig(
                 prompt_key="problem",
                 response_key="solution",
                 solution_key="solution",
             ),
         )
         self.data_config_sample_level_setting = DataProcessorConfig(
-            raw_data_path=os.path.join(
+            source_data_path=os.path.join(
                 os.path.dirname(os.path.realpath(__file__)),
                 "..",
                 "..",
                 "test_data",
                 "test_10_with_rewfn_workflow",
             ),
-            format_config=FormatConfig(
+            format=FormatConfig(
                 prompt_key="problem",
                 response_key="solution",
                 solution_key="solution",
@@ -62,8 +62,8 @@ class TestRftDataset(unittest.TestCase):
         # apply formatters
         dataset.format(
             formatters=[
-                BoxedMathAnswerFormatter(config=self.data_config.format_config),
-                RLHFFormatter(config=self.data_config.format_config),
+                BoxedMathAnswerFormatter(config=self.data_config.format),
+                RLHFFormatter(config=self.data_config.format),
             ]
         )
         self.assertNotEqual(dataset.data, original_data)

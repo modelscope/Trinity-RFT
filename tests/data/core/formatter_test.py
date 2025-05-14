@@ -19,14 +19,14 @@ class TestBoxedMathDataset(unittest.TestCase):
 
     def setUp(self) -> None:
         self.data_config = DataProcessorConfig(
-            raw_data_path=os.path.join(
+            source_data_path=os.path.join(
                 os.path.dirname(os.path.realpath(__file__)),
                 "..",
                 "..",
                 "test_data",
                 "test_10",
             ),
-            format_config=FormatConfig(
+            format=FormatConfig(
                 prompt_key="problem",
                 response_key="answer",
                 solution_key="solution",
@@ -35,7 +35,7 @@ class TestBoxedMathDataset(unittest.TestCase):
         )
 
     def test_init(self):
-        formatter = BoxedMathAnswerFormatter(config=self.data_config.format_config)
+        formatter = BoxedMathAnswerFormatter(config=self.data_config.format)
         # test for existing configs
         self.assertEqual(formatter.config.prompt_key, "problem")
         self.assertEqual(formatter.config.response_key, "answer")
@@ -49,7 +49,7 @@ class TestBoxedMathDataset(unittest.TestCase):
 
     def test_transform(self):
         dataset = RftDataset(data_config=self.data_config, reward_schema="default")
-        formatter = BoxedMathAnswerFormatter(config=self.data_config.format_config)
+        formatter = BoxedMathAnswerFormatter(config=self.data_config.format)
         self.assertNotIn(formatter.config.response_key, dataset.data.column_names)
         dataset.format(formatter)
         self.assertIn(formatter.config.response_key, dataset.data.column_names)
@@ -60,14 +60,14 @@ class TestRLHFFormatter(unittest.TestCase):
 
     def setUp(self) -> None:
         self.data_config = DataProcessorConfig(
-            raw_data_path=os.path.join(
+            source_data_path=os.path.join(
                 os.path.dirname(os.path.realpath(__file__)),
                 "..",
                 "..",
                 "test_data",
                 "test_10",
             ),
-            format_config=FormatConfig(
+            format=FormatConfig(
                 prompt_key="problem",
                 chat_template="User: {}\nAssistant: ",
             ),
@@ -77,7 +77,7 @@ class TestRLHFFormatter(unittest.TestCase):
         sample = {
             "problem": "What is the capital of France?",
         }
-        formatter = RLHFFormatter(config=self.data_config.format_config)
+        formatter = RLHFFormatter(config=self.data_config.format)
         res_sample = formatter._render_template(sample)
         self.assertEqual(
             res_sample[formatter.config.prompt_key],
@@ -85,14 +85,14 @@ class TestRLHFFormatter(unittest.TestCase):
         )
 
     def test_render_template_without_chat_template(self):
-        self.data_config.format_config.chat_template = ""
+        self.data_config.format.chat_template = ""
         sample = {
             "problem": "What is the capital of France?",
         }
-        formatter = RLHFFormatter(config=self.data_config.format_config)
+        formatter = RLHFFormatter(config=self.data_config.format)
         res_sample = formatter._render_template(sample)
         self.assertEqual(res_sample[formatter.config.prompt_key], "What is the capital of France?")
-        self.data_config.format_config.chat_template = "User: {}\nAssistant: "
+        self.data_config.format.chat_template = "User: {}\nAssistant: "
 
     def test_render_template_with_tokenizer(self):
         # TODO
@@ -108,14 +108,14 @@ class TestRewardFormatter(unittest.TestCase):
 
     def setUp(self) -> None:
         self.data_config = DataProcessorConfig(
-            raw_data_path=os.path.join(
+            source_data_path=os.path.join(
                 os.path.dirname(os.path.realpath(__file__)),
                 "..",
                 "..",
                 "test_data",
                 "test_10",
             ),
-            format_config=FormatConfig(
+            format=FormatConfig(
                 prompt_key="problem",
                 chosen_key="chosen",
                 rejected_key="rejected",
@@ -129,7 +129,7 @@ class TestRewardFormatter(unittest.TestCase):
             "chosen": "Paris",
             "rejected": "London",
         }
-        formatter = RewardFormatter(config=self.data_config.format_config)
+        formatter = RewardFormatter(config=self.data_config.format)
         res_sample = formatter._render_template(sample)
         self.assertEqual(
             res_sample[formatter.config.prompt_key],
@@ -139,13 +139,13 @@ class TestRewardFormatter(unittest.TestCase):
         self.assertEqual(res_sample[formatter.config.rejected_key], "London")
 
     def test_render_template_without_chat_template(self):
-        self.data_config.format_config.chat_template = ""
+        self.data_config.format.chat_template = ""
         sample = {
             "problem": "What is the capital of France?",
             "chosen": "Paris",
             "rejected": "London",
         }
-        formatter = RewardFormatter(config=self.data_config.format_config)
+        formatter = RewardFormatter(config=self.data_config.format)
         res_sample = formatter._render_template(sample)
         self.assertEqual(res_sample[formatter.config.prompt_key], "What is the capital of France?")
         self.assertEqual(res_sample[formatter.config.chosen_key], "Paris")
@@ -165,14 +165,14 @@ class TestSFTFormatter(unittest.TestCase):
 
     def setUp(self) -> None:
         self.data_config = DataProcessorConfig(
-            raw_data_path=os.path.join(
+            source_data_path=os.path.join(
                 os.path.dirname(os.path.realpath(__file__)),
                 "..",
                 "..",
                 "test_data",
                 "test_10",
             ),
-            format_config=FormatConfig(
+            format=FormatConfig(
                 prompt_key="problem",
                 response_key="answer",
                 chat_template="User: {}\nAssistant: ",
@@ -184,7 +184,7 @@ class TestSFTFormatter(unittest.TestCase):
             "problem": "What is the capital of France?",
             "answer": "Paris",
         }
-        formatter = SFTFormatter(config=self.data_config.format_config)
+        formatter = SFTFormatter(config=self.data_config.format)
         res_sample = formatter._render_template(sample)
         self.assertEqual(
             res_sample[formatter.config.prompt_key],
@@ -193,16 +193,16 @@ class TestSFTFormatter(unittest.TestCase):
         self.assertEqual(res_sample[formatter.config.response_key], "Paris")
 
     def test_render_template_without_chat_template(self):
-        self.data_config.format_config.chat_template = ""
+        self.data_config.format.chat_template = ""
         sample = {
             "problem": "What is the capital of France?",
             "answer": "Paris",
         }
-        formatter = SFTFormatter(config=self.data_config.format_config)
+        formatter = SFTFormatter(config=self.data_config.format)
         res_sample = formatter._render_template(sample)
         self.assertEqual(res_sample[formatter.config.prompt_key], "What is the capital of France?")
         self.assertEqual(res_sample[formatter.config.response_key], "Paris")
-        self.data_config.format_config.chat_template = "User: {}\nAssistant: "
+        self.data_config.format.chat_template = "User: {}\nAssistant: "
 
     def test_render_template_with_tokenizer(self):
         # TODO
@@ -218,14 +218,14 @@ class TestComposedFormatter(unittest.TestCase):
 
     def setUp(self) -> None:
         self.data_config = DataProcessorConfig(
-            raw_data_path=os.path.join(
+            source_data_path=os.path.join(
                 os.path.dirname(os.path.realpath(__file__)),
                 "..",
                 "..",
                 "test_data",
                 "test_10",
             ),
-            format_config=FormatConfig(
+            format=FormatConfig(
                 prompt_key="problem",
                 response_key="answer",
                 solution_key="solution",
@@ -240,8 +240,8 @@ class TestComposedFormatter(unittest.TestCase):
     def test_compose(self):
         composed_formatter = ComposedFormatter(
             formatters=[
-                BoxedMathAnswerFormatter(config=self.data_config.format_config),
-                SFTFormatter(config=self.data_config.format_config),
+                BoxedMathAnswerFormatter(config=self.data_config.format),
+                SFTFormatter(config=self.data_config.format),
             ]
         )
         self.assertNotIn(composed_formatter.config.response_key, self.sample)

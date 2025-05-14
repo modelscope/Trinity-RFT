@@ -5,7 +5,7 @@ data:
   subset_name: ''
   train_split: 'train'
   eval_split: 'test'
-  format_config:
+  format:
     prompt_key: 'question'
     response_key: 'answer'
   # downstream loading related

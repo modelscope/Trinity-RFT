@@ -36,7 +36,7 @@ data:
   dataset_path: '/path/to/gsm8k'
   dataset_config:
     split: 'train'  # only need the train split
-  format_config:  # set the field mappings
+  format:  # set the field mappings
     prompt_key: 'question'
     response_key: 'answer'
   # database related. The result dataset will be stored in the database.
@@ -51,7 +51,7 @@ Here you can set the basic information for the GSM-8K dataset, database informat
 
 + `dataset_path`: the path to the raw dataset.
 + `dataset_config`: extra config arguments for loading the raw dataset. Mainly for the `load_dataset` method in HuggingFace `datasets` library.
-+ `format_config`: some dataset format config items, which are used to map original data field names to unified ones.
++ `format`: some dataset format config items, which are used to map original data field names to unified ones.
 + `db_url`: the URL of the postgresql database to store the result dataset.
 + `total_epochs`: the total number of epochs to train on this dataset.
 + `batch_size`: the training batch size.
@@ -68,7 +68,7 @@ data:
   dataset_path: '/path/to/gsm8k'
   dataset_config:
     split: 'train'  # only need the train split
-  format_config:  # set the field mappings
+  format:  # set the field mappings
     prompt_key: 'question'
     response_key: 'answer'
   # database related. The result dataset will be stored in the database.
@@ -114,7 +114,7 @@ data:
   dataset_path: '/path/to/gsm8k'
   dataset_config:
     split: 'train'  # only need the train split
-  format_config:  # set the field mappings
+  format:  # set the field mappings
     prompt_key: 'question'
     response_key: 'answer'
   # database related. The result dataset will be stored in the database.
@@ -190,7 +190,7 @@ data:
   dataset_path: 'tests/test_data/test_human_annotator'
   dataset_config:
     split: 'train'  # only need the train split
-  format_config:  # set the field mappings
+  format:  # set the field mappings
     prompt_key: 'prompt'
     chosen_key: 'chosen'
     rejected_key: 'rejected'

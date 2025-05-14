@@ -61,23 +61,29 @@ class ConfigManager:
             "trainer_gpu_num": 6,
             "max_prompt_tokens": 1024,
             "max_response_tokens": 1024,
-            # Data Configs
+            # Global Configs
             "total_epochs": 20,
             "_train_batch_size_per_gpu": 16,
             "train_batch_size": 96,
-            "dataset_path": "",
-            "subset_name": None,
-            "train_split": "train",
-            "eval_split": "",
-            "prompt_key": "question",
-            "response_key": "answer",
+            "eval_interval": 1000,
+            # Taskset Configs
+            "taskset_path": "",
+            "taskset_subset_name": None,
+            "taskset_split": "train",
+            "taskset_prompt_key": "question",
+            "taskset_response_key": "answer",
+            # Eval Taskset Configs
+            # TODO
+            # Task Workflow Configs
             "default_workflow_type": "math_workflow",
             "default_reward_fn_type": "math_reward",
-            # Buffer Configs
-            "_is_dpo_storage_type": StorageType.FILE.value,
+            # Experience Buffer Configs
+            "_dpo_storage_type": StorageType.FILE.value,
             "_not_dpo_storage_type": StorageType.QUEUE.value,
             "storage_type": StorageType.QUEUE.value,
-            "train_dataset_path": "",
+            "_dpo_experience_buffer_path": "",
+            "_not_dpo_experience_buffer_path": "",
+            "experience_buffer_path": "",
             "buffer_max_retry_times": 3,
             "max_retry_interval": 1,
             "dpo_dataset_train_split": "train",
@@ -85,6 +91,7 @@ class ConfigManager:
             "dpo_dataset_prompt_key": "prompt",
             "dpo_dataset_chosen_key": "chosen",
             "dpo_dataset_rejected_key": "rejected",
+            # SFT Warmup Dataset Configs
             "sft_warmup_dataset_path": "",
             "sft_warmup_train_split": "train",
             "sft_warmup_prompt_type": PromptType.MESSAGES.value,
@@ -98,7 +105,6 @@ class ConfigManager:
             "_grouped_adv_repeat_times": 2,
             "_not_grouped_adv_repeat_times": 1,
             "repeat_times": 1,
-            "eval_interval": 1000,
             "tensor_parallel_size": 1,
             "enable_prefix_caching": False,
             "enforce_eager": True,
@@ -299,26 +305,25 @@ class ConfigManager:
             self.unfinished_fields.add("train_batch_size")
             st.warning(self._str_for_train_batch_size)
 
-    def _set_dataset_path(self):
-        st.text_input("Dataset Path", key="dataset_path")
-        if not st.session_state["dataset_path"].strip():
-            self.unfinished_fields.add("dataset_path")
-            st.warning("Please input dataset path.")
+    def _set_taskset_path(self):
+        st.text_input("Taskset Path", key="taskset_path")
+        if not st.session_state["taskset_path"].strip():
+            self.unfinished_fields.add("taskset_path")
+            st.warning("Please input taskset path.")
 
-    def _set_dataset_args(self):
-        if st.session_state["dataset_path"] and "://" not in st.session_state["dataset_path"]:
-            subset_name_col, train_split_col, eval_split_col = st.columns(3)
+    def _set_taskset_args(self):
+        if st.session_state["taskset_path"] and "://" not in st.session_state["taskset_path"]:
+            subset_name_col, split_col = st.columns(2)
             subset_name_col.text_input(
-                "Subset Name :orange-badge[(Needs review)]", key="subset_name"
+                "Subset Name :orange-badge[(Needs review)]", key="taskset_subset_name"
             )
-            train_split_col.text_input(
-                "Train Split :orange-badge[(Needs review)]", key="train_split"
-            )
-            eval_split_col.text_input("Eval Split :orange-badge[(Needs review)]", key="eval_split")
+            split_col.text_input("Train Split :orange-badge[(Needs review)]", key="taskset_split")
             prompt_key_col, response_key_col = st.columns(2)
-            prompt_key_col.text_input("Prompt Key :orange-badge[(Needs review)]", key="prompt_key")
+            prompt_key_col.text_input(
+                "Prompt Key :orange-badge[(Needs review)]", key="taskset_prompt_key"
+            )
             response_key_col.text_input(
-                "Response Key :orange-badge[(Needs review)]", key="response_key"
+                "Response Key :orange-badge[(Needs review)]", key="taskset_response_key"
             )
 
     def _set_default_workflow_type(self):
@@ -349,7 +354,7 @@ Other workflows: conduct multi-turn task for the given dataset.
 
     def _set_storage_type(self):
         if st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
-            st.session_state["storage_type"] = st.session_state["_is_dpo_storage_type"]
+            st.session_state["storage_type"] = st.session_state["_dpo_storage_type"]
             storage_candidates = [StorageType.FILE.value, StorageType.SQL.value]
         else:
             st.session_state["storage_type"] = st.session_state["_not_dpo_storage_type"]
@@ -357,7 +362,7 @@ Other workflows: conduct multi-turn task for the given dataset.
 
         def on_change():
             if st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
-                st.session_state["_is_dpo_storage_type"] = st.session_state["storage_type"]
+                st.session_state["_dpo_storage_type"] = st.session_state["storage_type"]
             else:
                 st.session_state["_not_dpo_storage_type"] = st.session_state["storage_type"]
 
@@ -368,19 +373,48 @@ Other workflows: conduct multi-turn task for the given dataset.
             on_change=on_change,
         )
 
-    def _set_train_dataset_path(self):  # TODO
+    def _set_experience_buffer_path(self):  # TODO
+        if st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
+            st.session_state["experience_buffer_path"] = st.session_state[
+                "_dpo_experience_buffer_path"
+            ]
+            title = "DPO Dataset Path"
+            help_msg = r"""This path to DPO dataset,
+
+if `storage_type == StorageType.FILE`, this should be a path to a file,
+
+if `storage_type == StorageType.SQL`, this should be a path to database."""
+        else:
+            st.session_state["experience_buffer_path"] = st.session_state[
+                "_not_dpo_experience_buffer_path"
+            ]
+            title = "Experience Buffer Path"
+            help_msg = r"""This path is used for `trainer`,
+
+if `storage_type == StorageType.QUEUE`, default to `None`,
+
+if `storage_type == StorageType.SQL`, default to `sqlite:///{os.path.join(checkpoint_path, '.cache', project_name, experiment_name)}/data.db`."""
+
+        def on_change():
+            if st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
+                st.session_state["_dpo_experience_buffer_path"] = st.session_state[
+                    "experience_buffer_path"
+                ]
+            else:
+                st.session_state["_not_dpo_experience_buffer_path"] = st.session_state[
+                    "experience_buffer_path"
+                ]
+
         st.text_input(
-            "Train Dataset Path",
-            key="train_dataset_path",
-            help=r"This path is used for `trainer`, "
-            r"if `storage_type == StorageType.QUEUE`, default to `None`, "
-            r"if `storage_type == StorageType.FILE`, this should be a path to a file, "
-            r"if `storage_type == StorageType.SQL`, default to `sqlite:///{os.path.join(checkpoint_path, '.cache', project_name, experiment_name)}/data.db`.",
+            title,
+            key="experience_buffer_path",
+            help=help_msg,
+            on_change=on_change,
         )
-        if st.session_state["storage_type"] == StorageType.FILE.value:
-            if not st.session_state["train_dataset_path"].strip():
-                self.unfinished_fields.add("train_dataset_path")
-                st.warning("Please input train dataset path.")
+        if st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
+            if not st.session_state["experience_buffer_path"].strip():
+                self.unfinished_fields.add("experience_buffer_path")
+                st.warning("Please input DPO dataset path.")
 
     def _set_buffer_max_retry_times(self):
         st.number_input("Max Retry Times", key="buffer_max_retry_times", min_value=1)
@@ -1025,7 +1059,7 @@ if node_num > 1:
 
         self._set_checkpoint_path()
 
-        self._set_dataset_path()
+        self._set_taskset_path()
 
         self._set_configs_with_st_columns(["algorithm_type", "sft_warmup_steps", "monitor_type"])
         if st.session_state["sft_warmup_steps"] > 0:
@@ -1055,7 +1089,7 @@ if node_num > 1:
         )
 
         if st.session_state["algorithm_type"] != AlgorithmType.DPO.value:
-            self._set_dataset_args()
+            self._set_taskset_args()
         else:
             self._set_dpo_dataset_kwargs()
 
@@ -1094,24 +1128,36 @@ if node_num > 1:
         self._set_configs_with_st_columns(["max_prompt_tokens", "max_response_tokens"])
 
     def _expert_buffer_part(self):
-        self._set_configs_with_st_columns(["total_epochs", "train_batch_size", "storage_type"])
+        self._set_configs_with_st_columns(["total_epochs", "train_batch_size"])
         self._check_train_batch_size()
 
-        self._set_dataset_path()
+        if st.session_state["algorithm_type"] != AlgorithmType.DPO.value:
+            with st.expander("Taskset Configs", expanded=True):
+                self._set_taskset_path()
+                self._set_taskset_args()
+        else:
+            with st.expander("DPO Dataset Configs", expanded=True):
+                self._set_experience_buffer_path()
+                self._set_dpo_dataset_kwargs()
+
+        with st.expander("Eval Tasksets Configs", expanded=True):
+            # TODO:
+            pass
+
+        with st.expander("SFT Dataset Configs"):
+            self._set_sft_warmup_dataset_path()
+            self._set_sft_warmup_dataset_args()
 
         if st.session_state["algorithm_type"] != AlgorithmType.DPO.value:
-            self._set_dataset_args()
-        else:
-            self._set_dpo_dataset_kwargs()
+            with st.expander("Experiences Buffer Configs", expanded=True):
+                self._set_storage_type()
+                self._set_experience_buffer_path()
 
         self._set_configs_with_st_columns(["default_workflow_type", "default_reward_fn_type"])
 
         self.buffer_advanced_tab = st.expander("Advanced Config")
         with self.buffer_advanced_tab:
             self._set_configs_with_st_columns(["buffer_max_retry_times", "max_retry_interval"])
-
-            self._set_sft_warmup_dataset_path()
-            self._set_sft_warmup_dataset_args()
 
     def _expert_explorer_part(self):
         self._set_configs_with_st_columns(
@@ -1233,7 +1279,7 @@ if node_num > 1:
     def expert_mode(self):
         tab2func = {
             "Model": self._expert_model_part,
-            "Data": self._expert_buffer_part,
+            "Buffer": self._expert_buffer_part,
             "Explorer and Synchronizer": self._expert_explorer_part,
             "Trainer": self._expert_trainer_part,
         }
@@ -1492,15 +1538,19 @@ if node_num > 1:
         )
 
         if st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
-            train_dataset_path = (
-                st.session_state["train_dataset_path"].strip()
-                if st.session_state["train_dataset_path"].strip()
-                else st.session_state["dataset_path"].strip()
-            )
+            pass
+            # experience_buffer_path = (
+            #     st.session_state["experience_buffer_path"].strip()
+            #     if st.session_state["experience_buffer_path"].strip()
+            #     else st.session_state["dataset_path"].strip()
+            # )
         else:  # not dpo algorithms
-            train_dataset_path = st.session_state["train_dataset_path"].strip()
-            if not train_dataset_path and st.session_state["storage_type"] == StorageType.SQL.value:
-                train_dataset_path = f"sqlite:///{os.path.join(st.session_state['checkpoint_path'], '.cache', st.session_state['project'], st.session_state['exp_name'])}/data.db"
+            experience_buffer_path = st.session_state["experience_buffer_path"].strip()
+            if (
+                not experience_buffer_path
+                and st.session_state["storage_type"] == StorageType.SQL.value
+            ):
+                experience_buffer_path = f"sqlite:///{os.path.join(st.session_state['checkpoint_path'], '.cache', st.session_state['project'], st.session_state['exp_name'])}/data.db"
 
         sft_storage_type = (
             StorageType.SQL.value
@@ -1534,18 +1584,10 @@ if node_num > 1:
         if st.session_state.config_generated:
             config = {
                 "mode": st.session_state["mode"],
-                "data": {
+                "global_config": {
                     "total_epochs": st.session_state["total_epochs"],
                     "batch_size": st.session_state["train_batch_size"],
-                    "dataset_path": st.session_state["dataset_path"],
-                    "default_workflow_type": st.session_state["default_workflow_type"],
-                    "default_reward_fn_type": st.session_state["default_reward_fn_type"],
-                    "train_split": st.session_state["train_split"],
-                    "eval_split": st.session_state["eval_split"],
-                    "format_config": {
-                        "prompt_key": st.session_state["prompt_key"],
-                        "response_key": st.session_state["response_key"],
-                    },
+                    "eval_interval": st.session_state["eval_interval"],
                 },
                 "model": {
                     "model_path": st.session_state["model_path"],
@@ -1561,10 +1603,28 @@ if node_num > 1:
                 "buffer": {
                     "max_retry_times": st.session_state["buffer_max_retry_times"],
                     "max_retry_interval": st.session_state["max_retry_interval"],
-                    "train_dataset": {
-                        "name": "experience_buffer",  # TODO
-                        "storage_type": st.session_state["storage_type"],
-                        "path": train_dataset_path,
+                    "explorer_input": {
+                        "taskset": {
+                            "name": "taskset",
+                            "storage_type": StorageType.FILE.value,
+                            "path": st.session_state["taskset_path"],
+                            "split": st.session_state["taskset_split"],
+                            "subset_name": st.session_state["taskset_subset_name"],
+                            "format": {
+                                "prompt_key": st.session_state["taskset_prompt_key"],
+                                "response_key": st.session_state["taskset_response_key"],
+                            },
+                        },
+                        "eval_tasksets": [],  # TODO: add eval tasksets
+                        "default_workflow_type": st.session_state["default_workflow_type"],
+                        "default_reward_fn_type": st.session_state["default_reward_fn_type"],
+                    },
+                    "trainer_input": {
+                        "experience_buffer": {
+                            "name": "experience_buffer",
+                            "storage_type": st.session_state["storage_type"],
+                            "path": experience_buffer_path,
+                        },
                     },
                 },
                 "explorer": {
@@ -1573,7 +1633,6 @@ if node_num > 1:
                     "runner_num": st.session_state["runner_num"],
                     "repeat_times": st.session_state["repeat_times"],
                     # "chat_template": None,  # TODO: add chat template
-                    "eval_interval": st.session_state["eval_interval"],
                     "tensor_parallel_size": st.session_state["tensor_parallel_size"],
                     "enable_prefix_caching": st.session_state["enable_prefix_caching"],
                     "enforce_eager": st.session_state["enforce_eager"],
@@ -1603,7 +1662,6 @@ if node_num > 1:
                     "algorithm_type": st.session_state["algorithm_type"],
                     "trainer_config": trainer_config,
                     "sft_warmup_steps": st.session_state["sft_warmup_steps"],
-                    "eval_interval": st.session_state["eval_interval"],
                     "save_interval": st.session_state["save_interval"],
                 },
                 "monitor": {
@@ -1614,24 +1672,21 @@ if node_num > 1:
             }
 
             if st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
-                config["buffer"]["train_dataset"]["split"] = st.session_state[
-                    "dpo_dataset_train_split"
-                ]
-                config["buffer"]["train_dataset"]["format_config"] = {
+                experience_buffer = config["buffer"]["trainer_input"]["experience_buffer"]
+                experience_buffer["split"] = st.session_state["dpo_dataset_train_split"]
+                experience_buffer["format"] = {
                     "prompt_type": st.session_state["dpo_dataset_prompt_type"],
                     "prompt_key": st.session_state["dpo_dataset_prompt_key"],
                     "chosen_key": st.session_state["dpo_dataset_chosen_key"],
                     "rejected_key": st.session_state["dpo_dataset_rejected_key"],
                 }
             if st.session_state["sft_warmup_dataset_path"].strip():
-                config["buffer"]["sft_warmup_dataset"]["split"] = st.session_state[
-                    "sft_warmup_train_split"
-                ]
-                config["buffer"]["sft_warmup_dataset"] = {
+                config["buffer"]["trainer_input"]["sft_warmup_dataset"] = {
                     "name": "sft_warmup_dataset",
                     "storage_type": sft_storage_type,
                     "path": st.session_state["sft_warmup_dataset_path"],
-                    "format_config": {
+                    "split": st.session_state["sft_warmup_train_split"],
+                    "format": {
                         "prompt_type": st.session_state["sft_warmup_prompt_type"],
                         "messages_key": st.session_state["sft_warmup_messages_key"],
                         "prompt_key": st.session_state["sft_warmup_prompt_key"],

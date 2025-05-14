@@ -3,7 +3,7 @@ data:
   dataset_path: '/Users/lielin/Projects/research/large_models/Trinity-RFT/tests/test_data/test_10/'
   dataset_config:
     split: 'train'
-  format_config:
+  format:
     prompt_key: 'problem'
     response_key: 'solution'
   # cleaner related

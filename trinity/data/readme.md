@@ -47,8 +47,8 @@ dataset = RftDataset(data_config)
 # format it for the target data and training format
 # e.g. format for a boxed-tagged MATH data and RLHF format
 dataset.format([
-  BoxedMathAnswerFormatter(data_config.format_config),
-  RLHFFormatter(data_config.format_config),
+  BoxedMathAnswerFormatter(data_config.format),
+  RLHFFormatter(data_config.format),
 ])
 
 # convert to a task set with global reward function and workflow

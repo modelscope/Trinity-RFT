@@ -24,7 +24,7 @@ data:
   dataset_path: '/PATH/TO/DATASET'
   train_split: 'train'
   eval_split: ''
-  format_config:
+  format:
     prompt_key: 'question'
     response_key: 'answer'
 
@@ -42,7 +42,7 @@ data:
 - `data.train_split`: The split name of the dataset used for training. Default is `train`.
 - `data.eval_split`: The split name of the dataset used for eval.
 <!-- - `data.dataset_config`: The configuration for the dataset. TODO: may only used in Data-Juicer -->
-- `data.format_config`: The configuration for the format of the dataset.
+- `data.format`: The configuration for the format of the dataset.
 - `data.db_url`: The URL of the database.
 - `data.max_retry_times`: The maximum number of retries when loading the dataset from database.
 - `data.max_retry_interval`: The maximum interval between retries when loading the dataset from database.
@@ -51,7 +51,7 @@ data:
 - `data.default_workflow_type`: The default workflow type used for training.
 - `data.default_reward_fn_type`: The default reward function type used for training.
 
-<!-- TODO explain the dataset_config and format_config -->
+<!-- TODO explain the dataset_config and format -->
 
 ## Model
 

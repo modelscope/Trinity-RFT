@@ -43,13 +43,13 @@ class RftDataset:
         track_lineage: bool = True,
     ):
         self.config = data_config
-        dataset_path = data_config.raw_data_path
+        dataset_path = data_config.source_data_path
         if not dataset_path:
             raise ValueError("dataset_path is not specified in DJ config")
         load_kwargs = data_config.load_kwargs
         self.data = load_dataset(dataset_path, trust_remote_code=True, **load_kwargs)
 
-        self.format_config = data_config.format_config
+        self.format = data_config.format
 
         self.reward_schema = self._init_reward_schema(reward_schema)
         self.stats: Dict[str, Any] = {}

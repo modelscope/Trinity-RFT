@@ -53,20 +53,20 @@ class StorageConfig:
 
     name: str = ""
     storage_type: StorageType = StorageType.FILE
-    algorithm_type: AlgorithmType = AlgorithmType.PPO
+    algorithm_type: AlgorithmType = AlgorithmType.PPO  # automatically set
     path: Optional[str] = None
 
     # used for StorageType.FILE
     split: str = "train"
     subset_name: Optional[str] = None
-    format_config: FormatConfig = field(default_factory=FormatConfig)
+    format: FormatConfig = field(default_factory=FormatConfig)
     index: int = 0
 
     # used for AlgorithmType.ROLLOUT
     task_type: TaskType = TaskType.EXPLORE
     default_workflow_type: Optional[str] = None
     default_reward_fn_type: Optional[str] = None
-    total_epochs: int = 1
+    total_epochs: int = 1  # automatically set
     # used for AlgorithmType.ROLLOUT and TaskType.EVAL
     eval_repeat_times: int = 1  # TODO
     eval_temperature: float = 0.1  # TODO
@@ -78,8 +78,8 @@ class DataProcessorConfig:
 
     data_workflow_url: Optional[str] = None
 
-    raw_data_path: str = ""
-    format_config: FormatConfig = field(default_factory=FormatConfig)
+    source_data_path: str = ""
+    format: FormatConfig = field(default_factory=FormatConfig)
 
     # data active iterator related
     load_kwargs: Dict[str, Any] = field(default_factory=dict)

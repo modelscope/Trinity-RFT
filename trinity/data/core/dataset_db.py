@@ -24,7 +24,7 @@ def rft_dataset_to_model(dataset: RftDataset) -> List[RftDatasetModel]:
     # - for other keys, we just need to check if they are in the dataset
     data = dataset.data
     features = data.features
-    content_key_mapping = dataset.format_config.__dict__
+    content_key_mapping = dataset.format.__dict__
     schema_keys = {key for key in RftDatasetModel.__dict__.keys() if not key.startswith("_")}
     for schema_key in schema_keys:
         key = schema_key

@@ -138,6 +138,7 @@ class MathWorkflow(SimpleWorkflow):
     ):
         if kwargs.get("reward_fn", None) is None:
             kwargs["reward_fn"] = MathRewardFn
+        if kwargs["reward_fn"] == MathRewardFn and kwargs.get("system_prompt", None) is None:
             kwargs[
                 "system_prompt"
             ] = """A conversation between User and Assistant. The user asks a question, and the Assistant solves it. The assistant first thinks about the reasoning process in the mind and then provides the user with the answer. The reasoning process and answer are enclosed within <think> </think> and <answer> </answer> tags, respectively, i.e.,

@@ -4,7 +4,7 @@ data:
   subset_name: "main"
   train_split: 'train'
   eval_split: 'test'
-  format_config:
+  format:
     prompt_key: 'question'
     response_key: 'answer'
   # data active iterator related

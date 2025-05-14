@@ -49,10 +49,10 @@ class SFTDataReader(BufferReader):
     def __init__(self, meta: StorageConfig, config: BufferConfig):
         self.split = meta.split
         subset_name = meta.subset_name
-        self.prompt_type = meta.format_config.prompt_type
-        self.messages_key = meta.format_config.messages_key
-        self.prompt_key = meta.format_config.prompt_key
-        self.response_key = meta.format_config.response_key
+        self.prompt_type = meta.format.prompt_type
+        self.messages_key = meta.format.messages_key
+        self.prompt_key = meta.format.prompt_key
+        self.response_key = meta.format.response_key
         self.read_batch_size = config.read_batch_size
         self.dataset = load_dataset(
             meta.path, name=subset_name, split=self.split
@@ -126,10 +126,10 @@ class DPODataReader(BufferReader):
     def __init__(self, meta: StorageConfig, config: BufferConfig):
         self.split = meta.split
         subset_name = meta.subset_name
-        self.prompt_type = meta.format_config.prompt_type
-        self.prompt_key = meta.format_config.prompt_key
-        self.chosen_key = meta.format_config.chosen_key
-        self.rejected_key = meta.format_config.rejected_key
+        self.prompt_type = meta.format.prompt_type
+        self.prompt_key = meta.format.prompt_key
+        self.chosen_key = meta.format.chosen_key
+        self.rejected_key = meta.format.rejected_key
         self.read_batch_size = config.read_batch_size
         self.dataset = load_dataset(
             meta.path, name=subset_name, split=self.split
@@ -213,10 +213,10 @@ class RolloutDataReader(BufferReader):
         datasets.enable_caching()
         self.index = meta.index  # TODO: apply shuffle
 
-        self.prompt_key = meta.format_config.prompt_key
-        self.response_key = meta.format_config.response_key
-        self.workflow_key = meta.format_config.workflow_key
-        self.reward_fn_key = meta.format_config.reward_fn_key
+        self.prompt_key = meta.format.prompt_key
+        self.response_key = meta.format.response_key
+        self.workflow_key = meta.format.workflow_key
+        self.reward_fn_key = meta.format.reward_fn_key
 
         self.task_type = meta.task_type
         self.default_workflow_cls = WORKFLOWS.get(meta.default_workflow_type)

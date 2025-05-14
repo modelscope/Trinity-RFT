@@ -36,8 +36,10 @@ def get_unittest_dataset_config(dataset_name: str = "countdown") -> DataProcesso
     """Countdown sample dataset for 8 steps"""
     if dataset_name == "countdown":
         return DataProcessorConfig(
-            raw_data_path=os.path.join(os.path.dirname(__file__), "template", "data", "countdown"),
-            format_config=FormatConfig(
+            source_data_path=os.path.join(
+                os.path.dirname(__file__), "template", "data", "countdown"
+            ),
+            format=FormatConfig(
                 prompt_key="question",
                 response_key="answer",
             ),
