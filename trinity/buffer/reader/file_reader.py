@@ -229,6 +229,8 @@ class RolloutDataReader(BufferReader):
         return len(self.dataset)
 
     def read(self, strategy: Optional[ReadStrategy] = None):
+        if self.index >= len(self.dataset) * self.total_epochs:
+            raise StopIteration
         sample = self.dataset[self.index % len(self.dataset)]
         task_desc = sample[self.prompt_key] if self.prompt_key in sample else None
         truth = sample[self.response_key] if self.response_key in sample else None
@@ -242,6 +244,7 @@ class RolloutDataReader(BufferReader):
             if self.reward_fn_key in sample
             else self.default_reward_fn_cls
         )
+        assert workflow_class is not None, "`default_reward_fn_type` or `workflow_key` is required"
         task = Task(
             task_desc=task_desc,
             truth=truth,
@@ -251,4 +254,6 @@ class RolloutDataReader(BufferReader):
             task_type=self.task_type,
         )
         self.index += 1
+        if self.task_type == TaskType.EVAL and self.index == len(self.dataset):
+            self.index = 0
         return task

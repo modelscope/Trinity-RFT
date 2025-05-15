@@ -15,7 +15,6 @@ class TestQueueBuffer(RayUnittestBase):
         read_batch_size = 4
         meta = StorageConfig(
             name="test_buffer",
-            namespace="test_namespace",
             algorithm_type=AlgorithmType.PPO,
             storage_type=StorageType.QUEUE,
         )

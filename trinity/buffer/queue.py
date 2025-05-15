@@ -16,12 +16,12 @@ class QueueActor:
 
     FINISH_MESSAGE = "$FINISH$"
 
-    def __init__(self, dataset_config: StorageConfig, config: BufferConfig) -> None:
+    def __init__(self, storage_config: StorageConfig, config: BufferConfig) -> None:
         self.config = config
         self.capacity = getattr(config, "capacity", 10000)
         self.queue = asyncio.Queue(self.capacity)
-        if dataset_config.path is not None and len(dataset_config.path) > 0:
-            sql_config = deepcopy(dataset_config)
+        if storage_config.path is not None and len(storage_config.path) > 0:
+            sql_config = deepcopy(storage_config)
             sql_config.storage_type = StorageType.SQL
             self.sql_writer = SQLWriter(sql_config, self.config)
         else:

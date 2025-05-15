@@ -136,6 +136,7 @@ class TestModelWrapperSyncV0(BaseTestModelWrapper, RayUnittestBase):
         self.config.explorer.tensor_parallel_size = 1
         self.config.explorer.engine_num = 2
         self.config.explorer.repeat_times = 2
+        self.config.explorer.use_v1 = False
         self.config.explorer.chat_template = CHAT_TEMPLATE
         self.engines = create_rollout_models(self.config)
         self.model_wrapper = ModelWrapper(self.engines[0], model_type="vllm")

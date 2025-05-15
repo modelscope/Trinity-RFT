@@ -43,11 +43,11 @@ class RftDataset:
         track_lineage: bool = True,
     ):
         self.config = data_config
-        dataset_path = data_config.source_data_path
-        if not dataset_path:
-            raise ValueError("dataset_path is not specified in DJ config")
+        source_data_path = data_config.source_data_path
+        if not source_data_path:
+            raise ValueError("source_data_path is not specified in DJ config")
         load_kwargs = data_config.load_kwargs
-        self.data = load_dataset(dataset_path, trust_remote_code=True, **load_kwargs)
+        self.data = load_dataset(source_data_path, trust_remote_code=True, **load_kwargs)
 
         self.format = data_config.format
 

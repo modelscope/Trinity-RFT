@@ -15,15 +15,13 @@ monitor:
 - `monitor.name`: The name of the experiment. It must be set manually.
 
 
-## Data
+<!-- ## Data Pre Processing
 
-<!-- The `data` configuration specifies the data used for training. It includes the total number of epochs, the batch size, the path to the dataset, the default workflow type, the default reward function type, and the format configuration. -->
+<!-- The `data` configuration specifies the data used for training. It includes the total number of epochs, the batch size, the path to the dataset, the default workflow type, the default reward function type, and the format configuration.
 
 ```yaml
-data:
-  dataset_path: '/PATH/TO/DATASET'
-  train_split: 'train'
-  eval_split: ''
+data_juicer:
+  source_data_path: '/PATH/TO/DATASET'
   format:
     prompt_key: 'question'
     response_key: 'answer'
@@ -31,27 +29,18 @@ data:
   db_url: ''
   max_retry_times: 3
   max_retry_interval: 1
-
-  total_epochs: 20
-  batch_size: 96
-  default_workflow_type: 'math_workflow'
-  default_reward_fn_type: 'countdown_reward'
 ```
 
-<!-- - `data.dataset_path`: The path to the dataset. -->
-- `data.train_split`: The split name of the dataset used for training. Default is `train`.
+<!-- - `data.source_data_path`: The path to the dataset.
+<!-- - `data.train_split`: The split name of the dataset used for training. Default is `train`.
 - `data.eval_split`: The split name of the dataset used for eval.
-<!-- - `data.dataset_config`: The configuration for the dataset. TODO: may only used in Data-Juicer -->
+<!-- - `data.load_kwargs`: The configuration for the dataset. TODO: may only used in Data-Juicer
 - `data.format`: The configuration for the format of the dataset.
 - `data.db_url`: The URL of the database.
 - `data.max_retry_times`: The maximum number of retries when loading the dataset from database.
 - `data.max_retry_interval`: The maximum interval between retries when loading the dataset from database.
-- `data.total_epochs`: The total number of epochs to explore the dataset. Default is `1`. It should be set manually.
-- `data.batch_size`: The number of `Task` in one training batch. The real batch size used in training is `data.batch_size` * `explorer.repeat_times`. It should be set manually.
-- `data.default_workflow_type`: The default workflow type used for training.
-- `data.default_reward_fn_type`: The default reward function type used for training.
 
-<!-- TODO explain the dataset_config and format -->
+TODO explain the load_kwargs and format -->
 
 ## Model
 
@@ -91,18 +80,40 @@ cluster:
 buffer:
   max_retry_times: 3
   max_retry_interval: 1
-  train_dataset:
-    name: countdown_buffer
-    storage_type: queue
-    algorithm_type: ppo
-    path: 'sqlite:///countdown.db'
-  sft_warmup_dataset: null
+  explorer_input:
+    taskset:
+      name: countdown
+      path: 'countdown_dataset/oneshot-split'
+      split: train
+      format:
+        prompt_key: 'question'
+        response_key: 'answer'
+    eval_tasksets: []
+    default_workflow_type: 'math_workflow'
+    default_reward_fn_type: 'countdown_reward'
+  trainer_input:
+    experience_buffer:
+      name: countdown_buffer
+      storage_type: queue
+      path: 'sqlite:///countdown.db'
+    sft_warmup_dataset: null
 ```
 
-- `buffer.max_retry_times`: The maximum number of retries when loading the dataset from database.
-- `buffer.max_retry_interval`: The maximum interval between retries when loading the dataset from database.
-- `buffer.train_dataset`: The configuration of the training dataset.
-- `buffer.sft_warmup_dataset`: The configuration of the SFT warmup dataset.
+- `buffer.max_retry_times`: The maximum number of retries when loading the data from database.
+- `buffer.max_retry_interval`: The maximum interval between retries when loading the data from database.
+- `buffer.explorer_input.taskset`: The configuration of the taskset.
+- `buffer.explorer_input.taskset.name`: The name of the taskset.
+- `buffer.explorer_input.taskset.path`: The path to the taskset.
+- `buffer.explorer_input.taskset.split`: The split name of the taskset used for training. Default is `train`.
+- `buffer.explorer_input.taskset.format`: The format of the taskset. It includes `prompt_key`, `response_key`, `workflow_key` and `reward_fn_key`.
+- `buffer.explorer_input.eval_tasksets`: The configuration of the eval tasksets. It is a list of tasksets which will be used for evaluation. And it is empty by default.
+- `buffer.explorer_input.default_workflow_type`: The default workflow type for `taskset` and `eval_tasksets`.
+- `buffer.explorer_input.default_reward_fn_type`: The default reward function type for `taskset` and `eval_tasksets`.
+- `buffer.trainer_input.experience_buffer`: The configuration of experience_buffer.
+- `buffer.trainer_input.experience_buffer.name`: The name of the experience buffer.
+- `buffer.trainer_input.experience_buffer.storage_type`: The storage type of the experience buffer. Default is `queue`.
+- `buffer.trainer_input.experience_buffer.path`: The sql path to store the experience buffer. It can be empty to indicate not saving to the database.
+- `buffer.trainer_input.sft_warmup_dataset`: The configuration of the SFT warmup dataset. The structure of `sft_warmup_dataset` is the similar to `buffer.explorer_input.taskset`.
 
 ## Explorer
 

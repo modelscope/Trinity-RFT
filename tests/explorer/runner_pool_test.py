@@ -68,13 +68,16 @@ class RunnerPoolTest(unittest.TestCase):
         self.config.explorer.max_timeout = 5
         self.config.buffer.read_batch_size = 2
         self.config.buffer.pad_token_id = 0
-        self.config.buffer.train_dataset = StorageConfig(
+        self.config.buffer.explorer_output = (
+            self.config.buffer.trainer_input.experience_buffer
+        ) = StorageConfig(
             name="test",
-            namespace="test_runner_pool",
             storage_type=StorageType.QUEUE,
             algorithm_type=AlgorithmType.PPO,
         )
-        self.queue = QueueReader(self.config.buffer.train_dataset, self.config.buffer)
+        self.queue = QueueReader(
+            self.config.buffer.trainer_input.experience_buffer, self.config.buffer
+        )
 
     def test_runner_pool(self):
         pool = RunnerPool(self.config, [DummyModel.remote(), DummyModel.remote()])

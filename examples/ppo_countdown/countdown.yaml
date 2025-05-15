@@ -1,14 +1,7 @@
-data:
+global_config:
   total_epochs: 20
   batch_size: 96
-  dataset_path: 'countdown_dataset/oneshot-split'
-  default_workflow_type: 'math_workflow'
-  train_split: 'train'
-  eval_split: ''
-  default_reward_fn_type: 'countdown_reward'
-  format:
-    prompt_key: 'question'
-    response_key: 'answer'
+  eval_interval: 1000
 model:
   model_path: '/PATH/TO/MODEL/CHECKPOINT/'
   max_prompt_tokens: 256
@@ -20,10 +13,21 @@ cluster:
 buffer:
   max_retry_times: 3
   max_retry_interval: 1
-  train_dataset:
-    name: countdown_buffer
-    storage_type: queue
-    path: 'sqlite:///countdown.db'
+  explorer_input:
+    taskset:
+      name: countdown
+      storage_type: file
+      path: 'countdown_dataset/oneshot-split'
+      format:
+        prompt_key: 'question'
+        response_key: 'answer'
+    default_workflow_type: 'math_workflow'
+    default_reward_fn_type: 'countdown_reward'
+  trainer_input:
+    experience_buffer:
+      name: countdown_buffer
+      storage_type: queue
+      path: 'sqlite:///countdown.db'
 explorer:
   engine_type: vllm_async
   engine_num: 2
@@ -49,7 +53,6 @@ trainer:
   algorithm_type: ppo
   trainer_config_path: 'examples/ppo_countdown/train_countdown.yaml'
   sft_warmup_steps: 0
-  eval_interval: 1000
   save_interval: 100
 monitor:
   cache_root_dir: ""

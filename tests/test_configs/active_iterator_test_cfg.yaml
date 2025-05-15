@@ -1,7 +1,7 @@
-data:
+data_juicer:
   # basic info
-  dataset_path: '/Users/lielin/Projects/research/large_models/Trinity-RFT/tests/test_data/test_10/'
-  dataset_config:
+  source_data_path: '/Users/lielin/Projects/research/large_models/Trinity-RFT/tests/test_data/test_10/'
+  load_kwargs:
     split: 'train'
   format:
     prompt_key: 'problem'

@@ -22,9 +22,11 @@ class BaseTrainerCase(RayUnittestBase):
     def setUp(self):
         ray.init(ignore_reinit_error=True)
         self.config = get_template_config()
+        self.config.global_config.total_epochs = 2
+        self.config.global_config.batch_size = 4
         self.config.model.model_path = get_model_path()
-        self.config.trainer.engine_type = "vllm_async"
-        self.config.trainer.repeat_times = 3
+        self.config.explorer.engine_type = "vllm_async"
+        self.config.explorer.repeat_times = 3
         self.config.monitor.monitor_type = MonitorType.TENSORBOARD
         self.config.model.checkpoint_path = os.path.join(
             get_checkpoint_path(), f"train-{datetime.now().strftime('%Y%m%d%H%M%S')}"
@@ -41,7 +43,10 @@ class BaseTrainerCase(RayUnittestBase):
 class TestTrainerCountdown(BaseTrainerCase):
     def test_trainer(self):
         """Test the trainer."""
-        self.config.data = get_unittest_dataset_config("countdown")
+        self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("countdown")
+        self.config.buffer.explorer_input.eval_tasksets.append(
+            get_unittest_dataset_config("countdown", "test")
+        )
         self.config.check_and_update()
         self.config.trainer.trainer_config.trainer.save_freq = 8
         both(self.config)

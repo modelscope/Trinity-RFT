@@ -1,17 +1,8 @@
 mode: train
-data:
-  # basic info
-  dataset_path: /PATH/TO/DATASET/
-  subset_name: ''
-  train_split: 'train'
-  eval_split: 'test'
-  format:
-    prompt_key: 'question'
-    response_key: 'answer'
-  # downstream loading related
+global_config:
   total_epochs: 20
   batch_size: 96
-  default_workflow_type: 'math_workflow'
+  eval_interval: 10
 model:
   model_path: /PATH/TO/MODEL/
   max_prompt_tokens: 256
@@ -23,10 +14,20 @@ cluster:
 buffer:
   max_retry_times: 3
   max_retry_interval: 1
-  train_dataset:
-    name: gsm8k_buffer
-    storage_type: queue
-    path: 'sqlite:///gsm8k.db'
+  explorer_input:
+    taskset:
+      name: gsm8k
+      storage_type: file
+      path: /PATH/TO/DATASET/
+      format:
+        prompt_key: 'question'
+        response_key: 'answer'
+    default_workflow_type: 'math_workflow'
+  trainer_input:
+    experience_buffer:
+      name: gsm8k_buffer
+      storage_type: queue
+      path: 'sqlite:///gsm8k.db'
 explorer:
   engine_type: vllm_async
   engine_num: 2
@@ -51,7 +52,6 @@ trainer:
   algorithm_type: grpo
   trainer_config_path: examples/async_gsm8k/verl_config.yaml
   sft_warmup_steps: 0 # Set to integer to enable sft warmup
-  eval_interval: 10
 monitor:
   cache_root_dir: ""
   project: "Trinity-RFT-gsm8k"

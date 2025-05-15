@@ -1,5 +1,5 @@
-data:
-  dataset_path: './tests/test_data/test_cleaner'
-  dataset_config: {"split": "train"}
+data_juicer:
+  source_data_path: './tests/test_data/test_cleaner'
+  load_kwargs: {"split": "train"}
   dj_config_path: './tests/test_configs/cleaner_test_dj_cfg.yaml'
   clean_strategy: 'iterative'

@@ -135,8 +135,8 @@ class ExplorerInput:
 
     taskset: StorageConfig = field(default_factory=StorageConfig)
     eval_tasksets: List[StorageConfig] = field(default_factory=list)
-    default_workflow_type: str = ""
-    default_reward_fn_type: str = ""
+    default_workflow_type: Optional[str] = None
+    default_reward_fn_type: Optional[str] = None
 
 
 @dataclass
@@ -327,6 +327,7 @@ class Config:
                 "`buffer.explorer_input.taskset.path` is required, please set it to the path of the taskset."
             )
         self.buffer.explorer_input.taskset.task_type = TaskType.EXPLORE
+        self.buffer.explorer_input.taskset.total_epochs = self.global_config.total_epochs
         if self.buffer.explorer_input.taskset.default_workflow_type is None:
             self.buffer.explorer_input.taskset.default_workflow_type = (
                 self.buffer.explorer_input.default_workflow_type

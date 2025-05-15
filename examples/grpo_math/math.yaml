@@ -1,18 +1,7 @@
-data:
-  # basic info
-  dataset_path: /PATH/TO/DATASET/
-  # dataset_config:
-  train_split: train
-  eval_split: test
-  format:
-    prompt_key: 'question'
-    response_key: 'gt_answer'
-  # db related
-  db_url: ''
-  # downstream loading related
+global_config:
   total_epochs: 20
   batch_size: 288
-  default_workflow_type: 'math_workflow'
+  eval_interval: 10
 model:
   model_path: /PATH/TO/MODEL/
   max_prompt_tokens: 1024
@@ -24,10 +13,20 @@ cluster:
 buffer:
   max_retry_times: 3
   max_retry_interval: 1
-  train_dataset:
-    name: math_buffer
-    storage_type: queue
-    path: 'sqlite:///math.db'
+  explorer_input:
+    taskset:
+      name: math
+      storage_type: file
+      path: /PATH/TO/DATASET/
+      format:
+        prompt_key: 'question'
+        response_key: 'gt_answer'
+    default_workflow_type: 'math_workflow'
+  trainer_input:
+    experience_buffer:
+      name: math_buffer
+      storage_type: queue
+      path: 'sqlite:///math.db'
 explorer:
   engine_type: vllm_async
   engine_num: 2
@@ -53,7 +52,6 @@ trainer:
   algorithm_type: grpo
   trainer_config_path: 'examples/grpo_math/train_math.yaml'
   sft_warmup_steps: 0 # Set to integer to enable sft warmup
-  eval_interval: 10
   save_interval: 100
 monitor:
   cache_root_dir: ""

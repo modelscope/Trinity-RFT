@@ -1,12 +1,6 @@
-data:
+data_juicer:
   # basic info
-  dataset_path: 'openai/gsm8k'
-  subset_name: "main"
-  train_split: 'train'
-  eval_split: 'test'
-  format:
-    prompt_key: 'question'
-    response_key: 'answer'
+  source_data_path: 'openai/gsm8k'
   # data active iterator related
   dj_process_desc: 'Please compute difficulty scores for these math questions.'
   agent_model_name: 'qwen-max'
@@ -17,10 +11,10 @@ data:
   clean_strategy: 'iterative'
   # db related
   db_url: ''
-  # downstream loading related
+global_config:
   total_epochs: 1
   batch_size: 96
-  default_workflow_type: 'math_workflow'
+  eval_interval: 50
 model:
   model_path: '/PATH/TO/MODEL/'
   max_prompt_tokens: 256
@@ -32,16 +26,37 @@ cluster:
 buffer:
   max_retry_times: 3
   max_retry_interval: 1
-  train_dataset:
-    name: gsm8k_buffer
-    storage_type: queue
-    path: 'sqlite:///gsm8k.db'
-  # sft_warmup_dataset: # Uncomment these to enable sft warmup
-  #   name: warmup_data
-  #   storage_type: file
-  #   path: '/PATH/TO/WARMUP_DATA/'
-  #   kwargs:
-  #     prompt_type: plaintext
+  explorer_input:
+    taskset:
+      name: gsm8k
+      storage_type: file
+      path: 'openai/gsm8k'
+      subset_name: 'main'
+      split: 'train'
+      format:
+        prompt_key: 'question'
+        response_key: 'answer'
+    eval_tasksets:
+    - name: gsm8k-eval
+      storage_type: file
+      path: 'openai/gsm8k'
+      subset_name: 'main'
+      split: 'test'
+      format:
+        prompt_key: 'question'
+        response_key: 'answer'
+    default_workflow_type: 'math_workflow'
+  trainer_input:
+    experience_buffer:
+      name: gsm8k_buffer
+      storage_type: queue
+      path: 'sqlite:///gsm8k.db'
+    # sft_warmup_dataset: # Uncomment these to enable sft warmup
+    #   name: warmup_data
+    #   storage_type: file
+    #   path: '/PATH/TO/WARMUP_DATA/'
+    #   kwargs:
+    #     prompt_type: plaintext
 explorer:
   engine_type: vllm_async
   engine_num: 2
@@ -67,7 +82,6 @@ trainer:
   algorithm_type: grpo
   trainer_config_path: 'examples/grpo_gsm8k/train_gsm8k.yaml'
   sft_warmup_steps: 0 # Set to integer to enable sft warmup
-  eval_interval: 50
   save_interval: 100
   # get_exp_strategy: 'LFU'
 monitor:

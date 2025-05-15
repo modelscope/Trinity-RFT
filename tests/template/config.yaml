@@ -1,12 +1,8 @@
 mode: both
-data:
-  dataset_path: ''
+global_config:
   total_epochs: 1
   batch_size: 4
-  train_split: 'train'
-  eval_split: ''
-  default_workflow_type: ''
-  default_reward_fn_type: ''
+  eval_interval: 1000
 model:
   model_path: ''
   max_prompt_tokens: 2048
@@ -18,6 +14,14 @@ cluster:  # 2 for explorer, 2 for trainer
 buffer:
   max_retry_times: 3
   max_retry_interval: 1
+  explorer_input:
+    taskset:
+      name: taskset
+      storage_type: file
+      path: ''
+      split: 'train'
+    default_workflow_type: ''
+    default_reward_fn_type: ''
 explorer:
   engine_type: vllm_async
   engine_num: 2
@@ -37,7 +41,6 @@ trainer:
   trainer_type: verl
   trainer_config_path: tests/template/verl_config.yaml
   sft_warmup_steps: 0
-  eval_interval: 1000
   save_interval: 100
 monitor:
   project: unittest

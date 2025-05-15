@@ -1,12 +1,6 @@
-data:
+global_config:
   total_epochs: 20
   batch_size: 4
-  dataset_path: 'scripts/data_prepare/alfworld_data'
-  default_workflow_type: 'alfworld_workflow'
-  train_split: 'train'
-  eval_split: ''
-  format:
-    prompt_key: 'game_file'
 model:
   model_path: '/PATH/TO/MODEL/CHECKPOINT/'
   max_prompt_tokens: 4096
@@ -18,10 +12,19 @@ cluster:
 buffer:
   max_retry_times: 3
   max_retry_interval: 1
-  train_dataset:
-    name: alfworld_buffer
-    storage_type: queue
-    path: 'sqlite:///alfworld.db'
+  explorer_input:
+    taskset:
+      name: alfworld
+      storage_type: file
+      path: 'scripts/data_prepare/alfworld_data'
+      format:
+        prompt_key: 'game_file'
+    default_workflow_type: 'alfworld_workflow'
+  trainer_input:
+    experience_buffer:
+      name: alfworld_buffer
+      storage_type: queue
+      path: 'sqlite:///alfworld.db'
 explorer:
   engine_type: vllm_async
   engine_num: 2

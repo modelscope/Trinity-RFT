@@ -18,6 +18,8 @@ from trinity.common.constants import MonitorType
 class BaseExplorerCase(RayUnittestBase):
     def setUp(self):
         self.config = get_template_config()
+        self.config.global_config.total_epochs = 2
+        self.config.global_config.batch_size = 4
         self.config.model.model_path = get_model_path()
         self.config.explorer.engine_type = "vllm_async"
         self.config.explorer.repeat_times = 2
@@ -34,7 +36,10 @@ class BaseExplorerCase(RayUnittestBase):
 
 class TestExplorerCountdownEval(BaseExplorerCase):
     def test_explorer(self):
-        self.config.data = get_unittest_dataset_config("countdown")
+        self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("countdown")
+        self.config.buffer.explorer_input.eval_tasksets.append(
+            get_unittest_dataset_config("countdown", "test")
+        )
         self.config.monitor.name = f"explore-eval-{datetime.now().strftime('%Y%m%d%H%M%S')}"
         self.config.explorer.use_v1 = True
         self.config.check_and_update()
@@ -50,9 +55,8 @@ class TestExplorerCountdownEval(BaseExplorerCase):
 
 class TestExplorerCountdownNoEval(BaseExplorerCase):
     def test_explorer(self):
-        self.config.data = get_unittest_dataset_config("countdown")
+        self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("countdown")
         self.config.monitor.name = f"explore-no-eval-{datetime.now().strftime('%Y%m%d%H%M%S')}"
-        self.config.data.eval_split = None
         self.config.explorer.use_v1 = False
         self.config.check_and_update()
         explore(self.config)

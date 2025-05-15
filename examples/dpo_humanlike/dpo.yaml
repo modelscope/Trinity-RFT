@@ -1,13 +1,7 @@
 mode: train
-data:
+global_config:
   total_epochs: 20
   batch_size: 32 # NOTE
-  train_split: "train"
-  dataset_path: ''
-  default_workflow_type: 'math_workflow'
-  format:
-    prompt_key: ''
-    response_key: ''
 model:
   model_path: '/PATH/TO/MODEL/CHECKPOINT/' # NOTE
   max_prompt_tokens: 1792
@@ -19,15 +13,16 @@ cluster:
 buffer:
   max_retry_times: 3
   max_retry_interval: 1
-  train_dataset:
-    name: dpo_buffer
-    storage_type: file
-    path: '/PATH/TO/DATASET/'
-    format:
-      prompt_type: plaintext # plaintext/messages
-      prompt_key: prompt
-      chosen_key: chosen
-      rejected_key: rejected
+  trainer_input:
+    experience_buffer:
+      name: dpo_buffer
+      storage_type: file
+      path: '/PATH/TO/DATASET/'
+      format:
+        prompt_type: plaintext # plaintext/messages
+        prompt_key: prompt
+        chosen_key: chosen
+        rejected_key: rejected
 explorer:
   engine_type: vllm_async
   engine_num: 0

@@ -1,12 +1,6 @@
-data:
+global_config:
   total_epochs: 20
   batch_size: 4
-  dataset_path: 'scripts/data_prepare/sciworld_data'
-  default_workflow_type: 'sciworld_workflow'
-  train_split: 'train'
-  eval_split: ''
-  format:
-    prompt_key: 'game_file'
 model:
   model_path: '/PATH/TO/MODEL/CHECKPOINT/'
   max_prompt_tokens: 4096
@@ -18,10 +12,19 @@ cluster:
 buffer:
   max_retry_times: 3
   max_retry_interval: 1
-  train_dataset:
-    name: sciworld_buffer
-    storage_type: queue
-    path: 'sqlite:///sciworld.db'
+  explorer_input:
+    taskset:
+      name: sciworld
+      storage_type: file
+      path: 'scripts/data_prepare/sciworld_data'
+      format:
+        prompt_key: 'game_file'
+    default_workflow_type: 'sciworld_workflow'
+  trainer_input:
+    experience_buffer:
+      name: sciworld_buffer
+      storage_type: queue
+      path: 'sqlite:///sciworld.db'
 explorer:
   engine_type: vllm_async
   engine_num: 2

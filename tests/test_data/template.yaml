@@ -1,5 +1,4 @@
-data:
-  dataset_path: ''
+global_config:
   batch_size: 32
 model:
   max_prompt_tokens: 2048
@@ -11,6 +10,13 @@ cluster:
 buffer:
   max_retry_times: 3
   max_retry_interval: 1
+  explorer_input:
+    taskset:
+      name: taskset
+      storage_type: file
+      path: ''
+    default_workflow_type: ''
+    default_reward_fn_type: ''
 explorer:
   engine_type: vllm
   engine_num: 2
