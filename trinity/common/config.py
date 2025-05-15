@@ -107,6 +107,7 @@ class GlobalConfig:
     total_epochs: int = 1
     batch_size: int = 1
     eval_interval: int = 100
+    eval_on_latest_ckp: bool = True
 
 
 @dataclass
@@ -299,7 +300,8 @@ class Config:
 
         # check eval_interval
         if (
-            self.trainer.algorithm_type != AlgorithmType.DPO
+            self.mode != "bench"
+            and self.trainer.algorithm_type != AlgorithmType.DPO
             and self.global_config.eval_interval % self.synchronizer.sync_interval != 0
         ):
             self.global_config.eval_interval = (
@@ -316,7 +318,7 @@ class Config:
         ):
             if self.trainer.save_interval != self.synchronizer.sync_interval:
                 logger.warning(
-                    f"When `trainer.algorithm_type != DPO` and `synchronizer.sync_method == checkpoint`, "
+                    f"When `trainer.algorithm_type` != `DPO` and `synchronizer.sync_method` == `checkpoint`, "
                     f"`trainer.save_interval` will be set to "
                     f"`synchronizer.sync_interval = {self.synchronizer.sync_interval}`."
                 )

@@ -3,6 +3,7 @@ import argparse
 import sys
 
 import ray
+import wandb
 
 from trinity.common.config import Config, load_config
 from trinity.common.constants import AlgorithmType
@@ -19,11 +20,12 @@ def bench(config: Config) -> None:
     try:
         ray.get(explorer.prepare.remote())
         ray.get(explorer.sync_weight.remote())
-        _, step = ray.get(explorer.eval.remote())
-        logger.info("Evaluation finished.")
-        ray.get(explorer.flush_log.remote(step=step))
+        bm_finished, step = ray.get(explorer.benchmark.remote())
+        logger.info("Benchmark finished.")
+        if bm_finished:
+            ray.get(explorer.flush_log.remote(step=step))
     except Exception as e:
-        logger.error(f"Evaluation failed: {e}")
+        logger.error(f"Benchmark failed: {e}")
         raise e
 
 
@@ -167,6 +169,9 @@ def run(config_path: str):
         both(config)
     elif config.mode == "bench":
         bench(config)
+
+    if config.monitor.monitor_type == "wandb":
+        wandb.finish()
 
 
 def studio(port: int = 8501):

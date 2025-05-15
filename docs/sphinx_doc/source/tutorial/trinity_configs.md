@@ -10,12 +10,14 @@ global_config:
   total_epochs: 1
   batch_size: 96
   eval_interval: 1000
+  eval_on_latest_ckp: true
 ```
 
 - `mode`: The mode of the experiment, chosen from `both`, `train`, `explore` or `bench`. `both` means both trainer and explorer are launched; `train` means only trainer is launched; `explore` means only explorer is launched; `bench` conducts benchmark evaluation. Default is `both`.
 - `global_config.total_epochs`: The total number of epochs. It should be checked manually.
 - `global_config.batch_size`: The batch size used for training. It should be checked manually.
 - `global_config.eval_interval`: The interval steps between two evaluations. Default is `1000`.
+- `global_config.eval_on_latest_ckp`: In bench mode, whether to evaluate on only the latest checkpoint or all the checkpoints in the path. Default is `true`.
 
 
 ## Monitor
