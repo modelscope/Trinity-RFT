@@ -154,6 +154,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">DialectKWArgs</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Executable</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">SchemaEventTarget</span> <span class="k">as</span> <span class="n">SchemaEventTarget</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">SchemaVisitable</span> <span class="k">as</span> <span class="n">SchemaVisitable</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.coercions</span><span class="w"> </span><span class="kn">import</span> <span class="n">_document_text_coercion</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.elements</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClauseElement</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.elements</span><span class="w"> </span><span class="kn">import</span> <span class="n">ColumnClause</span>
@@ -177,6 +178,7 @@
 
 <span class="k">if</span> <span class="n">typing</span><span class="o">.</span><span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">_AutoIncrementType</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">_CreateDropBind</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">_DDLColumnArgument</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">_InfoType</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">_TextCoercedExpressionArgument</span>
@@ -194,7 +196,6 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">..engine.interfaces</span><span class="w"> </span><span class="kn">import</span> <span class="n">_CoreMultiExecuteParams</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">..engine.interfaces</span><span class="w"> </span><span class="kn">import</span> <span class="n">CoreExecuteOptionsParameter</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">..engine.interfaces</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExecutionContext</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">..engine.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">MockConnection</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">..engine.reflection</span><span class="w"> </span><span class="kn">import</span> <span class="n">_ReflectionInfo</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">..sql.selectable</span><span class="w"> </span><span class="kn">import</span> <span class="n">FromClause</span>
 
@@ -202,8 +203,6 @@
 <span class="n">_SI</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;_SI&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s2">&quot;SchemaItem&quot;</span><span class="p">)</span>
 <span class="n">_TAB</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;_TAB&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s2">&quot;Table&quot;</span><span class="p">)</span>
 
-
-<span class="n">_CreateDropBind</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;Engine&quot;</span><span class="p">,</span> <span class="s2">&quot;Connection&quot;</span><span class="p">,</span> <span class="s2">&quot;MockConnection&quot;</span><span class="p">]</span>
 
 <span class="n">_ConstraintNameArgument</span> <span class="o">=</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">_NoneName</span><span class="p">]]</span>
 
@@ -298,7 +297,7 @@
 
 
 <span class="nd">@inspection</span><span class="o">.</span><span class="n">_self_inspects</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">SchemaItem</span><span class="p">(</span><span class="n">SchemaEventTarget</span><span class="p">,</span> <span class="n">visitors</span><span class="o">.</span><span class="n">Visitable</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SchemaItem</span><span class="p">(</span><span class="n">SchemaVisitable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for items that define a database schema.&quot;&quot;&quot;</span>
 
     <span class="n">__visit_name__</span> <span class="o">=</span> <span class="s2">&quot;schema_item&quot;</span>

@@ -140,13 +140,15 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_create_actors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">new_actors</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num</span><span class="p">):</span>
             <span class="n">engine_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">engine_status</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">engine_status</span><span class="p">))</span>
             <span class="n">new_actor</span> <span class="o">=</span> <span class="n">WorkflowRunner</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">engine_index</span><span class="p">])</span>
-            <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">new_actor</span><span class="o">.</span><span class="n">__ray_ready__</span><span class="o">.</span><span class="n">remote</span><span class="p">())</span>
+            <span class="n">new_actors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_actor</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">engine_status</span><span class="p">[</span><span class="n">engine_index</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">actor_to_engine_index</span><span class="p">[</span><span class="n">new_actor</span><span class="p">]</span> <span class="o">=</span> <span class="n">engine_index</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_return_actor</span><span class="p">(</span><span class="n">new_actor</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">actor</span> <span class="ow">in</span> <span class="n">new_actors</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_return_actor</span><span class="p">(</span><span class="n">actor</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_kill_actors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actors</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">actors</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
@@ -337,7 +339,7 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_return_actor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actor</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">actor</span><span class="o">.</span><span class="n">is_alive</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span>
+            <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">actor</span><span class="o">.</span><span class="n">is_alive</span><span class="o">.</span><span class="n">remote</span><span class="p">())</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_idle_actors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">actor</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;The actor is not alive, restart a new actor&quot;</span><span class="p">)</span>
