@@ -50,8 +50,9 @@
 <li class="toctree-l1"><a class="reference internal" href="example_dpo.html">Example: Run DPO on Human-Like-DPO-Dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_data_functionalities.html">Data processing functionalities</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Trinity-RFT Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#global-config">Global Config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#monitor">Monitor</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#data">Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#data-processing">Data Processing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#model">Model</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#cluster">Cluster</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#buffer">Buffer</a></li>
@@ -102,6 +103,22 @@
   <section id="trinity-rft-configuration">
 <h1>Trinity-RFT Configuration<a class="headerlink" href="#trinity-rft-configuration" title="Link to this heading"></a></h1>
 <p>The following is the main config file for Trinity-RFT. Take <code class="docutils literal notranslate"><span class="pre">countdown.yaml</span></code> as an example.</p>
+<section id="global-config">
+<h2>Global Config<a class="headerlink" href="#global-config" title="Link to this heading"></a></h2>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">both</span>
+<span class="nt">global_config</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">total_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">96</span>
+<span class="w">  </span><span class="nt">eval_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">mode</span></code>: The mode of the experiment, chosen from <code class="docutils literal notranslate"><span class="pre">both</span></code>, <code class="docutils literal notranslate"><span class="pre">train</span></code>, <code class="docutils literal notranslate"><span class="pre">explore</span></code> or <code class="docutils literal notranslate"><span class="pre">bench</span></code>. <code class="docutils literal notranslate"><span class="pre">both</span></code> means both trainer and explorer are launched; <code class="docutils literal notranslate"><span class="pre">train</span></code> means only trainer is launched; <code class="docutils literal notranslate"><span class="pre">explore</span></code> means only explorer is launched; <code class="docutils literal notranslate"><span class="pre">bench</span></code> conducts benchmark evaluation. Default is <code class="docutils literal notranslate"><span class="pre">both</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">global_config.total_epochs</span></code>: The total number of epochs. It should be checked manually.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">global_config.batch_size</span></code>: The batch size used for training. It should be checked manually.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">global_config.eval_interval</span></code>: The interval steps between two evaluations. Default is <code class="docutils literal notranslate"><span class="pre">1000</span></code>.</p></li>
+</ul>
+</section>
 <section id="monitor">
 <h2>Monitor<a class="headerlink" href="#monitor" title="Link to this heading"></a></h2>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">monitor</span><span class="p">:</span>
@@ -114,44 +131,32 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">monitor.name</span></code>: The name of the experiment. It must be set manually.</p></li>
 </ul>
 </section>
-<section id="data">
-<h2>Data<a class="headerlink" href="#data" title="Link to this heading"></a></h2>
+<section id="data-processing">
+<h2>Data Processing<a class="headerlink" href="#data-processing" title="Link to this heading"></a></h2>
 <!-- The `data` configuration specifies the data used for training. It includes the total number of epochs, the batch size, the path to the dataset, the default workflow type, the default reward function type, and the format configuration. -->
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">data</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">dataset_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;/PATH/TO/DATASET&#39;</span>
-<span class="w">  </span><span class="nt">train_split</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;train&#39;</span>
-<span class="w">  </span><span class="nt">eval_split</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;&#39;</span>
-<span class="w">  </span><span class="nt">dataset_config</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">split</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;train&#39;</span>
-<span class="w">  </span><span class="nt">format_config</span><span class="p">:</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">data_processor</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">source_data_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;/PATH/TO/DATASET&#39;</span>
+<span class="w">  </span><span class="nt">load_kwargs</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">split</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;train&#39;</span><span class="w">  </span><span class="c1"># only need the train split</span>
+<span class="w">  </span><span class="nt">format</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">prompt_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;question&#39;</span>
 <span class="w">    </span><span class="nt">response_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;answer&#39;</span>
 
-<span class="w">  </span><span class="nt">db_url</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;&#39;</span>
-<span class="w">  </span><span class="nt">max_retry_times</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
-<span class="w">  </span><span class="nt">max_retry_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-
-<span class="w">  </span><span class="nt">total_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
-<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">96</span>
-<span class="w">  </span><span class="nt">default_workflow_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;math_workflow&#39;</span>
-<span class="w">  </span><span class="nt">default_reward_fn_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;countdown_reward&#39;</span>
+<span class="w">  </span><span class="c1"># cleaner related</span>
+<span class="w">  </span><span class="nt">dj_config_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;tests/test_configs/active_iterator_test_dj_cfg.yaml&#39;</span>
+<span class="w">  </span><span class="nt">clean_strategy</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;iterative&#39;</span>
+<span class="w">  </span><span class="c1"># db related</span>
+<span class="w">  </span><span class="nt">db_url</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;postgresql://{username}@localhost:5432/{db_name}&#39;</span>
 </pre></div>
 </div>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">data.dataset_path</span></code>: The path to the dataset.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">data.train_split</span></code>: The split name of the dataset used for training. Default is <code class="docutils literal notranslate"><span class="pre">train</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">data.eval_split</span></code>: The split name of the dataset used for eval.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">data.dataset_config</span></code>: The configuration for the dataset. <!-- TODO: may only used in Data-Juicer --></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">data.format_config</span></code>: The configuration for the format of the dataset.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">data.source_data_path</span></code>: The path to the source dataset.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">data.load_kwargs</span></code>: The kwargs used in <code class="docutils literal notranslate"><span class="pre">datasets.load_dataset</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">data.format</span></code>: The format of the source dataset. It includes <code class="docutils literal notranslate"><span class="pre">prompt_key</span></code> and <code class="docutils literal notranslate"><span class="pre">response_key</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">data.dj_config_path</span></code>: The path to the Data-Juicer configuration.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">data.clean_strategy</span></code>: The cleaning strategy used for <code class="docutils literal notranslate"><span class="pre">DataCleaner</span></code>, which iteratively cleans dataset until targets are met.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">data.db_url</span></code>: The URL of the database.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">data.max_retry_times</span></code>: The maximum number of retries when loading the dataset from database.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">data.max_retry_interval</span></code>: The maximum interval between retries when loading the dataset from database.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">data.total_epochs</span></code>: The total number of epochs to explore the dataset. Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>. It should be set manually.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">data.batch_size</span></code>: The number of <code class="docutils literal notranslate"><span class="pre">Task</span></code> in one training batch. The real batch size used in training is <code class="docutils literal notranslate"><span class="pre">data.batch_size</span></code> * <code class="docutils literal notranslate"><span class="pre">explorer.repeat_times</span></code>. It should be set manually.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">data.default_workflow_type</span></code>: The default workflow type used for training.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">data.default_reward_fn_type</span></code>: The default reward function type used for training.</p></li>
 </ul>
-<!-- TODO explain the dataset_config and format_config -->
 </section>
 <section id="model">
 <h2>Model<a class="headerlink" href="#model" title="Link to this heading"></a></h2>
@@ -190,19 +195,41 @@
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">buffer</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">max_retry_times</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
 <span class="w">  </span><span class="nt">max_retry_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">  </span><span class="nt">train_dataset</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">countdown_buffer</span>
-<span class="w">    </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">queue</span>
-<span class="w">    </span><span class="nt">algorithm_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ppo</span>
-<span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;sqlite:///countdown.db&#39;</span>
-<span class="w">  </span><span class="nt">sft_warmup_dataset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">  </span><span class="nt">explorer_input</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">taskset</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">countdown</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;countdown_dataset/oneshot-split&#39;</span>
+<span class="w">      </span><span class="nt">split</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">train</span>
+<span class="w">      </span><span class="nt">format</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">prompt_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;question&#39;</span>
+<span class="w">        </span><span class="nt">response_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;answer&#39;</span>
+<span class="w">    </span><span class="nt">eval_tasksets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+<span class="w">    </span><span class="nt">default_workflow_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;math_workflow&#39;</span>
+<span class="w">    </span><span class="nt">default_reward_fn_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;countdown_reward&#39;</span>
+<span class="w">  </span><span class="nt">trainer_input</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">experience_buffer</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">countdown_buffer</span>
+<span class="w">      </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">queue</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;sqlite:///countdown.db&#39;</span>
+<span class="w">    </span><span class="nt">sft_warmup_dataset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
 </pre></div>
 </div>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">buffer.max_retry_times</span></code>: The maximum number of retries when loading the dataset from database.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">buffer.max_retry_interval</span></code>: The maximum interval between retries when loading the dataset from database.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">buffer.train_dataset</span></code>: The configuration of the training dataset.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">buffer.sft_warmup_dataset</span></code>: The configuration of the SFT warmup dataset.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">buffer.max_retry_times</span></code>: The maximum number of retries when loading the data from database.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">buffer.max_retry_interval</span></code>: The maximum interval between retries when loading the data from database.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.taskset</span></code>: The configuration of the taskset.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.taskset.name</span></code>: The name of the taskset.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.taskset.path</span></code>: The path to the taskset.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.taskset.split</span></code>: The split name of the taskset used for training. Default is <code class="docutils literal notranslate"><span class="pre">train</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.taskset.format</span></code>: The format of the taskset. It includes <code class="docutils literal notranslate"><span class="pre">prompt_key</span></code>, <code class="docutils literal notranslate"><span class="pre">response_key</span></code>, <code class="docutils literal notranslate"><span class="pre">workflow_key</span></code> and <code class="docutils literal notranslate"><span class="pre">reward_fn_key</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.eval_tasksets</span></code>: The configuration of the eval tasksets. It is a list of tasksets which will be used for evaluation. And it is empty by default.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.default_workflow_type</span></code>: The default workflow type for <code class="docutils literal notranslate"><span class="pre">taskset</span></code> and <code class="docutils literal notranslate"><span class="pre">eval_tasksets</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.default_reward_fn_type</span></code>: The default reward function type for <code class="docutils literal notranslate"><span class="pre">taskset</span></code> and <code class="docutils literal notranslate"><span class="pre">eval_tasksets</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">buffer.trainer_input.experience_buffer</span></code>: The configuration of experience_buffer.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">buffer.trainer_input.experience_buffer.name</span></code>: The name of the experience buffer.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">buffer.trainer_input.experience_buffer.storage_type</span></code>: The storage type of the experience buffer. Default is <code class="docutils literal notranslate"><span class="pre">queue</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">buffer.trainer_input.experience_buffer.path</span></code>: The sql path to store the experience buffer. It can be empty to indicate not saving to the database.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">buffer.trainer_input.sft_warmup_dataset</span></code>: The configuration of the SFT warmup dataset. The structure of <code class="docutils literal notranslate"><span class="pre">sft_warmup_dataset</span></code> is the similar to <code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.taskset</span></code>.</p></li>
 </ul>
 </section>
 <section id="explorer">
@@ -256,7 +283,7 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">synchronizer.sync_method</span></code>: The synchronization method between <code class="docutils literal notranslate"><span class="pre">trainer</span></code> and <code class="docutils literal notranslate"><span class="pre">explorer</span></code>.
 Support <code class="docutils literal notranslate"><span class="pre">nccl</span></code> and <code class="docutils literal notranslate"><span class="pre">checkpoint</span></code>, <code class="docutils literal notranslate"><span class="pre">nccl</span></code> represents that model weights in <code class="docutils literal notranslate"><span class="pre">explorer</span></code> will be synchronized from <code class="docutils literal notranslate"><span class="pre">trainer</span></code> through <code class="docutils literal notranslate"><span class="pre">nccl</span></code>,
 <code class="docutils literal notranslate"><span class="pre">checkpoint</span></code> represents that <code class="docutils literal notranslate"><span class="pre">explorer</span></code> will load the newest checkpoints saved by <code class="docutils literal notranslate"><span class="pre">trainer</span></code> then update its model weights. Default is <code class="docutils literal notranslate"><span class="pre">nccl</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">synchronizer.sync_interval</span></code>: The interval between two synchronizations. Default is <code class="docutils literal notranslate"><span class="pre">10</span></code>. It should be set manually.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">synchronizer.sync_interval</span></code>: The interval steps between two synchronizations. Default is <code class="docutils literal notranslate"><span class="pre">10</span></code>. It should be set manually.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">synchronizer.sync_timeout</span></code>: The timeout of the synchronization. Default is <code class="docutils literal notranslate"><span class="pre">1200</span></code>.</p></li>
 </ul>
 </section>
@@ -276,8 +303,8 @@ Support <code class="docutils literal notranslate"><span class="pre">nccl</span>
 <li><p><code class="docutils literal notranslate"><span class="pre">trainer.algorithm_type</span></code>: The type of the algorithm, Support <code class="docutils literal notranslate"><span class="pre">ppo</span></code>, <code class="docutils literal notranslate"><span class="pre">grpo</span></code>, <code class="docutils literal notranslate"><span class="pre">opmd</span></code> and <code class="docutils literal notranslate"><span class="pre">dpo</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">trainer.trainer_config_path</span></code>: The path to the trainer configuration file. It must be set manually.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">trainer.sft_warmup_steps</span></code>: The number of steps to warm up the model. Default is <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">trainer.eval_interval</span></code>: The interval between two evaluations. Default is <code class="docutils literal notranslate"><span class="pre">1000</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">trainer.save_interval</span></code>: The interval between two checkpoints. Default is <code class="docutils literal notranslate"><span class="pre">100</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trainer.eval_interval</span></code>: The interval steps between two evaluations. Default is <code class="docutils literal notranslate"><span class="pre">1000</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trainer.save_interval</span></code>: The interval steps between two checkpoints. Default is <code class="docutils literal notranslate"><span class="pre">100</span></code>.</p></li>
 </ul>
 <section id="verl-trainer-configuration">
 <h3>veRL Trainer Configuration<a class="headerlink" href="#verl-trainer-configuration" title="Link to this heading"></a></h3>

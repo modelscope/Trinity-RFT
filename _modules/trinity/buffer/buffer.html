@@ -90,7 +90,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.buffer_reader</span><span class="w"> </span><span class="kn">import</span> <span class="n">BufferReader</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.buffer_writer</span><span class="w"> </span><span class="kn">import</span> <span class="n">BufferWriter</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">BufferConfig</span><span class="p">,</span> <span class="n">Config</span><span class="p">,</span> <span class="n">DatasetConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">BufferConfig</span><span class="p">,</span> <span class="n">Config</span><span class="p">,</span> <span class="n">StorageConfig</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">StorageType</span>
 
 
@@ -99,56 +99,61 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Responsible for storing experiences.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">buffer_mapping</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DatasetConfig</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buffer_mapping</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">StorageConfig</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_register_from_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_dataset_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DatasetConfig</span><span class="p">:</span>
-        <span class="n">dataset_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer_mapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">dataset_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">dataset_config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_dataset_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StorageConfig</span><span class="p">:</span>
+        <span class="n">storage_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer_mapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">dataset_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">storage_config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dataset_name</span><span class="si">}</span><span class="s2"> not found.&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">dataset_config</span>
+        <span class="k">return</span> <span class="n">storage_config</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">register_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset_config</span><span class="p">:</span> <span class="n">DatasetConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">dataset_config</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer_mapping</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> already exists.&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">buffer_mapping</span><span class="p">[</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset_config</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">register_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">storage_config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer_mapping</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">storage_config</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> already exists.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buffer_mapping</span><span class="p">[</span><span class="n">storage_config</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">storage_config</span>
 
 
 <div class="viewcode-block" id="get_buffer_reader">
 <a class="viewcode-back" href="../../../build_api/trinity.buffer.html#trinity.buffer.buffer.get_buffer_reader">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_buffer_reader</span><span class="p">(</span><span class="n">dataset_config</span><span class="p">:</span> <span class="n">DatasetConfig</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BufferReader</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_buffer_reader</span><span class="p">(</span><span class="n">storage_config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BufferReader</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a buffer reader for the given dataset name.&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">dataset_config</span><span class="o">.</span><span class="n">storage_type</span> <span class="o">==</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">SQL</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">storage_type</span> <span class="o">==</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">SQL</span><span class="p">:</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.reader.sql_reader</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQLReader</span>
 
-        <span class="k">return</span> <span class="n">SQLReader</span><span class="p">(</span><span class="n">dataset_config</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">dataset_config</span><span class="o">.</span><span class="n">storage_type</span> <span class="o">==</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">QUEUE</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">SQLReader</span><span class="p">(</span><span class="n">storage_config</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">storage_type</span> <span class="o">==</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">QUEUE</span><span class="p">:</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.reader.queue_reader</span><span class="w"> </span><span class="kn">import</span> <span class="n">QueueReader</span>
 
-        <span class="k">return</span> <span class="n">QueueReader</span><span class="p">(</span><span class="n">dataset_config</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">dataset_config</span><span class="o">.</span><span class="n">storage_type</span> <span class="o">==</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">FILE</span><span class="p">:</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.reader.file_reader</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileReader</span>
+        <span class="k">return</span> <span class="n">QueueReader</span><span class="p">(</span><span class="n">storage_config</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">storage_type</span> <span class="o">==</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">FILE</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.reader.file_reader</span><span class="w"> </span><span class="kn">import</span> <span class="n">FILE_READERS</span>
 
-        <span class="k">return</span> <span class="n">FileReader</span><span class="p">(</span><span class="n">dataset_config</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">)</span>
+        <span class="n">file_read_type</span> <span class="o">=</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">algorithm_type</span>
+        <span class="k">if</span> <span class="n">file_read_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">file_read_type</span> <span class="o">=</span> <span class="n">file_read_type</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">file_read_type</span> <span class="o">=</span> <span class="s2">&quot;rollout&quot;</span>
+        <span class="k">return</span> <span class="n">FILE_READERS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">file_read_type</span><span class="p">)(</span><span class="n">storage_config</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">storage_type</span><span class="si">}</span><span class="s2"> not supported.&quot;</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">storage_config</span><span class="o">.</span><span class="n">storage_type</span><span class="si">}</span><span class="s2"> not supported.&quot;</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="get_buffer_writer">
 <a class="viewcode-back" href="../../../build_api/trinity.buffer.html#trinity.buffer.buffer.get_buffer_writer">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_buffer_writer</span><span class="p">(</span><span class="n">dataset_config</span><span class="p">:</span> <span class="n">DatasetConfig</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BufferWriter</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_buffer_writer</span><span class="p">(</span><span class="n">storage_config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BufferWriter</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a buffer writer for the given dataset name.&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">dataset_config</span><span class="o">.</span><span class="n">storage_type</span> <span class="o">==</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">SQL</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">storage_type</span> <span class="o">==</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">SQL</span><span class="p">:</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.writer.sql_writer</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQLWriter</span>
 
-        <span class="k">return</span> <span class="n">SQLWriter</span><span class="p">(</span><span class="n">dataset_config</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">dataset_config</span><span class="o">.</span><span class="n">storage_type</span> <span class="o">==</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">QUEUE</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">SQLWriter</span><span class="p">(</span><span class="n">storage_config</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">storage_type</span> <span class="o">==</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">QUEUE</span><span class="p">:</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.writer.queue_writer</span><span class="w"> </span><span class="kn">import</span> <span class="n">QueueWriter</span>
 
-        <span class="k">return</span> <span class="n">QueueWriter</span><span class="p">(</span><span class="n">dataset_config</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">QueueWriter</span><span class="p">(</span><span class="n">storage_config</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dataset_config</span><span class="o">.</span><span class="n">storage_type</span><span class="si">}</span><span class="s2"> not supported.&quot;</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">storage_config</span><span class="o">.</span><span class="n">storage_type</span><span class="si">}</span><span class="s2"> not supported.&quot;</span><span class="p">)</span></div>
 
 </pre></div>
 

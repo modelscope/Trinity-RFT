@@ -10,7 +10,7 @@ In addition, we need to configure the following parameters in both files.
 The model weights of the explorer and trainer are synchronized once every `sync_iteration_interval * batch_size` tasks.
 
 ```yaml
-data:
+global_config:
   batch_size: <batch_size>
 # The same checkpoint path
 model:
@@ -18,10 +18,11 @@ model:
 
 # The same data_base path
 buffer:
-  train_dataset:
-    name: gsm8k_buffer
-    storage_type: queue
-    path: 'sqlite:///gsm8k.db'
+  trainer_input:
+    experience_buffer:
+      name: gsm8k_buffer
+      storage_type: queue
+      path: 'sqlite:///gsm8k.db'
 
 synchronizer:
   sync_method: 'checkpoint'

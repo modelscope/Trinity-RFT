@@ -31,31 +31,24 @@ Trinity-RFT uses a unified config file to manage all config items. For the data 
 In this example, assume that you need to rank all math questions and corresponding answers by their difficulties. So you can set these config items like the following example:
 
 ```yaml
-data:
+data_processor:
   # basic info
-  dataset_path: '/path/to/gsm8k'
-  dataset_config:
+  source_data_path: '/path/to/gsm8k'
+  load_kwargs:
     split: 'train'  # only need the train split
-  format_config:  # set the field mappings
+  format:  # set the field mappings
     prompt_key: 'question'
     response_key: 'answer'
   # database related. The result dataset will be stored in the database.
   db_url: 'postgresql://{user_name}@localhost:5432/{db_name}'
-  # downstream loading related
-  total_epochs: 1
-  batch_size: 96
-  default_workflow_type: 'math_workflow'
 ```
 
 Here you can set the basic information for the GSM-8K dataset, database information that is used to store the result dataset, and some other items about downstream dataset loading for exploring and training:
 
-+ `dataset_path`: the path to the raw dataset.
-+ `dataset_config`: extra config arguments for loading the raw dataset. Mainly for the `load_dataset` method in HuggingFace `datasets` library.
-+ `format_config`: some dataset format config items, which are used to map original data field names to unified ones.
++ `source_data_path`: the path to the raw dataset.
++ `load_kwargs`: extra config arguments for loading the raw dataset. Mainly for the `load_dataset` method in HuggingFace `datasets` library.
++ `format`: some dataset format config items, which are used to map original data field names to unified ones.
 + `db_url`: the URL of the postgresql database to store the result dataset.
-+ `total_epochs`: the total number of epochs to train on this dataset.
-+ `batch_size`: the training batch size.
-+ `default_workflow_type`: the default exploring workflow type. Please refer to [programming guide](trinity_programming_guide.md) for more details.
 
 In addition, there are several config items related to the data active iterator, which is used to prepare a better dataset. The core part of the data active iterator, Data-Juicer, provides tens of operators to help clean or calculate key information for each sample in the dataset. You can configure this part depending on how familiar you are with Data-Juicer.
 
@@ -63,20 +56,16 @@ In addition, there are several config items related to the data active iterator,
 If you are not familiar with Data-Juicer, the data module provides a natural-language-based method to config the data processing recipe. What you need to do is only describe the demands of how you want to prepare for the raw dataset, and an agent will be invoked to arrange the data processing recipe for you. Here is an example:
 
 ```yaml
-data:
+data_processor:
   # basic info
-  dataset_path: '/path/to/gsm8k'
-  dataset_config:
+  source_data_path: '/path/to/gsm8k'
+  load_kwargs:
     split: 'train'  # only need the train split
-  format_config:  # set the field mappings
+  format:  # set the field mappings
     prompt_key: 'question'
     response_key: 'answer'
   # database related. The result dataset will be stored in the database.
   db_url: 'postgresql://{user_name}@localhost:5432/{db_name}'
-  # downstream loading related
-  total_epochs: 1
-  batch_size: 96
-  default_workflow_type: 'math_workflow'
 
   #### new part about data active iterator
   dj_process_desc: 'Please compute difficulty scores for these math questions.'
@@ -109,20 +98,16 @@ process:
 After preparing the Data-Juicer data processing recipe, you can set the `dj_config_path` item in the Trinity-RFT config file to the path to this recipe. For example:
 
 ```yaml
-data:
+data_processor:
   # basic info
-  dataset_path: '/path/to/gsm8k'
-  dataset_config:
+  source_data_path: '/path/to/gsm8k'
+  load_kwargs:
     split: 'train'  # only need the train split
-  format_config:  # set the field mappings
+  format:  # set the field mappings
     prompt_key: 'question'
     response_key: 'answer'
   # database related. The result dataset will be stored in the database.
   db_url: 'postgresql://{user_name}@localhost:5432/{db_name}'
-  # downstream loading related
-  total_epochs: 1
-  batch_size: 96
-  default_workflow_type: 'math_workflow'
 
   #### new part about data active iterator
   dj_config_path: '/path/to/the/Data-Juicer/data/processing/recipe/above.yaml'
@@ -185,12 +170,12 @@ Trinity-RFT uses a unified config file to manage all config items. For the data 
 In this example, assume that you need to rank all math questions and corresponding answers by their difficulties. So you can set these config items like the following example:
 
 ```yaml
-data:
+data_processor:
   # basic info
-  dataset_path: 'tests/test_data/test_human_annotator'
-  dataset_config:
+  source_data_path: 'tests/test_data/test_human_annotator'
+  load_kwargs:
     split: 'train'  # only need the train split
-  format_config:  # set the field mappings
+  format:  # set the field mappings
     prompt_key: 'prompt'
     chosen_key: 'chosen'
     rejected_key: 'rejected'
@@ -198,10 +183,6 @@ data:
   dj_config_path: 'tests/test_configs/human_annotator_test_dj_cfg.yaml'
   # database related. The result dataset will be stored in the database.
   db_url: 'postgresql://{user_name}@localhost:5432/{db_name}'
-  # downstream loading related
-  total_epochs: 20
-  batch_size: 32
-  default_workflow_type: 'math_workflow'
 ```
 
 Here you can set the basic information for the example dataset, database information that is used to store the result dataset, and some other items about downstream dataset loading for exploring and training, which is similar to the example above.

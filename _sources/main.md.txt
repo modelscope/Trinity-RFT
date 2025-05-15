@@ -186,8 +186,16 @@ You may customize the configurations in [`examples`](https://github.com/modelsco
 model:
   model_path: $MODEL_PATH/{model_name}
 
-data:
-  dataset_path: $DATASET_PATH/{dataset_name}
+buffer:
+  explorer_input:
+    taskset:
+      name: $TASKSET_NAME
+      path: $DATASET_PATH/{dataset_name}
+      format:
+        prompt_key: 'question'
+        response_key: 'answer'
+    default_workflow_type: $WORKFLOW_NAME
+    default_reward_fn_type: $REWARD_FN_NAME
 ```
 
 Please refer to [`examples`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/) for more details.

@@ -198,11 +198,16 @@
 <hr class="docutils" />
 <section id="step-3-modify-configuration-file">
 <h3>Step 3: Modify Configuration File<a class="headerlink" href="#step-3-modify-configuration-file" title="Link to this heading"></a></h3>
-<p>After completing the development of the <code class="docutils literal notranslate"><span class="pre">Workflow</span></code>, you need to modify the configuration file to set the <code class="docutils literal notranslate"><span class="pre">default_workflow_type</span></code> in the <code class="docutils literal notranslate"><span class="pre">data</span></code> domain to the newly registered <code class="docutils literal notranslate"><span class="pre">Workflow</span></code> name.</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">data</span><span class="p">:</span>
+<p>After completing the development of the <code class="docutils literal notranslate"><span class="pre">Workflow</span></code>, you need to modify the configuration file to set the <code class="docutils literal notranslate"><span class="pre">default_workflow_type</span></code> in the <code class="docutils literal notranslate"><span class="pre">buffer.explorer_input</span></code> domain to the newly registered <code class="docutils literal notranslate"><span class="pre">Workflow</span></code> name.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">buffer</span><span class="p">:</span>
 <span class="w">  </span><span class="c1"># Other fields</span>
-<span class="w">  </span><span class="nt">default_workflow_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example_workflow</span>
-<span class="w">  </span><span class="c1"># Other fields</span>
+<span class="w">  </span><span class="nt">explorer_input</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">taskset</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">taskset_name</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;path/to/taskset&#39;</span>
+<span class="w">        </span><span class="c1"># Other fields</span>
+<span class="w">    </span><span class="nt">eval_tasksets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+<span class="w">    </span><span class="nt">default_workflow_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example_workflow</span>
 <span class="c1"># Other fields</span>
 </pre></div>
 </div>

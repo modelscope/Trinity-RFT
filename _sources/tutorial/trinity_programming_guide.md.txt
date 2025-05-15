@@ -102,13 +102,18 @@ class ExampleWorkflow(Workflow):
 
 ### Step 3: Modify Configuration File
 
-After completing the development of the `Workflow`, you need to modify the configuration file to set the `default_workflow_type` in the `data` domain to the newly registered `Workflow` name.
+After completing the development of the `Workflow`, you need to modify the configuration file to set the `default_workflow_type` in the `buffer.explorer_input` domain to the newly registered `Workflow` name.
 
 ```yaml
-data:
+buffer:
   # Other fields
-  default_workflow_type: example_workflow
-  # Other fields
+  explorer_input:
+    taskset:
+      name: taskset_name
+      path: 'path/to/taskset'
+        # Other fields
+    eval_tasksets: []
+    default_workflow_type: example_workflow
 # Other fields
 ```
 

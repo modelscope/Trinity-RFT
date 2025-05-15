@@ -92,7 +92,7 @@
 The main difference between them is that in <code class="docutils literal notranslate"><span class="pre">trainer.yaml</span></code> we set <code class="docutils literal notranslate"><span class="pre">mode=train</span></code>, while in <code class="docutils literal notranslate"><span class="pre">explorer.yaml</span></code> we set <code class="docutils literal notranslate"><span class="pre">mode=explore</span></code>.
 In addition, we need to configure the following parameters in both files.
 The model weights of the explorer and trainer are synchronized once every <code class="docutils literal notranslate"><span class="pre">sync_iteration_interval</span> <span class="pre">*</span> <span class="pre">batch_size</span></code> tasks.</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">data</span><span class="p">:</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">global_config</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;batch_size&gt;</span>
 <span class="c1"># The same checkpoint path</span>
 <span class="nt">model</span><span class="p">:</span>
@@ -100,10 +100,11 @@ The model weights of the explorer and trainer are synchronized once every <code 
 
 <span class="c1"># The same data_base path</span>
 <span class="nt">buffer</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">train_dataset</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gsm8k_buffer</span>
-<span class="w">    </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">queue</span>
-<span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;sqlite:///gsm8k.db&#39;</span>
+<span class="w">  </span><span class="nt">trainer_input</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">experience_buffer</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gsm8k_buffer</span>
+<span class="w">      </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">queue</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;sqlite:///gsm8k.db&#39;</span>
 
 <span class="nt">synchronizer</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">sync_method</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;checkpoint&#39;</span>

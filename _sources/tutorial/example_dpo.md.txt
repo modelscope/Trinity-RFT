@@ -51,7 +51,7 @@ buffer:
   train_dataset:
     storage_type: file
     path: <$DATASET_PATH/human_like_dpo_dataset>
-    kwargs:
+    format:
       prompt_type: <prompt_type> # messages/plaintext
       prompt_key: <prompt_key>
       chosen_key: <chosen_key>

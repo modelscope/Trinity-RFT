@@ -129,50 +129,39 @@ python<span class="w"> </span>scripts/start_servers.py
 <h3>Configure the Data Module<a class="headerlink" href="#configure-the-data-module" title="Link to this heading"></a></h3>
 <p>Trinity-RFT uses a unified config file to manage all config items. For the data module, you need to focus on the <code class="docutils literal notranslate"><span class="pre">data</span></code> section in the config file.</p>
 <p>In this example, assume that you need to rank all math questions and corresponding answers by their difficulties. So you can set these config items like the following example:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">data</span><span class="p">:</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">data_processor</span><span class="p">:</span>
 <span class="w">  </span><span class="c1"># basic info</span>
-<span class="w">  </span><span class="nt">dataset_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;/path/to/gsm8k&#39;</span>
-<span class="w">  </span><span class="nt">dataset_config</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">source_data_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;/path/to/gsm8k&#39;</span>
+<span class="w">  </span><span class="nt">load_kwargs</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">split</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;train&#39;</span><span class="w">  </span><span class="c1"># only need the train split</span>
-<span class="w">  </span><span class="nt">format_config</span><span class="p">:</span><span class="w">  </span><span class="c1"># set the field mappings</span>
+<span class="w">  </span><span class="nt">format</span><span class="p">:</span><span class="w">  </span><span class="c1"># set the field mappings</span>
 <span class="w">    </span><span class="nt">prompt_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;question&#39;</span>
 <span class="w">    </span><span class="nt">response_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;answer&#39;</span>
 <span class="w">  </span><span class="c1"># database related. The result dataset will be stored in the database.</span>
 <span class="w">  </span><span class="nt">db_url</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;postgresql://{user_name}@localhost:5432/{db_name}&#39;</span>
-<span class="w">  </span><span class="c1"># downstream loading related</span>
-<span class="w">  </span><span class="nt">total_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">96</span>
-<span class="w">  </span><span class="nt">default_workflow_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;math_workflow&#39;</span>
 </pre></div>
 </div>
 <p>Here you can set the basic information for the GSM-8K dataset, database information that is used to store the result dataset, and some other items about downstream dataset loading for exploring and training:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">dataset_path</span></code>: the path to the raw dataset.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">dataset_config</span></code>: extra config arguments for loading the raw dataset. Mainly for the <code class="docutils literal notranslate"><span class="pre">load_dataset</span></code> method in HuggingFace <code class="docutils literal notranslate"><span class="pre">datasets</span></code> library.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">format_config</span></code>: some dataset format config items, which are used to map original data field names to unified ones.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">source_data_path</span></code>: the path to the raw dataset.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">load_kwargs</span></code>: extra config arguments for loading the raw dataset. Mainly for the <code class="docutils literal notranslate"><span class="pre">load_dataset</span></code> method in HuggingFace <code class="docutils literal notranslate"><span class="pre">datasets</span></code> library.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">format</span></code>: some dataset format config items, which are used to map original data field names to unified ones.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">db_url</span></code>: the URL of the postgresql database to store the result dataset.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">total_epochs</span></code>: the total number of epochs to train on this dataset.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">batch_size</span></code>: the training batch size.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">default_workflow_type</span></code>: the default exploring workflow type. Please refer to <a class="reference internal" href="trinity_programming_guide.html"><span class="std std-doc">programming guide</span></a> for more details.</p></li>
 </ul>
 <p>In addition, there are several config items related to the data active iterator, which is used to prepare a better dataset. The core part of the data active iterator, Data-Juicer, provides tens of operators to help clean or calculate key information for each sample in the dataset. You can configure this part depending on how familiar you are with Data-Juicer.</p>
 <section id="not-familiar-with-data-juicer">
 <h4>Not familiar with Data-Juicer<a class="headerlink" href="#not-familiar-with-data-juicer" title="Link to this heading"></a></h4>
 <p>If you are not familiar with Data-Juicer, the data module provides a natural-language-based method to config the data processing recipe. What you need to do is only describe the demands of how you want to prepare for the raw dataset, and an agent will be invoked to arrange the data processing recipe for you. Here is an example:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">data</span><span class="p">:</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">data_processor</span><span class="p">:</span>
 <span class="w">  </span><span class="c1"># basic info</span>
-<span class="w">  </span><span class="nt">dataset_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;/path/to/gsm8k&#39;</span>
-<span class="w">  </span><span class="nt">dataset_config</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">source_data_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;/path/to/gsm8k&#39;</span>
+<span class="w">  </span><span class="nt">load_kwargs</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">split</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;train&#39;</span><span class="w">  </span><span class="c1"># only need the train split</span>
-<span class="w">  </span><span class="nt">format_config</span><span class="p">:</span><span class="w">  </span><span class="c1"># set the field mappings</span>
+<span class="w">  </span><span class="nt">format</span><span class="p">:</span><span class="w">  </span><span class="c1"># set the field mappings</span>
 <span class="w">    </span><span class="nt">prompt_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;question&#39;</span>
 <span class="w">    </span><span class="nt">response_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;answer&#39;</span>
 <span class="w">  </span><span class="c1"># database related. The result dataset will be stored in the database.</span>
 <span class="w">  </span><span class="nt">db_url</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;postgresql://{user_name}@localhost:5432/{db_name}&#39;</span>
-<span class="w">  </span><span class="c1"># downstream loading related</span>
-<span class="w">  </span><span class="nt">total_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">96</span>
-<span class="w">  </span><span class="nt">default_workflow_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;math_workflow&#39;</span>
 
 <span class="w">  </span><span class="c1">#### new part about data active iterator</span>
 <span class="w">  </span><span class="nt">dj_process_desc</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;Please</span><span class="nv"> </span><span class="s">compute</span><span class="nv"> </span><span class="s">difficulty</span><span class="nv"> </span><span class="s">scores</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">these</span><span class="nv"> </span><span class="s">math</span><span class="nv"> </span><span class="s">questions.&#39;</span>
@@ -202,20 +191,16 @@ python<span class="w"> </span>scripts/start_servers.py
 </pre></div>
 </div>
 <p>After preparing the Data-Juicer data processing recipe, you can set the <code class="docutils literal notranslate"><span class="pre">dj_config_path</span></code> item in the Trinity-RFT config file to the path to this recipe. For example:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">data</span><span class="p">:</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">data_processor</span><span class="p">:</span>
 <span class="w">  </span><span class="c1"># basic info</span>
-<span class="w">  </span><span class="nt">dataset_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;/path/to/gsm8k&#39;</span>
-<span class="w">  </span><span class="nt">dataset_config</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">source_data_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;/path/to/gsm8k&#39;</span>
+<span class="w">  </span><span class="nt">load_kwargs</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">split</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;train&#39;</span><span class="w">  </span><span class="c1"># only need the train split</span>
-<span class="w">  </span><span class="nt">format_config</span><span class="p">:</span><span class="w">  </span><span class="c1"># set the field mappings</span>
+<span class="w">  </span><span class="nt">format</span><span class="p">:</span><span class="w">  </span><span class="c1"># set the field mappings</span>
 <span class="w">    </span><span class="nt">prompt_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;question&#39;</span>
 <span class="w">    </span><span class="nt">response_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;answer&#39;</span>
 <span class="w">  </span><span class="c1"># database related. The result dataset will be stored in the database.</span>
 <span class="w">  </span><span class="nt">db_url</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;postgresql://{user_name}@localhost:5432/{db_name}&#39;</span>
-<span class="w">  </span><span class="c1"># downstream loading related</span>
-<span class="w">  </span><span class="nt">total_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">96</span>
-<span class="w">  </span><span class="nt">default_workflow_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;math_workflow&#39;</span>
 
 <span class="w">  </span><span class="c1">#### new part about data active iterator</span>
 <span class="w">  </span><span class="nt">dj_config_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;/path/to/the/Data-Juicer/data/processing/recipe/above.yaml&#39;</span>
@@ -268,12 +253,12 @@ python<span class="w"> </span>scripts/start_servers.py
 <h3>Configure the Data Module<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
 <p>Trinity-RFT uses a unified config file to manage all config items. For the data module, you need to focus on the <code class="docutils literal notranslate"><span class="pre">data</span></code> section in the config file.</p>
 <p>In this example, assume that you need to rank all math questions and corresponding answers by their difficulties. So you can set these config items like the following example:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">data</span><span class="p">:</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">data_processor</span><span class="p">:</span>
 <span class="w">  </span><span class="c1"># basic info</span>
-<span class="w">  </span><span class="nt">dataset_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;tests/test_data/test_human_annotator&#39;</span>
-<span class="w">  </span><span class="nt">dataset_config</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">source_data_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;tests/test_data/test_human_annotator&#39;</span>
+<span class="w">  </span><span class="nt">load_kwargs</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">split</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;train&#39;</span><span class="w">  </span><span class="c1"># only need the train split</span>
-<span class="w">  </span><span class="nt">format_config</span><span class="p">:</span><span class="w">  </span><span class="c1"># set the field mappings</span>
+<span class="w">  </span><span class="nt">format</span><span class="p">:</span><span class="w">  </span><span class="c1"># set the field mappings</span>
 <span class="w">    </span><span class="nt">prompt_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;prompt&#39;</span>
 <span class="w">    </span><span class="nt">chosen_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;chosen&#39;</span>
 <span class="w">    </span><span class="nt">rejected_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;rejected&#39;</span>
@@ -281,10 +266,6 @@ python<span class="w"> </span>scripts/start_servers.py
 <span class="w">  </span><span class="nt">dj_config_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;tests/test_configs/human_annotator_test_dj_cfg.yaml&#39;</span>
 <span class="w">  </span><span class="c1"># database related. The result dataset will be stored in the database.</span>
 <span class="w">  </span><span class="nt">db_url</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;postgresql://{user_name}@localhost:5432/{db_name}&#39;</span>
-<span class="w">  </span><span class="c1"># downstream loading related</span>
-<span class="w">  </span><span class="nt">total_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
-<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32</span>
-<span class="w">  </span><span class="nt">default_workflow_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;math_workflow&#39;</span>
 </pre></div>
 </div>
 <p>Here you can set the basic information for the example dataset, database information that is used to store the result dataset, and some other items about downstream dataset loading for exploring and training, which is similar to the example above.</p>

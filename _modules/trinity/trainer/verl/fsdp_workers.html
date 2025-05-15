@@ -1001,6 +1001,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_is_offload_optimizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">fsdp_config</span><span class="o">.</span><span class="n">optimizer_offload</span>
 
         <span class="c1"># normalize config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">ppo_mini_batch_size</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">rollout_n</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">ppo_mini_batch_size</span> <span class="o">//=</span> <span class="p">(</span>
             <span class="n">torch</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">get_world_size</span><span class="p">()</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">ulysses_sequence_parallel_size</span>
         <span class="p">)</span>
