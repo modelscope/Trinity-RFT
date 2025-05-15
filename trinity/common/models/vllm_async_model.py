@@ -65,6 +65,7 @@ class vLLMAysncRolloutModel(InferenceModel):
             output_kind=RequestOutputKind.FINAL_ONLY,
             logprobs=config.explorer.logprobs,
         )
+        self.enable_thinking = config.model.enable_thinking
         self.request_id = 0
         engine_args = vllm.AsyncEngineArgs(
             model=config.model.model_path,
@@ -137,6 +138,7 @@ class vLLMAysncRolloutModel(InferenceModel):
                 tokenize=False,
                 add_generation_prompt=True,
                 chat_template=self.chat_template,
+                enable_thinking=self.enable_thinking,
             )
         return await self.generate_async(prompt=prompt, **kwargs)
 

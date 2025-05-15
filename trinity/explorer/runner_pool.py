@@ -49,13 +49,15 @@ class RunnerPool:
         self._create_actors(config.explorer.runner_num)
 
     def _create_actors(self, num: int = 1):
+        new_actors = []
         for _ in range(num):
             engine_index = self.engine_status.index(min(self.engine_status))
             new_actor = WorkflowRunner.remote(self.config, self.models[engine_index])
-            ray.get(new_actor.__ray_ready__.remote())
+            new_actors.append(new_actor)
             self.engine_status[engine_index] += 1
             self.actor_to_engine_index[new_actor] = engine_index
-            self._return_actor(new_actor)
+        for actor in new_actors:
+            self._return_actor(actor)
 
     def _kill_actors(self, actors):
         if not isinstance(actors, list):
@@ -234,7 +236,7 @@ class RunnerPool:
 
     def _return_actor(self, actor):
         try:
-            actor.is_alive.remote()
+            ray.get(actor.is_alive.remote())
             self._idle_actors.append(actor)
         except Exception:
             self.logger.info("The actor is not alive, restart a new actor")

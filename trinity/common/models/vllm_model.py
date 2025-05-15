@@ -71,6 +71,7 @@ class vLLMRolloutModel(InferenceModel):
         )
         self.tokenizer = self.llm.get_tokenizer()
         self.chat_template = self.tokenizer.get_chat_template()
+        self.enable_thinking = config.model.enable_thinking
         if self.config.explorer.chat_template:
             self.chat_template = self.config.explorer.chat_template
         if not re.search(r"\{\%-?\s*generation\s*-?\%\}", self.chat_template):
@@ -233,6 +234,7 @@ class vLLMRolloutModel(InferenceModel):
                 tokenize=False,
                 add_generation_prompt=True,
                 chat_template=self.chat_template,
+                enable_thinking=self.enable_thinking,
             )
         return self.generate([prompt], **kwargs)
 

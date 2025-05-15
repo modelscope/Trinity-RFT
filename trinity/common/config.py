@@ -119,6 +119,8 @@ class ModelConfig:
     max_response_tokens: int = 2048
     # The checkpoint directory, contains a latest dir link and multiple checkpoint dirs.
     checkpoint_path: str = ""
+    # for models support both thinking and non-thinking mode, e.g., Qwen3
+    enable_thinking: bool = False
 
 
 @dataclass
