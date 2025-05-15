@@ -15,32 +15,32 @@ monitor:
 - `monitor.name`: The name of the experiment. It must be set manually.
 
 
-<!-- ## Data Pre Processing
+## Data Processing
 
-<!-- The `data` configuration specifies the data used for training. It includes the total number of epochs, the batch size, the path to the dataset, the default workflow type, the default reward function type, and the format configuration.
+<!-- The `data` configuration specifies the data used for training. It includes the total number of epochs, the batch size, the path to the dataset, the default workflow type, the default reward function type, and the format configuration. -->
 
 ```yaml
 data_processor:
   source_data_path: '/PATH/TO/DATASET'
+  load_kwargs:
+    split: 'train'  # only need the train split
   format:
     prompt_key: 'question'
     response_key: 'answer'
 
-  db_url: ''
-  max_retry_times: 3
-  max_retry_interval: 1
+  # cleaner related
+  dj_config_path: 'tests/test_configs/active_iterator_test_dj_cfg.yaml'
+  clean_strategy: 'iterative'
+  # db related
+  db_url: 'postgresql://{username}@localhost:5432/{db_name}'
 ```
 
-<!-- - `data.source_data_path`: The path to the dataset.
-<!-- - `data.train_split`: The split name of the dataset used for training. Default is `train`.
-- `data.eval_split`: The split name of the dataset used for eval.
-<!-- - `data.load_kwargs`: The configuration for the dataset. TODO: may only used in Data-Juicer
-- `data.format`: The configuration for the format of the dataset.
+- `data.source_data_path`: The path to the source dataset.
+- `data.load_kwargs`: The kwargs used in `datasets.load_dataset`.
+- `data.format`: The format of the source dataset. It includes `prompt_key` and `response_key`.
+- `data.dj_config_path`: The path to the Data-Juicer configuration.
+- `data.clean_strategy`: The cleaning strategy used for `DataCleaner`, which iteratively cleans dataset until targets are met.
 - `data.db_url`: The URL of the database.
-- `data.max_retry_times`: The maximum number of retries when loading the dataset from database.
-- `data.max_retry_interval`: The maximum interval between retries when loading the dataset from database.
-
-TODO explain the load_kwargs and format -->
 
 ## Model
 

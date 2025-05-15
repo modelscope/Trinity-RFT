@@ -1,4 +1,4 @@
-data_juicer:
+data_processor:
   source_data_path: './tests/test_data/test_human_annotator'
   load_kwargs: {"split": "train"}
   dj_config_path: './tests/test_configs/human_annotator_test_dj_cfg.yaml'
