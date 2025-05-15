@@ -194,6 +194,7 @@ buffer:
       format:
         prompt_key: 'question'
         response_key: 'answer'
+    default_workflow_type: $WORKFLOW_NAME
     default_reward_fn_type: $REWARD_FN_NAME
 ```
 

@@ -2,6 +2,21 @@
 
 The following is the main config file for Trinity-RFT. Take `countdown.yaml` as an example.
 
+## Global Config
+
+```yaml
+mode: both
+global_config:
+  total_epochs: 1
+  batch_size: 96
+  eval_interval: 1000
+```
+
+- `mode`: The mode of the experiment, chosen from `both`, `train`, `explore` or `bench`. `both` means both trainer and explorer are launched; `train` means only trainer is launched; `explore` means only explorer is launched; `bench` conducts benchmark evaluation. Default is `both`.
+- `global_config.total_epochs`: The total number of epochs. It should be checked manually.
+- `global_config.batch_size`: The batch size used for training. It should be checked manually.
+- `global_config.eval_interval`: The interval steps between two evaluations. Default is `1000`.
+
 
 ## Monitor
 
@@ -166,7 +181,7 @@ synchronizer:
 - `synchronizer.sync_method`: The synchronization method between `trainer` and `explorer`.
 Support `nccl` and `checkpoint`, `nccl` represents that model weights in `explorer` will be synchronized from `trainer` through `nccl`,
 `checkpoint` represents that `explorer` will load the newest checkpoints saved by `trainer` then update its model weights. Default is `nccl`.
-- `synchronizer.sync_interval`: The interval between two synchronizations. Default is `10`. It should be set manually.
+- `synchronizer.sync_interval`: The interval steps between two synchronizations. Default is `10`. It should be set manually.
 - `synchronizer.sync_timeout`: The timeout of the synchronization. Default is `1200`.
 
 ## Trainer
@@ -185,8 +200,8 @@ trainer:
 - `trainer.algorithm_type`: The type of the algorithm, Support `ppo`, `grpo`, `opmd` and `dpo`.
 - `trainer.trainer_config_path`: The path to the trainer configuration file. It must be set manually.
 - `trainer.sft_warmup_steps`: The number of steps to warm up the model. Default is `0`.
-- `trainer.eval_interval`: The interval between two evaluations. Default is `1000`.
-- `trainer.save_interval`: The interval between two checkpoints. Default is `100`.
+- `trainer.eval_interval`: The interval steps between two evaluations. Default is `1000`.
+- `trainer.save_interval`: The interval steps between two checkpoints. Default is `100`.
 
 ### veRL Trainer Configuration
 
