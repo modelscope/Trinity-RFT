@@ -53,7 +53,7 @@ class StorageConfig:
 
     name: str = ""
     storage_type: StorageType = StorageType.FILE
-    algorithm_type: AlgorithmType = AlgorithmType.PPO  # automatically set
+    algorithm_type: Optional[AlgorithmType] = None  # automatically set
     path: Optional[str] = None
 
     # used for StorageType.FILE
@@ -62,12 +62,12 @@ class StorageConfig:
     format: FormatConfig = field(default_factory=FormatConfig)
     index: int = 0
 
-    # used for AlgorithmType.ROLLOUT
+    # used for algorithm_type is None
     task_type: TaskType = TaskType.EXPLORE
     default_workflow_type: Optional[str] = None
     default_reward_fn_type: Optional[str] = None
     total_epochs: int = 1  # automatically set
-    # used for AlgorithmType.ROLLOUT and TaskType.EVAL
+    # used for algorithm_type is None and TaskType.EVAL
     eval_repeat_times: int = 1  # TODO
     eval_temperature: float = 0.1  # TODO
 
@@ -326,7 +326,6 @@ class Config:
             raise ValueError(
                 "`buffer.explorer_input.taskset.path` is required, please set it to the path of the taskset."
             )
-        self.buffer.explorer_input.taskset.algorithm_type = AlgorithmType.ROLLOUT
         self.buffer.explorer_input.taskset.task_type = TaskType.EXPLORE
         if self.buffer.explorer_input.taskset.default_workflow_type is None:
             self.buffer.explorer_input.taskset.default_workflow_type = (
@@ -338,7 +337,6 @@ class Config:
             )
 
         for dataset in self.buffer.explorer_input.eval_tasksets:
-            dataset.algorithm_type = AlgorithmType.ROLLOUT
             dataset.task_type = TaskType.EVAL
             if dataset.default_workflow_type is None:
                 dataset.default_workflow_type = self.buffer.explorer_input.default_workflow_type

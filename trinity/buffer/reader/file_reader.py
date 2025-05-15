@@ -19,10 +19,12 @@ class FileReaderManager:
     subclasses: dict = {}
 
     @classmethod
-    def register_subclass(cls, algorithm_type: AlgorithmType):
+    def register_subclass(cls, algorithm_type: Optional[AlgorithmType] = None):
         def decorator(_cls):
             if algorithm_type not in cls.subclasses:
                 cls.subclasses[algorithm_type] = _cls
+            else:
+                raise ValueError(f"Algorithm type {algorithm_type} already registered")
             return _cls
 
         return decorator
@@ -194,7 +196,7 @@ class DPODataReader(BufferReader):
         return exp_list
 
 
-@FileReaderManager.register_subclass(AlgorithmType.ROLLOUT)
+@FileReaderManager.register_subclass()
 class RolloutDataReader(BufferReader):
     def __init__(self, meta: StorageConfig, config: BufferConfig):
         self.name = meta.name

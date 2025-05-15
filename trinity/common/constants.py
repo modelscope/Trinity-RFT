@@ -65,7 +65,6 @@ class StorageType(CaseInsensitiveEnum):
 class AlgorithmType(CaseInsensitiveEnum):
     """Algorithm Type."""
 
-    ROLLOUT = "rollout"
     SFT = "sft"
     PPO = "ppo"
     GRPO = "grpo"
@@ -85,10 +84,6 @@ class AlgorithmType(CaseInsensitiveEnum):
     def is_sft(self) -> bool:
         """Check if the algorithm is SFT."""
         return self == AlgorithmType.SFT
-
-    def is_rollout(self) -> bool:
-        """Check if the algorithm is ROLLOUT."""
-        return self == AlgorithmType.ROLLOUT
 
     def is_dpo(self) -> bool:
         """Check if the algorithm is DPO."""

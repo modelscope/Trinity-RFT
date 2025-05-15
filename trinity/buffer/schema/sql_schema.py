@@ -1,6 +1,6 @@
 """Schema for SQLAlchemy models."""
 
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 from sqlalchemy import Column, Float, Integer, LargeBinary, String
 from sqlalchemy.ext.declarative import declarative_base
@@ -126,7 +126,7 @@ class DPODataModel(Base):  # type: ignore
 
 
 SCHEMA_MAPPING = {
-    AlgorithmType.ROLLOUT: TaskModel,
+    None: TaskModel,
     AlgorithmType.SFT: SFTDataModel,
     AlgorithmType.PPO: ExperienceModel,
     AlgorithmType.GRPO: ExperienceModel,
@@ -135,7 +135,7 @@ SCHEMA_MAPPING = {
 }
 
 
-def create_dynamic_table(algorithm_type: AlgorithmType, table_name: str) -> Any:
+def create_dynamic_table(algorithm_type: Union[AlgorithmType | None], table_name: str) -> Any:
     """Create a dynamic table based on the provided algorithm type and table name."""
     if algorithm_type not in SCHEMA_MAPPING:
         raise ValueError(f"Unknown schema: {algorithm_type}")
