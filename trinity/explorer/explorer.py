@@ -38,6 +38,7 @@ class Explorer:
             self.config.buffer.explorer_output,  # type: ignore
             self.config.buffer,
         )
+        self.config.buffer.explorer_input.taskset.index = explorer_meta.get("latest_task_index", 0)
         self.taskset = get_buffer_reader(
             self.config.buffer.explorer_input.taskset, self.config.buffer
         )

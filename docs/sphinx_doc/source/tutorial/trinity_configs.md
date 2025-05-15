@@ -20,7 +20,7 @@ monitor:
 <!-- The `data` configuration specifies the data used for training. It includes the total number of epochs, the batch size, the path to the dataset, the default workflow type, the default reward function type, and the format configuration.
 
 ```yaml
-data_juicer:
+data_processor:
   source_data_path: '/PATH/TO/DATASET'
   format:
     prompt_key: 'question'

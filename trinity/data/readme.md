@@ -85,7 +85,7 @@ synth_data = synthesizer.process(clean_data)
 - You can either run `scripts/start_servers.py` or run `trinity/data/server.py` to start the data server.
   - Before running this config file, you need to replace the `username` and `db_name` with your own username and database name.
   - When requesting it, the server will load the dataset, clean it, compute priority scores from different dimensions, and export the result dataset to the database.
-- Then you need to prepare the `data_juicer` section in the config file (e.g. [test_cfg.yaml](tests/test_configs/active_iterator_test_cfg.yaml))
+- Then you need to prepare the `data_processor` section in the config file (e.g. [test_cfg.yaml](tests/test_configs/active_iterator_test_cfg.yaml))
   - For the `dj_config_path` argument in it, you can either specify a data-juicer config file path (e.g. [test_dj_cfg.yaml](tests/test_configs/active_iterator_test_dj_cfg.yaml)), or write the demand in `dj_process_desc` argument in natural language and our agent will help you to organize the data-juicer config.
 - Finally you can send requests to the data server to start an active iterator to process datasets in many ways:
   - Request with `curl`: `curl "http://127.0.0.1:5000/data_workflow?configPath=tests%2Ftest_configs%2Factive_iterator_test_cfg.yaml"`

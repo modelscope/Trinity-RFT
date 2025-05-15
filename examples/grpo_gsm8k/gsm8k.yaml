@@ -1,4 +1,4 @@
-data_juicer:
+data_processor:
   # basic info
   source_data_path: 'openai/gsm8k'
   # data active iterator related

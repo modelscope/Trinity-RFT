@@ -39,9 +39,14 @@ def get_buffer_reader(storage_config: StorageConfig, buffer_config: BufferConfig
 
         return QueueReader(storage_config, buffer_config)
     elif storage_config.storage_type == StorageType.FILE:
-        from trinity.buffer.reader.file_reader import FileReaderManager
+        from trinity.buffer.reader.file_reader import FILE_READERS
 
-        return FileReaderManager.create_reader(storage_config, buffer_config)
+        file_read_type = storage_config.algorithm_type
+        if file_read_type is not None:
+            file_read_type = file_read_type.value
+        else:
+            file_read_type = "rollout"
+        return FILE_READERS.get(file_read_type)(storage_config, buffer_config)
     else:
         raise ValueError(f"{storage_config.storage_type} not supported.")
 

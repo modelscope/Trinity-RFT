@@ -31,7 +31,7 @@ Trinity-RFT uses a unified config file to manage all config items. For the data 
 In this example, assume that you need to rank all math questions and corresponding answers by their difficulties. So you can set these config items like the following example:
 
 ```yaml
-data_juicer:
+data_processor:
   # basic info
   source_data_path: '/path/to/gsm8k'
   load_kwargs:
@@ -56,7 +56,7 @@ In addition, there are several config items related to the data active iterator,
 If you are not familiar with Data-Juicer, the data module provides a natural-language-based method to config the data processing recipe. What you need to do is only describe the demands of how you want to prepare for the raw dataset, and an agent will be invoked to arrange the data processing recipe for you. Here is an example:
 
 ```yaml
-data_juicer:
+data_processor:
   # basic info
   source_data_path: '/path/to/gsm8k'
   load_kwargs:
@@ -98,7 +98,7 @@ process:
 After preparing the Data-Juicer data processing recipe, you can set the `dj_config_path` item in the Trinity-RFT config file to the path to this recipe. For example:
 
 ```yaml
-data_juicer:
+data_processor:
   # basic info
   source_data_path: '/path/to/gsm8k'
   load_kwargs:
@@ -170,7 +170,7 @@ Trinity-RFT uses a unified config file to manage all config items. For the data 
 In this example, assume that you need to rank all math questions and corresponding answers by their difficulties. So you can set these config items like the following example:
 
 ```yaml
-data_juicer:
+data_processor:
   # basic info
   source_data_path: 'tests/test_data/test_human_annotator'
   load_kwargs:

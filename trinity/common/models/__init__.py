@@ -32,7 +32,7 @@ def create_rollout_models(
     else:
         raise ValueError(f"Unknown engine type: {config.explorer.engine_type}")
 
-    bundles = [{"GPU": 1} for _ in range(engine_num * tensor_parallel_size)]
+    bundles = [{"GPU": 1, "CPU": 1} for _ in range(engine_num * tensor_parallel_size)]
     pg = placement_group(bundles, strategy="PACK")
     ray.get(pg.ready())
 

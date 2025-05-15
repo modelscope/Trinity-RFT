@@ -49,7 +49,7 @@ class FormatConfig:
 
 @dataclass
 class StorageConfig:
-    """The config for a dataset."""
+    """Storage config."""
 
     name: str = ""
     storage_type: StorageType = StorageType.FILE
@@ -264,7 +264,7 @@ class Config:
     """Global Configuration"""
 
     mode: str = "both"  # `explore`, `train`, `both` or `bench`
-    data_juicer: DataProcessorConfig = field(default_factory=DataProcessorConfig)
+    data_processor: DataProcessorConfig = field(default_factory=DataProcessorConfig)
     global_config: GlobalConfig = field(default_factory=GlobalConfig)
     model: ModelConfig = field(default_factory=ModelConfig)
     cluster: ClusterConfig = field(default_factory=ClusterConfig)

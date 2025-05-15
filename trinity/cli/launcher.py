@@ -152,11 +152,11 @@ def run(config_path: str):
     config = load_config(config_path)
     config.check_and_update()
     # try to activate data module
-    data_juicer_config = config.data_juicer
-    if data_juicer_config.data_workflow_url and (
-        data_juicer_config.dj_config_path or data_juicer_config.dj_process_desc
+    data_processor_config = config.data_processor
+    if data_processor_config.data_workflow_url and (
+        data_processor_config.dj_config_path or data_processor_config.dj_process_desc
     ):
-        activate_data_module(data_juicer_config.data_workflow_url, config_path)
+        activate_data_module(data_processor_config.data_workflow_url, config_path)
     if not ray.is_initialized():
         ray.init(namespace=f"{config.monitor.project}-{config.monitor.name}")
     if config.mode == "explore":

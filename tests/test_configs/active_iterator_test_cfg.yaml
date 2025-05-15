@@ -1,4 +1,4 @@
-data_juicer:
+data_processor:
   # basic info
   source_data_path: '/Users/lielin/Projects/research/large_models/Trinity-RFT/tests/test_data/test_10/'
   load_kwargs:

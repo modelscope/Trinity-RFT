@@ -13,38 +13,12 @@ from trinity.common.experience import Experience
 from trinity.common.rewards import REWARD_FUNCTIONS
 from trinity.common.task import Task
 from trinity.common.workflows import WORKFLOWS
+from trinity.utils.registry import Registry
+
+FILE_READERS = Registry("file_readers")
 
 
-class FileReaderManager:
-    subclasses: dict = {}
-
-    @classmethod
-    def register_subclass(cls, algorithm_type: Optional[AlgorithmType] = None):
-        def decorator(_cls):
-            if algorithm_type not in cls.subclasses:
-                cls.subclasses[algorithm_type] = _cls
-            else:
-                raise ValueError(f"Algorithm type {algorithm_type} already registered")
-            return _cls
-
-        return decorator
-
-    @classmethod
-    def create_reader(cls, meta: StorageConfig, config: BufferConfig) -> BufferReader:
-        def add_read_check(read_func):
-            def wrapper(self, strategy: Optional[ReadStrategy] = None, *args, **kwargs):
-                if strategy is not None and strategy != ReadStrategy.FIFO:
-                    raise ValueError(f"Unsupported read strategy: {strategy}")
-                return read_func(self, strategy, *args, **kwargs)
-
-            return wrapper
-
-        subclasses = cls.subclasses[meta.algorithm_type]
-        subclasses.read = add_read_check(subclasses.read)
-        return subclasses(meta, config)
-
-
-@FileReaderManager.register_subclass(AlgorithmType.SFT)
+@FILE_READERS.register_module(AlgorithmType.SFT.value)
 class SFTDataReader(BufferReader):
     """Reader for SFT file data."""
 
@@ -123,7 +97,7 @@ class SFTDataReader(BufferReader):
         return exp_list
 
 
-@FileReaderManager.register_subclass(AlgorithmType.DPO)
+@FILE_READERS.register_module(AlgorithmType.DPO.value)
 class DPODataReader(BufferReader):
     def __init__(self, meta: StorageConfig, config: BufferConfig):
         self.split = meta.split
@@ -196,7 +170,7 @@ class DPODataReader(BufferReader):
         return exp_list
 
 
-@FileReaderManager.register_subclass()
+@FILE_READERS.register_module("rollout")
 class RolloutDataReader(BufferReader):
     def __init__(self, meta: StorageConfig, config: BufferConfig):
         self.name = meta.name
