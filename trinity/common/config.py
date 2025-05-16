@@ -67,9 +67,14 @@ class StorageConfig:
     default_workflow_type: Optional[str] = None
     default_reward_fn_type: Optional[str] = None
     total_epochs: int = 1  # automatically set
-    # used for algorithm_type is None and TaskType.EVAL
-    eval_repeat_times: int = 1  # TODO
-    eval_temperature: float = 0.1  # TODO
+    repeat_times: int = (
+        1  # if task_type == TaskType.EXPLORE, it will be set to `explorer.repeat_times`
+    )
+    temperature: float = (
+        0.1  # if task_type == TaskType.EXPLORE, it will be set to `explorer.temperature`
+    )
+    system_prompt: Optional[str] = None
+    reply_prefix: Optional[str] = None
 
 
 @dataclass
@@ -330,6 +335,8 @@ class Config:
             )
         self.buffer.explorer_input.taskset.task_type = TaskType.EXPLORE
         self.buffer.explorer_input.taskset.total_epochs = self.global_config.total_epochs
+        self.buffer.explorer_input.taskset.repeat_times = self.explorer.repeat_times
+        self.buffer.explorer_input.taskset.temperature = self.explorer.temperature
         if self.buffer.explorer_input.taskset.default_workflow_type is None:
             self.buffer.explorer_input.taskset.default_workflow_type = (
                 self.buffer.explorer_input.default_workflow_type

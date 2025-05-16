@@ -173,6 +173,7 @@ class DPODataReader(BufferReader):
 @FILE_READERS.register_module("rollout")
 class RolloutDataReader(BufferReader):
     def __init__(self, meta: StorageConfig, config: BufferConfig):
+        self.meta = meta
         self.name = meta.name
         self.split = meta.split
         subset_name = meta.subset_name
@@ -223,9 +224,9 @@ class RolloutDataReader(BufferReader):
             task_desc=task_desc,
             truth=truth,
             workflow=workflow_class,
+            storage_config=self.meta,
             reward_fn=reward_fn,
             raw=sample,
-            task_type=self.task_type,
         )
         self.index += 1
         if self.task_type == TaskType.EVAL and self.index == len(self.dataset):

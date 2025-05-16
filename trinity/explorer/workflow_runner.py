@@ -48,7 +48,7 @@ class WorkflowRunner:
         """Init workflow from the task and run it."""
         if task.workflow is None:
             raise ValueError("Workflow is not set in the task.")
-        workflow = task.to_workflow(self.model_wrapper, self.config)
+        workflow = task.to_workflow(self.model_wrapper)
         return workflow.run()
 
     def run_task(self, task: Task) -> Status:
@@ -77,7 +77,7 @@ class WorkflowRunner:
             if metrics:
                 for k, v in metrics.items():
                     metric[k] = sum(v) / len(v)  # type: ignore
-            if not task.task_type == TaskType.EVAL:
+            if not task.storage_config.task_type == TaskType.EVAL:
                 self.experience_buffer.write(exps)
             return Status(True, metric=metric)
         except Exception as e:

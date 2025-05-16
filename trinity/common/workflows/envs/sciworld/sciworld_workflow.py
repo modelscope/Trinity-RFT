@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 import json
-from typing import List
+from typing import List, Optional, Type
 
+from trinity.common.config import StorageConfig
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
+from trinity.common.rewards.reward_fn import RewardFn
 from trinity.common.workflows.workflow import WORKFLOWS, MultiTurnWorkflow
 
 SCIWORLD_SYSTEM_PROMPT = """
@@ -59,13 +61,18 @@ def parse_action(response):
 class SciWorldWorkflow(MultiTurnWorkflow):
     """A workflow for sciworld task."""
 
-    def __init__(self, model: ModelWrapper, **kwargs):
+    def __init__(
+        self,
+        model: ModelWrapper,
+        task_desc: str,
+        truth: str,
+        storage_config: StorageConfig,
+        reward_fn: Optional[Type[RewardFn]] = None,
+        **kwargs,
+    ):
         super().__init__(model)
-        self.system_prompt = kwargs.get("system_prompt", None)  # Unuse here
-        self.task_desc: str = kwargs.get("task_desc")
-        self.truth = kwargs.get("truth")  # Unuse here
-        self.reward_fn = None  # Unuse here
-        self.repeat_times = kwargs.get("repeat_times", 1)
+        self.task_desc: str = task_desc
+        self.repeat_times = storage_config.repeat_times
         self.max_env_steps = 30  # should be less than 100
 
     def get_model_response(self, messages):

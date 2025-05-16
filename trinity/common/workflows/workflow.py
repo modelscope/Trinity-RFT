@@ -2,10 +2,12 @@
 """Base Workflow Class"""
 
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Optional, Type
 
 import torch
 
+from trinity.common.config import StorageConfig
+from trinity.common.constants import TaskType
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
 from trinity.common.rewards.reward_fn import MathRewardFn, RewardFn
@@ -81,21 +83,25 @@ class SimpleWorkflow(Workflow):
     def __init__(
         self,
         model: ModelWrapper,
+        task_desc: str,
+        truth: str,
+        storage_config: StorageConfig,
+        reward_fn: Optional[Type[RewardFn]] = None,
         **kwargs,
     ):
         super().__init__(model)
-        self.system_prompt = kwargs.get("system_prompt", None)
-        self.reply_prefix = kwargs.get("reply_prefix", None)  # TODO: add reply_prefix
-        self.task_desc = kwargs.get("task_desc")
-        self.truth = kwargs.get("truth")
-        self.reward_fn = kwargs.get("reward_fn")
-        if isinstance(self.reward_fn, type) and issubclass(self.reward_fn, RewardFn):
-            self.reward_fn = self.reward_fn()
+        self.system_prompt = storage_config.system_prompt
+        self.reply_prefix = storage_config.reply_prefix
+        self.task_desc = task_desc
+        self.truth = truth
+        if isinstance(reward_fn, type) and issubclass(reward_fn, RewardFn):
+            self.reward_fn: RewardFn = reward_fn()
         else:
             raise ValueError("`reward_fn` must be a subclass of `RewardFn`")
         # Rollout n times
-        self.repeat_times = kwargs.get("repeat_times", 1)
-        self.is_eval = kwargs.get("is_eval", False)
+        self.repeat_times = storage_config.repeat_times
+        self.temperature = storage_config.temperature
+        self.is_eval = storage_config.task_type == TaskType.EVAL
 
     def run(self) -> List[Experience]:
         # TODO: Optimize the generate function
@@ -107,8 +113,7 @@ class SimpleWorkflow(Workflow):
             messages.append({"role": "assistant", "content": self.reply_prefix})
 
         logger.debug("start chat")
-        n = 1 if self.is_eval else self.repeat_times
-        responses = self.model.chat(messages, n=n)
+        responses = self.model.chat(messages, n=self.repeat_times, temperature=self.temperature)
         for response in responses:
             reward = self.reward_fn(  # type: ignore [misc]
                 response=response.response_text,  # type: ignore [arg-type]
@@ -134,18 +139,24 @@ class MathWorkflow(SimpleWorkflow):
     def __init__(
         self,
         model: ModelWrapper,
+        task_desc: str,
+        truth: str,
+        storage_config: StorageConfig,
+        reward_fn: Optional[Type[RewardFn]] = None,
         **kwargs,
     ):
-        if kwargs.get("reward_fn", None) is None:
-            kwargs["reward_fn"] = MathRewardFn
-        if kwargs["reward_fn"] == MathRewardFn and kwargs.get("system_prompt", None) is None:
-            kwargs[
-                "system_prompt"
-            ] = """A conversation between User and Assistant. The user asks a question, and the Assistant solves it. The assistant first thinks about the reasoning process in the mind and then provides the user with the answer. The reasoning process and answer are enclosed within <think> </think> and <answer> </answer> tags, respectively, i.e.,
+        if reward_fn is None:
+            reward_fn = MathRewardFn
+        if reward_fn == MathRewardFn and storage_config.system_prompt is None:
+            storage_config.system_prompt = """A conversation between User and Assistant. The user asks a question, and the Assistant solves it. The assistant first thinks about the reasoning process in the mind and then provides the user with the answer. The reasoning process and answer are enclosed within <think> </think> and <answer> </answer> tags, respectively, i.e.,
 <think> reasoning process here </think>
 <answer> answer here </answer>.
 """
         super().__init__(
             model,
+            task_desc,
+            truth,
+            storage_config,
+            reward_fn=reward_fn,
             **kwargs,
         )
