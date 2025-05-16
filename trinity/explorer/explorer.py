@@ -263,20 +263,22 @@ class Explorer:
 
     def benchmark(self) -> bool:
         """Benchmark the model checkpoints."""
-        latest_step = self.step_num
-
         # benchmark on the latest checkpoint
         if self.config.global_config.eval_on_latest_ckp:
             self.eval()
             return True
 
         # benchmark on all checkoints
-        for step_num in range(latest_step + 1):
-            path = os.path.join(self.config.model.checkpoint_path, f"global_step_{step_num}")
-            if not os.path.isdir(path) or len(os.listdir(path)) == 0:
-                self.step_num = step_num
-                self._checkpoint_weights_update(step_num=step_num)
-                self.eval()
+        all_ckp_steps = [
+            int(ckp.split("global_step_")[-1])
+            for ckp in os.listdir(self.config.model.checkpoint_path)
+            if os.path.isdir(os.path.join(self.config.model.checkpoint_path, ckp))
+            and ckp.startswith("global_step_")
+        ]
+        for step_num in all_ckp_steps:
+            self.step_num = step_num
+            self._checkpoint_weights_update(step_num=step_num)
+            self.eval()
         return True
 
     def sync_weight(self) -> None:
