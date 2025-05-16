@@ -34,10 +34,11 @@ class Explorer:
         self.step_num = explorer_meta.get("latest_iteration", 0)
         self.config = config
         self.models = create_rollout_models(config)
-        self.experience_buffer = get_buffer_writer(
-            self.config.buffer.explorer_output,  # type: ignore
-            self.config.buffer,
-        )
+        if self.config.mode != "bench":
+            self.experience_buffer = get_buffer_writer(
+                self.config.buffer.explorer_output,  # type: ignore
+                self.config.buffer,
+            )
         self.config.buffer.explorer_input.taskset.index = explorer_meta.get("latest_task_index", 0)
         self.taskset = get_buffer_reader(
             self.config.buffer.explorer_input.taskset, self.config.buffer
