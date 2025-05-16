@@ -20,7 +20,7 @@ classifiers = [
 requires-python = ">=3.10"
 dependencies = [
     "verl==0.3.0.post1",
-    "ray[default]==2.43.0",
+    "ray[default]>=2.45.0",
     "vllm>=0.8.5",
     "tensordict==0.6.2",
     "wandb",

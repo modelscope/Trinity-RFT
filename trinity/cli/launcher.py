@@ -19,10 +19,9 @@ def bench(config: Config) -> None:
     try:
         ray.get(explorer.prepare.remote())
         ray.get(explorer.sync_weight.remote())
-        bm_finished = ray.get(explorer.benchmark.remote())
+        ray.get(explorer.benchmark.remote())
         logger.info("Benchmark finished.")
-        if bm_finished:
-            ray.get(explorer.shutdown.remote())
+        ray.get(explorer.shutdown.remote())
     except Exception as e:
         logger.error(f"Benchmark failed: {e}")
         raise e
