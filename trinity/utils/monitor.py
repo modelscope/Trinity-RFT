@@ -54,6 +54,9 @@ class Monitor:
         """Log metrics."""
         self.logger.log(data, step=step, commit=commit)
 
+    def close(self) -> None:
+        self.logger.close()
+
 
 class TensorboardLogger:
     def __init__(self, project: str, name: str, role: str, config: Any = None) -> None:
@@ -69,6 +72,9 @@ class TensorboardLogger:
         """Log metrics."""
         for key in data:
             self.logger.add_scalar(key, data[key], step)
+
+    def close(self) -> None:
+        self.logger.close()
 
     def __del__(self) -> None:
         self.logger.close()
@@ -94,6 +100,9 @@ class WandbLogger:
         """Log metrics."""
         self.logger.log(data, step=step, commit=commit)
         self.console_logger.info(f"Step {step}: {data}")
+
+    def close(self) -> None:
+        self.logger.finish()
 
     def __del__(self) -> None:
         self.logger.finish()

@@ -36,7 +36,7 @@ def get_unittest_dataset_config(
     dataset_name: str = "countdown", split: str = "train"
 ) -> StorageConfig:
     """Countdown sample dataset for 8 steps"""
-    if dataset_name == "countdown":
+    if dataset_name == "countdown" or dataset_name == "countdown_copy":
         return StorageConfig(
             name=dataset_name,
             path=os.path.join(os.path.dirname(__file__), "template", "data", "countdown"),

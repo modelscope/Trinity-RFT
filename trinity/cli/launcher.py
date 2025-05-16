@@ -18,12 +18,11 @@ def bench(config: Config) -> None:
     explorer = Explorer.remote(config)
     try:
         ray.get(explorer.prepare.remote())
-        ray.get(explorer.sync_weight.remote())
-        _, step = ray.get(explorer.eval.remote())
-        logger.info("Evaluation finished.")
-        ray.get(explorer.flush_log.remote(step=step))
+        ray.get(explorer.benchmark.remote())
+        logger.info("Benchmark finished.")
+        ray.get(explorer.shutdown.remote())
     except Exception as e:
-        logger.error(f"Evaluation failed: {e}")
+        logger.error(f"Benchmark failed: {e}")
         raise e
 
 
@@ -35,6 +34,7 @@ def explore(config: Config) -> None:
         ray.get(explorer.sync_weight.remote())
         ray.get(explorer.explore.remote())
         logger.info("Explore finished.")
+        ray.get(explorer.shutdown.remote())
     except Exception as e:
         logger.error(f"Explore failed: {e}")
         raise e
@@ -60,6 +60,7 @@ def train(config: Config) -> None:
     try:
         ray.get(trainer.train.remote(algo_type))
         logger.info("Train finished.")
+        ray.get(trainer.shutdown.remote())
     except Exception as e:
         logger.error(f"Train failed {e}.")
         raise e
@@ -132,6 +133,9 @@ def both(config: Config) -> None:
                 raise e
         ray.get(explorer.flush_log.remote(step=explore_step_num))
         ray.get(trainer.flush_log.remote(step=train_step_num))
+
+    ray.get(explorer.shutdown.remote())
+    ray.get(trainer.shutdown.remote())
 
 
 def activate_data_module(data_workflow_url: str, config_path: str):
