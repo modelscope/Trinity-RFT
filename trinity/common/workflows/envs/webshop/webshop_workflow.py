@@ -187,14 +187,21 @@ class WebShopWorkflow(MultiTurnWorkflow):
         self,
         model: ModelWrapper,
         task_desc: str,
-        truth: str,
-        storage_config: StorageConfig,
+        taskset_config: StorageConfig,
+        truth: Optional[str] = None,
         reward_fn: Optional[Type[RewardFn]] = None,
-        **kwargs,
+        raw_task: Optional[dict] = None,
     ):
-        super().__init__(model)
+        super().__init__(
+            model,
+            task_desc,
+            taskset_config,
+            truth=truth,
+            reward_fn=reward_fn,
+            raw_task=raw_task,
+        )
         self.task_desc: str = task_desc
-        self.repeat_times = storage_config.repeat_times
+        self.repeat_times = taskset_config.repeat_times
         self.max_env_steps = 15
 
     def get_model_response(self, messages):

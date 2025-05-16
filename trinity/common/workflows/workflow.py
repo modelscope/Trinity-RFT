@@ -26,7 +26,15 @@ class Workflow(ABC):
     A workflow is a runnable object which generates a list of experiences.
     """
 
-    def __init__(self, model: ModelWrapper, **kwargs):
+    def __init__(
+        self,
+        model: ModelWrapper,
+        task_desc: str,
+        taskset_config: StorageConfig,
+        truth: Optional[str] = None,
+        reward_fn: Optional[Type[RewardFn]] = None,
+        raw_task: Optional[dict] = None,
+    ):
         self.model = model
 
     @abstractmethod
@@ -39,8 +47,23 @@ class MultiTurnWorkflow(Workflow):
     The base workflow class for multi-turn tasks.
     """
 
-    def __init__(self, model: ModelWrapper, **kwargs):
-        super().__init__(model)
+    def __init__(
+        self,
+        model: ModelWrapper,
+        task_desc: str,
+        taskset_config: StorageConfig,
+        truth: Optional[str] = None,
+        reward_fn: Optional[Type[RewardFn]] = None,
+        raw_task: Optional[dict] = None,
+    ):
+        super().__init__(
+            model,
+            task_desc,
+            taskset_config,
+            truth=truth,
+            reward_fn=reward_fn,
+            raw_task=raw_task,
+        )
 
     @abstractmethod
     def run(self) -> List[Experience]:
@@ -84,14 +107,21 @@ class SimpleWorkflow(Workflow):
         self,
         model: ModelWrapper,
         task_desc: str,
-        truth: str,
-        storage_config: StorageConfig,
+        taskset_config: StorageConfig,
+        truth: Optional[str] = None,
         reward_fn: Optional[Type[RewardFn]] = None,
-        **kwargs,
+        raw_task: Optional[dict] = None,
     ):
-        super().__init__(model)
-        self.system_prompt = storage_config.system_prompt
-        self.reply_prefix = storage_config.reply_prefix
+        super().__init__(
+            model,
+            task_desc,
+            taskset_config,
+            truth=truth,
+            reward_fn=reward_fn,
+            raw_task=raw_task,
+        )
+        self.system_prompt = taskset_config.system_prompt
+        self.reply_prefix = taskset_config.reply_prefix
         self.task_desc = task_desc
         self.truth = truth
         if isinstance(reward_fn, type) and issubclass(reward_fn, RewardFn):
@@ -99,9 +129,9 @@ class SimpleWorkflow(Workflow):
         else:
             raise ValueError("`reward_fn` must be a subclass of `RewardFn`")
         # Rollout n times
-        self.repeat_times = storage_config.repeat_times
-        self.temperature = storage_config.temperature
-        self.is_eval = storage_config.task_type == TaskType.EVAL
+        self.repeat_times = taskset_config.repeat_times
+        self.temperature = taskset_config.temperature
+        self.is_eval = taskset_config.task_type == TaskType.EVAL
 
     def run(self) -> List[Experience]:
         # TODO: Optimize the generate function
@@ -140,23 +170,23 @@ class MathWorkflow(SimpleWorkflow):
         self,
         model: ModelWrapper,
         task_desc: str,
-        truth: str,
-        storage_config: StorageConfig,
+        taskset_config: StorageConfig,
+        truth: Optional[str] = None,
         reward_fn: Optional[Type[RewardFn]] = None,
-        **kwargs,
+        raw_task: Optional[dict] = None,
     ):
         if reward_fn is None:
             reward_fn = MathRewardFn
-        if reward_fn == MathRewardFn and storage_config.system_prompt is None:
-            storage_config.system_prompt = """A conversation between User and Assistant. The user asks a question, and the Assistant solves it. The assistant first thinks about the reasoning process in the mind and then provides the user with the answer. The reasoning process and answer are enclosed within <think> </think> and <answer> </answer> tags, respectively, i.e.,
+        if reward_fn == MathRewardFn and taskset_config.system_prompt is None:
+            taskset_config.system_prompt = """A conversation between User and Assistant. The user asks a question, and the Assistant solves it. The assistant first thinks about the reasoning process in the mind and then provides the user with the answer. The reasoning process and answer are enclosed within <think> </think> and <answer> </answer> tags, respectively, i.e.,
 <think> reasoning process here </think>
 <answer> answer here </answer>.
 """
         super().__init__(
             model,
             task_desc,
-            truth,
-            storage_config,
+            taskset_config,
+            truth=truth,
             reward_fn=reward_fn,
-            **kwargs,
+            raw_task=raw_task,
         )

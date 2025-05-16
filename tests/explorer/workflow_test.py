@@ -28,9 +28,9 @@ class WorkflowTest(unittest.TestCase):
             MockResponse("<think>\nOnly thinking\n</think>"),
             MockResponse("<think>Thinking</think><answer>Answer is not end</answer><answer>1"),
         ]
-        storage_config = get_unittest_dataset_config("countdown")
+        taskset_config = get_unittest_dataset_config("countdown")
         workflow = MathWorkflow(
-            model=model, task_desc="1+1=", truth="2", storage_config=storage_config
+            model=model, task_desc="1+1=", truth="2", taskset_config=taskset_config
         )
         experiences = workflow.run()
         self.assertEqual(len(experiences), 9)
@@ -54,12 +54,12 @@ class WorkflowTest(unittest.TestCase):
             MockResponse(r"\boxed{\frac{1} {10}}"),
             MockResponse(r"The answer is \boxed{\frac{40}{400}}"),
         ]
-        storage_config = get_unittest_dataset_config("countdown")
+        taskset_config = get_unittest_dataset_config("countdown")
         workflow = MathWorkflow(
             model=model,
             task_desc=r"\frac{40}{400}",
             truth=r"\frac{40}{400}",
-            storage_config=storage_config,
+            taskset_config=taskset_config,
         )
         experiences = workflow.run()
         self.assertEqual(len(experiences), 6)
@@ -77,12 +77,12 @@ class WorkflowTest(unittest.TestCase):
                 r"$\boxed{\dfrac{108 + 31\sqrt{5}}{216}} \quad \text{and} \quad \boxed{\dfrac{108 - 31\sqrt{5}}{216}}$"
             ),
         ]
-        storage_config = get_unittest_dataset_config("countdown")
+        taskset_config = get_unittest_dataset_config("countdown")
         workflow = MathWorkflow(
             model=model,
             task_desc="",
             truth=r"$x_{1}=\frac{1}{2}+\frac{31\sqrt{5}}{216},\quadx_{2}=\frac{1}{2}-\frac{31\sqrt{5}}{216}$",
-            storage_config=storage_config,
+            taskset_config=taskset_config,
         )
         experiences = workflow.run()
         self.assertEqual(len(experiences), 1)
@@ -95,12 +95,12 @@ class WorkflowTest(unittest.TestCase):
             MockResponse("<answer> 36.0 </answer>"),
             MockResponse("<answer>Kim's total points are 6 + 30 = 36 </answer>"),
         ]
-        storage_config = get_unittest_dataset_config("countdown")
+        taskset_config = get_unittest_dataset_config("countdown")
         workflow = MathWorkflow(
             model=model,
             task_desc="",
             truth=r"36",
-            storage_config=storage_config,
+            taskset_config=taskset_config,
         )
         experiences = workflow.run()
         # self.assertEqual(len(experiences), 1)

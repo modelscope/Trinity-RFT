@@ -224,9 +224,9 @@ class RolloutDataReader(BufferReader):
             task_desc=task_desc,
             truth=truth,
             workflow=workflow_class,
-            storage_config=self.meta,
+            taskset_config=self.meta,
             reward_fn=reward_fn,
-            raw=sample,
+            raw_task=sample,
         )
         self.index += 1
         if self.task_type == TaskType.EVAL and self.index == len(self.dataset):

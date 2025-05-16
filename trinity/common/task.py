@@ -16,10 +16,10 @@ class Task:
 
     task_desc: str
     workflow: Type[Workflow]
-    storage_config: StorageConfig
+    taskset_config: StorageConfig
     reward_fn: Optional[Type[RewardFn]] = None
     truth: Optional[str] = None
-    raw: Optional[dict] = None  # The raw data sample
+    raw_task: Optional[dict] = None  # The raw data sample
 
     def to_workflow(self, model: Any) -> Workflow:
         """Convert the task to a workflow.
@@ -34,7 +34,7 @@ class Task:
             model=model,
             task_desc=self.task_desc,
             truth=self.truth,
-            storage_config=self.storage_config,
+            taskset_config=self.taskset_config,
             reward_fn=self.reward_fn,
-            raw=self.raw,
+            raw_task=self.raw_task,
         )
