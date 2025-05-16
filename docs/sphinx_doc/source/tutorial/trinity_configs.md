@@ -17,7 +17,7 @@ global_config:
 - `global_config.total_epochs`: The total number of epochs. It should be checked manually.
 - `global_config.batch_size`: The batch size used for training. It should be checked manually.
 - `global_config.eval_interval`: The interval steps between two evaluations. Default is `1000`.
-- `global_config.eval_on_latest_ckp`: In bench mode, whether to evaluate on only the latest checkpoint or all the checkpoints in the path. Default is `true`.
+- `global_config.eval_on_latest_ckp`: Whether to evaluate on only the latest checkpoint or all the checkpoints in the path. Only valid in `bench` mode. Default is `true`.
 
 
 ## Monitor

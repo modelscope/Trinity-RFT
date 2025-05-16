@@ -265,6 +265,7 @@ class Explorer:
         """Benchmark the model checkpoints."""
         # benchmark on the latest checkpoint
         if self.config.global_config.eval_on_latest_ckp:
+            self._checkpoint_weights_update()
             self.eval()
             return True
 

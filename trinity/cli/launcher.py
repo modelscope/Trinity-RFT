@@ -18,7 +18,6 @@ def bench(config: Config) -> None:
     explorer = Explorer.remote(config)
     try:
         ray.get(explorer.prepare.remote())
-        ray.get(explorer.sync_weight.remote())
         ray.get(explorer.benchmark.remote())
         logger.info("Benchmark finished.")
         ray.get(explorer.shutdown.remote())
