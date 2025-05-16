@@ -917,12 +917,16 @@
         <li><a href="build_api/trinity.common.models.html#trinity.common.models.model.ModelWrapper.get_ckp_version">(trinity.common.models.model.ModelWrapper method)</a>
 </li>
       </ul></li>
+      <li><a href="build_api/trinity.utils.html#trinity.utils.dlc_utils.get_dlc_env_vars">get_dlc_env_vars() (in module trinity.utils.dlc_utils)</a>
+</li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.TrainerConfig.get_exp_strategy">get_exp_strategy (trinity.common.config.TrainerConfig attribute)</a>
 </li>
       <li><a href="build_api/trinity.trainer.verl.html#trinity.trainer.verl.core_algos.get_kl_controller">get_kl_controller() (in module trinity.trainer.verl.core_algos)</a>
 </li>
       <li><a href="build_api/trinity.utils.html#trinity.utils.log.get_logger">get_logger() (in module trinity.utils.log)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.AlfworldWorkflow.get_model_response">get_model_response() (trinity.common.workflows.AlfworldWorkflow method)</a>
 
       <ul>
@@ -931,8 +935,6 @@
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.WebShopWorkflow.get_model_response">(trinity.common.workflows.WebShopWorkflow method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.AlfworldWorkflow.get_model_response_text">get_model_response_text() (trinity.common.workflows.AlfworldWorkflow method)</a>
 
       <ul>
@@ -1076,6 +1078,8 @@
       <li><a href="build_api/trinity.utils.html#trinity.utils.distributed.is_ipv6_address">is_ipv6_address() (in module trinity.utils.distributed)</a>
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.constants.AlgorithmType.is_rft">is_rft() (trinity.common.constants.AlgorithmType method)</a>
+</li>
+      <li><a href="build_api/trinity.utils.html#trinity.utils.dlc_utils.is_running">is_running() (in module trinity.utils.dlc_utils)</a>
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.constants.AlgorithmType.is_sft">is_sft() (trinity.common.constants.AlgorithmType method)</a>
 </li>
@@ -1448,6 +1452,8 @@
         <li><a href="build_api/trinity.utils.html#module-trinity.utils">trinity.utils</a>
 </li>
         <li><a href="build_api/trinity.utils.html#module-trinity.utils.distributed">trinity.utils.distributed</a>
+</li>
+        <li><a href="build_api/trinity.utils.html#module-trinity.utils.dlc_utils">trinity.utils.dlc_utils</a>
 </li>
         <li><a href="build_api/trinity.utils.html#module-trinity.utils.eval_utils">trinity.utils.eval_utils</a>
 </li>
@@ -1936,6 +1942,8 @@
         <li><a href="build_api/trinity.trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.set_mode">(trinity.trainer.verl_trainer.VerlPPOTrainerWrapper method)</a>
 </li>
       </ul></li>
+      <li><a href="build_api/trinity.utils.html#trinity.utils.dlc_utils.setup_ray_cluster">setup_ray_cluster() (in module trinity.utils.dlc_utils)</a>
+</li>
       <li><a href="build_api/trinity.trainer.verl.html#trinity.trainer.verl.fsdp_workers.ActorRolloutRefWorker.setup_weight_sync_group">setup_weight_sync_group() (trinity.trainer.verl.fsdp_workers.ActorRolloutRefWorker method)</a>
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.constants.AlgorithmType.SFT">SFT (trinity.common.constants.AlgorithmType attribute)</a>
@@ -2337,8 +2345,6 @@
         <li><a href="build_api/trinity.buffer.html#module-trinity.buffer.utils">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     trinity.buffer.writer
 
@@ -2346,6 +2352,8 @@
         <li><a href="build_api/trinity.buffer.writer.html#module-trinity.buffer.writer">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     trinity.buffer.writer.queue_writer
 
@@ -2641,6 +2649,13 @@
 </li>
       </ul></li>
       <li>
+    trinity.utils.dlc_utils
+
+      <ul>
+        <li><a href="build_api/trinity.utils.html#module-trinity.utils.dlc_utils">module</a>
+</li>
+      </ul></li>
+      <li>
     trinity.utils.eval_utils
 
       <ul>
@@ -2762,6 +2777,10 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.html#trinity.common.config.SynchronizerConfig.wait_for_checkpoint">wait_for_checkpoint (trinity.common.config.SynchronizerConfig attribute)</a>
 </li>
+      <li><a href="build_api/trinity.utils.html#trinity.utils.dlc_utils.wait_for_ray_setup">wait_for_ray_setup() (in module trinity.utils.dlc_utils)</a>
+</li>
+      <li><a href="build_api/trinity.utils.html#trinity.utils.dlc_utils.wait_for_ray_worker_nodes">wait_for_ray_worker_nodes() (in module trinity.utils.dlc_utils)</a>
+</li>
       <li><a href="build_api/trinity.common.html#trinity.common.constants.MonitorType.WANDB">WANDB (trinity.common.constants.MonitorType attribute)</a>
 </li>
       <li><a href="build_api/trinity.utils.html#trinity.utils.monitor.WandbLogger">WandbLogger (class in trinity.utils.monitor)</a>
@@ -2774,14 +2793,14 @@
 </li>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.Workflow">Workflow (class in trinity.common.workflows.workflow)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.html#trinity.common.schema.RftDatasetModel.workflow">workflow (trinity.common.schema.RftDatasetModel attribute)</a>
 
       <ul>
         <li><a href="build_api/trinity.common.html#trinity.common.task.Task.workflow">(trinity.common.task.Task attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.html#trinity.common.config.FormatConfig.workflow_key">workflow_key (trinity.common.config.FormatConfig attribute)</a>
 </li>
       <li><a href="build_api/trinity.buffer.schema.html#trinity.buffer.schema.sql_schema.TaskModel.workflow_type">workflow_type (trinity.buffer.schema.sql_schema.TaskModel attribute)</a>
