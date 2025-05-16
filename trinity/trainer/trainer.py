@@ -60,7 +60,7 @@ class Trainer:
             train_status, train_step_num = self.train_step(algo_type)
             if not train_status:
                 return False, train_step_num
-        self.logger.info(f"Trainer steps {train_step_num} finished.")
+        self.logger.info(f"Train step {train_step_num} finished.")
         return True, train_step_num
 
     def train_step(self, algo_type: AlgorithmType = AlgorithmType.PPO) -> Tuple[bool, int]:
@@ -122,7 +122,7 @@ class Trainer:
 
     def shutdown(self) -> None:
         # if checkpoint not saved, save the last checkpoint
-        step_num = self.engine.global_steps
+        step_num = self.engine.global_steps - 1
         path = os.path.join(self.config.model.checkpoint_path, f"global_step_{step_num}")
         if not os.path.isdir(path) or len(os.listdir(path)) == 0:
             self.engine.save_checkpoint()

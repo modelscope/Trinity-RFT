@@ -48,7 +48,7 @@ class TestTrainerCountdown(BaseTrainerCase):
             get_unittest_dataset_config("countdown", "test")
         )
         self.config.check_and_update()
-        self.config.trainer.trainer_config.trainer.save_freq = 8
+        self.config.trainer.save_interval = 8
         both(self.config)
         # check tensorboard
         parser = TensorBoardParser(os.path.join(self.config.monitor.job_dir, "tensorboard"))
