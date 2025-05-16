@@ -6,6 +6,7 @@ And is a reproduction code of Jiayi-Pan/TinyZero.
 
 Note that we don't combine the main with ray_trainer as ray_trainer is used by other main.
 """
+import os
 from abc import ABC, abstractmethod
 from typing import Tuple
 
@@ -118,6 +119,14 @@ class Trainer:
     def flush_log(self, step: int) -> None:
         """Flush the log of the current step."""
         self.engine.logger.log({}, step=step, commit=True)
+
+    def shutdown(self) -> None:
+        # if checkpoint not saved, save the last checkpoint
+        step_num = self.engine.global_steps
+        path = os.path.join(self.config.model.checkpoint_path, f"global_step_{step_num}")
+        if not os.path.isdir(path) or len(os.listdir(path)) == 0:
+            self.engine.save_checkpoint()
+        self.engine.logger.close()
 
 
 class TrainEngineWrapper(ABC):

@@ -3,7 +3,6 @@ import argparse
 import sys
 
 import ray
-import wandb
 
 from trinity.common.config import Config, load_config
 from trinity.common.constants import AlgorithmType
@@ -20,10 +19,9 @@ def bench(config: Config) -> None:
     try:
         ray.get(explorer.prepare.remote())
         ray.get(explorer.sync_weight.remote())
-        bm_finished, step = ray.get(explorer.benchmark.remote())
+        ray.get(explorer.benchmark.remote())
         logger.info("Benchmark finished.")
-        if bm_finished:
-            ray.get(explorer.flush_log.remote(step=step))
+        ray.get(explorer.shutdown.remote())
     except Exception as e:
         logger.error(f"Benchmark failed: {e}")
         raise e
@@ -37,6 +35,7 @@ def explore(config: Config) -> None:
         ray.get(explorer.sync_weight.remote())
         ray.get(explorer.explore.remote())
         logger.info("Explore finished.")
+        ray.get(explorer.shutdown.remote())
     except Exception as e:
         logger.error(f"Explore failed: {e}")
         raise e
@@ -62,6 +61,7 @@ def train(config: Config) -> None:
     try:
         ray.get(trainer.train.remote(algo_type))
         logger.info("Train finished.")
+        ray.get(trainer.shutdown.remote())
     except Exception as e:
         logger.error(f"Train failed {e}.")
         raise e
@@ -135,6 +135,9 @@ def both(config: Config) -> None:
         ray.get(explorer.flush_log.remote(step=explore_step_num))
         ray.get(trainer.flush_log.remote(step=train_step_num))
 
+    ray.get(explorer.shutdown.remote())
+    ray.get(trainer.shutdown.remote())
+
 
 def activate_data_module(data_workflow_url: str, config_path: str):
     """Check whether to activate data module and preprocess datasets."""
@@ -169,9 +172,6 @@ def run(config_path: str):
         both(config)
     elif config.mode == "bench":
         bench(config)
-
-    if config.monitor.monitor_type == "wandb":
-        wandb.finish()
 
 
 def studio(port: int = 8501):
