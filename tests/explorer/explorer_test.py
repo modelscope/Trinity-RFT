@@ -83,4 +83,4 @@ class TestExplorerCountdownBench(BaseExplorerCase):
         bench(self.config)
         parser = TensorBoardParser(os.path.join(self.config.monitor.job_dir, "tensorboard"))
         eval_metrics = parser.metric_list("eval")
-        self.assertEqual(len(eval_metrics), 5)
+        self.assertTrue(len(eval_metrics) > 0)

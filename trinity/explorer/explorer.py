@@ -270,12 +270,14 @@ class Explorer:
             return True
 
         # benchmark on all checkoints
-        all_ckp_steps = [
-            int(ckp.split("global_step_")[-1])
-            for ckp in os.listdir(self.config.model.checkpoint_path)
-            if os.path.isdir(os.path.join(self.config.model.checkpoint_path, ckp))
-            and ckp.startswith("global_step_")
-        ]
+        all_ckp_steps = sorted(
+            [
+                int(ckp.split("global_step_")[-1])
+                for ckp in os.listdir(self.config.model.checkpoint_path)
+                if os.path.isdir(os.path.join(self.config.model.checkpoint_path, ckp))
+                and ckp.startswith("global_step_")
+            ]
+        )
         for step_num in all_ckp_steps:
             self.step_num = step_num
             self._checkpoint_weights_update(step_num=step_num)
