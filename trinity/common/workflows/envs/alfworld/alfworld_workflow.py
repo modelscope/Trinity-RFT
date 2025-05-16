@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
-from typing import List
+from typing import List, Optional, Type
 
+from trinity.common.config import StorageConfig
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
+from trinity.common.rewards.reward_fn import RewardFn
 from trinity.common.workflows.workflow import WORKFLOWS, MultiTurnWorkflow
 
 EXAMPLE_PROMPT = """
@@ -96,13 +98,25 @@ def parse_action(response):
 class AlfworldWorkflow(MultiTurnWorkflow):
     """A workflow for alfworld task."""
 
-    def __init__(self, model: ModelWrapper, **kwargs):
-        super().__init__(model)
-        self.system_prompt = kwargs.get("system_prompt", None)  # Unuse here
-        self.task_desc: str = kwargs.get("task_desc")
-        self.truth = kwargs.get("truth")  # Unuse here
-        self.reward_fn = None  # Unuse here
-        self.repeat_times = kwargs.get("repeat_times", 1)
+    def __init__(
+        self,
+        model: ModelWrapper,
+        task_desc: str,
+        taskset_config: StorageConfig,
+        truth: Optional[str] = None,
+        reward_fn: Optional[Type[RewardFn]] = None,
+        raw_task: Optional[dict] = None,
+    ):
+        super().__init__(
+            model,
+            task_desc,
+            taskset_config,
+            truth=truth,
+            reward_fn=reward_fn,
+            raw_task=raw_task,
+        )
+        self.task_desc: str = task_desc
+        self.repeat_times = taskset_config.repeat_times
         self.max_env_steps = 30
 
     def get_model_response(self, messages):
