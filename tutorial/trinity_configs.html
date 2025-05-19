@@ -110,6 +110,7 @@
 <span class="w">  </span><span class="nt">total_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">96</span>
 <span class="w">  </span><span class="nt">eval_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+<span class="w">  </span><span class="nt">eval_on_latest_ckp</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -117,6 +118,7 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">global_config.total_epochs</span></code>: The total number of epochs. It should be checked manually.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">global_config.batch_size</span></code>: The batch size used for training. It should be checked manually.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">global_config.eval_interval</span></code>: The interval steps between two evaluations. Default is <code class="docutils literal notranslate"><span class="pre">1000</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">global_config.eval_on_latest_ckp</span></code>: Whether to evaluate on only the latest checkpoint or all the checkpoints in the path. Only valid in <code class="docutils literal notranslate"><span class="pre">bench</span></code> mode. Default is <code class="docutils literal notranslate"><span class="pre">true</span></code>.</p></li>
 </ul>
 </section>
 <section id="monitor">
