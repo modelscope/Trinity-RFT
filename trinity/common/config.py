@@ -144,6 +144,8 @@ class ExplorerInput:
     eval_tasksets: List[StorageConfig] = field(default_factory=list)
     default_workflow_type: Optional[str] = None
     default_reward_fn_type: Optional[str] = None
+    system_prompt: Optional[str] = None
+    reply_prefix: Optional[str] = None
 
 
 @dataclass
@@ -329,10 +331,12 @@ class Config:
 
     def _check_buffer(self) -> None:  # noqa: C901
         # check explorer_input
-        if self.mode != "train" and self.buffer.explorer_input.taskset.path is None:
+        if self.mode != "train" and not self.buffer.explorer_input.taskset.path:
             raise ValueError(
                 "`buffer.explorer_input.taskset.path` is required, please set it to the path of the taskset."
             )
+        if not self.buffer.explorer_input.taskset.name:
+            self.buffer.explorer_input.taskset.name = "taskset"
         self.buffer.explorer_input.taskset.task_type = TaskType.EXPLORE
         self.buffer.explorer_input.taskset.total_epochs = self.global_config.total_epochs
         self.buffer.explorer_input.taskset.repeat_times = self.explorer.repeat_times
@@ -345,13 +349,33 @@ class Config:
             self.buffer.explorer_input.taskset.default_reward_fn_type = (
                 self.buffer.explorer_input.default_reward_fn_type
             )
+        if self.buffer.explorer_input.taskset.system_prompt is None:
+            self.buffer.explorer_input.taskset.system_prompt = (
+                self.buffer.explorer_input.system_prompt
+            )
+        if self.buffer.explorer_input.taskset.reply_prefix is None:
+            self.buffer.explorer_input.taskset.reply_prefix = (
+                self.buffer.explorer_input.reply_prefix
+            )
 
-        for dataset in self.buffer.explorer_input.eval_tasksets:
+        remained_tasksets = []
+        for idx, dataset in enumerate(self.buffer.explorer_input.eval_tasksets):
+            if not dataset.path:
+                logger.warning(f"Eval dataset [{dataset}]'s path is not configured. Skip.")
+                continue
             dataset.task_type = TaskType.EVAL
+            if not dataset.name:
+                dataset.name = f"eval_taskset_{idx}"
             if dataset.default_workflow_type is None:
                 dataset.default_workflow_type = self.buffer.explorer_input.default_workflow_type
             if dataset.default_reward_fn_type is None:
                 dataset.default_reward_fn_type = self.buffer.explorer_input.default_reward_fn_type
+            if dataset.system_prompt is None:
+                dataset.system_prompt = self.buffer.explorer_input.system_prompt
+            if dataset.reply_prefix is None:
+                dataset.reply_prefix = self.buffer.explorer_input.reply_prefix
+            remained_tasksets.append(dataset)
+        self.buffer.explorer_input.eval_tasksets = remained_tasksets
 
         # check trainer_input.experience_buffer
         if self.mode == "both":

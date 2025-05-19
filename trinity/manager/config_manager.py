@@ -73,10 +73,12 @@ class ConfigManager:
             "taskset_prompt_key": "question",
             "taskset_response_key": "answer",
             # Eval Taskset Configs
-            # TODO
-            # Task Workflow Configs
+            "_eval_tasksets_num": 0,
+            # Explorer Input Configs
             "default_workflow_type": "math_workflow",
             "default_reward_fn_type": "math_reward",
+            "system_prompt": None,
+            "reply_prefix": None,
             # Experience Buffer Configs
             "_dpo_storage_type": StorageType.FILE.value,
             "_not_dpo_storage_type": StorageType.QUEUE.value,
@@ -197,6 +199,11 @@ class ConfigManager:
     def maintain_session_state(self):
         for key in self.default_config:
             st.session_state[key] = st.session_state[key]
+        eavl_dataset_keys = ["name", "path", "subset_name", "split", "prompt_key", "response_key"]
+        for idx in range(st.session_state["_eval_tasksets_num"]):
+            for key in eavl_dataset_keys:
+                full_key = f"eval_taskset_{idx}_{key}"
+                st.session_state[full_key] = st.session_state[full_key]
 
     def _set_project(self):
         st.text_input("Project", key="project")
@@ -311,11 +318,29 @@ class ConfigManager:
             self.unfinished_fields.add("taskset_path")
             st.warning("Please input taskset path.")
 
+    def _set_system_prompt(self):
+        st.text_area(
+            "System Prompt",
+            key="system_prompt",
+            placeholder="System prompt is used to guide the model behavior.",
+        )
+
+    def _set_reply_prefix(self):
+        st.text_area(
+            "Assistant Reply Prefix",
+            key="reply_prefix",
+            placeholder="""Assistant reply prefix is used to specify the initial content of model reply, """
+            """and a common setting is: \nLet me solve this step by step. """,
+        )
+
     def _set_taskset_args(self):
         if st.session_state["taskset_path"] and "://" not in st.session_state["taskset_path"]:
             subset_name_col, split_col = st.columns(2)
             subset_name_col.text_input(
-                "Subset Name :orange-badge[(Needs review)]", key="taskset_subset_name"
+                "Subset Name :orange-badge[(Needs review)]",
+                key="taskset_subset_name",
+                help="The subset name used for `datasets.load_datasets`, see "
+                "[here](https://huggingface.co/docs/datasets/v3.5.0/en/package_reference/loading_methods#datasets.load_dataset.name) for details.",
             )
             split_col.text_input("Train Split :orange-badge[(Needs review)]", key="taskset_split")
             prompt_key_col, response_key_col = st.columns(2)
@@ -325,6 +350,49 @@ class ConfigManager:
             response_key_col.text_input(
                 "Response Key :orange-badge[(Needs review)]", key="taskset_response_key"
             )
+
+    def _set_eval_taskset_idx(self, idx):
+        st.text_input(
+            "Taskset Name",
+            key=f"eval_taskset_{idx}_name",
+        )
+        st.text_input(
+            "Eval Taskset Path",
+            key=f"eval_taskset_{idx}_path",
+        )
+        if not st.session_state[f"eval_taskset_{idx}_path"].strip():
+            st.warning("Please input the taskset path, or it will be ignored.")
+        subset_name_col, split_col = st.columns(2)
+        subset_name_col.text_input(
+            "Subset Name :orange-badge[(Needs review)]",
+            key=f"eval_taskset_{idx}_subset_name",
+            help="The subset name used for `datasets.load_datasets`, see "
+            "[here](https://huggingface.co/docs/datasets/v3.5.0/en/package_reference/loading_methods#datasets.load_dataset.name) for details.",
+        )
+        split_col.text_input(
+            "Eval Split :orange-badge[(Needs review)]",
+            key=f"eval_taskset_{idx}_split",
+        )
+        prompt_key_col, response_key_col = st.columns(2)
+        prompt_key_col.text_input(
+            "Prompt Key :orange-badge[(Needs review)]",
+            key=f"eval_taskset_{idx}_prompt_key",
+        )
+        response_key_col.text_input(
+            "Response Key :orange-badge[(Needs review)]",
+            key=f"eval_taskset_{idx}_response_key",
+        )
+
+    def _set_eval_tasksets(self):
+        if st.button("Add Eval Taskset"):
+            st.session_state["_eval_tasksets_num"] += 1
+        if st.session_state["_eval_tasksets_num"] > 0:
+            tabs = st.tabs(
+                [f"Eval Taskset {i + 1}" for i in range(st.session_state["_eval_tasksets_num"])]
+            )
+            for idx, tab in enumerate(tabs):
+                with tab:
+                    self._set_eval_taskset_idx(idx)
 
     def _set_default_workflow_type(self):
         st.selectbox(
@@ -1131,6 +1199,10 @@ if node_num > 1:
         self._set_configs_with_st_columns(["total_epochs", "train_batch_size"])
         self._check_train_batch_size()
 
+        self._set_configs_with_st_columns(["default_workflow_type", "default_reward_fn_type"])
+        self._set_system_prompt()
+        self._set_reply_prefix()
+
         if st.session_state["algorithm_type"] != AlgorithmType.DPO.value:
             with st.expander("Taskset Configs", expanded=True):
                 self._set_taskset_path()
@@ -1141,8 +1213,7 @@ if node_num > 1:
                 self._set_dpo_dataset_kwargs()
 
         with st.expander("Eval Tasksets Configs", expanded=True):
-            # TODO:
-            pass
+            self._set_eval_tasksets()
 
         with st.expander("SFT Dataset Configs"):
             self._set_sft_warmup_dataset_path()
@@ -1152,8 +1223,6 @@ if node_num > 1:
             with st.expander("Experiences Buffer Configs", expanded=True):
                 self._set_storage_type()
                 self._set_experience_buffer_path()
-
-        self._set_configs_with_st_columns(["default_workflow_type", "default_reward_fn_type"])
 
         self.buffer_advanced_tab = st.expander("Advanced Config")
         with self.buffer_advanced_tab:
@@ -1618,6 +1687,8 @@ if node_num > 1:
                         "eval_tasksets": [],  # TODO: add eval tasksets
                         "default_workflow_type": st.session_state["default_workflow_type"],
                         "default_reward_fn_type": st.session_state["default_reward_fn_type"],
+                        "system_prompt": st.session_state["system_prompt"],
+                        "reply_prefix": st.session_state["reply_prefix"],
                     },
                     "trainer_input": {
                         "experience_buffer": {
@@ -1671,6 +1742,18 @@ if node_num > 1:
                 },
             }
 
+            for idx in range(st.session_state["_eval_taskset_num"]):
+                if st.session_state[f"eval_taskset_{idx}_path"].strip():
+                    config["buffer"]["explorer_input"]["eval_tasksets"].append(
+                        {
+                            "name": st.session_state[f"eval_taskset_{idx}_name"],
+                            "path": st.session_state[f"eval_taskset_{idx}_path"],
+                            "subset_name": st.session_state[f"eval_taskset_{idx}_subset_name"],
+                            "split": st.session_state[f"eval_taskset_{idx}_split"],
+                            "prompt_key": st.session_state[f"eval_taskset_{idx}_prompt_key"],
+                            "response_key": st.session_state[f"eval_taskset_{idx}_response_key"],
+                        }
+                    )
             if st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
                 experience_buffer = config["buffer"]["trainer_input"]["experience_buffer"]
                 experience_buffer["split"] = st.session_state["dpo_dataset_train_split"]
