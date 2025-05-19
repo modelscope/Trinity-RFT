@@ -36,7 +36,7 @@ def get_unittest_dataset_config(
     dataset_name: str = "countdown", split: str = "train"
 ) -> StorageConfig:
     """Countdown sample dataset for 8 steps"""
-    if dataset_name == "countdown":
+    if dataset_name == "countdown" or dataset_name == "copy_countdown":
         return StorageConfig(
             name=dataset_name,
             path=os.path.join(os.path.dirname(__file__), "template", "data", "countdown"),
@@ -86,10 +86,12 @@ class TensorBoardParser:
         return metric_name in self._metrics
 
     def metric_max_step(self, metric_name: str) -> int:
+        return max(self.metric_steps(metric_name))
+
+    def metric_steps(self, metric_name: str) -> List[int]:
         if not self.metric_exist(metric_name):
             raise ValueError(f"Metric '{metric_name}' does not exist.")
-        steps = list(self._metrics[metric_name].keys())
-        return max(steps)
+        return list(self._metrics[metric_name].keys())
 
     def metric_list(self, metric_prefix: str) -> List[str]:
         return [name for name in self._metrics if name.startswith(metric_prefix)]

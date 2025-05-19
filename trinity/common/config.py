@@ -112,6 +112,7 @@ class GlobalConfig:
     total_epochs: int = 1
     batch_size: int = 1
     eval_interval: int = 100
+    eval_on_latest_ckp: bool = True
 
 
 @dataclass
@@ -306,7 +307,8 @@ class Config:
 
         # check eval_interval
         if (
-            self.trainer.algorithm_type != AlgorithmType.DPO
+            self.mode != "bench"
+            and self.trainer.algorithm_type != AlgorithmType.DPO
             and self.global_config.eval_interval % self.synchronizer.sync_interval != 0
         ):
             self.global_config.eval_interval = (
@@ -318,12 +320,13 @@ class Config:
 
         # check save_interval
         if (
-            self.trainer.algorithm_type != AlgorithmType.DPO
+            self.mode != "bench"
+            and self.trainer.algorithm_type != AlgorithmType.DPO
             and self.synchronizer.sync_method == SyncMethod.CHECKPOINT
         ):
             if self.trainer.save_interval != self.synchronizer.sync_interval:
                 logger.warning(
-                    f"When `trainer.algorithm_type != DPO` and `synchronizer.sync_method == checkpoint`, "
+                    f"When `trainer.algorithm_type` != `DPO` and `synchronizer.sync_method` == `checkpoint`, "
                     f"`trainer.save_interval` will be set to "
                     f"`synchronizer.sync_interval = {self.synchronizer.sync_interval}`."
                 )
@@ -387,7 +390,7 @@ class Config:
                 logger.info(
                     f"Auto set `buffer.trainer_input.experience_buffer` to {self.buffer.trainer_input.experience_buffer}"
                 )
-        else:  # TODO: to be check
+        elif self.mode == "train":  # TODO: to be check
             if self.trainer.algorithm_type.is_dpo():
                 if (
                     self.buffer.trainer_input.experience_buffer is None
@@ -396,7 +399,8 @@ class Config:
                     raise ValueError(
                         "`buffer.trainer_input.experience_buffer.path` is required when `trainer.algorithm_type == AlgorithmType.DPO`"
                     )
-        self.buffer.trainer_input.experience_buffer.algorithm_type = self.trainer.algorithm_type
+        if self.mode in ["both", "train"]:
+            self.buffer.trainer_input.experience_buffer.algorithm_type = self.trainer.algorithm_type
 
         # set buffer.explorer_output
         if self.buffer.explorer_output is None:
@@ -449,7 +453,7 @@ class Config:
         )
         self.synchronizer.backend = self.explorer.backend
         if self.mode == "bench" and self.synchronizer.sync_method != SyncMethod.CHECKPOINT:
-            self.synchronizer.sync_method = "checkpoint"
+            self.synchronizer.sync_method = SyncMethod.CHECKPOINT
             logger.warning(
                 "Bench mode only supports checkpoint synchronization, set `synchronizer.sync_method` to `checkpoint`."
             )

@@ -34,10 +34,11 @@ class Explorer:
         self.step_num = explorer_meta.get("latest_iteration", 0)
         self.config = config
         self.models = create_rollout_models(config)
-        self.experience_buffer = get_buffer_writer(
-            self.config.buffer.explorer_output,  # type: ignore
-            self.config.buffer,
-        )
+        if self.config.mode != "bench":
+            self.experience_buffer = get_buffer_writer(
+                self.config.buffer.explorer_output,  # type: ignore
+                self.config.buffer,
+            )
         self.config.buffer.explorer_input.taskset.index = explorer_meta.get("latest_task_index", 0)
         self.taskset = get_buffer_reader(
             self.config.buffer.explorer_input.taskset, self.config.buffer
@@ -261,6 +262,29 @@ class Explorer:
         self.monitor.log(log_metrics, step=self.step_num)  # type: ignore
         return True, self.step_num
 
+    def benchmark(self) -> bool:
+        """Benchmark the model checkpoints."""
+        # benchmark on the latest checkpoint
+        if self.config.global_config.eval_on_latest_ckp:
+            self._checkpoint_weights_update()
+            self.eval()
+            return True
+
+        # benchmark on all checkoints
+        all_ckp_steps = sorted(
+            [
+                int(ckp.split("global_step_")[-1])
+                for ckp in os.listdir(self.config.model.checkpoint_path)
+                if os.path.isdir(os.path.join(self.config.model.checkpoint_path, ckp))
+                and ckp.startswith("global_step_")
+            ]
+        )
+        for step_num in all_ckp_steps:
+            self.step_num = step_num
+            self._checkpoint_weights_update(step_num=step_num)
+            self.eval()
+        return True
+
     def sync_weight(self) -> None:
         """Synchronize model weights."""
         # call this method before training start to load the latest model weights
@@ -272,3 +296,6 @@ class Explorer:
     def flush_log(self, step: int) -> None:
         """Flush the log of the current step."""
         self.monitor.log({}, step=step, commit=True)
+
+    def shutdown(self) -> None:
+        self.monitor.close()
