@@ -51,7 +51,7 @@ class TestTrainerCountdown(BaseTrainerCase):
             get_unittest_dataset_config("countdown", "test")
         )
         self.config.buffer.explorer_input.eval_tasksets.append(
-            get_unittest_dataset_config("countdown_copy", "test")
+            get_unittest_dataset_config("copy_countdown", "test")
         )
         self.config.trainer.save_interval = 4
         self.config.check_and_update()
@@ -71,17 +71,24 @@ class TestTrainerCountdown(BaseTrainerCase):
         response_metrics = parser.metric_list("response_length")
         self.assertTrue(len(response_metrics) > 0)
         self.assertEqual(parser.metric_max_step(response_metrics[0]), 8)
+        ray.shutdown(_exiting_interpreter=True)
         # check checkpoint
         from trinity.common.models.utils import get_checkpoint_dir_with_step_num
 
-        checkpoint_dir = get_checkpoint_dir_with_step_num(
+        checkpoint_step_4 = get_checkpoint_dir_with_step_num(
             checkpoint_root_path=self.config.model.checkpoint_path,
             trainer_type=self.config.trainer.trainer_type,
-            step_num=None,
+            step_num=4,
         )
-        self.assertTrue(os.path.exists(checkpoint_dir))
-        self.assertTrue(checkpoint_dir.endswith("step_8"))
+        checkpoint_step_8 = get_checkpoint_dir_with_step_num(
+            checkpoint_root_path=self.config.model.checkpoint_path,
+            trainer_type=self.config.trainer.trainer_type,
+            step_num=8,
+        )
+        self.assertTrue(os.path.exists(checkpoint_step_4))
+        self.assertTrue(os.path.exists(checkpoint_step_8))
 
+        ray.init(ignore_reinit_error=True)
         # test bench mode
         self.config.mode = "bench"
         self.config.synchronizer.sync_method = SyncMethod.CHECKPOINT
@@ -89,11 +96,16 @@ class TestTrainerCountdown(BaseTrainerCase):
         self.config.check_and_update()
         bench(self.config)
         parser = TensorBoardParser(os.path.join(self.config.monitor.job_dir, "tensorboard"))
-        eval_metrics = parser.metric_list("eval")
-        self.assertTrue(len(eval_metrics) > 0)
-        self.assertTrue(any(metric.startswith("eval/countdown") for metric in eval_metrics))
-        self.assertTrue(any(metric.startswith("eval/countdown_copy") for metric in eval_metrics))
-        self.assertEqual(parser.metric_max_step(eval_metrics[0]), 8)
+        countdown_metrics = parser.metric_list("eval/countdown")
+        copy_countdown_metrics = parser.metric_list("eval/copy_countdown")
+        self.assertTrue(len(countdown_metrics) > 0)
+        self.assertTrue(len(copy_countdown_metrics) > 0)
+        countdown_metric_steps = parser.metric_steps(countdown_metrics[0])
+        countdown_copy_metric_steps = parser.metric_steps(copy_countdown_metrics[0])
+        self.assertEqual(2, len(countdown_metric_steps))
+        self.assertEqual(2, len(countdown_copy_metric_steps))
+        self.assertTrue(4 in countdown_metric_steps)
+        self.assertTrue(8 in countdown_metric_steps)
 
     def tearDown(self):
         # remove dir only when the test passed
