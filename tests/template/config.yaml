@@ -18,7 +18,7 @@ buffer:
     taskset:
       name: taskset
       storage_type: file
-      path: ''
+      path: 'placeholder'
       split: 'train'
     default_workflow_type: ''
     default_reward_fn_type: ''

@@ -6,6 +6,7 @@ from typing import List
 import ray
 import torch
 
+from tests.tools import get_unittest_dataset_config
 from trinity.buffer.reader.queue_reader import QueueReader
 from trinity.common.config import StorageConfig, load_config
 from trinity.common.constants import AlgorithmType, StorageType
@@ -21,7 +22,7 @@ config_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_data
 @WORKFLOWS.register_module("dummy_workflow")
 class DummyWorkflow(Workflow):
     def __init__(self, model, **kwargs):
-        super().__init__(model)
+        super().__init__(model, **kwargs)
         self.error_type = kwargs.get("task_desc")
         self.seconds = None
         if "timeout" in self.error_type:
@@ -81,30 +82,37 @@ class RunnerPoolTest(unittest.TestCase):
 
     def test_runner_pool(self):
         pool = RunnerPool(self.config, [DummyModel.remote(), DummyModel.remote()])
+        taskset_config = get_unittest_dataset_config("countdown")
         tasks = [
             Task(
                 task_desc="timeout_100",
                 workflow=DummyWorkflow,
+                taskset_config=taskset_config,
             ),
             Task(
                 task_desc="exception",
                 workflow=DummyWorkflow,
+                taskset_config=taskset_config,
             ),
             Task(
                 task_desc="timeout_2",
                 workflow=DummyWorkflow,
+                taskset_config=taskset_config,
             ),
             Task(
                 task_desc="success",
                 workflow=DummyWorkflow,
+                taskset_config=taskset_config,
             ),
             Task(
                 task_desc="timeout_101",
                 workflow=DummyWorkflow,
+                taskset_config=taskset_config,
             ),
             Task(
                 task_desc="exit",
                 workflow=DummyWorkflow,
+                taskset_config=taskset_config,
             ),
         ]
 

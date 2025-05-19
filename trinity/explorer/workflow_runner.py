@@ -77,7 +77,7 @@ class WorkflowRunner:
             if metrics:
                 for k, v in metrics.items():
                     metric[k] = sum(v) / len(v)  # type: ignore
-            if not task.storage_config.task_type == TaskType.EVAL:
+            if not task.taskset_config.task_type == TaskType.EVAL:
                 self.experience_buffer.write(exps)
             return Status(True, metric=metric)
         except Exception as e:
