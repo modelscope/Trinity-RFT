@@ -55,7 +55,7 @@ class GenerationConfig:
     # repeat each task for `repeat_times` times (for GPRO-like algorithms)
     repeat_times: int = 1
 
-    temperature: float = 0.0
+    temperature: float = 1.0
     top_p: float = 1.0
     top_k: int = -1
     logprobs: int = 0  # vLLM return `logprobs + 1` elements
