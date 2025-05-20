@@ -66,6 +66,7 @@ class ConfigManager:
             "_train_batch_size_per_gpu": 16,
             "train_batch_size": 96,
             "eval_interval": 1000,
+            "algorithm_type": AlgorithmType.PPO.value,
             # Taskset Configs
             "taskset_path": "",
             "taskset_subset_name": None,
@@ -131,7 +132,6 @@ class ConfigManager:
             "sync_timeout": 1200,
             # Trainer Configs
             "trainer_type": "verl",
-            "algorithm_type": AlgorithmType.PPO.value,
             "sft_warmup_steps": 0,
             "_nccl_save_interval": 100,
             "save_interval": 100,
@@ -1600,20 +1600,7 @@ if node_num > 1:
         else:
             trainer_n_gpus_per_node = st.session_state["gpu_per_node"]
 
-        critic_model_path = (
-            st.session_state["critic_model_path"].strip()
-            if st.session_state["critic_model_path"].strip()
-            else st.session_state["model_path"]
-        )
-
-        if st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
-            pass
-            # experience_buffer_path = (
-            #     st.session_state["experience_buffer_path"].strip()
-            #     if st.session_state["experience_buffer_path"].strip()
-            #     else st.session_state["dataset_path"].strip()
-            # )
-        else:  # not dpo algorithms
+        if st.session_state["algorithm_type"] != AlgorithmType.DPO.value:
             experience_buffer_path = st.session_state["experience_buffer_path"].strip()
             if (
                 not experience_buffer_path
@@ -1657,10 +1644,10 @@ if node_num > 1:
                     "total_epochs": st.session_state["total_epochs"],
                     "batch_size": st.session_state["train_batch_size"],
                     "eval_interval": st.session_state["eval_interval"],
+                    "algorithm_type": st.session_state["algorithm_type"],
                 },
                 "model": {
                     "model_path": st.session_state["model_path"],
-                    "critic_model_path": critic_model_path,
                     "max_prompt_tokens": st.session_state["max_prompt_tokens"],
                     "max_response_tokens": st.session_state["max_response_tokens"],
                     "checkpoint_path": st.session_state["checkpoint_path"],
@@ -1732,7 +1719,6 @@ if node_num > 1:
                 },
                 "trainer": {
                     "trainer_type": st.session_state["trainer_type"],
-                    "algorithm_type": st.session_state["algorithm_type"],
                     "trainer_config": trainer_config,
                     "sft_warmup_steps": st.session_state["sft_warmup_steps"],
                     "save_interval": st.session_state["save_interval"],
@@ -1743,6 +1729,13 @@ if node_num > 1:
                     "monitor_type": st.session_state["monitor_type"],
                 },
             }
+
+            if st.session_state["adv_estimator"] == AdvantageEstimator.GAE.value:
+                config["model"]["critic_model_path"] = (
+                    st.session_state["critic_model_path"].strip()
+                    if st.session_state["critic_model_path"].strip()
+                    else st.session_state["model_path"]
+                )
 
             for idx in range(st.session_state["_eval_tasksets_num"]):
                 if st.session_state[f"eval_taskset_{idx}_path"].strip():

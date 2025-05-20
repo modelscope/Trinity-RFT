@@ -11,6 +11,7 @@ global_config:
   batch_size: 96
   eval_interval: 1000
   eval_on_latest_ckp: true
+  algorithm_type: ppo
 ```
 
 - `mode`: The mode of the experiment, chosen from `both`, `train`, `explore` or `bench`. `both` means both trainer and explorer are launched; `train` means only trainer is launched; `explore` means only explorer is launched; `bench` conducts benchmark evaluation. Default is `both`.
@@ -18,6 +19,7 @@ global_config:
 - `global_config.batch_size`: The batch size used for training. It should be checked manually.
 - `global_config.eval_interval`: The interval steps between two evaluations. Default is `1000`.
 - `global_config.eval_on_latest_ckp`: Whether to evaluate on only the latest checkpoint or all the checkpoints in the path. Only valid in `bench` mode. Default is `true`.
+- `global_config.algorithm_type`: The type of the algorithm, Support `ppo`, `grpo`, `opmd` and `dpo`.
 
 
 ## Monitor
@@ -192,7 +194,6 @@ Support `nccl` and `checkpoint`, `nccl` represents that model weights in `explor
 ```yaml
 trainer:
   trainer_type: 'verl'
-  algorithm_type: ppo
   trainer_config_path: 'examples/ppo_countdown/train_countdown.yaml'
   sft_warmup_steps: 0
   eval_interval: 1000
@@ -200,7 +201,6 @@ trainer:
 ```
 
 - `trainer.trainer_type`: The backend of the trainer, Only `verl` is supported.
-- `trainer.algorithm_type`: The type of the algorithm, Support `ppo`, `grpo`, `opmd` and `dpo`.
 - `trainer.trainer_config_path`: The path to the trainer configuration file. It must be set manually.
 - `trainer.sft_warmup_steps`: The number of steps to warm up the model. Default is `0`.
 - `trainer.eval_interval`: The interval steps between two evaluations. Default is `1000`.

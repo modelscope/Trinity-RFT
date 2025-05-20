@@ -3,6 +3,7 @@ global_config:
   total_epochs: 20
   batch_size: 96
   eval_interval: 10
+  algorithm_type: grpo
 model:
   model_path: /PATH/TO/MODEL/
   max_prompt_tokens: 256
@@ -50,7 +51,6 @@ synchronizer:
   sync_iteration_interval: 10
 trainer:
   trainer_type: 'verl'
-  algorithm_type: grpo
   trainer_config_path: examples/async_gsm8k/verl_config.yaml
   sft_warmup_steps: 0 # Set to integer to enable sft warmup
 monitor:

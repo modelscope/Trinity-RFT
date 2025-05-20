@@ -56,7 +56,7 @@ def train(config: Config) -> None:
                 logger.info("SFT warmup finished.")
                 break
 
-    algo_type = config.trainer.algorithm_type
+    algo_type = config.global_config.algorithm_type
     try:
         ray.get(trainer.train.remote(algo_type))
         logger.info("Train finished.")
@@ -100,7 +100,7 @@ def both(config: Config) -> None:
                 break
         ray.get([explorer.sync_weight.remote(), trainer.sync_weight.remote()])
 
-    algo_type = config.trainer.algorithm_type
+    algo_type = config.global_config.algorithm_type
     while True:
         try:
             ref_explore = explorer.explore_one_period.remote()

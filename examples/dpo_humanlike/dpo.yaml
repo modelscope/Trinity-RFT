@@ -2,6 +2,7 @@ mode: train
 global_config:
   total_epochs: 20
   batch_size: 32 # NOTE
+  algorithm_type: dpo
 model:
   model_path: '/PATH/TO/MODEL/CHECKPOINT/' # NOTE
   max_prompt_tokens: 1792
@@ -29,7 +30,6 @@ synchronizer:
   sync_timeout: 1200
 trainer:
   trainer_type: 'verl'
-  algorithm_type: dpo
   trainer_config_path: 'examples/dpo_humanlike/train_dpo.yaml'
   save_interval: 30
 monitor:

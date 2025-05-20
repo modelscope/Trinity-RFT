@@ -1,6 +1,7 @@
 global_config:
   total_epochs: 20
   batch_size: 4
+  algorithm_type: grpo
 model:
   model_path: '/PATH/TO/MODEL/CHECKPOINT/'
   max_prompt_tokens: 4096
@@ -50,7 +51,6 @@ synchronizer:
   sync_timeout: 1200
 trainer:
   trainer_type: 'verl'
-  algorithm_type: grpo
   trainer_config_path: 'examples/grpo_sciworld/train_sciworld.yaml'
   save_interval: 10
 monitor:

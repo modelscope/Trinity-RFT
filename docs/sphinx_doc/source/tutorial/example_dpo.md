@@ -56,7 +56,7 @@ buffer:
       prompt_key: <prompt_key>
       chosen_key: <chosen_key>
       rejected_key: <rejected_key>
-trainer:
+global_config:
   algorithm_type: dpo
 
 # In train_dpo.yaml

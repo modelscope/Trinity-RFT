@@ -2,6 +2,7 @@ global_config:
   total_epochs: 20
   batch_size: 96
   eval_interval: 1000
+  algorithm_type: ppo
 model:
   model_path: '/PATH/TO/MODEL/CHECKPOINT/'
   max_prompt_tokens: 256
@@ -51,7 +52,6 @@ synchronizer:
   sync_timeout: 1200
 trainer:
   trainer_type: 'verl'
-  algorithm_type: ppo
   trainer_config_path: 'examples/ppo_countdown/train_countdown.yaml'
   sft_warmup_steps: 0
   save_interval: 100

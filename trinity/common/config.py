@@ -120,6 +120,7 @@ class GlobalConfig:
     batch_size: int = 1
     eval_interval: int = 100
     eval_on_latest_ckp: bool = True
+    algorithm_type: AlgorithmType = AlgorithmType.PPO
 
 
 @dataclass
@@ -227,7 +228,6 @@ class TrainerConfig:
     trainer_config: Any = field(default_factory=dict)
 
     # train algorithm
-    algorithm_type: AlgorithmType = AlgorithmType.PPO
     get_exp_strategy: Optional[str] = None
 
     # warmup config
@@ -309,7 +309,7 @@ class Config:
         # check eval_interval
         if (
             self.mode != "bench"
-            and self.trainer.algorithm_type != AlgorithmType.DPO
+            and self.global_config.algorithm_type != AlgorithmType.DPO
             and self.global_config.eval_interval % self.synchronizer.sync_interval != 0
         ):
             self.global_config.eval_interval = (
@@ -322,12 +322,12 @@ class Config:
         # check save_interval
         if (
             self.mode != "bench"
-            and self.trainer.algorithm_type != AlgorithmType.DPO
+            and self.global_config.algorithm_type != AlgorithmType.DPO
             and self.synchronizer.sync_method == SyncMethod.CHECKPOINT
         ):
             if self.trainer.save_interval != self.synchronizer.sync_interval:
                 logger.warning(
-                    f"When `trainer.algorithm_type` != `DPO` and `synchronizer.sync_method` == `checkpoint`, "
+                    f"When `global_config.algorithm_type` != `DPO` and `synchronizer.sync_method` == `checkpoint`, "
                     f"`trainer.save_interval` will be set to "
                     f"`synchronizer.sync_interval = {self.synchronizer.sync_interval}`."
                 )
@@ -390,20 +390,22 @@ class Config:
                     f"Auto set `buffer.trainer_input.experience_buffer` to {self.buffer.trainer_input.experience_buffer}"
                 )
         elif self.mode == "train":  # TODO: to be check
-            if self.trainer.algorithm_type.is_dpo():
+            if self.global_config.algorithm_type.is_dpo():
                 if (
                     self.buffer.trainer_input.experience_buffer is None
                     or not self.buffer.trainer_input.experience_buffer.path
                 ):
                     raise ValueError(
-                        "`buffer.trainer_input.experience_buffer.path` is required when `trainer.algorithm_type == AlgorithmType.DPO`"
+                        "`buffer.trainer_input.experience_buffer.path` is required when `global_config.algorithm_type == AlgorithmType.DPO`"
                     )
-        if self.mode in ["both", "train"]:
-            self.buffer.trainer_input.experience_buffer.algorithm_type = self.trainer.algorithm_type
+        if self.buffer.trainer_input.experience_buffer is not None:
+            self.buffer.trainer_input.experience_buffer.algorithm_type = self.global_config.algorithm_type
 
         # set buffer.explorer_output
         if self.buffer.explorer_output is None:
             self.buffer.explorer_output = self.buffer.trainer_input.experience_buffer
+        else:
+            self.buffer.explorer_output.algorithm_type = self.global_config.algorithm_type
 
         # check trainer_input.sft_warmup_dataset
         if (
@@ -440,7 +442,7 @@ class Config:
         # check mode
         if self.mode not in ["explore", "train", "both", "bench"]:
             raise ValueError(f"Invalid mode: {self.mode}")
-        if self.trainer.algorithm_type == AlgorithmType.DPO and self.mode == "both":
+        if self.global_config.algorithm_type == AlgorithmType.DPO and self.mode == "both":
             raise ValueError("DPO does not support `both` mode")
 
         # check model path
@@ -454,21 +456,19 @@ class Config:
             self.explorer.engine_num * self.explorer.tensor_parallel_size
         )
         self.synchronizer.backend = self.explorer.backend
-        if self.mode == "bench" and self.synchronizer.sync_method != SyncMethod.CHECKPOINT:
+        if self.mode in ["train", "explore", "bench"] and self.synchronizer.sync_method != SyncMethod.CHECKPOINT:
             self.synchronizer.sync_method = SyncMethod.CHECKPOINT
             logger.warning(
-                "Bench mode only supports checkpoint synchronization, set `synchronizer.sync_method` to `checkpoint`."
+                f"`{self.mode}` mode only supports checkpoint synchronization, set `synchronizer.sync_method` to `checkpoint`."
             )
         if (
-            self.trainer.algorithm_type == AlgorithmType.DPO
+            self.global_config.algorithm_type == AlgorithmType.DPO
             and self.synchronizer.sync_method != SyncMethod.CHECKPOINT
         ):
             self.synchronizer.sync_method = SyncMethod.CHECKPOINT
             logger.warning(
                 "DPO only supports checkpoint synchronization, set `synchronizer.sync_method` to `checkpoint`."
             )
-        if self.synchronizer.sync_method == SyncMethod.NCCL and self.mode != "both":
-            raise ValueError("`nccl` synchronization is only supported in both mode.")
 
         self._check_interval()
 

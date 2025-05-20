@@ -1,6 +1,7 @@
 global_config:
   total_epochs: 1
   batch_size: 96
+  algorithm_type: opmd
 model:
   model_path: '{path to models}/Qwen2.5-1.5B-Inst'
   max_prompt_tokens: 256
@@ -49,7 +50,6 @@ synchronizer:
   sync_timeout: 1200
 trainer:
   trainer_type: 'verl'
-  algorithm_type: opmd
   trainer_config_path: 'examples/opmd_gsm8k/train_opmd_gsm8k.yaml'
   sft_warmup_steps: 0
   save_interval: 100

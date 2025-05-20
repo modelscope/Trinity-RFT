@@ -310,11 +310,11 @@ class veRLConfig:
         self.critic.ppo_mini_batch_size = config.global_config.batch_size
         self.critic.rollout_n = self.actor_rollout_ref.rollout.n
 
-        self.actor_rollout_ref.actor.algorithm_type = config.trainer.algorithm_type
-        if config.trainer.algorithm_type == AlgorithmType.PPO:
+        self.actor_rollout_ref.actor.algorithm_type = config.global_config.algorithm_type
+        if config.global_config.algorithm_type == AlgorithmType.PPO:
             logger.info("Using GAE `adv_estimator` for PPO")
             self.algorithm.adv_estimator = AdvantageEstimator.GAE.value
-        elif config.trainer.algorithm_type == AlgorithmType.GRPO:
+        elif config.global_config.algorithm_type == AlgorithmType.GRPO:
             logger.info("Using GRPO `adv_estimator` for GRPO")
             self.algorithm.adv_estimator = AdvantageEstimator.GRPO.value
 
