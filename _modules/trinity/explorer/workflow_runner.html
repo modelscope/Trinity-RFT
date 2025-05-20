@@ -97,10 +97,9 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_buffer_writer</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">TaskType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">InferenceModel</span><span class="p">,</span> <span class="n">ModelWrapper</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.task</span><span class="w"> </span><span class="kn">import</span> <span class="n">Task</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows</span><span class="w"> </span><span class="kn">import</span> <span class="n">Task</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
 
@@ -137,7 +136,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Init workflow from the task and run it.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">workflow</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Workflow is not set in the task.&quot;</span><span class="p">)</span>
-        <span class="n">workflow</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">to_workflow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+        <span class="n">workflow</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">to_workflow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">workflow</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">run_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Status</span><span class="p">:</span>
@@ -166,7 +165,7 @@
             <span class="k">if</span> <span class="n">metrics</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">metrics</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                     <span class="n">metric</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">task</span><span class="o">.</span><span class="n">task_type</span> <span class="o">==</span> <span class="n">TaskType</span><span class="o">.</span><span class="n">EVAL</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">task</span><span class="o">.</span><span class="n">is_eval</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">experience_buffer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">Status</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>

@@ -105,6 +105,10 @@ buffer:
       format:
         prompt_key: 'question'
         response_key: 'answer'
+      rollout_args:
+        repeat_times: 1
+        temperature: 1.0
+        logprobs: 0
     eval_tasksets: []
     default_workflow_type: 'math_workflow'
     default_reward_fn_type: 'countdown_reward'
@@ -123,6 +127,9 @@ buffer:
 - `buffer.explorer_input.taskset.path`: The path to the taskset.
 - `buffer.explorer_input.taskset.split`: The split name of the taskset used for training. Default is `train`.
 - `buffer.explorer_input.taskset.format`: The format of the taskset. It includes `prompt_key`, `response_key`, `workflow_key` and `reward_fn_key`.
+- `buffer.explorer_input.taskset.rollout_args.repeat_times`: The number of times to repeat each task, used for GRPO-like algorithms. Default is `1`.
+- `buffer.explorer_input.taskset.rollout_args.temperature`: The temperature used in vLLM. Default is `1.0`.
+- `buffer.explorer_input.taskset.rollout_args.logprobs`: The logprobs used in vLLM. Default is `0`.
 - `buffer.explorer_input.eval_tasksets`: The configuration of the eval tasksets. It is a list of tasksets which will be used for evaluation. And it is empty by default.
 - `buffer.explorer_input.default_workflow_type`: The default workflow type for `taskset` and `eval_tasksets`.
 - `buffer.explorer_input.default_reward_fn_type`: The default reward function type for `taskset` and `eval_tasksets`.
@@ -145,10 +152,7 @@ explorer:
   enable_prefix_caching: false
   enforce_eager: true
   dtype: bfloat16
-  temperature: 1.0
   seed: 42
-  logprobs: 0
-  repeat_times: 5
   use_ray: false
   backend: 'nccl'
   max_pending_requests: 32
@@ -162,10 +166,7 @@ explorer:
 - `explorer.enable_prefix_caching`: Whether to enable prefix caching. Default is `False`.
 - `explorer.enforce_eager`: Whether to enforce eager mode. Default is `True`.
 - `explorer.dtype`: The data type used in vLLM. Default is `bfloat16`.
-- `explorer.temperature`: The temperature used in vLLM. Default is `1.0`.
 - `explorer.seed`: The seed used in vLLM. Default is `42`.
-- `explorer.logprobs`: The logprobs used in vLLM. Default is `0`.
-- `explorer.repeat_times`: The number of times to repeat each task, used for GRPO-like algorithms. Default is `5`.
 - `explorer.use_ray`: Whether to use Ray. Default is `False`.
 - `explorer.backend`: The backend used in vLLM. Default is `nccl`.
 - `explorer.max_pending_requests`: The maximum number of pending requests. Default is `32`.

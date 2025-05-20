@@ -205,6 +205,10 @@
 <span class="w">      </span><span class="nt">format</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">prompt_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;question&#39;</span>
 <span class="w">        </span><span class="nt">response_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;answer&#39;</span>
+<span class="w">      </span><span class="nt">rollout_args</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">repeat_times</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">        </span><span class="nt">temperature</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">        </span><span class="nt">logprobs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
 <span class="w">    </span><span class="nt">eval_tasksets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
 <span class="w">    </span><span class="nt">default_workflow_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;math_workflow&#39;</span>
 <span class="w">    </span><span class="nt">default_reward_fn_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;countdown_reward&#39;</span>
@@ -224,6 +228,9 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.taskset.path</span></code>: The path to the taskset.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.taskset.split</span></code>: The split name of the taskset used for training. Default is <code class="docutils literal notranslate"><span class="pre">train</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.taskset.format</span></code>: The format of the taskset. It includes <code class="docutils literal notranslate"><span class="pre">prompt_key</span></code>, <code class="docutils literal notranslate"><span class="pre">response_key</span></code>, <code class="docutils literal notranslate"><span class="pre">workflow_key</span></code> and <code class="docutils literal notranslate"><span class="pre">reward_fn_key</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.taskset.rollout_args.repeat_times</span></code>: The number of times to repeat each task, used for GRPO-like algorithms. Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.taskset.rollout_args.temperature</span></code>: The temperature used in vLLM. Default is <code class="docutils literal notranslate"><span class="pre">1.0</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.taskset.rollout_args.logprobs</span></code>: The logprobs used in vLLM. Default is <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.eval_tasksets</span></code>: The configuration of the eval tasksets. It is a list of tasksets which will be used for evaluation. And it is empty by default.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.default_workflow_type</span></code>: The default workflow type for <code class="docutils literal notranslate"><span class="pre">taskset</span></code> and <code class="docutils literal notranslate"><span class="pre">eval_tasksets</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.default_reward_fn_type</span></code>: The default reward function type for <code class="docutils literal notranslate"><span class="pre">taskset</span></code> and <code class="docutils literal notranslate"><span class="pre">eval_tasksets</span></code>.</p></li>
@@ -245,10 +252,7 @@
 <span class="w">  </span><span class="nt">enable_prefix_caching</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 <span class="w">  </span><span class="nt">enforce_eager</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">  </span><span class="nt">dtype</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bfloat16</span>
-<span class="w">  </span><span class="nt">temperature</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
 <span class="w">  </span><span class="nt">seed</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">42</span>
-<span class="w">  </span><span class="nt">logprobs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
-<span class="w">  </span><span class="nt">repeat_times</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
 <span class="w">  </span><span class="nt">use_ray</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 <span class="w">  </span><span class="nt">backend</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;nccl&#39;</span>
 <span class="w">  </span><span class="nt">max_pending_requests</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32</span>
@@ -263,10 +267,7 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">explorer.enable_prefix_caching</span></code>: Whether to enable prefix caching. Default is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">explorer.enforce_eager</span></code>: Whether to enforce eager mode. Default is <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">explorer.dtype</span></code>: The data type used in vLLM. Default is <code class="docutils literal notranslate"><span class="pre">bfloat16</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">explorer.temperature</span></code>: The temperature used in vLLM. Default is <code class="docutils literal notranslate"><span class="pre">1.0</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">explorer.seed</span></code>: The seed used in vLLM. Default is <code class="docutils literal notranslate"><span class="pre">42</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">explorer.logprobs</span></code>: The logprobs used in vLLM. Default is <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">explorer.repeat_times</span></code>: The number of times to repeat each task, used for GRPO-like algorithms. Default is <code class="docutils literal notranslate"><span class="pre">5</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">explorer.use_ray</span></code>: Whether to use Ray. Default is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">explorer.backend</span></code>: The backend used in vLLM. Default is <code class="docutils literal notranslate"><span class="pre">nccl</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">explorer.max_pending_requests</span></code>: The maximum number of pending requests. Default is <code class="docutils literal notranslate"><span class="pre">32</span></code>.</p></li>

@@ -164,10 +164,12 @@
             <span class="s2">&quot;taskset_prompt_key&quot;</span><span class="p">:</span> <span class="s2">&quot;question&quot;</span><span class="p">,</span>
             <span class="s2">&quot;taskset_response_key&quot;</span><span class="p">:</span> <span class="s2">&quot;answer&quot;</span><span class="p">,</span>
             <span class="c1"># Eval Taskset Configs</span>
-            <span class="c1"># TODO</span>
-            <span class="c1"># Task Workflow Configs</span>
+            <span class="s2">&quot;_eval_tasksets_num&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="c1"># Explorer Input Configs</span>
             <span class="s2">&quot;default_workflow_type&quot;</span><span class="p">:</span> <span class="s2">&quot;math_workflow&quot;</span><span class="p">,</span>
             <span class="s2">&quot;default_reward_fn_type&quot;</span><span class="p">:</span> <span class="s2">&quot;math_reward&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;system_prompt&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;reply_prefix&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
             <span class="c1"># Experience Buffer Configs</span>
             <span class="s2">&quot;_dpo_storage_type&quot;</span><span class="p">:</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">FILE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
             <span class="s2">&quot;_not_dpo_storage_type&quot;</span><span class="p">:</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">QUEUE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
@@ -292,7 +294,12 @@
 <a class="viewcode-back" href="../../../build_api/trinity.manager.html#trinity.manager.config_manager.ConfigManager.maintain_session_state">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">maintain_session_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_config</span><span class="p">:</span>
-            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
+            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="n">eavl_dataset_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span><span class="p">,</span> <span class="s2">&quot;subset_name&quot;</span><span class="p">,</span> <span class="s2">&quot;split&quot;</span><span class="p">,</span> <span class="s2">&quot;prompt_key&quot;</span><span class="p">,</span> <span class="s2">&quot;response_key&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;_eval_tasksets_num&quot;</span><span class="p">]):</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">eavl_dataset_keys</span><span class="p">:</span>
+                <span class="n">full_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="n">full_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="n">full_key</span><span class="p">]</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_project</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -408,11 +415,29 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">unfinished_fields</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;taskset_path&quot;</span><span class="p">)</span>
             <span class="n">st</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Please input taskset path.&quot;</span><span class="p">)</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_system_prompt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">text_area</span><span class="p">(</span>
+            <span class="s2">&quot;System Prompt&quot;</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="s2">&quot;system_prompt&quot;</span><span class="p">,</span>
+            <span class="n">placeholder</span><span class="o">=</span><span class="s2">&quot;System prompt is used to guide the model behavior.&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_reply_prefix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">text_area</span><span class="p">(</span>
+            <span class="s2">&quot;Assistant Reply Prefix&quot;</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="s2">&quot;reply_prefix&quot;</span><span class="p">,</span>
+            <span class="n">placeholder</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;Assistant reply prefix is used to specify the initial content of model reply, &quot;&quot;&quot;</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;and a common setting is: \nLet me solve this step by step. &quot;&quot;&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_taskset_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;taskset_path&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="s2">&quot;://&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;taskset_path&quot;</span><span class="p">]:</span>
             <span class="n">subset_name_col</span><span class="p">,</span> <span class="n">split_col</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">columns</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
             <span class="n">subset_name_col</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span>
-                <span class="s2">&quot;Subset Name :orange-badge[(Needs review)]&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;taskset_subset_name&quot;</span>
+                <span class="s2">&quot;Subset Name :orange-badge[(Needs review)]&quot;</span><span class="p">,</span>
+                <span class="n">key</span><span class="o">=</span><span class="s2">&quot;taskset_subset_name&quot;</span><span class="p">,</span>
+                <span class="n">help</span><span class="o">=</span><span class="s2">&quot;The subset name used for `datasets.load_datasets`, see &quot;</span>
+                <span class="s2">&quot;[here](https://huggingface.co/docs/datasets/v3.5.0/en/package_reference/loading_methods#datasets.load_dataset.name) for details.&quot;</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">split_col</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span><span class="s2">&quot;Train Split :orange-badge[(Needs review)]&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;taskset_split&quot;</span><span class="p">)</span>
             <span class="n">prompt_key_col</span><span class="p">,</span> <span class="n">response_key_col</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">columns</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
@@ -422,6 +447,49 @@
             <span class="n">response_key_col</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span>
                 <span class="s2">&quot;Response Key :orange-badge[(Needs review)]&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;taskset_response_key&quot;</span>
             <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_eval_taskset_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span>
+            <span class="s2">&quot;Taskset Name&quot;</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">_name&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span>
+            <span class="s2">&quot;Eval Taskset Path&quot;</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">_path&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">_path&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Please input the taskset path, or it will be ignored.&quot;</span><span class="p">)</span>
+        <span class="n">subset_name_col</span><span class="p">,</span> <span class="n">split_col</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">columns</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">subset_name_col</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span>
+            <span class="s2">&quot;Subset Name :orange-badge[(Needs review)]&quot;</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">_subset_name&quot;</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;The subset name used for `datasets.load_datasets`, see &quot;</span>
+            <span class="s2">&quot;[here](https://huggingface.co/docs/datasets/v3.5.0/en/package_reference/loading_methods#datasets.load_dataset.name) for details.&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">split_col</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span>
+            <span class="s2">&quot;Eval Split :orange-badge[(Needs review)]&quot;</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">_split&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">prompt_key_col</span><span class="p">,</span> <span class="n">response_key_col</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">columns</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">prompt_key_col</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span>
+            <span class="s2">&quot;Prompt Key :orange-badge[(Needs review)]&quot;</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">_prompt_key&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">response_key_col</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span>
+            <span class="s2">&quot;Response Key :orange-badge[(Needs review)]&quot;</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">_response_key&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_eval_tasksets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">button</span><span class="p">(</span><span class="s2">&quot;Add Eval Taskset&quot;</span><span class="p">):</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;_eval_tasksets_num&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;_eval_tasksets_num&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">tabs</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">tabs</span><span class="p">(</span>
+                <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;Eval Taskset </span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;_eval_tasksets_num&quot;</span><span class="p">])]</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">tab</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tabs</span><span class="p">):</span>
+                <span class="k">with</span> <span class="n">tab</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_set_eval_taskset_idx</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_default_workflow_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">selectbox</span><span class="p">(</span>
@@ -1231,6 +1299,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;total_epochs&quot;</span><span class="p">,</span> <span class="s2">&quot;train_batch_size&quot;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_train_batch_size</span><span class="p">()</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;default_workflow_type&quot;</span><span class="p">,</span> <span class="s2">&quot;default_reward_fn_type&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_system_prompt</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_reply_prefix</span><span class="p">()</span>
+
         <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">DPO</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
             <span class="k">with</span> <span class="n">st</span><span class="o">.</span><span class="n">expander</span><span class="p">(</span><span class="s2">&quot;Taskset Configs&quot;</span><span class="p">,</span> <span class="n">expanded</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_set_taskset_path</span><span class="p">()</span>
@@ -1241,8 +1313,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_set_dpo_dataset_kwargs</span><span class="p">()</span>
 
         <span class="k">with</span> <span class="n">st</span><span class="o">.</span><span class="n">expander</span><span class="p">(</span><span class="s2">&quot;Eval Tasksets Configs&quot;</span><span class="p">,</span> <span class="n">expanded</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-            <span class="c1"># TODO:</span>
-            <span class="k">pass</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_eval_tasksets</span><span class="p">()</span>
 
         <span class="k">with</span> <span class="n">st</span><span class="o">.</span><span class="n">expander</span><span class="p">(</span><span class="s2">&quot;SFT Dataset Configs&quot;</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_sft_warmup_dataset_path</span><span class="p">()</span>
@@ -1252,8 +1323,6 @@
             <span class="k">with</span> <span class="n">st</span><span class="o">.</span><span class="n">expander</span><span class="p">(</span><span class="s2">&quot;Experiences Buffer Configs&quot;</span><span class="p">,</span> <span class="n">expanded</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_set_storage_type</span><span class="p">()</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_set_experience_buffer_path</span><span class="p">()</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;default_workflow_type&quot;</span><span class="p">,</span> <span class="s2">&quot;default_reward_fn_type&quot;</span><span class="p">])</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">buffer_advanced_tab</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">expander</span><span class="p">(</span><span class="s2">&quot;Advanced Config&quot;</span><span class="p">)</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer_advanced_tab</span><span class="p">:</span>
@@ -1719,10 +1788,19 @@
                                 <span class="s2">&quot;prompt_key&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;taskset_prompt_key&quot;</span><span class="p">],</span>
                                 <span class="s2">&quot;response_key&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;taskset_response_key&quot;</span><span class="p">],</span>
                             <span class="p">},</span>
+                            <span class="s2">&quot;rollout_args&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;repeat_times&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;repeat_times&quot;</span><span class="p">],</span>
+                                <span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;temperature&quot;</span><span class="p">],</span>
+                                <span class="s2">&quot;top_p&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;top_p&quot;</span><span class="p">],</span>
+                                <span class="s2">&quot;top_k&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;top_k&quot;</span><span class="p">],</span>
+                                <span class="s2">&quot;logprobs&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;logprobs&quot;</span><span class="p">],</span>
+                            <span class="p">},</span>
                         <span class="p">},</span>
                         <span class="s2">&quot;eval_tasksets&quot;</span><span class="p">:</span> <span class="p">[],</span>  <span class="c1"># TODO: add eval tasksets</span>
                         <span class="s2">&quot;default_workflow_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;default_workflow_type&quot;</span><span class="p">],</span>
                         <span class="s2">&quot;default_reward_fn_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;default_reward_fn_type&quot;</span><span class="p">],</span>
+                        <span class="s2">&quot;system_prompt&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;system_prompt&quot;</span><span class="p">],</span>
+                        <span class="s2">&quot;reply_prefix&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;reply_prefix&quot;</span><span class="p">],</span>
                     <span class="p">},</span>
                     <span class="s2">&quot;trainer_input&quot;</span><span class="p">:</span> <span class="p">{</span>
                         <span class="s2">&quot;experience_buffer&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -1736,26 +1814,21 @@
                     <span class="s2">&quot;engine_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;engine_type&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;engine_num&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;engine_num&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;runner_num&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;runner_num&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;repeat_times&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;repeat_times&quot;</span><span class="p">],</span>
                     <span class="c1"># &quot;chat_template&quot;: None,  # TODO: add chat template</span>
                     <span class="s2">&quot;tensor_parallel_size&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;tensor_parallel_size&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;enable_prefix_caching&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;enable_prefix_caching&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;enforce_eager&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;enforce_eager&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;dtype&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;dtype&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;temperature&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;top_p&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;top_p&quot;</span><span class="p">],</span>  <span class="c1"># TODO</span>
-                    <span class="s2">&quot;top_k&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;top_k&quot;</span><span class="p">],</span>  <span class="c1"># TODO</span>
                     <span class="s2">&quot;seed&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;seed&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;logprobs&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;logprobs&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;backend&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;backend&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;use_ray&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;use_ray&quot;</span><span class="p">],</span>  <span class="c1"># TODO</span>
-                    <span class="s2">&quot;gpu_memory_utilization&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;gpu_memory_utilization&quot;</span><span class="p">],</span>  <span class="c1"># TODO</span>
-                    <span class="s2">&quot;enable_chunked_prefill&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;enable_chunked_prefill&quot;</span><span class="p">],</span>  <span class="c1"># TODO</span>
+                    <span class="s2">&quot;use_ray&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;use_ray&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;gpu_memory_utilization&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;gpu_memory_utilization&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;enable_chunked_prefill&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;enable_chunked_prefill&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;use_v1&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
                     <span class="s2">&quot;max_pending_requests&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_pending_requests&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;max_waiting_steps&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_waiting_steps&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;max_timeout&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_timeout&quot;</span><span class="p">],</span>  <span class="c1"># TODO</span>
-                    <span class="s2">&quot;max_retry_times&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;explorer_max_retry_times&quot;</span><span class="p">],</span>  <span class="c1"># TODO</span>
+                    <span class="s2">&quot;max_timeout&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_timeout&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;max_retry_times&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;explorer_max_retry_times&quot;</span><span class="p">],</span>
                 <span class="p">},</span>
                 <span class="s2">&quot;synchronizer&quot;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="s2">&quot;sync_method&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sync_method&quot;</span><span class="p">],</span>
@@ -1776,6 +1849,18 @@
                 <span class="p">},</span>
             <span class="p">}</span>
 
+            <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;_eval_tasksets_num&quot;</span><span class="p">]):</span>
+                <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">_path&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+                    <span class="n">config</span><span class="p">[</span><span class="s2">&quot;buffer&quot;</span><span class="p">][</span><span class="s2">&quot;explorer_input&quot;</span><span class="p">][</span><span class="s2">&quot;eval_tasksets&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="p">{</span>
+                            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">_name&quot;</span><span class="p">],</span>
+                            <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">_path&quot;</span><span class="p">],</span>
+                            <span class="s2">&quot;subset_name&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">_subset_name&quot;</span><span class="p">],</span>
+                            <span class="s2">&quot;split&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">_split&quot;</span><span class="p">],</span>
+                            <span class="s2">&quot;prompt_key&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">_prompt_key&quot;</span><span class="p">],</span>
+                            <span class="s2">&quot;response_key&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">_response_key&quot;</span><span class="p">],</span>
+                        <span class="p">}</span>
+                    <span class="p">)</span>
             <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">DPO</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
                 <span class="n">experience_buffer</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;buffer&quot;</span><span class="p">][</span><span class="s2">&quot;trainer_input&quot;</span><span class="p">][</span><span class="s2">&quot;experience_buffer&quot;</span><span class="p">]</span>
                 <span class="n">experience_buffer</span><span class="p">[</span><span class="s2">&quot;split&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;dpo_dataset_train_split&quot;</span><span class="p">]</span>

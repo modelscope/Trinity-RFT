@@ -87,11 +87,15 @@
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;Base Workflow Class&quot;&quot;&quot;</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
 <span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">asdict</span><span class="p">,</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">FormatConfig</span><span class="p">,</span> <span class="n">GenerationConfig</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelWrapper</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.rewards.reward_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">MathRewardFn</span><span class="p">,</span> <span class="n">RewardFn</span>
@@ -104,6 +108,48 @@
 <span class="n">WORKFLOWS</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span><span class="s2">&quot;workflows&quot;</span><span class="p">)</span>
 
 
+<div class="viewcode-block" id="Task">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.Task">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Task</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A Task class that defines a task and its associated reward function / workflow.&quot;&quot;&quot;</span>
+
+    <span class="n">workflow</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Workflow</span><span class="p">]</span>
+    <span class="n">format_args</span><span class="p">:</span> <span class="n">FormatConfig</span>
+    <span class="n">rollout_args</span><span class="p">:</span> <span class="n">GenerationConfig</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">GenerationConfig</span><span class="p">)</span>
+    <span class="n">is_eval</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">reward_fn</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">RewardFn</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">raw_task</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># The raw data sample</span>
+
+<div class="viewcode-block" id="Task.to_workflow">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.Task.to_workflow">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_workflow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Workflow</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert the task to a workflow.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (ModelWrapper): The rollout model for the workflow.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Workflow: The generated workflow object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflow</span><span class="p">(</span>
+            <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+            <span class="n">task</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">task_desc</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+        <span class="n">prompt_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_args</span><span class="o">.</span><span class="n">prompt_key</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_task</span><span class="p">[</span><span class="n">prompt_key</span><span class="p">]</span> <span class="k">if</span> <span class="n">prompt_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_task</span> <span class="k">else</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">truth</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+        <span class="n">response_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_args</span><span class="o">.</span><span class="n">response_key</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_task</span><span class="p">[</span><span class="n">response_key</span><span class="p">]</span> <span class="k">if</span> <span class="n">response_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_task</span> <span class="k">else</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span></div>
+
+
+
 <div class="viewcode-block" id="Workflow">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.Workflow">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Workflow</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
@@ -114,7 +160,11 @@
 
 <div class="viewcode-block" id="Workflow.__init__">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.Workflow.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">ModelWrapper</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">ModelWrapper</span><span class="p">,</span>
+        <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span></div>
 
 
@@ -136,8 +186,15 @@
 
 <div class="viewcode-block" id="MultiTurnWorkflow.__init__">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.MultiTurnWorkflow.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">ModelWrapper</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">model</span><span class="p">)</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">ModelWrapper</span><span class="p">,</span>
+        <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+            <span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="MultiTurnWorkflow.run">
@@ -192,37 +249,52 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">model</span><span class="p">:</span> <span class="n">ModelWrapper</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;system_prompt&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">reply_prefix</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;reply_prefix&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># TODO: add reply_prefix</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">task_desc</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;task_desc&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">truth</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;truth&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">reward_fn</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;reward_fn&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reward_fn</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reward_fn</span><span class="p">,</span> <span class="n">RewardFn</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">reward_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reward_fn</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+            <span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">format_args</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">format_args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">format_args</span><span class="o">.</span><span class="n">system_prompt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reply_prefix</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">format_args</span><span class="o">.</span><span class="n">reply_prefix</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">raw_task</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">raw_task</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">task_desc</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">task_desc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">truth</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">truth</span>
+
+        <span class="n">reward_fn</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">reward_fn</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reward_fn</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">reward_fn</span><span class="p">,</span> <span class="n">RewardFn</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reward_fn</span><span class="p">:</span> <span class="n">RewardFn</span> <span class="o">=</span> <span class="n">reward_fn</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;`reward_fn` must be a subclass of `RewardFn`&quot;</span><span class="p">)</span>
-        <span class="c1"># Rollout n times</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">repeat_times</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;repeat_times&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_eval</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;is_eval&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span></div>
+        <span class="c1"># Rollout args</span>
+        <span class="n">rollout_args</span> <span class="o">=</span> <span class="n">asdict</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">rollout_args</span><span class="p">)</span>
+        <span class="n">rollout_args</span><span class="p">[</span><span class="s2">&quot;n&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rollout_args</span><span class="p">[</span><span class="s2">&quot;repeat_times&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rollout_args</span> <span class="o">=</span> <span class="n">rollout_args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_eval</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">is_eval</span></div>
 
 
-<div class="viewcode-block" id="SimpleWorkflow.run">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.SimpleWorkflow.run">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
-        <span class="c1"># TODO: Optimize the generate function</span>
+<div class="viewcode-block" id="SimpleWorkflow.format_messages">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.SimpleWorkflow.format_messages">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">format_messages</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">messages</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt</span><span class="p">:</span>
             <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt</span><span class="p">})</span>
         <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">task_desc</span><span class="p">})</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reply_prefix</span><span class="p">:</span>
             <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;assistant&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">reply_prefix</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">messages</span></div>
+
+
+<div class="viewcode-block" id="SimpleWorkflow.run">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.SimpleWorkflow.run">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+        <span class="c1"># TODO: Optimize the generate function</span>
+        <span class="n">messages</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_messages</span><span class="p">()</span>
 
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;start chat&quot;</span><span class="p">)</span>
-        <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_eval</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">repeat_times</span>
-        <span class="n">responses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">chat</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">responses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">chat</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">rollout_args</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">response</span> <span class="ow">in</span> <span class="n">responses</span><span class="p">:</span>
             <span class="n">reward</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reward_fn</span><span class="p">(</span>  <span class="c1"># type: ignore [misc]</span>
                 <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">response_text</span><span class="p">,</span>  <span class="c1"># type: ignore [arg-type]</span>
@@ -254,20 +326,18 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">model</span><span class="p">:</span> <span class="n">ModelWrapper</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;reward_fn&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;reward_fn&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">MathRewardFn</span>
-        <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;reward_fn&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">MathRewardFn</span> <span class="ow">and</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;system_prompt&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">kwargs</span><span class="p">[</span>
-                <span class="s2">&quot;system_prompt&quot;</span>
-            <span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;A conversation between User and Assistant. The user asks a question, and the Assistant solves it. The assistant first thinks about the reasoning process in the mind and then provides the user with the answer. The reasoning process and answer are enclosed within &lt;think&gt; &lt;/think&gt; and &lt;answer&gt; &lt;/answer&gt; tags, respectively, i.e.,</span>
+        <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">reward_fn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">reward_fn</span> <span class="o">=</span> <span class="n">MathRewardFn</span>
+        <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">reward_fn</span> <span class="o">==</span> <span class="n">MathRewardFn</span> <span class="ow">and</span> <span class="n">task</span><span class="o">.</span><span class="n">format_args</span><span class="o">.</span><span class="n">system_prompt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">format_args</span><span class="o">.</span><span class="n">system_prompt</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;A conversation between User and Assistant. The user asks a question, and the Assistant solves it. The assistant first thinks about the reasoning process in the mind and then provides the user with the answer. The reasoning process and answer are enclosed within &lt;think&gt; &lt;/think&gt; and &lt;answer&gt; &lt;/answer&gt; tags, respectively, i.e.,</span>
 <span class="s2">&lt;think&gt; reasoning process here &lt;/think&gt;</span>
 <span class="s2">&lt;answer&gt; answer here &lt;/answer&gt;.</span>
 <span class="s2">&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="n">model</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+            <span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span>
         <span class="p">)</span></div>
 </div>
 

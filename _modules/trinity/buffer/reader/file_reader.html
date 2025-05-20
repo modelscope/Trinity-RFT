@@ -97,8 +97,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">AlgorithmType</span><span class="p">,</span> <span class="n">PromptType</span><span class="p">,</span> <span class="n">ReadStrategy</span><span class="p">,</span> <span class="n">TaskType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.rewards</span><span class="w"> </span><span class="kn">import</span> <span class="n">REWARD_FUNCTIONS</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.task</span><span class="w"> </span><span class="kn">import</span> <span class="n">Task</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows</span><span class="w"> </span><span class="kn">import</span> <span class="n">WORKFLOWS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows</span><span class="w"> </span><span class="kn">import</span> <span class="n">WORKFLOWS</span><span class="p">,</span> <span class="n">Task</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Registry</span>
 
 <span class="n">FILE_READERS</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span><span class="s2">&quot;file_readers&quot;</span><span class="p">)</span>
@@ -281,6 +280,7 @@
 <div class="viewcode-block" id="RolloutDataReader.__init__">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.html#trinity.buffer.reader.file_reader.RolloutDataReader.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meta</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="n">meta</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">split</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">split</span>
         <span class="n">subset_name</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">subset_name</span>
@@ -317,8 +317,6 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_epochs</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">StopIteration</span>
         <span class="n">sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">)]</span>
-        <span class="n">task_desc</span> <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt_key</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_key</span> <span class="ow">in</span> <span class="n">sample</span> <span class="k">else</span> <span class="kc">None</span>
-        <span class="n">truth</span> <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">response_key</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">response_key</span> <span class="ow">in</span> <span class="n">sample</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="n">workflow_class</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">WORKFLOWS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">workflow_key</span><span class="p">])</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflow_key</span> <span class="ow">in</span> <span class="n">sample</span>
@@ -331,12 +329,12 @@
         <span class="p">)</span>
         <span class="k">assert</span> <span class="n">workflow_class</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;`default_reward_fn_type` or `workflow_key` is required&quot;</span>
         <span class="n">task</span> <span class="o">=</span> <span class="n">Task</span><span class="p">(</span>
-            <span class="n">task_desc</span><span class="o">=</span><span class="n">task_desc</span><span class="p">,</span>
-            <span class="n">truth</span><span class="o">=</span><span class="n">truth</span><span class="p">,</span>
             <span class="n">workflow</span><span class="o">=</span><span class="n">workflow_class</span><span class="p">,</span>
+            <span class="n">format_args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">format</span><span class="p">,</span>
+            <span class="n">rollout_args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">rollout_args</span><span class="p">,</span>
+            <span class="n">is_eval</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">task_type</span> <span class="o">==</span> <span class="n">TaskType</span><span class="o">.</span><span class="n">EVAL</span><span class="p">,</span>
             <span class="n">reward_fn</span><span class="o">=</span><span class="n">reward_fn</span><span class="p">,</span>
-            <span class="n">raw</span><span class="o">=</span><span class="n">sample</span><span class="p">,</span>
-            <span class="n">task_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">task_type</span><span class="p">,</span>
+            <span class="n">raw_task</span><span class="o">=</span><span class="n">sample</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task_type</span> <span class="o">==</span> <span class="n">TaskType</span><span class="o">.</span><span class="n">EVAL</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">):</span>

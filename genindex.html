@@ -146,6 +146,8 @@
 </li>
         <li><a href="build_api/trinity.common.html#trinity.common.config.FormatConfig.__init__">(trinity.common.config.FormatConfig method)</a>
 </li>
+        <li><a href="build_api/trinity.common.html#trinity.common.config.GenerationConfig.__init__">(trinity.common.config.GenerationConfig method)</a>
+</li>
         <li><a href="build_api/trinity.common.html#trinity.common.config.GlobalConfig.__init__">(trinity.common.config.GlobalConfig method)</a>
 </li>
         <li><a href="build_api/trinity.common.html#trinity.common.config.ModelConfig.__init__">(trinity.common.config.ModelConfig method)</a>
@@ -194,8 +196,6 @@
 </li>
         <li><a href="build_api/trinity.common.html#trinity.common.schema.TaskModel.__init__">(trinity.common.schema.TaskModel method)</a>
 </li>
-        <li><a href="build_api/trinity.common.html#trinity.common.task.Task.__init__">(trinity.common.task.Task method)</a>
-</li>
         <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Actor.__init__">(trinity.common.verl_config.Actor method)</a>
 </li>
         <li><a href="build_api/trinity.common.html#trinity.common.verl_config.ActorModel.__init__">(trinity.common.verl_config.ActorModel method)</a>
@@ -240,6 +240,8 @@
 </li>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.SimpleWorkflow.__init__">(trinity.common.workflows.SimpleWorkflow method)</a>
 </li>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.Task.__init__">(trinity.common.workflows.Task method)</a>
+</li>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.WebShopWorkflow.__init__">(trinity.common.workflows.WebShopWorkflow method)</a>
 </li>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.MathWorkflow.__init__">(trinity.common.workflows.workflow.MathWorkflow method)</a>
@@ -247,6 +249,8 @@
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.MultiTurnWorkflow.__init__">(trinity.common.workflows.workflow.MultiTurnWorkflow method)</a>
 </li>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.SimpleWorkflow.__init__">(trinity.common.workflows.workflow.SimpleWorkflow method)</a>
+</li>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.Task.__init__">(trinity.common.workflows.workflow.Task method)</a>
 </li>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.Workflow.__init__">(trinity.common.workflows.workflow.Workflow method)</a>
 </li>
@@ -733,13 +737,9 @@
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.GlobalConfig.eval_on_latest_ckp">eval_on_latest_ckp (trinity.common.config.GlobalConfig attribute)</a>
 </li>
-      <li><a href="build_api/trinity.common.html#trinity.common.config.StorageConfig.eval_repeat_times">eval_repeat_times (trinity.common.config.StorageConfig attribute)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.html#trinity.common.config.ExplorerInput.eval_tasksets">eval_tasksets (trinity.common.config.ExplorerInput attribute)</a>
-</li>
-      <li><a href="build_api/trinity.common.html#trinity.common.config.StorageConfig.eval_temperature">eval_temperature (trinity.common.config.StorageConfig attribute)</a>
 </li>
       <li><a href="build_api/trinity.utils.html#trinity.utils.eval_utils.evaluate_equation">evaluate_equation() (in module trinity.utils.eval_utils)</a>
 </li>
@@ -815,6 +815,18 @@
       </ul></li>
       <li><a href="build_api/trinity.utils.html#trinity.utils.log.NewLineFormatter.format">format() (trinity.utils.log.NewLineFormatter method)</a>
 </li>
+      <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.Task.format_args">format_args (trinity.common.workflows.Task attribute)</a>
+
+      <ul>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.Task.format_args">(trinity.common.workflows.workflow.Task attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.SimpleWorkflow.format_messages">format_messages() (trinity.common.workflows.SimpleWorkflow method)</a>
+
+      <ul>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.SimpleWorkflow.format_messages">(trinity.common.workflows.workflow.SimpleWorkflow method)</a>
+</li>
+      </ul></li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.FormatConfig">FormatConfig (class in trinity.common.config)</a>
 </li>
       <li><a href="build_api/trinity.common.rewards.html#trinity.common.rewards.FormatReward">FormatReward (class in trinity.common.rewards)</a>
@@ -823,10 +835,10 @@
         <li><a href="build_api/trinity.common.rewards.html#trinity.common.rewards.reward_fn.FormatReward">(class in trinity.common.rewards.reward_fn)</a>
 </li>
       </ul></li>
-      <li><a href="build_api/trinity.common.rewards.html#trinity.common.rewards.format_reward.FormatRewardShapper">FormatRewardShapper (class in trinity.common.rewards.format_reward)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="build_api/trinity.common.rewards.html#trinity.common.rewards.format_reward.FormatRewardShapper">FormatRewardShapper (class in trinity.common.rewards.format_reward)</a>
+</li>
       <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Critic.forward_max_token_len_per_gpu">forward_max_token_len_per_gpu (trinity.common.verl_config.Critic attribute)</a>
 
       <ul>
@@ -902,6 +914,8 @@
 </li>
       </ul></li>
       <li><a href="build_api/trinity.trainer.verl.html#trinity.trainer.verl.fsdp_workers.ActorRolloutRefWorker.generate_sequences">generate_sequences() (trinity.trainer.verl.fsdp_workers.ActorRolloutRefWorker method)</a>
+</li>
+      <li><a href="build_api/trinity.common.html#trinity.common.config.GenerationConfig">GenerationConfig (class in trinity.common.config)</a>
 </li>
       <li><a href="build_api/trinity.utils.html#trinity.utils.registry.Registry.get">get() (trinity.utils.registry.Registry method)</a>
 </li>
@@ -1061,10 +1075,10 @@
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.StorageConfig.index">index (trinity.common.config.StorageConfig attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.models.html#trinity.common.models.model.InferenceModel">InferenceModel (class in trinity.common.models.model)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.html#trinity.common.experience.Experience.info">info (trinity.common.experience.Experience attribute)</a>
 </li>
       <li><a href="build_api/trinity.trainer.verl.html#trinity.trainer.verl.fsdp_workers.ActorRolloutRefWorker.init_model">init_model() (trinity.trainer.verl.fsdp_workers.ActorRolloutRefWorker method)</a>
@@ -1085,6 +1099,12 @@
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.constants.AlgorithmType.is_dpo">is_dpo() (trinity.common.constants.AlgorithmType method)</a>
 </li>
+      <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.Task.is_eval">is_eval (trinity.common.workflows.Task attribute)</a>
+
+      <ul>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.Task.is_eval">(trinity.common.workflows.workflow.Task attribute)</a>
+</li>
+      </ul></li>
       <li><a href="build_api/trinity.utils.html#trinity.utils.distributed.is_ipv6_address">is_ipv6_address() (in module trinity.utils.distributed)</a>
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.constants.AlgorithmType.is_rft">is_rft() (trinity.common.constants.AlgorithmType method)</a>
@@ -1211,7 +1231,7 @@
       </ul></li>
       <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Trainer.logger">logger (trinity.common.verl_config.Trainer attribute)</a>
 </li>
-      <li><a href="build_api/trinity.common.html#trinity.common.config.ExplorerConfig.logprobs">logprobs (trinity.common.config.ExplorerConfig attribute)</a>
+      <li><a href="build_api/trinity.common.html#trinity.common.config.GenerationConfig.logprobs">logprobs (trinity.common.config.GenerationConfig attribute)</a>
 
       <ul>
         <li><a href="build_api/trinity.common.html#trinity.common.experience.Experience.logprobs">(trinity.common.experience.Experience attribute)</a>
@@ -1422,8 +1442,6 @@
         <li><a href="build_api/trinity.common.rewards.html#module-trinity.common.rewards.tool_reward">trinity.common.rewards.tool_reward</a>
 </li>
         <li><a href="build_api/trinity.common.html#module-trinity.common.schema">trinity.common.schema</a>
-</li>
-        <li><a href="build_api/trinity.common.html#module-trinity.common.task">trinity.common.task</a>
 </li>
         <li><a href="build_api/trinity.common.html#module-trinity.common.verl_config">trinity.common.verl_config</a>
 </li>
@@ -1700,8 +1718,12 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.html#trinity.common.constants.ReadStrategy.RANDOM">RANDOM (trinity.common.constants.ReadStrategy attribute)</a>
 </li>
-      <li><a href="build_api/trinity.common.html#trinity.common.task.Task.raw">raw (trinity.common.task.Task attribute)</a>
+      <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.Task.raw_task">raw_task (trinity.common.workflows.Task attribute)</a>
+
+      <ul>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.Task.raw_task">(trinity.common.workflows.workflow.Task attribute)</a>
 </li>
+      </ul></li>
       <li><a href="build_api/trinity.trainer.verl.html#trinity.trainer.verl.ray_trainer.RayPPOTrainer">RayPPOTrainer (class in trinity.trainer.verl.ray_trainer)</a>
 </li>
       <li><a href="build_api/trinity.buffer.html#trinity.buffer.buffer_reader.BufferReader.read">read() (trinity.buffer.buffer_reader.BufferReader method)</a>
@@ -1752,8 +1774,14 @@
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Trainer.remove_previous_ckpt_in_save">remove_previous_ckpt_in_save (trinity.common.verl_config.Trainer attribute)</a>
 </li>
-      <li><a href="build_api/trinity.common.html#trinity.common.config.ExplorerConfig.repeat_times">repeat_times (trinity.common.config.ExplorerConfig attribute)</a>
+      <li><a href="build_api/trinity.common.html#trinity.common.config.GenerationConfig.repeat_times">repeat_times (trinity.common.config.GenerationConfig attribute)</a>
 </li>
+      <li><a href="build_api/trinity.common.html#trinity.common.config.ExplorerInput.reply_prefix">reply_prefix (trinity.common.config.ExplorerInput attribute)</a>
+
+      <ul>
+        <li><a href="build_api/trinity.common.html#trinity.common.config.FormatConfig.reply_prefix">(trinity.common.config.FormatConfig attribute)</a>
+</li>
+      </ul></li>
       <li><a href="build_api/trinity.trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.reset_experiences_example_table">reset_experiences_example_table() (trinity.trainer.verl_trainer.VerlPPOTrainerWrapper method)</a>
 </li>
       <li><a href="build_api/trinity.manager.html#trinity.manager.config_manager.ConfigManager.reset_session_state">reset_session_state() (trinity.manager.config_manager.ConfigManager method)</a>
@@ -1803,7 +1831,9 @@
       <li><a href="build_api/trinity.common.html#trinity.common.schema.RftDatasetModel.reward_fn">reward_fn (trinity.common.schema.RftDatasetModel attribute)</a>
 
       <ul>
-        <li><a href="build_api/trinity.common.html#trinity.common.task.Task.reward_fn">(trinity.common.task.Task attribute)</a>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.Task.reward_fn">(trinity.common.workflows.Task attribute)</a>
+</li>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.Task.reward_fn">(trinity.common.workflows.workflow.Task attribute)</a>
 </li>
       </ul></li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.FormatConfig.reward_fn_key">reward_fn_key (trinity.common.config.FormatConfig attribute)</a>
@@ -1850,6 +1880,14 @@
 </li>
       <li><a href="build_api/trinity.trainer.verl.html#trinity.trainer.verl.ray_trainer.Role.Rollout">Rollout (trinity.trainer.verl.ray_trainer.Role attribute)</a>
 </li>
+      <li><a href="build_api/trinity.common.html#trinity.common.config.StorageConfig.rollout_args">rollout_args (trinity.common.config.StorageConfig attribute)</a>
+
+      <ul>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.Task.rollout_args">(trinity.common.workflows.Task attribute)</a>
+</li>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.Task.rollout_args">(trinity.common.workflows.workflow.Task attribute)</a>
+</li>
+      </ul></li>
       <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Critic.rollout_n">rollout_n (trinity.common.verl_config.Critic attribute)</a>
 </li>
       <li><a href="build_api/trinity.buffer.reader.html#trinity.buffer.reader.file_reader.RolloutDataReader">RolloutDataReader (class in trinity.buffer.reader.file_reader)</a>
@@ -2086,6 +2124,12 @@
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.constants.SyncMethodEnumMeta">SyncMethodEnumMeta (class in trinity.common.constants)</a>
 </li>
+      <li><a href="build_api/trinity.common.html#trinity.common.config.ExplorerInput.system_prompt">system_prompt (trinity.common.config.ExplorerInput attribute)</a>
+
+      <ul>
+        <li><a href="build_api/trinity.common.html#trinity.common.config.FormatConfig.system_prompt">(trinity.common.config.FormatConfig attribute)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -2094,22 +2138,24 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.html#trinity.common.verl_config.KL_Ctrl.target_kl">target_kl (trinity.common.verl_config.KL_Ctrl attribute)</a>
 </li>
-      <li><a href="build_api/trinity.common.html#trinity.common.task.Task">Task (class in trinity.common.task)</a>
+      <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.Task">Task (class in trinity.common.workflows)</a>
+
+      <ul>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.Task">(class in trinity.common.workflows.workflow)</a>
 </li>
+      </ul></li>
       <li><a href="build_api/trinity.buffer.schema.html#trinity.buffer.schema.sql_schema.TaskModel.task_desc">task_desc (trinity.buffer.schema.sql_schema.TaskModel attribute)</a>
 
       <ul>
         <li><a href="build_api/trinity.common.html#trinity.common.schema.TaskModel.task_desc">(trinity.common.schema.TaskModel attribute)</a>
 </li>
-        <li><a href="build_api/trinity.common.html#trinity.common.task.Task.task_desc">(trinity.common.task.Task attribute)</a>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.Task.task_desc">(trinity.common.workflows.Task property)</a>
+</li>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.Task.task_desc">(trinity.common.workflows.workflow.Task property)</a>
 </li>
       </ul></li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.StorageConfig.task_type">task_type (trinity.common.config.StorageConfig attribute)</a>
-
-      <ul>
-        <li><a href="build_api/trinity.common.html#trinity.common.task.Task.task_type">(trinity.common.task.Task attribute)</a>
 </li>
-      </ul></li>
       <li><a href="build_api/trinity.buffer.schema.html#trinity.buffer.schema.sql_schema.TaskModel">TaskModel (class in trinity.buffer.schema.sql_schema)</a>
 
       <ul>
@@ -2122,7 +2168,7 @@
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Actor.tau">tau (trinity.common.verl_config.Actor attribute)</a>
 </li>
-      <li><a href="build_api/trinity.common.html#trinity.common.config.ExplorerConfig.temperature">temperature (trinity.common.config.ExplorerConfig attribute)</a>
+      <li><a href="build_api/trinity.common.html#trinity.common.config.GenerationConfig.temperature">temperature (trinity.common.config.GenerationConfig attribute)</a>
 
       <ul>
         <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Rollout.temperature">(trinity.common.verl_config.Rollout attribute)</a>
@@ -2154,8 +2200,12 @@
         <li><a href="build_api/trinity.common.html#trinity.common.schema.SFTDataModel.to_experience">(trinity.common.schema.SFTDataModel method)</a>
 </li>
       </ul></li>
-      <li><a href="build_api/trinity.common.html#trinity.common.task.Task.to_workflow">to_workflow() (trinity.common.task.Task method)</a>
+      <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.Task.to_workflow">to_workflow() (trinity.common.workflows.Task method)</a>
+
+      <ul>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.Task.to_workflow">(trinity.common.workflows.workflow.Task method)</a>
 </li>
+      </ul></li>
       <li><a href="build_api/trinity.common.models.html#trinity.common.models.utils.tokenize_and_mask_messages_default">tokenize_and_mask_messages_default() (in module trinity.common.models.utils)</a>
 </li>
       <li><a href="build_api/trinity.common.models.html#trinity.common.models.utils.tokenize_and_mask_messages_hf">tokenize_and_mask_messages_hf() (in module trinity.common.models.utils)</a>
@@ -2174,13 +2224,13 @@
         <li><a href="build_api/trinity.common.html#trinity.common.experience.Experiences.tokens">(trinity.common.experience.Experiences attribute)</a>
 </li>
       </ul></li>
-      <li><a href="build_api/trinity.common.html#trinity.common.config.ExplorerConfig.top_k">top_k (trinity.common.config.ExplorerConfig attribute)</a>
+      <li><a href="build_api/trinity.common.html#trinity.common.config.GenerationConfig.top_k">top_k (trinity.common.config.GenerationConfig attribute)</a>
 
       <ul>
         <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Rollout.top_k">(trinity.common.verl_config.Rollout attribute)</a>
 </li>
       </ul></li>
-      <li><a href="build_api/trinity.common.html#trinity.common.config.ExplorerConfig.top_p">top_p (trinity.common.config.ExplorerConfig attribute)</a>
+      <li><a href="build_api/trinity.common.html#trinity.common.config.GenerationConfig.top_p">top_p (trinity.common.config.GenerationConfig attribute)</a>
 
       <ul>
         <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Rollout.top_p">(trinity.common.verl_config.Rollout attribute)</a>
@@ -2355,6 +2405,8 @@
         <li><a href="build_api/trinity.buffer.html#module-trinity.buffer.utils">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     trinity.buffer.writer
 
@@ -2362,8 +2414,6 @@
         <li><a href="build_api/trinity.buffer.writer.html#module-trinity.buffer.writer">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     trinity.buffer.writer.queue_writer
 
@@ -2516,13 +2566,6 @@
 
       <ul>
         <li><a href="build_api/trinity.common.html#module-trinity.common.schema">module</a>
-</li>
-      </ul></li>
-      <li>
-    trinity.common.task
-
-      <ul>
-        <li><a href="build_api/trinity.common.html#module-trinity.common.task">module</a>
 </li>
       </ul></li>
       <li>
@@ -2695,8 +2738,12 @@
       </ul></li>
       <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Data.truncation">truncation (trinity.common.verl_config.Data attribute)</a>
 </li>
-      <li><a href="build_api/trinity.common.html#trinity.common.task.Task.truth">truth (trinity.common.task.Task attribute)</a>
+      <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.Task.truth">truth (trinity.common.workflows.Task property)</a>
+
+      <ul>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.Task.truth">(trinity.common.workflows.workflow.Task property)</a>
 </li>
+      </ul></li>
       <li><a href="build_api/trinity.common.html#trinity.common.verl_config.KL_Ctrl.type">type (trinity.common.verl_config.KL_Ctrl attribute)</a>
 </li>
   </ul></td>
@@ -2803,14 +2850,16 @@
 </li>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.Workflow">Workflow (class in trinity.common.workflows.workflow)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.html#trinity.common.schema.RftDatasetModel.workflow">workflow (trinity.common.schema.RftDatasetModel attribute)</a>
 
       <ul>
-        <li><a href="build_api/trinity.common.html#trinity.common.task.Task.workflow">(trinity.common.task.Task attribute)</a>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.Task.workflow">(trinity.common.workflows.Task attribute)</a>
+</li>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.Task.workflow">(trinity.common.workflows.workflow.Task attribute)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.html#trinity.common.config.FormatConfig.workflow_key">workflow_key (trinity.common.config.FormatConfig attribute)</a>
 </li>
       <li><a href="build_api/trinity.buffer.schema.html#trinity.buffer.schema.sql_schema.TaskModel.workflow_type">workflow_type (trinity.buffer.schema.sql_schema.TaskModel attribute)</a>

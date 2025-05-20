@@ -45,14 +45,6 @@ trinity.common.schema module
    :undoc-members:
    :show-inheritance:
 
-trinity.common.task module
---------------------------
-
-.. automodule:: trinity.common.task
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 trinity.common.verl\_config module
 ----------------------------------
 
