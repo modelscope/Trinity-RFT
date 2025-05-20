@@ -190,9 +190,31 @@ class WebShopWorkflow(MultiTurnWorkflow):
             model=model,
             task=task,
         )
+        self.max_env_steps = 15
+        self.reset(task)
+
+        # TODO: Make parallel envs
+        try:
+            import gym
+            from web_agent_site.envs import WebAgentTextEnv  # noqa: F401
+        except Exception as e:
+            print("Please make sure you have installed the web_agent_site package.")
+            error_message = f"Error importing WebAgentTextEnv {str(e)}. Please make sure you have installed the web_agent_site package, following the instructions in https://github.com/princeton-nlp/WebShop"
+            raise ImportError(error_message)
+        print("Making GYM env")
+        # NOTE: Hosting the env require ~15GB CPU memory.
+        # If you want easier env, you can set the num_products to 1000 or 100000.
+        self.env = gym.make(
+            "WebAgentTextEnv-v0", observation_mode="text_rich", num_products=None, human_goals=True
+        )
+
+    @property
+    def resettable(self):
+        return True
+
+    def reset(self, task: Task):
         self.task_desc = task.task_desc or "0"
         self.repeat_times = task.rollout_args.repeat_times
-        self.max_env_steps = 15
 
     def get_model_response(self, messages):
         responses = self.model.chat(messages, repeat_times=1)
@@ -241,26 +263,10 @@ class WebShopWorkflow(MultiTurnWorkflow):
                 {"session_id": session_id, "env_rounds": r, "env_done": 1 if done else 0},
             )
             experience_list.append(experience)
-        # Close the env to save cpu memory
-        env.close()
         return experience_list
 
     def run(self) -> List[Experience]:
         # assume the task_description is the session_id generated.
         session_id = int(self.task_desc)
         rollout_n = self.repeat_times
-        # TODO: Make parallel envs
-        try:
-            import gym
-            from web_agent_site.envs import WebAgentTextEnv  # noqa: F401
-        except Exception as e:
-            print("Please make sure you have installed the web_agent_site package.")
-            error_message = f"Error importing WebAgentTextEnv {str(e)}. Please make sure you have installed the web_agent_site package, following the instructions in https://github.com/princeton-nlp/WebShop"
-            raise ImportError(error_message)
-        print("Making GYM env")
-        # NOTE: Hosting the env require ~15GB CPU memory.
-        # If you want easier env, you can set the num_products to 1000 or 100000.
-        env = gym.make(
-            "WebAgentTextEnv-v0", observation_mode="text_rich", num_products=None, human_goals=True
-        )
-        return self.generate_env_inference_samples(env, session_id, rollout_n)
+        return self.generate_env_inference_samples(self.env, session_id, rollout_n)

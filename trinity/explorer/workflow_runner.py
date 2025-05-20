@@ -39,6 +39,7 @@ class WorkflowRunner:
         self.model = model
         self.model_wrapper = ModelWrapper(model, config.explorer.engine_type)
         self.logger = get_logger(__name__)
+        self.workflow_instance = None
 
     def is_alive(self):
         return True
@@ -47,8 +48,15 @@ class WorkflowRunner:
         """Init workflow from the task and run it."""
         if task.workflow is None:
             raise ValueError("Workflow is not set in the task.")
-        workflow = task.to_workflow(self.model_wrapper)
-        return workflow.run()
+        if (
+            self.workflow_instance is None
+            or not self.workflow_instance.__class__ == task.workflow
+            or not self.workflow_instance.resettable
+        ):
+            self.workflow_instance = task.to_workflow(self.model_wrapper)
+        else:
+            self.workflow_instance.reset(task)
+        return self.workflow_instance.run()
 
     def run_task(self, task: Task) -> Status:
         """Run the task and return the states."""

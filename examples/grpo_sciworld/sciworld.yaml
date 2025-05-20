@@ -19,7 +19,7 @@ buffer:
       storage_type: file
       path: 'scripts/data_prepare/sciworld_data'
       format:
-        prompt_key: 'game_file'
+        prompt_key: 'task_desc'
       rollout_args:
         repeat_times: 8
         temperature: 1.0
