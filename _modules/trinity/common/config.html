@@ -219,7 +219,8 @@
     <span class="n">total_epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">eval_interval</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span>
-    <span class="n">eval_on_latest_ckp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span></div>
+    <span class="n">eval_on_latest_ckp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">algorithm_type</span><span class="p">:</span> <span class="n">AlgorithmType</span> <span class="o">=</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">PPO</span></div>
 
 
 
@@ -348,7 +349,6 @@
     <span class="n">trainer_config</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
 
     <span class="c1"># train algorithm</span>
-    <span class="n">algorithm_type</span><span class="p">:</span> <span class="n">AlgorithmType</span> <span class="o">=</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">PPO</span>
     <span class="n">get_exp_strategy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1"># warmup config</span>
@@ -442,7 +442,7 @@
         <span class="c1"># check eval_interval</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">!=</span> <span class="s2">&quot;bench&quot;</span>
-            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">algorithm_type</span> <span class="o">!=</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">DPO</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_config</span><span class="o">.</span><span class="n">algorithm_type</span> <span class="o">!=</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">DPO</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_config</span><span class="o">.</span><span class="n">eval_interval</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_interval</span> <span class="o">!=</span> <span class="mi">0</span>
         <span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">global_config</span><span class="o">.</span><span class="n">eval_interval</span> <span class="o">=</span> <span class="p">(</span>
@@ -455,12 +455,12 @@
         <span class="c1"># check save_interval</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">!=</span> <span class="s2">&quot;bench&quot;</span>
-            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">algorithm_type</span> <span class="o">!=</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">DPO</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_config</span><span class="o">.</span><span class="n">algorithm_type</span> <span class="o">!=</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">DPO</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_method</span> <span class="o">==</span> <span class="n">SyncMethod</span><span class="o">.</span><span class="n">CHECKPOINT</span>
         <span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">save_interval</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_interval</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;When `trainer.algorithm_type` != `DPO` and `synchronizer.sync_method` == `checkpoint`, &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;When `global_config.algorithm_type` != `DPO` and `synchronizer.sync_method` == `checkpoint`, &quot;</span>
                     <span class="sa">f</span><span class="s2">&quot;`trainer.save_interval` will be set to &quot;</span>
                     <span class="sa">f</span><span class="s2">&quot;`synchronizer.sync_interval = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_interval</span><span class="si">}</span><span class="s2">`.&quot;</span>
                 <span class="p">)</span>
@@ -523,20 +523,24 @@
                     <span class="sa">f</span><span class="s2">&quot;Auto set `buffer.trainer_input.experience_buffer` to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="p">)</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;train&quot;</span><span class="p">:</span>  <span class="c1"># TODO: to be check</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">algorithm_type</span><span class="o">.</span><span class="n">is_dpo</span><span class="p">():</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_config</span><span class="o">.</span><span class="n">algorithm_type</span><span class="o">.</span><span class="n">is_dpo</span><span class="p">():</span>
                 <span class="k">if</span> <span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span> <span class="ow">is</span> <span class="kc">None</span>
                     <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="o">.</span><span class="n">path</span>
                 <span class="p">):</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="s2">&quot;`buffer.trainer_input.experience_buffer.path` is required when `trainer.algorithm_type == AlgorithmType.DPO`&quot;</span>
+                        <span class="s2">&quot;`buffer.trainer_input.experience_buffer.path` is required when `global_config.algorithm_type == AlgorithmType.DPO`&quot;</span>
                     <span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="s2">&quot;train&quot;</span><span class="p">]:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="o">.</span><span class="n">algorithm_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">algorithm_type</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="o">.</span><span class="n">algorithm_type</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">global_config</span><span class="o">.</span><span class="n">algorithm_type</span>
+            <span class="p">)</span>
 
         <span class="c1"># set buffer.explorer_output</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_output</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_output</span><span class="o">.</span><span class="n">algorithm_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_config</span><span class="o">.</span><span class="n">algorithm_type</span>
 
         <span class="c1"># check trainer_input.sft_warmup_dataset</span>
         <span class="k">if</span> <span class="p">(</span>
@@ -575,7 +579,7 @@
         <span class="c1"># check mode</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;explore&quot;</span><span class="p">,</span> <span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="s2">&quot;bench&quot;</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid mode: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">algorithm_type</span> <span class="o">==</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">DPO</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;both&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_config</span><span class="o">.</span><span class="n">algorithm_type</span> <span class="o">==</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">DPO</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;both&quot;</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;DPO does not support `both` mode&quot;</span><span class="p">)</span>
 
         <span class="c1"># check model path</span>
@@ -589,21 +593,22 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">engine_num</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">tensor_parallel_size</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">backend</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">backend</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;bench&quot;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_method</span> <span class="o">!=</span> <span class="n">SyncMethod</span><span class="o">.</span><span class="n">CHECKPOINT</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="s2">&quot;explore&quot;</span><span class="p">,</span> <span class="s2">&quot;bench&quot;</span><span class="p">]</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_method</span> <span class="o">!=</span> <span class="n">SyncMethod</span><span class="o">.</span><span class="n">CHECKPOINT</span>
+        <span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_method</span> <span class="o">=</span> <span class="n">SyncMethod</span><span class="o">.</span><span class="n">CHECKPOINT</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                <span class="s2">&quot;Bench mode only supports checkpoint synchronization, set `synchronizer.sync_method` to `checkpoint`.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="si">}</span><span class="s2">` mode only supports checkpoint synchronization, set `synchronizer.sync_method` to `checkpoint`.&quot;</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">algorithm_type</span> <span class="o">==</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">DPO</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">global_config</span><span class="o">.</span><span class="n">algorithm_type</span> <span class="o">==</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">DPO</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_method</span> <span class="o">!=</span> <span class="n">SyncMethod</span><span class="o">.</span><span class="n">CHECKPOINT</span>
         <span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_method</span> <span class="o">=</span> <span class="n">SyncMethod</span><span class="o">.</span><span class="n">CHECKPOINT</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                 <span class="s2">&quot;DPO only supports checkpoint synchronization, set `synchronizer.sync_method` to `checkpoint`.&quot;</span>
             <span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_method</span> <span class="o">==</span> <span class="n">SyncMethod</span><span class="o">.</span><span class="n">NCCL</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">!=</span> <span class="s2">&quot;both&quot;</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;`nccl` synchronization is only supported in both mode.&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_interval</span><span class="p">()</span>
 

@@ -157,6 +157,7 @@
             <span class="s2">&quot;_train_batch_size_per_gpu&quot;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
             <span class="s2">&quot;train_batch_size&quot;</span><span class="p">:</span> <span class="mi">96</span><span class="p">,</span>
             <span class="s2">&quot;eval_interval&quot;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+            <span class="s2">&quot;algorithm_type&quot;</span><span class="p">:</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">PPO</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
             <span class="c1"># Taskset Configs</span>
             <span class="s2">&quot;taskset_path&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
             <span class="s2">&quot;taskset_subset_name&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
@@ -222,7 +223,6 @@
             <span class="s2">&quot;sync_timeout&quot;</span><span class="p">:</span> <span class="mi">1200</span><span class="p">,</span>
             <span class="c1"># Trainer Configs</span>
             <span class="s2">&quot;trainer_type&quot;</span><span class="p">:</span> <span class="s2">&quot;verl&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;algorithm_type&quot;</span><span class="p">:</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">PPO</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
             <span class="s2">&quot;sft_warmup_steps&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
             <span class="s2">&quot;_nccl_save_interval&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
             <span class="s2">&quot;save_interval&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
@@ -1705,20 +1705,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">trainer_n_gpus_per_node</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;gpu_per_node&quot;</span><span class="p">]</span>
 
-        <span class="n">critic_model_path</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;critic_model_path&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;critic_model_path&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="k">else</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;model_path&quot;</span><span class="p">]</span>
-        <span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">DPO</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
-            <span class="k">pass</span>
-            <span class="c1"># experience_buffer_path = (</span>
-            <span class="c1">#     st.session_state[&quot;experience_buffer_path&quot;].strip()</span>
-            <span class="c1">#     if st.session_state[&quot;experience_buffer_path&quot;].strip()</span>
-            <span class="c1">#     else st.session_state[&quot;dataset_path&quot;].strip()</span>
-            <span class="c1"># )</span>
-        <span class="k">else</span><span class="p">:</span>  <span class="c1"># not dpo algorithms</span>
+        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">DPO</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
             <span class="n">experience_buffer_path</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;experience_buffer_path&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
             <span class="k">if</span> <span class="p">(</span>
                 <span class="ow">not</span> <span class="n">experience_buffer_path</span>
@@ -1762,10 +1749,10 @@
                     <span class="s2">&quot;total_epochs&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;total_epochs&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;batch_size&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;train_batch_size&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;eval_interval&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;eval_interval&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;algorithm_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">],</span>
                 <span class="p">},</span>
                 <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="s2">&quot;model_path&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;model_path&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;critic_model_path&quot;</span><span class="p">:</span> <span class="n">critic_model_path</span><span class="p">,</span>
                     <span class="s2">&quot;max_prompt_tokens&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_prompt_tokens&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;max_response_tokens&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_response_tokens&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;checkpoint_path&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;checkpoint_path&quot;</span><span class="p">],</span>
@@ -1837,7 +1824,6 @@
                 <span class="p">},</span>
                 <span class="s2">&quot;trainer&quot;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="s2">&quot;trainer_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;trainer_type&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;algorithm_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;trainer_config&quot;</span><span class="p">:</span> <span class="n">trainer_config</span><span class="p">,</span>
                     <span class="s2">&quot;sft_warmup_steps&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_steps&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;save_interval&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;save_interval&quot;</span><span class="p">],</span>
@@ -1848,6 +1834,13 @@
                     <span class="s2">&quot;monitor_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;monitor_type&quot;</span><span class="p">],</span>
                 <span class="p">},</span>
             <span class="p">}</span>
+
+            <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;adv_estimator&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">AdvantageEstimator</span><span class="o">.</span><span class="n">GAE</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                <span class="n">config</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">][</span><span class="s2">&quot;critic_model_path&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;critic_model_path&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;critic_model_path&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    <span class="k">else</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;model_path&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
 
             <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;_eval_tasksets_num&quot;</span><span class="p">]):</span>
                 <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">_path&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
