@@ -399,7 +399,9 @@ class Config:
                         "`buffer.trainer_input.experience_buffer.path` is required when `global_config.algorithm_type == AlgorithmType.DPO`"
                     )
         if self.buffer.trainer_input.experience_buffer is not None:
-            self.buffer.trainer_input.experience_buffer.algorithm_type = self.global_config.algorithm_type
+            self.buffer.trainer_input.experience_buffer.algorithm_type = (
+                self.global_config.algorithm_type
+            )
 
         # set buffer.explorer_output
         if self.buffer.explorer_output is None:
@@ -456,7 +458,10 @@ class Config:
             self.explorer.engine_num * self.explorer.tensor_parallel_size
         )
         self.synchronizer.backend = self.explorer.backend
-        if self.mode in ["train", "explore", "bench"] and self.synchronizer.sync_method != SyncMethod.CHECKPOINT:
+        if (
+            self.mode in ["train", "explore", "bench"]
+            and self.synchronizer.sync_method != SyncMethod.CHECKPOINT
+        ):
             self.synchronizer.sync_method = SyncMethod.CHECKPOINT
             logger.warning(
                 f"`{self.mode}` mode only supports checkpoint synchronization, set `synchronizer.sync_method` to `checkpoint`."
