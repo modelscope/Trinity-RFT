@@ -28,7 +28,10 @@ class FormatConfig:
     prompt_key: str = "prompt"
     response_key: str = "response"
     messages_key: str = "message"
-    chat_template: str = ""
+    chat_template: str = ""  # deprecated
+
+    system_prompt: Optional[str] = None
+    reply_prefix: Optional[str] = None
 
     # for sample-level task controlling
     reward_fn_key: str = ""
@@ -48,6 +51,17 @@ class FormatConfig:
 
 
 @dataclass
+class GenerationConfig:
+    # repeat each task for `repeat_times` times (for GPRO-like algorithms)
+    repeat_times: int = 1
+
+    temperature: float = 0.0
+    top_p: float = 1.0
+    top_k: int = -1
+    logprobs: int = 0  # vLLM return `logprobs + 1` elements
+
+
+@dataclass
 class StorageConfig:
     """Storage config."""
 
@@ -63,18 +77,11 @@ class StorageConfig:
     index: int = 0
 
     # used for algorithm_type is None
-    task_type: TaskType = TaskType.EXPLORE
+    task_type: TaskType = TaskType.EXPLORE  # automatically set
     default_workflow_type: Optional[str] = None
     default_reward_fn_type: Optional[str] = None
     total_epochs: int = 1  # automatically set
-    repeat_times: int = (
-        1  # if task_type == TaskType.EXPLORE, it will be set to `explorer.repeat_times`
-    )
-    temperature: float = (
-        0.1  # if task_type == TaskType.EXPLORE, it will be set to `explorer.temperature`
-    )
-    system_prompt: Optional[str] = None
-    reply_prefix: Optional[str] = None
+    rollout_args: GenerationConfig = field(default_factory=GenerationConfig)
 
 
 @dataclass
@@ -187,9 +194,6 @@ class ExplorerConfig:
     # For async engine (vllm_async), it can be larger than `engine_num`, e.g. 16 * `engine_num`
     runner_num: int = 1
 
-    # repeat each task for `repeat_times` times (for GPRO-like algorithms)
-    repeat_times: int = 1
-
     # for rollout tokneize
     chat_template: Optional[str] = None
 
@@ -198,11 +202,7 @@ class ExplorerConfig:
     enable_prefix_caching: bool = False
     enforce_eager: bool = True
     dtype: str = "bfloat16"
-    temperature: float = 0.0
-    top_p: float = 1.0
-    top_k: int = -1
     seed: int = 42
-    logprobs: int = 0  # vLLM return `logprobs + 1` elements
     backend: str = "nccl"
     use_ray: bool = False
     gpu_memory_utilization: float = 0.9
@@ -342,8 +342,6 @@ class Config:
             self.buffer.explorer_input.taskset.name = "taskset"
         self.buffer.explorer_input.taskset.task_type = TaskType.EXPLORE
         self.buffer.explorer_input.taskset.total_epochs = self.global_config.total_epochs
-        self.buffer.explorer_input.taskset.repeat_times = self.explorer.repeat_times
-        self.buffer.explorer_input.taskset.temperature = self.explorer.temperature
         if self.buffer.explorer_input.taskset.default_workflow_type is None:
             self.buffer.explorer_input.taskset.default_workflow_type = (
                 self.buffer.explorer_input.default_workflow_type
@@ -352,12 +350,12 @@ class Config:
             self.buffer.explorer_input.taskset.default_reward_fn_type = (
                 self.buffer.explorer_input.default_reward_fn_type
             )
-        if self.buffer.explorer_input.taskset.system_prompt is None:
-            self.buffer.explorer_input.taskset.system_prompt = (
+        if self.buffer.explorer_input.taskset.format.system_prompt is None:
+            self.buffer.explorer_input.taskset.format.system_prompt = (
                 self.buffer.explorer_input.system_prompt
             )
-        if self.buffer.explorer_input.taskset.reply_prefix is None:
-            self.buffer.explorer_input.taskset.reply_prefix = (
+        if self.buffer.explorer_input.taskset.format.reply_prefix is None:
+            self.buffer.explorer_input.taskset.format.reply_prefix = (
                 self.buffer.explorer_input.reply_prefix
             )
 
@@ -373,10 +371,10 @@ class Config:
                 dataset.default_workflow_type = self.buffer.explorer_input.default_workflow_type
             if dataset.default_reward_fn_type is None:
                 dataset.default_reward_fn_type = self.buffer.explorer_input.default_reward_fn_type
-            if dataset.system_prompt is None:
-                dataset.system_prompt = self.buffer.explorer_input.system_prompt
-            if dataset.reply_prefix is None:
-                dataset.reply_prefix = self.buffer.explorer_input.reply_prefix
+            if dataset.format.system_prompt is None:
+                dataset.format.system_prompt = self.buffer.explorer_input.system_prompt
+            if dataset.format.reply_prefix is None:
+                dataset.format.reply_prefix = self.buffer.explorer_input.reply_prefix
             remained_tasksets.append(dataset)
         self.buffer.explorer_input.eval_tasksets = remained_tasksets
 
@@ -418,7 +416,10 @@ class Config:
             self.buffer.trainer_input.sft_warmup_dataset.algorithm_type = AlgorithmType.SFT
 
         # set read_batch_size / pad_token_id / tokenizer_path
-        self.buffer.read_batch_size = self.global_config.batch_size * self.explorer.repeat_times
+        self.buffer.read_batch_size = (
+            self.global_config.batch_size
+            * self.buffer.explorer_input.taskset.rollout_args.repeat_times
+        )
         if self.buffer.pad_token_id is None:
             from transformers import AutoTokenizer
 

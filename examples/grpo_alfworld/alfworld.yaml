@@ -19,6 +19,10 @@ buffer:
       path: 'scripts/data_prepare/alfworld_data'
       format:
         prompt_key: 'game_file'
+      rollout_args:
+        repeat_times: 8
+        temperature: 1.0
+        logprobs: 0
     default_workflow_type: 'alfworld_workflow'
   trainer_input:
     experience_buffer:
@@ -33,10 +37,7 @@ explorer:
   enable_prefix_caching: false
   enforce_eager: true
   dtype: bfloat16
-  temperature: 1.0
   seed: 42
-  logprobs: 0
-  repeat_times: 8
   use_ray: false
   backend: 'nccl'
   max_pending_requests: 32

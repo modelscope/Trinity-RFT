@@ -23,22 +23,6 @@ buffer:
         prompt_key: prompt
         chosen_key: chosen
         rejected_key: rejected
-explorer:
-  engine_type: vllm_async
-  engine_num: 0
-  runner_num: 32
-  tensor_parallel_size: 1
-  enable_prefix_caching: false
-  enforce_eager: true
-  dtype: bfloat16
-  temperature: 1.0
-  seed: 42
-  logprobs: 0
-  repeat_times: 1 # NOTE
-  use_ray: false
-  backend: 'nccl'
-  max_pending_requests: 32
-  max_waiting_steps: 4
 synchronizer:
   sync_method: 'checkpoint'
   sync_interval: 30

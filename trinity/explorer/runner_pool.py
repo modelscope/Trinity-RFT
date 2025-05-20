@@ -5,7 +5,7 @@ from typing import List, Tuple, Union
 import ray
 
 from trinity.common.config import Config
-from trinity.common.task import Task
+from trinity.common.workflows import Task
 from trinity.explorer.workflow_runner import Status, WorkflowRunner
 from trinity.utils.log import get_logger
 

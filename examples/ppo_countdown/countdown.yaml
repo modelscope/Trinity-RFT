@@ -21,6 +21,10 @@ buffer:
       format:
         prompt_key: 'question'
         response_key: 'answer'
+      rollout_args:
+        repeat_times: 5
+        temperature: 1.0
+        logprobs: 0
     default_workflow_type: 'math_workflow'
     default_reward_fn_type: 'countdown_reward'
   trainer_input:
@@ -36,10 +40,7 @@ explorer:
   enable_prefix_caching: false
   enforce_eager: true
   dtype: bfloat16
-  temperature: 1.0
   seed: 42
-  logprobs: 0
-  repeat_times: 5
   use_ray: false
   backend: 'nccl'
   max_pending_requests: 32

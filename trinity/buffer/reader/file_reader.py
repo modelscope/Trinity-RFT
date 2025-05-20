@@ -11,8 +11,7 @@ from trinity.common.config import BufferConfig, StorageConfig
 from trinity.common.constants import AlgorithmType, PromptType, ReadStrategy, TaskType
 from trinity.common.experience import Experience
 from trinity.common.rewards import REWARD_FUNCTIONS
-from trinity.common.task import Task
-from trinity.common.workflows import WORKFLOWS
+from trinity.common.workflows import WORKFLOWS, Task
 from trinity.utils.registry import Registry
 
 FILE_READERS = Registry("file_readers")
@@ -207,8 +206,6 @@ class RolloutDataReader(BufferReader):
         if self.index >= len(self.dataset) * self.total_epochs:
             raise StopIteration
         sample = self.dataset[self.index % len(self.dataset)]
-        task_desc = sample[self.prompt_key] if self.prompt_key in sample else None
-        truth = sample[self.response_key] if self.response_key in sample else None
         workflow_class = (
             WORKFLOWS.get(sample[self.workflow_key])
             if self.workflow_key in sample
@@ -221,10 +218,10 @@ class RolloutDataReader(BufferReader):
         )
         assert workflow_class is not None, "`default_reward_fn_type` or `workflow_key` is required"
         task = Task(
-            task_desc=task_desc,
-            truth=truth,
             workflow=workflow_class,
-            taskset_config=self.meta,
+            format_args=self.meta.format,
+            rollout_args=self.meta.rollout_args,
+            is_eval=self.meta.task_type == TaskType.EVAL,
             reward_fn=reward_fn,
             raw_task=sample,
         )

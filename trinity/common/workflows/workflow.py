@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 """Base Workflow Class"""
 
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from typing import List, Optional, Type
+from dataclasses import asdict, dataclass, field
+from typing import Any, List, Optional, Type, Union
 
 import torch
 
-from trinity.common.config import StorageConfig
-from trinity.common.constants import TaskType
+from trinity.common.config import FormatConfig, GenerationConfig
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
 from trinity.common.rewards.reward_fn import MathRewardFn, RewardFn
@@ -20,6 +22,42 @@ logger = get_logger(__name__)
 WORKFLOWS = Registry("workflows")
 
 
+@dataclass
+class Task:
+    """A Task class that defines a task and its associated reward function / workflow."""
+
+    workflow: Type[Workflow]
+    format_args: FormatConfig
+    rollout_args: GenerationConfig = field(default_factory=GenerationConfig)
+    is_eval: bool = False
+    reward_fn: Optional[Type[RewardFn]] = None
+    raw_task: Optional[dict] = None  # The raw data sample
+
+    def to_workflow(self, model: Any) -> Workflow:
+        """Convert the task to a workflow.
+
+        Args:
+            model (ModelWrapper): The rollout model for the workflow.
+
+        Returns:
+            Workflow: The generated workflow object.
+        """
+        return self.workflow(
+            model=model,
+            task=self,
+        )
+
+    @property
+    def task_desc(self) -> Union[str, None]:
+        prompt_key = self.format_args.prompt_key
+        return self.raw_task[prompt_key] if prompt_key in self.raw_task else None  # type: ignore
+
+    @property
+    def truth(self) -> Union[str, None]:
+        response_key = self.format_args.response_key
+        return self.raw_task[response_key] if response_key in self.raw_task else None  # type: ignore
+
+
 class Workflow(ABC):
     """The base workflow class.
 
@@ -29,11 +67,7 @@ class Workflow(ABC):
     def __init__(
         self,
         model: ModelWrapper,
-        task_desc: str,
-        taskset_config: StorageConfig,
-        truth: Optional[str] = None,
-        reward_fn: Optional[Type[RewardFn]] = None,
-        raw_task: Optional[dict] = None,
+        task: Task,
     ):
         self.model = model
 
@@ -50,19 +84,11 @@ class MultiTurnWorkflow(Workflow):
     def __init__(
         self,
         model: ModelWrapper,
-        task_desc: str,
-        taskset_config: StorageConfig,
-        truth: Optional[str] = None,
-        reward_fn: Optional[Type[RewardFn]] = None,
-        raw_task: Optional[dict] = None,
+        task: Task,
     ):
         super().__init__(
-            model,
-            task_desc,
-            taskset_config,
-            truth=truth,
-            reward_fn=reward_fn,
-            raw_task=raw_task,
+            model=model,
+            task=task,
         )
 
     @abstractmethod
@@ -106,44 +132,46 @@ class SimpleWorkflow(Workflow):
     def __init__(
         self,
         model: ModelWrapper,
-        task_desc: str,
-        taskset_config: StorageConfig,
-        truth: Optional[str] = None,
-        reward_fn: Optional[Type[RewardFn]] = None,
-        raw_task: Optional[dict] = None,
+        task: Task,
     ):
         super().__init__(
-            model,
-            task_desc,
-            taskset_config,
-            truth=truth,
-            reward_fn=reward_fn,
-            raw_task=raw_task,
+            model=model,
+            task=task,
         )
-        self.system_prompt = taskset_config.system_prompt
-        self.reply_prefix = taskset_config.reply_prefix
-        self.task_desc = task_desc
-        self.truth = truth
+        self.format_args = task.format_args
+        self.system_prompt = task.format_args.system_prompt
+        self.reply_prefix = task.format_args.reply_prefix
+
+        self.raw_task = task.raw_task
+        self.task_desc = task.task_desc
+        self.truth = task.truth
+
+        reward_fn = task.reward_fn
         if isinstance(reward_fn, type) and issubclass(reward_fn, RewardFn):
             self.reward_fn: RewardFn = reward_fn()
         else:
             raise ValueError("`reward_fn` must be a subclass of `RewardFn`")
-        # Rollout n times
-        self.repeat_times = taskset_config.repeat_times
-        self.temperature = taskset_config.temperature
-        self.is_eval = taskset_config.task_type == TaskType.EVAL
+        # Rollout args
+        rollout_args = asdict(task.rollout_args)
+        rollout_args["n"] = rollout_args["repeat_times"]
+        self.rollout_args = rollout_args
+        self.is_eval = task.is_eval
 
-    def run(self) -> List[Experience]:
-        # TODO: Optimize the generate function
+    def format_messages(self):
         messages = []
         if self.system_prompt:
             messages.append({"role": "system", "content": self.system_prompt})
         messages.append({"role": "user", "content": self.task_desc})
         if self.reply_prefix:
             messages.append({"role": "assistant", "content": self.reply_prefix})
+        return messages
+
+    def run(self) -> List[Experience]:
+        # TODO: Optimize the generate function
+        messages = self.format_messages()
 
         logger.debug("start chat")
-        responses = self.model.chat(messages, n=self.repeat_times, temperature=self.temperature)
+        responses = self.model.chat(messages, **self.rollout_args)
         for response in responses:
             reward = self.reward_fn(  # type: ignore [misc]
                 response=response.response_text,  # type: ignore [arg-type]
@@ -169,24 +197,16 @@ class MathWorkflow(SimpleWorkflow):
     def __init__(
         self,
         model: ModelWrapper,
-        task_desc: str,
-        taskset_config: StorageConfig,
-        truth: Optional[str] = None,
-        reward_fn: Optional[Type[RewardFn]] = None,
-        raw_task: Optional[dict] = None,
+        task: Task,
     ):
-        if reward_fn is None:
-            reward_fn = MathRewardFn
-        if reward_fn == MathRewardFn and taskset_config.system_prompt is None:
-            taskset_config.system_prompt = """A conversation between User and Assistant. The user asks a question, and the Assistant solves it. The assistant first thinks about the reasoning process in the mind and then provides the user with the answer. The reasoning process and answer are enclosed within <think> </think> and <answer> </answer> tags, respectively, i.e.,
+        if task.reward_fn is None:
+            task.reward_fn = MathRewardFn
+        if task.reward_fn == MathRewardFn and task.format_args.system_prompt is None:
+            task.format_args.system_prompt = """A conversation between User and Assistant. The user asks a question, and the Assistant solves it. The assistant first thinks about the reasoning process in the mind and then provides the user with the answer. The reasoning process and answer are enclosed within <think> </think> and <answer> </answer> tags, respectively, i.e.,
 <think> reasoning process here </think>
 <answer> answer here </answer>.
 """
         super().__init__(
-            model,
-            task_desc,
-            taskset_config,
-            truth=truth,
-            reward_fn=reward_fn,
-            raw_task=raw_task,
+            model=model,
+            task=task,
         )

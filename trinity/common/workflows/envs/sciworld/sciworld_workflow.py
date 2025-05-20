@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 import json
-from typing import List, Optional, Type
+from typing import List
 
-from trinity.common.config import StorageConfig
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
-from trinity.common.rewards.reward_fn import RewardFn
-from trinity.common.workflows.workflow import WORKFLOWS, MultiTurnWorkflow
+from trinity.common.workflows.workflow import WORKFLOWS, MultiTurnWorkflow, Task
 
 SCIWORLD_SYSTEM_PROMPT = """
 You are an agent, you job is to do some scientific experiment in a virtual test-based environments.
@@ -64,22 +62,14 @@ class SciWorldWorkflow(MultiTurnWorkflow):
     def __init__(
         self,
         model: ModelWrapper,
-        task_desc: str,
-        taskset_config: StorageConfig,
-        truth: Optional[str] = None,
-        reward_fn: Optional[Type[RewardFn]] = None,
-        raw_task: Optional[dict] = None,
+        task: Task,
     ):
         super().__init__(
-            model,
-            task_desc,
-            taskset_config,
-            truth=truth,
-            reward_fn=reward_fn,
-            raw_task=raw_task,
+            model=model,
+            task=task,
         )
-        self.task_desc: str = task_desc
-        self.repeat_times = taskset_config.repeat_times
+        self.task_desc = task.task_desc or "0"
+        self.repeat_times = task.rollout_args.repeat_times
         self.max_env_steps = 30  # should be less than 100
 
     def get_model_response(self, messages):

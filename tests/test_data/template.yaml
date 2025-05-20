@@ -25,6 +25,4 @@ explorer:
   enable_prefix_caching: false
   enforce_eager: true
   dtype: bfloat16
-  temperature: 1.0
   seed: 42
-  logprobs: 0

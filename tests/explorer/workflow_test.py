@@ -6,6 +6,7 @@ from unittest.mock import MagicMock
 
 from tests.tools import get_unittest_dataset_config
 from trinity.common.workflows import MathWorkflow
+from trinity.common.workflows.workflow import Task
 
 
 @dataclass
@@ -29,9 +30,17 @@ class WorkflowTest(unittest.TestCase):
             MockResponse("<think>Thinking</think><answer>Answer is not end</answer><answer>1"),
         ]
         taskset_config = get_unittest_dataset_config("countdown")
-        workflow = MathWorkflow(
-            model=model, task_desc="1+1=", truth="2", taskset_config=taskset_config
+        task = Task(
+            workflow=MathWorkflow,
+            format_args=taskset_config.format,
+            rollout_args=taskset_config.rollout_args,
+            is_eval=False,
+            raw_task={
+                taskset_config.format.prompt_key: "1+1=",
+                taskset_config.format.response_key: "2",
+            },
         )
+        workflow = task.to_workflow(model=model)
         experiences = workflow.run()
         self.assertEqual(len(experiences), 9)
         self.assertEqual(experiences[0].reward, 0.9)
@@ -55,12 +64,17 @@ class WorkflowTest(unittest.TestCase):
             MockResponse(r"The answer is \boxed{\frac{40}{400}}"),
         ]
         taskset_config = get_unittest_dataset_config("countdown")
-        workflow = MathWorkflow(
-            model=model,
-            task_desc=r"\frac{40}{400}",
-            truth=r"\frac{40}{400}",
-            taskset_config=taskset_config,
+        task = Task(
+            workflow=MathWorkflow,
+            format_args=taskset_config.format,
+            rollout_args=taskset_config.rollout_args,
+            is_eval=False,
+            raw_task={
+                taskset_config.format.prompt_key: r"\frac{40}{400}",
+                taskset_config.format.response_key: r"\frac{40}{400}",
+            },
         )
+        workflow = task.to_workflow(model=model)
         experiences = workflow.run()
         self.assertEqual(len(experiences), 6)
         self.assertEqual(experiences[0].reward, 0.9)
@@ -78,12 +92,17 @@ class WorkflowTest(unittest.TestCase):
             ),
         ]
         taskset_config = get_unittest_dataset_config("countdown")
-        workflow = MathWorkflow(
-            model=model,
-            task_desc="",
-            truth=r"$x_{1}=\frac{1}{2}+\frac{31\sqrt{5}}{216},\quadx_{2}=\frac{1}{2}-\frac{31\sqrt{5}}{216}$",
-            taskset_config=taskset_config,
+        task = Task(
+            workflow=MathWorkflow,
+            format_args=taskset_config.format,
+            rollout_args=taskset_config.rollout_args,
+            is_eval=False,
+            raw_task={
+                taskset_config.format.prompt_key: "",
+                taskset_config.format.response_key: r"$x_{1}=\frac{1}{2}+\frac{31\sqrt{5}}{216},\quadx_{2}=\frac{1}{2}-\frac{31\sqrt{5}}{216}$",
+            },
         )
+        workflow = task.to_workflow(model=model)
         experiences = workflow.run()
         self.assertEqual(len(experiences), 1)
         self.assertEqual(experiences[0].reward, 0.9)
@@ -96,12 +115,17 @@ class WorkflowTest(unittest.TestCase):
             MockResponse("<answer>Kim's total points are 6 + 30 = 36 </answer>"),
         ]
         taskset_config = get_unittest_dataset_config("countdown")
-        workflow = MathWorkflow(
-            model=model,
-            task_desc="",
-            truth=r"36",
-            taskset_config=taskset_config,
+        task = Task(
+            workflow=MathWorkflow,
+            format_args=taskset_config.format,
+            rollout_args=taskset_config.rollout_args,
+            is_eval=False,
+            raw_task={
+                taskset_config.format.prompt_key: "",
+                taskset_config.format.response_key: r"36",
+            },
         )
+        workflow = task.to_workflow(model=model)
         experiences = workflow.run()
         # self.assertEqual(len(experiences), 1)
         self.assertEqual(experiences[0].reward, 1.1)

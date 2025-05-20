@@ -41,14 +41,14 @@ class vLLMRolloutModel(InferenceModel):
             os.environ["VLLM_WORKER_MULTIPROC_METHOD"] = "spawn"
             os.environ["VLLM_ENABLE_V1_MULTIPROCESSING"] = "0"
         self.default_sampling_params = SamplingParams(
-            n=config.explorer.repeat_times,
-            temperature=config.explorer.temperature,
+            n=1,
+            temperature=0.0,
             max_tokens=config.model.max_response_tokens,
             min_tokens=1,
             truncate_prompt_tokens=config.model.max_prompt_tokens,
             skip_special_tokens=True,
             include_stop_str_in_output=False,
-            logprobs=config.explorer.logprobs,
+            logprobs=0,
         )
         self.llm = LLM(
             # TODO: check checkpoint path

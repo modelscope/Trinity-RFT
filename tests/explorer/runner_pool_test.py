@@ -12,7 +12,7 @@ from trinity.common.config import StorageConfig, load_config
 from trinity.common.constants import AlgorithmType, StorageType
 from trinity.common.experience import Experience
 from trinity.common.models.model import InferenceModel
-from trinity.common.task import Task
+from trinity.common.workflows import Task
 from trinity.common.workflows.workflow import WORKFLOWS, Workflow
 from trinity.explorer.runner_pool import RunnerPool
 
@@ -21,9 +21,9 @@ config_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_data
 
 @WORKFLOWS.register_module("dummy_workflow")
 class DummyWorkflow(Workflow):
-    def __init__(self, model, **kwargs):
-        super().__init__(model, **kwargs)
-        self.error_type = kwargs.get("task_desc")
+    def __init__(self, model, task):
+        super().__init__(model, task)
+        self.error_type = task.task_desc
         self.seconds = None
         if "timeout" in self.error_type:
             self.seconds = int(self.error_type.split("_")[-1])
@@ -85,34 +85,58 @@ class RunnerPoolTest(unittest.TestCase):
         taskset_config = get_unittest_dataset_config("countdown")
         tasks = [
             Task(
-                task_desc="timeout_100",
                 workflow=DummyWorkflow,
-                taskset_config=taskset_config,
+                format_args=taskset_config.format,
+                rollout_args=taskset_config.rollout_args,
+                is_eval=False,
+                raw_task={
+                    taskset_config.format.prompt_key: "timeout_100",
+                },
             ),
             Task(
-                task_desc="exception",
                 workflow=DummyWorkflow,
-                taskset_config=taskset_config,
+                format_args=taskset_config.format,
+                rollout_args=taskset_config.rollout_args,
+                is_eval=False,
+                raw_task={
+                    taskset_config.format.prompt_key: "exception",
+                },
             ),
             Task(
-                task_desc="timeout_2",
                 workflow=DummyWorkflow,
-                taskset_config=taskset_config,
+                format_args=taskset_config.format,
+                rollout_args=taskset_config.rollout_args,
+                is_eval=False,
+                raw_task={
+                    taskset_config.format.prompt_key: "timeout_2",
+                },
             ),
             Task(
-                task_desc="success",
                 workflow=DummyWorkflow,
-                taskset_config=taskset_config,
+                format_args=taskset_config.format,
+                rollout_args=taskset_config.rollout_args,
+                is_eval=False,
+                raw_task={
+                    taskset_config.format.prompt_key: "success",
+                },
             ),
             Task(
-                task_desc="timeout_101",
                 workflow=DummyWorkflow,
-                taskset_config=taskset_config,
+                format_args=taskset_config.format,
+                rollout_args=taskset_config.rollout_args,
+                is_eval=False,
+                raw_task={
+                    taskset_config.format.prompt_key: "timeout_101",
+                },
             ),
             Task(
-                task_desc="exit",
                 workflow=DummyWorkflow,
-                taskset_config=taskset_config,
+                format_args=taskset_config.format,
+                rollout_args=taskset_config.rollout_args,
+                is_eval=False,
+                raw_task={
+                    taskset_config.format.prompt_key: "exit",
+                },
             ),
         ]
 

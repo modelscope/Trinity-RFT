@@ -11,10 +11,9 @@ import ray
 
 from trinity.buffer import get_buffer_writer
 from trinity.common.config import Config
-from trinity.common.constants import TaskType
 from trinity.common.experience import Experience
 from trinity.common.models.model import InferenceModel, ModelWrapper
-from trinity.common.task import Task
+from trinity.common.workflows import Task
 from trinity.utils.log import get_logger
 
 
@@ -77,7 +76,7 @@ class WorkflowRunner:
             if metrics:
                 for k, v in metrics.items():
                     metric[k] = sum(v) / len(v)  # type: ignore
-            if not task.taskset_config.task_type == TaskType.EVAL:
+            if not task.is_eval:
                 self.experience_buffer.write(exps)
             return Status(True, metric=metric)
         except Exception as e:

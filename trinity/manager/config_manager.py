@@ -1683,6 +1683,13 @@ if node_num > 1:
                                 "prompt_key": st.session_state["taskset_prompt_key"],
                                 "response_key": st.session_state["taskset_response_key"],
                             },
+                            "rollout_args": {
+                                "repeat_times": st.session_state["repeat_times"],
+                                "temperature": st.session_state["temperature"],
+                                "top_p": st.session_state["top_p"],
+                                "top_k": st.session_state["top_k"],
+                                "logprobs": st.session_state["logprobs"],
+                            },
                         },
                         "eval_tasksets": [],  # TODO: add eval tasksets
                         "default_workflow_type": st.session_state["default_workflow_type"],
@@ -1702,26 +1709,21 @@ if node_num > 1:
                     "engine_type": st.session_state["engine_type"],
                     "engine_num": st.session_state["engine_num"],
                     "runner_num": st.session_state["runner_num"],
-                    "repeat_times": st.session_state["repeat_times"],
                     # "chat_template": None,  # TODO: add chat template
                     "tensor_parallel_size": st.session_state["tensor_parallel_size"],
                     "enable_prefix_caching": st.session_state["enable_prefix_caching"],
                     "enforce_eager": st.session_state["enforce_eager"],
                     "dtype": st.session_state["dtype"],
-                    "temperature": st.session_state["temperature"],
-                    "top_p": st.session_state["top_p"],  # TODO
-                    "top_k": st.session_state["top_k"],  # TODO
                     "seed": st.session_state["seed"],
-                    "logprobs": st.session_state["logprobs"],
                     "backend": st.session_state["backend"],
-                    "use_ray": st.session_state["use_ray"],  # TODO
-                    "gpu_memory_utilization": st.session_state["gpu_memory_utilization"],  # TODO
-                    "enable_chunked_prefill": st.session_state["enable_chunked_prefill"],  # TODO
+                    "use_ray": st.session_state["use_ray"],
+                    "gpu_memory_utilization": st.session_state["gpu_memory_utilization"],
+                    "enable_chunked_prefill": st.session_state["enable_chunked_prefill"],
                     "use_v1": True,
                     "max_pending_requests": st.session_state["max_pending_requests"],
                     "max_waiting_steps": st.session_state["max_waiting_steps"],
-                    "max_timeout": st.session_state["max_timeout"],  # TODO
-                    "max_retry_times": st.session_state["explorer_max_retry_times"],  # TODO
+                    "max_timeout": st.session_state["max_timeout"],
+                    "max_retry_times": st.session_state["explorer_max_retry_times"],
                 },
                 "synchronizer": {
                     "sync_method": st.session_state["sync_method"],
@@ -1742,7 +1744,7 @@ if node_num > 1:
                 },
             }
 
-            for idx in range(st.session_state["_eval_taskset_num"]):
+            for idx in range(st.session_state["_eval_tasksets_num"]):
                 if st.session_state[f"eval_taskset_{idx}_path"].strip():
                     config["buffer"]["explorer_input"]["eval_tasksets"].append(
                         {
