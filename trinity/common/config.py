@@ -150,6 +150,7 @@ class ExplorerInput:
 
     taskset: StorageConfig = field(default_factory=StorageConfig)
     eval_tasksets: List[StorageConfig] = field(default_factory=list)
+    # The following args provide default values for the corresponding args in `taskset` and `eval_tasksets`
     default_workflow_type: Optional[str] = None
     default_reward_fn_type: Optional[str] = None
     system_prompt: Optional[str] = None

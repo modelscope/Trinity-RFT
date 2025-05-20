@@ -26,7 +26,7 @@ class BaseTrainerCase(RayUnittestBase):
         self.config.global_config.batch_size = 4
         self.config.model.model_path = get_model_path()
         self.config.explorer.engine_type = "vllm_async"
-        self.config.explorer.repeat_times = 3
+        self.config.buffer.explorer_input.taskset.rollout_args.repeat_times = 3
         self.config.explorer.use_v1 = False
         self.config.monitor.name = f"trainer-{datetime.now().strftime('%Y%m%d%H%M%S')}"
         self.config.monitor.monitor_type = MonitorType.TENSORBOARD

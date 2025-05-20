@@ -85,8 +85,9 @@ CHAT_TEMPLATE = r"""
 class BaseTestModelWrapper:
     def test_generate(self):
         prompts = ["Hello, world!", "Hello, my name is"]
-        results = self.model_wrapper.generate(prompts)
-        self.assertEqual(len(results), len(prompts) * self.config.explorer.repeat_times)
+        repeat_times = self.config.buffer.explorer_input.taskset.rollout_args.repeat_times
+        results = self.model_wrapper.generate(prompts, n=repeat_times, temperature=1.0)
+        self.assertEqual(len(results), len(prompts) * repeat_times)
         messages = [
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": "What's the weather like today?"},
@@ -96,8 +97,8 @@ class BaseTestModelWrapper:
             },
             {"role": "user", "content": "OK, thanks!"},
         ]
-        results = self.model_wrapper.chat(messages)
-        self.assertEqual(len(results), self.config.explorer.repeat_times)
+        results = self.model_wrapper.chat(messages, n=repeat_times, temperature=1.0)
+        self.assertEqual(len(results), repeat_times)
         for result in results:
             input_logprobs = result.logprobs[: result.prompt_length]
             output_logprobs = result.logprobs[result.prompt_length :]
@@ -135,7 +136,7 @@ class TestModelWrapperSyncV0(BaseTestModelWrapper, RayUnittestBase):
         self.config.explorer.engine_type = "vllm"
         self.config.explorer.tensor_parallel_size = 1
         self.config.explorer.engine_num = 2
-        self.config.explorer.repeat_times = 2
+        self.config.buffer.explorer_input.taskset.rollout_args.repeat_times = 2
         self.config.explorer.use_v1 = False
         self.config.explorer.chat_template = CHAT_TEMPLATE
         self.engines = create_rollout_models(self.config)
@@ -149,7 +150,7 @@ class TestModelWrapperAsyncV0(BaseTestModelWrapper, RayUnittestBase):
         self.config.explorer.engine_type = "vllm_async"
         self.config.explorer.engine_num = 2
         self.config.explorer.tensor_parallel_size = 1
-        self.config.explorer.repeat_times = 2
+        self.config.buffer.explorer_input.taskset.rollout_args.repeat_times = 2
         self.config.explorer.use_v1 = False
         self.config.explorer.chat_template = CHAT_TEMPLATE
         self.engines = create_rollout_models(self.config)
@@ -176,7 +177,7 @@ class TestModelWrapperAsyncTPV1(BaseTestModelWrapper, RayUnittestBase):
         self.config.explorer.engine_type = "vllm_async"
         self.config.explorer.engine_num = 2
         self.config.explorer.tensor_parallel_size = 2
-        self.config.explorer.repeat_times = 2
+        self.config.buffer.explorer_input.taskset.rollout_args.repeat_times = 2
         self.config.explorer.use_v1 = True
         self.config.explorer.chat_template = CHAT_TEMPLATE
         self.engines = create_rollout_models(self.config)

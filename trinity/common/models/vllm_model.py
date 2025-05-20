@@ -33,6 +33,9 @@ class vLLMRolloutModel(InferenceModel):
     def __init__(self, config: Config, **kwargs):
         self.logger = get_logger(__name__)
         self.config = config
+        if config.explorer.tensor_parallel_size != 1:
+            os.environ["VLLM_WORKER_MULTIPROC_METHOD"] = "spawn"
+            os.environ["VLLM_RAY_BUNDLE_INDICES"] = config.explorer.bundle_indices
         if not vllm.envs.is_set("VLLM_USE_V1"):
             self.logger.info(f"Using vLLM v{int(config.explorer.use_v1)} engine")
             os.environ["VLLM_USE_V1"] = str(int(config.explorer.use_v1))
@@ -151,7 +154,7 @@ class vLLMRolloutModel(InferenceModel):
 
         Example:
 
-            >>> # config.explorer.repeat_times == 2 or kwargs["repeat_times"] == 2
+            >>> # config.buffer.explorer_input.taskset.rollout_args.repeat_times == 2 or kwargs["repeat_times"] == 2
             >>>
             >>> prompts = [
             >>>     "Hello, world!",
@@ -172,7 +175,7 @@ class vLLMRolloutModel(InferenceModel):
             )
         experiences = []
         for output in outputs:
-            for i in range(self.config.explorer.repeat_times):
+            for i in range(self.config.buffer.explorer_input.taskset.rollout_args.repeat_times):
                 experiences.append(
                     Experience(
                         tokens=torch.cat(

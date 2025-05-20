@@ -47,6 +47,7 @@ class vLLMAysncRolloutModel(InferenceModel):
         self.use_v1 = config.explorer.use_v1
         if config.explorer.tensor_parallel_size != 1:
             os.environ["VLLM_WORKER_MULTIPROC_METHOD"] = "spawn"
+            os.environ["VLLM_RAY_BUNDLE_INDICES"] = config.explorer.bundle_indices
         if not vllm.envs.is_set("VLLM_USE_V1"):
             self.logger.info(f"Using vLLM v{int(config.explorer.use_v1)} engine")
             os.environ["VLLM_USE_V1"] = str(int(config.explorer.use_v1))
