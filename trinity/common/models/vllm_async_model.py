@@ -227,24 +227,6 @@ class vLLMAysncRolloutModel(InferenceModel):
             action_mask=action_mask,
         )
 
-    async def tokenize_text_async(self, text: str) -> torch.Tensor:
-        """Convert text to token ids tensor.
-
-        Args:
-            text (str): Input text to be tokenized
-
-        Returns:
-            torch.Tensor: Token ids tensor
-        """
-        if self.tokenizer is None:
-            self.tokenizer = await self.async_llm.get_tokenizer()
-
-        # Tokenize the text
-        token_ids = self.tokenizer.encode(text)
-
-        # Convert to tensor
-        return torch.tensor(token_ids, dtype=torch.int32)
-
     def shutdown(self):
         """Shutdown the vLLM v1 engine. This kills child processes forked
         by the vLLM engine. If not called, the child processes will be
