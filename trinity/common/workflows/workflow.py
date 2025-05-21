@@ -81,9 +81,9 @@ class Workflow(ABC):
     def resettable(self):
         return False
 
-    @abstractmethod
     def reset(self, task: Task):
         """Reset the workflow."""
+        raise NotImplementedError
 
     @abstractmethod
     def run(self) -> List[Experience]:
