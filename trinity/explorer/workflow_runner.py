@@ -30,14 +30,30 @@ class Status:
 class WorkflowRunner:
     """A Ray remote actor to run the workflow and put the returned experiences into the buffer."""
 
-    def __init__(self, config: Config, model: InferenceModel) -> None:
+    def __init__(
+        self,
+        config: Config,
+        model: InferenceModel,
+        auxiliary_models: Optional[List[InferenceModel]] = None,
+    ) -> None:
         self.config = config
         self.experience_buffer = get_buffer_writer(
             self.config.buffer.explorer_output,  # type: ignore
             self.config.buffer,
         )
         self.model = model
-        self.model_wrapper = ModelWrapper(model, config.explorer.engine_type)
+        self.model_wrapper = ModelWrapper(
+            model,
+            config.explorer.engine_type,
+        )
+        self.auxiliary_models = []
+        if auxiliary_models is not None:
+            for model in auxiliary_models:
+                api_client = ModelWrapper(
+                    model,
+                    "vllm_async",
+                ).get_openai_client()
+                self.auxiliary_models.append(api_client)
         self.logger = get_logger(__name__)
         self.workflow_instance = None
 
@@ -53,7 +69,7 @@ class WorkflowRunner:
             or not self.workflow_instance.__class__ == task.workflow
             or not self.workflow_instance.resettable
         ):
-            self.workflow_instance = task.to_workflow(self.model_wrapper)
+            self.workflow_instance = task.to_workflow(self.model_wrapper, self.auxiliary_models)
         else:
             self.workflow_instance.reset(task)
         return self.workflow_instance.run()

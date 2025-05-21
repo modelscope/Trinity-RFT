@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from typing import List
+from typing import List, Optional
 
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
@@ -100,6 +100,7 @@ class AlfworldWorkflow(MultiTurnWorkflow):
         self,
         model: ModelWrapper,
         task: Task,
+        auxiliary_models: Optional[List] = None,
     ):
         super().__init__(
             model=model,

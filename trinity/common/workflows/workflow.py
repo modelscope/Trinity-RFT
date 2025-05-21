@@ -7,6 +7,7 @@ from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass, field
 from typing import Any, List, Optional, Type, Union
 
+import openai
 import torch
 
 from trinity.common.config import FormatConfig, GenerationConfig
@@ -33,7 +34,9 @@ class Task:
     reward_fn: Optional[Type[RewardFn]] = None
     raw_task: Optional[dict] = None  # The raw data sample
 
-    def to_workflow(self, model: Any) -> Workflow:
+    def to_workflow(
+        self, model: Any, auxiliary_models: Optional[List[openai.OpenAI]] = None
+    ) -> Workflow:
         """Convert the task to a workflow.
 
         Args:
@@ -45,6 +48,7 @@ class Task:
         return self.workflow(
             model=model,
             task=self,
+            auxiliary_models=auxiliary_models,
         )
 
     @property
@@ -68,8 +72,10 @@ class Workflow(ABC):
         self,
         model: ModelWrapper,
         task: Task,
+        auxiliary_models: Optional[List[openai.OpenAI]] = None,
     ):
         self.model = model
+        self.auxiliary_models = auxiliary_models
 
     @property
     def resettable(self):
@@ -93,10 +99,12 @@ class MultiTurnWorkflow(Workflow):
         self,
         model: ModelWrapper,
         task: Task,
+        auxiliary_models: Optional[List[openai.OpenAI]] = None,
     ):
         super().__init__(
             model=model,
             task=task,
+            auxiliary_models=auxiliary_models,
         )
 
     @abstractmethod
@@ -141,6 +149,7 @@ class SimpleWorkflow(Workflow):
         self,
         model: ModelWrapper,
         task: Task,
+        auxiliary_models: Optional[List[openai.OpenAI]] = None,
     ):
         super().__init__(
             model=model,
@@ -213,6 +222,7 @@ class MathWorkflow(SimpleWorkflow):
         self,
         model: ModelWrapper,
         task: Task,
+        auxiliary_models: Optional[List[openai.OpenAI]] = None,
     ):
         if task.reward_fn is None:
             task.reward_fn = MathRewardFn

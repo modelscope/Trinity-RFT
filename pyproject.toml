@@ -36,6 +36,7 @@ dependencies = [
     "flask",
     "requests",
     "tensorboard",
+    "openai",
 ]
 
 [project.scripts]

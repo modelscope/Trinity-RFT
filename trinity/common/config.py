@@ -138,6 +138,25 @@ class ModelConfig:
 
 
 @dataclass
+class InferenceModelConfig:
+    # TODO: support setting engine_num
+    model_path: str = ""
+    tensor_parallel_size: int = 1
+    use_v1: bool = True
+    max_prompt_tokens: int = 2048
+    max_response_tokens: int = 2048
+    enable_thinking: bool = False
+    enforce_eager: bool = True
+    enable_prefix_caching: bool = False
+    enable_chunked_prefill: bool = False
+    gpu_memory_utilization: float = 0.9
+    dtype: str = "bfloat16"
+    seed: int = 42
+    chat_template: Optional[str] = None
+    bundle_indices: str = ""  # DO NOT SET this field
+
+
+@dataclass
 class ClusterConfig:
     """Config for the cluster."""
 
@@ -185,10 +204,10 @@ class BufferConfig:
 class ExplorerConfig:
     """Config for explorer."""
 
-    # inference engine type, `vllm` or `vllm_async`
-    engine_type: str = "vllm"
+    # rollout engine type, `vllm` or `vllm_async`
+    engine_type: str = "vllm_async"
 
-    # number of inference engines
+    # number of rollout engines
     engine_num: int = 1
 
     # number of workflow runners.
@@ -199,7 +218,8 @@ class ExplorerConfig:
     # for rollout tokneize
     chat_template: Optional[str] = None
 
-    # for vLLM
+    # TODO: move vllm rollout model related args into
+    # `explorer.rollout_model: InferenceModelConfig`
     tensor_parallel_size: int = 1
     enable_prefix_caching: bool = False
     enforce_eager: bool = True
@@ -210,6 +230,7 @@ class ExplorerConfig:
     gpu_memory_utilization: float = 0.9
     enable_chunked_prefill: bool = False
     use_v1: bool = True
+    enable_openai_api: bool = False
     bundle_indices: str = ""  # DO NOT SET this field
 
     # for workflow runner
@@ -217,6 +238,9 @@ class ExplorerConfig:
     max_waiting_steps: int = 1
     max_timeout: int = 900  # wait each task for 15 minutes
     max_retry_times: int = 2  # retry each task for 2 times if it fails or timeout
+
+    # for other models used in the custom workflows
+    auxiliary_models: List[InferenceModelConfig] = field(default_factory=list)
 
 
 @dataclass
@@ -452,6 +476,10 @@ class Config:
             self.model.checkpoint_path = os.path.join(os.getcwd(), self.model.checkpoint_path)
         if not self.model.critic_model_path:
             self.model.critic_model_path = self.model.model_path
+
+        # check explorer
+        if self.explorer.engine_type != "vllm_asyc" and self.explorer.enable_openai_api:
+            raise ValueError("OpenAI API server only support `vllm_async` engine.")
 
         # check synchronizer
         self.synchronizer.explorer_world_size = (

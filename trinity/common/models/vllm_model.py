@@ -10,13 +10,12 @@ import re
 import threading
 from typing import List
 
-import ray
 import torch
 import vllm
 from vllm import LLM
 from vllm.sampling_params import SamplingParams
 
-from trinity.common.config import Config
+from trinity.common.config import InferenceModelConfig
 from trinity.common.experience import Experience
 from trinity.common.models.model import InferenceModel
 from trinity.common.models.utils import (
@@ -26,57 +25,53 @@ from trinity.common.models.utils import (
 from trinity.utils.log import get_logger
 
 
-@ray.remote
 class vLLMRolloutModel(InferenceModel):
     """Actor for vLLM."""
 
-    def __init__(self, config: Config, **kwargs):
+    def __init__(self, config: InferenceModelConfig):
         self.logger = get_logger(__name__)
         self.config = config
-        if config.explorer.tensor_parallel_size != 1:
+        if config.tensor_parallel_size != 1:
             os.environ["VLLM_WORKER_MULTIPROC_METHOD"] = "spawn"
-            os.environ["VLLM_RAY_BUNDLE_INDICES"] = config.explorer.bundle_indices
+            os.environ["VLLM_RAY_BUNDLE_INDICES"] = config.bundle_indices
         if not vllm.envs.is_set("VLLM_USE_V1"):
-            self.logger.info(f"Using vLLM v{int(config.explorer.use_v1)} engine")
-            os.environ["VLLM_USE_V1"] = str(int(config.explorer.use_v1))
-        if config.explorer.use_v1:
-            os.environ["VLLM_RAY_PER_WORKER_GPUS"] = str(int(config.explorer.use_v1))
+            self.logger.info(f"Using vLLM v{int(config.use_v1)} engine")
+            os.environ["VLLM_USE_V1"] = str(int(config.use_v1))
+        if config.use_v1:
+            os.environ["VLLM_RAY_PER_WORKER_GPUS"] = str(int(config.use_v1))
             os.environ["VLLM_WORKER_MULTIPROC_METHOD"] = "spawn"
             os.environ["VLLM_ENABLE_V1_MULTIPROCESSING"] = "0"
         self.default_sampling_params = SamplingParams(
             n=1,
             temperature=0.0,
-            max_tokens=config.model.max_response_tokens,
+            max_tokens=config.max_response_tokens,
             min_tokens=1,
-            truncate_prompt_tokens=config.model.max_prompt_tokens,
+            truncate_prompt_tokens=config.max_prompt_tokens,
             skip_special_tokens=True,
             include_stop_str_in_output=False,
             logprobs=0,
         )
         self.llm = LLM(
             # TODO: check checkpoint path
-            model=config.model.model_path,
-            enforce_eager=config.explorer.enforce_eager,
+            model=config.model_path,
+            enforce_eager=config.enforce_eager,
             worker_extension_cls="trinity.common.models.vllm_worker.WorkerExtension",
-            tensor_parallel_size=config.explorer.tensor_parallel_size,
-            seed=config.explorer.seed,
-            distributed_executor_backend=(
-                "uni" if config.explorer.tensor_parallel_size == 1 else "ray"
-            ),
-            max_model_len=config.model.max_prompt_tokens + config.model.max_response_tokens,
-            enable_prefix_caching=config.explorer.enable_prefix_caching,
-            dtype=config.explorer.dtype,
+            tensor_parallel_size=config.tensor_parallel_size,
+            seed=config.seed,
+            distributed_executor_backend=("uni" if config.tensor_parallel_size == 1 else "ray"),
+            max_model_len=config.max_prompt_tokens + config.max_response_tokens,
+            enable_prefix_caching=config.enable_prefix_caching,
+            dtype=config.dtype,
             trust_remote_code=True,
-            gpu_memory_utilization=config.explorer.gpu_memory_utilization,
-            enable_chunked_prefill=config.explorer.enable_chunked_prefill,
+            gpu_memory_utilization=config.gpu_memory_utilization,
+            enable_chunked_prefill=config.enable_chunked_prefill,
             # max_num_batched_tokens=256,
-            **kwargs,
         )
         self.tokenizer = self.llm.get_tokenizer()
         self.chat_template = self.tokenizer.get_chat_template()
-        self.enable_thinking = config.model.enable_thinking
-        if self.config.explorer.chat_template:
-            self.chat_template = self.config.explorer.chat_template
+        self.enable_thinking = config.enable_thinking
+        if self.config.chat_template:
+            self.chat_template = self.config.chat_template
         if not re.search(r"\{\%-?\s*generation\s*-?\%\}", self.chat_template):
             self.logger.warning(
                 "The provided chat template does not support `return_assitant_tokens_mask`. "
@@ -170,12 +165,11 @@ class vLLMRolloutModel(InferenceModel):
             ]
         """
         with self.lock:
-            outputs = self.llm.generate(
-                prompts, self._create_sampling_params(**kwargs), use_tqdm=False
-            )
+            sampling_params = self._create_sampling_params(**kwargs)
+            outputs = self.llm.generate(prompts, sampling_params, use_tqdm=False)
         experiences = []
         for output in outputs:
-            for i in range(self.config.buffer.explorer_input.taskset.rollout_args.repeat_times):
+            for i in range(sampling_params.n):
                 experiences.append(
                     Experience(
                         tokens=torch.cat(
@@ -273,6 +267,9 @@ class vLLMRolloutModel(InferenceModel):
             logprobs=logprobs,
             action_mask=action_mask,
         )
+
+    def has_api_server(self) -> bool:
+        return False
 
     def sync_model(self, update_weight_args_list) -> bool:
         """Sync model weights to vLLM."""

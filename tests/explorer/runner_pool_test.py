@@ -21,7 +21,7 @@ config_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_data
 
 @WORKFLOWS.register_module("dummy_workflow")
 class DummyWorkflow(Workflow):
-    def __init__(self, model, task):
+    def __init__(self, model, task, auxiliary_models):
         super().__init__(model, task)
         self.error_type = task.task_desc
         self.seconds = None

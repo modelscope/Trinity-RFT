@@ -270,7 +270,9 @@ class veRLConfig:
 
     def synchronize_config(self, config: Config) -> None:
         """Synchronize config."""
-        rollout_gpu_num = config.explorer.tensor_parallel_size * config.explorer.engine_num
+        rollout_gpu_num = config.explorer.tensor_parallel_size * config.explorer.engine_num + sum(
+            [model.tensor_parallel_size for model in config.explorer.auxiliary_models]
+        )
         rollout_node_num = rollout_gpu_num // config.cluster.gpu_per_node
         self.trainer.nnodes = config.cluster.node_num - rollout_node_num
         self.actor_rollout_ref.model.path = config.model.model_path

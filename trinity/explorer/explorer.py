@@ -12,7 +12,7 @@ from trinity.buffer import get_buffer_writer
 from trinity.buffer.buffer import get_buffer_reader
 from trinity.common.config import Config
 from trinity.common.constants import ROLLOUT_WEIGHT_SYNC_GROUP_NAME, SyncMethod
-from trinity.common.models import create_rollout_models
+from trinity.common.models import create_inference_models
 from trinity.common.models.utils import (
     get_checkpoint_dir_with_step_num,
     load_state_dict,
@@ -33,7 +33,7 @@ class Explorer:
         explorer_meta = self.cache.load_explorer()
         self.step_num = explorer_meta.get("latest_iteration", 0)
         self.config = config
-        self.models = create_rollout_models(config)
+        self.models, self.auxiliary_models = create_inference_models(config)
         if self.config.mode != "bench":
             self.experience_buffer = get_buffer_writer(
                 self.config.buffer.explorer_output,  # type: ignore
@@ -147,7 +147,7 @@ class Explorer:
     def prepare(self) -> None:
         """Preparation before running."""
         if self.use_checkpoint_weights_update:
-            master_address, master_port = ray.get(self.models[0].get_address.remote())
+            master_address, master_port = ray.get(self.models[0].get_available_address.remote())
             self.setup_weight_sync_group(master_address, master_port)
 
     @ray.method(concurrency_group="get_weight")
