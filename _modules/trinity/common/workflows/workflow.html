@@ -175,6 +175,17 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_models</span> <span class="o">=</span> <span class="n">auxiliary_models</span></div>
 
 
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">resettable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="Workflow.reset">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.Workflow.reset">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reset the workflow.&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+
 <div class="viewcode-block" id="Workflow.run">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.Workflow.run">[docs]</a>
     <span class="nd">@abstractmethod</span>
@@ -265,6 +276,16 @@
             <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
             <span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">task</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">resettable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="SimpleWorkflow.reset">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.SimpleWorkflow.reset">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">format_args</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">format_args</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">format_args</span><span class="o">.</span><span class="n">system_prompt</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reply_prefix</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">format_args</span><span class="o">.</span><span class="n">reply_prefix</span>
