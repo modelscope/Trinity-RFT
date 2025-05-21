@@ -43,6 +43,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../../tutorial/example_reasoning_basic.html">A quick example with GSM8k</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../../tutorial/example_reasoning_advanced.html">Example: off-policy RFT mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../tutorial/example_async_mode.html">A quick example for asynchronous mode</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../../tutorial/example_multi_turn.html">Example: Multi-Turn RFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../../tutorial/example_dpo.html">Example: Run DPO on Human-Like-DPO-Dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../../tutorial/example_data_functionalities.html">Data processing functionalities</a></li>
@@ -86,7 +87,7 @@
   <h1>Source code for trinity.common.workflows.envs.sciworld.sciworld_workflow</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelWrapper</span>
@@ -153,6 +154,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">model</span><span class="p">:</span> <span class="n">ModelWrapper</span><span class="p">,</span>
         <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">,</span>
+        <span class="n">auxiliary_models</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
