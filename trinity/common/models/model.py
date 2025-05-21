@@ -99,6 +99,12 @@ class ModelWrapper:
         else:
             return ray.get(self.model.convert_messages_to_experience.remote(messages))
 
+    def tokenize_text(self, text: str) -> Tensor:
+        if self.use_async:
+            return ray.get(self.model.tokenize_text_async.remote(text))
+        else:
+            return ray.get(self.model.tokenize_text.remote(text))
+
     def get_ckp_version(self) -> int:
         return ray.get(self.model.get_ckp_version.remote())
 

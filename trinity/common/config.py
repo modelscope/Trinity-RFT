@@ -49,6 +49,8 @@ class FormatConfig:
     # for unpaired preference dataset
     label_key: str = ""
 
+    use_base_format: bool = False
+
 
 @dataclass
 class GenerationConfig:
