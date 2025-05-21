@@ -268,6 +268,19 @@ class vLLMRolloutModel(InferenceModel):
             action_mask=action_mask,
         )
 
+    def tokenize_text(self, text: str) -> torch.Tensor:
+        """
+        Convert text to token ids tensor.
+
+        Args:
+            text (str)
+
+        Returns:
+            torch.Tensor: token ids tensor
+        """
+        token_ids = self.tokenizer.encode(text)
+        return torch.tensor(token_ids, dtype=torch.int32)
+
     def has_api_server(self) -> bool:
         return False
 
