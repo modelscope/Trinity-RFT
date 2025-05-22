@@ -139,16 +139,13 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>openai/gs
 <h3>Use GRPO or PPO Algorithm<a class="headerlink" href="#use-grpo-or-ppo-algorithm" title="Link to this heading"></a></h3>
 <p>We use the configurations in <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k/gsm8k.yaml"><code class="docutils literal notranslate"><span class="pre">gsm8k.yaml</span></code></a> and <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k/train_gsm8k.yaml"><code class="docutils literal notranslate"><span class="pre">train_gsm8k.yaml</span></code></a> for this experiment. Some important setups are listed in the following:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># In gsm8k.yaml</span>
-<span class="nt">explorer</span><span class="p">:</span>
+<span class="nt">algorithm</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">algorithm_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">grpo / ppo</span>
 <span class="w">  </span><span class="nt">repeat_times</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nv">number of rollouts for each task</span><span class="p p-Indicator">}</span>
 
-<span class="c1"># In train_gsm8k.yaml</span>
-<span class="nt">actor_rollout_ref</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">actor</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">use_kl_loss</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True (fro GRPO) / False (for PPO)</span>
-<span class="w">    </span><span class="nt">kl_loss_coef</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.001</span>
-<span class="nt">algorithm</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">adv_estimator</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">grpo (fro GRPO) / gae (for PPO)</span>
+<span class="nt">trainer</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">actor_use_kl_loss</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True (fro GRPO) / False (for PPO)</span>
+<span class="w">  </span><span class="nt">actort_kl_loss_coef</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.001</span>
 </pre></div>
 </div>
 </section>
@@ -162,18 +159,18 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>openai/gs
 </section>
 <section id="optional-rft-with-sft-warmup">
 <h2>Optional: RFT with SFT Warmup<a class="headerlink" href="#optional-rft-with-sft-warmup" title="Link to this heading"></a></h2>
-<p>Before RFT, we may use SFT as a warmup step. We need to set <code class="docutils literal notranslate"><span class="pre">trainer.sft_warmup_steps</span> <span class="pre">&gt;</span> <span class="pre">0</span></code> and prepare the SFT data to <code class="docutils literal notranslate"><span class="pre">buffer.train_dataset.path=$DATASET_PATH/{sft_data}</span></code>.</p>
+<p>Before RFT, we may use SFT as a warmup step. We need to set <code class="docutils literal notranslate"><span class="pre">buffer.trainer_input.sft_warmup_steps</span> <span class="pre">&gt;</span> <span class="pre">0</span></code> and prepare the SFT data to <code class="docutils literal notranslate"><span class="pre">buffer.trainer_input.sft_warmup_dataset.path=$DATASET_PATH/{sft_data}</span></code>.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Properly set the following configs in gsm8k.yaml</span>
 <span class="nt">buffer</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">sft_warmup_dataset</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">file</span>
-<span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;$DATASET_PATH/{sft_data}&gt;</span>
-<span class="w">    </span><span class="nt">format</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">prompt_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;prompt_type&gt;</span><span class="w"> </span><span class="c1"># messages/plaintext/chatpair</span>
-<span class="w">      </span><span class="nt">prompt_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;prompt_key&gt;</span>
-<span class="w">      </span><span class="nt">response_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;response_key&gt;</span>
-<span class="nt">trainer</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">sft_warmup_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">  </span><span class="nt">trainer_input</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">sft_warmup_dataset</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">file</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;$DATASET_PATH/{sft_data}&gt;</span>
+<span class="w">      </span><span class="nt">format</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">prompt_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;prompt_type&gt;</span><span class="w"> </span><span class="c1"># messages/plaintext/chatpair</span>
+<span class="w">        </span><span class="nt">prompt_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;prompt_key&gt;</span>
+<span class="w">        </span><span class="nt">response_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;response_key&gt;</span>
+<span class="w">    </span><span class="nt">sft_warmup_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
 </pre></div>
 </div>
 <p>The following command runs SFT and RFT in sequence:</p>

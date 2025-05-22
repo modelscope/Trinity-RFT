@@ -143,11 +143,13 @@
         <span class="p">)</span></div>
 
 
+    <span class="c1"># Deprecated property, will be removed in the future</span>
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">task_desc</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
         <span class="n">prompt_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_args</span><span class="o">.</span><span class="n">prompt_key</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_task</span><span class="p">[</span><span class="n">prompt_key</span><span class="p">]</span> <span class="k">if</span> <span class="n">prompt_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_task</span> <span class="k">else</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
 
+    <span class="c1"># Deprecated property, will be removed in the future</span>
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">truth</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
         <span class="n">response_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_args</span><span class="o">.</span><span class="n">response_key</span>
@@ -275,6 +277,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
             <span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span>
+            <span class="n">auxiliary_models</span><span class="o">=</span><span class="n">auxiliary_models</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">task</span><span class="p">)</span></div>
 
@@ -301,7 +304,6 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;`reward_fn` must be a subclass of `RewardFn`&quot;</span><span class="p">)</span>
         <span class="c1"># Rollout args</span>
         <span class="n">rollout_args</span> <span class="o">=</span> <span class="n">asdict</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">rollout_args</span><span class="p">)</span>
-        <span class="n">rollout_args</span><span class="p">[</span><span class="s2">&quot;n&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rollout_args</span><span class="p">[</span><span class="s2">&quot;repeat_times&quot;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rollout_args</span> <span class="o">=</span> <span class="n">rollout_args</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">is_eval</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">is_eval</span></div>
 
@@ -367,10 +369,21 @@
 <span class="s2">&lt;think&gt; reasoning process here &lt;/think&gt;</span>
 <span class="s2">&lt;answer&gt; answer here &lt;/answer&gt;.</span>
 <span class="s2">&quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
-            <span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span>
-        <span class="p">)</span></div>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span> <span class="n">auxiliary_models</span><span class="o">=</span><span class="n">auxiliary_models</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MathWorkflow.reset">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.MathWorkflow.reset">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">reward_fn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">reward_fn</span> <span class="o">=</span> <span class="n">MathRewardFn</span>
+        <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">reward_fn</span> <span class="o">==</span> <span class="n">MathRewardFn</span> <span class="ow">and</span> <span class="n">task</span><span class="o">.</span><span class="n">format_args</span><span class="o">.</span><span class="n">system_prompt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">format_args</span><span class="o">.</span><span class="n">system_prompt</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;A conversation between User and Assistant. The user asks a question, and the Assistant solves it. The assistant first thinks about the reasoning process in the mind and then provides the user with the answer. The reasoning process and answer are enclosed within &lt;think&gt; &lt;/think&gt; and &lt;answer&gt; &lt;/answer&gt; tags, respectively, i.e.,</span>
+<span class="s2">&lt;think&gt; reasoning process here &lt;/think&gt;</span>
+<span class="s2">&lt;answer&gt; answer here &lt;/answer&gt;.</span>
+<span class="s2">&quot;&quot;&quot;</span>
+        <span class="c1"># call the SimpleWorkflow.reset</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">task</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

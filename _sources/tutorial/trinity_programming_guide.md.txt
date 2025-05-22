@@ -116,7 +116,7 @@ class ExampleWorkflow(Workflow):
                     "content": f"Question:\n{self.question}",
                 }
             ],
-            n=self.task.rollout_args.repeat_times,
+            n=self.task.rollout_args.n,
             temperature=self.task.rollout_args.temperature,
         )
         reward: float = self.calculate_reward(response.response_text, self.answer)

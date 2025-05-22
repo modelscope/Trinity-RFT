@@ -5,33 +5,36 @@ The following is the main config file for Trinity-RFT. Take `countdown.yaml` as 
 ## Global Config
 
 ```yaml
+project: Trinity-RFT
+name: example
 mode: both
-global_config:
-  algorithm_type: ppo
-  total_epochs: 1
-  batch_size: 96
-  eval_interval: 1000
-  eval_on_latest_ckp: true
+checkpoint_root_dir: /PATH/TO/CHECKPOINT
 ```
 
+- `project`: The name of the project.
+- `name`: The name of the experiment.
 - `mode`: The mode of the experiment, chosen from `both`, `train`, `explore` or `bench`. `both` means both trainer and explorer are launched; `train` means only trainer is launched; `explore` means only explorer is launched; `bench` conducts benchmark evaluation. Default is `both`.
-- `global_config.algorithm_type`: The type of the algorithm, Support `ppo`, `grpo`, `opmd` and `dpo`.
-- `global_config.total_epochs`: The total number of epochs. It should be checked manually.
-- `global_config.batch_size`: The batch size used for training. It should be checked manually.
-- `global_config.eval_interval`: The interval steps between two evaluations. Default is `1000`.
-- `global_config.eval_on_latest_ckp`: Whether to evaluate on only the latest checkpoint or all the checkpoints in the path. Only valid in `bench` mode. Default is `true`.
+- `checkpoint_root_dir`: The root directory to save the checkpoints. Sepcifically, the generated checkpoints will be saved in `<checkpoint_root_dir>/<project>/<name>/.
 
+## Algorithm
+
+```yaml
+algorithm:
+  algorithm_type: grpo
+  repeat_times: 1
+```
+
+- `algorithm.algorithm_type`: The type of the algorithm. Support `ppo`, `grpo`, `opmd` and `dpo`.
+- `algorithm.repeat_times`: The number of times to repeat each task. Used for GRPO-like algorithm. Default is `1`.
 
 ## Monitor
 
 ```yaml
 monitor:
-  project: "Trinity-RFT-countdown"
-  name: "qwen2.5-1.5B-countdown"
+  monitor_type: MonitorType.WANDB
 ```
 
-- `monitor.project`: The project name. It must be set manually.
-- `monitor.name`: The name of the experiment. It must be set manually.
+- `monitor.monitor_type`: The type of the monitor. For now, `MonitorType.WANDB` and `MonitorType.TENSORBOARD` are supported.
 
 
 ## Data Processing
@@ -69,16 +72,11 @@ The `model` configuration specifies the model used for training. It includes the
 model:
   model_path: '/PATH/TO/MODEL/CHECKPOINT/'
   critic_model_path: ''
-  max_prompt_tokens: 256
-  max_response_tokens: 1024
-  checkpoint_path: 'checkpoints/qwen2.5-1.5B-countdown'
 ```
 
 - `model.model_path`: The path to the model checkpoint. It must be set manually.
 - `model.critic_model_path`: The path to the critic model checkpoint. If not set, the `model.critic_model_path` will be set to `model.model_path`.
-- `model.max_prompt_tokens`: The maximum number of tokens in the prompt. Default is `2048`. It should be set manually.
-- `model.max_response_tokens`: The maximum number of tokens in the response. Default is `2048`. It should be set manually.
-- `model.checkpoint_path`: The path to the checkpoint of the model. It must be set manually.
+
 
 ## Cluster
 
@@ -108,7 +106,7 @@ buffer:
         prompt_key: 'question'
         response_key: 'answer'
       rollout_args:
-        repeat_times: 1
+        n: 1
         temperature: 1.0
         logprobs: 0
     eval_tasksets: []
@@ -129,7 +127,7 @@ buffer:
 - `buffer.explorer_input.taskset.path`: The path to the taskset.
 - `buffer.explorer_input.taskset.split`: The split name of the taskset used for training. Default is `train`.
 - `buffer.explorer_input.taskset.format`: The format of the taskset. It includes `prompt_key`, `response_key`, `workflow_key` and `reward_fn_key`.
-- `buffer.explorer_input.taskset.rollout_args.repeat_times`: The number of times to repeat each task, used for GRPO-like algorithms. Default is `1`.
+- `buffer.explorer_input.taskset.rollout_args.n`: The number of times to repeat each task. This field is automatically set to `algorithm.repeat_times`.
 - `buffer.explorer_input.taskset.rollout_args.temperature`: The temperature used in vLLM. Default is `1.0`.
 - `buffer.explorer_input.taskset.rollout_args.logprobs`: The logprobs used in vLLM. Default is `0`.
 - `buffer.explorer_input.eval_tasksets`: The configuration of the eval tasksets. It is a list of tasksets which will be used for evaluation. And it is empty by default.
@@ -143,22 +141,19 @@ buffer:
 
 ## Explorer
 
-The `explorer` configuration specifies the explorer configuration. It includes the type of the engine, the number of engines, the number of workflow runners, the tensor parallel size, whether to enable prefix caching, whether to enforce eager mode, the data type, the `temperature`, the `top-p`, the `top-k`, the `seed`, the `logprobs`, the number of times to repeat each task, whether to use Ray, the backend, the maximum number of pending requests, and the maximum number of waitingsteps.
+The `explorer` configuration specifies the explorer configuration. It includes the type of the engine, the number of engines, the number of workflow runners, the tensor parallel size, whether to enable prefix caching, whether to enforce eager mode, the data type, the `temperature`, the `top-p`, the `top-k`, the `seed`, the `logprobs`, the number of times to repeat each task, the maximum number of pending requests, and the maximum number of waitingsteps.
 
 ```yaml
 explorer:
-  engine_type: vllm_async
-  engine_num: 2
   runner_num: 32
-  tensor_parallel_size: 1
-  enable_prefix_caching: false
-  enforce_eager: true
-  dtype: bfloat16
-  seed: 42
-  use_ray: false
-  backend: 'nccl'
-  max_pending_requests: 32
-  max_waiting_steps: 4
+  rollout_model:
+    engine_type: vllm_async
+    engine_num: 2
+    tensor_parallel_size: 1
+    enable_prefix_caching: false
+    enforce_eager: true
+    dtype: bfloat16
+    seed: 42
 ```
 
 - `explorer.engine_type`: The type of the engine, Support `vllm_async` and `vllm_sync`. Default is `vllm_async`.
@@ -169,10 +164,8 @@ explorer:
 - `explorer.enforce_eager`: Whether to enforce eager mode. Default is `True`.
 - `explorer.dtype`: The data type used in vLLM. Default is `bfloat16`.
 - `explorer.seed`: The seed used in vLLM. Default is `42`.
-- `explorer.use_ray`: Whether to use Ray. Default is `False`.
-- `explorer.backend`: The backend used in vLLM. Default is `nccl`.
-- `explorer.max_pending_requests`: The maximum number of pending requests. Default is `32`.
-- `explorer.max_waiting_steps`: The maximum number of waiting steps. Default is `4`.
+- `explorer.rollout_model.max_prompt_tokens`: The maximum number of tokens in the prompt. Default is `2048`. It should be set manually.
+- `explorer.rollout_model.max_response_tokens`: The maximum number of tokens in the response. Default is `2048`. It should be set manually.
 
 ## Synchronizer
 
@@ -195,15 +188,11 @@ Support `nccl` and `checkpoint`, `nccl` represents that model weights in `explor
 trainer:
   trainer_type: 'verl'
   trainer_config_path: 'examples/ppo_countdown/train_countdown.yaml'
-  sft_warmup_steps: 0
-  eval_interval: 1000
   save_interval: 100
 ```
 
 - `trainer.trainer_type`: The backend of the trainer, Only `verl` is supported.
 - `trainer.trainer_config_path`: The path to the trainer configuration file. It must be set manually.
-- `trainer.sft_warmup_steps`: The number of steps to warm up the model. Default is `0`.
-- `trainer.eval_interval`: The interval steps between two evaluations. Default is `1000`.
 - `trainer.save_interval`: The interval steps between two checkpoints. Default is `100`.
 
 ### veRL Trainer Configuration

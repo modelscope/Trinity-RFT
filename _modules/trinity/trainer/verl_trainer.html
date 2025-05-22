@@ -164,7 +164,6 @@
         <span class="n">global_config</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="n">train_config</span> <span class="o">=</span> <span class="n">global_config</span><span class="o">.</span><span class="n">trainer</span>
-        <span class="n">pprint</span><span class="p">(</span><span class="n">train_config</span><span class="o">.</span><span class="n">trainer_config</span><span class="p">)</span>
         <span class="n">config</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">structured</span><span class="p">(</span><span class="n">train_config</span><span class="o">.</span><span class="n">trainer_config</span><span class="p">)</span>
         <span class="c1"># download the checkpoint from hdfs</span>
         <span class="n">local_path</span> <span class="o">=</span> <span class="n">copy_local_path_from_hdfs</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
@@ -408,7 +407,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sft_warmup_step_num</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">sft_warmup_steps</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
                 <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;sft_warmup_steps&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sft_warmup_step_num</span><span class="p">},</span>
-                <span class="n">step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="p">,</span>
+                <span class="n">step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">with</span> <span class="n">_timer</span><span class="p">(</span><span class="s2">&quot;save_checkpoint&quot;</span><span class="p">,</span> <span class="n">timing_raw</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_save_checkpoint</span><span class="p">()</span>

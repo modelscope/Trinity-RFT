@@ -53,16 +53,13 @@ We use the configurations in [`gsm8k.yaml`](https://github.com/modelscope/Trinit
 
 ```yaml
 # In gsm8k.yaml
-explorer:
+algorithm:
+  algorithm_type: grpo / ppo
   repeat_times: {number of rollouts for each task}
 
-# In train_gsm8k.yaml
-actor_rollout_ref:
-  actor:
-    use_kl_loss: True (fro GRPO) / False (for PPO)
-    kl_loss_coef: 0.001
-algorithm:
-  adv_estimator: grpo (fro GRPO) / gae (for PPO)
+trainer:
+  actor_use_kl_loss: True (fro GRPO) / False (for PPO)
+  actort_kl_loss_coef: 0.001
 ```
 
 ### Run the Experiment
@@ -76,20 +73,20 @@ trinity run --config examples/grpo_gsm8k/gsm8k.yaml
 
 ## Optional: RFT with SFT Warmup
 
-Before RFT, we may use SFT as a warmup step. We need to set `trainer.sft_warmup_steps > 0` and prepare the SFT data to `buffer.train_dataset.path=$DATASET_PATH/{sft_data}`.
+Before RFT, we may use SFT as a warmup step. We need to set `buffer.trainer_input.sft_warmup_steps > 0` and prepare the SFT data to `buffer.trainer_input.sft_warmup_dataset.path=$DATASET_PATH/{sft_data}`.
 
 ```yaml
 # Properly set the following configs in gsm8k.yaml
 buffer:
-  sft_warmup_dataset:
-    storage_type: file
-    path: <$DATASET_PATH/{sft_data}>
-    format:
-      prompt_type: <prompt_type> # messages/plaintext/chatpair
-      prompt_key: <prompt_key>
-      response_key: <response_key>
-trainer:
-  sft_warmup_steps: 10
+  trainer_input:
+    sft_warmup_dataset:
+      storage_type: file
+      path: <$DATASET_PATH/{sft_data}>
+      format:
+        prompt_type: <prompt_type> # messages/plaintext/chatpair
+        prompt_key: <prompt_key>
+        response_key: <response_key>
+    sft_warmup_steps: 10
 ```
 
 The following command runs SFT and RFT in sequence:

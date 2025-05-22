@@ -198,14 +198,14 @@
             <span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">task_desc</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">task_desc</span> <span class="ow">or</span> <span class="s2">&quot;0&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">repeat_times</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">rollout_args</span><span class="o">.</span><span class="n">repeat_times</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">repeat_times</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">rollout_args</span><span class="o">.</span><span class="n">n</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_env_steps</span> <span class="o">=</span> <span class="mi">30</span></div>
 
 
 <div class="viewcode-block" id="AlfworldWorkflow.get_model_response">
 <a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.AlfworldWorkflow.get_model_response">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_model_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">):</span>
-        <span class="n">responses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">chat</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span> <span class="n">repeat_times</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">responses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">chat</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">responses</span></div>
 
 
