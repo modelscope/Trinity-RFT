@@ -11,6 +11,11 @@ actor_rollout_ref:
     ppo_micro_batch_size_per_gpu: 1
     use_dynamic_bsz: False
     ppo_max_token_len_per_gpu: 16384 # n * ${data.max_prompt_length} + ${data.max_response_length}
+    grad_clip: 1.0
+    clip_ratio: 0.2
+    entropy_coeff: 0.001
+    use_kl_loss: True # True for GRPO
+    kl_loss_coef: 0.001 # for grpo
     kl_loss_type: low_var_kl # for grpo
     ppo_epochs: 1
     shuffle: False
@@ -44,6 +49,8 @@ custom_reward_function:
   name: compute_score
 
 algorithm:
+  gamma: 1.0
+  lam: 1.0
   kl_penalty: kl  # how to estimate kl divergence
   kl_ctrl:
     type: fixed
@@ -52,7 +59,6 @@ algorithm:
 trainer:
   balance_batch: True
   # total_training_steps: null
-  logger: [ 'wandb' ]
   # auto: find the last ckpt to resume. If can't find, start from scratch
   resume_mode: auto # or auto or resume_path if
   default_hdfs_dir: null

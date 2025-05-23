@@ -173,8 +173,8 @@ class AlgorithmConfig:
     algorithm_type: AlgorithmType = AlgorithmType.PPO
     # for GRPO-like algorithms, repeat each task for `repeat_times` times
     repeat_times: int = 1
-    gamma: float = 1.0
-    lam: float = 1.0
+    gamma: Optional[float] = None
+    lam: Optional[float] = None
     # TODO: add more algorithm params here
 
 
@@ -263,11 +263,11 @@ class TrainerConfig:
     enable_preview: bool = True  # enable rollout preview in wandb
 
     # trainer configs
-    actor_use_kl_loss: bool = False
-    actor_kl_loss_coef: float = 0.001
-    actor_entropy_coef: float = 0.001
-    actor_grad_clip: float = 1.0
-    actor_clip_ratio: float = 0.2
+    actor_use_kl_loss: Optional[bool] = None
+    actor_kl_loss_coef: Optional[float] = None
+    actor_entropy_coef: Optional[float] = None
+    actor_grad_clip: Optional[float] = None
+    actor_clip_ratio: Optional[float] = None
     # TODO: extract more train-related params from underlying trainer engine
 
     # Only one needs to be set for `trainer_config` and `trainer_config_path`
