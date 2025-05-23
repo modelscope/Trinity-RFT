@@ -46,7 +46,8 @@ class TestConfig(unittest.TestCase):
                     print(f"Checking config: {filename}")
                     config_path = os.path.join(example_dir, example_name, filename)
                     try:
-                        load_config(config_path)
+                        config = load_config(config_path)
+                        config.check_and_update()
                     except Exception as e:
                         print(f"Error loading config {config_path}: {e}")
                         raise e
