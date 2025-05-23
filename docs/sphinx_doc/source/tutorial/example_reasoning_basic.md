@@ -123,7 +123,6 @@ buffer:
         prompt_key: 'question'
         response_key: 'answer'
       rollout_args:
-        n: 8
         temperature: 1.0
     eval_tasksets:
     - name: gsm8k-eval

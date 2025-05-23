@@ -1,4 +1,4 @@
-# Asynchronous RFT Mode
+# Asynchronous RFT
 
 This example shows how to run RFT in a fully asynchronous mode with the GRPO algorithm, Qwen-2.5-1.5B-Instruct model and GSM8K dataset.
 
@@ -38,7 +38,6 @@ buffer:
         response_key: 'answer'
       rollout_args:
         temperature: 1.0
-        logprobs: 0
     default_workflow_type: 'math_workflow'
   trainer_input:
     experience_buffer:
@@ -51,8 +50,6 @@ explorer:
   rollout_model:
     engine_type: vllm_async
     engine_num: 4
-    dtype: bfloat16
-    seed: 42
 synchronizer:
   sync_method: 'checkpoint'
   sync_interval: 10
@@ -87,7 +84,6 @@ buffer:
         prompt_key: 'question'
         response_key: 'answer'
       rollout_args:
-        n: 8
         temperature: 1.0
     default_workflow_type: 'math_workflow'
   trainer_input:
