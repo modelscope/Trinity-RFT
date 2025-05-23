@@ -292,38 +292,27 @@ Support <code class="docutils literal notranslate"><span class="pre">nccl</span>
 <h2>Trainer<a class="headerlink" href="#trainer" title="Link to this heading"></a></h2>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">trainer</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">trainer_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;verl&#39;</span>
-<span class="w">  </span><span class="nt">trainer_config_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;examples/ppo_countdown/train_countdown.yaml&#39;</span>
 <span class="w">  </span><span class="nt">save_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">  </span><span class="nt">trainer_config_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;examples/ppo_countdown/train_countdown.yaml&#39;</span>
 </pre></div>
 </div>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">trainer.trainer_type</span></code>: The backend of the trainer, Only <code class="docutils literal notranslate"><span class="pre">verl</span></code> is supported.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">trainer.trainer_config_path</span></code>: The path to the trainer configuration file. It must be set manually.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">trainer.save_interval</span></code>: The interval steps between two checkpoints. Default is <code class="docutils literal notranslate"><span class="pre">100</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trainer.actor_grad_clip</span></code>: Gradient clip for actor model training.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trainer.actor_clip_ratio</span></code>: Used for compute policy loss.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trainer.actor_entropy_coeff</span></code>: Used for compute policy loss.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trainer.actor_use_kl_loss</span></code>: Whether to enable kl loss.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trainer.actor_kl_loss_coef</span></code>: The coefficient of kl loss.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trainer.train_config</span></code>: The configuration of the trainer. Only one needs to be set for <code class="docutils literal notranslate"><span class="pre">trainer.trainer_config</span></code> and <code class="docutils literal notranslate"><span class="pre">trainer.trainer_config_path</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trainer.trainer_config_path</span></code>: The path to the trainer configuration file. It must be set manually.</p></li>
 </ul>
 <section id="verl-trainer-configuration">
 <h3>veRL Trainer Configuration<a class="headerlink" href="#verl-trainer-configuration" title="Link to this heading"></a></h3>
 <p>Here we mainly introduce the parameters that can be set in veRL. For the specific meaning of the parameters, please refer to the official document of <a class="reference external" href="https://github.com/volcengine/verl/blob/0bdf7f469854815177e73dcfe9e420836c952e6e/docs/examples/config.rst">veRL</a>.</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">data</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">tokenizer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
-<span class="w">  </span><span class="nt">train_files</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">train_example.parquet</span>
-<span class="w">  </span><span class="nt">val_files</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test_example.parquet</span>
-<span class="w">  </span><span class="nt">prompt_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">prompt</span>
-<span class="w">  </span><span class="nt">max_prompt_length</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">256</span>
-<span class="w">  </span><span class="nt">max_response_length</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1024</span>
-<span class="w">  </span><span class="nt">train_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">256</span>
-<span class="w">  </span><span class="nt">val_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
-<span class="w">  </span><span class="nt">return_raw_input_ids</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">  </span><span class="c1"># This should be set to true when the tokenizer between policy and rm differs</span>
-<span class="w">  </span><span class="nt">return_raw_chat</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
-<span class="w">  </span><span class="nt">shuffle</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="w">  </span><span class="nt">filter_overlong_prompts</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># for large-scale dataset, filtering overlong prompts could be timeconsuming. You should disable this and set `truncation=&#39;left&#39;</span>
-<span class="w">  </span><span class="nt">truncation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">error</span>
-<span class="w">  </span><span class="nt">image_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">images</span>
-
-<span class="nt">actor_rollout_ref</span><span class="p">:</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">actor_rollout_ref</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">hybrid_engine</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
 <span class="w">  </span><span class="nt">model</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/MODEL/CHECKPOINT/</span>
 <span class="w">    </span><span class="nt">external_lib</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
 <span class="w">    </span><span class="nt">override_config</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="w"> </span><span class="p p-Indicator">}</span>
 <span class="w">    </span><span class="nt">enable_gradient_checkpointing</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
@@ -374,35 +363,6 @@ Support <code class="docutils literal notranslate"><span class="pre">nccl</span>
 <span class="w">    </span><span class="nt">log_prob_use_dynamic_bsz</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${actor_rollout_ref.actor.use_dynamic_bsz}</span>
 <span class="w">    </span><span class="nt">log_prob_max_token_len_per_gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${actor_rollout_ref.actor.ppo_max_token_len_per_gpu}</span>
 <span class="w">    </span><span class="nt">ulysses_sequence_parallel_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${actor_rollout_ref.actor.ulysses_sequence_parallel_size}</span><span class="w"> </span><span class="c1"># sp size</span>
-<span class="w">  </span><span class="nt">rollout</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vllm</span>
-<span class="w">    </span><span class="nt">temperature</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
-<span class="w">    </span><span class="nt">top_k</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-1</span><span class="w"> </span><span class="c1"># 0 for hf rollout, -1 for vllm rollout</span>
-<span class="w">    </span><span class="nt">top_p</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">    </span><span class="nt">use_fire_sampling</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># https://arxiv.org/abs/2410.21236</span>
-<span class="w">    </span><span class="nt">prompt_length</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${data.max_prompt_length}</span><span class="w">  </span><span class="c1"># not use for opensource</span>
-<span class="w">    </span><span class="nt">response_length</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${data.max_response_length}</span>
-<span class="w">    </span><span class="c1"># for vllm rollout</span>
-<span class="w">    </span><span class="nt">dtype</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bfloat16</span><span class="w"> </span><span class="c1"># should align with FSDP</span>
-<span class="w">    </span><span class="nt">gpu_memory_utilization</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.4</span>
-<span class="w">    </span><span class="nt">ignore_eos</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
-<span class="w">    </span><span class="nt">enforce_eager</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="w">    </span><span class="nt">free_cache_engine</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="w">    </span><span class="nt">load_format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dummy_dtensor</span>
-<span class="w">    </span><span class="nt">tensor_model_parallel_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
-<span class="w">    </span><span class="nt">max_num_batched_tokens</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8192</span>
-<span class="w">    </span><span class="nt">max_model_len</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
-<span class="w">    </span><span class="nt">max_num_seqs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1024</span>
-<span class="w">    </span><span class="c1"># log_prob_micro_batch_size: 8 # will be deprecated, use log_prob_micro_batch_size_per_gpu</span>
-<span class="w">    </span><span class="nt">log_prob_micro_batch_size_per_gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
-<span class="w">    </span><span class="nt">log_prob_use_dynamic_bsz</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${actor_rollout_ref.actor.use_dynamic_bsz}</span>
-<span class="w">    </span><span class="nt">log_prob_max_token_len_per_gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${actor_rollout_ref.actor.ppo_max_token_len_per_gpu}</span>
-<span class="w">    </span><span class="nt">disable_log_stats</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="w">    </span><span class="nt">enable_chunked_prefill</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1"># could get higher throughput</span>
-<span class="w">    </span><span class="c1"># for hf rollout</span>
-<span class="w">    </span><span class="nt">do_sample</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="w">    </span><span class="c1"># number of responses (i.e. num sample times)</span>
-<span class="w">    </span><span class="nt">n</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"> </span><span class="c1"># &gt; 1 for grpo</span>
 
 <span class="nt">critic</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fsdp</span>
@@ -413,8 +373,6 @@ Support <code class="docutils literal notranslate"><span class="pre">nccl</span>
 <span class="w">    </span><span class="nt">warmup_style</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">constant</span><span class="w">  </span><span class="c1"># select from constant/cosine</span>
 <span class="w">    </span><span class="nt">total_training_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-1</span><span class="w">  </span><span class="c1"># must be override by program</span>
 <span class="w">  </span><span class="nt">model</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/MODEL/CHECKPOINT/</span>
-<span class="w">    </span><span class="nt">tokenizer_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${actor_rollout_ref.model.path}</span>
 <span class="w">    </span><span class="nt">override_config</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="w"> </span><span class="p p-Indicator">}</span>
 <span class="w">    </span><span class="nt">external_lib</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${actor_rollout_ref.model.external_lib}</span>
 <span class="w">    </span><span class="nt">enable_gradient_checkpointing</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
@@ -427,7 +385,6 @@ Support <code class="docutils literal notranslate"><span class="pre">nccl</span>
 <span class="w">        </span><span class="nt">min_num_params</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
 <span class="w">      </span><span class="nt">fsdp_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-1</span>
 <span class="w">  </span><span class="nt">ppo_mini_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${actor_rollout_ref.actor.ppo_mini_batch_size}</span>
-<span class="w">  </span><span class="c1"># ppo_micro_batch_size: 8 # will be deprecated, use ppo_micro_batch_size_per_gpu</span>
 <span class="w">  </span><span class="nt">ppo_micro_batch_size_per_gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
 <span class="w">  </span><span class="nt">forward_micro_batch_size_per_gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${critic.ppo_micro_batch_size_per_gpu}</span>
 <span class="w">  </span><span class="nt">use_dynamic_bsz</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${actor_rollout_ref.actor.use_dynamic_bsz}</span>
@@ -439,26 +396,6 @@ Support <code class="docutils literal notranslate"><span class="pre">nccl</span>
 <span class="w">  </span><span class="nt">grad_clip</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
 <span class="w">  </span><span class="nt">cliprange_value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
 
-<span class="nt">reward_model</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">enable</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
-<span class="w">  </span><span class="nt">strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fsdp</span>
-<span class="w">  </span><span class="nt">model</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">input_tokenizer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${actor_rollout_ref.model.path}</span><span class="w">  </span><span class="c1"># set this to null if the chat template is identical</span>
-<span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">~/models/FsfairX-LLaMA3-RM-v0.1</span>
-<span class="w">    </span><span class="nt">external_lib</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${actor_rollout_ref.model.external_lib}</span>
-<span class="w">    </span><span class="nt">use_remove_padding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
-<span class="w">    </span><span class="nt">fsdp_config</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">min_num_params</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
-<span class="w">      </span><span class="nt">param_offload</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
-<span class="w">      </span><span class="nt">fsdp_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-1</span>
-<span class="w">  </span><span class="c1"># micro_batch_size: null # will be deprecated, use micro_batch_size_per_gpu</span>
-<span class="w">  </span><span class="c1"># micro_batch_size_per_gpu: 2 # set a number</span>
-<span class="w">  </span><span class="c1"># max_length: null</span>
-<span class="w">  </span><span class="nt">ulysses_sequence_parallel_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"> </span><span class="c1"># sp size</span>
-<span class="w">  </span><span class="nt">use_dynamic_bsz</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${critic.use_dynamic_bsz}</span>
-<span class="w">  </span><span class="nt">forward_max_token_len_per_gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${critic.forward_max_token_len_per_gpu}</span>
-<span class="w">  </span><span class="nt">reward_manager</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tinyzero</span>
-
 <span class="nt">custom_reward_function</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
 <span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">compute_score</span>
@@ -466,7 +403,6 @@ Support <code class="docutils literal notranslate"><span class="pre">nccl</span>
 <span class="nt">algorithm</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">gamma</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
 <span class="w">  </span><span class="nt">lam</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
-<span class="w">  </span><span class="nt">adv_estimator</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gae</span>
 <span class="w">  </span><span class="nt">norm_adv_by_std_in_grpo</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
 <span class="w">  </span><span class="nt">use_kl_in_reward</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
 <span class="w">  </span><span class="nt">kl_penalty</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kl</span><span class="w">  </span><span class="c1"># how to estimate kl divergence</span>
@@ -478,24 +414,14 @@ Support <code class="docutils literal notranslate"><span class="pre">nccl</span>
 
 <span class="nt">trainer</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">balance_batch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="w">  </span><span class="nt">total_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">15</span>
 <span class="w">  </span><span class="c1"># total_training_steps: null</span>
-<span class="w">  </span><span class="nt">project_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TinyZero</span>
-<span class="w">  </span><span class="nt">experiment_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">trinity-qwen2.5-1.5b</span>
-<span class="w">  </span><span class="nt">logger</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="w"> </span><span class="s">&#39;wandb&#39;</span><span class="w"> </span><span class="p p-Indicator">]</span>
-<span class="w">  </span><span class="nt">val_generations_to_log_to_wandb</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
-<span class="w">  </span><span class="nt">nnodes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">  </span><span class="nt">n_gpus_per_node</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
-<span class="w">  </span><span class="nt">save_freq</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
 <span class="w">  </span><span class="c1"># auto: find the last ckpt to resume. If can&#39;t find, start from scratch</span>
 <span class="w">  </span><span class="nt">resume_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auto</span><span class="w"> </span><span class="c1"># or auto or resume_path if</span>
 <span class="w">  </span><span class="nt">resume_from_path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
-<span class="w">  </span><span class="nt">test_freq</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
 <span class="w">  </span><span class="nt">critic_warmup</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
 <span class="w">  </span><span class="nt">default_hdfs_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
 <span class="w">  </span><span class="nt">remove_previous_ckpt_in_save</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
 <span class="w">  </span><span class="nt">del_local_ckpt_after_load</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
-<span class="w">  </span><span class="nt">default_local_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">checkpoints/${trainer.project_name}/${trainer.experiment_name}</span>
 <span class="w">  </span><span class="nt">val_before_train</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
 <span class="w">  </span><span class="nt">max_actor_ckpt_to_keep</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
 <span class="w">  </span><span class="nt">max_critic_ckpt_to_keep</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
@@ -506,11 +432,6 @@ Support <code class="docutils literal notranslate"><span class="pre">nccl</span>
 <li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.model.use_remove_padding</span></code>: Whether to remove pad tokens, which will reduce training time.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.use_dynamic_bsz</span></code>: Whether to reorganize the batch data, specifically to splice the shorter data to reduce the batch size in the actual training process.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu</span></code>: Batch size for one GPU in one forward pass.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.grad_clip</span></code>: Gradient clip for actor model training.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.clip_ratio</span></code>: Used for compute policy loss.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.entropy_coeff</span></code>: Used for compute policy loss.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.use_kl_loss</span></code>: Whether to enable kl loss.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.kl_loss_coef</span></code>: The coefficient of kl loss.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.kl_loss_type</span></code>: How to compute kl loss, optional value is <code class="docutils literal notranslate"><span class="pre">kl</span></code>, <code class="docutils literal notranslate"><span class="pre">abs</span></code>, <code class="docutils literal notranslate"><span class="pre">mse</span></code> or <code class="docutils literal notranslate"><span class="pre">low_var_kl</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.ulysses_sequence_parallel_size</span></code>: Ulysses sequence parallel size.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.tau</span></code>: strength of regularization w.r.t. old / ref policy.</p></li>

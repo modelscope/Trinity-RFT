@@ -142,29 +142,41 @@
             <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;both&quot;</span><span class="p">,</span>
             <span class="s2">&quot;project&quot;</span><span class="p">:</span> <span class="s2">&quot;Trinity-RFT&quot;</span><span class="p">,</span>
             <span class="s2">&quot;exp_name&quot;</span><span class="p">:</span> <span class="s2">&quot;qwen2.5-1.5B&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;checkpoint_root_dir&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
             <span class="s2">&quot;monitor_type&quot;</span><span class="p">:</span> <span class="n">MonitorType</span><span class="o">.</span><span class="n">TENSORBOARD</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="c1"># Algorithm Configs</span>
+            <span class="s2">&quot;algorithm_type&quot;</span><span class="p">:</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">PPO</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="s2">&quot;_grouped_adv_repeat_times&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="s2">&quot;_not_grouped_adv_repeat_times&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;repeat_times&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;gamma&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+            <span class="s2">&quot;lam&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
             <span class="c1"># Model Configs</span>
             <span class="s2">&quot;model_path&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
             <span class="s2">&quot;critic_model_path&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;checkpoint_path&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;max_prompt_tokens&quot;</span><span class="p">:</span> <span class="mi">1024</span><span class="p">,</span>
+            <span class="s2">&quot;max_response_tokens&quot;</span><span class="p">:</span> <span class="mi">1024</span><span class="p">,</span>
+            <span class="c1"># Cluster Config</span>
             <span class="s2">&quot;node_num&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
             <span class="s2">&quot;gpu_per_node&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
             <span class="s2">&quot;total_gpu_num&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
             <span class="s2">&quot;trainer_gpu_num&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
-            <span class="s2">&quot;max_prompt_tokens&quot;</span><span class="p">:</span> <span class="mi">1024</span><span class="p">,</span>
-            <span class="s2">&quot;max_response_tokens&quot;</span><span class="p">:</span> <span class="mi">1024</span><span class="p">,</span>
-            <span class="c1"># Global Configs</span>
+            <span class="c1"># Buffer Configs</span>
             <span class="s2">&quot;total_epochs&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
             <span class="s2">&quot;_train_batch_size_per_gpu&quot;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
             <span class="s2">&quot;train_batch_size&quot;</span><span class="p">:</span> <span class="mi">96</span><span class="p">,</span>
-            <span class="s2">&quot;eval_interval&quot;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
-            <span class="s2">&quot;algorithm_type&quot;</span><span class="p">:</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">PPO</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="s2">&quot;buffer_max_retry_times&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+            <span class="s2">&quot;max_retry_interval&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
             <span class="c1"># Taskset Configs</span>
             <span class="s2">&quot;taskset_path&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
             <span class="s2">&quot;taskset_subset_name&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
             <span class="s2">&quot;taskset_split&quot;</span><span class="p">:</span> <span class="s2">&quot;train&quot;</span><span class="p">,</span>
             <span class="s2">&quot;taskset_prompt_key&quot;</span><span class="p">:</span> <span class="s2">&quot;question&quot;</span><span class="p">,</span>
             <span class="s2">&quot;taskset_response_key&quot;</span><span class="p">:</span> <span class="s2">&quot;answer&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+            <span class="s2">&quot;top_p&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>  <span class="c1"># TODO: to be used</span>
+            <span class="s2">&quot;top_k&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># TODO: to be used</span>
+            <span class="s2">&quot;logprobs&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
             <span class="c1"># Eval Taskset Configs</span>
             <span class="s2">&quot;_eval_tasksets_num&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
             <span class="c1"># Explorer Input Configs</span>
@@ -172,15 +184,13 @@
             <span class="s2">&quot;default_reward_fn_type&quot;</span><span class="p">:</span> <span class="s2">&quot;math_reward&quot;</span><span class="p">,</span>
             <span class="s2">&quot;system_prompt&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
             <span class="s2">&quot;reply_prefix&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="c1"># Experience Buffer Configs</span>
+            <span class="c1"># Experience Buffer / DPO Dataset Configs</span>
             <span class="s2">&quot;_dpo_storage_type&quot;</span><span class="p">:</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">FILE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
             <span class="s2">&quot;_not_dpo_storage_type&quot;</span><span class="p">:</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">QUEUE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
             <span class="s2">&quot;storage_type&quot;</span><span class="p">:</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">QUEUE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
             <span class="s2">&quot;_dpo_experience_buffer_path&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
             <span class="s2">&quot;_not_dpo_experience_buffer_path&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
             <span class="s2">&quot;experience_buffer_path&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;buffer_max_retry_times&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
-            <span class="s2">&quot;max_retry_interval&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
             <span class="s2">&quot;dpo_dataset_train_split&quot;</span><span class="p">:</span> <span class="s2">&quot;train&quot;</span><span class="p">,</span>
             <span class="s2">&quot;dpo_dataset_prompt_type&quot;</span><span class="p">:</span> <span class="n">PromptType</span><span class="o">.</span><span class="n">MESSAGES</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
             <span class="s2">&quot;dpo_dataset_prompt_key&quot;</span><span class="p">:</span> <span class="s2">&quot;prompt&quot;</span><span class="p">,</span>
@@ -193,26 +203,32 @@
             <span class="s2">&quot;sft_warmup_messages_key&quot;</span><span class="p">:</span> <span class="s2">&quot;messages&quot;</span><span class="p">,</span>
             <span class="s2">&quot;sft_warmup_prompt_key&quot;</span><span class="p">:</span> <span class="s2">&quot;prompt&quot;</span><span class="p">,</span>
             <span class="s2">&quot;sft_warmup_response_key&quot;</span><span class="p">:</span> <span class="s2">&quot;response&quot;</span><span class="p">,</span>
+            <span class="c1"># TrainerInput Configs</span>
+            <span class="c1"># TODO: read_experience_strategy</span>
+            <span class="s2">&quot;sft_warmup_steps&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
             <span class="c1"># Explorer and Sync Configs</span>
-            <span class="s2">&quot;engine_type&quot;</span><span class="p">:</span> <span class="s2">&quot;vllm_async&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;engine_num&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
             <span class="s2">&quot;runner_num&quot;</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
-            <span class="s2">&quot;_grouped_adv_repeat_times&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-            <span class="s2">&quot;_not_grouped_adv_repeat_times&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-            <span class="s2">&quot;repeat_times&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-            <span class="s2">&quot;tensor_parallel_size&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-            <span class="s2">&quot;enable_prefix_caching&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;enforce_eager&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;dtype&quot;</span><span class="p">:</span> <span class="s2">&quot;bfloat16&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
-            <span class="s2">&quot;top_p&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
-            <span class="s2">&quot;top_k&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
-            <span class="s2">&quot;seed&quot;</span><span class="p">:</span> <span class="mi">42</span><span class="p">,</span>
-            <span class="s2">&quot;logprobs&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="s2">&quot;gpu_memory_utilization&quot;</span><span class="p">:</span> <span class="mf">0.9</span><span class="p">,</span>
-            <span class="s2">&quot;enable_chunked_prefill&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
             <span class="s2">&quot;max_timeout&quot;</span><span class="p">:</span> <span class="mi">900</span><span class="p">,</span>
             <span class="s2">&quot;explorer_max_retry_times&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="s2">&quot;eval_interval&quot;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+            <span class="s2">&quot;eval_on_latest_checkpoint&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="c1"># Rollout Model Configs</span>
+            <span class="s2">&quot;engine_type&quot;</span><span class="p">:</span> <span class="s2">&quot;vllm_async&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;engine_num&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="s2">&quot;tensor_parallel_size&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;use_v1&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;enforce_eager&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;enable_prefix_caching&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;enable_chunked_prefill&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;gpu_memory_utilization&quot;</span><span class="p">:</span> <span class="mf">0.9</span><span class="p">,</span>
+            <span class="s2">&quot;dtype&quot;</span><span class="p">:</span> <span class="s2">&quot;bfloat16&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;seed&quot;</span><span class="p">:</span> <span class="mi">42</span><span class="p">,</span>
+            <span class="c1"># TODO: max_prompt_tokens</span>
+            <span class="c1"># TODO: max_response_tokens</span>
+            <span class="c1"># TODO: chat_template</span>
+            <span class="s2">&quot;enable_thinking&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;enable_openai_api&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="c1"># TODO: Auxiliary Models Configs</span>
             <span class="c1"># Synchronizer Configs</span>
             <span class="s2">&quot;_not_dpo_sync_method&quot;</span><span class="p">:</span> <span class="n">SyncMethod</span><span class="o">.</span><span class="n">NCCL</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
             <span class="s2">&quot;sync_method&quot;</span><span class="p">:</span> <span class="n">SyncMethod</span><span class="o">.</span><span class="n">NCCL</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
@@ -220,9 +236,15 @@
             <span class="s2">&quot;sync_timeout&quot;</span><span class="p">:</span> <span class="mi">1200</span><span class="p">,</span>
             <span class="c1"># Trainer Configs</span>
             <span class="s2">&quot;trainer_type&quot;</span><span class="p">:</span> <span class="s2">&quot;verl&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;sft_warmup_steps&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
             <span class="s2">&quot;_nccl_save_interval&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
             <span class="s2">&quot;save_interval&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+            <span class="c1"># TODO: enable_preview</span>
+            <span class="s2">&quot;_not_dpo_actor_use_kl_loss&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;actor_use_kl_loss&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;actor_kl_loss_coef&quot;</span><span class="p">:</span> <span class="mf">0.001</span><span class="p">,</span>
+            <span class="s2">&quot;actor_entropy_coef&quot;</span><span class="p">:</span> <span class="mf">0.001</span><span class="p">,</span>
+            <span class="s2">&quot;actor_grad_clip&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+            <span class="s2">&quot;actor_clip_ratio&quot;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">,</span>
             <span class="c1"># veRL Trainer Configs</span>
             <span class="s2">&quot;training_args&quot;</span><span class="p">:</span> <span class="p">[</span>
                 <span class="s2">&quot;balance_batch&quot;</span><span class="p">,</span>
@@ -243,8 +265,6 @@
             <span class="s2">&quot;del_local_ckpt_after_load&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
             <span class="s2">&quot;max_actor_ckpt_to_keep&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
             <span class="s2">&quot;max_critic_ckpt_to_keep&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="s2">&quot;gamma&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
-            <span class="s2">&quot;lam&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
             <span class="s2">&quot;adv_estimator&quot;</span><span class="p">:</span> <span class="s2">&quot;gae&quot;</span><span class="p">,</span>
             <span class="s2">&quot;norm_adv_by_std_in_grpo&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
             <span class="s2">&quot;use_kl_in_reward&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
@@ -262,12 +282,6 @@
             <span class="s2">&quot;actor_tau&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
             <span class="s2">&quot;actor_opmd_baseline&quot;</span><span class="p">:</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span>
             <span class="s2">&quot;actor_use_uid&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s2">&quot;actor_grad_clip&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
-            <span class="s2">&quot;actor_clip_ratio&quot;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">,</span>
-            <span class="s2">&quot;actor_entropy_coef&quot;</span><span class="p">:</span> <span class="mf">0.001</span><span class="p">,</span>
-            <span class="s2">&quot;_not_dpo_actor_use_kl_loss&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;actor_use_kl_loss&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;actor_kl_loss_coef&quot;</span><span class="p">:</span> <span class="mf">0.001</span><span class="p">,</span>
             <span class="s2">&quot;actor_kl_loss_type&quot;</span><span class="p">:</span> <span class="s2">&quot;low_var_kl&quot;</span><span class="p">,</span>
             <span class="s2">&quot;actor_checkpoint&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">,</span> <span class="s2">&quot;hf_model&quot;</span><span class="p">,</span> <span class="s2">&quot;optimizer&quot;</span><span class="p">,</span> <span class="s2">&quot;extra&quot;</span><span class="p">],</span>
             <span class="s2">&quot;critic_lr&quot;</span><span class="p">:</span> <span class="mf">1e-6</span><span class="p">,</span>
@@ -302,7 +316,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_project</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span><span class="s2">&quot;Project&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;project&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_set_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_exp_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span><span class="s2">&quot;Experiment Name&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;exp_name&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_monitor_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -319,18 +333,19 @@
             <span class="n">st</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Please input model path.&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_critic_model_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">st</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span>
-            <span class="s2">&quot;Critic Model Path (defaults to `model_path`)&quot;</span><span class="p">,</span>
-            <span class="n">key</span><span class="o">=</span><span class="s2">&quot;critic_model_path&quot;</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;adv_estimator&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">AdvantageEstimator</span><span class="o">.</span><span class="n">GAE</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span>
+                <span class="s2">&quot;Critic Model Path (defaults to `model_path`)&quot;</span><span class="p">,</span>
+                <span class="n">key</span><span class="o">=</span><span class="s2">&quot;critic_model_path&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_set_checkpoint_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">st</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span><span class="s2">&quot;Checkpoint Path&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;checkpoint_path&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;checkpoint_path&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>  <span class="c1"># TODO: may auto generate</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">unfinished_fields</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;checkpoint_path&quot;</span><span class="p">)</span>
-            <span class="n">st</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Please input checkpoint path.&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;checkpoint_path&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">unfinished_fields</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;checkpoint_path&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_checkpoint_root_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span><span class="s2">&quot;Checkpoint Root Dir&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;checkpoint_root_dir&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;checkpoint_root_dir&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>  <span class="c1"># TODO: may auto generate</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">unfinished_fields</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;checkpoint_root_dir&quot;</span><span class="p">)</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Please input checkpoint root dir.&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;checkpoint_root_dir&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">unfinished_fields</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;checkpoint_root_dir&quot;</span><span class="p">)</span>
             <span class="n">st</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Please input an absolute path.&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_node_num</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -444,8 +459,9 @@
             <span class="n">response_key_col</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span>
                 <span class="s2">&quot;Response Key :orange-badge[(Needs review)]&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;taskset_response_key&quot;</span>
             <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;temperature&quot;</span><span class="p">,</span> <span class="s2">&quot;logprobs&quot;</span><span class="p">])</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_set_eval_taskset_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_eval_taskset_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>  <span class="c1"># TODO: add delete</span>
         <span class="n">st</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span>
             <span class="s2">&quot;Taskset Name&quot;</span><span class="p">,</span>
             <span class="n">key</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">_name&quot;</span><span class="p">,</span>
@@ -555,7 +571,7 @@
 
 <span class="s2">if `storage_type == StorageType.QUEUE`, default to `None`,</span>
 
-<span class="s2">if `storage_type == StorageType.SQL`, default to `sqlite:///{os.path.join(checkpoint_path, &#39;.cache&#39;, project_name, experiment_name)}/data.db`.&quot;&quot;&quot;</span>
+<span class="s2">if `storage_type == StorageType.SQL`, default to `sqlite:///{os.path.join(checkpoint_root_dir, &#39;.cache&#39;, project_name, experiment_name)}/data.db`.&quot;&quot;&quot;</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">on_change</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">DPO</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
@@ -643,7 +659,9 @@
                 <span class="n">sft_warmup_messages_key_col</span><span class="p">,</span>
                 <span class="n">sft_warmup_prompt_key_col</span><span class="p">,</span>
                 <span class="n">sft_warmup_response_key_col</span><span class="p">,</span>
-            <span class="p">)</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">columns</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+            <span class="p">)</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">columns</span><span class="p">(</span>
+                <span class="mi">3</span>
+            <span class="p">)</span>  <span class="c1"># TODO: select by prompt type</span>
             <span class="n">sft_warmup_messages_key_col</span><span class="o">.</span><span class="n">text_input</span><span class="p">(</span>
                 <span class="s2">&quot;SFT Dataset Messages Key :orange-badge[(Needs review)]&quot;</span><span class="p">,</span>
                 <span class="n">key</span><span class="o">=</span><span class="s2">&quot;sft_warmup_messages_key&quot;</span><span class="p">,</span>
@@ -670,7 +688,7 @@
 <span class="s2">```&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_engine_num</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">total_gpu_num</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;gpu_per_node&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;node_num&quot;</span><span class="p">]</span>
+        <span class="n">total_gpu_num</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;total_gpu_num&quot;</span><span class="p">]</span>
         <span class="n">max_engine_num</span> <span class="o">=</span> <span class="p">(</span><span class="n">total_gpu_num</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;tensor_parallel_size&quot;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;engine_num&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">max_engine_num</span><span class="p">:</span>
             <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;engine_num&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_engine_num</span>
@@ -686,7 +704,7 @@
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_tensor_parallel_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">total_gpu_num</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;gpu_per_node&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;node_num&quot;</span><span class="p">]</span>
+        <span class="n">total_gpu_num</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;total_gpu_num&quot;</span><span class="p">]</span>
         <span class="n">max_tensor_parallel_size</span> <span class="o">=</span> <span class="p">(</span><span class="n">total_gpu_num</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;engine_num&quot;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;tensor_parallel_size&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">max_tensor_parallel_size</span><span class="p">:</span>
             <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;tensor_parallel_size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_tensor_parallel_size</span>
@@ -717,6 +735,33 @@
                 <span class="n">st</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                     <span class="s2">&quot;Please ensure that `engine_num * tensor_parallel_size` can be divided by `gpu_per_node` when `node_num &gt; 1`.&quot;</span>
                 <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_repeat_times</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># TODO</span>
+        <span class="n">grouped_adv_algorithms</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">GRPO</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">OPMD</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>  <span class="c1"># TODO: may add rloo</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">grouped_adv_algorithms</span><span class="p">:</span>
+            <span class="n">min_repeat_times</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;repeat_times&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;_grouped_adv_repeat_times&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">min_repeat_times</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;repeat_times&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;_not_grouped_adv_repeat_times&quot;</span><span class="p">]</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">on_change</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">grouped_adv_algorithms</span><span class="p">:</span>
+                <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;_grouped_adv_repeat_times&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;repeat_times&quot;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;_not_grouped_adv_repeat_times&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;repeat_times&quot;</span><span class="p">]</span>
+
+        <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span>
+            <span class="s2">&quot;Repeat Times&quot;</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="s2">&quot;repeat_times&quot;</span><span class="p">,</span>
+            <span class="n">min_value</span><span class="o">=</span><span class="n">min_repeat_times</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;`repeat_times` is used to set how many experiences each task can generate, &quot;</span>
+            <span class="s2">&quot;and it must be greater than `1` when `algorithm_type` is `opmd` or `grpo`.&quot;</span><span class="p">,</span>
+            <span class="n">on_change</span><span class="o">=</span><span class="n">on_change</span><span class="p">,</span>
+        <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_sync_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">DPO</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
@@ -784,6 +829,9 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_logprobs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span><span class="s2">&quot;Logprobs&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;logprobs&quot;</span><span class="p">,</span> <span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_use_v1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">checkbox</span><span class="p">(</span><span class="s2">&quot;Use V1 Engine&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;use_v1&quot;</span><span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_enable_prefix_caching</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">checkbox</span><span class="p">(</span><span class="s2">&quot;Prefix Caching&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;enable_prefix_caching&quot;</span><span class="p">)</span>
 
@@ -797,6 +845,12 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_enable_chunked_prefill</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">checkbox</span><span class="p">(</span><span class="s2">&quot;Chunked Prefill&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;enable_chunked_prefill&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_enable_thinking</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">checkbox</span><span class="p">(</span><span class="s2">&quot;Enable Thinking For Qwen3&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;enable_thinking&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_enable_openai_api</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">checkbox</span><span class="p">(</span><span class="s2">&quot;Enable OpenAI API&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;enable_openai_api&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_max_timeout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span><span class="s2">&quot;Max Timeout&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;max_timeout&quot;</span><span class="p">,</span> <span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -843,6 +897,9 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_eval_interval</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span><span class="s2">&quot;Eval Interval&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;eval_interval&quot;</span><span class="p">,</span> <span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_eval_on_latest_checkpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">checkbox</span><span class="p">(</span><span class="s2">&quot;Eval on Latest Checkpoint&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;eval_on_latest_ckp&quot;</span><span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_training_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">multiselect</span><span class="p">(</span>
             <span class="s2">&quot;Training Args&quot;</span><span class="p">,</span>
@@ -884,33 +941,6 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_ppo_epochs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span><span class="s2">&quot;PPO Epochs&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;ppo_epochs&quot;</span><span class="p">,</span> <span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_set_repeat_times</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># TODO</span>
-        <span class="n">grouped_adv_algorithms</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">GRPO</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-            <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">OPMD</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>  <span class="c1"># TODO: may add rloo</span>
-        <span class="p">]</span>
-        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">grouped_adv_algorithms</span><span class="p">:</span>
-            <span class="n">min_repeat_times</span> <span class="o">=</span> <span class="mi">2</span>
-            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;repeat_times&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;_grouped_adv_repeat_times&quot;</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">min_repeat_times</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;repeat_times&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;_not_grouped_adv_repeat_times&quot;</span><span class="p">]</span>
-
-        <span class="k">def</span><span class="w"> </span><span class="nf">on_change</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">grouped_adv_algorithms</span><span class="p">:</span>
-                <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;_grouped_adv_repeat_times&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;repeat_times&quot;</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;_not_grouped_adv_repeat_times&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;repeat_times&quot;</span><span class="p">]</span>
-
-        <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span>
-            <span class="s2">&quot;Repeat Times&quot;</span><span class="p">,</span>
-            <span class="n">key</span><span class="o">=</span><span class="s2">&quot;repeat_times&quot;</span><span class="p">,</span>
-            <span class="n">min_value</span><span class="o">=</span><span class="n">min_repeat_times</span><span class="p">,</span>
-            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;`repeat_times` is used to set how many experiences each task can generate, &quot;</span>
-            <span class="s2">&quot;and it must be greater than `1` when `algorithm_type` is `opmd` or `grpo`.&quot;</span><span class="p">,</span>
-            <span class="n">on_change</span><span class="o">=</span><span class="n">on_change</span><span class="p">,</span>
-        <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_training_strategy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">selectbox</span><span class="p">(</span>
@@ -1205,11 +1235,11 @@
 <a class="viewcode-back" href="../../../build_api/trinity.manager.html#trinity.manager.config_manager.ConfigManager.beginner_mode">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">beginner_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span><span class="o">.</span><span class="n">header</span><span class="p">(</span><span class="s2">&quot;Essential Configs&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;project&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="n">columns_config</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;project&quot;</span><span class="p">,</span> <span class="s2">&quot;exp_name&quot;</span><span class="p">],</span> <span class="n">columns_config</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_model_path</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_set_checkpoint_path</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_checkpoint_root_dir</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_taskset_path</span><span class="p">()</span>
 
@@ -1270,12 +1300,12 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_expert_model_part</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;project&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="n">columns_config</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;project&quot;</span><span class="p">,</span> <span class="s2">&quot;exp_name&quot;</span><span class="p">],</span> <span class="n">columns_config</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_model_path</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_critic_model_path</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_set_checkpoint_path</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_checkpoint_root_dir</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;monitor_type&quot;</span><span class="p">,</span> <span class="s2">&quot;node_num&quot;</span><span class="p">,</span> <span class="s2">&quot;gpu_per_node&quot;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;max_prompt_tokens&quot;</span><span class="p">,</span> <span class="s2">&quot;max_response_tokens&quot;</span><span class="p">])</span>
@@ -1314,34 +1344,36 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;buffer_max_retry_times&quot;</span><span class="p">,</span> <span class="s2">&quot;max_retry_interval&quot;</span><span class="p">])</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_expert_explorer_part</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">(</span>
-            <span class="p">[</span><span class="s2">&quot;engine_type&quot;</span><span class="p">,</span> <span class="s2">&quot;engine_num&quot;</span><span class="p">,</span> <span class="s2">&quot;tensor_parallel_size&quot;</span><span class="p">,</span> <span class="s2">&quot;repeat_times&quot;</span><span class="p">]</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_check_engine_num_and_tp_size</span><span class="p">()</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;sync_method&quot;</span><span class="p">,</span> <span class="s2">&quot;sync_interval&quot;</span><span class="p">,</span> <span class="s2">&quot;sync_timeout&quot;</span><span class="p">])</span>
 
-        <span class="k">with</span> <span class="n">st</span><span class="o">.</span><span class="n">expander</span><span class="p">(</span><span class="s2">&quot;Advanced Config&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="s2">&quot;runner_num&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;max_timeout&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;explorer_max_retry_times&quot;</span><span class="p">,</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;eval_interval&quot;</span><span class="p">,</span> <span class="s2">&quot;eval_on_latest_checkpoint&quot;</span><span class="p">])</span>
+
+        <span class="k">with</span> <span class="n">st</span><span class="o">.</span><span class="n">expander</span><span class="p">(</span><span class="s2">&quot;Rollout Model Config&quot;</span><span class="p">,</span> <span class="n">expanded</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;engine_type&quot;</span><span class="p">,</span> <span class="s2">&quot;engine_num&quot;</span><span class="p">,</span> <span class="s2">&quot;tensor_parallel_size&quot;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_check_engine_num_and_tp_size</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;gpu_memory_utilization&quot;</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">,</span> <span class="s2">&quot;seed&quot;</span><span class="p">])</span>
+
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">(</span>
-                <span class="p">[</span><span class="s2">&quot;runner_num&quot;</span><span class="p">,</span> <span class="s2">&quot;temperature&quot;</span><span class="p">,</span> <span class="s2">&quot;top_p&quot;</span><span class="p">,</span> <span class="s2">&quot;top_k&quot;</span><span class="p">,</span> <span class="s2">&quot;seed&quot;</span><span class="p">,</span> <span class="s2">&quot;logprobs&quot;</span><span class="p">]</span>
+                <span class="p">[</span><span class="s2">&quot;use_v1&quot;</span><span class="p">,</span> <span class="s2">&quot;enforce_eager&quot;</span><span class="p">,</span> <span class="s2">&quot;enable_prefix_caching&quot;</span><span class="p">,</span> <span class="s2">&quot;enable_chunked_prefill&quot;</span><span class="p">]</span>
             <span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;dtype&quot;</span><span class="p">,</span> <span class="s2">&quot;gpu_memory_utilization&quot;</span><span class="p">])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">(</span>
-                <span class="p">[</span>
-                    <span class="s2">&quot;max_timeout&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;explorer_max_retry_times&quot;</span><span class="p">,</span>
-                <span class="p">]</span>
-            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;enable_thinking&quot;</span><span class="p">,</span> <span class="s2">&quot;enable_openai_api&quot;</span><span class="p">])</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">(</span>
-                <span class="p">[</span><span class="s2">&quot;enable_prefix_caching&quot;</span><span class="p">,</span> <span class="s2">&quot;enforce_eager&quot;</span><span class="p">,</span> <span class="s2">&quot;enable_chunked_prefill&quot;</span><span class="p">]</span>
-            <span class="p">)</span>
+        <span class="k">with</span> <span class="n">st</span><span class="o">.</span><span class="n">expander</span><span class="p">(</span><span class="s2">&quot;Auxiliary Models&quot;</span><span class="p">,</span> <span class="n">expanded</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>  <span class="c1"># TODO</span>
+            <span class="k">pass</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_expert_trainer_part</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">(</span>  <span class="c1"># TODO: may add `trainer_type`</span>
-            <span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">,</span> <span class="s2">&quot;sft_warmup_steps&quot;</span><span class="p">,</span> <span class="s2">&quot;eval_interval&quot;</span><span class="p">,</span> <span class="s2">&quot;save_interval&quot;</span><span class="p">]</span>
-        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">,</span> <span class="s2">&quot;gamma&quot;</span><span class="p">,</span> <span class="s2">&quot;lam&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;repeat_times&quot;</span><span class="p">,</span> <span class="s2">&quot;save_interval&quot;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_sft_warmup_dataset_path</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;trainer_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;verl&quot;</span><span class="p">:</span>
@@ -1381,7 +1413,6 @@
 
         <span class="k">with</span> <span class="n">rl_algorithm_tab</span><span class="p">:</span>
             <span class="n">st</span><span class="o">.</span><span class="n">subheader</span><span class="p">(</span><span class="s2">&quot;RL Algorithm Config&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;gamma&quot;</span><span class="p">,</span> <span class="s2">&quot;lam&quot;</span><span class="p">])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;norm_adv_by_std_in_grpo&quot;</span><span class="p">,</span> <span class="s2">&quot;use_kl_in_reward&quot;</span><span class="p">])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;kl_penalty&quot;</span><span class="p">,</span> <span class="s2">&quot;kl_ctrl_type&quot;</span><span class="p">,</span> <span class="s2">&quot;kl_ctrl_coef&quot;</span><span class="p">])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_configs_with_st_columns</span><span class="p">([</span><span class="s2">&quot;horizon&quot;</span><span class="p">,</span> <span class="s2">&quot;target_kl&quot;</span><span class="p">])</span>
@@ -1445,7 +1476,7 @@
                 <span class="n">func</span><span class="p">()</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_generate_verl_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trainer_nnodes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">trainer_n_gpus_per_node</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_generate_verl_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">balance_batch</span> <span class="o">=</span> <span class="s2">&quot;balance_batch&quot;</span> <span class="ow">in</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;training_args&quot;</span><span class="p">]</span>
         <span class="n">enable_gradient_checkpointing</span> <span class="o">=</span> <span class="p">(</span>
             <span class="s2">&quot;gradient_checkpointing&quot;</span> <span class="ow">in</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;training_args&quot;</span><span class="p">]</span>
@@ -1467,33 +1498,10 @@
             <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_prompt_tokens&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_response_tokens&quot;</span><span class="p">]</span>
         <span class="p">)</span>
 
-        <span class="n">critic_model_path</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;critic_model_path&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;critic_model_path&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="k">else</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;model_path&quot;</span><span class="p">]</span>
-        <span class="p">)</span>
         <span class="n">trainer_config</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;tokenizer&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-                <span class="s2">&quot;train_files&quot;</span><span class="p">:</span> <span class="s2">&quot;placeholder&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;val_files&quot;</span><span class="p">:</span> <span class="s2">&quot;placeholder&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;prompt_key&quot;</span><span class="p">:</span> <span class="s2">&quot;placeholder&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;max_prompt_length&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_prompt_tokens&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;max_response_length&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_response_tokens&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;train_batch_size&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;train_batch_size&quot;</span><span class="p">]</span>
-                <span class="o">*</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;repeat_times&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;val_batch_size&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-                <span class="s2">&quot;return_raw_input_ids&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-                <span class="s2">&quot;return_raw_chat&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-                <span class="s2">&quot;shuffle&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="s2">&quot;filter_overlong_prompts&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-                <span class="s2">&quot;truncation&quot;</span><span class="p">:</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;image_key&quot;</span><span class="p">:</span> <span class="s2">&quot;images&quot;</span><span class="p">,</span>
-            <span class="p">},</span>
             <span class="s2">&quot;actor_rollout_ref&quot;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s2">&quot;hybrid_engine&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
                 <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;model_path&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;external_lib&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
                     <span class="s2">&quot;override_config&quot;</span><span class="p">:</span> <span class="p">{},</span>
                     <span class="s2">&quot;enable_gradient_checkpointing&quot;</span><span class="p">:</span> <span class="n">enable_gradient_checkpointing</span><span class="p">,</span>
@@ -1507,11 +1515,6 @@
                     <span class="p">],</span>
                     <span class="s2">&quot;use_dynamic_bsz&quot;</span><span class="p">:</span> <span class="n">use_dynamic_bsz</span><span class="p">,</span>
                     <span class="s2">&quot;ppo_max_token_len_per_gpu&quot;</span><span class="p">:</span> <span class="n">ppo_max_token_len_per_gpu</span><span class="p">,</span>
-                    <span class="s2">&quot;grad_clip&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_grad_clip&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;clip_ratio&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_clip_ratio&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;entropy_coeff&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_entropy_coef&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;use_kl_loss&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_use_kl_loss&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;kl_loss_coef&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_kl_loss_coef&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;kl_loss_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_kl_loss_type&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;ppo_epochs&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;ppo_epochs&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;shuffle&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
@@ -1545,34 +1548,32 @@
                         <span class="s2">&quot;actor_ulysses_sequence_parallel_size&quot;</span>
                     <span class="p">],</span>
                 <span class="p">},</span>
-                <span class="s2">&quot;rollout&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;vllm&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;temperature&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;top_k&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
-                    <span class="s2">&quot;top_p&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-                    <span class="s2">&quot;use_fire_sampling&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-                    <span class="s2">&quot;prompt_length&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_prompt_tokens&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;response_length&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_response_tokens&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;dtype&quot;</span><span class="p">:</span> <span class="s2">&quot;bfloat16&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;gpu_memory_utilization&quot;</span><span class="p">:</span> <span class="mf">0.4</span><span class="p">,</span>
-                    <span class="s2">&quot;ignore_eos&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-                    <span class="s2">&quot;enforce_eager&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                    <span class="s2">&quot;free_cache_engine&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                    <span class="s2">&quot;load_format&quot;</span><span class="p">:</span> <span class="s2">&quot;dummy_dtensor&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;tensor_model_parallel_size&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-                    <span class="s2">&quot;max_num_batched_tokens&quot;</span><span class="p">:</span> <span class="mi">8192</span><span class="p">,</span>
-                    <span class="s2">&quot;max_model_len&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-                    <span class="s2">&quot;max_num_seqs&quot;</span><span class="p">:</span> <span class="mi">1024</span><span class="p">,</span>
-                    <span class="s2">&quot;log_prob_micro_batch_size_per_gpu&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-                    <span class="s2">&quot;log_prob_use_dynamic_bsz&quot;</span><span class="p">:</span> <span class="n">use_dynamic_bsz</span><span class="p">,</span>
-                    <span class="s2">&quot;log_prob_max_token_len_per_gpu&quot;</span><span class="p">:</span> <span class="n">ppo_max_token_len_per_gpu</span><span class="p">,</span>
-                    <span class="s2">&quot;disable_log_stats&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                    <span class="s2">&quot;enable_chunked_prefill&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                    <span class="s2">&quot;do_sample&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                    <span class="s2">&quot;n&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;repeat_times&quot;</span><span class="p">],</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;custom_reward_function&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;compute_score&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;algorithm&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;kl_penalty&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;kl_penalty&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;kl_ctrl&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;kl_ctrl_type&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;kl_coef&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;kl_ctrl_coef&quot;</span><span class="p">],</span>
                 <span class="p">},</span>
             <span class="p">},</span>
-            <span class="s2">&quot;critic&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;trainer&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;balance_batch&quot;</span><span class="p">:</span> <span class="n">balance_batch</span><span class="p">,</span>
+                <span class="s2">&quot;logger&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;tensorboard&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;resume_mode&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;resume_mode&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;resume_from_path&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;resume_from_path&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;default_hdfs_dir&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;default_hdfs_dir&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;remove_previous_ckpt_in_save&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;remove_previous_ckpt_in_save&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;del_local_ckpt_after_load&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;del_local_ckpt_after_load&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;val_before_train&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s2">&quot;max_actor_ckpt_to_keep&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_actor_ckpt_to_keep&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;max_critic_ckpt_to_keep&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_critic_ckpt_to_keep&quot;</span><span class="p">],</span>
+            <span class="p">},</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;adv_estimator&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">AdvantageEstimator</span><span class="o">.</span><span class="n">GAE</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="n">trainer_config</span><span class="p">[</span><span class="s2">&quot;trainer&quot;</span><span class="p">][</span><span class="s2">&quot;critic_warmup&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;critic_warmup&quot;</span><span class="p">]</span>
+            <span class="n">trainer_config</span><span class="p">[</span><span class="s2">&quot;critic&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="s2">&quot;strategy&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;training_strategy&quot;</span><span class="p">],</span>
                 <span class="s2">&quot;optim&quot;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="s2">&quot;lr&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;critic_lr&quot;</span><span class="p">],</span>
@@ -1585,8 +1586,6 @@
                     <span class="p">),</span>
                 <span class="p">},</span>
                 <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">critic_model_path</span><span class="p">,</span>
-                    <span class="s2">&quot;tokenizer_path&quot;</span><span class="p">:</span> <span class="n">critic_model_path</span><span class="p">,</span>
                     <span class="s2">&quot;override_config&quot;</span><span class="p">:</span> <span class="p">{},</span>
                     <span class="s2">&quot;external_lib&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
                     <span class="s2">&quot;enable_gradient_checkpointing&quot;</span><span class="p">:</span> <span class="n">enable_gradient_checkpointing</span><span class="p">,</span>
@@ -1611,100 +1610,131 @@
                 <span class="s2">&quot;grad_clip&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;critic_grad_clip&quot;</span><span class="p">],</span>
                 <span class="s2">&quot;cliprange_value&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;critic_cliprange_value&quot;</span><span class="p">],</span>
                 <span class="s2">&quot;checkpoint&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;contents&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;critic_checkpoint&quot;</span><span class="p">]},</span>
-            <span class="p">},</span>
-            <span class="s2">&quot;reward_model&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;enable&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-                <span class="s2">&quot;strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;fsdp&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;input_tokenizer&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;model_path&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="s2">&quot;~/models/FsfairX-LLaMA3-RM-v0.1&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;external_lib&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-                    <span class="s2">&quot;use_remove_padding&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-                    <span class="s2">&quot;fsdp_config&quot;</span><span class="p">:</span> <span class="p">{</span>
-                        <span class="s2">&quot;min_num_params&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-                        <span class="s2">&quot;param_offload&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-                        <span class="s2">&quot;fsdp_size&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
-                    <span class="p">},</span>
-                <span class="p">},</span>
-                <span class="s2">&quot;ulysses_sequence_parallel_size&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-                <span class="s2">&quot;use_dynamic_bsz&quot;</span><span class="p">:</span> <span class="n">use_dynamic_bsz</span><span class="p">,</span>
-                <span class="s2">&quot;forward_max_token_len_per_gpu&quot;</span><span class="p">:</span> <span class="n">ppo_max_token_len_per_gpu</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span>
-                <span class="s2">&quot;reward_manager&quot;</span><span class="p">:</span> <span class="s2">&quot;naive&quot;</span><span class="p">,</span>
-            <span class="p">},</span>
-            <span class="s2">&quot;custom_reward_function&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;compute_score&quot;</span><span class="p">},</span>
-            <span class="s2">&quot;algorithm&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;gamma&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;gamma&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;lam&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;lam&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;adv_estimator&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;adv_estimator&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;kl_penalty&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;kl_penalty&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;kl_ctrl&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;kl_ctrl_type&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;kl_coef&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;kl_ctrl_coef&quot;</span><span class="p">],</span>
-                <span class="p">},</span>
-            <span class="p">},</span>
-            <span class="s2">&quot;trainer&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;balance_batch&quot;</span><span class="p">:</span> <span class="n">balance_batch</span><span class="p">,</span>
-                <span class="s2">&quot;total_epochs&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;total_epochs&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;project_name&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;project&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;experiment_name&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;exp_name&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;logger&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;tensorboard&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;val_generations_to_log_to_wandb&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-                <span class="s2">&quot;nnodes&quot;</span><span class="p">:</span> <span class="n">trainer_nnodes</span><span class="p">,</span>
-                <span class="s2">&quot;n_gpus_per_node&quot;</span><span class="p">:</span> <span class="n">trainer_n_gpus_per_node</span><span class="p">,</span>
-                <span class="s2">&quot;save_freq&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;save_interval&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;resume_mode&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;resume_mode&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;resume_from_path&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;resume_from_path&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;test_freq&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
-                <span class="s2">&quot;critic_warmup&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;critic_warmup&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;default_hdfs_dir&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;default_hdfs_dir&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;remove_previous_ckpt_in_save&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;remove_previous_ckpt_in_save&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;del_local_ckpt_after_load&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;del_local_ckpt_after_load&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;default_local_dir&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;checkpoint_path&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;val_before_train&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-                <span class="s2">&quot;sync_freq&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sync_interval&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;max_actor_ckpt_to_keep&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_actor_ckpt_to_keep&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;max_critic_ckpt_to_keep&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_critic_ckpt_to_keep&quot;</span><span class="p">],</span>
-            <span class="p">},</span>
-        <span class="p">}</span>
+            <span class="p">}</span>
         <span class="k">return</span> <span class="n">trainer_config</span>
 
-<div class="viewcode-block" id="ConfigManager.generate_config">
-<a class="viewcode-back" href="../../../build_api/trinity.manager.html#trinity.manager.config_manager.ConfigManager.generate_config">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">generate_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;mode&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;both&quot;</span><span class="p">:</span>
-            <span class="n">trainer_nnodes</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;node_num&quot;</span><span class="p">]</span>
-                <span class="o">-</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;engine_num&quot;</span><span class="p">]</span>
-                <span class="o">*</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;tensor_parallel_size&quot;</span><span class="p">]</span>
-                <span class="o">//</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;gpu_per_node&quot;</span><span class="p">]</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">trainer_nnodes</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;node_num&quot;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;node_num&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;mode&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;both&quot;</span><span class="p">:</span>
-            <span class="n">trainer_n_gpus_per_node</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;gpu_per_node&quot;</span><span class="p">]</span>
-                <span class="o">-</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;engine_num&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;tensor_parallel_size&quot;</span><span class="p">]</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">trainer_n_gpus_per_node</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;gpu_per_node&quot;</span><span class="p">]</span>
-
+    <span class="k">def</span><span class="w"> </span><span class="nf">_gen_buffer_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">DPO</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
             <span class="n">experience_buffer_path</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;experience_buffer_path&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
             <span class="k">if</span> <span class="p">(</span>
                 <span class="ow">not</span> <span class="n">experience_buffer_path</span>
                 <span class="ow">and</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;storage_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">SQL</span><span class="o">.</span><span class="n">value</span>
             <span class="p">):</span>
-                <span class="n">experience_buffer_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;sqlite:///</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s1">&#39;checkpoint_path&#39;</span><span class="p">],</span><span class="w"> </span><span class="s1">&#39;.cache&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s1">&#39;project&#39;</span><span class="p">],</span><span class="w"> </span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s1">&#39;exp_name&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">/data.db&quot;</span>
+                <span class="n">experience_buffer_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;sqlite:///</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s1">&#39;checkpoint_root_dir&#39;</span><span class="p">],</span><span class="w"> </span><span class="s1">&#39;.cache&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s1">&#39;project&#39;</span><span class="p">],</span><span class="w"> </span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s1">&#39;exp_name&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">/data.db&quot;</span>
 
         <span class="n">sft_storage_type</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">StorageType</span><span class="o">.</span><span class="n">SQL</span><span class="o">.</span><span class="n">value</span>
             <span class="k">if</span> <span class="s2">&quot;://&quot;</span> <span class="ow">in</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_dataset_path&quot;</span><span class="p">]</span>
             <span class="k">else</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">FILE</span><span class="o">.</span><span class="n">value</span>
         <span class="p">)</span>  <span class="c1"># TODO</span>
+
+        <span class="n">buffer_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;batch_size&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;train_batch_size&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;total_epochs&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;total_epochs&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;explorer_input&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;taskset&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;taskset&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;storage_type&quot;</span><span class="p">:</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">FILE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                    <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;taskset_path&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;split&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;taskset_split&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;subset_name&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;taskset_subset_name&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;format&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">&quot;prompt_key&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;taskset_prompt_key&quot;</span><span class="p">],</span>
+                        <span class="s2">&quot;response_key&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;taskset_response_key&quot;</span><span class="p">],</span>
+                    <span class="p">},</span>
+                    <span class="s2">&quot;rollout_args&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;temperature&quot;</span><span class="p">],</span>
+                        <span class="s2">&quot;logprobs&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;logprobs&quot;</span><span class="p">],</span>
+                    <span class="p">},</span>
+                <span class="p">},</span>
+                <span class="s2">&quot;eval_tasksets&quot;</span><span class="p">:</span> <span class="p">[],</span>
+                <span class="s2">&quot;default_workflow_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;default_workflow_type&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;default_reward_fn_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;default_reward_fn_type&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;system_prompt&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;system_prompt&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;reply_prefix&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;reply_prefix&quot;</span><span class="p">],</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;trainer_input&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;experience_buffer&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;experience_buffer&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;storage_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;storage_type&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">experience_buffer_path</span><span class="p">,</span>
+                <span class="p">},</span>
+                <span class="s2">&quot;sft_warmup_steps&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_steps&quot;</span><span class="p">],</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;max_retry_times&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;buffer_max_retry_times&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;max_retry_interval&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_retry_interval&quot;</span><span class="p">],</span>
+        <span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;_eval_tasksets_num&quot;</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">_path&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+                <span class="n">buffer_config</span><span class="p">[</span><span class="s2">&quot;explorer_input&quot;</span><span class="p">][</span><span class="s2">&quot;eval_tasksets&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">_name&quot;</span><span class="p">],</span>
+                        <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">_path&quot;</span><span class="p">],</span>
+                        <span class="s2">&quot;subset_name&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">_subset_name&quot;</span><span class="p">],</span>
+                        <span class="s2">&quot;split&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">_split&quot;</span><span class="p">],</span>
+                        <span class="s2">&quot;prompt_key&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">_prompt_key&quot;</span><span class="p">],</span>
+                        <span class="s2">&quot;response_key&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">_response_key&quot;</span><span class="p">],</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
+        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">DPO</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="n">experience_buffer</span> <span class="o">=</span> <span class="n">buffer_config</span><span class="p">[</span><span class="s2">&quot;trainer_input&quot;</span><span class="p">][</span><span class="s2">&quot;experience_buffer&quot;</span><span class="p">]</span>
+            <span class="n">experience_buffer</span><span class="p">[</span><span class="s2">&quot;split&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;dpo_dataset_train_split&quot;</span><span class="p">]</span>
+            <span class="n">experience_buffer</span><span class="p">[</span><span class="s2">&quot;format&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;prompt_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;dpo_dataset_prompt_type&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;prompt_key&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;dpo_dataset_prompt_key&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;chosen_key&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;dpo_dataset_chosen_key&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;rejected_key&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;dpo_dataset_rejected_key&quot;</span><span class="p">],</span>
+            <span class="p">}</span>
+        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_dataset_path&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+            <span class="n">buffer_config</span><span class="p">[</span><span class="s2">&quot;trainer_input&quot;</span><span class="p">][</span><span class="s2">&quot;sft_warmup_dataset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;sft_warmup_dataset&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;storage_type&quot;</span><span class="p">:</span> <span class="n">sft_storage_type</span><span class="p">,</span>
+                <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_dataset_path&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;split&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_train_split&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;format&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;prompt_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_prompt_type&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;messages_key&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_messages_key&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;prompt_key&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_prompt_key&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;response_key&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_response_key&quot;</span><span class="p">],</span>
+                <span class="p">},</span>
+            <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">buffer_config</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_gen_explorer_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">explorer_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;runner_num&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;runner_num&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;max_timeout&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_timeout&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;max_retry_times&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;explorer_max_retry_times&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;rollout_model&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;engine_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;engine_type&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;engine_num&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;engine_num&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;tensor_parallel_size&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;tensor_parallel_size&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;use_v1&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;use_v1&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;enforce_eager&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;enforce_eager&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;enable_prefix_caching&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;enable_prefix_caching&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;enable_chunked_prefill&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;enable_chunked_prefill&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;gpu_memory_utilization&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;gpu_memory_utilization&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;dtype&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;dtype&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;seed&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;seed&quot;</span><span class="p">],</span>
+                <span class="c1"># &quot;max_prompt_tokens&quot;: None,  # TODO</span>
+                <span class="c1"># &quot;max_response_tokens&quot;: None,  # TODO</span>
+                <span class="c1"># &quot;chat_template&quot;: None,  # TODO: add chat template</span>
+                <span class="s2">&quot;enable_thinking&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;enable_thinking&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;enable_openai_api&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;enable_openai_api&quot;</span><span class="p">],</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;auxiliary_models&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;eval_interval&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;eval_interval&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;eval_on_latest_checkpoint&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;eval_on_latest_checkpoint&quot;</span><span class="p">],</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">explorer_config</span>
+
+<div class="viewcode-block" id="ConfigManager.generate_config">
+<a class="viewcode-back" href="../../../build_api/trinity.manager.html#trinity.manager.config_manager.ConfigManager.generate_config">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;trainer_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;verl&quot;</span><span class="p">:</span>
-            <span class="n">trainer_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_verl_config</span><span class="p">(</span>
-                <span class="n">trainer_nnodes</span><span class="o">=</span><span class="n">trainer_nnodes</span><span class="p">,</span> <span class="n">trainer_n_gpus_per_node</span><span class="o">=</span><span class="n">trainer_n_gpus_per_node</span>
-            <span class="p">)</span>
+            <span class="n">trainer_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_verl_config</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid trainer type: </span><span class="si">{</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s1">&#39;trainer_type&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
@@ -1729,12 +1759,15 @@
             <span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;mode&quot;</span><span class="p">],</span>
                 <span class="s2">&quot;project&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;project&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;checkpoint_root_dir&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;checkpoint_path&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;exp_name&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;checkpoint_root_dir&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;checkpoint_root_dir&quot;</span><span class="p">],</span>
                 <span class="s2">&quot;algorithm&quot;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="s2">&quot;algorithm_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;repeat_times&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;repeat_times&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;gamma&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;gamma&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;lam&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;lam&quot;</span><span class="p">],</span>
                 <span class="p">},</span>
+                <span class="s2">&quot;data_processor&quot;</span><span class="p">:</span> <span class="p">{},</span>  <span class="c1"># TODO: Add data processor config</span>
                 <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="s2">&quot;model_path&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;model_path&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;max_prompt_tokens&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_prompt_tokens&quot;</span><span class="p">],</span>
@@ -1744,74 +1777,26 @@
                     <span class="s2">&quot;node_num&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;node_num&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;gpu_per_node&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;gpu_per_node&quot;</span><span class="p">],</span>
                 <span class="p">},</span>
-                <span class="s2">&quot;buffer&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;total_epochs&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;total_epochs&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;batch_size&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;train_batch_size&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;max_retry_times&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;buffer_max_retry_times&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;max_retry_interval&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_retry_interval&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;explorer_input&quot;</span><span class="p">:</span> <span class="p">{</span>
-                        <span class="s2">&quot;taskset&quot;</span><span class="p">:</span> <span class="p">{</span>
-                            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;taskset&quot;</span><span class="p">,</span>
-                            <span class="s2">&quot;storage_type&quot;</span><span class="p">:</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">FILE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-                            <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;taskset_path&quot;</span><span class="p">],</span>
-                            <span class="s2">&quot;split&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;taskset_split&quot;</span><span class="p">],</span>
-                            <span class="s2">&quot;subset_name&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;taskset_subset_name&quot;</span><span class="p">],</span>
-                            <span class="s2">&quot;format&quot;</span><span class="p">:</span> <span class="p">{</span>
-                                <span class="s2">&quot;prompt_key&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;taskset_prompt_key&quot;</span><span class="p">],</span>
-                                <span class="s2">&quot;response_key&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;taskset_response_key&quot;</span><span class="p">],</span>
-                            <span class="p">},</span>
-                            <span class="s2">&quot;rollout_args&quot;</span><span class="p">:</span> <span class="p">{</span>
-                                <span class="s2">&quot;n&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;repeat_times&quot;</span><span class="p">],</span>
-                                <span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;temperature&quot;</span><span class="p">],</span>
-                                <span class="s2">&quot;top_p&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;top_p&quot;</span><span class="p">],</span>
-                                <span class="s2">&quot;top_k&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;top_k&quot;</span><span class="p">],</span>
-                                <span class="s2">&quot;logprobs&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;logprobs&quot;</span><span class="p">],</span>
-                            <span class="p">},</span>
-                        <span class="p">},</span>
-                        <span class="s2">&quot;eval_tasksets&quot;</span><span class="p">:</span> <span class="p">[],</span>  <span class="c1"># TODO: add eval tasksets</span>
-                        <span class="s2">&quot;default_workflow_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;default_workflow_type&quot;</span><span class="p">],</span>
-                        <span class="s2">&quot;default_reward_fn_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;default_reward_fn_type&quot;</span><span class="p">],</span>
-                        <span class="s2">&quot;system_prompt&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;system_prompt&quot;</span><span class="p">],</span>
-                        <span class="s2">&quot;reply_prefix&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;reply_prefix&quot;</span><span class="p">],</span>
-                    <span class="p">},</span>
-                    <span class="s2">&quot;trainer_input&quot;</span><span class="p">:</span> <span class="p">{</span>
-                        <span class="s2">&quot;experience_buffer&quot;</span><span class="p">:</span> <span class="p">{</span>
-                            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;experience_buffer&quot;</span><span class="p">,</span>
-                            <span class="s2">&quot;storage_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;storage_type&quot;</span><span class="p">],</span>
-                            <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">experience_buffer_path</span><span class="p">,</span>
-                        <span class="p">},</span>
-                        <span class="s2">&quot;sft_warmup_steps&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_steps&quot;</span><span class="p">],</span>
-                    <span class="p">},</span>
+                <span class="s2">&quot;buffer&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gen_buffer_config</span><span class="p">(),</span>
+                <span class="s2">&quot;explorer&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gen_explorer_config</span><span class="p">(),</span>
+                <span class="s2">&quot;trainer&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;trainer_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;trainer_type&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;save_interval&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;save_interval&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;enable_preview&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># TODO</span>
+                    <span class="s2">&quot;actor_use_kl_loss&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_use_kl_loss&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;actor_kl_loss_coef&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_kl_loss_coef&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;actor_entropy_coef&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_entropy_coef&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;actor_grad_clip&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_grad_clip&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;actor_clip_ratio&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_clip_ratio&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;trainer_config&quot;</span><span class="p">:</span> <span class="n">trainer_config</span><span class="p">,</span>
                 <span class="p">},</span>
-                <span class="s2">&quot;explorer&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;eval_interval&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;eval_interval&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;engine_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;engine_type&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;engine_num&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;engine_num&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;runner_num&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;runner_num&quot;</span><span class="p">],</span>
-                    <span class="c1"># &quot;chat_template&quot;: None,  # TODO: add chat template</span>
-                    <span class="s2">&quot;tensor_parallel_size&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;tensor_parallel_size&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;enable_prefix_caching&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;enable_prefix_caching&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;enforce_eager&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;enforce_eager&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;dtype&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;dtype&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;seed&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;seed&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;gpu_memory_utilization&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;gpu_memory_utilization&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;enable_chunked_prefill&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;enable_chunked_prefill&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;use_v1&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                    <span class="s2">&quot;max_timeout&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_timeout&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;max_retry_times&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;explorer_max_retry_times&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;monitor&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;monitor_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;monitor_type&quot;</span><span class="p">],</span>
                 <span class="p">},</span>
                 <span class="s2">&quot;synchronizer&quot;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="s2">&quot;sync_method&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sync_method&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;sync_interval&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sync_interval&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;sync_timeout&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sync_timeout&quot;</span><span class="p">],</span>
-                <span class="p">},</span>
-                <span class="s2">&quot;trainer&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;trainer_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;trainer_type&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;trainer_config&quot;</span><span class="p">:</span> <span class="n">trainer_config</span><span class="p">,</span>
-                    <span class="s2">&quot;save_interval&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;save_interval&quot;</span><span class="p">],</span>
-                <span class="p">},</span>
-                <span class="s2">&quot;monitor&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;monitor_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;monitor_type&quot;</span><span class="p">],</span>
                 <span class="p">},</span>
             <span class="p">}</span>
 
@@ -1822,40 +1807,6 @@
                     <span class="k">else</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;model_path&quot;</span><span class="p">]</span>
                 <span class="p">)</span>
 
-            <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;_eval_tasksets_num&quot;</span><span class="p">]):</span>
-                <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">_path&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
-                    <span class="n">config</span><span class="p">[</span><span class="s2">&quot;buffer&quot;</span><span class="p">][</span><span class="s2">&quot;explorer_input&quot;</span><span class="p">][</span><span class="s2">&quot;eval_tasksets&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                        <span class="p">{</span>
-                            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">_name&quot;</span><span class="p">],</span>
-                            <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">_path&quot;</span><span class="p">],</span>
-                            <span class="s2">&quot;subset_name&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">_subset_name&quot;</span><span class="p">],</span>
-                            <span class="s2">&quot;split&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">_split&quot;</span><span class="p">],</span>
-                            <span class="s2">&quot;prompt_key&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">_prompt_key&quot;</span><span class="p">],</span>
-                            <span class="s2">&quot;response_key&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">_response_key&quot;</span><span class="p">],</span>
-                        <span class="p">}</span>
-                    <span class="p">)</span>
-            <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">DPO</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
-                <span class="n">experience_buffer</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;buffer&quot;</span><span class="p">][</span><span class="s2">&quot;trainer_input&quot;</span><span class="p">][</span><span class="s2">&quot;experience_buffer&quot;</span><span class="p">]</span>
-                <span class="n">experience_buffer</span><span class="p">[</span><span class="s2">&quot;split&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;dpo_dataset_train_split&quot;</span><span class="p">]</span>
-                <span class="n">experience_buffer</span><span class="p">[</span><span class="s2">&quot;format&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="s2">&quot;prompt_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;dpo_dataset_prompt_type&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;prompt_key&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;dpo_dataset_prompt_key&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;chosen_key&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;dpo_dataset_chosen_key&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;rejected_key&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;dpo_dataset_rejected_key&quot;</span><span class="p">],</span>
-                <span class="p">}</span>
-            <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_dataset_path&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
-                <span class="n">config</span><span class="p">[</span><span class="s2">&quot;buffer&quot;</span><span class="p">][</span><span class="s2">&quot;trainer_input&quot;</span><span class="p">][</span><span class="s2">&quot;sft_warmup_dataset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;sft_warmup_dataset&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;storage_type&quot;</span><span class="p">:</span> <span class="n">sft_storage_type</span><span class="p">,</span>
-                    <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_dataset_path&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;split&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_train_split&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;format&quot;</span><span class="p">:</span> <span class="p">{</span>
-                        <span class="s2">&quot;prompt_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_prompt_type&quot;</span><span class="p">],</span>
-                        <span class="s2">&quot;messages_key&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_messages_key&quot;</span><span class="p">],</span>
-                        <span class="s2">&quot;prompt_key&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_prompt_key&quot;</span><span class="p">],</span>
-                        <span class="s2">&quot;response_key&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_response_key&quot;</span><span class="p">],</span>
-                    <span class="p">},</span>
-                <span class="p">}</span>
             <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">config_generated</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">st</span><span class="o">.</span><span class="n">header</span><span class="p">(</span><span class="s2">&quot;Generated Config File&quot;</span><span class="p">)</span>
             <span class="n">buttons</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">container</span><span class="p">()</span>
@@ -1864,7 +1815,7 @@
             <span class="n">save_btn</span><span class="o">.</span><span class="n">download_button</span><span class="p">(</span>
                 <span class="s2">&quot;Save&quot;</span><span class="p">,</span>
                 <span class="n">data</span><span class="o">=</span><span class="n">yaml_config</span><span class="p">,</span>
-                <span class="n">file_name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;monitor&#39;</span><span class="p">][</span><span class="s1">&#39;project&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;monitor&#39;</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">.yaml&quot;</span><span class="p">,</span>
+                <span class="n">file_name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;project&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">.yaml&quot;</span><span class="p">,</span>
                 <span class="n">mime</span><span class="o">=</span><span class="s2">&quot;text/plain&quot;</span><span class="p">,</span>
                 <span class="n">icon</span><span class="o">=</span><span class="s2">&quot;:material/download:&quot;</span><span class="p">,</span>
                 <span class="n">use_container_width</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>

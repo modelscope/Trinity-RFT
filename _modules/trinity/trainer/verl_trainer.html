@@ -522,17 +522,6 @@
                 <span class="n">actor_output_metrics</span> <span class="o">=</span> <span class="n">reduce_metrics</span><span class="p">(</span><span class="n">actor_output</span><span class="o">.</span><span class="n">meta_info</span><span class="p">[</span><span class="s2">&quot;metrics&quot;</span><span class="p">])</span>
                 <span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">actor_output_metrics</span><span class="p">)</span>
 
-            <span class="c1"># validate</span>
-            <span class="k">if</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">val_reward_fn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">test_freq</span> <span class="o">&gt;</span> <span class="mi">0</span>
-                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">test_freq</span> <span class="o">==</span> <span class="mi">0</span>
-            <span class="p">):</span>
-                <span class="k">pass</span>  <span class="c1"># TODO: may add validation</span>
-                <span class="c1"># with _timer(&quot;testing&quot;, timing_raw):</span>
-                <span class="c1">#     val_metrics: dict = self._validate()</span>
-                <span class="c1"># metrics.update(val_metrics)</span>
-
             <span class="k">if</span> <span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">save_freq</span> <span class="o">&gt;</span> <span class="mi">0</span>
                 <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">save_freq</span> <span class="o">==</span> <span class="mi">0</span>
