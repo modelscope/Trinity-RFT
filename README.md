@@ -96,7 +96,7 @@ among others. -->
 
 
 Meanwhile, Trinity-RFT has done a lot of work to ensure high efficiency and robustness in every component of the framework,
-e.g., utilizing NCCL (when feasible) for model weight synchronization, sequence concatenation with proper masking for multi-turn conversations and ReAct-style workflows, pipeline parallelism for the synchronous RFT mode, 
+e.g., utilizing NCCL (when feasible) for model weight synchronization, sequence concatenation with proper masking for multi-turn conversations and ReAct-style workflows, pipeline parallelism for the synchronous RFT mode,
 asynchronous and concurrent LLM inference for rollout,
 fault tolerance for agent/environment failures,
 among many others.
