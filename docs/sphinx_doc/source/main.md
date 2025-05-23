@@ -255,8 +255,8 @@ For more detailed examples about how to use Trinity-RFT, please refer to the fol
 + [Off-policy mode of RFT](tutorial/example_reasoning_advanced.md);
 + [Asynchronous mode of RFT](tutorial/example_async_mode.md);
 + [Multi-turn tasks](tutorial/example_multi_turn.md);
-+ [Data processing pipelines](tutorial/example_data_functionalities.md);
 + [Offline learning by DPO](tutorial/example_dpo.md).
++ [Advanced data processing / human-in-the-loop](tutorial/example_data_functionalities.md);
 
 
 

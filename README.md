@@ -263,8 +263,8 @@ For more detailed examples about how to use Trinity-RFT, please refer to the fol
 + [Off-policy mode of RFT](./docs/sphinx_doc/source/tutorial/example_reasoning_advanced.md);
 + [Asynchronous mode of RFT](./docs/sphinx_doc/source/tutorial/example_async_mode.md);
 + [Multi-turn tasks](./docs/sphinx_doc/source/tutorial/example_multi_turn.md);
-+ [Data processing pipelines](./docs/sphinx_doc/source/tutorial/example_data_functionalities.md);
 + [Offline learning by DPO](./docs/sphinx_doc/source/tutorial/example_dpo.md).
++ [Advanced data processing / human-in-the-loop](./docs/sphinx_doc/source/tutorial/example_data_functionalities.md);
 
 
 
@@ -292,10 +292,8 @@ Please refer to [this document](./docs/sphinx_doc/source/tutorial/trinity_progra
 - [ ] Support automatic load balancing
 - [ ] Improve robustness of `WorkflowRunner`
 - [ ] Support training with Megatron-LM
-
 - [ ] Implement more algorithms for off-policy / asynchronous RL
 - [ ] Implement more advanced sampling strategies for task / experience buffer
-
 - [ ] Further integrate RL process with advanced data processing functionalities
 - [ ] Continue refining Trinity-Studio
 
