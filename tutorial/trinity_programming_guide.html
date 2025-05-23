@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Trinity-RFT Developer Guide &mdash; Trinity-RFT 0.1.0 documentation</title>
+  <title>Developer Guide &mdash; Trinity-RFT 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
@@ -20,7 +20,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="trinity.buffer" href="../build_api/trinity.buffer.html" />
-    <link rel="prev" title="Trinity-RFT Configuration" href="trinity_configs.html" /> 
+    <link rel="prev" title="Configuration Guide" href="trinity_configs.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -49,9 +49,9 @@
 <li class="toctree-l1"><a class="reference internal" href="example_async_mode.html">Asynchronous RFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_multi_turn.html">Multi-Turn RFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_dpo.html">Offline DPO</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_data_functionalities.html">Data processing functionalities</a></li>
-<li class="toctree-l1"><a class="reference internal" href="trinity_configs.html">Trinity-RFT Configuration</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Trinity-RFT Developer Guide</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="example_data_functionalities.html">Data Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trinity_configs.html">Configuration Guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Developer Guide</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#creating-new-task-types">Creating New Task Types</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#step-0-basic-concepts">Step 0: Basic Concepts</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#step-1-prepare-task-dataset">Step 1: Prepare Task Dataset</a></li>
@@ -87,9 +87,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Trinity-RFT Developer Guide</li>
+      <li class="breadcrumb-item active">Developer Guide</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/tutorial/trinity_programming_guide.md.txt" rel="nofollow"> View page source</a>
+              <a href="https://github.com/modelscope/Trinity-RFT/blob/main/docs/sphinx_doc/source/tutorial/trinity_programming_guide.md" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -97,8 +97,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="trinity-rft-developer-guide">
-<h1>Trinity-RFT Developer Guide<a class="headerlink" href="#trinity-rft-developer-guide" title="Link to this heading"></a></h1>
+  <section id="developer-guide">
+<h1>Developer Guide<a class="headerlink" href="#developer-guide" title="Link to this heading"></a></h1>
 <p>This guide will introduce how to add new task types to Trinity-RFT and provide relevant development guidelines.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -182,7 +182,7 @@ The <code class="docutils literal notranslate"><span class="pre">rollout_args</s
 </ul>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">model</span></code> also provided an OpenAI compatible API, you can switch to it by setting <code class="docutils literal notranslate"><span class="pre">explorer.enable_openai_api</span></code> to <code class="docutils literal notranslate"><span class="pre">true</span></code> in your config file and use <code class="docutils literal notranslate"><span class="pre">model.get_openai_client()</span></code> to get an <code class="docutils literal notranslate"><span class="pre">openai.OpenAI</span></code> instance.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">model</span></code> also provided an OpenAI compatible API, you can switch to it by setting <code class="docutils literal notranslate"><span class="pre">explorer.rollout_model.enable_openai_api</span></code> to <code class="docutils literal notranslate"><span class="pre">true</span></code> in your config file and use <code class="docutils literal notranslate"><span class="pre">model.get_openai_client()</span></code> to get an <code class="docutils literal notranslate"><span class="pre">openai.OpenAI</span></code> instance in your workflow.</p>
 </div>
 </section>
 <section id="example-code">
@@ -224,6 +224,21 @@ The <code class="docutils literal notranslate"><span class="pre">rollout_args</s
         <span class="p">]</span>
 </pre></div>
 </div>
+<p>For some heavy workflows, the initialization process may be time-consuming.
+In this case, you can implement the <code class="docutils literal notranslate"><span class="pre">resettable</span></code> and <code class="docutils literal notranslate"><span class="pre">reset</span></code> methods to avoid re-initialization.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;example_workflow&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+    <span class="c1"># some code</span>
+    <span class="c1"># ...</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">resettable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">question</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">raw_task</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;question&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">answer</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">raw_task</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;answer&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 </section>
 </section>
 <hr class="docutils" />
@@ -234,10 +249,10 @@ The <code class="docutils literal notranslate"><span class="pre">rollout_args</s
 <span class="w">  </span><span class="c1"># Other fields</span>
 <span class="w">  </span><span class="nt">explorer_input</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">taskset</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">taskset_name</span>
-<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;path/to/taskset&#39;</span>
-<span class="w">        </span><span class="c1"># Other fields</span>
-<span class="w">    </span><span class="nt">eval_tasksets</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example_task</span>
+<span class="w">      </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">file</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/path/to/taskset</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain"># Other fields</span>
 <span class="w">    </span><span class="nt">default_workflow_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example_workflow</span>
 <span class="c1"># Other fields</span>
 </pre></div>
@@ -269,7 +284,7 @@ git<span class="w"> </span>commit<span class="w"> </span>-am<span class="w"> </s
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="trinity_configs.html" class="btn btn-neutral float-left" title="Trinity-RFT Configuration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="trinity_configs.html" class="btn btn-neutral float-left" title="Configuration Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="../build_api/trinity.buffer.html" class="btn btn-neutral float-right" title="trinity.buffer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

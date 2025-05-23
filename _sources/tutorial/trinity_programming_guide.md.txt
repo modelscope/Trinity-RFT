@@ -1,4 +1,4 @@
-# Trinity-RFT Developer Guide
+# Developer Guide
 
 This guide will introduce how to add new task types to Trinity-RFT and provide relevant development guidelines.
 
@@ -87,7 +87,7 @@ The `rollout_args` field contains the parameters for the rollout process, such a
 - `auxiliary_models`: A list of auxiliary models, which will not be trained. All of them provide OpenAI compatible API.
 
 ```{tip}
-The `model` also provided an OpenAI compatible API, you can switch to it by setting `explorer.enable_openai_api` to `true` in your config file and use `model.get_openai_client()` to get an `openai.OpenAI` instance.
+The `model` also provided an OpenAI compatible API, you can switch to it by setting `explorer.rollout_model.enable_openai_api` to `true` in your config file and use `model.get_openai_client()` to get an `openai.OpenAI` instance in your workflow.
 ```
 
 #### Example Code
@@ -130,6 +130,23 @@ class ExampleWorkflow(Workflow):
         ]
 ```
 
+For some heavy workflows, the initialization process may be time-consuming.
+In this case, you can implement the `resettable` and `reset` methods to avoid re-initialization.
+
+```python
+@WORKFLOWS.register_module("example_workflow")
+class ExampleWorkflow(Workflow):
+    # some code
+    # ...
+
+    def resettable(self):
+        return True
+
+    def reset(self, task: Task):
+        self.question = task.raw_task.get("question")
+        self.answer = task.raw_task.get("answer")
+```
+
 ---
 
 ### Step 3: Modify Configuration File
@@ -141,10 +158,10 @@ buffer:
   # Other fields
   explorer_input:
     taskset:
-      name: taskset_name
-      path: 'path/to/taskset'
+      name: example_task
+      storage_type: file
+      path: /path/to/taskset
         # Other fields
-    eval_tasksets: []
     default_workflow_type: example_workflow
 # Other fields
 ```

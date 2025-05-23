@@ -1,4 +1,4 @@
-# Data processing functionalities
+# Data Processing
 
 ## Example: reasoning task
 
