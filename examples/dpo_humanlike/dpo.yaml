@@ -3,16 +3,16 @@ name: "trinity_dpo"
 mode: train
 algorithm:
   algorithm_type: dpo
-checkpoint_root_dir: /PATH/TO/CHECKPOINT
+checkpoint_root_dir: /PATH/TO/CHECKPOINT/
 model:
-  model_path: '/PATH/TO/MODEL'
-  max_prompt_tokens: 1792
-  max_response_tokens: 256
+  model_path: /PATH/TO/MODEL
+  max_prompt_tokens: 512
+  max_response_tokens: 1024
 cluster:
   node_num: 1
   gpu_per_node: 8
 buffer:
-  total_epochs: 20
+  total_epochs: 2
   batch_size: 32
   max_retry_times: 3
   max_retry_interval: 1
@@ -20,7 +20,7 @@ buffer:
     experience_buffer:
       name: dpo_buffer
       storage_type: file
-      path: '/PATH/TO/DATASET/'
+      path: /PATH/TO/DATASET/
       format:
         prompt_type: plaintext # plaintext/messages/chatpair
         prompt_key: prompt

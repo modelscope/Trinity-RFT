@@ -19,7 +19,7 @@ data_processor:
   db_url: ''
 
 model:
-  model_path: '/PATH/TO/MODEL/'
+  model_path: /PATH/TO/MODEL/
   max_prompt_tokens: 256
   max_response_tokens: 1024
 cluster:
@@ -77,7 +77,7 @@ explorer:
     seed: 42
 synchronizer:
   sync_method: 'nccl'
-  sync_interval: 2
+  sync_interval: 1
   sync_timeout: 1200
 trainer:
   trainer_type: 'verl'

@@ -47,7 +47,7 @@ explorer:
     seed: 42
 synchronizer:
   sync_method: 'nccl'
-  sync_interval: 2
+  sync_interval: 1
   sync_timeout: 1200
 trainer:
   trainer_type: 'verl'

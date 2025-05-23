@@ -1,7 +1,7 @@
 project: "Trinity-RFT-gsm8k"
 name: "async-qwen2.5-1.5B-gsm8k"
 mode: explore
-checkpoint_root_dir: '/PATH/TO/CHECKPOINT/'
+checkpoint_root_dir: /PATH/TO/CHECKPOINT/
 algorithm:
   algorithm_type: grpo
   repeat_times: 8
@@ -11,9 +11,9 @@ model:
   max_response_tokens: 1024
 cluster:
   node_num: 1
-  gpu_per_node: 8
+  gpu_per_node: 4
 buffer:
-  total_epochs: 20
+  total_epochs: 1
   batch_size: 96
   max_retry_times: 3
   max_retry_interval: 1
@@ -40,7 +40,7 @@ explorer:
   runner_num: 32
   rollout_model:
     engine_type: vllm_async
-    engine_num: 2
+    engine_num: 4
     tensor_parallel_size: 1
     enable_prefix_caching: false
     enforce_eager: true
