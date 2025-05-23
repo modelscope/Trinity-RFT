@@ -259,7 +259,6 @@ class ExplorerConfig:
 @dataclass
 class TrainerConfig:
     trainer_type: str = "verl"
-    trainer_config_path: str = ""
     save_interval: int = 0
     enable_preview: bool = True  # enable rollout preview in wandb
 
@@ -271,7 +270,9 @@ class TrainerConfig:
     actor_clip_ratio: float = 0.2
     # TODO: extract more train-related params from underlying trainer engine
 
+    # Only one needs to be set for `trainer_config` and `trainer_config_path`
     trainer_config: Any = field(default_factory=dict)
+    trainer_config_path: str = ""
 
 
 @dataclass
