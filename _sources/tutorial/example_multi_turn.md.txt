@@ -1,4 +1,4 @@
-# Example: Multi-Turn RFT
+# Multi-Turn RFT
 
 In Trinity-RFT, we support Agentic RL with multiple rounds of interaction with environments.
 

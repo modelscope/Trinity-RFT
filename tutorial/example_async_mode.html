@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>A quick example for asynchronous mode &mdash; Trinity-RFT 0.1.0 documentation</title>
+  <title>Asynchronous RFT &mdash; Trinity-RFT 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
@@ -19,8 +19,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Example: Multi-Turn RFT" href="example_multi_turn.html" />
-    <link rel="prev" title="Example: off-policy RFT mode" href="example_reasoning_advanced.html" /> 
+    <link rel="next" title="Multi-Turn RFT" href="example_multi_turn.html" />
+    <link rel="prev" title="Off-Policy RFT" href="example_reasoning_advanced.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -44,11 +44,11 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="example_reasoning_basic.html">A quick example with GSM8k</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_reasoning_advanced.html">Example: off-policy RFT mode</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">A quick example for asynchronous mode</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_multi_turn.html">Example: Multi-Turn RFT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_dpo.html">Example: Run DPO on Human-Like-DPO-Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_reasoning_basic.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_reasoning_advanced.html">Off-Policy RFT</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Asynchronous RFT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_multi_turn.html">Multi-Turn RFT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_dpo.html">Offline DPO</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_data_functionalities.html">Data processing functionalities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="trinity_configs.html">Trinity-RFT Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="trinity_programming_guide.html">Trinity-RFT Developer Guide</a></li>
@@ -77,7 +77,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">A quick example for asynchronous mode</li>
+      <li class="breadcrumb-item active">Asynchronous RFT</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/tutorial/example_async_mode.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -87,29 +87,97 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="a-quick-example-for-asynchronous-mode">
-<h1>A quick example for asynchronous mode<a class="headerlink" href="#a-quick-example-for-asynchronous-mode" title="Link to this heading"></a></h1>
-<p>This example shows how to run RFT in asynchronous mode with the GRPO algorithm, Qwen-2.5-1.5B-Instruct model and GSM8K dataset.</p>
+  <section id="asynchronous-rft">
+<h1>Asynchronous RFT<a class="headerlink" href="#asynchronous-rft" title="Link to this heading"></a></h1>
+<p>This example shows how to run RFT in a fully asynchronous mode with the GRPO algorithm, Qwen-2.5-1.5B-Instruct model and GSM8K dataset.</p>
 <p>Trinity-RFT supports an asynchronous mode by running the trainer and explorer in separate processes.</p>
-<p>For this purpose, we prepare two main config files: <code class="docutils literal notranslate"><span class="pre">trainer.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">explorer.yaml</span></code>.
-The main difference between them is that in <code class="docutils literal notranslate"><span class="pre">trainer.yaml</span></code> we set <code class="docutils literal notranslate"><span class="pre">mode=train</span></code>, while in <code class="docutils literal notranslate"><span class="pre">explorer.yaml</span></code> we set <code class="docutils literal notranslate"><span class="pre">mode=explore</span></code>.
-In addition, we need to configure the following parameters in both files.
+<p>For this purpose, we prepare two main config files: <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/blob/main/examples/async_gsm8k/explorer.yaml"><code class="docutils literal notranslate"><span class="pre">explorer.yaml</span></code></a> and <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/blob/main/examples/async_gsm8k/trainer.yaml"><code class="docutils literal notranslate"><span class="pre">trainer.yaml</span></code></a>.
+The main difference between them is that in <code class="docutils literal notranslate"><span class="pre">explorer.yaml</span></code> we set <code class="docutils literal notranslate"><span class="pre">mode</span></code> as <code class="docutils literal notranslate"><span class="pre">explore</span></code>, while in <code class="docutils literal notranslate"><span class="pre">trainer.yaml</span></code> we set <code class="docutils literal notranslate"><span class="pre">mode</span></code> as <code class="docutils literal notranslate"><span class="pre">train</span></code>.
 The model weights of the explorer and trainer are synchronized once every <code class="docutils literal notranslate"><span class="pre">sync_interval</span> <span class="pre">*</span> <span class="pre">batch_size</span></code> tasks.</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tutorial</span>
-<span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">async_mode_example</span>
-<span class="nt">checkpoint_root_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/CHECKPOINT</span>
-
+<p>Suppose we have a node of 8 GPUs; we use 4 GPUs for the trainer and 4 GPUs for the explorer.
+Some important setups of <code class="docutils literal notranslate"><span class="pre">explorer.yaml</span></code> are listed in the following:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;project_name&gt;</span>
+<span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;experiment_name&gt;</span>
+<span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">explore</span>
+<span class="nt">checkpoint_root_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/CHECKPOINT/</span>
+<span class="nt">algorithm</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">algorithm_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">grpo</span>
+<span class="w">  </span><span class="nt">repeat_times</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
+<span class="nt">model</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">model_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/MODEL/</span>
+<span class="nt">cluster</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">node_num</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">  </span><span class="nt">gpu_per_node</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
 <span class="nt">buffer</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;batch_size&gt;</span>
+<span class="w">  </span><span class="nt">total_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">96</span>
+<span class="w">  </span><span class="nt">explorer_input</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">taskset</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gsm8k</span>
+<span class="w">      </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">file</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/DATASET/</span>
+<span class="w">      </span><span class="nt">split</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">train</span>
+<span class="w">      </span><span class="nt">format</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">prompt_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;question&#39;</span>
+<span class="w">        </span><span class="nt">response_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;answer&#39;</span>
+<span class="w">      </span><span class="nt">rollout_args</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">temperature</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">    </span><span class="nt">default_workflow_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;math_workflow&#39;</span>
 <span class="w">  </span><span class="nt">trainer_input</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">experience_buffer</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gsm8k_buffer</span>
 <span class="w">      </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">queue</span>
 <span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;sqlite:///gsm8k.db&#39;</span>
-
+<span class="nt">explorer</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">eval_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">  </span><span class="nt">runner_num</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32</span>
+<span class="w">  </span><span class="nt">rollout_model</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">engine_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vllm_async</span>
+<span class="w">    </span><span class="nt">engine_num</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
 <span class="nt">synchronizer</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">sync_method</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;checkpoint&#39;</span>
-<span class="w">  </span><span class="nt">sync_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;sync_interval&gt;</span>
+<span class="w">  </span><span class="nt">sync_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="nt">trainer</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">trainer_config_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">examples/async_gsm8k/verl_config.yaml</span>
+</pre></div>
+</div>
+<p>Some important setups of <code class="docutils literal notranslate"><span class="pre">trainer.yaml</span></code> are listed in the following:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;project_name&gt;</span>
+<span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;experiment_name&gt;</span>
+<span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">train</span>
+<span class="nt">checkpoint_root_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/CHECKPOINT/</span>
+<span class="nt">algorithm</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">algorithm_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">grpo</span>
+<span class="w">  </span><span class="nt">repeat_times</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
+<span class="nt">model</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">model_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/MODEL/</span>
+<span class="nt">cluster</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">node_num</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">  </span><span class="nt">gpu_per_node</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="nt">buffer</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">total_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">96</span>
+<span class="w">  </span><span class="nt">explorer_input</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">taskset</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gsm8k</span>
+<span class="w">      </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">file</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/DATASET/</span>
+<span class="w">      </span><span class="nt">format</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">prompt_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;question&#39;</span>
+<span class="w">        </span><span class="nt">response_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;answer&#39;</span>
+<span class="w">      </span><span class="nt">rollout_args</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">temperature</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">    </span><span class="nt">default_workflow_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;math_workflow&#39;</span>
+<span class="w">  </span><span class="nt">trainer_input</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">experience_buffer</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gsm8k_buffer</span>
+<span class="w">      </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">queue</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;sqlite:///gsm8k.db&#39;</span>
+<span class="nt">synchronizer</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">sync_method</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;checkpoint&#39;</span>
+<span class="w">  </span><span class="nt">sync_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="nt">trainer</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">trainer_config_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">examples/async_gsm8k/verl_config.yaml</span>
 </pre></div>
 </div>
 <p>You may run this example with the following command:</p>
@@ -128,8 +196,8 @@ We are continuously investigating other RL algorithms (e.g., <a class="reference
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="example_reasoning_advanced.html" class="btn btn-neutral float-left" title="Example: off-policy RFT mode" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="example_multi_turn.html" class="btn btn-neutral float-right" title="Example: Multi-Turn RFT" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="example_reasoning_advanced.html" class="btn btn-neutral float-left" title="Off-Policy RFT" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="example_multi_turn.html" class="btn btn-neutral float-right" title="Multi-Turn RFT" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

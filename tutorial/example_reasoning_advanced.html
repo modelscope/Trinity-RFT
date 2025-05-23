@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Example: off-policy RFT mode &mdash; Trinity-RFT 0.1.0 documentation</title>
+  <title>Off-Policy RFT &mdash; Trinity-RFT 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
@@ -19,8 +19,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="A quick example for asynchronous mode" href="example_async_mode.html" />
-    <link rel="prev" title="A quick example with GSM8k" href="example_reasoning_basic.html" /> 
+    <link rel="next" title="Asynchronous RFT" href="example_async_mode.html" />
+    <link rel="prev" title="Quick Start" href="example_reasoning_basic.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -44,14 +44,14 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="example_reasoning_basic.html">A quick example with GSM8k</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Example: off-policy RFT mode</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="example_reasoning_basic.html">Quick Start</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Off-Policy RFT</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#opmd-a-native-off-policy-rl-algorithm">OPMD: a native off-policy RL algorithm</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="example_async_mode.html">A quick example for asynchronous mode</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_multi_turn.html">Example: Multi-Turn RFT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_dpo.html">Example: Run DPO on Human-Like-DPO-Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_async_mode.html">Asynchronous RFT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_multi_turn.html">Multi-Turn RFT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_dpo.html">Offline DPO</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_data_functionalities.html">Data processing functionalities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="trinity_configs.html">Trinity-RFT Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="trinity_programming_guide.html">Trinity-RFT Developer Guide</a></li>
@@ -80,7 +80,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Example: off-policy RFT mode</li>
+      <li class="breadcrumb-item active">Off-Policy RFT</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/tutorial/example_reasoning_advanced.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -90,13 +90,14 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="example-off-policy-rft-mode">
-<h1>Example: off-policy RFT mode<a class="headerlink" href="#example-off-policy-rft-mode" title="Link to this heading"></a></h1>
+  <section id="off-policy-rft">
+<h1>Off-Policy RFT<a class="headerlink" href="#off-policy-rft" title="Link to this heading"></a></h1>
 <p>Let’s continue with the <a class="reference internal" href="example_reasoning_basic.html"><span class="std std-doc">previous GSM8k example</span></a> and show some advanced features provided by Trinity-RFT, namely, off-policy or asynchronous RFT mode.</p>
 <section id="opmd-a-native-off-policy-rl-algorithm">
 <h2>OPMD: a native off-policy RL algorithm<a class="headerlink" href="#opmd-a-native-off-policy-rl-algorithm" title="Link to this heading"></a></h2>
 <p>As an experimental feature of Trinity-RFT, we develop an embarrasingly simple off-policy RL algorithm, termed as OPMD (Online Policy Mirror Descent, inspired by <a class="reference external" href="https://arxiv.org/abs/2501.12599">Kimi k1.5</a>).
-The algorithm design and analysis can be found in this <a class="reference download internal" download="" href="../_downloads/58b8fcb03170ae266deecc350a70b8be/opmd.pdf"><span class="xref download myst">technical report</span></a>.</p>
+The algorithm design and analysis can be found in this <a class="reference download internal" download="" href="../_downloads/58b8fcb03170ae266deecc350a70b8be/opmd.pdf"><span class="xref download myst">technical report</span></a>.
+The config files are <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/blob/main/examples/opmd_gsm8k/opmd_gsm8k.yaml"><code class="docutils literal notranslate"><span class="pre">opmd_gsm8k.yaml</span></code></a> and <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/blob/main/examples/opmd_gsm8k/train_opmd_gsm8k.yaml"><code class="docutils literal notranslate"><span class="pre">train_opmd_gsm8k.yaml</span></code></a>.</p>
 <p>To try out the OPMD algorithm:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>examples/opmd_gsm8k/opmd_gsm8k.yaml
 </pre></div>
@@ -115,8 +116,8 @@ A similar performance boost is shown at step 21, which leads to a converged scor
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="example_reasoning_basic.html" class="btn btn-neutral float-left" title="A quick example with GSM8k" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="example_async_mode.html" class="btn btn-neutral float-right" title="A quick example for asynchronous mode" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="example_reasoning_basic.html" class="btn btn-neutral float-left" title="Quick Start" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="example_async_mode.html" class="btn btn-neutral float-right" title="Asynchronous RFT" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

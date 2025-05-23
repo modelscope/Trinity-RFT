@@ -1,4 +1,4 @@
-# Example: Run DPO on Human-Like-DPO-Dataset
+# Offline DPO
 
 This example describes DPO based on the Qwen-2.5-1.5B-Instruct model and [Human-like-DPO-dataset](https://huggingface.co/datasets/HumanLLMs/Human-Like-DPO-Dataset).
 
@@ -40,25 +40,36 @@ Note that the dataset has the keys `prompt`, `chosen` and `rejected`. If not, pa
 
 We use the configurations in [`dpo.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/dpo_humanlike/dpo.yaml) and [`train_dpo.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/dpo_humanlike/train_dpo.yaml) for this experiment. Some important setups are listed in the following:
 
-We run the experiment in a train mode, as there is no Explorer. To enable this mode, we config `mode` to `train` and set `sync_method` to `checkpoint`.
+We run the experiment in a train mode, as there is no Explorer. To enable this mode, we config `mode` to `train` and pass the data path to the trainer.
 
 ```yaml
-# In dpo.yaml
+project: <project_name>
+name: <experiment_name>
 mode: train
 algorithm:
   algorithm_type: dpo
-synchronizer:
-  sync_method: 'checkpoint'
+checkpoint_root_dir: /PATH/TO/CHECKPOINT/
+model:
+  model_path: /PATH/TO/MODEL/
+cluster:
+  node_num: 1
+  gpu_per_node: 8
 buffer:
-  train_dataset:
-    storage_type: file
-    path: <$DATASET_PATH/human_like_dpo_dataset>
-    format:
-      prompt_type: <prompt_type> # messages/plaintext
-      prompt_key: <prompt_key>
-      chosen_key: <chosen_key>
-      rejected_key: <rejected_key>
+  total_epochs: 2
+  batch_size: 64
+  trainer_input:
+    experience_buffer:
+      name: dpo_buffer
+      storage_type: file
+      path: /PATH/TO/DATASET/
+      format:
+        prompt_type: plaintext # plaintext/messages/chatpair
+        prompt_key: prompt
+        chosen_key: chosen
+        rejected_key: rejected
 trainer:
+  trainer_config_path: 'examples/dpo_humanlike/train_dpo.yaml'
+  save_interval: 30
   actor_use_kl_loss: True
   actor_kl_loss_coef: 0.1  # value of beta in DPO
 ```

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Example: Run DPO on Human-Like-DPO-Dataset &mdash; Trinity-RFT 0.1.0 documentation</title>
+  <title>Offline DPO &mdash; Trinity-RFT 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
@@ -20,7 +20,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Data processing functionalities" href="example_data_functionalities.html" />
-    <link rel="prev" title="Example: Multi-Turn RFT" href="example_multi_turn.html" /> 
+    <link rel="prev" title="Multi-Turn RFT" href="example_multi_turn.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -44,11 +44,11 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="example_reasoning_basic.html">A quick example with GSM8k</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_reasoning_advanced.html">Example: off-policy RFT mode</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_async_mode.html">A quick example for asynchronous mode</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_multi_turn.html">Example: Multi-Turn RFT</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Example: Run DPO on Human-Like-DPO-Dataset</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="example_reasoning_basic.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_reasoning_advanced.html">Off-Policy RFT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_async_mode.html">Asynchronous RFT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_multi_turn.html">Multi-Turn RFT</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Offline DPO</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#step-1-model-and-data-preparation">Step 1: Model and Data Preparation</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#model-preparation">Model Preparation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#data-preparation">Data Preparation</a></li>
@@ -89,7 +89,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Example: Run DPO on Human-Like-DPO-Dataset</li>
+      <li class="breadcrumb-item active">Offline DPO</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/tutorial/example_dpo.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -99,8 +99,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="example-run-dpo-on-human-like-dpo-dataset">
-<h1>Example: Run DPO on Human-Like-DPO-Dataset<a class="headerlink" href="#example-run-dpo-on-human-like-dpo-dataset" title="Link to this heading"></a></h1>
+  <section id="offline-dpo">
+<h1>Offline DPO<a class="headerlink" href="#offline-dpo" title="Link to this heading"></a></h1>
 <p>This example describes DPO based on the Qwen-2.5-1.5B-Instruct model and <a class="reference external" href="https://huggingface.co/datasets/HumanLLMs/Human-Like-DPO-Dataset">Human-like-DPO-dataset</a>.</p>
 <section id="step-1-model-and-data-preparation">
 <h2>Step 1: Model and Data Preparation<a class="headerlink" href="#step-1-model-and-data-preparation" title="Link to this heading"></a></h2>
@@ -135,23 +135,34 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>HumanLLMs
 <section id="configuration">
 <h3>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h3>
 <p>We use the configurations in <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/dpo_humanlike/dpo.yaml"><code class="docutils literal notranslate"><span class="pre">dpo.yaml</span></code></a> and <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/dpo_humanlike/train_dpo.yaml"><code class="docutils literal notranslate"><span class="pre">train_dpo.yaml</span></code></a> for this experiment. Some important setups are listed in the following:</p>
-<p>We run the experiment in a train mode, as there is no Explorer. To enable this mode, we config <code class="docutils literal notranslate"><span class="pre">mode</span></code> to <code class="docutils literal notranslate"><span class="pre">train</span></code> and set <code class="docutils literal notranslate"><span class="pre">sync_method</span></code> to <code class="docutils literal notranslate"><span class="pre">checkpoint</span></code>.</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># In dpo.yaml</span>
+<p>We run the experiment in a train mode, as there is no Explorer. To enable this mode, we config <code class="docutils literal notranslate"><span class="pre">mode</span></code> to <code class="docutils literal notranslate"><span class="pre">train</span></code> and pass the data path to the trainer.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;project_name&gt;</span>
+<span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;experiment_name&gt;</span>
 <span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">train</span>
 <span class="nt">algorithm</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">algorithm_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dpo</span>
-<span class="nt">synchronizer</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">sync_method</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;checkpoint&#39;</span>
+<span class="nt">checkpoint_root_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/CHECKPOINT/</span>
+<span class="nt">model</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">model_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/MODEL/</span>
+<span class="nt">cluster</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">node_num</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">  </span><span class="nt">gpu_per_node</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
 <span class="nt">buffer</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">train_dataset</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">file</span>
-<span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;$DATASET_PATH/human_like_dpo_dataset&gt;</span>
-<span class="w">    </span><span class="nt">format</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">prompt_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;prompt_type&gt;</span><span class="w"> </span><span class="c1"># messages/plaintext</span>
-<span class="w">      </span><span class="nt">prompt_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;prompt_key&gt;</span>
-<span class="w">      </span><span class="nt">chosen_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;chosen_key&gt;</span>
-<span class="w">      </span><span class="nt">rejected_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;rejected_key&gt;</span>
+<span class="w">  </span><span class="nt">total_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">64</span>
+<span class="w">  </span><span class="nt">trainer_input</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">experience_buffer</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dpo_buffer</span>
+<span class="w">      </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">file</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/DATASET/</span>
+<span class="w">      </span><span class="nt">format</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">prompt_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">plaintext</span><span class="w"> </span><span class="c1"># plaintext/messages/chatpair</span>
+<span class="w">        </span><span class="nt">prompt_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">prompt</span>
+<span class="w">        </span><span class="nt">chosen_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">chosen</span>
+<span class="w">        </span><span class="nt">rejected_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rejected</span>
 <span class="nt">trainer</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">trainer_config_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;examples/dpo_humanlike/train_dpo.yaml&#39;</span>
+<span class="w">  </span><span class="nt">save_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
 <span class="w">  </span><span class="nt">actor_use_kl_loss</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
 <span class="w">  </span><span class="nt">actor_kl_loss_coef</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w">  </span><span class="c1"># value of beta in DPO</span>
 </pre></div>
@@ -171,7 +182,7 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>HumanLLMs
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="example_multi_turn.html" class="btn btn-neutral float-left" title="Example: Multi-Turn RFT" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="example_multi_turn.html" class="btn btn-neutral float-left" title="Multi-Turn RFT" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="example_data_functionalities.html" class="btn btn-neutral float-right" title="Data processing functionalities" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

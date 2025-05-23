@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Example: Multi-Turn RFT &mdash; Trinity-RFT 0.1.0 documentation</title>
+  <title>Multi-Turn RFT &mdash; Trinity-RFT 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
@@ -19,8 +19,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Example: Run DPO on Human-Like-DPO-Dataset" href="example_dpo.html" />
-    <link rel="prev" title="A quick example for asynchronous mode" href="example_async_mode.html" /> 
+    <link rel="next" title="Offline DPO" href="example_dpo.html" />
+    <link rel="prev" title="Asynchronous RFT" href="example_async_mode.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -44,10 +44,10 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="example_reasoning_basic.html">A quick example with GSM8k</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_reasoning_advanced.html">Example: off-policy RFT mode</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_async_mode.html">A quick example for asynchronous mode</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Example: Multi-Turn RFT</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="example_reasoning_basic.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_reasoning_advanced.html">Off-Policy RFT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_async_mode.html">Asynchronous RFT</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Multi-Turn RFT</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#step-1-environments-data-preparation">Step 1: Environments &amp; Data preparation</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#environment-preparation">Environment Preparation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#data-preparation">Data Preparation</a></li>
@@ -57,7 +57,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#advance-how-to-build-your-own-environment">Advance: How to build your own environment</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="example_dpo.html">Example: Run DPO on Human-Like-DPO-Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_dpo.html">Offline DPO</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_data_functionalities.html">Data processing functionalities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="trinity_configs.html">Trinity-RFT Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="trinity_programming_guide.html">Trinity-RFT Developer Guide</a></li>
@@ -86,7 +86,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Example: Multi-Turn RFT</li>
+      <li class="breadcrumb-item active">Multi-Turn RFT</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/tutorial/example_multi_turn.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -96,8 +96,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="example-multi-turn-rft">
-<h1>Example: Multi-Turn RFT<a class="headerlink" href="#example-multi-turn-rft" title="Link to this heading"></a></h1>
+  <section id="multi-turn-rft">
+<h1>Multi-Turn RFT<a class="headerlink" href="#multi-turn-rft" title="Link to this heading"></a></h1>
 <p>In Trinity-RFT, we support Agentic RL with multiple rounds of interaction with environments.</p>
 <p>Trinity’s decoupled design allows you to easily define custom interaction methods between environments and agents through Workflow configuration, to collect corresponding <code class="docutils literal notranslate"><span class="pre">experiences</span></code> for RL training.</p>
 <p>Below, we will first provide two multi-round environment Workflows - ALFworld and WebShop - as examples of multi-round interaction.</p>
@@ -223,8 +223,8 @@ trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="example_async_mode.html" class="btn btn-neutral float-left" title="A quick example for asynchronous mode" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="example_dpo.html" class="btn btn-neutral float-right" title="Example: Run DPO on Human-Like-DPO-Dataset" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="example_async_mode.html" class="btn btn-neutral float-left" title="Asynchronous RFT" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="example_dpo.html" class="btn btn-neutral float-right" title="Offline DPO" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
