@@ -3,7 +3,7 @@
 <!-- ![trinity-rft](./docs/sphinx_doc/assets/trinity-title.png) -->
 
 <div align="center">
-  <img src="./docs/sphinx_doc/assets/trinity-title.png" alt="Trinity-RFT" style="height: 100px;">
+  <img src="./docs/sphinx_doc/assets/trinity-title.png" alt="Trinity-RFT" style="height: 120px;">
 </div>
 
 
@@ -11,10 +11,10 @@
 
 
 
-**Trinity-RFT is a general-purpose, flexible and scalable framework designed for reinforcement fine-tuning (RFT) of large language models (LLM).**
+**Trinity-RFT is a general-purpose, flexible, scalable and user-friendly framework designed for reinforcement fine-tuning (RFT) of large language models (LLM).**
 
 
-Built with a decoupled design, seamless integration for agentic workflows, and systematic data processing pipelines, Trinity-RFT can be easily adapted for diverse application scenarios, and serve as a platform for exploring advanced reinforcement learning (RL) paradigms.
+Built with a decoupled design, seamless integration for agent-environment interaction, and systematic data processing pipelines, Trinity-RFT can be easily adapted for diverse application scenarios, and serve as a unified platform for exploring advanced reinforcement learning (RL) paradigms.
 
 
 
@@ -23,7 +23,7 @@ Built with a decoupled design, seamless integration for agentic workflows, and s
 ## Vision of this project
 
 
-Current RFT approaches, such as RLHF (Reinforcement Learning from Human Feedback) with proxy reward models or training long-CoT reasoning models with rule-based rewards, are limited in their ability to handle dynamic, real-world learning.
+Current RFT approaches, such as RLHF (Reinforcement Learning from Human Feedback) with proxy reward models or training long-CoT reasoning models with rule-based rewards, are limited in their ability to handle dynamic, real-world, and continuous learning.
 
 Trinity-RFT envisions a future where AI agents learn by interacting directly with environments, collecting delayed or complex reward signals, and continuously refining their behavior through RL.
 
@@ -31,7 +31,7 @@ Trinity-RFT envisions a future where AI agents learn by interacting directly wit
 For example, imagine an AI scientist that designs an experiment, executes it, waits for feedback (while working on other tasks concurrently), and iteratively updates itself based on true environmental rewards when the experiment is finally finished.
 
 
-Trinity-RFT offers a path into this future by addressing critical gaps in existing solutions.
+Trinity-RFT offers a path into this future by providing various useful features.
 
 
 
@@ -42,7 +42,7 @@ Trinity-RFT offers a path into this future by addressing critical gaps in existi
 
 
 + **Unified RFT modes & algorithm support.**
-Trinity-RFT unifies and generalizes existing RFT methodologies into a flexible and configurable framework, supporting synchronous/asynchronous and on-policy/off-policy/offline training, as well as hybrid modes that combine them seamlessly into a single learning process.
+Trinity-RFT unifies and generalizes existing RFT methodologies into a flexible and configurable framework, supporting synchronous/asynchronous, on-policy/off-policy, and online/offline training, as well as hybrid modes that combine them seamlessly into a single learning process.
 
 
 + **Agent-environment interaction as a first-class citizen.**
@@ -51,9 +51,7 @@ Trinity-RFT allows delayed rewards in multi-step/time-lagged feedback loops, han
 
 
 + **Data processing pipelines optimized for RFT with diverse/messy data.**
-These include converting raw datasets to prompt/task sets for RL, cleaning/filtering/prioritizing experiences stored in the replay buffer, synthesizing data for tasks and experiences, offering user interfaces for human in the loop, etc.
-<!-- managing the task and experience buffers (e.g., supporting collection of lagged reward signals) -->
-
+These include converting raw datasets to task sets for RL, cleaning/filtering/prioritizing experiences stored in the replay buffer, synthesizing data for tasks and experiences, offering user interfaces for human in the loop, etc.
 
 
 
@@ -73,20 +71,20 @@ These include converting raw datasets to prompt/task sets for RL, cleaning/filte
 The overall design of Trinity-RFT exhibits a trinity:
 + RFT-core;
 + agent-environment interaction;
-+ data processing pipelines tailored to RFT;
++ data processing pipelines;
 
 and the design of RFT-core also exhibits a trinity:
 + explorer;
 + trainer;
-+ manager & buffer.
++ buffer.
 
 
 
 The *explorer*, powered by the rollout model, interacts with the environment and generates rollout trajectories to be stored in the experience buffer.
 
-The *trainer*, powered by the policy model, samples batches of experiences from the buffer and updates the policy via RL algorithms.
+The *trainer*, powered by the policy model, samples batches of experiences from the buffer and updates the policy model via RL algorithms.
 
-These two can be completely decoupled and act asynchronously, except that they share the same experience buffer, and their model weights are synchronized once in a while.
+These two can be completely decoupled and act asynchronously on separate machines, except that they share the same experience buffer, and their model weights are synchronized once in a while.
 Such a decoupled design is crucial for making the aforementioned features of Trinity-RFT possible.
 
 <!-- e.g., flexible and configurable RFT modes (on-policy/off-policy, synchronous/asynchronous, immediate/lagged rewards),
@@ -97,8 +95,11 @@ among others. -->
 
 
 
-Meanwhile, Trinity-RFT has done the dirty work for ensuring high efficiency in every component of the framework,
-e.g., utilizing NCCL (when feasible) for model weight synchronization, sequence concatenation with proper masking for multi-turn conversations and ReAct-style workflows, pipeline parallelism for the synchronous RFT mode, among many others.
+Meanwhile, Trinity-RFT has done a lot of work to ensure high efficiency and robustness in every component of the framework,
+e.g., utilizing NCCL (when feasible) for model weight synchronization, sequence concatenation with proper masking for multi-turn conversations and ReAct-style workflows, pipeline parallelism for the synchronous RFT mode, 
+asynchronous and concurrent LLM inference for rollout,
+fault tolerance for agent/environment failures,
+among many others.
 
 
 
@@ -146,8 +147,7 @@ pip install flash-attn -v
 ```
 
 Installation from docker:
-
-We provided a dockerfile for Trinity-RFT (trinity)
+we have provided a dockerfile for Trinity-RFT (trinity)
 
 ```shell
 git clone https://github.com/modelscope/Trinity-RFT
@@ -161,6 +161,12 @@ docker build -f scripts/docker/Dockerfile -t trinity-rft:latest .
 # run the docker image
 docker run -it --gpus all --shm-size="64g" --rm -v $PWD:/workspace -v <root_path_of_data_and_checkpoints>:/data trinity-rft:latest
 ```
+
+
+Trinity-RFT requires
+Python version >= 3.10,
+CUDA version >= 12.4,
+and at least 2 GPUs.
 
 
 ### Step 2: prepare dataset and model
@@ -203,7 +209,7 @@ For more details about dataset downloading, please refer to [Huggingface](https:
 For convenience, Trinity-RFT provides a web interface for configuring your RFT process.
 
 > [!NOTE]
-> This is a experimental feature. We will continue to improve it and make it more user-friendly.
+> This is an experimental feature, and we will continue to improve it.
 
 ```bash
 trinity studio --port 8080
@@ -214,7 +220,7 @@ Then you can configure your RFT process in the web page and generate a config fi
 You can save the config for later use or run it directly as described in the following section.
 
 
-For advanced users, you can also manually configure your RFT process by editing the config file.
+Advanced users can also configure the RFT process by editing the config file directly.
 We provide a set of example config files in [`examples`](examples/).
 
 
