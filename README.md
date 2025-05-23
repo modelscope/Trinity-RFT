@@ -285,6 +285,21 @@ Please refer to [this document](./docs/sphinx_doc/source/tutorial/trinity_config
 Please refer to [this document](./docs/sphinx_doc/source/tutorial/trinity_programming_guide.md).
 
 
+## A tentative roadmap
+
+- [ ] Support generic multi-step RL scenarios (infra & algorithm)
+- [ ] Further optimize utilization of computational resources
+- [ ] Support automatic load balancing
+- [ ] Improve robustness of `WorkflowRunner`
+- [ ] Support training with Megatron-LM
+
+- [ ] Implement more algorithms for off-policy / asynchronous RL
+- [ ] Implement more advanced sampling strategies for task / experience buffer
+
+- [ ] Further integrate RL process with advanced data processing functionalities
+- [ ] Continue refining Trinity-Studio
+
+
 
 ## Contribution guide
 
