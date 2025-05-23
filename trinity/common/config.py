@@ -293,7 +293,7 @@ class SynchronizerConfig:
     sync_interval: int = 1
     # waiting for `sync_timeout` seconds before timeout in `nccl` method
     sync_timeout: int = 1200
-    # wait for the lastest checkpoint to be ready
+    # wait for the lastest checkpoint to be ready  # TODO: to be used
     wait_for_checkpoint: bool = False
 
     # ! DO NOT SET, automatically calculated
@@ -339,7 +339,7 @@ class Config:
             and self.algorithm.algorithm_type != AlgorithmType.DPO
             and self.explorer.eval_interval % self.synchronizer.sync_interval != 0
         ):
-            self.buffer.eval_interval = (
+            self.explorer.eval_interval = (
                 max(self.explorer.eval_interval // self.synchronizer.sync_interval, 1)
             ) * self.synchronizer.sync_interval
             logger.warning(

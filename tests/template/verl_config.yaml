@@ -8,15 +8,9 @@ actor_rollout_ref:
   actor:
     strategy: fsdp  # This is for backward-compatibility
     ppo_mini_batch_size: 4
-    # ppo_micro_batch_size: 8 # will be deprecated, use ppo_micro_batch_size_per_gpu
     ppo_micro_batch_size_per_gpu: 1
     use_dynamic_bsz: True
     ppo_max_token_len_per_gpu: 16384 # n * ${data.max_prompt_length} + ${data.max_response_length}
-    grad_clip: 1.0
-    clip_ratio: 0.2
-    entropy_coeff: 0.001
-    use_kl_loss: False # True for GRPO
-    kl_loss_coef: 0.001 # for grpo
     kl_loss_type: low_var_kl # for grpo
     ppo_epochs: 1
     shuffle: False
@@ -46,37 +40,10 @@ actor_rollout_ref:
       wrap_policy:
         # transformer_layer_cls_to_wrap: None
         min_num_params: 0
-    # log_prob_micro_batch_size: 4 # will be deprecated, use log_prob_micro_batch_size_per_gpu
     log_prob_micro_batch_size_per_gpu: 1
     log_prob_use_dynamic_bsz: ${actor_rollout_ref.actor.use_dynamic_bsz}
     log_prob_max_token_len_per_gpu: ${actor_rollout_ref.actor.ppo_max_token_len_per_gpu}
     ulysses_sequence_parallel_size: ${actor_rollout_ref.actor.ulysses_sequence_parallel_size} # sp size
-  rollout:
-    name: vllm
-    use_fire_sampling: False # https://arxiv.org/abs/2410.21236
-    prompt_length: ${data.max_prompt_length}  # not use for opensource
-    response_length: ${data.max_response_length}
-    # for vllm rollout
-    dtype: bfloat16 # should align with FSDP
-    gpu_memory_utilization: 0.4
-    ignore_eos: False
-    enforce_eager: True
-    free_cache_engine: True
-    load_format: dummy_dtensor
-    tensor_model_parallel_size: 2
-    max_num_batched_tokens: 8192
-    max_model_len: null
-    max_num_seqs: 1024
-    # log_prob_micro_batch_size: 8 # will be deprecated, use log_prob_micro_batch_size_per_gpu
-    log_prob_micro_batch_size_per_gpu: 1
-    log_prob_use_dynamic_bsz: ${actor_rollout_ref.actor.use_dynamic_bsz}
-    log_prob_max_token_len_per_gpu: ${actor_rollout_ref.actor.ppo_max_token_len_per_gpu}
-    disable_log_stats: True
-    enable_chunked_prefill: True # could get higher throughput
-    # for hf rollout
-    do_sample: True
-    # number of responses (i.e. num sample times)
-    n: 1 # > 1 for grpo
 
 critic:
   strategy: fsdp
@@ -87,7 +54,6 @@ critic:
     warmup_style: constant  # select from constant/cosine
     total_training_steps: -1  # must be override by program
   model:
-    tokenizer_path: ${actor_rollout_ref.model.path}
     override_config: { }
     external_lib: ${actor_rollout_ref.model.external_lib}
     enable_gradient_checkpointing: True
@@ -100,7 +66,6 @@ critic:
         min_num_params: 0
       fsdp_size: -1
   ppo_mini_batch_size: ${actor_rollout_ref.actor.ppo_mini_batch_size}
-  # ppo_micro_batch_size: 8 # will be deprecated, use ppo_micro_batch_size_per_gpu
   ppo_micro_batch_size_per_gpu: 1
   forward_micro_batch_size_per_gpu: ${critic.ppo_micro_batch_size_per_gpu}
   use_dynamic_bsz: ${actor_rollout_ref.actor.use_dynamic_bsz}
@@ -113,9 +78,6 @@ critic:
   cliprange_value: 0.5
 
 algorithm:
-  gamma: 1.0
-  lam: 1.0
-  adv_estimator: gae
   kl_penalty: kl  # how to estimate kl divergence
   kl_ctrl:
     type: fixed
@@ -123,22 +85,14 @@ algorithm:
 
 trainer:
   balance_batch: True
-  total_epochs: 10
   # total_training_steps: null
-  project_name: TinyZero
-  experiment_name: trinity-qwen2.5-1.5b
   logger: [ 'wandb' ]
-  val_generations_to_log_to_wandb: 0
-  nnodes: 1
-  n_gpus_per_node: 2
-  save_freq: 20
   # auto: find the last ckpt to resume. If can't find, start from scratch
   resume_mode: auto # or auto or resume_path if
   critic_warmup: 0
   default_hdfs_dir: null
   remove_previous_ckpt_in_save: False
   del_local_ckpt_after_load: False
-  default_local_dir: checkpoints/${trainer.project_name}/${trainer.experiment_name}
   val_before_train: False
   max_actor_ckpt_to_keep: 1
   max_critic_ckpt_to_keep: 1

@@ -416,17 +416,6 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                 actor_output_metrics = reduce_metrics(actor_output.meta_info["metrics"])
                 metrics.update(actor_output_metrics)
 
-            # validate
-            if (
-                self.val_reward_fn is not None
-                and self.config.trainer.test_freq > 0
-                and self.global_steps % self.config.trainer.test_freq == 0
-            ):
-                pass  # TODO: may add validation
-                # with _timer("testing", timing_raw):
-                #     val_metrics: dict = self._validate()
-                # metrics.update(val_metrics)
-
             if (
                 self.config.trainer.save_freq > 0
                 and self.global_steps % self.config.trainer.save_freq == 0
