@@ -251,12 +251,12 @@ More example config files can be found in `examples`.
 
 
 For more detailed examples about how to use Trinity-RFT, please refer to the following documents:
-+ [A quick example with GSM8k](tutorial/example_reasoning_basic.md);
-+ [Off-policy mode of RFT](tutorial/example_reasoning_advanced.md);
-+ [Asynchronous mode of RFT](tutorial/example_async_mode.md);
-+ [Multi-turn tasks](tutorial/example_multi_turn.md);
-+ [Offline learning by DPO](tutorial/example_dpo.md).
-+ [Advanced data processing / human-in-the-loop](tutorial/example_data_functionalities.md);
++ [A quick example with GSM8k](tutorial/example_reasoning_basic.md)
++ [Off-policy mode of RFT](tutorial/example_reasoning_advanced.md)
++ [Asynchronous mode of RFT](tutorial/example_async_mode.md)
++ [Multi-turn tasks](tutorial/example_multi_turn.md)
++ [Offline learning by DPO](tutorial/example_dpo.md)
++ [Advanced data processing / human-in-the-loop](tutorial/example_data_functionalities.md)
 
 
 
