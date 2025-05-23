@@ -1,4 +1,4 @@
-# Example: Run DPO on Human-Like-DPO-Dataset
+# DPO Mode
 
 This example describes DPO based on the Qwen-2.5-1.5B-Instruct model and [Human-like-DPO-dataset](https://huggingface.co/datasets/HumanLLMs/Human-Like-DPO-Dataset).
 

@@ -1,4 +1,4 @@
-# Example: off-policy RFT mode
+# Off-Policy RFT
 
 
 Let's continue with the [previous GSM8k example](./example_reasoning_basic.md) and show some advanced features provided by Trinity-RFT, namely, off-policy or asynchronous RFT mode.
