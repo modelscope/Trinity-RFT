@@ -834,33 +834,6 @@ if node_num > 1:
     def _set_ppo_epochs(self):
         st.number_input("PPO Epochs", key="ppo_epochs", min_value=1)
 
-    def _set_repeat_times(self):  # TODO
-        grouped_adv_algorithms = [
-            AlgorithmType.GRPO.value,
-            AlgorithmType.OPMD.value,  # TODO: may add rloo
-        ]
-        if st.session_state["algorithm_type"] in grouped_adv_algorithms:
-            min_repeat_times = 2
-            st.session_state["repeat_times"] = st.session_state["_grouped_adv_repeat_times"]
-        else:
-            min_repeat_times = 1
-            st.session_state["repeat_times"] = st.session_state["_not_grouped_adv_repeat_times"]
-
-        def on_change():
-            if st.session_state["algorithm_type"] in grouped_adv_algorithms:
-                st.session_state["_grouped_adv_repeat_times"] = st.session_state["repeat_times"]
-            else:
-                st.session_state["_not_grouped_adv_repeat_times"] = st.session_state["repeat_times"]
-
-        st.number_input(
-            "Repeat Times",
-            key="repeat_times",
-            min_value=min_repeat_times,
-            help="`repeat_times` is used to set how many experiences each task can generate, "
-            "and it must be greater than `1` when `algorithm_type` is `opmd` or `grpo`.",
-            on_change=on_change,
-        )
-
     def _set_training_strategy(self):
         st.selectbox(
             "Training Strategy",
@@ -1389,7 +1362,7 @@ if node_num > 1:
             with tab:
                 func()
 
-    def _generate_verl_config(self, trainer_nnodes: int = 1, trainer_n_gpus_per_node: int = 8):
+    def _generate_verl_config(self):
         balance_batch = "balance_batch" in st.session_state["training_args"]
         enable_gradient_checkpointing = (
             "gradient_checkpointing" in st.session_state["training_args"]
@@ -1411,33 +1384,10 @@ if node_num > 1:
             st.session_state["max_prompt_tokens"] + st.session_state["max_response_tokens"]
         )
 
-        critic_model_path = (
-            st.session_state["critic_model_path"].strip()
-            if st.session_state["critic_model_path"].strip()
-            else st.session_state["model_path"]
-        )
         trainer_config = {
-            "data": {
-                "tokenizer": None,
-                "train_files": "placeholder",
-                "val_files": "placeholder",
-                "prompt_key": "placeholder",
-                "max_prompt_length": st.session_state["max_prompt_tokens"],
-                "max_response_length": st.session_state["max_response_tokens"],
-                "train_batch_size": st.session_state["train_batch_size"]
-                * st.session_state["repeat_times"],
-                "val_batch_size": None,
-                "return_raw_input_ids": False,
-                "return_raw_chat": False,
-                "shuffle": True,
-                "filter_overlong_prompts": False,
-                "truncation": "error",
-                "image_key": "images",
-            },
             "actor_rollout_ref": {
                 "hybrid_engine": True,
                 "model": {
-                    "path": st.session_state["model_path"],
                     "external_lib": None,
                     "override_config": {},
                     "enable_gradient_checkpointing": enable_gradient_checkpointing,
@@ -1451,11 +1401,6 @@ if node_num > 1:
                     ],
                     "use_dynamic_bsz": use_dynamic_bsz,
                     "ppo_max_token_len_per_gpu": ppo_max_token_len_per_gpu,
-                    "grad_clip": st.session_state["actor_grad_clip"],
-                    "clip_ratio": st.session_state["actor_clip_ratio"],
-                    "entropy_coeff": st.session_state["actor_entropy_coef"],
-                    "use_kl_loss": st.session_state["actor_use_kl_loss"],
-                    "kl_loss_coef": st.session_state["actor_kl_loss_coef"],
                     "kl_loss_type": st.session_state["actor_kl_loss_type"],
                     "ppo_epochs": st.session_state["ppo_epochs"],
                     "shuffle": False,
@@ -1490,33 +1435,39 @@ if node_num > 1:
                     ],
                 },
                 "rollout": {
-                    "name": "vllm",
                     "temperature": st.session_state["temperature"],
-                    "top_k": -1,
-                    "top_p": 1,
-                    "use_fire_sampling": False,
-                    "prompt_length": st.session_state["max_prompt_tokens"],
-                    "response_length": st.session_state["max_response_tokens"],
-                    "dtype": "bfloat16",
-                    "gpu_memory_utilization": 0.4,
-                    "ignore_eos": False,
-                    "enforce_eager": True,
-                    "free_cache_engine": True,
-                    "load_format": "dummy_dtensor",
-                    "tensor_model_parallel_size": 2,
-                    "max_num_batched_tokens": 8192,
-                    "max_model_len": None,
-                    "max_num_seqs": 1024,
-                    "log_prob_micro_batch_size_per_gpu": 4,
-                    "log_prob_use_dynamic_bsz": use_dynamic_bsz,
-                    "log_prob_max_token_len_per_gpu": ppo_max_token_len_per_gpu,
-                    "disable_log_stats": True,
-                    "enable_chunked_prefill": True,
-                    "do_sample": True,
                     "n": st.session_state["repeat_times"],
                 },
             },
-            "critic": {
+            "reward_model": {
+                "enable": False,
+            },
+            "custom_reward_function": {"path": None, "name": "compute_score"},
+            "algorithm": {
+                "kl_penalty": st.session_state["kl_penalty"],
+                "kl_ctrl": {
+                    "type": st.session_state["kl_ctrl_type"],
+                    "kl_coef": st.session_state["kl_ctrl_coef"],
+                },
+            },
+            "trainer": {
+                "balance_batch": balance_batch,
+                "logger": ["tensorboard"],
+                "resume_mode": st.session_state["resume_mode"],
+                "resume_from_path": st.session_state["resume_from_path"],
+                "test_freq": 100,
+                "critic_warmup": st.session_state["critic_warmup"],
+                "default_hdfs_dir": st.session_state["default_hdfs_dir"],
+                "remove_previous_ckpt_in_save": st.session_state["remove_previous_ckpt_in_save"],
+                "del_local_ckpt_after_load": st.session_state["del_local_ckpt_after_load"],
+                "val_before_train": False,
+                "max_actor_ckpt_to_keep": st.session_state["max_actor_ckpt_to_keep"],
+                "max_critic_ckpt_to_keep": st.session_state["max_critic_ckpt_to_keep"],
+            },
+        }
+
+        if st.session_state["adv_estimator"] == AdvantageEstimator.GAE.value:
+            trainer_config["critic"] = {
                 "strategy": st.session_state["training_strategy"],
                 "optim": {
                     "lr": st.session_state["critic_lr"],
@@ -1529,8 +1480,6 @@ if node_num > 1:
                     ),
                 },
                 "model": {
-                    "path": critic_model_path,
-                    "tokenizer_path": critic_model_path,
                     "override_config": {},
                     "external_lib": None,
                     "enable_gradient_checkpointing": enable_gradient_checkpointing,
@@ -1555,61 +1504,7 @@ if node_num > 1:
                 "grad_clip": st.session_state["critic_grad_clip"],
                 "cliprange_value": st.session_state["critic_cliprange_value"],
                 "checkpoint": {"contents": st.session_state["critic_checkpoint"]},
-            },
-            "reward_model": {
-                "enable": False,
-                "strategy": "fsdp",
-                "model": {
-                    "input_tokenizer": st.session_state["model_path"],
-                    "path": "~/models/FsfairX-LLaMA3-RM-v0.1",
-                    "external_lib": None,
-                    "use_remove_padding": False,
-                    "fsdp_config": {
-                        "min_num_params": 0,
-                        "param_offload": False,
-                        "fsdp_size": -1,
-                    },
-                },
-                "ulysses_sequence_parallel_size": 1,
-                "use_dynamic_bsz": use_dynamic_bsz,
-                "forward_max_token_len_per_gpu": ppo_max_token_len_per_gpu * 2,
-                "reward_manager": "naive",
-            },
-            "custom_reward_function": {"path": None, "name": "compute_score"},
-            "algorithm": {
-                "gamma": st.session_state["gamma"],
-                "lam": st.session_state["lam"],
-                "adv_estimator": st.session_state["adv_estimator"],
-                "kl_penalty": st.session_state["kl_penalty"],
-                "kl_ctrl": {
-                    "type": st.session_state["kl_ctrl_type"],
-                    "kl_coef": st.session_state["kl_ctrl_coef"],
-                },
-            },
-            "trainer": {
-                "balance_batch": balance_batch,
-                "total_epochs": st.session_state["total_epochs"],
-                "project_name": st.session_state["project"],
-                "experiment_name": st.session_state["exp_name"],
-                "logger": ["tensorboard"],
-                "val_generations_to_log_to_wandb": 0,
-                "nnodes": trainer_nnodes,
-                "n_gpus_per_node": trainer_n_gpus_per_node,
-                "save_freq": st.session_state["save_interval"],
-                "resume_mode": st.session_state["resume_mode"],
-                "resume_from_path": st.session_state["resume_from_path"],
-                "test_freq": 100,
-                "critic_warmup": st.session_state["critic_warmup"],
-                "default_hdfs_dir": st.session_state["default_hdfs_dir"],
-                "remove_previous_ckpt_in_save": st.session_state["remove_previous_ckpt_in_save"],
-                "del_local_ckpt_after_load": st.session_state["del_local_ckpt_after_load"],
-                "default_local_dir": st.session_state["checkpoint_root_dir"],
-                "val_before_train": False,
-                "sync_freq": st.session_state["sync_interval"],
-                "max_actor_ckpt_to_keep": st.session_state["max_actor_ckpt_to_keep"],
-                "max_critic_ckpt_to_keep": st.session_state["max_critic_ckpt_to_keep"],
-            },
-        }
+            }
         return trainer_config
 
     def _gen_buffer_config(self):
@@ -1730,27 +1625,8 @@ if node_num > 1:
         return explorer_config
 
     def generate_config(self):
-        if st.session_state["mode"] == "both":
-            trainer_nnodes = (
-                st.session_state["node_num"]
-                - st.session_state["engine_num"]
-                * st.session_state["tensor_parallel_size"]
-                // st.session_state["gpu_per_node"]
-            )
-        else:
-            trainer_nnodes = st.session_state["node_num"]
-        if st.session_state["node_num"] == 1 and st.session_state["mode"] == "both":
-            trainer_n_gpus_per_node = (
-                st.session_state["gpu_per_node"]
-                - st.session_state["engine_num"] * st.session_state["tensor_parallel_size"]
-            )
-        else:
-            trainer_n_gpus_per_node = st.session_state["gpu_per_node"]
-
         if st.session_state["trainer_type"] == "verl":
-            trainer_config = self._generate_verl_config(
-                trainer_nnodes=trainer_nnodes, trainer_n_gpus_per_node=trainer_n_gpus_per_node
-            )
+            trainer_config = self._generate_verl_config()
         else:
             raise ValueError(f"Invalid trainer type: {st.session_state['trainer_type']}")
 

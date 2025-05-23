@@ -1,3 +1,4 @@
+import math
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
@@ -13,20 +14,7 @@ logger = get_logger(__name__)
 
 @dataclass
 class Data:
-    tokenizer: Optional[str] = None
-    train_files: str = ""
-    val_files: str = ""
-    prompt_key: str = "prompt"
-    max_prompt_length: int = 512
-    max_response_length: int = 512
     train_batch_size: int = 1024
-    val_batch_size: Optional[int] = None
-    return_raw_input_ids: bool = False
-    return_raw_chat: bool = False
-    shuffle: bool = True
-    filter_overlong_prompts: bool = False
-    truncation: str = "error"
-    image_key: str = "images"
 
 
 @dataclass
@@ -109,30 +97,7 @@ class Ref:
 
 @dataclass
 class Rollout:
-    name: str = "vllm"
     temperature: float = 1.0
-    top_k: int = -1
-    top_p: float = 1.0
-    use_fire_sampling: bool = False
-    prompt_length: int = 0
-    response_length: int = 0
-    dtype: str = "bfloat16"
-    gpu_memory_utilization: float = 0.5
-    ignore_eos: bool = False
-    enforce_eager: bool = True
-    free_cache_engine: bool = True
-    load_format: str = "dummy_dtensor"
-    tensor_model_parallel_size: int = 2
-    max_num_batched_tokens: int = 8192
-    max_model_len: Optional[int] = None
-    max_num_seqs: int = 1024
-    log_prob_micro_batch_size: Optional[int] = None
-    log_prob_micro_batch_size_per_gpu: int = 1
-    log_prob_use_dynamic_bsz: bool = False
-    log_prob_max_token_len_per_gpu: int = 0
-    disable_log_stats: bool = True
-    enable_chunked_prefill: bool = True
-    do_sample: bool = True
     n: int = 1  # > 1 for grpo
 
 
@@ -283,36 +248,50 @@ class veRLConfig:
             )
         else:
             rollout_gpu_num = 0
-        rollout_node_num = rollout_gpu_num // config.cluster.gpu_per_node
-        self.trainer.nnodes = config.cluster.node_num - rollout_node_num
-        self.actor_rollout_ref.model.path = config.model.model_path
-        self.critic.model.path = config.model.critic_model_path
-        self.critic.model.tokenizer_path = config.model.critic_model_path
 
         if config.cluster.node_num == 1:
             # for single node scenarios, rollout and training are on the same node
+            self.trainer.nnodes = config.cluster.node_num
             self.trainer.n_gpus_per_node = config.cluster.gpu_per_node - rollout_gpu_num
         else:
             # for multi-node scenarios, some nodes for rollout, others for training
+            assert (
+                rollout_gpu_num % config.cluster.gpu_per_node == 0
+            ), "rollout_gpu_num must be divisible by `gpu_per_node`"
+            rollout_node_num = math.ceil(rollout_gpu_num / config.cluster.gpu_per_node)
+            self.trainer.nnodes = config.cluster.node_num - rollout_node_num
+            if self.trainer.nnodes < 1:
+                raise ValueError("The number of training nodes must be greater than 0")
             self.trainer.n_gpus_per_node = config.cluster.gpu_per_node
-        self.trainer.sync_freq = config.synchronizer.sync_interval
-        self.trainer.save_freq = config.trainer.save_interval
-        self.synchronizer = config.synchronizer
-        self.actor_rollout_ref.synchronizer = config.synchronizer
-        self.buffer = config.buffer
+
         world_size = self.trainer.nnodes * self.trainer.n_gpus_per_node
         if config.buffer.batch_size % world_size != 0:
             raise ValueError(
                 f"batch_size ({config.buffer.batch_size}) must be divisible by ({world_size})"
             )
-        # TODO: use dynamic read_batch_size to support multi-round scenarios
-        # Get the experiences of one explore step
+
+        self.trainer.sync_freq = config.synchronizer.sync_interval
+        self.trainer.save_freq = config.trainer.save_interval
         self.trainer.project_name = config.project
         self.trainer.experiment_name = config.name
-        self.data.train_batch_size = config.buffer.batch_size
         self.trainer.default_local_dir = config.checkpoint_job_dir
         self.trainer.sft_warmup_steps = config.buffer.trainer_input.sft_warmup_steps
-        self.actor_rollout_ref.actor.ppo_mini_batch_size = config.buffer.batch_size
+
+        self.buffer = config.buffer
+        # TODO: use dynamic read_batch_size to support multi-round scenarios
+        # Get the experiences of one explore step
+        self.data.train_batch_size = config.buffer.batch_size
+
+        self.synchronizer = config.synchronizer
+        self.actor_rollout_ref.synchronizer = config.synchronizer
+
+        # Actor / Critic config
+        self.actor_rollout_ref.model.path = config.model.model_path
+        self.critic.model.path = config.model.critic_model_path
+        self.critic.model.tokenizer_path = config.model.critic_model_path
+        self.actor_rollout_ref.actor.ppo_mini_batch_size = (
+            config.buffer.batch_size
+        )  # TODO: may allow user to change
         self.actor_rollout_ref.rollout.temperature = (
             config.buffer.explorer_input.taskset.rollout_args.temperature
         )
@@ -320,6 +299,15 @@ class veRLConfig:
         self.critic.ppo_mini_batch_size = config.buffer.batch_size
         self.critic.rollout_n = self.actor_rollout_ref.rollout.n
 
+        self.actor_rollout_ref.actor.use_kl_loss = config.trainer.actor_use_kl_loss
+        self.actor_rollout_ref.actor.kl_loss_coef = config.trainer.actor_kl_loss_coef
+        self.actor_rollout_ref.actor.entropy_coeff = config.trainer.actor_entropy_coef
+        self.actor_rollout_ref.actor.grad_clip = config.trainer.actor_grad_clip
+        self.actor_rollout_ref.actor.clip_ratio = config.trainer.actor_clip_ratio
+
+        # Algorithm related config
+        self.algorithm.gamma = config.algorithm.gamma
+        self.algorithm.lam = config.algorithm.lam
         self.actor_rollout_ref.actor.algorithm_type = config.algorithm.algorithm_type
         if config.algorithm.algorithm_type == AlgorithmType.PPO:
             logger.info("Using GAE `adv_estimator` for PPO")
@@ -327,15 +315,6 @@ class veRLConfig:
         elif config.algorithm.algorithm_type == AlgorithmType.GRPO:
             logger.info("Using GRPO `adv_estimator` for GRPO")
             self.algorithm.adv_estimator = AdvantageEstimator.GRPO.value
-
-        # copy trainer related config from global config
-        self.algorithm.gamma = config.algorithm.gamma
-        self.algorithm.lam = config.algorithm.lam
-        self.actor_rollout_ref.actor.use_kl_loss = config.trainer.actor_use_kl_loss
-        self.actor_rollout_ref.actor.kl_loss_coef = config.trainer.actor_kl_loss_coef
-        self.actor_rollout_ref.actor.entropy_coeff = config.trainer.actor_entropy_coef
-        self.actor_rollout_ref.actor.grad_clip = config.trainer.actor_grad_clip
-        self.actor_rollout_ref.actor.clip_ratio = config.trainer.actor_clip_ratio
 
         if self.actor_rollout_ref.actor.algorithm_type.is_dpo():  # for DPO
             if not self.actor_rollout_ref.actor.use_kl_loss:
