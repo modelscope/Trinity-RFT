@@ -34,7 +34,7 @@ class _BundleAllocator:
 
 def create_inference_models(
     config: Config,
-) -> Tuple[List[InferenceModel], List[InferenceModel]]:
+) -> Tuple[List[InferenceModel], List[List[InferenceModel]]]:
     """Create `engine_num` rollout models.
 
     Each model has `tensor_parallel_size` workers.
@@ -116,11 +116,12 @@ def create_inference_models(
 
     # create auxiliary models
     for model_config in config.explorer.auxiliary_models:
+        engines = []
         for _ in range(model_config.engine_num):
             bundles_for_engine = allocator.allocate(model_config.tensor_parallel_size)
             model_config.enable_openai_api = True
             model_config.engine_type = "vllm_async"
-            auxiliary_engines.append(
+            engines.append(
                 ray.remote(vLLMAysncRolloutModel)
                 .options(
                     num_cpus=0,
@@ -132,8 +133,10 @@ def create_inference_models(
                 )
                 .remote(config=model_config)
             )
+        auxiliary_engines.append(engines)
     # all auxiliary engines run api server
-    for engine in auxiliary_engines:
-        engine.run_api_server.remote()
+    for engines in auxiliary_engines:
+        for engine in engines:
+            engine.run_api_server.remote()
 
     return rollout_engines, auxiliary_engines

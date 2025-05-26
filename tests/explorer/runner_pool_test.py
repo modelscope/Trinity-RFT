@@ -37,7 +37,7 @@ class DummyWorkflow(Workflow):
         elif self.error_type == "exit":
             exit(1)
         elif self.error_type == "auxiliary_models":
-            assert self.auxiliary_models is not None and len(self.auxiliary_models) > 0
+            assert self.auxiliary_models is not None and len(self.auxiliary_models) == 2
         return [Experience(tokens=torch.zeros(5), prompt_length=2, prompt_text=self.error_type)]
 
 
@@ -221,12 +221,15 @@ class RunnerPoolTest(unittest.TestCase):
         config.explorer.auxiliary_models = [
             InferenceModelConfig(
                 engine_num=1,
-            )
+            ),
+            InferenceModelConfig(
+                engine_num=1,
+            ),
         ]
         pool = RunnerPool(
             config,
             [DummyModel.remote(), DummyModel.remote()],
-            [DummyAuxiliaryModel.remote(), DummyAuxiliaryModel.remote()],
+            [[DummyAuxiliaryModel.remote()], [DummyAuxiliaryModel.remote()]],
         )
         taskset_config = get_unittest_dataset_config("countdown")
         tasks = [

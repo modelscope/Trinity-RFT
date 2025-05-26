@@ -5,6 +5,7 @@ from typing import List, Optional, Tuple, Union
 import ray
 
 from trinity.common.config import Config
+from trinity.common.models.model import InferenceModel
 from trinity.common.workflows import Task
 from trinity.explorer.workflow_runner import Status, WorkflowRunner
 from trinity.utils.log import get_logger
@@ -19,13 +20,17 @@ class RunnerPool:
     `config.explorer.max_timeout`.
     """
 
-    def __init__(self, config: Config, models: List, auxiliary_models: Optional[List] = None):
+    def __init__(
+        self,
+        config: Config,
+        models: List[InferenceModel],
+        auxiliary_models: Optional[List[List[InferenceModel]]] = None,
+    ):
         # actors to be used
         self.logger = get_logger(__name__)
         self.config = config
         self.models = models
         self.auxiliary_models = auxiliary_models or []
-        self.auxiliary_models = [self.auxiliary_models]  # TODO: support multiple auxiliary models
         self.timeout = config.explorer.max_timeout
         self.max_retry_times = config.explorer.max_retry_times
 
@@ -47,10 +52,7 @@ class RunnerPool:
         # create new actors
         self.engine_status = [0] * config.explorer.rollout_model.engine_num
         self.auxiliary_engine_status_list = [
-            [0]
-            * len(self.auxiliary_models[0])
-            # TODO: support multiple auxiliary models
-            # [0] * cfg.engine_num for cfg in config.explorer.auxiliary_models
+            [0] * cfg.engine_num for cfg in config.explorer.auxiliary_models
         ]
         self._idle_actors = list()
         self.actor_to_engine_index = {}
