@@ -124,6 +124,11 @@ pip install flash-attn -v
 # pip install flash-attn -v --no-build-isolation
 ```
 
+Installation using pip:
+
+```shell
+pip install trinity-rft==0.1.0
+```
 
 Installation from docker:
 we have provided a dockerfile for Trinity-RFT (trinity)
@@ -319,10 +324,13 @@ This project is built upon many excellent open-source projects, including:
 
 ## Citation
 ```
-@misc{Trinity-RFT,
-  title={Trinity-RFT},
-  author={{Trinity-RFT Team}},
-  url={https://github.com/modelscope/trinity-rft},
-  year={2025},
+@misc{trinity-rft,
+      title={Trinity-RFT: A General-Purpose and Unified Framework for Reinforcement Fine-Tuning of Large Language Models},
+      author={Xuchen Pan and Yanxi Chen and Yushuo Chen and Yuchang Sun and Daoyuan Chen and Wenhao Zhang and Yuexiang Xie and Yilun Huang and Yilei Zhang and Dawei Gao and Yaliang Li and Bolin Ding and Jingren Zhou},
+      year={2025},
+      eprint={2505.17826},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2505.17826},
 }
 ```

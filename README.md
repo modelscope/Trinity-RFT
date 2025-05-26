@@ -7,7 +7,10 @@
 </div>
 
 
-&nbsp;
+[![paper](http://img.shields.io/badge/cs.LG-2505.17826-B31B1B?logo=arxiv&logoColor=red)](https://arxiv.org/abs/2505.17826)
+[![doc](https://img.shields.io/badge/Docs-blue?logo=markdown)](https://modelscope.github.io/Trinity-RFT/)
+[![pypi](https://img.shields.io/pypi/v/trinity-rft?logo=pypi&color=026cad)](https://pypi.org/project/trinity-rft/0.1.0/)
+![license](https://img.shields.io/badge/license-Apache--2.0-000000.svg)
 
 
 
@@ -144,6 +147,12 @@ pip install -e .\[dev\]
 pip install flash-attn -v
 # Try the following command if you encounter errors during installation
 # pip install flash-attn -v --no-build-isolation
+```
+
+Installation using pip:
+
+```shell
+pip install trinity-rft==0.1.0
 ```
 
 Installation from docker:
@@ -332,10 +341,13 @@ This project is built upon many excellent open-source projects, including:
 
 ## Citation
 ```plain
-@misc{Trinity-RFT,
-  title={Trinity-RFT},
-  author={{Trinity-RFT Team}},
-  url={https://github.com/modelscope/trinity-rft},
-  year={2025},
+@misc{trinity-rft,
+      title={Trinity-RFT: A General-Purpose and Unified Framework for Reinforcement Fine-Tuning of Large Language Models},
+      author={Xuchen Pan and Yanxi Chen and Yushuo Chen and Yuchang Sun and Daoyuan Chen and Wenhao Zhang and Yuexiang Xie and Yilun Huang and Yilei Zhang and Dawei Gao and Yaliang Li and Bolin Ding and Jingren Zhou},
+      year={2025},
+      eprint={2505.17826},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2505.17826},
 }
 ```
