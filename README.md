@@ -224,17 +224,17 @@ For convenience, Trinity-RFT provides a web interface for configuring your RFT p
 > [!NOTE]
 > This is an experimental feature, and we will continue to improve it.
 
+
+To enable *minimal* features (mainly for trainer), you can run
 ```bash
 trinity studio --port 8080
 ```
-
-
-Then you can configure your RFT process in the web page and generate a config file.
-You can save the config for later use or run it directly as described in the following section.
-
+Then you can configure your RFT process in the web page and generate a config file. You can save the config for later use or run it directly as described in the following section. 
 
 Advanced users can also configure the RFT process by editing the config file directly.
 We provide a set of example config files in [`examples`](examples/).
+
+To enable *complete* visualization features, please refer to the monorepo for [Trinity-Studio](https://github.com/modelscope/Trinity-RFT).
 
 
 ### Step 4: run the RFT process
