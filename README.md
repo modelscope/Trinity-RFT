@@ -229,7 +229,7 @@ To enable *minimal* features (mainly for trainer), you can run
 ```bash
 trinity studio --port 8080
 ```
-Then you can configure your RFT process in the web page and generate a config file. You can save the config for later use or run it directly as described in the following section. 
+Then you can configure your RFT process in the web page and generate a config file. You can save the config for later use or run it directly as described in the following section.
 
 Advanced users can also configure the RFT process by editing the config file directly.
 We provide a set of example config files in [`examples`](examples/).
