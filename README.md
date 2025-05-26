@@ -234,7 +234,7 @@ Then you can configure your RFT process in the web page and generate a config fi
 Advanced users can also configure the RFT process by editing the config file directly.
 We provide a set of example config files in [`examples`](examples/).
 
-To enable *complete* visualization features, please refer to the monorepo for [Trinity-Studio](https://github.com/modelscope/Trinity-RFT).
+To enable *complete* visualization features, please refer to the monorepo for [Trinity-Studio](https://github.com/modelscope/Trinity-Studio).
 
 
 ### Step 4: run the RFT process
