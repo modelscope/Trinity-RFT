@@ -1,6 +1,6 @@
 """Runner pool for running tasks in parallel. Modified from ray.util.actor_pool.ActorPool."""
 import random
-from typing import List, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 import ray
 
@@ -19,11 +19,13 @@ class RunnerPool:
     `config.explorer.max_timeout`.
     """
 
-    def __init__(self, config: Config, models: List):
+    def __init__(self, config: Config, models: List, auxiliary_models: Optional[List] = None):
         # actors to be used
         self.logger = get_logger(__name__)
         self.config = config
         self.models = models
+        self.auxiliary_models = auxiliary_models or []
+        self.auxiliary_models = [self.auxiliary_models]  # TODO: support multiple auxiliary models
         self.timeout = config.explorer.max_timeout
         self.max_retry_times = config.explorer.max_retry_times
 
@@ -44,6 +46,12 @@ class RunnerPool:
 
         # create new actors
         self.engine_status = [0] * config.explorer.rollout_model.engine_num
+        self.auxiliary_engine_status_list = [
+            [0]
+            * len(self.auxiliary_models[0])
+            # TODO: support multiple auxiliary models
+            # [0] * cfg.engine_num for cfg in config.explorer.auxiliary_models
+        ]
         self._idle_actors = list()
         self.actor_to_engine_index = {}
         self._create_actors(config.explorer.runner_num)
@@ -52,7 +60,15 @@ class RunnerPool:
         new_actors = []
         for _ in range(num):
             engine_index = self.engine_status.index(min(self.engine_status))
-            new_actor = WorkflowRunner.remote(self.config, self.models[engine_index])
+            selected_auxiliary_models = [
+                models[engine_status.index(min(engine_status))]
+                for models, engine_status in zip(
+                    self.auxiliary_models, self.auxiliary_engine_status_list
+                )
+            ]
+            new_actor = WorkflowRunner.remote(
+                self.config, self.models[engine_index], selected_auxiliary_models
+            )
             new_actors.append(new_actor)
             self.engine_status[engine_index] += 1
             self.actor_to_engine_index[new_actor] = engine_index

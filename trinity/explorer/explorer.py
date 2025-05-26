@@ -114,7 +114,7 @@ class Explorer:
                 f"Number of Runners is less than number of models, set to {self.config.explorer.runner_num}"
             )
         self.logger.info(f"Setup {self.config.explorer.runner_num} WorkflowRunners")
-        return RunnerPool(self.config, self.models)
+        return RunnerPool(self.config, self.models, self.auxiliary_models)
 
     def _update_model_weight(self, state_dict: dict) -> None:
         # TODO: update model weight

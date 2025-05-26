@@ -1,3 +1,4 @@
+import copy
 import os
 import time
 import unittest
@@ -8,7 +9,7 @@ import torch
 
 from tests.tools import get_unittest_dataset_config
 from trinity.buffer.reader.queue_reader import QueueReader
-from trinity.common.config import StorageConfig, load_config
+from trinity.common.config import InferenceModelConfig, StorageConfig, load_config
 from trinity.common.constants import AlgorithmType, StorageType
 from trinity.common.experience import Experience
 from trinity.common.models.model import InferenceModel
@@ -22,7 +23,7 @@ config_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_data
 @WORKFLOWS.register_module("dummy_workflow")
 class DummyWorkflow(Workflow):
     def __init__(self, model, task, auxiliary_models):
-        super().__init__(model, task)
+        super().__init__(model, task, auxiliary_models)
         self.error_type = task.task_desc
         self.seconds = None
         if "timeout" in self.error_type:
@@ -35,6 +36,8 @@ class DummyWorkflow(Workflow):
             raise ValueError("Exception occurred")
         elif self.error_type == "exit":
             exit(1)
+        elif self.error_type == "auxiliary_models":
+            assert self.auxiliary_models is not None and len(self.auxiliary_models) > 0
         return [Experience(tokens=torch.zeros(5), prompt_length=2, prompt_text=self.error_type)]
 
 
@@ -58,6 +61,34 @@ class DummyModel(InferenceModel):
         update_with_checkpoint: bool = True,
     ) -> None:
         pass
+
+
+@ray.remote
+class DummyAuxiliaryModel(InferenceModel):
+    def sync_model(self, update_weight_args_list):
+        return True
+
+    def get_ckp_version(self):
+        return 0
+
+    def init_process_group(
+        self,
+        master_address: str,
+        master_port: int,
+        rank_offset: int,
+        world_size: int,
+        group_name: str,
+        backend: str = "nccl",
+        timeout: int = 1200,
+        update_with_checkpoint: bool = True,
+    ) -> None:
+        pass
+
+    def has_api_server(self) -> bool:
+        return True
+
+    def api_server_ready(self) -> str:
+        return "http://localhosts:12345"
 
 
 class RunnerPoolTest(unittest.TestCase):
@@ -184,3 +215,40 @@ class RunnerPoolTest(unittest.TestCase):
         exps = self.queue.read()
         self.assertEqual(len(exps), 2)  # `timeout_2` and `success`
         self.assertEqual(len(pool._idle_actors), self.config.explorer.runner_num)
+
+    def test_runner_pool_with_auxiliary_models(self):
+        config = copy.deepcopy(self.config)
+        config.explorer.auxiliary_models = [
+            InferenceModelConfig(
+                engine_num=1,
+            )
+        ]
+        pool = RunnerPool(
+            config,
+            [DummyModel.remote(), DummyModel.remote()],
+            [DummyAuxiliaryModel.remote(), DummyAuxiliaryModel.remote()],
+        )
+        taskset_config = get_unittest_dataset_config("countdown")
+        tasks = [
+            Task(
+                workflow=DummyWorkflow,
+                format_args=taskset_config.format,
+                rollout_args=taskset_config.rollout_args,
+                is_eval=False,
+                raw_task={
+                    taskset_config.format.prompt_key: "auxiliary_models",
+                },
+            ),
+        ]
+
+        pool.run_tasks(
+            tasks=tasks,
+        )
+
+        # `auxiliary_models`
+        st = time.time()
+        status = pool.get_next_unorder()
+        et = time.time()
+        self.assertTrue(et - st < 1)
+        self.assertEqual(len(status), 1)
+        self.assertTrue(status[0].ok)
