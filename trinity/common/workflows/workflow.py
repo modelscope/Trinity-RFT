@@ -14,6 +14,7 @@ from trinity.common.config import FormatConfig, GenerationConfig
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
 from trinity.common.rewards.reward_fn import MathRewardFn, RewardFn
+from trinity.utils.eval_utils import compute_response_metrics
 from trinity.utils.log import get_logger
 from trinity.utils.registry import Registry
 
@@ -213,6 +214,8 @@ class SimpleWorkflow(Workflow):
                 response.metrics.update(reward)
                 reward = sum(reward.values())
             response.reward = reward
+        if self.is_eval:
+            responses = compute_response_metrics(responses)
         return responses
 
 
