@@ -123,7 +123,7 @@
 <a class="viewcode-back" href="../../../build_api/trinity.common.models.html#trinity.common.models.create_inference_models">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">create_inference_models</span><span class="p">(</span>
     <span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">InferenceModel</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">InferenceModel</span><span class="p">]]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">InferenceModel</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">InferenceModel</span><span class="p">]]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create `engine_num` rollout models.</span>
 
 <span class="sd">    Each model has `tensor_parallel_size` workers.</span>
@@ -205,11 +205,12 @@
 
     <span class="c1"># create auxiliary models</span>
     <span class="k">for</span> <span class="n">model_config</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">auxiliary_models</span><span class="p">:</span>
+        <span class="n">engines</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">model_config</span><span class="o">.</span><span class="n">engine_num</span><span class="p">):</span>
             <span class="n">bundles_for_engine</span> <span class="o">=</span> <span class="n">allocator</span><span class="o">.</span><span class="n">allocate</span><span class="p">(</span><span class="n">model_config</span><span class="o">.</span><span class="n">tensor_parallel_size</span><span class="p">)</span>
             <span class="n">model_config</span><span class="o">.</span><span class="n">enable_openai_api</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">model_config</span><span class="o">.</span><span class="n">engine_type</span> <span class="o">=</span> <span class="s2">&quot;vllm_async&quot;</span>
-            <span class="n">auxiliary_engines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">engines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">ray</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">vLLMAysncRolloutModel</span><span class="p">)</span>
                 <span class="o">.</span><span class="n">options</span><span class="p">(</span>
                     <span class="n">num_cpus</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
@@ -221,9 +222,11 @@
                 <span class="p">)</span>
                 <span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">model_config</span><span class="p">)</span>
             <span class="p">)</span>
+        <span class="n">auxiliary_engines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">engines</span><span class="p">)</span>
     <span class="c1"># all auxiliary engines run api server</span>
-    <span class="k">for</span> <span class="n">engine</span> <span class="ow">in</span> <span class="n">auxiliary_engines</span><span class="p">:</span>
-        <span class="n">engine</span><span class="o">.</span><span class="n">run_api_server</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">engines</span> <span class="ow">in</span> <span class="n">auxiliary_engines</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">engine</span> <span class="ow">in</span> <span class="n">engines</span><span class="p">:</span>
+            <span class="n">engine</span><span class="o">.</span><span class="n">run_api_server</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">rollout_engines</span><span class="p">,</span> <span class="n">auxiliary_engines</span></div>
 

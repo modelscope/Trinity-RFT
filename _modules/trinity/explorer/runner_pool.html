@@ -87,11 +87,12 @@
   <h1>Source code for trinity.explorer.runner_pool</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Runner pool for running tasks in parallel. Modified from ray.util.actor_pool.ActorPool.&quot;&quot;&quot;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">ray</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">InferenceModel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows</span><span class="w"> </span><span class="kn">import</span> <span class="n">Task</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.explorer.workflow_runner</span><span class="w"> </span><span class="kn">import</span> <span class="n">Status</span><span class="p">,</span> <span class="n">WorkflowRunner</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
@@ -110,11 +111,17 @@
 
 <div class="viewcode-block" id="RunnerPool.__init__">
 <a class="viewcode-back" href="../../../build_api/trinity.explorer.html#trinity.explorer.runner_pool.RunnerPool.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">models</span><span class="p">:</span> <span class="n">List</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span>
+        <span class="n">models</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">InferenceModel</span><span class="p">],</span>
+        <span class="n">auxiliary_models</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">InferenceModel</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="c1"># actors to be used</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="n">models</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_models</span> <span class="o">=</span> <span class="n">auxiliary_models</span> <span class="ow">or</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">max_timeout</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_retry_times</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">max_retry_times</span>
 
@@ -135,6 +142,9 @@
 
         <span class="c1"># create new actors</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">engine_status</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">rollout_model</span><span class="o">.</span><span class="n">engine_num</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_engine_status_list</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">cfg</span><span class="o">.</span><span class="n">engine_num</span> <span class="k">for</span> <span class="n">cfg</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">auxiliary_models</span>
+        <span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_idle_actors</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actor_to_engine_index</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_create_actors</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">runner_num</span><span class="p">)</span></div>
@@ -144,7 +154,15 @@
         <span class="n">new_actors</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num</span><span class="p">):</span>
             <span class="n">engine_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">engine_status</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">engine_status</span><span class="p">))</span>
-            <span class="n">new_actor</span> <span class="o">=</span> <span class="n">WorkflowRunner</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">engine_index</span><span class="p">])</span>
+            <span class="n">selected_auxiliary_models</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">models</span><span class="p">[</span><span class="n">engine_status</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">engine_status</span><span class="p">))]</span>
+                <span class="k">for</span> <span class="n">models</span><span class="p">,</span> <span class="n">engine_status</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_models</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_engine_status_list</span>
+                <span class="p">)</span>
+            <span class="p">]</span>
+            <span class="n">new_actor</span> <span class="o">=</span> <span class="n">WorkflowRunner</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">engine_index</span><span class="p">],</span> <span class="n">selected_auxiliary_models</span>
+            <span class="p">)</span>
             <span class="n">new_actors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_actor</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">engine_status</span><span class="p">[</span><span class="n">engine_index</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">actor_to_engine_index</span><span class="p">[</span><span class="n">new_actor</span><span class="p">]</span> <span class="o">=</span> <span class="n">engine_index</span>
