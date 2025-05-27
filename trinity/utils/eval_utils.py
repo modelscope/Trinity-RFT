@@ -89,8 +89,8 @@ def compute_response_metrics(responses):
     total_response_length = 0
     total_correct_length = 0
     total_incorrect_length = 0
-    pass_k_count = 0
-    num_responses = len(responses)
+    n_correct = 0
+    n_responses = len(responses)
 
     for response in responses:
         tokens_length = len(response.tokens) - response.prompt_length
@@ -98,23 +98,19 @@ def compute_response_metrics(responses):
 
         total_response_length += tokens_length
         if is_correct:
-            pass_k_count += 1
+            n_correct += 1
             total_correct_length += tokens_length
         else:
             total_incorrect_length += tokens_length
 
-    avg_response_length = total_response_length / num_responses
-    avg_pass_k = pass_k_count / num_responses
-    avg_correct_length = total_correct_length / pass_k_count if pass_k_count > 0 else None
+    avg_response_length = total_response_length / n_responses
+    avg_correct_length = total_correct_length / n_correct if n_correct > 0 else None
     avg_incorrect_length = (
-        total_incorrect_length / (num_responses - pass_k_count)
-        if num_responses > pass_k_count
-        else None
+        total_incorrect_length / (n_responses - n_correct) if n_responses > n_correct else None
     )
 
     metrics = {
         "response_length": avg_response_length,
-        "pass@k": avg_pass_k,
         **(
             {"response_length_correct": avg_correct_length}
             if avg_correct_length is not None
