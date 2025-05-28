@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass, field
+from functools import partial
 from typing import Any, List, Optional, Type, Union
 
 import openai
@@ -176,6 +177,12 @@ class SimpleWorkflow(Workflow):
         reward_fn = task.reward_fn
         if isinstance(reward_fn, type) and issubclass(reward_fn, RewardFn):
             self.reward_fn: RewardFn = reward_fn()
+        elif isinstance(reward_fn, partial):
+            # 确保 partial 的基础函数是 RewardFn 的子类
+            if isinstance(reward_fn.func, type) and issubclass(reward_fn.func, RewardFn):
+                self.reward_fn = reward_fn()
+            else:
+                raise ValueError("`reward_fn` as partial must wrap a subclass of `RewardFn`")
         else:
             raise ValueError("`reward_fn` must be a subclass of `RewardFn`")
         # Rollout args

@@ -178,6 +178,7 @@ class WorkflowTest(unittest.TestCase):
                 taskset_config.format.response_key: r"36",
             },
         )
+        task.format_args.system_prompt = PREDEFINED_MATH_SYSTEM_PROMPTS["deepseek_like"]
         workflow = task.to_workflow(model=model)
         experiences = workflow.run()
         # self.assertEqual(len(experiences), 1)
@@ -185,9 +186,9 @@ class WorkflowTest(unittest.TestCase):
         self.assertEqual(experiences[1].reward, 0.9)
         self.assertEqual(experiences[2].reward, 0.9)
         self.assertEqual(experiences[3].reward, 0.1)
-        self.assertEqual(experiences[4].reward, -0.1)
-        self.assertEqual(experiences[5].reward, -0.1)
-        self.assertEqual(experiences[6].reward, -0.1)
+        self.assertEqual(experiences[4].reward, 0.9)
+        self.assertEqual(experiences[5].reward, 0.9)
+        self.assertEqual(experiences[6].reward, 0.9)
         self.assertEqual(experiences[7].reward, -0.1)
         task_new = Task(
             workflow=MathWorkflow,
@@ -202,6 +203,7 @@ class WorkflowTest(unittest.TestCase):
                 taskset_config.format.response_key: r"36",
             },
         )
+        task_new.format_args.system_prompt = PREDEFINED_MATH_SYSTEM_PROMPTS["boxed_with_think"]
         workflow.reset(task_new)
         workflow_new = task_new.to_workflow(model=model)
         experiences = workflow_new.run()
@@ -226,6 +228,7 @@ class WorkflowTest(unittest.TestCase):
                 taskset_config.format.response_key: r"36",
             },
         )
+        task_new2.format_args.system_prompt = PREDEFINED_MATH_SYSTEM_PROMPTS["boxed_no_think"]
         workflow.reset(task_new2)
         workflow_new2 = task_new2.to_workflow(model=model)
         experiences = workflow_new2.run()

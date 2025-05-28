@@ -177,7 +177,7 @@ class MathBoxedRewardFn(RewardFn):
             return -0.1
 
         try:
-            reward = float(verify(answer, truth))
+            reward = float(verify(parse(answer), parse(truth)))
         except Exception as e:
             print(f"verify failed: {e}, answer: {answer}, gold: {truth}")
             logger.info(f"verify failed: {e}, answer: {answer}, gold: {truth}")
