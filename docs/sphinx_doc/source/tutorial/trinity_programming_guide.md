@@ -286,7 +286,7 @@ trinity run --config <your_yaml_file>
 
 ---
 
-## Creating New Parameters for the Config Generator
+## Creating New Parameters for the Config Generator (Advanced)
 
 ### Step 0: Understanding Streamlit
 
@@ -367,21 +367,42 @@ def check_train_batch_size(unfinished_fields: set, key: str):
 The `CONFIG_GENERATORS.register_check` decorator automatically receives `key=config_name` and `unfinished_fields=self.unfinished_fields` as arguments. Ensure your function accepts these keyword arguments.
 ```
 
-### Step 2: Integrating Parameters into `config_manager.py`
+### Step 2: Integrating New Parameters into `config_manager.py`
 
-To incorporate new parameters into `config_manager.py`, follow these steps:
+To successfully integrate new parameters into the `config_manager.py` file, please adhere to the following procedure:
 
-1. Identify the appropriate section for the parameter based on its type. The page is divided into two main sections:
-   - Beginner mode: "Essential Configs" and "Important Configs"
-   - Expert mode: "Model", "Buffer", "Explorer and Synchronizer", and "Trainer"
+1. Parameter Categorization:
+   Determine the appropriate section for the new parameter based on its functionality. The config generator page is structured into two primary modes:
+   - Beginner Mode: Comprises "Essential Configs" and "Important Configs" sections.
+   - Expert Mode: Includes "Model", "Buffer", "Explorer and Synchronizer", and "Trainer" sections.
 
-2. Add the parameter to the corresponding location using the `self.get_configs` function.
+2. Parameter Addition:
+   Incorporate the new parameter into the relevant section using the `self.get_configs` method within the `ConfigManager` class.
 
-3. In the `generate_config` function and its sub-functions, locate the appropriate position for the parameter in the YAML file.
+   Example:
+   ```python
+   class ConfigManager:
+       def _expert_buffer_part(self):
+           self.get_configs("total_epochs", "train_batch_size")
+   ```
 
-4. Use `st.session_state` to output the parameter value obtained from the page to the YAML file.
+3. YAML File Integration:
+   Locate the appropriate position for the new parameter within the YAML file structure. This should be done in the `generate_config` function and its associated sub-functions.
 
-By following these steps, you can successfully add new parameters to the Config Generator page and ensure they are properly integrated into the configuration system.
+4. Parameter Value Assignment:
+   Utilize `st.session_state` to retrieve the parameter value from the config generator page and assign it to the corresponding field in the YAML.
+
+   Example:
+   ```python
+   class ConfigManager:
+       def _gen_buffer_config(self):
+           buffer_config = {
+               "batch_size": st.session_state["train_batch_size"],
+               # Additional configuration parameters
+           }
+   ```
+
+By meticulously following these steps, you can ensure that new parameters are successfully added to the Config Generator page and properly integrated into the configuration system. This process maintains the integrity and functionality of the configuration management framework.
 
 ---
 
