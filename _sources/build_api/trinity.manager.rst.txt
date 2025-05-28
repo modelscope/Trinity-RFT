@@ -1,5 +1,13 @@
 trinity.manager
 ===============
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   trinity.manager.config_registry
+
 Submodules
 ----------
 

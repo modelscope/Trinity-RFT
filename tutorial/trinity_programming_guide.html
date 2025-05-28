@@ -59,6 +59,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#step-3-use-your-workflow">Step 3: Use Your Workflow</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#adding-new-config-entries-for-the-config-generator-advanced">Adding New Config Entries for the Config Generator (Advanced)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#step-0-understanding-streamlit">Step 0: Understanding Streamlit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-1-implement-new-config-entries">Step 1: Implement New Config Entries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-2-integrating-new-parameters-into-config-manager-py">Step 2: Integrating New Parameters into <code class="docutils literal notranslate"><span class="pre">config_manager.py</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#check-code-style">Check Code Style</a></li>
 </ul>
 </li>
@@ -358,6 +364,125 @@ In this case, you can implement the <code class="docutils literal notranslate"><
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">trinity</span> <span class="n">run</span> <span class="o">--</span><span class="n">config</span> <span class="o">&lt;</span><span class="n">your_yaml_file</span><span class="o">&gt;</span>
 </pre></div>
 </div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="adding-new-config-entries-for-the-config-generator-advanced">
+<h2>Adding New Config Entries for the Config Generator (Advanced)<a class="headerlink" href="#adding-new-config-entries-for-the-config-generator-advanced" title="Link to this heading"></a></h2>
+<section id="step-0-understanding-streamlit">
+<h3>Step 0: Understanding Streamlit<a class="headerlink" href="#step-0-understanding-streamlit" title="Link to this heading"></a></h3>
+<p>Before adding new parameters to the Config Generator page, it is essential to familiarize yourself with the relevant API and mechanisms of <a class="reference external" href="https://docs.streamlit.io/develop/api-reference">Streamlit</a>. This project primarily utilizes various input components from Streamlit and employs <code class="docutils literal notranslate"><span class="pre">st.session_state</span></code> to store user-input parameters.</p>
+</section>
+<section id="step-1-implement-new-config-entries">
+<h3>Step 1: Implement New Config Entries<a class="headerlink" href="#step-1-implement-new-config-entries" title="Link to this heading"></a></h3>
+<p>To illustrate the process of creating a new parameter setting for the Config Generator page, we will use <code class="docutils literal notranslate"><span class="pre">train_batch_size</span></code> as an example.</p>
+<ol class="arabic">
+<li><p>Determine the appropriate scope for the parameter. Currently, parameters are categorized into four files:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">trinity/manager/config_registry/buffer_config_manager.py</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trinity/manager/config_registry/explorer_config_manager.py</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trinity/manager/config_registry/model_config_manager.py</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trinity/manager/config_registry/trainer_config_manager.py</span></code></p></li>
+</ul>
+<p>In this case, <code class="docutils literal notranslate"><span class="pre">train_batch_size</span></code> should be placed in the <code class="docutils literal notranslate"><span class="pre">buffer_config_manager.py</span></code> file.</p>
+</li>
+<li><p>Create a parameter setting function using Streamlit. The function name must follow the convention of starting with ‘set_’, and the remainder of the name becomes the config name.</p></li>
+<li><p>Decorate the parameter setting function with the <code class="docutils literal notranslate"><span class="pre">CONFIG_GENERATORS.register_config</span></code> decorator. This decorator requires the following information:</p>
+<ul class="simple">
+<li><p>Default value of the parameter</p></li>
+<li><p>Visibility condition (if applicable)</p></li>
+<li><p>Additional config parameters (if needed)</p></li>
+</ul>
+</li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">CONFIG_GENERATORS.register_config</span></code> decorator automatically passes <code class="docutils literal notranslate"><span class="pre">key=config_name</span></code> as an argument to the registered configuration function. Ensure that your function accepts this keyword argument.</p>
+</div>
+<p>For <code class="docutils literal notranslate"><span class="pre">train_batch_size</span></code>, we will use the following settings:</p>
+<ul class="simple">
+<li><p>Default value: 96</p></li>
+<li><p>Visibility condition: <code class="docutils literal notranslate"><span class="pre">lambda:</span> <span class="pre">st.session_state[&quot;trainer_gpu_num&quot;]</span> <span class="pre">&gt;</span> <span class="pre">0</span></code></p></li>
+<li><p>Additional config: <code class="docutils literal notranslate"><span class="pre">{&quot;_train_batch_size_per_gpu&quot;:</span> <span class="pre">16}</span></code></p></li>
+</ul>
+<p>Here’s the complete code for the <code class="docutils literal notranslate"><span class="pre">train_batch_size</span></code> parameter:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@CONFIG_GENERATORS</span><span class="o">.</span><span class="n">register_config</span><span class="p">(</span>
+    <span class="n">default_value</span><span class="o">=</span><span class="mi">96</span><span class="p">,</span>
+    <span class="n">visible</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;trainer_gpu_num&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">other_configs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;_train_batch_size_per_gpu&quot;</span><span class="p">:</span> <span class="mi">16</span><span class="p">},</span>
+<span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">set_train_batch_size</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;key&quot;</span><span class="p">)</span>
+    <span class="n">trainer_gpu_num</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;trainer_gpu_num&quot;</span><span class="p">]</span>
+    <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;_train_batch_size_per_gpu&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;trainer_gpu_num&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_change</span><span class="p">():</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;_train_batch_size_per_gpu&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">//</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;trainer_gpu_num&quot;</span><span class="p">],</span> <span class="mi">1</span>
+        <span class="p">)</span>
+
+    <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span>
+        <span class="s2">&quot;Train Batch Size&quot;</span><span class="p">,</span>
+        <span class="n">min_value</span><span class="o">=</span><span class="n">trainer_gpu_num</span><span class="p">,</span>
+        <span class="n">step</span><span class="o">=</span><span class="n">trainer_gpu_num</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="n">_str_for_train_batch_size</span><span class="p">(),</span>
+        <span class="n">on_change</span><span class="o">=</span><span class="n">on_change</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p>If the parameter requires validation, create a check function. For <code class="docutils literal notranslate"><span class="pre">train_batch_size</span></code>, we need to ensure it is divisible by <code class="docutils literal notranslate"><span class="pre">trainer_gpu_num</span></code>. If not, a warning should be displayed, and the parameter should be added to <code class="docutils literal notranslate"><span class="pre">unfinished_fields</span></code>.</p>
+<p>Decorate the check function with the <code class="docutils literal notranslate"><span class="pre">CONFIG_GENERATORS.register_check</span></code> decorator:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@CONFIG_GENERATORS</span><span class="o">.</span><span class="n">register_check</span><span class="p">()</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_train_batch_size</span><span class="p">(</span><span class="n">unfinished_fields</span><span class="p">:</span> <span class="nb">set</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">%</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;trainer_gpu_num&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">unfinished_fields</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">_str_for_train_batch_size</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">CONFIG_GENERATORS.register_check</span></code> decorator automatically receives <code class="docutils literal notranslate"><span class="pre">key=config_name</span></code> and <code class="docutils literal notranslate"><span class="pre">unfinished_fields=self.unfinished_fields</span></code> as arguments. Ensure your function accepts these keyword arguments.</p>
+</div>
+</section>
+<section id="step-2-integrating-new-parameters-into-config-manager-py">
+<h3>Step 2: Integrating New Parameters into <code class="docutils literal notranslate"><span class="pre">config_manager.py</span></code><a class="headerlink" href="#step-2-integrating-new-parameters-into-config-manager-py" title="Link to this heading"></a></h3>
+<p>To successfully integrate new parameters into the <code class="docutils literal notranslate"><span class="pre">config_manager.py</span></code> file, please adhere to the following procedure:</p>
+<ol class="arabic">
+<li><p>Parameter Categorization:
+Determine the appropriate section for the new parameter based on its functionality. The config generator page is structured into two primary modes:</p>
+<ul class="simple">
+<li><p>Beginner Mode: Comprises “Essential Configs” and “Important Configs” sections.</p></li>
+<li><p>Expert Mode: Includes “Model”, “Buffer”, “Explorer and Synchronizer”, and “Trainer” sections.</p></li>
+</ul>
+</li>
+<li><p>Parameter Addition:
+Incorporate the new parameter into the relevant section using the <code class="docutils literal notranslate"><span class="pre">self.get_configs</span></code> method within the <code class="docutils literal notranslate"><span class="pre">ConfigManager</span></code> class.</p>
+<p>Example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ConfigManager</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_expert_buffer_part</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;total_epochs&quot;</span><span class="p">,</span> <span class="s2">&quot;train_batch_size&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p>YAML File Integration:
+Locate the appropriate position for the new parameter within the YAML file structure. This should be done in the <code class="docutils literal notranslate"><span class="pre">generate_config</span></code> function and its associated sub-functions.</p></li>
+<li><p>Parameter Value Assignment:
+Utilize <code class="docutils literal notranslate"><span class="pre">st.session_state</span></code> to retrieve the parameter value from the config generator page and assign it to the corresponding field in the YAML.</p>
+<p>Example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ConfigManager</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_gen_buffer_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">buffer_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;batch_size&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;train_batch_size&quot;</span><span class="p">],</span>
+            <span class="c1"># Additional configuration parameters</span>
+        <span class="p">}</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<p>By meticulously following these steps, you can ensure that new parameters are successfully added to the Config Generator page and properly integrated into the configuration system. This process maintains the integrity and functionality of the configuration management framework.</p>
 </section>
 </section>
 <hr class="docutils" />
