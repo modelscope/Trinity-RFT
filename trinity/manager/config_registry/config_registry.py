@@ -61,13 +61,13 @@ class ConfigRegistry(Registry):
         check_func_name = f"check_{config_name}"
         return super().get(check_func_name)
 
-    def get_configs(self, *config_names: str, columns_config: List[int] = None):
+    def get_configs(self, *config_names: str, columns_spec: List[int] = None):
         """
         Retrieve and display multiple configurations in Streamlit columns.
 
         Args:
             *config_names (str): Names of configurations to retrieve.
-            columns_config (List[int], optional): Configuration for Streamlit columns.
+            columns_spec (List[int], optional): Configuration for Streamlit columns.
         """
         config_pair = []
         for config_name in config_names:
@@ -77,9 +77,9 @@ class ConfigRegistry(Registry):
         if len(config_pair) == 0:
             return
 
-        if columns_config is None:
-            columns_config = len(config_pair)
-        columns = st.columns(columns_config)
+        if columns_spec is None:
+            columns_spec = len(config_pair)
+        columns = st.columns(columns_spec)
         for col, (_, config_func) in zip(columns, config_pair):
             with col:
                 config_func()

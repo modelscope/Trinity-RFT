@@ -97,12 +97,12 @@ class ConfigManager:
             last_idx += 1
         st.session_state["_auxiliary_models_num"] -= del_num
 
-    def get_configs(self, *config_names: str, columns_config: List[int] = None):
-        CONFIG_GENERATORS.get_configs(*config_names, columns_config=columns_config)
+    def get_configs(self, *config_names: str, columns_spec: List[int] = None):
+        CONFIG_GENERATORS.get_configs(*config_names, columns_spec=columns_spec)
 
     def beginner_mode(self):
         st.header("Essential Configs")
-        self.get_configs("project", "exp_name", columns_config=[1, 2])
+        self.get_configs("project", "exp_name", columns_spec=[1, 2])
 
         self.get_configs("model_path")
 
@@ -148,7 +148,7 @@ class ConfigManager:
         self.get_configs("critic_ppo_micro_batch_size_per_gpu", "critic_lr")
 
     def _expert_model_part(self):
-        self.get_configs("project", "exp_name", columns_config=[1, 2])
+        self.get_configs("project", "exp_name", columns_spec=[1, 2])
 
         self.get_configs("model_path")
         self.get_configs("critic_model_path")
