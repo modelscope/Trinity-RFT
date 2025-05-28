@@ -25,7 +25,6 @@ from trinity.trainer.verl.ray_trainer import (
     Role,
     _timer,
     apply_kl_penalty,
-    compute_advantage,
     compute_data_metrics,
     compute_throughout_metrics,
     compute_timing_metrics,
@@ -35,6 +34,7 @@ from trinity.trainer.verl.ray_trainer import (
     reduce_metrics,
 )
 from trinity.utils.monitor import Monitor
+from trinity.algorithm import ADVANTAGE_FN
 
 
 class _InternalDataLoader:
@@ -128,6 +128,14 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         self.algorithm_type = (
             AlgorithmType.PPO
         )  # TODO: initialize algorithm_type according to config
+
+        # specify advantage function for various rft algorithms
+        algo_config = global_config.algorithm
+        if algo_config.algorithm_type.is_rft():
+            adv_fn_type = algo_config.advantage_fn_type
+            adv_fn_args = algo_config.get("advantage_fn_args", {})  # TODO: does this work properly??
+            self.advantage_fn = ADVANTAGE_FN.get(adv_fn_type)(**adv_fn_args)
+
         self.logger = Monitor(
             project=config.trainer.project_name,
             name=config.trainer.experiment_name,
@@ -379,26 +387,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                     batch.batch["token_level_rewards"] = batch.batch["token_level_scores"]
 
                 # compute advantages, executed on the driver process
-                kwargs = {}
-                algorithm_type = self.config.actor_rollout_ref.actor.get(
-                    "algorithm_type", AlgorithmType.PPO
-                )
-                if algorithm_type == AlgorithmType.OPMD:
-                    tau = self.config.actor_rollout_ref.actor.get("tau", 0.0)
-                    opmd_baseline = self.config.actor_rollout_ref.actor.get("opmd_baseline", "mean")
-                    kwargs = {
-                        "algorithm_type": algorithm_type,
-                        "tau": tau,
-                        "opmd_baseline": opmd_baseline,
-                    }
-                batch = compute_advantage(
-                    batch,
-                    adv_estimator=self.config.algorithm.adv_estimator,
-                    gamma=self.config.algorithm.gamma,
-                    lam=self.config.algorithm.lam,
-                    num_repeat=self.config.actor_rollout_ref.rollout.n,
-                    **kwargs,
-                )
+                batch, _ = self.advantage_fn(batch)
 
             # update critic
             if self.use_critic:
