@@ -76,3 +76,19 @@ def evaluate_equation(equation_str):
         return result
     except Exception as e:  # noqa: F841
         return None
+
+
+def validate_think_pattern(text):
+    """Validate whether the <think> </think> tag is properly formatted."""
+    start_tag = "<think>"
+    end_tag = "</think>"
+
+    start_count = text.count(start_tag)
+    end_count = text.count(end_tag)
+
+    if start_count == 1 and end_count == 1:
+        start_pos = text.find(start_tag)
+        end_pos = text.find(end_tag)
+        if start_pos < end_pos:
+            return True
+    return False

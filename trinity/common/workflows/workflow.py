@@ -13,7 +13,7 @@ import torch
 from trinity.common.config import FormatConfig, GenerationConfig
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
-from trinity.common.rewards.reward_fn import MathRewardFn, RewardFn
+from trinity.common.rewards.reward_fn import RewardFn
 from trinity.utils.log import get_logger
 from trinity.utils.registry import Registry
 
@@ -216,30 +216,37 @@ class SimpleWorkflow(Workflow):
         return responses
 
 
-@WORKFLOWS.register_module("math_workflow")
-class MathWorkflow(SimpleWorkflow):
-    """A workflow for math tasks as introduced in DeepSeek-R1."""
+@WORKFLOWS.register_module("basemodel_workflow")
+class BaseModelWorkflow(SimpleWorkflow):
+    """A workflow for simple single-round task, using base model"""
 
-    def __init__(
-        self,
-        model: ModelWrapper,
-        task: Task,
-        auxiliary_models: Optional[List[openai.OpenAI]] = None,
-    ):
-        self.reset(task)
-        super().__init__(
-            model=model,
-            task=task,
-            auxiliary_models=auxiliary_models,
-        )
+    def format_prompt(self):
+        prompt_text = ""
+        if self.system_prompt:
+            prompt_text += self.system_prompt
+            prompt_text += "\nTask:\n" + self.task_desc + "\nResponse:\n"
+        else:
+            prompt_text += "\nTask:\n" + self.task_desc + "\nResponse:\n"
+        return prompt_text
 
-    def reset(self, task: Task):
-        if task.reward_fn is None:
-            task.reward_fn = MathRewardFn
-        if task.reward_fn == MathRewardFn and task.format_args.system_prompt is None:
-            task.format_args.system_prompt = """A conversation between User and Assistant. The user asks a question, and the Assistant solves it. The assistant first thinks about the reasoning process in the mind and then provides the user with the answer. The reasoning process and answer are enclosed within <think> </think> and <answer> </answer> tags, respectively, i.e.,
-<think> reasoning process here </think>
-<answer> answer here </answer>.
-"""
-        # call the SimpleWorkflow.reset
-        super().reset(task)
+    def run(self) -> List[Experience]:
+        prompt_text = self.format_prompt()
+
+        logger.debug("start generation")
+        responses = self.model.generate([prompt_text], **self.rollout_args)
+        for response in responses:
+            reward = self.reward_fn(
+                response=response.response_text,  # type: ignore [arg-type]
+                truth=self.truth,
+                return_dict=self.is_eval,
+            )
+            logger.debug(
+                f"self.task_desc: {self.task_desc}, prompt_text: {prompt_text}, response: {response.response_text}, reward: {reward}"
+            )
+            if isinstance(reward, dict):
+                if response.metrics is None:
+                    response.metrics = {}
+                response.metrics.update(reward)
+                reward = sum(reward.values())
+            response.reward = reward
+        return responses

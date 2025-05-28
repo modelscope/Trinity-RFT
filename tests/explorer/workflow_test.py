@@ -6,6 +6,7 @@ from unittest.mock import MagicMock
 
 from tests.tools import get_unittest_dataset_config
 from trinity.common.workflows import MathWorkflow
+from trinity.common.workflows.math_workflows import PREDEFINED_MATH_SYSTEM_PROMPTS
 from trinity.common.workflows.workflow import Task
 
 
@@ -150,3 +151,89 @@ class WorkflowTest(unittest.TestCase):
         self.assertEqual(experiences[1].reward, -0.1)
         self.assertEqual(experiences[2].reward, -0.1)
         self.assertEqual(experiences[3].reward, 1.1)
+
+    def test_math_workflow_with_different_system_prompt(self) -> None:
+        model = MagicMock()
+        model.chat.return_value = [
+            MockResponse("<think> balabalabala 99 </think>\n<answer> 36 </answer>"),
+            MockResponse("<answer> 36.0 </answer>"),
+            MockResponse("<answer>Kim's total points are 6 + 30 = 36 </answer>"),
+            MockResponse("<think> balalaba </think><answer> 35.00 </answer>"),
+            MockResponse("<think> balabalabala 99 </think>\n \\boxed{36}"),
+            MockResponse("\\boxed{36.0}"),
+            MockResponse("Kim's total points are 6 + 30 =\\boxed{36}"),
+            MockResponse("<think> balalaba </think> \\boxed{35.00}"),
+        ]
+        taskset_config = get_unittest_dataset_config("countdown")
+        task = Task(
+            workflow=MathWorkflow,
+            format_args=taskset_config.format,
+            rollout_args=taskset_config.rollout_args,
+            is_eval=False,
+            raw_task={
+                taskset_config.format.system_prompt: PREDEFINED_MATH_SYSTEM_PROMPTS[
+                    "deepseek_like"
+                ],
+                taskset_config.format.prompt_key: "",
+                taskset_config.format.response_key: r"36",
+            },
+        )
+        workflow = task.to_workflow(model=model)
+        experiences = workflow.run()
+        # self.assertEqual(len(experiences), 1)
+        self.assertEqual(experiences[0].reward, 1.1)
+        self.assertEqual(experiences[1].reward, 0.9)
+        self.assertEqual(experiences[2].reward, 0.9)
+        self.assertEqual(experiences[3].reward, 0.1)
+        self.assertEqual(experiences[4].reward, -0.1)
+        self.assertEqual(experiences[5].reward, -0.1)
+        self.assertEqual(experiences[6].reward, -0.1)
+        self.assertEqual(experiences[7].reward, -0.1)
+        task_new = Task(
+            workflow=MathWorkflow,
+            format_args=taskset_config.format,
+            rollout_args=taskset_config.rollout_args,
+            is_eval=False,
+            raw_task={
+                taskset_config.format.system_prompt: PREDEFINED_MATH_SYSTEM_PROMPTS[
+                    "boxed_with_think"
+                ],
+                taskset_config.format.prompt_key: "",
+                taskset_config.format.response_key: r"36",
+            },
+        )
+        workflow.reset(task_new)
+        workflow_new = task_new.to_workflow(model=model)
+        experiences = workflow_new.run()
+        self.assertEqual(experiences[0].reward, -0.1)
+        self.assertEqual(experiences[1].reward, -0.1)
+        self.assertEqual(experiences[2].reward, -0.1)
+        self.assertEqual(experiences[3].reward, -0.1)
+        self.assertEqual(experiences[4].reward, 1.0)
+        self.assertEqual(experiences[5].reward, 0.9)
+        self.assertEqual(experiences[6].reward, 0.9)
+        self.assertEqual(experiences[7].reward, 0.0)
+        task_new2 = Task(
+            workflow=MathWorkflow,
+            format_args=taskset_config.format,
+            rollout_args=taskset_config.rollout_args,
+            is_eval=False,
+            raw_task={
+                taskset_config.format.system_prompt: PREDEFINED_MATH_SYSTEM_PROMPTS[
+                    "boxed_no_think"
+                ],
+                taskset_config.format.prompt_key: "",
+                taskset_config.format.response_key: r"36",
+            },
+        )
+        workflow.reset(task_new2)
+        workflow_new2 = task_new2.to_workflow(model=model)
+        experiences = workflow_new2.run()
+        self.assertEqual(experiences[0].reward, -0.1)
+        self.assertEqual(experiences[1].reward, -0.1)
+        self.assertEqual(experiences[2].reward, -0.1)
+        self.assertEqual(experiences[3].reward, -0.1)
+        self.assertEqual(experiences[4].reward, 1.0)
+        self.assertEqual(experiences[5].reward, 1.0)
+        self.assertEqual(experiences[6].reward, 1.0)
+        self.assertEqual(experiences[7].reward, 0.0)

@@ -11,8 +11,10 @@ from math_verify import LatexExtractionConfig, parse, verify
 from trinity.utils.eval_utils import (
     evaluate_equation,
     extract_solution,
+    find_boxed_answer,
     simple_answer_parser,
     validate_equation,
+    validate_think_pattern,
 )
 from trinity.utils.log import get_logger
 from trinity.utils.registry import Registry
@@ -150,6 +152,49 @@ class MathRewardFn(RewardFn):
             return {"accuracy": accuracy_score, "format_score": format_score}
 
         return accuracy_score + format_score
+
+
+class MathBoxedRewardFn(RewardFn):
+    """Math Reward function that parse the boxed answer"""
+
+    def __init__(
+        self,
+        have_think_pattern: Optional[bool] = True,
+    ):
+        self.have_think_pattern = have_think_pattern
+
+    def __call__(  # type: ignore
+        self,
+        response: str,
+        prompt: Optional[str] = None,
+        truth: Optional[str] = None,
+        return_dict: Optional[bool] = False,
+    ) -> Union[float, dict]:
+        answer = find_boxed_answer(response)
+        if answer is None:
+            if return_dict:
+                return {"accuracy": 0.0, "format_score": -0.1}
+            return -0.1
+
+        try:
+            reward = float(verify(answer, truth))
+        except Exception as e:
+            print(f"verify failed: {e}, answer: {answer}, gold: {truth}")
+            logger.info(f"verify failed: {e}, answer: {answer}, gold: {truth}")
+            reward = 0.0
+
+        if self.have_think_pattern:
+            if validate_think_pattern(response):
+                reward += 0.0
+            else:
+                reward -= 0.1
+
+        if return_dict:
+            return {
+                "accuracy": 1.0 if reward > 0.9 else 0.0,
+                "format_score": 0.0 if reward >= 0.0 else -0.1,
+            }
+        return reward
 
 
 @REWARD_FUNCTIONS.register_module("countdown_reward")
