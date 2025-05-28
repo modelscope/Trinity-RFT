@@ -24,7 +24,9 @@ def _str_for_train_batch_size():
 
 
 @CONFIG_GENERATORS.register_config(
-    default_value=96, other_configs={"_train_batch_size_per_gpu": 16}
+    default_value=96,
+    visible=lambda: st.session_state["trainer_gpu_num"] > 0,
+    other_configs={"_train_batch_size_per_gpu": 16},
 )
 def set_train_batch_size(**kwargs):
     key = kwargs.get("key")
@@ -97,7 +99,7 @@ def check_taskset_path(unfinished_fields: set, key: str):
 
 
 @CONFIG_GENERATORS.register_config(
-    condition=lambda: st.session_state["taskset_path"]
+    visible=lambda: st.session_state["taskset_path"]
     and "://" not in st.session_state["taskset_path"],
     other_configs={
         "taskset_subset_name": None,
@@ -165,10 +167,35 @@ def _set_eval_taskset_idx(idx):
         key=f"eval_taskset_{idx}_response_key",
     )
 
+    temperature_col, logprobs_col, n_col = st.columns(3)
+    temperature_col.number_input(
+        "Temperature",
+        key=f"eval_taskset_{idx}_temperature",
+        min_value=0.0,
+        max_value=1.0,
+    )
+    logprobs_col.number_input(
+        "Logprobs",
+        key=f"eval_taskset_{idx}_logprobs",
+        min_value=0,
+        max_value=20,
+    )
+    n_col.number_input(
+        "Eval repeat times",
+        key=f"eval_taskset_{idx}_n",
+        min_value=1,
+        max_value=20,
+    )
+
 
 @CONFIG_GENERATORS.register_config(other_configs={"_eval_tasksets_num": 0})
 def set_eval_tasksets(**kwargs):
     if st.button("Add Eval Taskset"):
+        idx = st.session_state["_eval_tasksets_num"]
+        st.session_state[f"eval_taskset_{idx}_split"] = "test"
+        st.session_state[f"eval_taskset_{idx}_prompt_key"] = "prompt"
+        st.session_state[f"eval_taskset_{idx}_response_key"] = "response"
+        st.session_state[f"eval_taskset_{idx}_temperature"] = 0.1
         st.session_state["_eval_tasksets_num"] += 1
     if st.session_state["_eval_tasksets_num"] > 0:
         tabs = st.tabs(
@@ -354,7 +381,7 @@ def check_sft_warmup_dataset_path(unfinished_fields: set, key: str):
 
 
 @CONFIG_GENERATORS.register_config(
-    condition=lambda: st.session_state["sft_warmup_dataset_path"]
+    visible=lambda: st.session_state["sft_warmup_dataset_path"]
     and "://" not in st.session_state["sft_warmup_dataset_path"],
     other_configs={
         "sft_warmup_train_split": "train",

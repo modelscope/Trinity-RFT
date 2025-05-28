@@ -5,51 +5,41 @@ from trinity.manager.config_registry.config_registry import CONFIG_GENERATORS
 from trinity.manager.config_registry.model_config_manager import set_trainer_gpu_num
 
 
-def explorer_condition() -> bool:
+def explorer_visible() -> bool:
     return st.session_state["mode"] == "both"
 
 
-@CONFIG_GENERATORS.register_config(default_value=32, condition=explorer_condition)
+@CONFIG_GENERATORS.register_config(default_value=32, visible=explorer_visible)
 def set_runner_num(**kwargs):
     st.number_input("Runner Num", min_value=1, **kwargs)
 
 
-@CONFIG_GENERATORS.register_config(default_value=900, condition=explorer_condition)
+@CONFIG_GENERATORS.register_config(default_value=900, visible=explorer_visible)
 def set_max_timeout(**kwargs):
     st.number_input("Max Timeout", min_value=0, **kwargs)
 
 
-@CONFIG_GENERATORS.register_config(default_value=2, condition=explorer_condition)
+@CONFIG_GENERATORS.register_config(default_value=2, visible=explorer_visible)
 def set_explorer_max_retry_times(**kwargs):
     st.number_input("Explorer Max Retry Times", min_value=0, **kwargs)
 
 
-@CONFIG_GENERATORS.register_config(default_value=1000, condition=explorer_condition)
+@CONFIG_GENERATORS.register_config(default_value=1000, visible=explorer_visible)
 def set_eval_interval(**kwargs):
     st.number_input("Eval Interval", min_value=1, **kwargs)
 
 
-@CONFIG_GENERATORS.register_config(default_value=True, condition=explorer_condition)
+@CONFIG_GENERATORS.register_config(default_value=True, visible=explorer_visible)
 def set_eval_on_latest_checkpoint(**kwargs):
     st.checkbox("Eval on Latest Checkpoint", **kwargs)
 
 
-@CONFIG_GENERATORS.register_config(default_value="vllm_async", condition=explorer_condition)
+@CONFIG_GENERATORS.register_config(default_value="vllm_async", visible=explorer_visible)
 def set_engine_type(**kwargs):
     st.selectbox("Engine Type", ["vllm_async", "vllm"], **kwargs)
 
 
-def _str_for_engine_num_and_tp_size():
-    return r"""and it must meet the following constraints:
-```python
-assert engine_num * tensor_parallel_size < gpu_per_node * node_num
-if node_num > 1:
-assert gpu_per_node % tensor_parallel_size == 0
-assert engine_num * tensor_parallel_size % gpu_per_node == 0
-```"""
-
-
-@CONFIG_GENERATORS.register_config(default_value=2, condition=explorer_condition)
+@CONFIG_GENERATORS.register_config(default_value=2, visible=explorer_visible)
 def set_engine_num(**kwargs):
     key = kwargs.get("key")
     total_gpu_num = st.session_state["total_gpu_num"]
@@ -61,28 +51,12 @@ def set_engine_num(**kwargs):
         "Engine Num",
         min_value=1,
         max_value=max_engine_num,
-        help=f"`engine_num` is used to set the quantity of inference engines, "
-        f"{_str_for_engine_num_and_tp_size()}",
         on_change=set_trainer_gpu_num,
         **kwargs,
     )
 
 
-@CONFIG_GENERATORS.register_check()
-def check_engine_num(unfinished_fields: set, key: str):
-    node_num = st.session_state["node_num"]
-    gpu_per_node = st.session_state["gpu_per_node"]
-    engine_num = st.session_state["engine_num"]
-    tensor_parallel_size = st.session_state["tensor_parallel_size"]
-    if node_num > 1:
-        if engine_num * tensor_parallel_size % gpu_per_node != 0:
-            unfinished_fields.add("engine_num")
-            st.warning(
-                "Please ensure that `engine_num * tensor_parallel_size` can be divided by `gpu_per_node` when `node_num > 1`."
-            )
-
-
-@CONFIG_GENERATORS.register_config(default_value=1, condition=explorer_condition)
+@CONFIG_GENERATORS.register_config(default_value=1, visible=explorer_visible)
 def set_tensor_parallel_size(**kwargs):
     key = kwargs.get("key")
     total_gpu_num = st.session_state["total_gpu_num"]
@@ -94,8 +68,6 @@ def set_tensor_parallel_size(**kwargs):
         "Tensor Parallel Size",
         min_value=1,
         max_value=max_tensor_parallel_size,
-        help=f"`tensor_parallel_size` is used to set the tensor parallel size of inference engines, "
-        f"{_str_for_engine_num_and_tp_size()}",
         on_change=set_trainer_gpu_num,
         **kwargs,
     )
@@ -103,48 +75,54 @@ def set_tensor_parallel_size(**kwargs):
 
 @CONFIG_GENERATORS.register_check()
 def check_tensor_parallel_size(unfinished_fields: set, key: str):
-    node_num = st.session_state["node_num"]
-    gpu_per_node = st.session_state["gpu_per_node"]
-    tensor_parallel_size = st.session_state["tensor_parallel_size"]
-    if node_num > 1:
-        if gpu_per_node % tensor_parallel_size != 0:
-            unfinished_fields.add("tensor_parallel_size")
-            st.warning(
-                "Please ensure that `tensor_parallel_size` is a factor of `gpu_per_node` when `node_num > 1`."
-            )
+    if st.session_state["trainer_gpu_num"] <= 0:
+        unfinished_fields.add("engine_num")
+        unfinished_fields.add("tensor_parallel_size")
+        st.warning(
+            "Please check the settings of each `engine_num` and `tensor_marallel_size` to ensure that at least one GPU is reserved for the `trainer`."
+        )
+    elif (
+        st.session_state["node_num"] > 1
+        and st.session_state["trainer_gpu_num"] % st.session_state["gpu_per_node"] != 0
+    ):
+        unfinished_fields.add("engine_num")
+        unfinished_fields.add("tensor_parallel_size")
+        st.warning(
+            "When `node_num > 1`, please check the settings of each `engine_num` and `tensor_marallel_size` to ensure that the number of GPUs reserved for the `trainer` is divisible by `gpu_per_node`"
+        )
 
 
-@CONFIG_GENERATORS.register_config(default_value=True, condition=explorer_condition)
+@CONFIG_GENERATORS.register_config(default_value=True, visible=explorer_visible)
 def set_use_v1(**kwargs):
     st.checkbox("Use V1 Engine", **kwargs)
 
 
-@CONFIG_GENERATORS.register_config(default_value=True, condition=explorer_condition)
+@CONFIG_GENERATORS.register_config(default_value=True, visible=explorer_visible)
 def set_enforce_eager(**kwargs):
     st.checkbox("Enforce Eager", **kwargs)
 
 
-@CONFIG_GENERATORS.register_config(default_value=False, condition=explorer_condition)
+@CONFIG_GENERATORS.register_config(default_value=False, visible=explorer_visible)
 def set_enable_prefix_caching(**kwargs):
     st.checkbox("Prefix Caching", **kwargs)
 
 
-@CONFIG_GENERATORS.register_config(default_value=False, condition=explorer_condition)
+@CONFIG_GENERATORS.register_config(default_value=False, visible=explorer_visible)
 def set_enable_chunked_prefill(**kwargs):
     st.checkbox("Chunked Prefill", **kwargs)
 
 
-@CONFIG_GENERATORS.register_config(default_value=0.9, condition=explorer_condition)
+@CONFIG_GENERATORS.register_config(default_value=0.9, visible=explorer_visible)
 def set_gpu_memory_utilization(**kwargs):
     st.number_input("GPU Memory Utilization", min_value=0.0, max_value=1.0, **kwargs)
 
 
-@CONFIG_GENERATORS.register_config(default_value="bfloat16", condition=explorer_condition)
+@CONFIG_GENERATORS.register_config(default_value="bfloat16", visible=explorer_visible)
 def set_dtype(**kwargs):
     st.selectbox("Dtype", ["bfloat16", "float16", "float32"], **kwargs)
 
 
-@CONFIG_GENERATORS.register_config(default_value=42, condition=explorer_condition)
+@CONFIG_GENERATORS.register_config(default_value=42, visible=explorer_visible)
 def set_seed(**kwargs):
     st.number_input("Seed", step=1, **kwargs)
 
@@ -154,17 +132,16 @@ def set_seed(**kwargs):
 # TODO: chat_template
 
 
-@CONFIG_GENERATORS.register_config(default_value=False, condition=explorer_condition)
+@CONFIG_GENERATORS.register_config(default_value=False, visible=explorer_visible)
 def set_enable_thinking(**kwargs):
     st.checkbox("Enable Thinking For Qwen3", **kwargs)
 
 
-@CONFIG_GENERATORS.register_config(default_value=False, condition=explorer_condition)
+@CONFIG_GENERATORS.register_config(default_value=False, visible=explorer_visible)
 def set_enable_openai_api(**kwargs):
     st.checkbox("Enable OpenAI API", **kwargs)
 
 
-# TODO: Auxiliary Models Configs
 def _set_auxiliary_model_idx(idx):
     col1, col2 = st.columns([9, 1])
     col1.text_input(
@@ -176,26 +153,20 @@ def _set_auxiliary_model_idx(idx):
 
     engine_type_col, engine_num_col, tensor_parallel_size_col = st.columns(3)
     total_gpu_num = st.session_state["total_gpu_num"]
-    max_engine_num = (total_gpu_num - 1) // st.session_state["tensor_parallel_size"]
-    max_tensor_parallel_size = (total_gpu_num - 1) // st.session_state["engine_num"]
     engine_type_col.selectbox(
         "Engine Type", ["vllm_async"], key=f"auxiliary_model_{idx}_engine_type"
     )
     engine_num_col.number_input(
         "Engine Num",
         min_value=1,
-        max_value=max_engine_num,
-        help=f"`engine_num` is used to set the quantity of inference engines, "
-        f"{_str_for_engine_num_and_tp_size()}",
+        max_value=total_gpu_num - 1,
         on_change=set_trainer_gpu_num,
         key=f"auxiliary_model_{idx}_engine_num",
     )
     tensor_parallel_size_col.number_input(
         "Tensor Parallel Size",
         min_value=1,
-        max_value=max_tensor_parallel_size,
-        help=f"`tensor_parallel_size` is used to set the tensor parallel size of inference engines, "
-        f"{_str_for_engine_num_and_tp_size()}",
+        max_value=8,
         on_change=set_trainer_gpu_num,
         key=f"auxiliary_model_{idx}_tensor_parallel_size",
     )
@@ -237,7 +208,15 @@ def _set_auxiliary_model_idx(idx):
 @CONFIG_GENERATORS.register_config(other_configs={"_auxiliary_models_num": 0})
 def set_auxiliary_models(**kwargs):
     if st.button("Add Auxiliary Models"):
+        idx = st.session_state["_auxiliary_models_num"]
+        st.session_state[f"auxiliary_model_{idx}_engine_num"] = 1
+        st.session_state[f"auxiliary_model_{idx}_tensor_parallel_size"] = 1
+        st.session_state[f"auxiliary_model_{idx}_gpu_memory_utilization"] = 0.9
+        st.session_state[f"auxiliary_model_{idx}_seed"] = 42
+        st.session_state[f"auxiliary_model_{idx}_use_v1"] = True
+        st.session_state[f"auxiliary_model_{idx}_enforce_eager"] = True
         st.session_state["_auxiliary_models_num"] += 1
+        set_trainer_gpu_num()
     if st.session_state["_auxiliary_models_num"] > 0:
         tabs = st.tabs(
             [f"Auxiliary Model {i + 1}" for i in range(st.session_state["_auxiliary_models_num"])]
@@ -247,12 +226,31 @@ def set_auxiliary_models(**kwargs):
                 _set_auxiliary_model_idx(idx)
 
 
+@CONFIG_GENERATORS.register_check()
+def check_auxiliary_models(unfinished_fields: set, key: str):
+    if st.session_state["trainer_gpu_num"] <= 0:
+        unfinished_fields.add("engine_num")
+        unfinished_fields.add("tensor_parallel_size")
+        st.warning(
+            "Please check the settings of each `engine_num` and `tensor_marallel_size` to ensure that at least one GPU is reserved for the `trainer`."
+        )
+    elif (
+        st.session_state["node_num"] > 1
+        and st.session_state["trainer_gpu_num"] % st.session_state["gpu_per_node"] != 0
+    ):
+        unfinished_fields.add("engine_num")
+        unfinished_fields.add("tensor_parallel_size")
+        st.warning(
+            "When `node_num > 1`, please check the settings of each `engine_num` and `tensor_marallel_size` to ensure that the number of GPUs reserved for the `trainer` is divisible by `gpu_per_node`"
+        )
+
+
 # Synchronizer Configs
 
 
 @CONFIG_GENERATORS.register_config(
     default_value=SyncMethod.NCCL.value,
-    condition=explorer_condition,
+    visible=explorer_visible,
     other_configs={"_not_dpo_sync_method": SyncMethod.NCCL.value},
 )
 def set_sync_method(**kwargs):
@@ -280,7 +278,7 @@ def set_sync_method(**kwargs):
     )
 
 
-@CONFIG_GENERATORS.register_config(default_value=10, condition=explorer_condition)
+@CONFIG_GENERATORS.register_config(default_value=10, visible=explorer_visible)
 def set_sync_interval(**kwargs):
     st.number_input(
         "Sync Interval",
@@ -290,7 +288,7 @@ def set_sync_interval(**kwargs):
     )
 
 
-@CONFIG_GENERATORS.register_config(default_value=1200, condition=explorer_condition)
+@CONFIG_GENERATORS.register_config(default_value=1200, visible=explorer_visible)
 def set_sync_timeout(**kwargs):
     st.number_input(
         "Sync Timeout",

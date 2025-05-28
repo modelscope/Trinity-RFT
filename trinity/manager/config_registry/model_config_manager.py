@@ -4,6 +4,7 @@ import streamlit as st
 
 from trinity.common.constants import AlgorithmType, MonitorType
 from trinity.manager.config_registry.config_registry import CONFIG_GENERATORS
+from trinity.manager.config_registry.trainer_config_manager import use_critic
 from trinity.trainer.verl.ray_trainer import AdvantageEstimator
 
 
@@ -16,10 +17,15 @@ def set_total_gpu_num():
 
 def set_trainer_gpu_num():
     if st.session_state["mode"] == "both":
-        st.session_state["trainer_gpu_num"] = (
+        trainer_gpu_num = (
             st.session_state["total_gpu_num"]
             - st.session_state["engine_num"] * st.session_state["tensor_parallel_size"]
         )
+        for idx in range(st.session_state["_auxiliary_models_num"]):
+            engine_num = st.session_state[f"auxiliary_model_{idx}_engine_num"]
+            tensor_parallel_size = st.session_state[f"auxiliary_model_{idx}_tensor_parallel_size"]
+            trainer_gpu_num -= engine_num * tensor_parallel_size
+        st.session_state["trainer_gpu_num"] = trainer_gpu_num
     else:  # model == train
         st.session_state["trainer_gpu_num"] = st.session_state["total_gpu_num"]
 
@@ -98,7 +104,7 @@ def set_algorithm_type(**kwargs):
 
 @CONFIG_GENERATORS.register_config(
     default_value=1,
-    condition=lambda: st.session_state["mode"] == "both",
+    visible=lambda: st.session_state["mode"] == "both",
     other_configs={
         "_grouped_adv_repeat_times": 2,
         "_not_grouped_adv_repeat_times": 1,
@@ -160,7 +166,7 @@ def check_model_path(unfinished_fields: set, key: str):
 
 @CONFIG_GENERATORS.register_config(
     default_value="",
-    condition=lambda: st.session_state["adv_estimator"] == AdvantageEstimator.GAE.value,
+    visible=use_critic,
 )
 def set_critic_model_path(**kwargs):
     st.text_input(

@@ -49,7 +49,7 @@ def set_enable_preview(**kwargs):
     st.checkbox("Enable Preview", **kwargs)
 
 
-def _actor_use_kl_loss_condition():
+def _actor_use_kl_loss_visible():
     if st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
         st.session_state["actor_use_kl_loss"] = True
         return False
@@ -58,7 +58,7 @@ def _actor_use_kl_loss_condition():
 
 @CONFIG_GENERATORS.register_config(
     default_value=True,
-    condition=_actor_use_kl_loss_condition,
+    visible=_actor_use_kl_loss_visible,
     other_configs={"_not_dpo_actor_use_kl_loss": True},
 )
 def set_actor_use_kl_loss(**kwargs):
@@ -72,7 +72,7 @@ def set_actor_use_kl_loss(**kwargs):
 
 
 @CONFIG_GENERATORS.register_config(
-    default_value=0.001, condition=lambda: st.session_state["actor_use_kl_loss"]
+    default_value=0.001, visible=lambda: st.session_state["actor_use_kl_loss"]
 )
 def set_actor_kl_loss_coef(**kwargs):
     st.number_input(
@@ -85,7 +85,7 @@ def set_actor_kl_loss_coef(**kwargs):
 
 
 @CONFIG_GENERATORS.register_config(
-    default_value=0.001, condition=lambda: st.session_state["actor_use_kl_loss"]
+    default_value=0.001, visible=lambda: st.session_state["actor_use_kl_loss"]
 )
 def set_actor_entropy_coef(**kwargs):
     st.number_input(
@@ -161,12 +161,12 @@ def use_fsdp():
     return st.session_state["training_strategy"] == "fsdp"
 
 
-@CONFIG_GENERATORS.register_config(default_value=False, condition=use_fsdp)
+@CONFIG_GENERATORS.register_config(default_value=False, visible=use_fsdp)
 def set_param_offload(**kwargs):
     st.checkbox("FSDP Param Offload", **kwargs)
 
 
-@CONFIG_GENERATORS.register_config(default_value=False, condition=use_fsdp)
+@CONFIG_GENERATORS.register_config(default_value=False, visible=use_fsdp)
 def set_optimizer_offload(**kwargs):
     st.checkbox("FSDP Optimizer Offload", **kwargs)
 
@@ -177,7 +177,7 @@ def set_resume_mode(**kwargs):
 
 
 @CONFIG_GENERATORS.register_config(
-    default_value="", condition=lambda: st.session_state["resume_mode"] == "resume_path"
+    default_value="", visible=lambda: st.session_state["resume_mode"] == "resume_path"
 )
 def set_resume_from_path(**kwargs):
     st.text_input("Resume Path", **kwargs)
@@ -323,14 +323,14 @@ def set_actor_lr_warmup_steps_ratio(**kwargs):
 
 
 @CONFIG_GENERATORS.register_config(
-    default_value=0.0, condition=lambda: st.session_state["algorithm_type"] == "opmd"
+    default_value=0.0, visible=lambda: st.session_state["algorithm_type"] == "opmd"
 )
 def set_actor_tau(**kwargs):
     st.number_input("Tau for OPMD", min_value=0.0, format="%.1e", **kwargs)
 
 
 @CONFIG_GENERATORS.register_config(
-    default_value="mean", condition=lambda: st.session_state["algorithm_type"] == "opmd"
+    default_value="mean", visible=lambda: st.session_state["algorithm_type"] == "opmd"
 )
 def set_actor_opmd_baseline(**kwargs):
     st.selectbox(
@@ -341,7 +341,7 @@ def set_actor_opmd_baseline(**kwargs):
 
 
 @CONFIG_GENERATORS.register_config(
-    default_value=False, condition=lambda: st.session_state["algorithm_type"] == "opmd"
+    default_value=False, visible=lambda: st.session_state["algorithm_type"] == "opmd"
 )
 def set_actor_use_uid(**kwargs):
     st.checkbox("Use UID for OPMD", **kwargs)
@@ -365,7 +365,7 @@ def set_actor_checkpoint(**kwargs):
     )
 
 
-@CONFIG_GENERATORS.register_config(default_value=1e-6, condition=use_critic)
+@CONFIG_GENERATORS.register_config(default_value=1e-6, visible=use_critic)
 def set_critic_lr(**kwargs):
     st.number_input(
         "Learning Rate :blue-badge[(Critic)]",
@@ -376,7 +376,7 @@ def set_critic_lr(**kwargs):
     )
 
 
-@CONFIG_GENERATORS.register_config(default_value="constant", condition=use_critic)
+@CONFIG_GENERATORS.register_config(default_value="constant", visible=use_critic)
 def set_critic_warmup_style(**kwargs):
     st.selectbox(
         "LR Warmup Style :blue-badge[(Critic)]",
@@ -385,7 +385,7 @@ def set_critic_warmup_style(**kwargs):
     )
 
 
-@CONFIG_GENERATORS.register_config(default_value=0.0, condition=use_critic)
+@CONFIG_GENERATORS.register_config(default_value=0.0, visible=use_critic)
 def set_critic_lr_warmup_steps_ratio(**kwargs):
     st.number_input(
         "LR Warmup Steps Ratio :blue-badge[(Critic)]",
@@ -395,7 +395,7 @@ def set_critic_lr_warmup_steps_ratio(**kwargs):
     )
 
 
-@CONFIG_GENERATORS.register_config(default_value=1.0, condition=use_critic)
+@CONFIG_GENERATORS.register_config(default_value=1.0, visible=use_critic)
 def set_critic_grad_clip(**kwargs):
     st.number_input(
         "Grad Clip :blue-badge[(Critic)]",
@@ -406,7 +406,7 @@ def set_critic_grad_clip(**kwargs):
     )
 
 
-@CONFIG_GENERATORS.register_config(default_value=0.5, condition=use_critic)
+@CONFIG_GENERATORS.register_config(default_value=0.5, visible=use_critic)
 def set_critic_cliprange_value(**kwargs):
     st.number_input(
         "Cliprange Value",
@@ -416,7 +416,7 @@ def set_critic_cliprange_value(**kwargs):
     )
 
 
-@CONFIG_GENERATORS.register_config(default_value=8, condition=use_critic)
+@CONFIG_GENERATORS.register_config(default_value=8, visible=use_critic)
 def set_critic_ppo_micro_batch_size_per_gpu(**kwargs):
     key = kwargs.get("key")
     max_value = st.session_state["_train_batch_size_per_gpu"]
@@ -429,7 +429,7 @@ def set_critic_ppo_micro_batch_size_per_gpu(**kwargs):
     )
 
 
-@CONFIG_GENERATORS.register_config(default_value=1, condition=use_critic)
+@CONFIG_GENERATORS.register_config(default_value=1, visible=use_critic)
 def set_critic_ulysses_sequence_parallel_size(**kwargs):
     st.number_input(
         "Ulysses Sequence Parallel Size",
@@ -440,7 +440,7 @@ def set_critic_ulysses_sequence_parallel_size(**kwargs):
 
 
 @CONFIG_GENERATORS.register_config(
-    default_value=["model", "optimizer", "extra"], condition=use_critic
+    default_value=["model", "optimizer", "extra"], visible=use_critic
 )
 def set_critic_checkpoint(**kwargs):
     st.multiselect(

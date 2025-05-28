@@ -46,18 +46,56 @@ class ConfigManager:
         st.session_state["_init_config_manager"] = True
         for key in CONFIG_GENERATORS.default_config:
             st.session_state[key] = st.session_state[key]
-        eavl_dataset_keys = ["name", "path", "subset_name", "split", "prompt_key", "response_key"]
+
+        eval_dataset_keys = [
+            "name",
+            "path",
+            "subset_name",
+            "split",
+            "prompt_key",
+            "response_key",
+            "temperature",
+            "logprobs",
+            "n",
+        ]
         last_idx, del_num = 0, 0
         for idx in range(st.session_state["_eval_tasksets_num"]):
             if st.session_state.get(f"eval_taskset_{idx}_del_flag", False):
                 del_num += 1
                 continue
-            for key in eavl_dataset_keys:
+            for key in eval_dataset_keys:
                 full_key = f"eval_taskset_{idx}_{key}"
                 last_full_key = f"eval_taskset_{last_idx}_{key}"
                 st.session_state[last_full_key] = st.session_state[full_key]
             last_idx += 1
         st.session_state["_eval_tasksets_num"] -= del_num
+
+        auxiliary_model_keys = [
+            "model_path",
+            "engine_type",
+            "engine_num",
+            "tensor_parallel_size",
+            "gpu_memory_utilization",
+            "dtype",
+            "seed",
+            "use_v1",
+            "enforce_eager",
+            "enable_prefix_caching",
+            "enable_chunked_prefill",
+            "enable_thinking",
+            "enable_openai_api",
+        ]
+        last_idx, del_num = 0, 0
+        for idx in range(st.session_state["_auxiliary_models_num"]):
+            if st.session_state.get(f"auxiliary_model_{idx}_del_flag", False):
+                del_num += 1
+                continue
+            for key in auxiliary_model_keys:
+                full_key = f"auxiliary_model_{idx}_{key}"
+                last_full_key = f"auxiliary_model_{last_idx}_{key}"
+                st.session_state[last_full_key] = st.session_state[full_key]
+            last_idx += 1
+        st.session_state["_auxiliary_models_num"] -= del_num
 
     def get_configs(self, *config_names: str, columns_config: List[int] = None):
         CONFIG_GENERATORS.get_configs(*config_names, columns_config=columns_config)
@@ -171,8 +209,8 @@ class ConfigManager:
 
             self.get_configs("enable_thinking", "enable_openai_api")
 
-        with st.expander("Auxiliary Models", expanded=True):  # TODO
-            pass
+        with st.expander("Auxiliary Models", expanded=True):
+            self.get_configs("auxiliary_models")
 
     def _expert_trainer_part(self):
         self.get_configs("algorithm_type", "gamma", "lam")
