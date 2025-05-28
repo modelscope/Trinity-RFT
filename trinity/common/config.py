@@ -174,12 +174,10 @@ class AlgorithmConfig:
     # for GRPO-like algorithms, repeat each task for `repeat_times` times
     repeat_times: int = 1
     # configs for advantage calculation
-    advantage_fn_type: Optional[str] = "ppo_adv_fn"
+    advantage_fn_type: str = "ppo_adv_fn"
     gamma: Optional[float] = None
     lam: Optional[float] = None
     # TODO: add more algorithm params here
-
-    # TODO (yanxi): add advantage_fn_type, advantage_fn_args; or not? (keep it simple)
 
 
 @dataclass

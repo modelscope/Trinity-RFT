@@ -13,6 +13,7 @@ from omegaconf import OmegaConf
 from verl.utils import hf_tokenizer
 from verl.utils.fs import copy_local_path_from_hdfs
 
+from trinity.algorithm import ADVANTAGE_FN
 from trinity.common.config import Config
 from trinity.common.constants import AlgorithmType
 from trinity.common.experience import Experiences
@@ -34,7 +35,6 @@ from trinity.trainer.verl.ray_trainer import (
     reduce_metrics,
 )
 from trinity.utils.monitor import Monitor
-from trinity.algorithm import ADVANTAGE_FN
 
 
 class _InternalDataLoader:
@@ -133,7 +133,9 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         algo_config = global_config.algorithm
         if algo_config.algorithm_type.is_rft():
             adv_fn_type = algo_config.advantage_fn_type
-            adv_fn_args = algo_config.get("advantage_fn_args", {})  # TODO: does this work properly??
+            adv_fn_args = algo_config.get(
+                "advantage_fn_args", {}
+            )  # TODO (yanxi): does this work properly??
             self.advantage_fn = ADVANTAGE_FN.get(adv_fn_type)(**adv_fn_args)
 
         self.logger = Monitor(

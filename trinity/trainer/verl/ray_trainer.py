@@ -16,18 +16,14 @@ Modified from ray_trainer.py
 """
 
 import os
-import uuid
 from contextlib import contextmanager
-from copy import deepcopy
 from dataclasses import dataclass, field
 from enum import Enum
-from pprint import pprint
 from typing import Dict, Type
 
 import numpy as np
 import ray
 import torch
-import tqdm
 from codetiming import Timer
 from omegaconf import OmegaConf, open_dict
 from torch.utils.data import RandomSampler, SequentialSampler
@@ -41,12 +37,6 @@ from verl.single_controller.ray import (
     RayWorkerGroup,
 )
 from verl.single_controller.ray.base import create_colocated_worker_cls
-from verl.trainer.ppo.metric_utils import (
-    compute_data_metrics,
-    compute_throughout_metrics,
-    compute_timing_metrics,
-    reduce_metrics,
-)
 from verl.utils.checkpoint.checkpoint_manager import find_latest_ckpt_path
 from verl.utils.dataset.rl_dataset import RLHFDataset, collate_fn
 from verl.utils.seqlen_balancing import (

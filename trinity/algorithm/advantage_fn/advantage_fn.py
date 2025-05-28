@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, Tuple
 
 from verl import DataProto
+
 from trinity.trainer.verl import core_algos
 from trinity.utils.registry import Registry
 
@@ -27,16 +28,11 @@ class AdvantageFn(ABC):
 class PPOAdvantageFn(AdvantageFn):
     """PPO's GAE advantage computation"""
 
-    def __init__(
-        self,
-        gamma,
-        lam,
-    ):
-        self.gamma = gamma
-        self.lam = lam
+    def __init__(self, **kwargs):
+        self.gamma = kwargs.get("gamma")
+        self.lam = kwargs.get("lam")
 
-
-    def __call__(self, exps: DataProto) -> Tuple[DataProto, Dict]:
+    def __call__(self, exps: DataProto, **kwargs) -> Tuple[DataProto, Dict]:
         """Adapted from compute_advantage_ppo in ray_trainer.py"""
 
         advantages, returns = core_algos.compute_gae_advantage_return(
@@ -60,13 +56,10 @@ class PPOAdvantageFn(AdvantageFn):
 class GRPOAdvantageFn(AdvantageFn):
     """GRPO advantage computation"""
 
-    def __init__(
-        self,
-    ):
+    def __init__(self, **kwargs):
         pass
 
-
-    def __call__(self, exps: DataProto) -> Tuple[DataProto, Dict]:
+    def __call__(self, exps: DataProto, **kwargs) -> Tuple[DataProto, Dict]:
         """Adapted from compute_advantage_ppo in ray_trainer.py"""
 
         advantages, returns = core_algos.compute_grpo_outcome_advantage(
@@ -88,14 +81,10 @@ class GRPOAdvantageFn(AdvantageFn):
 class REINFORCEPLUSPLUSAdvantageFn(AdvantageFn):
     """REINFORCE++ advantage computation"""
 
-    def __init__(
-        self,
-        gamma,
-    ):
-        self.gamma = gamma
+    def __init__(self, **kwargs):
+        self.gamma = kwargs.get("gamma")
 
-
-    def __call__(self, exps: DataProto) -> Tuple[DataProto, Dict]:
+    def __call__(self, exps: DataProto, **kwargs) -> Tuple[DataProto, Dict]:
         """Adapted from compute_advantage_ppo in ray_trainer.py"""
 
         advantages, returns = core_algos.compute_reinforce_plus_plus_outcome_advantage(
@@ -117,13 +106,10 @@ class REINFORCEPLUSPLUSAdvantageFn(AdvantageFn):
 class REMAXAdvantageFn(AdvantageFn):
     """REMAX advantage computation"""
 
-    def __init__(
-        self,
-    ):
+    def __init__(self, **kwargs):
         pass
 
-
-    def __call__(self, exps: DataProto) -> Tuple[DataProto, Dict]:
+    def __call__(self, exps: DataProto, **kwargs) -> Tuple[DataProto, Dict]:
         """Adapted from compute_advantage_ppo in ray_trainer.py"""
 
         advantages, returns = core_algos.compute_remax_outcome_advantage(
@@ -141,18 +127,14 @@ class REMAXAdvantageFn(AdvantageFn):
         return exps, metrics
 
 
-
 @ADVANTAGE_FN.register("rloo_adv_fn")
 class RLOOAdvantageFn(AdvantageFn):
     """RLOO advantage computation"""
 
-    def __init__(
-        self,
-    ):
+    def __init__(self, **kwargs):
         pass
 
-
-    def __call__(self, exps: DataProto) -> Tuple[DataProto, Dict]:
+    def __call__(self, exps: DataProto, **kwargs) -> Tuple[DataProto, Dict]:
         """Adapted from compute_advantage_ppo in ray_trainer.py"""
 
         advantages, returns = core_algos.compute_rloo_outcome_advantage(
@@ -174,18 +156,15 @@ class RLOOAdvantageFn(AdvantageFn):
 class OPMDAdvantageFn(AdvantageFn):
     """OPMD advantage computation"""
 
-    def __init__(
-        self,
-    ):
+    def __init__(self, **kwargs):
         pass
 
-
-    def __call__(self, exps: DataProto) -> Tuple[DataProto, Dict]:
+    def __call__(self, exps: DataProto, **kwargs) -> Tuple[DataProto, Dict]:
         """Adapted from compute_advantage_opmd in ray_trainer.py"""
 
         advantages, returns = core_algos.compute_opmd_outcome_advantage(
             token_level_rewards=exps.batch["token_level_rewards"],
-            eos_mask=exps.batch["response_mask"],  
+            eos_mask=exps.batch["response_mask"],
             # TODO: check consistency with exps.batch["attention_mask"][:, -response_length:] in original implementation
             index=exps.non_tensor_batch["uid"],
             opmd_baseline="mean",
@@ -199,4 +178,3 @@ class OPMDAdvantageFn(AdvantageFn):
         }
 
         return exps, metrics
-
