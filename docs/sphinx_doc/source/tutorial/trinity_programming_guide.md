@@ -286,21 +286,21 @@ trinity run --config <your_yaml_file>
 
 ---
 
-## Creating New Parameters for the Config Generator (Advanced)
+## Adding New Config Entries for the Config Generator (Advanced)
 
 ### Step 0: Understanding Streamlit
 
 Before adding new parameters to the Config Generator page, it is essential to familiarize yourself with the relevant API and mechanisms of [Streamlit](https://docs.streamlit.io/develop/api-reference). This project primarily utilizes various input components from Streamlit and employs `st.session_state` to store user-input parameters.
 
-### Step 1: Implementing New Parameter Settings
+### Step 1: Implement New Config Entries
 
 To illustrate the process of creating a new parameter setting for the Config Generator page, we will use `train_batch_size` as an example.
 
 1. Determine the appropriate scope for the parameter. Currently, parameters are categorized into four files:
-   - `buffer_config_manager.py`
-   - `explorer_config_manager.py`
-   - `model_config_manager.py`
-   - `trainer_config_manager.py`
+   - `trinity/manager/config_registry/buffer_config_manager.py`
+   - `trinity/manager/config_registry/explorer_config_manager.py`
+   - `trinity/manager/config_registry/model_config_manager.py`
+   - `trinity/manager/config_registry/trainer_config_manager.py`
 
    In this case, `train_batch_size` should be placed in the `buffer_config_manager.py` file.
 
