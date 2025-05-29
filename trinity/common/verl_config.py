@@ -182,8 +182,12 @@ class KL_Ctrl:
 
 @dataclass
 class Algorithm:
+    # ! DO NOT SET gamma or lam below; they are kept here merely for compatibility with verl,
+    # and their values will be overwritten by those in AlgorithmConfig.advantage_fn_args
+    # if they are really needed (e.g., for GAE advantage/returns computation)
+    gamma: float = 1.0
+    lam: float = 1.0
     adv_estimator: str = "gae"
-    # TODO (yanxi): might remove adv_estimator completely, use AlgorithmConfig.advantage_fn_type instead
     norm_adv_by_std_in_grpo: bool = True
     use_kl_in_reward: bool = False
     kl_penalty: str = "kl"
@@ -314,6 +318,11 @@ class veRLConfig:
             self.actor_rollout_ref.actor.clip_ratio = config.trainer.actor_clip_ratio
 
         # Algorithm related config
+        adv_fn_args = config.algorithm.advantage_fn_args
+        if adv_fn_args is not None and "gamma" in adv_fn_args:
+            self.algorithm.gamma = adv_fn_args["gamma"]
+        if adv_fn_args is not None and "lam" in adv_fn_args:
+            self.algorithm.lam = adv_fn_args["lam"]
         self.actor_rollout_ref.actor.algorithm_type = config.algorithm.algorithm_type
         if config.algorithm.algorithm_type == AlgorithmType.PPO:
             logger.info("Setting `adv_estimator` to 'gae' for PPO")
