@@ -5,6 +5,9 @@ checkpoint_root_dir: ''
 algorithm:
   algorithm_type: ppo
   repeat_times: 1
+  policy_loss_fn: ppo
+  policy_loss_fn_args:
+    clip_range: 0.2
 model:
   model_path: ''
   max_prompt_tokens: 2048

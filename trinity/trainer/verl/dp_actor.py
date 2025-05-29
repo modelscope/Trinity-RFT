@@ -30,6 +30,8 @@ from verl.utils.torch_functional import logprobs_from_logits, masked_mean
 from verl.utils.ulysses import gather_outpus_and_unpad, ulysses_pad_and_slice_inputs
 from verl.workers.actor import BasePPOActor
 
+from trinity.algorithm import POLICY_LOSS_FN
+from trinity.common.config import AlgorithmConfig
 from trinity.common.constants import AlgorithmType
 from trinity.trainer.verl import core_algos
 
@@ -54,9 +56,13 @@ class DataParallelPPOActor(BasePPOActor):
 
         self.compute_entropy_from_logits = torch.compile(verl_F.entropy_from_logits, dynamic=True)
         self.algorithm_type = AlgorithmType.PPO
+        self.policy_loss_fn = None
 
-    def set_mode(self, algorithm_type: AlgorithmType = AlgorithmType.PPO):
-        self.algorithm_type = algorithm_type
+    def set_algorithm(self, algorithm_config: AlgorithmConfig):
+        self.algorithm_type = algorithm_config.algorithm_type
+        self.policy_loss_fn = POLICY_LOSS_FN.get(algorithm_config.policy_loss_fn)(
+            **algorithm_config.policy_loss_fn_args
+        )
 
     def _forward_micro_batch(self, micro_batch, temperature) -> Tuple[torch.Tensor, torch.Tensor]:
         """
@@ -129,27 +135,6 @@ class DataParallelPPOActor(BasePPOActor):
                     use_cache=False,
                 )  # prevent model thinks we are generating
                 logits_rmpad = output.logits.squeeze(0)  # (total_nnz, vocab_size)
-                if self.algorithm_type.is_sft():  # SFT
-                    loss_fct = nn.CrossEntropyLoss(reduction="none")
-                    loss = loss_fct(logits_rmpad, input_ids_rmpad_rolled)
-                    if self.use_ulysses_sp:
-                        loss = gather_outpus_and_unpad(
-                            loss, gather_dim=0, unpad_dim=0, padding_size=pad_size
-                        )
-                    response_mask = attention_mask[:, -response_length:].bool()
-                    # pad back to (bsz, seqlen)
-                    full_loss = pad_input(
-                        hidden_states=loss.unsqueeze(-1),
-                        indices=indices,
-                        batch=batch_size,
-                        seqlen=seqlen,
-                    ).squeeze(-1)
-                    full_loss = torch.where(
-                        response_mask, full_loss[:, -response_length - 1 : -1], 0.0
-                    )
-                    full_loss = full_loss.sum(-1) / response_mask.sum(-1)
-                    full_loss = full_loss.mean()
-                    return full_loss
 
                 logits_rmpad.div_(temperature)
 
@@ -201,21 +186,6 @@ class DataParallelPPOActor(BasePPOActor):
                     use_cache=False,
                 )  # prevent model thinks we are generating
                 logits = output.logits
-                if self.algorithm_type.is_sft():
-                    loss_fct = nn.CrossEntropyLoss(reduction="none", ignore_index=-100)
-                    response_mask = attention_mask[:, -response_length:].bool()
-                    response_labels = torch.where(
-                        response_mask, input_ids[:, -response_length:], -100
-                    )
-                    response_logits = logits[:, -response_length - 1 : -1, :]
-                    loss = loss_fct(
-                        response_logits.reshape(-1, response_logits.shape[-1]),
-                        response_labels.reshape(-1),
-                    )
-                    loss = loss.view(response_labels.shape)
-                    loss = loss.sum(-1) / response_mask.sum(-1)
-                    loss = loss.mean()
-                    return loss
                 logits.div_(temperature)
                 logits = logits[
                     :, -response_length - 1 : -1, :
@@ -308,57 +278,25 @@ class DataParallelPPOActor(BasePPOActor):
         temperature = data.meta_info[
             "temperature"
         ]  # temperature must be in the data.meta_info to avoid slient error
-
-        algorithm_type: AlgorithmType = self.config.get("algorithm_type", AlgorithmType.PPO)
-        if self.algorithm_type.is_rft():
-            select_keys = [
-                "responses",
-                "input_ids",
-                "attention_mask",
-                "position_ids",
-                "old_log_probs",
-                "advantages",
-                "response_mask",
-            ]
-            if self.config.use_kl_loss:
-                select_keys.append("ref_log_prob")
-
-            if algorithm_type == AlgorithmType.PAIRWISE_OPMD:
-                select_keys.append("token_level_scores")
-        elif self.algorithm_type.is_dpo():
-            select_keys = [
-                "attention_mask",
-                "input_ids",
-                "position_ids",
-                "response_mask",
-                "responses",
-                "ref_log_prob",
-            ]
-        else:  # sft
-            select_keys = [
-                "attention_mask",
-                "input_ids",
-                "position_ids",
-                "response_mask",
-                "responses",
-            ]
-        use_uid = self.config.get("use_uid", False)
-
+        select_keys = [
+            "responses",
+            "input_ids",
+            "attention_mask",
+            "position_ids",
+            "old_log_probs",
+            "advantages",
+            "response_mask",
+        ]
+        if self.config.use_kl_loss:
+            select_keys.append("ref_log_prob")
         batch = data.select(batch_keys=select_keys).batch
         has_multi_modal_inputs = "multi_modal_inputs" in data.non_tensor_batch.keys()
 
         # Split to make minibatch iterator for updating the actor
         # See PPO paper for details. https://arxiv.org/abs/1707.06347
-        if has_multi_modal_inputs or ((algorithm_type == AlgorithmType.PAIRWISE_OPMD) and use_uid):
-            # TODO: for now, we treat algorithm_type == AlgorithmType.PAIRWISE_OPMD in the same way that
-            # has_multi_modal_inputs was treated originally (to handle non_tensor_select_keys);
-            # need to double check if this is the best approach.
+        if has_multi_modal_inputs:
             num_mini_batches = data.batch.batch_size[0] // self.config.ppo_mini_batch_size
-            non_tensor_select_keys = []
-            if has_multi_modal_inputs:
-                non_tensor_select_keys.append("multi_modal_inputs")
-            if (algorithm_type == AlgorithmType.PAIRWISE_OPMD) and use_uid:
-                non_tensor_select_keys.append("uid")
+            non_tensor_select_keys = ["multi_modal_inputs"]
             dataloader = data.select(select_keys, non_tensor_select_keys).chunk(num_mini_batches)
         else:
             dataloader = batch.split(self.config.ppo_mini_batch_size)
@@ -373,9 +311,7 @@ class DataParallelPPOActor(BasePPOActor):
             for batch_idx, data in enumerate(dataloader):
                 # split batch into micro_batches
                 mini_batch = data
-                if has_multi_modal_inputs or (
-                    (algorithm_type == AlgorithmType.PAIRWISE_OPMD) and use_uid
-                ):
+                if has_multi_modal_inputs:
                     self.gradient_accumulation = (
                         self.config.ppo_mini_batch_size // self.config.ppo_micro_batch_size_per_gpu
                     )
@@ -412,93 +348,48 @@ class DataParallelPPOActor(BasePPOActor):
                         data = data.to(
                             torch.cuda.current_device()
                         )  # actor device is cpu when using offload
+                    responses = data["responses"]
+                    response_length = responses.size(1)
+                    attention_mask = data["attention_mask"]
+                    # response_mask = attention_mask[:, -response_length:]
+                    response_mask = data["response_mask"]
+                    assert response_mask.shape == attention_mask[:, -response_length:].shape
+                    old_log_prob = data["old_log_probs"]
+                    advantages = data["advantages"]
+                    entropy_coeff = self.config.entropy_coeff
 
-                    # TODO: it is better to unify the returns of several modes (sft, dpo)
-                    if self.algorithm_type.is_sft():
-                        policy_loss = self._forward_micro_batch(
-                            micro_batch=data, temperature=temperature
+                    # all return: (bsz, response_length)
+                    entropy, log_prob = self._forward_micro_batch(
+                        micro_batch=data, temperature=temperature
+                    )
+
+                    pg_loss, metric = self.policy_loss_fn(  # type: ignore
+                        logprob=log_prob,
+                        old_logprob=old_log_prob,
+                        action_mask=response_mask,
+                        advantages=advantages,
+                        experiences=data,
+                    )
+
+                    # compute entropy loss from entropy
+                    entropy_loss = verl_F.masked_mean(entropy, response_mask)
+
+                    # compute policy loss
+                    policy_loss = pg_loss - entropy_loss * entropy_coeff
+
+                    if self.config.use_kl_loss:
+                        ref_log_prob = data["ref_log_prob"]
+                        # compute kl loss
+                        kld = core_algos.kl_penalty(
+                            logprob=log_prob,
+                            ref_logprob=ref_log_prob,
+                            kl_penalty=self.config.kl_loss_type,
                         )
+                        kl_loss = masked_mean(kld, response_mask)
 
-                    elif self.algorithm_type.is_dpo():
-                        response_mask = data["response_mask"]
-
-                        _, log_prob = self._forward_micro_batch(
-                            micro_batch=data, temperature=temperature
-                        )
-                        if self.config.use_kl_loss:
-                            ref_log_prob = data["ref_log_prob"]
-                        else:
-                            ref_log_prob = None
-
-                        (
-                            policy_loss,
-                            chosen_reward,
-                            rejected_reward,
-                        ) = core_algos.compute_policy_loss_dpo(
-                            log_prob=log_prob,
-                            ref_log_prob=ref_log_prob,
-                            eos_mask=response_mask,
-                            beta=self.config.kl_loss_coef,
-                            # label_smoothing=self.config.label_smoothing # TODO: add configs for dpo
-                        )
-
-                    else:  # rft
-                        responses = data["responses"]
-                        response_length = responses.size(1)
-                        attention_mask = data["attention_mask"]
-                        # response_mask = attention_mask[:, -response_length:]
-                        response_mask = data["response_mask"]
-                        assert response_mask.shape == attention_mask[:, -response_length:].shape
-                        old_log_prob = data["old_log_probs"]
-                        advantages = data["advantages"]
-
-                        clip_ratio = self.config.clip_ratio
-                        entropy_coeff = self.config.entropy_coeff
-
-                        tau = self.config.get("tau", 1.0)
-                        token_level_scores = None
-                        index = None
-                        if algorithm_type == AlgorithmType.PAIRWISE_OPMD:
-                            token_level_scores = data["token_level_scores"]
-                            if use_uid:
-                                index = data["uid"]
-
-                        # all return: (bsz, response_length)
-                        entropy, log_prob = self._forward_micro_batch(
-                            micro_batch=data, temperature=temperature
-                        )
-
-                        pg_loss, pg_clipfrac, ppo_kl = core_algos.compute_policy_loss(
-                            old_log_prob=old_log_prob,
-                            log_prob=log_prob,
-                            eos_mask=response_mask,
-                            algorithm_type=algorithm_type,
-                            advantages=advantages,
-                            cliprange=clip_ratio,
-                            # for opmd / pairwise_opmd
-                            tau=tau,
-                            token_level_scores=token_level_scores,
-                            index=index,
-                        )
-                        # compute entropy loss from entropy
-                        entropy_loss = verl_F.masked_mean(entropy, response_mask)
-
-                        # compute policy loss
-                        policy_loss = pg_loss - entropy_loss * entropy_coeff
-
-                        if self.config.use_kl_loss:
-                            ref_log_prob = data["ref_log_prob"]
-                            # compute kl loss
-                            kld = core_algos.kl_penalty(
-                                logprob=log_prob,
-                                ref_logprob=ref_log_prob,
-                                kl_penalty=self.config.kl_loss_type,
-                            )
-                            kl_loss = masked_mean(kld, response_mask)
-
-                            policy_loss = policy_loss + kl_loss * self.config.kl_loss_coef
-                            metrics["actor/kl_loss"] = kl_loss.detach().item()
-                            metrics["actor/kl_coef"] = self.config.kl_loss_coef
+                        policy_loss = policy_loss + kl_loss * self.config.kl_loss_coef
+                        metrics["actor/kl_loss"] = kl_loss.detach().item()
+                        metrics["actor/kl_coef"] = self.config.kl_loss_coef
 
                     if self.config.use_dynamic_bsz:
                         # relative to the dynamic bsz
@@ -507,28 +398,9 @@ class DataParallelPPOActor(BasePPOActor):
                         loss = policy_loss / self.gradient_accumulation
                     loss.backward()
 
-                    if self.algorithm_type.is_rft():
-                        data = {
-                            "actor/entropy_loss": entropy_loss.detach().item(),
-                            "actor/pg_loss": pg_loss.detach().item(),
-                            "actor/pg_clipfrac": pg_clipfrac.detach().item(),
-                            "actor/ppo_kl": ppo_kl.detach().item(),
-                        }
-                    elif self.algorithm_type.is_dpo():
-                        data = {
-                            "dpo/loss": policy_loss.detach().item(),
-                            "dpo/loss_mean": loss.detach().item(),
-                            "dpo/chosen_reward": chosen_reward.detach().mean().item(),
-                            "dpo/rejected_reward": rejected_reward.detach().mean().item(),
-                            "dpo/accuracy_mean": (chosen_reward > rejected_reward)
-                            .float()
-                            .mean()
-                            .item(),
-                        }
-                    else:
-                        data = {
-                            "sft/loss": loss.detach().item(),
-                        }
+                    data = {f"actor/{key}": value for key, value in metric.items()}
+                    # TODO: refactor entropy loss
+                    data["actor/entropy_loss"] = entropy_loss.detach().item()
                     append_to_dict(metrics, data)
 
                 grad_norm = self._optimizer_step()

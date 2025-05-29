@@ -190,6 +190,10 @@ class Algorithm:
     kl_penalty: str = "kl"
     kl_ctrl: KL_Ctrl = field(default_factory=KL_Ctrl)
 
+    # ! DO NOT SET THE FLOWING PARAMETERS
+    policy_loss_fn: str = "ppo"
+    policy_loss_fn_args: Optional[dict] = None
+
 
 @dataclass
 class Trainer:

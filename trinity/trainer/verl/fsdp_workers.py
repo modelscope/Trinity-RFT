@@ -50,7 +50,8 @@ from verl.utils.import_utils import import_external_libs
 from verl.utils.model import compute_position_id_with_mask
 from verl.workers.sharding_manager.fsdp_ulysses import FSDPUlyssesShardingManager
 
-from trinity.common.constants import AlgorithmType, SyncMethod
+from trinity.common.config import AlgorithmConfig
+from trinity.common.constants import SyncMethod
 from trinity.utils.distributed import init_process_group, is_ipv6_address
 
 logger = logging.getLogger(__file__)
@@ -623,8 +624,8 @@ class ActorRolloutRefWorker(Worker):
             torch.cuda.empty_cache()
 
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
-    def set_mode(self, algo_type: AlgorithmType = AlgorithmType.PPO):
-        self.actor.set_mode(algo_type)
+    def set_algorithm(self, algo_config: AlgorithmConfig):
+        self.actor.set_algorithm(algo_config)
 
     @register(dispatch_mode=Dispatch.DP_COMPUTE_PROTO)
     def update_actor(self, data: DataProto):

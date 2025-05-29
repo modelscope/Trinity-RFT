@@ -177,7 +177,10 @@ class AlgorithmConfig:
     advantage_fn_type: str = "ppo_adv_fn"
     gamma: Optional[float] = None
     lam: Optional[float] = None
-    # TODO: add more algorithm params here
+
+    policy_loss_fn: str = "ppo"
+    # If not set, use PolicyLossFn.default_args()
+    policy_loss_fn_args: Optional[dict] = None
 
 
 @dataclass
@@ -468,6 +471,15 @@ class Config:
                 self.buffer.pad_token_id = 0
         self.buffer.tokenizer_path = self.model.model_path
 
+    def _check_algorithm(self) -> None:
+        from trinity.algorithm import POLICY_LOSS_FN
+
+        policy_fn_cls = POLICY_LOSS_FN.get(self.algorithm.policy_loss_fn)
+        if policy_fn_cls is None:
+            raise ValueError(f"Invalid policy_loss_fn: {self.algorithm.policy_loss_fn}")
+        if self.algorithm.policy_loss_fn_args is None:
+            self.algorithm.policy_loss_fn_args = policy_fn_cls.default_args()
+
     def check_and_update(self) -> None:  # noqa: C901
         """Check and update the config."""
         self._check_deprecated()
@@ -490,6 +502,9 @@ class Config:
             self.explorer.rollout_model.model_path = self.model.model_path
         if not self.model.critic_model_path:
             self.model.critic_model_path = self.model.model_path
+
+        # check algorithm
+        self._check_algorithm()
 
         # check explorer
         if (

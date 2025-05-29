@@ -22,6 +22,8 @@ from trinity.utils.log import get_logger
 logger = get_logger(__name__)
 
 
+# TODO: support lazy load
+# e.g. @MODULES.register_module("name", lazy=True)
 class Registry(object):
     """This class is used to register some modules to registry by a repo
     name."""

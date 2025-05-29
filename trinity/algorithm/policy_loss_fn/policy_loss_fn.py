@@ -36,3 +36,11 @@ class PolicyLossFn(ABC):
             `torch.Tensor`: Policy loss
             `Dict`: The metrics for logging.
         """
+
+    @classmethod
+    @abstractmethod
+    def default_args(cls) -> Dict:
+        """
+        Returns:
+            `Dict`: The default init arguments for the policy loss function.
+        """

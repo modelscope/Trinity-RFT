@@ -13,7 +13,7 @@ from typing import Tuple
 import ray
 
 from trinity.buffer import get_buffer_reader
-from trinity.common.config import Config
+from trinity.common.config import AlgorithmConfig, Config
 from trinity.common.constants import AlgorithmType, SyncMethod
 from trinity.common.experience import Experiences
 from trinity.utils.log import get_logger
@@ -73,7 +73,7 @@ class Trainer:
         Returns:
             bool: Whether to continue training.
         """
-        self.engine.set_mode(algo_type)
+        self.engine.set_algorithm(self.config.algorithm)
         if algo_type.is_rft() and self.config.buffer.trainer_input.read_experience_strategy:
             strategy = self.config.buffer.trainer_input.read_experience_strategy
         else:
@@ -157,8 +157,8 @@ class TrainEngineWrapper(ABC):
         """Sync the model weight."""
 
     @abstractmethod
-    def set_mode(self, algo_type: AlgorithmType) -> None:
-        """Set training mode."""
+    def set_algorithm(self, algorithm_config: AlgorithmConfig) -> None:
+        """Set training algorithm config."""
 
     @abstractmethod
     def shutdown(self) -> None:
