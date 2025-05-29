@@ -178,7 +178,6 @@ class SimpleWorkflow(Workflow):
         if isinstance(reward_fn, type) and issubclass(reward_fn, RewardFn):
             self.reward_fn: RewardFn = reward_fn()
         elif isinstance(reward_fn, partial):
-            # 确保 partial 的基础函数是 RewardFn 的子类
             if isinstance(reward_fn.func, type) and issubclass(reward_fn.func, RewardFn):
                 self.reward_fn = reward_fn()
             else:
