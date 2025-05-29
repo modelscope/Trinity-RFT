@@ -4,12 +4,20 @@
 Modified from verl/trainer/ppo/ray_trainer.py
 """
 import os
+from pprint import pprint
 from typing import Tuple
 
+import numpy as np
 import pandas as pd
 import ray
 import torch
 from omegaconf import OmegaConf
+from verl.trainer.ppo.metric_utils import (
+    compute_data_metrics,
+    compute_throughout_metrics,
+    compute_timing_metrics,
+    reduce_metrics,
+)
 from verl.utils import hf_tokenizer
 from verl.utils.fs import copy_local_path_from_hdfs
 
@@ -26,13 +34,7 @@ from trinity.trainer.verl.ray_trainer import (
     Role,
     _timer,
     apply_kl_penalty,
-    compute_data_metrics,
-    compute_throughout_metrics,
-    compute_timing_metrics,
     find_latest_ckpt_path,
-    np,
-    pprint,
-    reduce_metrics,
 )
 from trinity.utils.monitor import Monitor
 
