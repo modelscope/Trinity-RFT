@@ -16,6 +16,14 @@ class AdvantageFn(ABC):
             kwargs (`Dict`): The step-level parameters for calculating advantages.
 
         Returns:
-            `Any`: The experiences with advantages.
+            `DataProto`: The experiences with advantages.
             `Dict`: The metrics for logging.
+        """
+
+    @classmethod
+    @abstractmethod
+    def default_args(cls) -> Dict:
+        """
+        Returns:
+            `Dict`: The default init arguments for the advantage function.
         """

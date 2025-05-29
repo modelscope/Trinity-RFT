@@ -8,6 +8,11 @@ algorithm:
   policy_loss_fn: ppo
   policy_loss_fn_args:
     clip_range: 0.2
+  advantage_fn_type: ppo_adv_fn
+  advantage_fn_args:
+    gamma: 1.0
+    lam: 1.0
+
 model:
   model_path: ''
   max_prompt_tokens: 2048
