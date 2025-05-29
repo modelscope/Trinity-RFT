@@ -139,8 +139,8 @@ def compute_gae_advantage_return(
     token_level_rewards: torch.Tensor,
     values: torch.Tensor,
     eos_mask: torch.Tensor,
-    gamma: torch.Tensor,
-    lam: torch.Tensor,
+    gamma: float,
+    lam: float,
 ):
     """Adapted from https://github.com/huggingface/trl/blob/main/trl/trainer/ppo_trainer.py
 
@@ -283,7 +283,7 @@ def compute_rloo_outcome_advantage(
 
 
 def compute_reinforce_plus_plus_outcome_advantage(
-    token_level_rewards: torch.Tensor, eos_mask: torch.Tensor, gamma: torch.Tensor
+    token_level_rewards: torch.Tensor, eos_mask: torch.Tensor, gamma: float
 ):
     """
     Compute advantage for REINFORCE++.
