@@ -173,14 +173,14 @@ class AlgorithmConfig:
     algorithm_type: AlgorithmType = AlgorithmType.PPO
     # for GRPO-like algorithms, repeat each task for `repeat_times` times
     repeat_times: int = 1
-    # configs for advantage calculation
-    advantage_fn_type: str = "ppo_adv_fn"
-    gamma: Optional[float] = None
-    lam: Optional[float] = None
 
     policy_loss_fn: str = "ppo"
     # If not set, use PolicyLossFn.default_args()
     policy_loss_fn_args: Optional[dict] = None
+
+    advantage_fn_type: str = "ppo_adv_fn"
+    # If not set, use AdvantageFn.default_args()
+    advantage_fn_args: Optional[dict] = None
 
 
 @dataclass
@@ -472,13 +472,19 @@ class Config:
         self.buffer.tokenizer_path = self.model.model_path
 
     def _check_algorithm(self) -> None:
-        from trinity.algorithm import POLICY_LOSS_FN
+        from trinity.algorithm import ADVANTAGE_FN, POLICY_LOSS_FN
 
         policy_fn_cls = POLICY_LOSS_FN.get(self.algorithm.policy_loss_fn)
         if policy_fn_cls is None:
             raise ValueError(f"Invalid policy_loss_fn: {self.algorithm.policy_loss_fn}")
         if self.algorithm.policy_loss_fn_args is None:
             self.algorithm.policy_loss_fn_args = policy_fn_cls.default_args()
+
+        advantage_fn_cls = ADVANTAGE_FN.get(self.algorithm.advantage_fn_type)
+        if advantage_fn_cls is None:
+            raise ValueError(f"Invalid advantage_fn_type: {self.algorithm.advantage_fn_type}")
+        if self.algorithm.advantage_fn_args is None:
+            self.algorithm.advantage_fn_args = advantage_fn_cls.default_args()
 
     def check_and_update(self) -> None:  # noqa: C901
         """Check and update the config."""

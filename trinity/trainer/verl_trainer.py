@@ -131,9 +131,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         algo_config = global_config.algorithm
         if algo_config.algorithm_type.is_rft():
             adv_fn_type = algo_config.advantage_fn_type
-            adv_fn_args = algo_config.get(
-                "advantage_fn_args", {}
-            )  # TODO (yanxi): does this work properly??
+            adv_fn_args = algo_config.advantage_fn_args
             self.advantage_fn = ADVANTAGE_FN.get(adv_fn_type)(**adv_fn_args)
 
         self.logger = Monitor(

@@ -185,12 +185,13 @@ class Algorithm:
     gamma: float = 1.0
     lam: float = 1.0
     adv_estimator: str = "gae"
+    # TODO (yanxi): remove the above advantage-related parameters?
     norm_adv_by_std_in_grpo: bool = True
     use_kl_in_reward: bool = False
     kl_penalty: str = "kl"
     kl_ctrl: KL_Ctrl = field(default_factory=KL_Ctrl)
 
-    # ! DO NOT SET THE FLOWING PARAMETERS
+    # ! DO NOT SET THE FOLLOWING PARAMETERS
     policy_loss_fn: str = "ppo"
     policy_loss_fn_args: Optional[dict] = None
 
@@ -321,11 +322,14 @@ class veRLConfig:
             self.algorithm.lam = config.algorithm.lam
         self.actor_rollout_ref.actor.algorithm_type = config.algorithm.algorithm_type
         if config.algorithm.algorithm_type == AlgorithmType.PPO:
-            logger.info("Using GAE `adv_estimator` for PPO")
+            logger.info("Setting `adv_estimator` to 'gae' for PPO")
             self.algorithm.adv_estimator = AdvantageEstimator.GAE.value
-        elif config.algorithm.algorithm_type == AlgorithmType.GRPO:
-            logger.info("Using GRPO `adv_estimator` for GRPO")
+        elif config.algorithm.algorithm_type in (AlgorithmType.GRPO, AlgorithmType.OPMD):
+            logger.info("Setting `adv_estimator` to 'grpo' for GRPO/OPMD")
             self.algorithm.adv_estimator = AdvantageEstimator.GRPO.value
+        # TODO (yanxi): it seems that adv_estimator only affects whether use_critic is set to
+        # True or False in RayPPOTrainer.__init__() (and hence in VerlPPOTrainerWrapper);
+        # need to double check whether this is indeed the case.
 
         if self.actor_rollout_ref.actor.algorithm_type.is_dpo():  # for DPO
             if not self.actor_rollout_ref.actor.use_kl_loss:
