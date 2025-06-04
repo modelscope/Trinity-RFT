@@ -73,7 +73,17 @@ class Trainer:
         Returns:
             bool: Whether to continue training.
         """
-        self.engine.set_algorithm(self.config.algorithm)
+        if algo_type.is_sft():
+            algorithm_config = AlgorithmConfig(
+                algorithm_type=AlgorithmType.SFT,
+                policy_loss_fn="sft",
+                policy_loss_fn_args={
+                    "use_token_level_loss": self.config.algorithm.use_token_level_loss
+                },
+            )
+            self.engine.set_algorithm(algorithm_config)
+        else:
+            self.engine.set_algorithm(self.config.algorithm)
         if algo_type.is_rft() and self.config.buffer.trainer_input.read_experience_strategy:
             strategy = self.config.buffer.trainer_input.read_experience_strategy
         else:

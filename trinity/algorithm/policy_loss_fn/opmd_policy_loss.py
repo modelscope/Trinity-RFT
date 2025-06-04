@@ -3,7 +3,7 @@
 Modified from https://github.com/volcengine/verl/blob/main/verl/trainer/ppo/core_algos.py
 """
 
-from typing import Any, Dict, Tuple
+from typing import Dict, List, Tuple
 
 import torch
 
@@ -19,17 +19,28 @@ class OPMDPolicyLossFn(PolicyLossFn):
     def __call__(
         self,
         logprob: torch.Tensor,
-        old_logprob: torch.Tensor,
-        action_mask: torch.Tensor,
+        old_log_probs: torch.Tensor,
+        response_mask: torch.Tensor,
         advantages: torch.Tensor,
-        experiences: Any,
         **kwargs,
     ) -> Tuple[torch.Tensor, Dict]:
         pg_losses = -advantages * logprob
-        opmd_loss = masked_mean(pg_losses, action_mask)
+        opmd_loss = masked_mean(pg_losses, response_mask)
         opmd_loss = opmd_loss / (1.0 + self.tau)  # for regularization (w.r.t. current pi_theta)
         return opmd_loss, {"opmd_loss": opmd_loss.detach().item()}
 
     @classmethod
     def default_args(cls) -> Dict:
         return {"tau": 1.0}
+
+    @property
+    def select_keys(self) -> List[str]:
+        return [
+            "responses",
+            "input_ids",
+            "attention_mask",
+            "position_ids",
+            "old_log_probs",
+            "advantages",
+            "response_mask",
+        ]

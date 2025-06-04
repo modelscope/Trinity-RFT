@@ -278,16 +278,8 @@ class DataParallelPPOActor(BasePPOActor):
         temperature = data.meta_info[
             "temperature"
         ]  # temperature must be in the data.meta_info to avoid slient error
-        select_keys = [
-            "responses",
-            "input_ids",
-            "attention_mask",
-            "position_ids",
-            "old_log_probs",
-            "advantages",
-            "response_mask",
-        ]
-        if self.config.use_kl_loss:
+        select_keys = self.policy_loss_fn.select_keys
+        if self.config.use_kl_loss and "ref_log_prob" not in select_keys:
             select_keys.append("ref_log_prob")
         batch = data.select(batch_keys=select_keys).batch
         has_multi_modal_inputs = "multi_modal_inputs" in data.non_tensor_batch.keys()
@@ -351,11 +343,8 @@ class DataParallelPPOActor(BasePPOActor):
                     responses = data["responses"]
                     response_length = responses.size(1)
                     attention_mask = data["attention_mask"]
-                    # response_mask = attention_mask[:, -response_length:]
                     response_mask = data["response_mask"]
                     assert response_mask.shape == attention_mask[:, -response_length:].shape
-                    old_log_prob = data["old_log_probs"]
-                    advantages = data["advantages"]
                     entropy_coeff = self.config.entropy_coeff
 
                     # all return: (bsz, response_length)
@@ -365,10 +354,7 @@ class DataParallelPPOActor(BasePPOActor):
 
                     pg_loss, metric = self.policy_loss_fn(  # type: ignore
                         logprob=log_prob,
-                        old_logprob=old_log_prob,
-                        action_mask=response_mask,
-                        advantages=advantages,
-                        experiences=data,
+                        **data.to_dict(),
                     )
 
                     # compute entropy loss from entropy

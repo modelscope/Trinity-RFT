@@ -1,6 +1,6 @@
 """DPO loss function."""
 
-from typing import Any, Dict, Tuple
+from typing import Dict, List, Tuple
 
 import torch
 import torch.nn.functional as F
@@ -22,21 +22,19 @@ class DPOLossFn(PolicyLossFn):
     def __call__(
         self,
         logprob: torch.Tensor,
-        old_logprob: torch.Tensor,
-        action_mask: torch.Tensor,
-        advantages: torch.Tensor,
-        experiences: Any,
+        ref_log_prob: torch.Tensor,
+        response_mask: torch.Tensor,
         **kwargs,
     ) -> Tuple[torch.Tensor, Dict]:
         chosen_logprob = logprob[::2]
         rejected_logprob = logprob[1::2]
-        chosen_mask = action_mask[::2]
-        rejected_mask = action_mask[1::2]
+        chosen_mask = response_mask[::2]
+        rejected_mask = response_mask[1::2]
         chosen_logprob_sum = masked_sum(chosen_logprob, chosen_mask)
         rejected_logprob_sum = masked_sum(rejected_logprob, rejected_mask)
 
-        chosen_ref_logprob = old_logprob[::2]
-        rejected_ref_logprob = old_logprob[1::2]
+        chosen_ref_logprob = ref_log_prob[::2]
+        rejected_ref_logprob = ref_log_prob[1::2]
         chosen_ref_logprob_sum = masked_sum(chosen_ref_logprob, chosen_mask)
         rejected_ref_logprob_sum = masked_sum(rejected_ref_logprob, rejected_mask)
 
@@ -65,3 +63,14 @@ class DPOLossFn(PolicyLossFn):
             "beta": 0.1,
             "label_smoothing": 0.0,
         }
+
+    @property
+    def select_keys(self) -> List[str]:
+        return [
+            "attention_mask",
+            "input_ids",
+            "position_ids",
+            "response_mask",
+            "responses",
+            "ref_log_prob",
+        ]

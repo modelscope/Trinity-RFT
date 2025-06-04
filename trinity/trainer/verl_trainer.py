@@ -4,6 +4,7 @@
 Modified from verl/trainer/ppo/ray_trainer.py
 """
 import os
+import sys
 from pprint import pprint
 from typing import Tuple
 
@@ -169,29 +170,14 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                 return
 
         # we start from step 1
-        self.global_steps += 1
 
     def _create_dataloader(self):
         self.train_dataloader = _InternalDataLoader(self.config)
         # TODO: compute total training steps
-        # if self.algorithm_type.is_dpo():
-        #     train_batch_size = self.config.buffer.read_batch_size
-        #     total_epochs = self.config.trainer.total_epochs
-        #     from math import ceil
-
-        #     self.total_training_steps = ceil(
-        #         self.train_dataloader.size() // train_batch_size * total_epochs
-        #     )
-        #     if not self.config.actor_rollout_ref.actor.optim.total_training_steps > 0:
-        #         self.config.actor_rollout_ref.actor.optim.total_training_steps = (
-        #             self.total_training_steps
-        #         )
-        #     if not self.config.critic.optim.total_training_steps > 0:
-        #         self.config.critic.optim.total_training_steps = self.total_training_steps
-        # else:
-        self.total_training_steps = float("inf")
+        self.total_training_steps = self.config.trainer.total_training_steps or sys.maxsize
 
     def train_dpo_step(self, experiences: Experiences) -> Tuple[bool, int]:
+        self.global_steps += 1
         metrics = {}
         timing_raw = {}
 
@@ -251,12 +237,23 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             with _timer("save_checkpoint", timing_raw):
                 self._save_checkpoint()
 
-        self.global_steps += 1
-        return True, self.global_steps - 1
+        if self.global_steps >= self.total_training_steps:
+            if (
+                self.config.trainer.save_freq > 0
+                and self.global_steps % self.config.trainer.save_freq != 0
+            ):
+                with _timer("save_checkpoint", timing_raw):
+                    self._save_checkpoint()
+            # stop training
+            return False, self.global_steps
+        else:
+            # continue
+            return True, self.global_steps
 
     def train_sft_step(self, experiences: Experiences) -> Tuple[bool, int]:
         if self.sft_warmup_step_num >= self.config.trainer.sft_warmup_steps:
-            return False, self.global_steps - 1
+            return False, self.global_steps
+        self.global_steps += 1
         metrics = {}
         timing_raw = {}
 
@@ -308,18 +305,19 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         # TODO: log as sft metrics
         self.logger.log(data=metrics, step=self.global_steps)
         self.sft_warmup_step_num += 1
-        self.global_steps += 1
+        train_status = True
         if self.sft_warmup_step_num == self.config.trainer.sft_warmup_steps:
             self.logger.log(
                 data={"sft_warmup_steps": self.sft_warmup_step_num},
-                step=self.global_steps - 1,
+                step=self.global_steps,
             )
             with _timer("save_checkpoint", timing_raw):
                 self._save_checkpoint()
-            return False, self.global_steps - 1
-        return True, self.global_steps - 1
+            train_status = False
+        return train_status, self.global_steps
 
     def train_rft_step(self, experiences: Experiences) -> Tuple[bool, int]:
+        self.global_steps += 1
         metrics = {}
         timing_raw = {}
 
@@ -426,20 +424,18 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         # TODO: make a canonical logger that supports various backend
         self.logger.log(data=metrics, step=self.global_steps)
 
-        self.global_steps += 1
-
         if self.global_steps >= self.total_training_steps:
             if (
                 self.config.trainer.save_freq > 0
-                and (self.global_steps - 1) % self.config.trainer.save_freq != 0
+                and self.global_steps % self.config.trainer.save_freq != 0
             ):
                 with _timer("save_checkpoint", timing_raw):
                     self._save_checkpoint()
             # stop training
-            return False, self.global_steps - 1
+            return False, self.global_steps
         else:
             # continue
-            return True, self.global_steps - 1
+            return True, self.global_steps
 
     def _log_single_experience(
         self, experiences: Experiences, idx: int, skip_special_tokens: bool

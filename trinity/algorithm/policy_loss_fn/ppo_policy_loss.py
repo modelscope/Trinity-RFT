@@ -3,7 +3,7 @@
 Modified from https://github.com/volcengine/verl/blob/main/verl/trainer/ppo/core_algos.py
 """
 
-from typing import Any, Dict, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import torch
 
@@ -33,23 +33,22 @@ class PPOPolicyLossFn(PolicyLossFn):
     def __call__(
         self,
         logprob: torch.Tensor,
-        old_logprob: torch.Tensor,
-        action_mask: torch.Tensor,
+        old_log_probs: torch.Tensor,
+        response_mask: torch.Tensor,
         advantages: torch.Tensor,
-        experiences: Any,
         **kwargs,
     ) -> Tuple[torch.Tensor, Dict]:
-        negative_approx_kl = logprob - old_logprob
+        negative_approx_kl = logprob - old_log_probs
         ratio = torch.exp(negative_approx_kl)
-        ppo_kl = masked_mean(-negative_approx_kl, action_mask)
+        ppo_kl = masked_mean(-negative_approx_kl, response_mask)
 
         pg_losses = -advantages * ratio
         pg_losses2 = -advantages * torch.clamp(
             ratio, 1.0 - self.clip_range_low, 1.0 + self.clip_range_high  # type: ignore
         )
 
-        pg_loss = masked_mean(torch.max(pg_losses, pg_losses2), action_mask)
-        pg_clipfrac = masked_mean(torch.gt(pg_losses2, pg_losses).float(), action_mask)
+        pg_loss = masked_mean(torch.max(pg_losses, pg_losses2), response_mask)
+        pg_clipfrac = masked_mean(torch.gt(pg_losses2, pg_losses).float(), response_mask)
         metrics = {
             "pg_clipfrac": pg_clipfrac.detach().item(),
             "ppo_kl": ppo_kl.detach().item(),
@@ -62,3 +61,15 @@ class PPOPolicyLossFn(PolicyLossFn):
         return {
             "clip_range": 0.2,
         }
+
+    @property
+    def select_keys(self) -> List[str]:
+        return [
+            "responses",
+            "input_ids",
+            "attention_mask",
+            "position_ids",
+            "old_log_probs",
+            "advantages",
+            "response_mask",
+        ]

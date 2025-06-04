@@ -14,8 +14,8 @@ from tests.tools import (
     get_template_config,
     get_unittest_dataset_config,
 )
-from trinity.cli.launcher import bench, both
-from trinity.common.constants import MonitorType, SyncMethod
+from trinity.cli.launcher import bench, both, train
+from trinity.common.constants import AlgorithmType, MonitorType, SyncMethod
 
 
 class BaseTrainerCase(RayUnittestBase):
@@ -105,6 +105,109 @@ class TestTrainerCountdown(BaseTrainerCase):
         self.assertEqual(2, len(countdown_copy_metric_steps))
         self.assertTrue(4 in countdown_metric_steps)
         self.assertTrue(8 in countdown_metric_steps)
+
+    def tearDown(self):
+        # remove dir only when the test passed
+        shutil.rmtree(self.config.checkpoint_job_dir)
+
+
+class TestTrainerGSM8K(BaseTrainerCase):
+    def test_trainer(self):
+        """Test GSM8K."""
+        # test both mode
+        self.config.algorithm.algorithm_type = AlgorithmType.GRPO
+        self.config.algorithm.repeat_times = 8
+        self.config.algorithm.advantage_fn_type = "grpo_adv_fn"
+        self.config.algorithm.advantage_fn_args = {}
+        # self.config.buffer.batch_size = 96  # TODO: used for real testing
+        self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("gsm8k")
+        self.config.check_and_update()
+        self.config.trainer.trainer_config.trainer.total_training_steps = 4
+        self.config.trainer.trainer_config.trainer.max_actor_ckpt_to_keep = 2
+        self.config.trainer.trainer_config.actor_rollout_ref.actor.optim.lr = 1e-5
+        both(self.config)
+        parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
+        rollout_metrics = parser.metric_list("rollout")
+        self.assertTrue(len(rollout_metrics) > 0)
+        self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 4)
+        actor_metrics = parser.metric_list("actor")
+        self.assertTrue(len(actor_metrics) > 0)
+        self.assertEqual(parser.metric_max_step(actor_metrics[0]), 4)
+        response_metrics = parser.metric_list("response_length")
+        self.assertTrue(len(response_metrics) > 0)
+        self.assertEqual(parser.metric_max_step(response_metrics[0]), 4)
+        # TODO: used for real testing
+        # rewards = parser.metric_values("critic/rewards/mean")
+        # self.assertTrue(0.4 < rewards[0] < 0.55)
+        # self.assertTrue(0.4 < rewards[1] < 0.55)
+        # self.assertTrue(0.6 < rewards[2] < 0.7)
+        # self.assertTrue(0.6 < rewards[3] < 0.7)
+        ray.shutdown(_exiting_interpreter=True)
+        # check checkpoint
+
+    def tearDown(self):
+        # remove dir only when the test passed
+        shutil.rmtree(self.config.checkpoint_job_dir)
+
+
+class TestTrainerGSM8KWithSFT(BaseTrainerCase):
+    def test_trainer(self):
+        """Test GSM8K With SFT."""
+        # test both mode
+        self.config.algorithm.algorithm_type = AlgorithmType.GRPO
+        self.config.algorithm.repeat_times = 8
+        self.config.algorithm.advantage_fn_type = "grpo_adv_fn"
+        self.config.algorithm.advantage_fn_args = {}
+        self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("gsm8k")
+        self.config.buffer.trainer_input.sft_warmup_steps = 2
+        self.config.buffer.trainer_input.sft_warmup_dataset = get_unittest_dataset_config(
+            "sft_for_gsm8k"
+        )
+        self.config.check_and_update()
+        self.config.trainer.trainer_config.trainer.total_training_steps = 4
+        self.config.trainer.trainer_config.trainer.max_actor_ckpt_to_keep = 2
+        self.config.trainer.trainer_config.actor_rollout_ref.actor.optim.lr = 1e-5
+        both(self.config)
+        parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
+        rollout_metrics = parser.metric_list("rollout")
+        self.assertTrue(len(rollout_metrics) > 0)
+        self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 2)
+        actor_metrics = parser.metric_list("actor")
+        self.assertTrue(len(actor_metrics) > 0)
+        self.assertEqual(parser.metric_max_step(actor_metrics[0]), 2)  # SFT
+        self.assertEqual(parser.metric_max_step(actor_metrics[-1]), 4)  # RFT
+        response_metrics = parser.metric_list("response_length")
+        self.assertTrue(len(response_metrics) > 0)
+        self.assertEqual(parser.metric_max_step(response_metrics[0]), 4)
+        ray.shutdown(_exiting_interpreter=True)
+        # check checkpoint
+
+    def tearDown(self):
+        # remove dir only when the test passed
+        shutil.rmtree(self.config.checkpoint_job_dir)
+
+
+class TestTrainerDPO(BaseTrainerCase):
+    def test_trainer(self):
+        """Test DPO."""
+        # test both mode
+        self.config.mode = "train"
+        self.config.algorithm.algorithm_type = AlgorithmType.DPO
+        self.config.algorithm.policy_loss_fn = "dpo"
+        self.config.algorithm.policy_loss_fn_args = {}
+        # self.config.buffer.batch_size = 32
+        self.config.buffer.trainer_input.experience_buffer = get_unittest_dataset_config("dpo")
+        self.config.check_and_update()
+        self.config.trainer.trainer_config.trainer.total_training_steps = 4
+        self.config.trainer.trainer_config.trainer.max_actor_ckpt_to_keep = 2
+        self.config.trainer.trainer_config.actor_rollout_ref.actor.optim.lr = 5e-7
+        train(self.config)
+        parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
+        actor_metrics = parser.metric_list("actor")
+        self.assertTrue(len(actor_metrics) > 0)
+        self.assertEqual(parser.metric_max_step(actor_metrics[0]), 4)
+        ray.shutdown(_exiting_interpreter=True)
+        # check checkpoint
 
     def tearDown(self):
         # remove dir only when the test passed

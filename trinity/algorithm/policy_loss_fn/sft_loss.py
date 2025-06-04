@@ -1,6 +1,6 @@
 """SFT loss function."""
 
-from typing import Any, Dict, Tuple
+from typing import Dict, List, Tuple
 
 import torch
 
@@ -16,16 +16,13 @@ class SFTLossFn(PolicyLossFn):
     def __call__(
         self,
         logprob: torch.Tensor,
-        old_logprob: torch.Tensor,
-        action_mask: torch.Tensor,
-        advantages: torch.Tensor,
-        experiences: Any,
+        response_mask: torch.Tensor,
         **kwargs,
     ) -> Tuple[torch.Tensor, Dict]:
         if self.use_token_level_loss:
-            sft_loss = masked_mean(-logprob, action_mask)
+            sft_loss = masked_mean(-logprob, response_mask)
         else:
-            sft_loss = masked_mean(-logprob, action_mask, axis=1).mean()
+            sft_loss = masked_mean(-logprob, response_mask, axis=1).mean()
         return sft_loss, {"sft_loss": sft_loss.detach().item()}
 
     @classmethod
@@ -33,3 +30,13 @@ class SFTLossFn(PolicyLossFn):
         return {
             "use_token_level_loss": True,
         }
+
+    @property
+    def select_keys(self) -> List[str]:
+        return [
+            "attention_mask",
+            "input_ids",
+            "position_ids",
+            "response_mask",
+            "responses",
+        ]
