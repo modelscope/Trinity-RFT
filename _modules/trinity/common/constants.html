@@ -110,7 +110,10 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="p">[</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getattr__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getattr__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
 
@@ -148,11 +151,11 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Pop Strategy.&quot;&quot;&quot;</span>
 
     <span class="n">DEFAULT</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">FIFO</span> <span class="o">=</span> <span class="s2">&quot;FIFO&quot;</span>
-    <span class="n">RANDOM</span> <span class="o">=</span> <span class="s2">&quot;RANDOM&quot;</span>
-    <span class="n">LRU</span> <span class="o">=</span> <span class="s2">&quot;LRU&quot;</span>
-    <span class="n">LFU</span> <span class="o">=</span> <span class="s2">&quot;LFU&quot;</span>
-    <span class="n">PRIORITY</span> <span class="o">=</span> <span class="s2">&quot;PRIORITY&quot;</span></div>
+    <span class="n">FIFO</span> <span class="o">=</span> <span class="s2">&quot;fifo&quot;</span>
+    <span class="n">RANDOM</span> <span class="o">=</span> <span class="s2">&quot;random&quot;</span>
+    <span class="n">LRU</span> <span class="o">=</span> <span class="s2">&quot;lru&quot;</span>
+    <span class="n">LFU</span> <span class="o">=</span> <span class="s2">&quot;lfu&quot;</span>
+    <span class="n">PRIORITY</span> <span class="o">=</span> <span class="s2">&quot;priority&quot;</span></div>
 
 
 
