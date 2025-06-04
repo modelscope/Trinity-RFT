@@ -278,9 +278,26 @@ class DataParallelPPOActor(BasePPOActor):
         temperature = data.meta_info[
             "temperature"
         ]  # temperature must be in the data.meta_info to avoid slient error
-        select_keys = self.policy_loss_fn.select_keys
-        if self.config.use_kl_loss and "ref_log_prob" not in select_keys:
+        select_keys = [
+            "input_ids",
+            "position_ids",
+            "attention_mask",
+            "responses",
+            "response_mask",
+        ]
+        select_keys_verl2trinity = {
+            "old_log_probs": "old_logprob",
+            "ref_log_prob": "ref_logprob",
+            "response_mask": "action_mask",
+            "advantages": "advantages",
+        }
+        select_keys_trinity2verl = {value: key for key, value in select_keys_verl2trinity.items()}
+        for trinity_key in self.policy_loss_fn.select_keys:
+            verl_key = select_keys_trinity2verl[trinity_key]
+            select_keys.append(verl_key)
+        if self.config.use_kl_loss:
             select_keys.append("ref_log_prob")
+        select_keys = list(set(select_keys))
         batch = data.select(batch_keys=select_keys).batch
         has_multi_modal_inputs = "multi_modal_inputs" in data.non_tensor_batch.keys()
 
@@ -352,9 +369,14 @@ class DataParallelPPOActor(BasePPOActor):
                         micro_batch=data, temperature=temperature
                     )
 
+                    kwargs = {
+                        select_keys_verl2trinity[verl_key]: value
+                        for verl_key, value in data.items()
+                        if verl_key in select_keys_verl2trinity
+                    }
                     pg_loss, metric = self.policy_loss_fn(  # type: ignore
                         logprob=log_prob,
-                        **data.to_dict(),
+                        **kwargs,
                     )
 
                     # compute entropy loss from entropy

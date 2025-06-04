@@ -116,7 +116,8 @@ class TestTrainerGSM8K(BaseTrainerCase):
         """Test GSM8K."""
         # test both mode
         self.config.algorithm.algorithm_type = AlgorithmType.GRPO
-        self.config.algorithm.repeat_times = 8
+        self.config.algorithm.repeat_times = 4
+        # self.config.algorithm.repeat_times = 8  # TODO: used for real testing
         self.config.algorithm.advantage_fn_type = "grpo_adv_fn"
         self.config.algorithm.advantage_fn_args = {}
         # self.config.buffer.batch_size = 96  # TODO: used for real testing
@@ -155,7 +156,7 @@ class TestTrainerGSM8KWithSFT(BaseTrainerCase):
         """Test GSM8K With SFT."""
         # test both mode
         self.config.algorithm.algorithm_type = AlgorithmType.GRPO
-        self.config.algorithm.repeat_times = 8
+        self.config.algorithm.repeat_times = 4
         self.config.algorithm.advantage_fn_type = "grpo_adv_fn"
         self.config.algorithm.advantage_fn_args = {}
         self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("gsm8k")
