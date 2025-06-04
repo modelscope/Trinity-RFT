@@ -16,7 +16,7 @@ class OPMDPolicyLossFn(PolicyLossFn):
     def __init__(self, tau: float = 1.0) -> None:
         self.tau = tau
 
-    def __call__(
+    def __call__(  # type: ignore
         self,
         logprob: torch.Tensor,
         old_log_probs: torch.Tensor,

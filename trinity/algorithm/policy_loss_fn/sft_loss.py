@@ -13,7 +13,7 @@ class SFTLossFn(PolicyLossFn):
     def __init__(self, use_token_level_loss: bool = True) -> None:
         self.use_token_level_loss = use_token_level_loss
 
-    def __call__(
+    def __call__(  # type: ignore
         self,
         logprob: torch.Tensor,
         response_mask: torch.Tensor,

@@ -19,7 +19,7 @@ class DPOLossFn(PolicyLossFn):
         self.beta = beta
         self.label_smoothing = label_smoothing
 
-    def __call__(
+    def __call__(  # type: ignore
         self,
         logprob: torch.Tensor,
         ref_log_prob: torch.Tensor,

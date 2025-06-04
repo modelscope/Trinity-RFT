@@ -30,7 +30,7 @@ class PPOPolicyLossFn(PolicyLossFn):
         assert self.clip_range_low is not None, "clip_range_low must be specified."
         assert self.clip_range_high is not None, "clip_range_high must be specified."
 
-    def __call__(
+    def __call__(  # type: ignore
         self,
         logprob: torch.Tensor,
         old_log_probs: torch.Tensor,

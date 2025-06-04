@@ -40,6 +40,7 @@ class PolicyLossFn(ABC):
         """
 
     @property
+    @abstractmethod
     def select_keys(self) -> List[str]:
         """
         Returns:
