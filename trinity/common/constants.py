@@ -22,7 +22,7 @@ class CaseInsensitiveEnumMeta(EnumMeta):
         if not name.startswith("_"):
             return cls[name.upper()]
         return super().__getattr__(name)
-    
+
     def __call__(cls, value, *args, **kwargs):
         return super().__call__(value.lower(), *args, **kwargs)
 
@@ -55,7 +55,6 @@ class ReadStrategy(CaseInsensitiveEnum):
     LRU = "lru"
     LFU = "lfu"
     PRIORITY = "priority"
-
 
 
 class StorageType(CaseInsensitiveEnum):
