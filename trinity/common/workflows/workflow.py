@@ -44,7 +44,7 @@ class Task:
             auxiliary_models (List[openai.OpenAI]): The auxiliary models for the workflow.
 
         Note:
-            `model_math` attribute will be added to the auxiliary_models for use within the workflow.
+            `model_path` attribute is added to the `auxiliary_models` for use within the workflow.
 
         Returns:
             Workflow: The generated workflow object.
