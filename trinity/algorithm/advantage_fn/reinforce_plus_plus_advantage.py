@@ -22,11 +22,34 @@ class REINFORCEPLUSPLUSAdvantageFn(AdvantageFn):
         exps: DataProto,
         **kwargs,
     ) -> Tuple[DataProto, Dict]:
-        advantages, returns = compute_reinforce_plus_plus_outcome_advantage(
-            token_level_rewards=exps.batch["token_level_rewards"],
-            eos_mask=exps.batch["response_mask"],
-            gamma=self.gamma,
-        )
+        """
+        Compute advantage for REINFORCE++.
+        This implementation is based on the paper: https://arxiv.org/abs/2501.03262
+
+            token_level_rewards: `(torch.Tensor)`
+                shape: (bs, response_length)
+            eos_mask: `(torch.Tensor)`
+                shape: (bs, response_length)
+            advantages: `(torch.Tensor)`
+                shape: (bs, response_length)
+            returns: `(torch.Tensor)`
+                shape: (bs, response_length)
+        """
+        token_level_rewards = exps.batch["token_level_rewards"]
+        eos_mask = exps.batch["response_mask"]
+        gamma = self.gamma
+
+        with torch.no_grad():
+            returns = torch.zeros_like(token_level_rewards)
+            running_return = 0
+
+            for t in reversed(range(token_level_rewards.shape[1])):
+                running_return = token_level_rewards[:, t] + gamma * running_return
+                returns[:, t] = running_return
+
+            advantages = masked_whiten(returns, eos_mask)
+            advantages = advantages * eos_mask
+
         exps.batch["advantages"] = advantages
         exps.batch["returns"] = returns
 
@@ -41,36 +64,3 @@ class REINFORCEPLUSPLUSAdvantageFn(AdvantageFn):
         return {
             "gamma": 1.0,
         }
-
-
-def compute_reinforce_plus_plus_outcome_advantage(
-    token_level_rewards: torch.Tensor, eos_mask: torch.Tensor, gamma: float
-):
-    """
-    Compute advantage for REINFORCE++.
-    This implementation is based on the paper: https://arxiv.org/abs/2501.03262
-    Args:
-        token_level_rewards: `(torch.Tensor)`
-            shape: (bs, response_length)
-        eos_mask: `(torch.Tensor)`
-            shape: (bs, response_length)
-
-    Returns:
-        advantages: `(torch.Tensor)`
-            shape: (bs, response_length)
-        Returns: `(torch.Tensor)`
-            shape: (bs, response_length)
-    """
-
-    with torch.no_grad():
-        returns = torch.zeros_like(token_level_rewards)
-        running_return = 0
-
-        for t in reversed(range(token_level_rewards.shape[1])):
-            running_return = token_level_rewards[:, t] + gamma * running_return
-            returns[:, t] = running_return
-
-        advantages = masked_whiten(returns, eos_mask)
-        advantages = advantages * eos_mask
-
-    return advantages, returns

@@ -21,11 +21,37 @@ class REMAXAdvantageFn(AdvantageFn):
         exps: DataProto,
         **kwargs,
     ) -> Tuple[DataProto, Dict]:
-        advantages, returns = compute_remax_outcome_advantage(
-            token_level_rewards=exps.batch["token_level_rewards"],
-            reward_baselines=exps.batch["reward_baselines"],
-            eos_mask=exps.batch["response_mask"],
-        )
+        """
+        Compute advantage for ReMax, operating only on Outcome reward
+        (with only one scalar reward for each response).
+        This implementation is based on the paper: https://arxiv.org/abs/2310.10505
+
+            token_level_rewards: `(torch.Tensor)`
+                shape: (bs, response_length)
+            reward_baselines: `(torch.Tensor)`
+                shape: (bs,)
+            eos_mask: `(torch.Tensor)`
+                shape: (bs, response_length)
+            advantages: `(torch.Tensor)`
+                shape: (bs, response_length)
+            returns: `(torch.Tensor)`
+                shape: (bs, response_length)
+        """
+        token_level_rewards = exps.batch["token_level_rewards"]
+        reward_baselines = exps.batch["reward_baselines"]
+        eos_mask = exps.batch["response_mask"]
+
+        response_length = token_level_rewards.shape[-1]
+        token_level_rewards.sum(dim=-1)
+
+        with torch.no_grad():
+            returns = (
+                (token_level_rewards * eos_mask).flip(dims=[-1]).cumsum(dim=-1).flip(dims=[-1])
+            )
+            advantages = (
+                returns - reward_baselines.unsqueeze(-1).tile([1, response_length]) * eos_mask
+            )
+
         exps.batch["advantages"] = advantages
         exps.batch["returns"] = returns
 
@@ -38,35 +64,3 @@ class REMAXAdvantageFn(AdvantageFn):
     @classmethod
     def default_args(cls) -> Dict:
         return {}
-
-
-def compute_remax_outcome_advantage(
-    token_level_rewards: torch.Tensor, reward_baselines: torch.Tensor, eos_mask: torch.Tensor
-):
-    """
-    Compute advantage for ReMax, operating only on Outcome reward
-    This implementation is based on the paper: https://arxiv.org/abs/2310.10505
-
-    (with only one scalar reward for each response).
-    Args:
-        token_level_rewards: `(torch.Tensor)`
-            shape: (bs, response_length)
-        reward_baselines: `(torch.Tensor)`
-            shape: (bs,)
-        eos_mask: `(torch.Tensor)`
-            shape: (bs, response_length)
-
-    Returns:
-        advantages: `(torch.Tensor)`
-            shape: (bs, response_length)
-        Returns: `(torch.Tensor)`
-            shape: (bs, response_length)
-    """
-    response_length = token_level_rewards.shape[-1]
-    token_level_rewards.sum(dim=-1)
-
-    with torch.no_grad():
-        returns = (token_level_rewards * eos_mask).flip(dims=[-1]).cumsum(dim=-1).flip(dims=[-1])
-        advantages = returns - reward_baselines.unsqueeze(-1).tile([1, response_length]) * eos_mask
-
-    return advantages, returns
