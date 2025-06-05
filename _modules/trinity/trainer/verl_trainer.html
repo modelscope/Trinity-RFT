@@ -121,7 +121,7 @@
     <span class="n">pprint</span><span class="p">,</span>
     <span class="n">reduce_metrics</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.monitor</span><span class="w"> </span><span class="kn">import</span> <span class="n">Monitor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.monitor</span><span class="w"> </span><span class="kn">import</span> <span class="n">MONITOR</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">_InternalDataLoader</span><span class="p">:</span>
@@ -219,7 +219,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">algorithm_type</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">PPO</span>
         <span class="p">)</span>  <span class="c1"># TODO: initialize algorithm_type according to config</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">Monitor</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">MONITOR</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">global_config</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">monitor_type</span><span class="p">)(</span>
             <span class="n">project</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">project_name</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">experiment_name</span><span class="p">,</span>
             <span class="n">role</span><span class="o">=</span><span class="s2">&quot;trainer&quot;</span><span class="p">,</span>
