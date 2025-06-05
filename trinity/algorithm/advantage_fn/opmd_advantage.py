@@ -13,8 +13,13 @@ from trinity.algorithm.advantage_fn import ADVANTAGE_FN, AdvantageFn
 class OPMDAdvantageFn(AdvantageFn):
     """OPMD advantage computation"""
 
-    def __init__(self) -> None:
-        pass
+    def __init__(
+        self,
+        opmd_baseline: str = "mean",
+        tau: float = 1.0,
+    ) -> None:
+        self.opmd_baseline = opmd_baseline
+        self.tau = tau
 
     def __call__(
         self,
@@ -37,8 +42,8 @@ class OPMDAdvantageFn(AdvantageFn):
         eos_mask = exps.batch["response_mask"]
         # TODO (yanxi): confirm consistency with exps.batch["attention_mask"][:, -response_length:] in original implementation
         index = exps.non_tensor_batch["uid"]
-        opmd_baseline = "mean"
-        tau = 1.0
+        opmd_baseline = self.opmd_baseline
+        tau = self.tau
 
         response_length = token_level_rewards.shape[-1]
         scores = token_level_rewards.sum(dim=-1)
@@ -83,4 +88,7 @@ class OPMDAdvantageFn(AdvantageFn):
 
     @classmethod
     def default_args(cls) -> Dict:
-        return {}
+        return {
+            "opmd_baseline": "mean",
+            "tau": 1.0,
+        }

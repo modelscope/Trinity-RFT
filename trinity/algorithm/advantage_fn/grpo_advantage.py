@@ -16,8 +16,11 @@ from trinity.algorithm.advantage_fn import ADVANTAGE_FN, AdvantageFn
 class GRPOAdvantageFn(AdvantageFn):
     """GRPO advantage computation"""
 
-    def __init__(self) -> None:
-        pass
+    def __init__(
+        self,
+        epsilon: float = 1e-6,
+    ) -> None:
+        self.epsilon = epsilon
 
     def __call__(
         self,
@@ -38,7 +41,7 @@ class GRPOAdvantageFn(AdvantageFn):
         token_level_rewards = exps.batch["token_level_rewards"]
         eos_mask = exps.batch["response_mask"]
         index = exps.non_tensor_batch["uid"]
-        epsilon = 1e-6
+        epsilon = self.epsilon
 
         response_length = token_level_rewards.shape[-1]
         scores = token_level_rewards.sum(dim=-1)
@@ -75,4 +78,6 @@ class GRPOAdvantageFn(AdvantageFn):
 
     @classmethod
     def default_args(cls) -> Dict:
-        return {}
+        return {
+            "epsilon": 1e-6,
+        }
