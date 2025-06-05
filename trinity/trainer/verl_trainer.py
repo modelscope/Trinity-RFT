@@ -430,6 +430,127 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             # continue
             return True, self.global_steps
 
+    def train_step(self, experiences: Experiences, algo_type: AlgorithmType) -> Tuple[bool, int]:
+        # TODO
+        if algo_type.is_sft() and self.sft_warmup_step_num >= self.config.trainer.sft_warmup_steps:
+            return False, self.global_steps
+        self.global_steps += 1
+        metrics = {}
+        timing_raw = {}
+
+        with _timer("step", timing_raw):
+            # Convert rewards to token_level_rewards
+            attention_mask = experiences.attention_masks
+            cumsum = torch.cumsum(attention_mask, dim=-1)
+            position_ids = torch.clip(cumsum - 1, 0, None).long()
+            batch_dict = {
+                "uid": np.array(experiences.run_ids),
+                "position_ids": position_ids,
+                "input_ids": experiences.tokens.long(),
+                "responses": experiences.tokens[:, experiences.prompt_length :].long(),
+                "attention_mask": attention_mask.long(),
+                "response_mask": (
+                    experiences.action_masks[:, experiences.prompt_length :].long()
+                    if hasattr(experiences, "action_masks")
+                    and experiences.action_masks is not None
+                    else attention_mask[:, experiences.prompt_length :].long()
+                ),
+            }
+            if algo_type.use_token_level_rewards:  # TODO
+                token_level_rewards = torch.zeros(attention_mask.shape, dtype=experiences.rewards.dtype)
+                eos_mask_idx = cumsum.argmax(dim=-1)
+                token_level_rewards[
+                    torch.arange(experiences.batch_size), eos_mask_idx
+                ] = experiences.rewards
+                token_level_rewards = token_level_rewards[:, experiences.prompt_length :]
+                batch_dict.update({
+                    "token_level_scores": token_level_rewards,
+                    "old_log_probs": experiences.logprobs[:, experiences.prompt_length :],  # type: ignore
+                })
+
+            batch = DataProto.from_single_dict(batch_dict)
+            batch.meta_info["temperature"] = self.config.actor_rollout_ref.rollout.temperature
+
+            if algo_type.is_sft() or (algo_type.is_rft() and self.config.trainer.balance_batch):
+                self._balance_batch(batch, metrics=metrics)  # TODO this may affect multi-turn
+
+            # compute global_valid tokens
+            batch.meta_info["global_token_num"] = torch.sum(
+                batch.batch["attention_mask"], dim=-1
+            ).tolist()
+
+            if algo_type.use_reference_policy:  # TODO
+                # compute reference log_prob
+                with _timer("ref", timing_raw):
+                    ref_log_prob = self.ref_policy_wg.compute_ref_log_prob(batch)
+                    batch = batch.union(ref_log_prob)
+
+            if algo_type.use_critic:  # TODO
+                with _timer("values", timing_raw):
+                    values = self.critic_wg.compute_values(batch)
+                    batch = batch.union(values)
+
+            if algo_type.use_advantage:  # TODO
+                with _timer("adv", timing_raw):
+                    # compute kl penalty
+                    batch, kl_metrics = self.kl_fn.apply_kl_penalty_to_reward(batch)
+                    metrics.update(prefix_metrics(kl_metrics, prefix="critic"))
+                    # compute advantages, executed on the driver process
+                    batch, _ = self.advantage_fn(batch)
+
+                # update critic
+            if algo_type.use_critic:  # TODO
+                with _timer("update_critic", timing_raw):
+                    critic_output = self.critic_wg.update_critic(batch)
+                critic_output_metrics = reduce_metrics(critic_output.meta_info["metrics"])
+                metrics.update(critic_output_metrics)
+
+            # implement critic warmup
+            # TODO: use_critic_warmup
+            if algo_type.use_critic_warmup or self.config.trainer.critic_warmup <= self.global_steps:
+                # update actor
+                with _timer("update_actor", timing_raw):
+                    actor_output = self.actor_rollout_wg.update_actor(batch)
+                    # TODO add send weight explorer
+                actor_output_metrics = reduce_metrics(actor_output.meta_info["metrics"])
+                metrics.update(actor_output_metrics)
+
+            if (
+                self.config.trainer.save_freq > 0
+                and self.global_steps % self.config.trainer.save_freq == 0
+            ):
+                with _timer("save_checkpoint", timing_raw):
+                    self._save_checkpoint()
+
+        # collect metrics
+        if algo_type.is_rft():  # TODO
+            metrics.update(compute_data_metrics(batch=batch, use_critic=self.use_critic))
+        metrics.update(compute_timing_metrics(batch=batch, timing_raw=timing_raw))
+        n_gpus = self.resource_pool_manager.get_n_gpus()
+        metrics.update(
+            compute_throughout_metrics(batch=batch, timing_raw=timing_raw, n_gpus=n_gpus)
+        )
+
+        if algo_type.is_rft() and self.config.enable_preview:  # TODO
+            self._log_experiences(experiences)
+
+        # TODO: make a canonical logger that supports various backend
+        self.logger.log(data=metrics, step=self.global_steps)
+
+        if algo_type.is_sft():  # TODO
+            self.sft_warmup_step_num += 1
+            train_status = (self.sft_warmup_step_num < self.config.trainer.sft_warmup_steps)
+        else:
+            train_status = (self.global_steps < self.total_training_steps)
+        if not train_status:  # stop training
+            if (
+                self.config.trainer.save_freq > 0
+                and self.global_steps % self.config.trainer.save_freq != 0
+            ):
+                with _timer("save_checkpoint", timing_raw):
+                    self._save_checkpoint()
+        return train_status, self.global_steps
+
     def _log_single_experience(
         self, experiences: Experiences, idx: int, skip_special_tokens: bool
     ) -> None:

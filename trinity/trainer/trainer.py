@@ -101,29 +101,13 @@ class Trainer:
             self.logger.warning("No more data to train. Stop training.")
             return False, 0  # TODO: get the actual step number
 
-        if algo_type.is_sft():
-            return self.engine.train_sft_step(
-                Experiences.gather_experiences(
-                    exps,
-                    pad_token_id=self.config.buffer.pad_token_id,  # type: ignore
-                )
-            )
-        elif algo_type.is_rft():
-            return self.engine.train_rft_step(
-                Experiences.gather_experiences(
-                    exps,
-                    pad_token_id=self.config.buffer.pad_token_id,  # type: ignore
-                )
-            )
-        elif algo_type.is_dpo():
-            return self.engine.train_dpo_step(
-                Experiences.gather_dpo_experiences(
-                    exps,
-                    pad_token_id=self.config.buffer.pad_token_id,  # type: ignore
-                )
-            )
-        else:
-            raise ValueError(f"Unsupported algorithm type: {algo_type}")
+        self.engine.train_step(
+            Experiences.gather_experiences(
+                exps,
+                pad_token_id=self.config.buffer.pad_token_id,  # type: ignore
+            ),
+            algo_type,
+        )
 
     def sync_weight(self) -> None:
         """Sync the model weight."""
@@ -149,6 +133,10 @@ class TrainEngineWrapper(ABC):
     @abstractmethod
     def prepare(self) -> None:
         """Do some preparation before training started."""
+
+    @abstractmethod
+    def train_step(self, experiences, algo_type) -> Tuple[bool, int]:
+        """Training."""
 
     @abstractmethod
     def train_rft_step(self, experiences) -> Tuple[bool, int]:
