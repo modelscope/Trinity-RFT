@@ -246,6 +246,11 @@
 <div class="viewcode-block" id="ModelWrapper.get_openai_client">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.model.ModelWrapper.get_openai_client">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_openai_client</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">openai</span><span class="o">.</span><span class="n">OpenAI</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the openai client.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            openai.OpenAI: The openai client. And `model_path` is added to the client which refers to the model path.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">openai_client</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">openai_client</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">has_api_server</span><span class="o">.</span><span class="n">remote</span><span class="p">()):</span>
@@ -253,9 +258,9 @@
                 <span class="s2">&quot;OpenAI API server is not running on current model.&quot;</span>
                 <span class="s2">&quot;Please set `enable_openai_api` to `True`.&quot;</span>
             <span class="p">)</span>
-        <span class="n">api_address</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">api_address</span><span class="p">,</span> <span class="n">model_path</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">api_address</span> <span class="o">=</span> <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">api_server_ready</span><span class="o">.</span><span class="n">remote</span><span class="p">())</span>
+            <span class="n">api_address</span><span class="p">,</span> <span class="n">model_path</span> <span class="o">=</span> <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">api_server_ready</span><span class="o">.</span><span class="n">remote</span><span class="p">())</span>
             <span class="k">if</span> <span class="n">api_address</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">break</span>
             <span class="k">else</span><span class="p">:</span>
@@ -270,6 +275,7 @@
             <span class="n">base_url</span><span class="o">=</span><span class="n">api_address</span><span class="p">,</span>
             <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;EMPTY&quot;</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">openai_client</span><span class="p">,</span> <span class="s2">&quot;model_path&quot;</span><span class="p">,</span> <span class="n">model_path</span><span class="p">)</span>  <span class="c1"># TODO: may be removed</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">openai_client</span></div>
 </div>
 

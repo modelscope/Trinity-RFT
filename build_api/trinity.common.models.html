@@ -217,7 +217,16 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.common.models.model.ModelWrapper.get_openai_client">
 <span class="sig-name descname"><span class="pre">get_openai_client</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">OpenAI</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/model.html#ModelWrapper.get_openai_client"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.model.ModelWrapper.get_openai_client" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Get the openai client.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The openai client. And <cite>model_path</cite> is added to the client which refers to the model path.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>openai.OpenAI</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
@@ -459,14 +468,15 @@ This method will run forever until the server is shut down.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.api_server_ready">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">api_server_ready</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/vllm_async_model.html#vLLMAysncRolloutModel.api_server_ready"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.api_server_ready" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">api_server_ready</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/models/vllm_async_model.html#vLLMAysncRolloutModel.api_server_ready"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.api_server_ready" title="Link to this definition"></a></dt>
 <dd><p>Check if the OpenAI API server is ready.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The URL of the OpenAI API server.</p>
+<dd class="field-odd"><p>The URL of the OpenAI API server.
+model_path (str): The path of the model.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>str</p>
+<dd class="field-even"><p>api_url (str)</p>
 </dd>
 </dl>
 </dd></dl>

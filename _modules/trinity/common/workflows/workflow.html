@@ -132,6 +132,10 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            model (ModelWrapper): The rollout model for the workflow.</span>
+<span class="sd">            auxiliary_models (List[openai.OpenAI]): The auxiliary models for the workflow.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            `model_path` attribute is added to the `auxiliary_models` for use within the workflow.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Workflow: The generated workflow object.</span>
