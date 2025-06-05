@@ -1,7 +1,4 @@
-"""PPO policy loss function.
-
-Modified from https://github.com/volcengine/verl/blob/main/verl/trainer/ppo/core_algos.py
-"""
+"""OPMD policy loss function."""
 
 from typing import Dict, List, Tuple
 

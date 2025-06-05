@@ -1,3 +1,11 @@
+"""KL penalty and loss.
+
+Ref:
+https://github.com/volcengine/verl/blob/main/verl/trainer/ppo/core_algos.py
+https://github.com/volcengine/verl/blob/main/verl/trainer/ppo/ray_trainer.py
+https://github.com/OpenRLHF/OpenRLHF/blob/main/openrlhf/models/utils.py
+"""
+
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional, Tuple
 
@@ -11,7 +19,7 @@ KL_FN = Registry("kl_fn")
 
 class KLFn(ABC):
     """
-    KL controller.
+    KL penalty and loss.
     """
 
     def __init__(
