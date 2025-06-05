@@ -132,5 +132,5 @@ class ModelWrapper:
             base_url=api_address,
             api_key="EMPTY",
         )
-        setattr(self.openai_client, "model_path", model_path)
+        setattr(self.openai_client, "model_path", model_path)  # TODO: may be removed
         return self.openai_client
