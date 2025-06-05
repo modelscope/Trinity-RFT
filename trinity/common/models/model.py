@@ -103,6 +103,11 @@ class ModelWrapper:
         return ray.get(self.model.get_ckp_version.remote())
 
     def get_openai_client(self) -> openai.OpenAI:
+        """Get the openai client.
+
+        Returns:
+            openai.OpenAI: The openai client. And `model_path` is added to the client which refers to the model path.
+        """
         if self.openai_client is not None:
             return self.openai_client
         if not ray.get(self.model.has_api_server.remote()):
@@ -110,9 +115,9 @@ class ModelWrapper:
                 "OpenAI API server is not running on current model."
                 "Please set `enable_openai_api` to `True`."
             )
-        api_address = None
+        api_address, model_path = None, None
         while True:
-            api_address = ray.get(self.model.api_server_ready.remote())
+            api_address, model_path = ray.get(self.model.api_server_ready.remote())
             if api_address is not None:
                 break
             else:
@@ -127,4 +132,5 @@ class ModelWrapper:
             base_url=api_address,
             api_key="EMPTY",
         )
+        setattr(self.openai_client, "model_path", model_path)
         return self.openai_client

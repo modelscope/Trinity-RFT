@@ -5,7 +5,7 @@ Modified from Ray python/ray/llm/_internal/batch/stages/vllm_engine_stage.py
 
 import os
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import aiohttp
 import torch
@@ -319,26 +319,30 @@ class vLLMAysncRolloutModel(InferenceModel):
     async def has_api_server(self) -> bool:
         return self.config.enable_openai_api
 
-    async def api_server_ready(self) -> Optional[str]:
+    async def api_server_ready(self) -> Tuple[Union[str, None], Union[str, None]]:
         """Check if the OpenAI API server is ready.
 
         Returns:
-            str: The URL of the OpenAI API server.
+            api_url (str): The URL of the OpenAI API server.
+            model_path (str): The path of the model.
         """
         if not await self.has_api_server():
-            return None
+            return None, None
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.get(
                     f"http://{self.api_server_host}:{self.api_server_port}/health"
                 ) as response:
                     if response.status == 200:
-                        return f"http://{self.api_server_host}:{self.api_server_port}/v1"
+                        return (
+                            f"http://{self.api_server_host}:{self.api_server_port}/v1",
+                            self.config.model_path,
+                        )
                     else:
-                        return None
+                        return None, None
         except Exception as e:
             self.logger.error(e)
-            return None
+            return None, None
 
     async def reset_prefix_cache(self) -> None:
         await self.async_llm.reset_prefix_cache()

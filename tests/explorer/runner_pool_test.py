@@ -2,7 +2,7 @@ import copy
 import os
 import time
 import unittest
-from typing import List
+from typing import List, Tuple
 
 import ray
 import torch
@@ -87,8 +87,8 @@ class DummyAuxiliaryModel(InferenceModel):
     def has_api_server(self) -> bool:
         return True
 
-    def api_server_ready(self) -> str:
-        return "http://localhosts:12345"
+    def api_server_ready(self) -> Tuple[str, str]:
+        return "http://localhosts:12345", "placeholder"
 
 
 class RunnerPoolTest(unittest.TestCase):
