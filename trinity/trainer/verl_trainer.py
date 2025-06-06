@@ -19,16 +19,7 @@ from verl.trainer.ppo.metric_utils import (
     compute_timing_metrics,
     reduce_metrics,
 )
-from verl.utils import hf_tokenizer
-from verl.utils.fs import copy_local_path_from_hdfs
-
-from trinity.algorithm import ADVANTAGE_FN, KL_FN
-from trinity.algorithm.utils import prefix_metrics
-from trinity.common.config import AlgorithmConfig, Config
-from trinity.common.constants import AlgorithmType
-from trinity.common.experience import Experiences
-from trinity.trainer.trainer import TrainEngineWrapper
-from trinity.trainer.verl.ray_trainer import (
+from verl.trainer.ppo.ray_trainer import (
     DataProto,
     RayPPOTrainer,
     RayWorkerGroup,
@@ -37,6 +28,14 @@ from trinity.trainer.verl.ray_trainer import (
     _timer,
     find_latest_ckpt_path,
 )
+from verl.utils import hf_tokenizer
+from verl.utils.fs import copy_local_path_from_hdfs
+
+from trinity.algorithm import ADVANTAGE_FN, KL_FN
+from trinity.algorithm.utils import prefix_metrics
+from trinity.common.config import AlgorithmConfig, Config
+from trinity.common.experience import Experiences
+from trinity.trainer.trainer import TrainEngineWrapper
 from trinity.utils.monitor import Monitor
 
 
@@ -119,16 +118,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         resource_pool_manager = ResourcePoolManager(
             resource_pool_spec=resource_pool_spec, mapping=mapping
         )
-
-        super().__init__(
-            config,
-            tokenizer,
-            role_worker_mapping,
-            resource_pool_manager,
-            ray_worker_group_cls,
-        )
-        self.init_workers()
-        self.algorithm_type = AlgorithmType.PPO
+        self.algorithm_type = global_config.algorithm.algorithm_type
 
         # specify advantage function for various rft algorithms
         algo_config = global_config.algorithm
@@ -138,6 +128,15 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             )
         self.kl_fn = KL_FN.get(algo_config.kl_penalty_fn)(**algo_config.kl_penalty_fn_args)
 
+        super().__init__(
+            config,
+            tokenizer,
+            role_worker_mapping,
+            resource_pool_manager,
+            ray_worker_group_cls,
+        )
+        self.init_workers()
+
         self.logger = Monitor(
             project=config.trainer.project_name,
             name=config.trainer.experiment_name,
@@ -145,6 +144,10 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             config=global_config,
         )
         self.reset_experiences_example_table()
+
+    def _validate_config(self):  # TODO
+        self.use_critic = self.algorithm_type.use_critic
+        super()._validate_config()
 
     def reset_experiences_example_table(self):
         self.experiences_example_table = pd.DataFrame(
@@ -430,9 +433,12 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             # continue
             return True, self.global_steps
 
-    def train_step(self, experiences: Experiences, algo_type: AlgorithmType) -> Tuple[bool, int]:
+    def train_step(self, experiences: Experiences) -> Tuple[bool, int]:
         # TODO
-        if algo_type.is_sft() and self.sft_warmup_step_num >= self.config.trainer.sft_warmup_steps:
+        if (
+            self.algorithm_type.is_sft()
+            and self.sft_warmup_step_num >= self.config.trainer.sft_warmup_steps
+        ):
             return False, self.global_steps
         self.global_steps += 1
         metrics = {}
@@ -451,27 +457,30 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                 "attention_mask": attention_mask.long(),
                 "response_mask": (
                     experiences.action_masks[:, experiences.prompt_length :].long()
-                    if hasattr(experiences, "action_masks")
-                    and experiences.action_masks is not None
+                    if hasattr(experiences, "action_masks") and experiences.action_masks is not None
                     else attention_mask[:, experiences.prompt_length :].long()
                 ),
             }
-            if algo_type.use_token_level_rewards:  # TODO
-                token_level_rewards = torch.zeros(attention_mask.shape, dtype=experiences.rewards.dtype)
+            if self.algorithm_type.use_advantage:
+                token_level_rewards = torch.zeros(
+                    attention_mask.shape, dtype=experiences.rewards.dtype
+                )
                 eos_mask_idx = cumsum.argmax(dim=-1)
                 token_level_rewards[
                     torch.arange(experiences.batch_size), eos_mask_idx
                 ] = experiences.rewards
                 token_level_rewards = token_level_rewards[:, experiences.prompt_length :]
-                batch_dict.update({
-                    "token_level_scores": token_level_rewards,
-                    "old_log_probs": experiences.logprobs[:, experiences.prompt_length :],  # type: ignore
-                })
+                batch_dict.update(
+                    {
+                        "token_level_scores": token_level_rewards,
+                        "old_log_probs": experiences.logprobs[:, experiences.prompt_length :],  # type: ignore
+                    }
+                )
 
             batch = DataProto.from_single_dict(batch_dict)
             batch.meta_info["temperature"] = self.config.actor_rollout_ref.rollout.temperature
 
-            if algo_type.is_sft() or (algo_type.is_rft() and self.config.trainer.balance_batch):
+            if self.algorithm_type.can_balance_batch and self.config.trainer.balance_batch:
                 self._balance_batch(batch, metrics=metrics)  # TODO this may affect multi-turn
 
             # compute global_valid tokens
@@ -479,18 +488,18 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                 batch.batch["attention_mask"], dim=-1
             ).tolist()
 
-            if algo_type.use_reference_policy:  # TODO
+            if self.algorithm_type.use_reference:  # ref_logprob may not be used
                 # compute reference log_prob
                 with _timer("ref", timing_raw):
                     ref_log_prob = self.ref_policy_wg.compute_ref_log_prob(batch)
                     batch = batch.union(ref_log_prob)
 
-            if algo_type.use_critic:  # TODO
+            if self.algorithm_type.use_critic:
                 with _timer("values", timing_raw):
                     values = self.critic_wg.compute_values(batch)
                     batch = batch.union(values)
 
-            if algo_type.use_advantage:  # TODO
+            if self.algorithm_type.use_advantage:
                 with _timer("adv", timing_raw):
                     # compute kl penalty
                     batch, kl_metrics = self.kl_fn.apply_kl_penalty_to_reward(batch)
@@ -499,15 +508,17 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                     batch, _ = self.advantage_fn(batch)
 
                 # update critic
-            if algo_type.use_critic:  # TODO
+            if self.algorithm_type.use_critic:
                 with _timer("update_critic", timing_raw):
                     critic_output = self.critic_wg.update_critic(batch)
                 critic_output_metrics = reduce_metrics(critic_output.meta_info["metrics"])
                 metrics.update(critic_output_metrics)
 
             # implement critic warmup
-            # TODO: use_critic_warmup
-            if algo_type.use_critic_warmup or self.config.trainer.critic_warmup <= self.global_steps:
+            if (
+                self.algorithm_type.use_critic
+                or self.config.trainer.critic_warmup <= self.global_steps
+            ):
                 # update actor
                 with _timer("update_actor", timing_raw):
                     actor_output = self.actor_rollout_wg.update_actor(batch)
@@ -523,7 +534,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                     self._save_checkpoint()
 
         # collect metrics
-        if algo_type.is_rft():  # TODO
+        if self.algorithm_type.use_advantage:  # TODO
             metrics.update(compute_data_metrics(batch=batch, use_critic=self.use_critic))
         metrics.update(compute_timing_metrics(batch=batch, timing_raw=timing_raw))
         n_gpus = self.resource_pool_manager.get_n_gpus()
@@ -531,17 +542,17 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             compute_throughout_metrics(batch=batch, timing_raw=timing_raw, n_gpus=n_gpus)
         )
 
-        if algo_type.is_rft() and self.config.enable_preview:  # TODO
+        if self.algorithm_type.use_advantage and self.config.enable_preview:  # TODO
             self._log_experiences(experiences)
 
         # TODO: make a canonical logger that supports various backend
         self.logger.log(data=metrics, step=self.global_steps)
 
-        if algo_type.is_sft():  # TODO
+        if self.algorithm_type.is_sft():  # TODO
             self.sft_warmup_step_num += 1
-            train_status = (self.sft_warmup_step_num < self.config.trainer.sft_warmup_steps)
+            train_status = self.sft_warmup_step_num < self.config.trainer.sft_warmup_steps
         else:
-            train_status = (self.global_steps < self.total_training_steps)
+            train_status = self.global_steps < self.total_training_steps
         if not train_status:  # stop training
             if (
                 self.config.trainer.save_freq > 0

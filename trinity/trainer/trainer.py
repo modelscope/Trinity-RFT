@@ -101,13 +101,17 @@ class Trainer:
             self.logger.warning("No more data to train. Stop training.")
             return False, 0  # TODO: get the actual step number
 
-        self.engine.train_step(
-            Experiences.gather_experiences(
+        if algo_type.is_dpo():  # TODO
+            experiences = Experiences.gather_dpo_experiences(
                 exps,
                 pad_token_id=self.config.buffer.pad_token_id,  # type: ignore
-            ),
-            algo_type,
-        )
+            )
+        else:
+            experiences = Experiences.gather_experiences(
+                exps,
+                pad_token_id=self.config.buffer.pad_token_id,  # type: ignore
+            )
+        return self.engine.train_step(experiences)
 
     def sync_weight(self) -> None:
         """Sync the model weight."""
@@ -135,7 +139,7 @@ class TrainEngineWrapper(ABC):
         """Do some preparation before training started."""
 
     @abstractmethod
-    def train_step(self, experiences, algo_type) -> Tuple[bool, int]:
+    def train_step(self, experiences) -> Tuple[bool, int]:
         """Training."""
 
     @abstractmethod
