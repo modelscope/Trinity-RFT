@@ -1,14 +1,15 @@
 """REINFORCE++ advantage computation
 
-Adapted from compute_advantage_ppo in original ray_trainer.py
+Ref: https://github.com/volcengine/verl/blob/main/verl/trainer/ppo/core_algos.py
 """
 
 from typing import Dict, Tuple
 
+import torch
 from verl import DataProto
 
 from trinity.algorithm.advantage_fn import ADVANTAGE_FN, AdvantageFn
-from trinity.trainer.verl import core_algos
+from trinity.algorithm.utils import masked_whiten
 
 
 @ADVANTAGE_FN.register_module("reinforceplusplus")
@@ -21,11 +22,34 @@ class REINFORCEPLUSPLUSAdvantageFn(AdvantageFn):
         exps: DataProto,
         **kwargs,
     ) -> Tuple[DataProto, Dict]:
-        advantages, returns = core_algos.compute_reinforce_plus_plus_outcome_advantage(
-            token_level_rewards=exps.batch["token_level_rewards"],
-            eos_mask=exps.batch["response_mask"],
-            gamma=self.gamma,
-        )
+        """
+        Compute advantage for REINFORCE++.
+        This implementation is based on the paper: https://arxiv.org/abs/2501.03262
+
+            token_level_rewards: `(torch.Tensor)`
+                shape: (bs, response_length)
+            eos_mask: `(torch.Tensor)`
+                shape: (bs, response_length)
+            advantages: `(torch.Tensor)`
+                shape: (bs, response_length)
+            returns: `(torch.Tensor)`
+                shape: (bs, response_length)
+        """
+        token_level_rewards = exps.batch["token_level_rewards"]
+        eos_mask = exps.batch["response_mask"]
+        gamma = self.gamma
+
+        with torch.no_grad():
+            returns = torch.zeros_like(token_level_rewards)
+            running_return = 0
+
+            for t in reversed(range(token_level_rewards.shape[1])):
+                running_return = token_level_rewards[:, t] + gamma * running_return
+                returns[:, t] = running_return
+
+            advantages = masked_whiten(returns, eos_mask)
+            advantages = advantages * eos_mask
+
         exps.batch["advantages"] = advantages
         exps.batch["returns"] = returns
 
