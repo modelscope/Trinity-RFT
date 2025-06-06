@@ -77,6 +77,9 @@ class StorageConfig:
     format: FormatConfig = field(default_factory=FormatConfig)
     index: int = 0
 
+    # used for StorageType.SQL
+    wrap_in_ray: bool = True
+
     # used for rollout tasks
     default_workflow_type: Optional[str] = None
     default_reward_fn_type: Optional[str] = None

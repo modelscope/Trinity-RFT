@@ -23,6 +23,7 @@ class QueueActor:
         if storage_config.path is not None and len(storage_config.path) > 0:
             sql_config = deepcopy(storage_config)
             sql_config.storage_type = StorageType.SQL
+            sql_config.wrap_in_ray = False
             self.sql_writer = SQLWriter(sql_config, self.config)
         else:
             self.sql_writer = None

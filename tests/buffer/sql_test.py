@@ -1,6 +1,7 @@
 import os
 import unittest
 
+import ray
 import torch
 
 from trinity.buffer.reader.sql_reader import SQLReader
@@ -22,6 +23,7 @@ class TestSQLBuffer(unittest.TestCase):
             algorithm_type=AlgorithmType.PPO,
             path=f"sqlite:///{db_path}",
             storage_type=StorageType.SQL,
+            wrap_in_ray=True,
         )
         config = BufferConfig(
             max_retry_times=3,
@@ -45,3 +47,5 @@ class TestSQLBuffer(unittest.TestCase):
         for _ in range(total_num // read_batch_size):
             exps = sql_reader.read()
             self.assertEqual(len(exps), read_batch_size)
+        db_wrapper = ray.get_actor("sql-test_buffer")
+        self.assertIsNotNone(db_wrapper)
