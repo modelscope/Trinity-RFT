@@ -69,7 +69,6 @@ class AlgorithmType(CaseInsensitiveEnum):
     PPO = "ppo"
     GRPO = "grpo"
     OPMD = "opmd"
-    PAIRWISE_OPMD = "pairwise_opmd"
     DPO = "dpo"
 
     def is_rft(self) -> bool:
@@ -78,7 +77,6 @@ class AlgorithmType(CaseInsensitiveEnum):
             AlgorithmType.PPO,
             AlgorithmType.GRPO,
             AlgorithmType.OPMD,
-            AlgorithmType.PAIRWISE_OPMD,
         ]
 
     def is_sft(self) -> bool:
@@ -88,6 +86,40 @@ class AlgorithmType(CaseInsensitiveEnum):
     def is_dpo(self) -> bool:
         """Check if the algorithm is DPO."""
         return self == AlgorithmType.DPO
+
+    @property
+    def use_critic(self) -> bool:
+        """Check if the algorithm uses critic."""
+        return self == AlgorithmType.PPO
+
+    @property
+    def use_reference(self) -> bool:
+        """Check if the algorithm uses reference."""
+        return self in {
+            AlgorithmType.PPO,
+            AlgorithmType.GRPO,
+            AlgorithmType.OPMD,
+            AlgorithmType.DPO,
+        }
+
+    @property
+    def use_advantage(self) -> bool:
+        """Check if the algorithm uses advantage."""
+        return self in {
+            AlgorithmType.PPO,
+            AlgorithmType.GRPO,
+            AlgorithmType.OPMD,
+        }
+
+    @property
+    def can_balance_batch(self) -> bool:
+        """Check if the algorithm can balance batch."""
+        return self in {
+            AlgorithmType.SFT,
+            AlgorithmType.PPO,
+            AlgorithmType.GRPO,
+            AlgorithmType.OPMD,
+        }
 
 
 class MonitorType(CaseInsensitiveEnum):
