@@ -2,10 +2,12 @@
 """Configs for RFT."""
 import os
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from omegaconf import OmegaConf
 
+from trinity.algorithm.algorithm import ALGORITHM, Algorithm
+from trinity.algorithm.algorithm_manager import AlgorithmManager
 from trinity.common.constants import (
     AlgorithmType,
     MonitorType,
@@ -170,33 +172,42 @@ class InferenceModelConfig:
 class AlgorithmConfig:
     """Config for algorithm."""
 
-    algorithm_type: AlgorithmType = AlgorithmType.PPO
+    algorithm_type: Union[str, Algorithm] = "ppo"
     # for GRPO-like algorithms, repeat each task for `repeat_times` times
     repeat_times: int = 1
 
-    policy_loss_fn: str = "ppo"
+    policy_loss_fn: str = None  # "ppo"
     # If not set, use PolicyLossFn.default_args()
     policy_loss_fn_args: Optional[dict] = None
 
-    advantage_fn: str = "ppo"
+    advantage_fn: str = None  # "ppo"
     # If not set, use AdvantageFn.default_args()
     advantage_fn_args: Optional[dict] = None
 
-    kl_penalty_fn: str = "none"  # set to "none" to disable kl penalty in reward
+    kl_penalty_fn: str = None  # "none"  # set to "none" to disable kl penalty in reward
     # If not set, use kl_penalty_fn.default_args()
     kl_penalty_fn_args: Optional[dict] = None
 
-    kl_loss_fn: str = "k2"  # set to "none" to disable kl loss
+    kl_loss_fn: str = None  # "k2"  # set to "none" to disable kl loss
     # If not set, use kl_loss_fn.default_args()
     kl_loss_fn_args: Optional[dict] = None
 
-    entropy_loss_fn: str = "basic"
+    entropy_loss_fn: str = None  # "basic"
     # If not set, use entropy_loss_fn.default_args()
     entropy_loss_fn_args: Optional[dict] = None
 
     # used for SFT warmup
     # TODO: move this to SFT warmup
     use_token_level_loss: bool = True
+
+    # do not set
+    algorithm_manager: Optional[AlgorithmManager] = None
+
+    def get_current_algorithm_config(self, global_steps: int):
+        return self.algorithm_manager.get_current_algorithm_config(global_steps)
+
+    def need_save(self, global_steps: int):
+        return self.algorithm_manager.need_save(global_steps)
 
 
 @dataclass
@@ -491,6 +502,12 @@ class Config:
             KL_FN,
             POLICY_LOSS_FN,
         )
+
+        self.algorithm.algorithm_manager = AlgorithmManager(self)
+        self.algorithm.algorithm_type = ALGORITHM.get(self.algorithm.algorithm_type)
+        for key, value in self.algorithm.algorithm_type.get_default_config().items():
+            if getattr(self.algorithm, key, None) is None:
+                setattr(self.algorithm, key, value)
 
         policy_fn_cls = POLICY_LOSS_FN.get(self.algorithm.policy_loss_fn)
         if policy_fn_cls is None:

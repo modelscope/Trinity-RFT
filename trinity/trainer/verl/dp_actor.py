@@ -33,7 +33,6 @@ from verl.workers.actor import BasePPOActor
 from trinity.algorithm import ENTROPY_LOSS_FN, KL_FN, POLICY_LOSS_FN
 from trinity.algorithm.utils import prefix_metrics
 from trinity.common.config import AlgorithmConfig
-from trinity.common.constants import AlgorithmType
 
 __all__ = ["DataParallelPPOActor"]
 
@@ -55,11 +54,11 @@ class DataParallelPPOActor(BasePPOActor):
         self.use_ulysses_sp = self.ulysses_sequence_parallel_size > 1
 
         self.compute_entropy_from_logits = torch.compile(verl_F.entropy_from_logits, dynamic=True)
-        self.algorithm_type = AlgorithmType.PPO
         self.policy_loss_fn = None
+        self.kl_loss_fn = None
+        # self.entropy_loss_fn = None
 
     def set_algorithm(self, algorithm_config: AlgorithmConfig):
-        self.algorithm_type = algorithm_config.algorithm_type
         self.policy_loss_fn = POLICY_LOSS_FN.get(algorithm_config.policy_loss_fn)(
             **algorithm_config.policy_loss_fn_args
         )

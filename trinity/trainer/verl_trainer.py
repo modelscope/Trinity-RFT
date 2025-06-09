@@ -118,15 +118,16 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         resource_pool_manager = ResourcePoolManager(
             resource_pool_spec=resource_pool_spec, mapping=mapping
         )
-        self.algorithm_type = global_config.algorithm.algorithm_type
+        self.algorithm_config = global_config.algorithm
+        self.algorithm_type = None
 
         # specify advantage function for various rft algorithms
         algo_config = global_config.algorithm
-        if algo_config.algorithm_type.is_rft():
+        if algo_config.algorithm_type.use_advantage:
             self.advantage_fn = ADVANTAGE_FN.get(algo_config.advantage_fn)(
                 **algo_config.advantage_fn_args
             )
-        self.kl_fn = KL_FN.get(algo_config.kl_penalty_fn)(**algo_config.kl_penalty_fn_args)
+            self.kl_fn = KL_FN.get(algo_config.kl_penalty_fn)(**algo_config.kl_penalty_fn_args)
 
         super().__init__(
             config,
@@ -153,6 +154,10 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         self.experiences_example_table = pd.DataFrame(
             columns=["step", "reward", "prompt", "response"]
         )
+
+    @property
+    def train_step_num(self) -> int:
+        return self.global_steps
 
     def prepare(self):
         self.actor_rollout_wg.setup_weight_sync_group()
@@ -434,15 +439,13 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             return True, self.global_steps
 
     def train_step(self, experiences: Experiences) -> Tuple[bool, int]:
-        # TODO
-        if (
-            self.algorithm_type.is_sft()
-            and self.sft_warmup_step_num >= self.config.trainer.sft_warmup_steps
-        ):
-            return False, self.global_steps
         self.global_steps += 1
         metrics = {}
         timing_raw = {}
+        algorithm_config = self.algorithm_config.get_current_algorithm_config(self.global_steps)
+        if self.algorithm_type != algorithm_config.algorithm_type:
+            self.algorithm_type = algorithm_config.algorithm_type
+            self.actor_rollout_wg.set_algorithm(algorithm_config)
 
         with _timer("step", timing_raw):
             # Convert rewards to token_level_rewards
@@ -517,7 +520,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             # implement critic warmup
             if (
                 self.algorithm_type.use_critic
-                or self.config.trainer.critic_warmup <= self.global_steps
+                and self.config.trainer.critic_warmup <= self.global_steps
             ):
                 # update actor
                 with _timer("update_actor", timing_raw):
@@ -548,12 +551,8 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         # TODO: make a canonical logger that supports various backend
         self.logger.log(data=metrics, step=self.global_steps)
 
-        if self.algorithm_type.is_sft():  # TODO
-            self.sft_warmup_step_num += 1
-            train_status = self.sft_warmup_step_num < self.config.trainer.sft_warmup_steps
-        else:
-            train_status = self.global_steps < self.total_training_steps
-        if not train_status:  # stop training
+        train_status = self.global_steps < self.total_training_steps
+        if not train_status or self.algorithm_config.need_save(self.global_steps):
             if (
                 self.config.trainer.save_freq > 0
                 and self.global_steps % self.config.trainer.save_freq != 0

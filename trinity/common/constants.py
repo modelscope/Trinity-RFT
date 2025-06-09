@@ -62,64 +62,64 @@ class StorageType(CaseInsensitiveEnum):
     FILE = "file"
 
 
-class AlgorithmType(CaseInsensitiveEnum):
-    """Algorithm Type."""
+# class AlgorithmType(CaseInsensitiveEnum):
+#     """Algorithm Type."""
 
-    SFT = "sft"
-    PPO = "ppo"
-    GRPO = "grpo"
-    OPMD = "opmd"
-    DPO = "dpo"
+#     SFT = "sft"
+#     PPO = "ppo"
+#     GRPO = "grpo"
+#     OPMD = "opmd"
+#     DPO = "dpo"
 
-    def is_rft(self) -> bool:
-        """Check if the algorithm is RFT."""
-        return self in [
-            AlgorithmType.PPO,
-            AlgorithmType.GRPO,
-            AlgorithmType.OPMD,
-        ]
+#     def is_rft(self) -> bool:
+#         """Check if the algorithm is RFT."""
+#         return self in [
+#             AlgorithmType.PPO,
+#             AlgorithmType.GRPO,
+#             AlgorithmType.OPMD,
+#         ]
 
-    def is_sft(self) -> bool:
-        """Check if the algorithm is SFT."""
-        return self == AlgorithmType.SFT
+#     def is_sft(self) -> bool:
+#         """Check if the algorithm is SFT."""
+#         return self == AlgorithmType.SFT
 
-    def is_dpo(self) -> bool:
-        """Check if the algorithm is DPO."""
-        return self == AlgorithmType.DPO
+#     def is_dpo(self) -> bool:
+#         """Check if the algorithm is DPO."""
+#         return self == AlgorithmType.DPO
 
-    @property
-    def use_critic(self) -> bool:
-        """Check if the algorithm uses critic."""
-        return self == AlgorithmType.PPO
+#     @property
+#     def use_critic(self) -> bool:
+#         """Check if the algorithm uses critic."""
+#         return self == AlgorithmType.PPO
 
-    @property
-    def use_reference(self) -> bool:
-        """Check if the algorithm uses reference."""
-        return self in {
-            AlgorithmType.PPO,
-            AlgorithmType.GRPO,
-            AlgorithmType.OPMD,
-            AlgorithmType.DPO,
-        }
+#     @property
+#     def use_reference(self) -> bool:
+#         """Check if the algorithm uses reference."""
+#         return self in {
+#             AlgorithmType.PPO,
+#             AlgorithmType.GRPO,
+#             AlgorithmType.OPMD,
+#             AlgorithmType.DPO,
+#         }
 
-    @property
-    def use_advantage(self) -> bool:
-        """Check if the algorithm uses advantage."""
-        return self in {
-            AlgorithmType.PPO,
-            AlgorithmType.GRPO,
-            AlgorithmType.OPMD,
-        }
+#     @property
+#     def use_advantage(self) -> bool:
+#         """Check if the algorithm uses advantage."""
+#         return self in {
+#             AlgorithmType.PPO,
+#             AlgorithmType.GRPO,
+#             AlgorithmType.OPMD,
+#         }
 
-    @property
-    def can_balance_batch(self) -> bool:
-        """Check if the algorithm can balance batch."""
-        return self in {
-            AlgorithmType.SFT,
-            AlgorithmType.PPO,
-            AlgorithmType.GRPO,
-            AlgorithmType.OPMD,
-        }
+#     @property
+#     def can_balance_batch(self) -> bool:
+#         """Check if the algorithm can balance batch."""
+#         return self in {
+#             AlgorithmType.SFT,
+#             AlgorithmType.PPO,
+#             AlgorithmType.GRPO,
+#             AlgorithmType.OPMD,
+#         }
 
 
 class MonitorType(CaseInsensitiveEnum):

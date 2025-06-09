@@ -12,10 +12,10 @@ from typing import Tuple
 
 import ray
 
+from trinity.algorithm.algorithm import SFTAlgorithm
 from trinity.buffer import get_buffer_reader
 from trinity.common.config import AlgorithmConfig, Config
 from trinity.common.constants import AlgorithmType, SyncMethod
-from trinity.common.experience import Experiences
 from trinity.utils.log import get_logger
 
 
@@ -73,44 +73,27 @@ class Trainer:
         Returns:
             bool: Whether to continue training.
         """
-        if algo_type.is_sft():
-            algorithm_config = AlgorithmConfig(
-                algorithm_type=AlgorithmType.SFT,
-                policy_loss_fn="sft",
-                policy_loss_fn_args={
-                    "use_token_level_loss": self.config.algorithm.use_token_level_loss
-                },
-                kl_loss_fn="none",
-                kl_loss_fn_args={},
-                entropy_loss_fn="basic",
-                entropy_loss_fn_args=self.config.algorithm.entropy_loss_fn_args,
-            )
-            self.engine.set_algorithm(algorithm_config)
-        else:
-            self.engine.set_algorithm(self.config.algorithm)
-        if algo_type.is_rft() and self.config.buffer.trainer_input.read_experience_strategy:
+        algo_config = self.config.algorithm.get_current_algorithm_config(
+            self.engine.train_step_num + 1
+        )
+        algo_type = algo_config.algorithm_type
+        if algo_type.use_advantage:
             strategy = self.config.buffer.trainer_input.read_experience_strategy
         else:
             strategy = None
         try:
-            if algo_type.is_sft():
+            if algo_type == SFTAlgorithm:
                 exps = self.sft_warmup_buffer.read()
             else:
                 exps = self.train_buffer.read(strategy=strategy)
         except StopIteration:
             self.logger.warning("No more data to train. Stop training.")
-            return False, 0  # TODO: get the actual step number
+            return False, self.engine.train_step_num
 
-        if algo_type.is_dpo():  # TODO
-            experiences = Experiences.gather_dpo_experiences(
-                exps,
-                pad_token_id=self.config.buffer.pad_token_id,  # type: ignore
-            )
-        else:
-            experiences = Experiences.gather_experiences(
-                exps,
-                pad_token_id=self.config.buffer.pad_token_id,  # type: ignore
-            )
+        experiences = algo_type.gather_experience(
+            exps,
+            pad_token_id=self.config.buffer.pad_token_id,  # type: ignore
+        )
         return self.engine.train_step(experiences)
 
     def sync_weight(self) -> None:
@@ -137,6 +120,11 @@ class TrainEngineWrapper(ABC):
     @abstractmethod
     def prepare(self) -> None:
         """Do some preparation before training started."""
+
+    @abstractmethod
+    @property
+    def train_step_num(self) -> int:
+        """Get the current training step number."""
 
     @abstractmethod
     def train_step(self, experiences) -> Tuple[bool, int]:
