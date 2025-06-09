@@ -116,9 +116,11 @@
 <h2 id="_">_</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="build_api/trinity.buffer.reader.html#trinity.buffer.reader.file_reader.DPODataReader.__init__">__init__() (trinity.buffer.reader.file_reader.DPODataReader method)</a>
+      <li><a href="build_api/trinity.buffer.html#trinity.buffer.db_wrapper.DBWrapper.__init__">__init__() (trinity.buffer.db_wrapper.DBWrapper method)</a>
 
       <ul>
+        <li><a href="build_api/trinity.buffer.reader.html#trinity.buffer.reader.file_reader.DPODataReader.__init__">(trinity.buffer.reader.file_reader.DPODataReader method)</a>
+</li>
         <li><a href="build_api/trinity.buffer.reader.html#trinity.buffer.reader.file_reader.RolloutDataReader.__init__">(trinity.buffer.reader.file_reader.RolloutDataReader method)</a>
 </li>
         <li><a href="build_api/trinity.buffer.reader.html#trinity.buffer.reader.file_reader.SFTDataReader.__init__">(trinity.buffer.reader.file_reader.SFTDataReader method)</a>
@@ -684,6 +686,8 @@
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.DataProcessorConfig.db_url">db_url (trinity.common.config.DataProcessorConfig attribute)</a>
 </li>
+      <li><a href="build_api/trinity.buffer.html#trinity.buffer.db_wrapper.DBWrapper">DBWrapper (class in trinity.buffer.db_wrapper)</a>
+</li>
       <li><a href="build_api/trinity.common.html#trinity.common.constants.ReadStrategy.DEFAULT">DEFAULT (trinity.common.constants.ReadStrategy attribute)</a>
 </li>
       <li><a href="build_api/trinity.common.rewards.html#trinity.common.rewards.reward_fn.MathRewardFn.DEFAULT_ANSWER_PARSER">DEFAULT_ANSWER_PARSER() (trinity.common.rewards.reward_fn.MathRewardFn method)</a>
@@ -1066,6 +1070,8 @@
       </ul></li>
       <li><a href="build_api/trinity.common.models.html#trinity.common.models.utils.get_verl_checkpoint_dir">get_verl_checkpoint_dir() (in module trinity.common.models.utils)</a>
 </li>
+      <li><a href="build_api/trinity.buffer.html#trinity.buffer.db_wrapper.DBWrapper.get_wrapper">get_wrapper() (trinity.buffer.db_wrapper.DBWrapper class method)</a>
+</li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.InferenceModelConfig.gpu_memory_utilization">gpu_memory_utilization (trinity.common.config.InferenceModelConfig attribute)</a>
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.ClusterConfig.gpu_per_node">gpu_per_node (trinity.common.config.ClusterConfig attribute)</a>
@@ -1430,6 +1436,8 @@
 </li>
         <li><a href="build_api/trinity.buffer.html#module-trinity.buffer.buffer_writer">trinity.buffer.buffer_writer</a>
 </li>
+        <li><a href="build_api/trinity.buffer.html#module-trinity.buffer.db_wrapper">trinity.buffer.db_wrapper</a>
+</li>
         <li><a href="build_api/trinity.buffer.html#module-trinity.buffer.queue">trinity.buffer.queue</a>
 </li>
         <li><a href="build_api/trinity.buffer.reader.html#module-trinity.buffer.reader">trinity.buffer.reader</a>
@@ -1792,6 +1800,8 @@
       <li><a href="build_api/trinity.buffer.html#trinity.buffer.buffer_reader.BufferReader.read">read() (trinity.buffer.buffer_reader.BufferReader method)</a>
 
       <ul>
+        <li><a href="build_api/trinity.buffer.html#trinity.buffer.db_wrapper.DBWrapper.read">(trinity.buffer.db_wrapper.DBWrapper method)</a>
+</li>
         <li><a href="build_api/trinity.buffer.reader.html#trinity.buffer.reader.file_reader.DPODataReader.read">(trinity.buffer.reader.file_reader.DPODataReader method)</a>
 </li>
         <li><a href="build_api/trinity.buffer.reader.html#trinity.buffer.reader.file_reader.RolloutDataReader.read">(trinity.buffer.reader.file_reader.RolloutDataReader method)</a>
@@ -2653,6 +2663,13 @@
 </li>
       </ul></li>
       <li>
+    trinity.buffer.db_wrapper
+
+      <ul>
+        <li><a href="build_api/trinity.buffer.html#module-trinity.buffer.db_wrapper">module</a>
+</li>
+      </ul></li>
+      <li>
     trinity.buffer.queue
 
       <ul>
@@ -2736,6 +2753,8 @@
         <li><a href="build_api/trinity.common.html#module-trinity.common">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     trinity.common.config
 
@@ -2743,8 +2762,6 @@
         <li><a href="build_api/trinity.common.html#module-trinity.common.config">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     trinity.common.constants
 
@@ -3212,8 +3229,6 @@
 </li>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.Workflow">Workflow (class in trinity.common.workflows.workflow)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.html#trinity.common.schema.RftDatasetModel.workflow">workflow (trinity.common.schema.RftDatasetModel attribute)</a>
 
       <ul>
@@ -3222,6 +3237,8 @@
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.Task.workflow">(trinity.common.workflows.workflow.Task attribute)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.html#trinity.common.config.FormatConfig.workflow_key">workflow_key (trinity.common.config.FormatConfig attribute)</a>
 </li>
       <li><a href="build_api/trinity.buffer.schema.html#trinity.buffer.schema.sql_schema.TaskModel.workflow_type">workflow_type (trinity.buffer.schema.sql_schema.TaskModel attribute)</a>
@@ -3230,6 +3247,8 @@
         <li><a href="build_api/trinity.common.html#trinity.common.schema.TaskModel.workflow_type">(trinity.common.schema.TaskModel attribute)</a>
 </li>
       </ul></li>
+      <li><a href="build_api/trinity.common.html#trinity.common.config.StorageConfig.wrap_in_ray">wrap_in_ray (trinity.common.config.StorageConfig attribute)</a>
+</li>
       <li><a href="build_api/trinity.common.html#trinity.common.verl_config.FSDPConfig.wrap_policy">wrap_policy (trinity.common.verl_config.FSDPConfig attribute)</a>
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.verl_config.WrapPolicy">WrapPolicy (class in trinity.common.verl_config)</a>
@@ -3237,6 +3256,8 @@
       <li><a href="build_api/trinity.buffer.html#trinity.buffer.buffer_writer.BufferWriter.write">write() (trinity.buffer.buffer_writer.BufferWriter method)</a>
 
       <ul>
+        <li><a href="build_api/trinity.buffer.html#trinity.buffer.db_wrapper.DBWrapper.write">(trinity.buffer.db_wrapper.DBWrapper method)</a>
+</li>
         <li><a href="build_api/trinity.buffer.writer.html#trinity.buffer.writer.queue_writer.QueueWriter.write">(trinity.buffer.writer.queue_writer.QueueWriter method)</a>
 </li>
         <li><a href="build_api/trinity.buffer.writer.html#trinity.buffer.writer.sql_writer.SQLWriter.write">(trinity.buffer.writer.sql_writer.SQLWriter method)</a>

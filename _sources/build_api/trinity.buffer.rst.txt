@@ -37,6 +37,14 @@ trinity.buffer.buffer\_writer module
    :undoc-members:
    :show-inheritance:
 
+trinity.buffer.db\_wrapper module
+---------------------------------
+
+.. automodule:: trinity.buffer.db_wrapper
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 trinity.buffer.queue module
 ---------------------------
 
