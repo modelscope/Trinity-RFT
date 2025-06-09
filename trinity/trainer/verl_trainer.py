@@ -13,6 +13,7 @@ import pandas as pd
 import ray
 import torch
 from omegaconf import OmegaConf
+from trinity.algorithm.algorithm import SFTAlgorithm
 from verl.trainer.ppo.metric_utils import (
     compute_data_metrics,
     compute_throughout_metrics,
@@ -147,7 +148,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         self.reset_experiences_example_table()
 
     def _validate_config(self):  # TODO
-        self.use_critic = self.algorithm_type.use_critic
+        self.use_critic = self.algorithm_config.algorithm_type.use_critic
         super()._validate_config()
 
     def reset_experiences_example_table(self):
@@ -444,8 +445,10 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         timing_raw = {}
         algorithm_config = self.algorithm_config.get_current_algorithm_config(self.global_steps)
         if self.algorithm_type != algorithm_config.algorithm_type:
-            self.algorithm_type = algorithm_config.algorithm_type
             self.actor_rollout_wg.set_algorithm(algorithm_config)
+            if isinstance(self.algorithm_type, SFTAlgorithm):
+                self.sft_to_rft()
+            self.algorithm_type = algorithm_config.algorithm_type
 
         with _timer("step", timing_raw):
             # Convert rewards to token_level_rewards
@@ -554,8 +557,8 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         train_status = self.global_steps < self.total_training_steps
         if not train_status or self.algorithm_config.need_save(self.global_steps):
             if (
-                self.config.trainer.save_freq > 0
-                and self.global_steps % self.config.trainer.save_freq != 0
+                self.config.trainer.save_freq == 0
+                or self.global_steps % self.config.trainer.save_freq != 0
             ):
                 with _timer("save_checkpoint", timing_raw):
                     self._save_checkpoint()
@@ -607,12 +610,6 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
 
     def sync_weight(self) -> None:
         self.actor_rollout_wg.sync_weight()
-
-    def set_algorithm(self, algorithm_config: AlgorithmConfig) -> None:
-        self.actor_rollout_wg.set_algorithm(algorithm_config)
-        if self.algorithm_type.is_sft() and (not algorithm_config.algorithm_type.is_sft()):
-            self.sft_to_rft()
-        self.algorithm_type = algorithm_config.algorithm_type
 
     def sft_to_rft(self) -> None:
         # load from hdfs

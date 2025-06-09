@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from omegaconf import OmegaConf
 
-from trinity.algorithm.algorithm import ALGORITHM, Algorithm
+from trinity.algorithm.algorithm import ALGORITHM, Algorithm, DPOAlgorithm, SFTAlgorithm
 from trinity.algorithm.algorithm_manager import AlgorithmManager
 from trinity.common.constants import (
     AlgorithmType,
@@ -451,13 +451,13 @@ class Config:
                     f"Auto set `buffer.trainer_input.experience_buffer` to {self.buffer.trainer_input.experience_buffer}"
                 )
         elif self.mode == "train":  # TODO: to be check
-            if self.algorithm.algorithm_type.is_dpo():
+            if isinstance(self.algorithm.algorithm_type, DPOAlgorithm):
                 if (
                     self.buffer.trainer_input.experience_buffer is None
                     or not self.buffer.trainer_input.experience_buffer.path
                 ):
                     raise ValueError(
-                        "`buffer.trainer_input.experience_buffer.path` is required when `algorithm.algorithm_type == AlgorithmType.DPO`"
+                        "`buffer.trainer_input.experience_buffer.path` is required when `algorithm.algorithm_type == dpo`"
                     )
         if self.buffer.trainer_input.experience_buffer is not None:
             self.buffer.trainer_input.experience_buffer.algorithm_type = (
@@ -479,7 +479,7 @@ class Config:
                 "`buffer.trainer_input.sft_warmup_dataset` is required when `buffer.trainer_input.sft_warmup_steps` > 0"
             )
         if self.buffer.trainer_input.sft_warmup_dataset is not None:
-            self.buffer.trainer_input.sft_warmup_dataset.algorithm_type = AlgorithmType.SFT
+            self.buffer.trainer_input.sft_warmup_dataset.algorithm_type = SFTAlgorithm
 
         # set read_batch_size / pad_token_id / tokenizer_path
         self.buffer.read_batch_size = self.buffer.batch_size * self.algorithm.repeat_times
@@ -543,10 +543,13 @@ class Config:
         """Check and update the config."""
         self._check_deprecated()
 
+        # check algorithm
+        self._check_algorithm()
+
         # check mode
         if self.mode not in ["explore", "train", "both", "bench"]:
             raise ValueError(f"Invalid mode: {self.mode}")
-        if self.algorithm.algorithm_type == AlgorithmType.DPO and self.mode == "both":
+        if isinstance(self.algorithm.algorithm_type, DPOAlgorithm) and self.mode == "both":
             raise ValueError("DPO does not support `both` mode")
 
         # prepare for the checkpoint directory
@@ -561,9 +564,6 @@ class Config:
             self.explorer.rollout_model.model_path = self.model.model_path
         if not self.model.critic_model_path:
             self.model.critic_model_path = self.model.model_path
-
-        # check algorithm
-        self._check_algorithm()
 
         # check explorer
         if (
@@ -590,16 +590,21 @@ class Config:
                 f"`{self.mode}` mode only supports checkpoint synchronization, set `synchronizer.sync_method` to `checkpoint`."
             )
         if (
-            self.algorithm.algorithm_type == AlgorithmType.DPO
+            isinstance(self.algorithm.algorithm_type, DPOAlgorithm)
             and self.synchronizer.sync_method != SyncMethod.CHECKPOINT
         ):
             self.synchronizer.sync_method = SyncMethod.CHECKPOINT
             logger.warning(
                 "DPO only supports checkpoint synchronization, set `synchronizer.sync_method` to `checkpoint`."
             )
-        if self.algorithm.algorithm_type == AlgorithmType.DPO and self.algorithm.repeat_times != 2:
+        if (
+            isinstance(self.algorithm.algorithm_type, DPOAlgorithm)
+            and self.algorithm.repeat_times != 2
+        ):
             self.algorithm.repeat_times = 2
-            logger.warning("DPO only supports 2 repeat times, set `algorithm.repeat_times` to 2.")
+            logger.warning(
+                "DPO only supports 2 repeat times, set `algorithm.repeat_times` to 2."
+            )  # no need to warn
 
         self._check_interval()
 

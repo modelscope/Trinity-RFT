@@ -6,9 +6,10 @@ import datasets
 import transformers
 from datasets import load_dataset
 
+from trinity.algorithm.algorithm import DPOAlgorithm, SFTAlgorithm
 from trinity.buffer.buffer_reader import BufferReader
 from trinity.common.config import BufferConfig, StorageConfig
-from trinity.common.constants import AlgorithmType, PromptType, ReadStrategy, TaskType
+from trinity.common.constants import PromptType, ReadStrategy, TaskType
 from trinity.common.experience import Experience
 from trinity.common.rewards import REWARD_FUNCTIONS
 from trinity.common.workflows import WORKFLOWS, Task
@@ -17,7 +18,7 @@ from trinity.utils.registry import Registry
 FILE_READERS = Registry("file_readers")
 
 
-@FILE_READERS.register_module(AlgorithmType.SFT.value)
+@FILE_READERS.register_module(SFTAlgorithm.name())
 class SFTDataReader(BufferReader):
     """Reader for SFT file data."""
 
@@ -96,7 +97,7 @@ class SFTDataReader(BufferReader):
         return exp_list
 
 
-@FILE_READERS.register_module(AlgorithmType.DPO.value)
+@FILE_READERS.register_module(DPOAlgorithm.name())
 class DPODataReader(BufferReader):
     def __init__(self, meta: StorageConfig, config: BufferConfig):
         self.split = meta.split

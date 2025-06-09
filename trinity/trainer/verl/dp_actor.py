@@ -56,7 +56,7 @@ class DataParallelPPOActor(BasePPOActor):
         self.compute_entropy_from_logits = torch.compile(verl_F.entropy_from_logits, dynamic=True)
         self.policy_loss_fn = None
         self.kl_loss_fn = None
-        # self.entropy_loss_fn = None
+        # self.entropy_loss_fn = None  # TODO
 
     def set_algorithm(self, algorithm_config: AlgorithmConfig):
         self.policy_loss_fn = POLICY_LOSS_FN.get(algorithm_config.policy_loss_fn)(

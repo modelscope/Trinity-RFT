@@ -5,7 +5,7 @@ from typing import Any, Optional, Union
 from sqlalchemy import Column, Float, Integer, LargeBinary, String
 from sqlalchemy.ext.declarative import declarative_base
 
-from trinity.common.constants import AlgorithmType
+from trinity.algorithm.algorithm import Algorithm
 from trinity.common.experience import Experience
 from trinity.common.models.utils import tokenize_and_mask_messages_hf
 
@@ -125,22 +125,38 @@ class DPODataModel(Base):  # type: ignore
         return exp
 
 
-SCHEMA_MAPPING = {
-    None: TaskModel,
-    AlgorithmType.SFT: SFTDataModel,
-    AlgorithmType.PPO: ExperienceModel,
-    AlgorithmType.GRPO: ExperienceModel,
-    AlgorithmType.OPMD: ExperienceModel,
-    AlgorithmType.DPO: DPODataModel,
-}
+class SchemaRegistry:
+    def __init__(self):
+        self.schema_mapping = {
+            None: TaskModel,
+        }
+
+    def __call__(self, schema, algorithm_type_cls: type = None):
+        def _register(cls):
+            self.schema_mapping[cls.name()] = schema
+            return cls
+
+        if algorithm_type_cls:
+            return _register(algorithm_type_cls)
+        return _register
+
+    def get_base_class(self, algorithm_type: Union[Algorithm | None]):
+        if algorithm_type is not None:
+            algorithm_type_name = algorithm_type.name()
+        else:
+            algorithm_type_name = None
+        if algorithm_type_name not in self.schema_mapping:
+            raise ValueError(f"Unknown schema: {algorithm_type}")
+
+        return self.schema_mapping[algorithm_type_name]
 
 
-def create_dynamic_table(algorithm_type: Union[AlgorithmType | None], table_name: str) -> Any:
+SCHEMA_REGISTRY = SchemaRegistry()
+
+
+def create_dynamic_table(algorithm_type: Union[Algorithm | None], table_name: str) -> Any:
     """Create a dynamic table based on the provided algorithm type and table name."""
-    if algorithm_type not in SCHEMA_MAPPING:
-        raise ValueError(f"Unknown schema: {algorithm_type}")
-
-    base_class = SCHEMA_MAPPING[algorithm_type]
+    base_class = SCHEMA_REGISTRY.get_base_class(algorithm_type)
 
     table_attrs = {
         "__tablename__": table_name,

@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional
 
 from omegaconf import OmegaConf
 
+from trinity.algorithm.algorithm import DPOAlgorithm
 from trinity.common.config import BufferConfig, Config, SynchronizerConfig
 from trinity.common.constants import AlgorithmType
 from trinity.trainer.verl.ray_trainer import AdvantageEstimator
@@ -334,7 +335,7 @@ class veRLConfig:
         # Need to double check whether this is indeed the case,
         # and see if adv_estimator can be removed completely.
 
-        if self.actor_rollout_ref.actor.algorithm_type.is_dpo():  # for DPO
+        if isinstance(self.actor_rollout_ref.actor.algorithm_type, DPOAlgorithm):  # for DPO
             if not self.actor_rollout_ref.actor.use_kl_loss:
                 self.actor_rollout_ref.actor.use_kl_loss = True
                 logger.warning("DPO must use KL loss.")

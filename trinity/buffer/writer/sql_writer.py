@@ -22,7 +22,7 @@ class SQLWriter(BufferWriter):
         assert meta.storage_type == StorageType.SQL
         # we only support write RFT algorithm buffer for now
         # TODO: support other algorithms
-        assert meta.algorithm_type.is_rft, "Only RFT buffer is supported for writing."
+        assert meta.algorithm_type.use_rollout, "Only RFT buffer is supported for writing."
         self.engine = create_engine(meta.path, poolclass=NullPool)
         self.table_model_cls = create_dynamic_table(meta.algorithm_type, meta.name)
 

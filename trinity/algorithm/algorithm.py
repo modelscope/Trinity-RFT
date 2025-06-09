@@ -1,6 +1,12 @@
 from abc import ABC, abstractmethod
 from typing import Dict
 
+from trinity.buffer.schema.sql_schema import (
+    SCHEMA_REGISTRY,
+    DPODataModel,
+    ExperienceModel,
+    SFTDataModel,
+)
 from trinity.common.experience import Experience, Experiences
 from trinity.utils.registry import Registry
 
@@ -11,6 +17,7 @@ class Algorithm(ABC):
     use_critic: bool
     use_reference: bool
     use_advantage: bool
+    use_rollout: bool
     can_balance_batch: bool
 
     @classmethod
@@ -22,7 +29,12 @@ class Algorithm(ABC):
     def get_default_config(cls) -> Dict:
         pass
 
+    @classmethod
+    def name(cls) -> str:
+        return cls._name
 
+
+@SCHEMA_REGISTRY(SFTDataModel)
 @ALGORITHM.register_module("sft")
 class SFTAlgorithm(Algorithm):
     """SFT Algorithm."""
@@ -30,6 +42,7 @@ class SFTAlgorithm(Algorithm):
     use_critic: bool = False
     use_reference: bool = False
     use_advantage: bool = False
+    use_rollout: bool = False
     can_balance_batch: bool = True
 
     @classmethod
@@ -41,6 +54,7 @@ class SFTAlgorithm(Algorithm):
         }
 
 
+@SCHEMA_REGISTRY(ExperienceModel)
 @ALGORITHM.register_module("ppo")
 class PPOAlgorithm(Algorithm):
     """PPO Algorithm."""
@@ -48,6 +62,7 @@ class PPOAlgorithm(Algorithm):
     use_critic: bool = True
     use_reference: bool = True
     use_advantage: bool = True
+    use_rollout: bool = True
     can_balance_batch: bool = True
 
     @classmethod
@@ -62,6 +77,7 @@ class PPOAlgorithm(Algorithm):
         }
 
 
+@SCHEMA_REGISTRY(ExperienceModel)
 @ALGORITHM.register_module("grpo")
 class GRPOAlgorithm(Algorithm):
     """GRPO algorithm."""
@@ -69,6 +85,7 @@ class GRPOAlgorithm(Algorithm):
     use_critic: bool = False
     use_reference: bool = True
     use_advantage: bool = True
+    use_rollout: bool = True
     can_balance_batch: bool = True
 
     @classmethod
@@ -83,6 +100,7 @@ class GRPOAlgorithm(Algorithm):
         }
 
 
+@SCHEMA_REGISTRY(ExperienceModel)
 @ALGORITHM.register_module("opmd")
 class OPMDAlgorithm(Algorithm):
     """OPMD algorithm."""
@@ -90,6 +108,7 @@ class OPMDAlgorithm(Algorithm):
     use_critic: bool = False
     use_reference: bool = True
     use_advantage: bool = True
+    use_rollout: bool = True
     can_balance_batch: bool = True
 
     @classmethod
@@ -104,6 +123,7 @@ class OPMDAlgorithm(Algorithm):
         }
 
 
+@SCHEMA_REGISTRY(DPODataModel)
 @ALGORITHM.register_module("dpo")
 class DPOAlgorithm(Algorithm):
     """DPO algorithm."""
@@ -111,6 +131,7 @@ class DPOAlgorithm(Algorithm):
     use_critic: bool = False
     use_reference: bool = True
     use_advantage: bool = False
+    use_rollout: bool = False
     can_balance_batch: bool = False
 
     @classmethod

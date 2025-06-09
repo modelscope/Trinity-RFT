@@ -14,8 +14,8 @@ import ray
 
 from trinity.algorithm.algorithm import SFTAlgorithm
 from trinity.buffer import get_buffer_reader
-from trinity.common.config import AlgorithmConfig, Config
-from trinity.common.constants import AlgorithmType, SyncMethod
+from trinity.common.config import Config
+from trinity.common.constants import SyncMethod
 from trinity.utils.log import get_logger
 
 
@@ -44,31 +44,27 @@ class Trainer:
         """Prepare the trainer."""
         self.engine.prepare()
 
-    def train(self, algo_type: AlgorithmType = AlgorithmType.PPO):
+    def train(self):
         """Train the model."""
         while True:
-            train_status, _ = self.train_step(algo_type)
+            train_status, _ = self.train_step()
             if not train_status:
                 break
 
-    def train_one_period(self, algo_type: AlgorithmType = AlgorithmType.PPO) -> Tuple[bool, int]:
+    def train_one_period(self) -> Tuple[bool, int]:
         """Train for one period. Each period contains `sync_interval` steps.
         Returns:
             train_status: Whether to continue training.
             train_step_num: The number of training steps"""
         for _ in range(self.config.synchronizer.sync_interval):
-            train_status, train_step_num = self.train_step(algo_type)
+            train_status, train_step_num = self.train_step()
             if not train_status:
                 return False, train_step_num
         self.logger.info(f"Train step {train_step_num} finished.")
         return True, train_step_num
 
-    def train_step(self, algo_type: AlgorithmType = AlgorithmType.PPO) -> Tuple[bool, int]:
+    def train_step(self) -> Tuple[bool, int]:
         """Train one step.
-
-        Args:
-            algo_type (AlgorithmType): The type of data to be used for training.
-                Defaults to AlgorithmType.PPO.
 
         Returns:
             bool: Whether to continue training.
@@ -77,12 +73,12 @@ class Trainer:
             self.engine.train_step_num + 1
         )
         algo_type = algo_config.algorithm_type
-        if algo_type.use_advantage:
+        if algo_type.use_rollout:
             strategy = self.config.buffer.trainer_input.read_experience_strategy
         else:
             strategy = None
         try:
-            if algo_type == SFTAlgorithm:
+            if isinstance(algo_type, SFTAlgorithm):
                 exps = self.sft_warmup_buffer.read()
             else:
                 exps = self.train_buffer.read(strategy=strategy)
@@ -130,17 +126,17 @@ class TrainEngineWrapper(ABC):
     def train_step(self, experiences) -> Tuple[bool, int]:
         """Training."""
 
-    @abstractmethod
-    def train_rft_step(self, experiences) -> Tuple[bool, int]:
-        """Train on the RFT data."""
+    # @abstractmethod
+    # def train_rft_step(self, experiences) -> Tuple[bool, int]:
+    #     """Train on the RFT data."""
 
-    @abstractmethod
-    def train_sft_step(self, experiences) -> Tuple[bool, int]:
-        """Train on the SFT data."""
+    # @abstractmethod
+    # def train_sft_step(self, experiences) -> Tuple[bool, int]:
+    #     """Train on the SFT data."""
 
-    @abstractmethod
-    def train_dpo_step(self, experiences) -> Tuple[bool, int]:
-        """Train on the DPO data."""
+    # @abstractmethod
+    # def train_dpo_step(self, experiences) -> Tuple[bool, int]:
+    #     """Train on the DPO data."""
 
     @abstractmethod
     def save_checkpoint(self) -> None:
@@ -149,10 +145,6 @@ class TrainEngineWrapper(ABC):
     @abstractmethod
     def sync_weight(self) -> None:
         """Sync the model weight."""
-
-    @abstractmethod
-    def set_algorithm(self, algorithm_config: AlgorithmConfig) -> None:
-        """Set training algorithm config."""
 
     @abstractmethod
     def shutdown(self) -> None:

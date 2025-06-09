@@ -8,7 +8,6 @@ from pprint import pprint
 import ray
 
 from trinity.common.config import Config, load_config
-from trinity.common.constants import AlgorithmType
 from trinity.explorer.explorer import Explorer
 from trinity.trainer.trainer import Trainer
 from trinity.utils.log import get_logger
@@ -49,20 +48,8 @@ def train(config: Config) -> None:
     trainer = Trainer.remote(config)
     ray.get(trainer.prepare.remote())
 
-    if config.buffer.trainer_input.sft_warmup_steps > 0:
-        while True:
-            train_continue, train_step_num = ray.get(
-                trainer.train_one_period.remote(AlgorithmType.SFT)
-            )
-            if train_step_num <= config.buffer.trainer_input.sft_warmup_steps:
-                logger.info(f"SFT warmup step {train_step_num} finished.")
-            if not train_continue:
-                logger.info("SFT warmup finished.")
-                break
-
-    algo_type = config.algorithm.algorithm_type
     try:
-        ray.get(trainer.train.remote(algo_type))
+        ray.get(trainer.train.remote())
         logger.info("Train finished.")
         ray.get(trainer.shutdown.remote())
     except Exception as e:
@@ -93,23 +80,10 @@ def both(config: Config) -> None:
     # sync weight before training start
     ray.get([explorer.sync_weight.remote(), trainer.sync_weight.remote()])
 
-    if config.buffer.trainer_input.sft_warmup_steps > 0:
-        while True:
-            train_continue, train_step_num = ray.get(
-                trainer.train_one_period.remote(AlgorithmType.SFT)
-            )
-            if train_step_num <= config.buffer.trainer_input.sft_warmup_steps:
-                logger.info(f"SFT warmup step {train_step_num} finished.")
-            if not train_continue:
-                logger.info("SFT warmup finished.")
-                break
-        ray.get([explorer.sync_weight.remote(), trainer.sync_weight.remote()])
-
-    algo_type = config.algorithm.algorithm_type
     while True:
         try:
             ref_explore = explorer.explore_one_period.remote()
-            ref_train = trainer.train_one_period.remote(algo_type)
+            ref_train = trainer.train_one_period.remote()
             explore_continue, explore_step_num = ray.get(ref_explore)
             train_continue, train_step_num = ray.get(ref_train)
             if not explore_continue:
