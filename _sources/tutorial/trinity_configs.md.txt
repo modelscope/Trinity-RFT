@@ -223,6 +223,8 @@ The configuration for each task dataset is defined as follows:
   - `temperature`: The temperature for sampling.
 - `default_workflow_type`: Type of workflow logic applied to this dataset. If not specified, the `buffer.default_workflow_type` is used.
 - `default_reward_fn_type`: Reward function used during exploration. If not specified, the `buffer.default_reward_fn_type` is used.
+- `workflow_args`: A dictionary of arguments used to supplement dataset-level parameters.
+
 
 ### Trainer Input
 

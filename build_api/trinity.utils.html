@@ -190,8 +190,22 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="trinity.utils.eval_utils.find_boxed_answer">
-<span class="sig-prename descclassname"><span class="pre">trinity.utils.eval_utils.</span></span><span class="sig-name descname"><span class="pre">find_boxed_answer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/utils/eval_utils.html#find_boxed_answer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.eval_utils.find_boxed_answer" title="Link to this definition"></a></dt>
-<dd><p>Find answers from solutions where the answers are enclosed in LaTeX’s <cite>oxed</cite> tag</p>
+<span class="sig-prename descclassname"><span class="pre">trinity.utils.eval_utils.</span></span><span class="sig-name descname"><span class="pre">find_boxed_answer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_answer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/utils/eval_utils.html#find_boxed_answer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.eval_utils.find_boxed_answer" title="Link to this definition"></a></dt>
+<dd><p>Find answers from solutions where the answers are enclosed in LaTeX’s <cite>boxed</cite> tag</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw_answer</strong> (<cite>str</cite>) – raw answer from model</p></li>
+<li><p><strong>timeout</strong> (<cite>int</cite>) – timeout in seconds for regex</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>answer if found, otherwise None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><cite>str</cite></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">

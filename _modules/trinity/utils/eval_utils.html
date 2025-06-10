@@ -107,12 +107,19 @@
 
 <div class="viewcode-block" id="find_boxed_answer">
 <a class="viewcode-back" href="../../../build_api/trinity.utils.html#trinity.utils.eval_utils.find_boxed_answer">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">find_boxed_answer</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_boxed_answer</span><span class="p">(</span><span class="n">raw_answer</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Find answers from solutions where the answers are enclosed in LaTeX&#39;s `\boxed` tag</span>
+<span class="sd">    Find answers from solutions where the answers are enclosed in LaTeX&#39;s `\\boxed` tag</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        raw_answer (`str`): raw answer from model</span>
+<span class="sd">        timeout (`int`): timeout in seconds for regex</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        `str`: answer if found, otherwise None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">pattern</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">boxed\s*(({(?:</span><span class="se">\\</span><span class="s2">.|[^</span><span class="si">{}</span><span class="s2">]|(?2))*})|(.))&quot;</span>
-    <span class="n">res</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">string</span><span class="p">)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">raw_answer</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">res</span><span class="p">:</span>
         <span class="n">answer</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># regard the last boxed as the answer</span>
         <span class="k">if</span> <span class="n">answer</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;{&quot;</span><span class="p">):</span>

@@ -117,8 +117,9 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A Task class that defines a task and its associated reward function / workflow.&quot;&quot;&quot;</span>
 
     <span class="n">workflow</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Workflow</span><span class="p">]</span>
-    <span class="n">format_args</span><span class="p">:</span> <span class="n">FormatConfig</span>
+    <span class="n">format_args</span><span class="p">:</span> <span class="n">FormatConfig</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">FormatConfig</span><span class="p">)</span>
     <span class="n">rollout_args</span><span class="p">:</span> <span class="n">GenerationConfig</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">GenerationConfig</span><span class="p">)</span>
+    <span class="n">workflow_args</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
     <span class="n">is_eval</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">reward_fn</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">RewardFn</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">raw_task</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># The raw data sample</span>
