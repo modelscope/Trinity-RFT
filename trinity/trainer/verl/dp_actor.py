@@ -388,35 +388,31 @@ class DataParallelPPOActor(BasePPOActor):
                         src_metrics=pg_loss_metrics, prefix="actor", dst_metrics=micro_batch_metrics
                     )
 
-                    if isinstance(self.entropy_loss_fn, DummyEntropyLossFn):
-                        policy_loss = pg_loss
-                    else:
-                        # compute entropy loss from entropy
-                        entropy_loss, entropy_loss_metrics = self.entropy_loss_fn(
-                            entropy=entropy,
-                            action_mask=response_mask,
-                        )
-                        prefix_metrics(
-                            src_metrics=entropy_loss_metrics,
-                            prefix="actor",
-                            dst_metrics=micro_batch_metrics,
-                        )
+                    # compute entropy loss from entropy
+                    entropy_loss, entropy_loss_metrics = self.entropy_loss_fn(
+                        entropy=entropy,
+                        action_mask=response_mask,
+                    )
+                    prefix_metrics(
+                        src_metrics=entropy_loss_metrics,
+                        prefix="actor",
+                        dst_metrics=micro_batch_metrics,
+                    )
 
-                        # compute policy loss
-                        policy_loss = pg_loss - entropy_loss
+                    # compute policy loss
+                    policy_loss = pg_loss - entropy_loss
 
-                    if not isinstance(self.kl_loss_fn, DummyKLFn):
-                        kl_loss, kl_loss_metrics = self.kl_loss_fn.calculate_kl_loss(
-                            logprob=log_prob,
-                            ref_logprob=data["ref_log_prob"],
-                            response_mask=response_mask,
-                        )
-                        prefix_metrics(
-                            src_metrics=kl_loss_metrics,
-                            prefix="actor",
-                            dst_metrics=micro_batch_metrics,
-                        )
-                        policy_loss = policy_loss + kl_loss
+                    kl_loss, kl_loss_metrics = self.kl_loss_fn.calculate_kl_loss(
+                        logprob=log_prob,
+                        ref_logprob=data.get("ref_log_prob", None),
+                        response_mask=response_mask,
+                    )
+                    prefix_metrics(
+                        src_metrics=kl_loss_metrics,
+                        prefix="actor",
+                        dst_metrics=micro_batch_metrics,
+                    )
+                    policy_loss = policy_loss + kl_loss
 
                     if self.config.use_dynamic_bsz:
                         # relative to the dynamic bsz
