@@ -8,6 +8,7 @@ from typing import List, Optional, Tuple
 import ray
 import torch
 
+from trinity.algorithm.algorithm_manager import AlgorithmManager
 from trinity.buffer import get_buffer_writer
 from trinity.buffer.buffer import get_buffer_reader
 from trinity.common.config import Config
@@ -33,6 +34,7 @@ class Explorer:
         explorer_meta = self.cache.load_explorer()
         self.step_num = explorer_meta.get("latest_iteration", 0)
         self.config = config
+        self.algorithm_manager = AlgorithmManager(config)
         self.models, self.auxiliary_models = create_inference_models(config)
         if self.config.mode != "bench":
             self.experience_buffer = get_buffer_writer(
@@ -177,6 +179,15 @@ class Explorer:
             explore_status: whether there are more tasks to explore.
             explore_step_num: the number of explore steps
         """
+        # skip for sft
+        algo_config = self.algorithm_manager.get_current_algorithm_config(self.step_num + 1)
+        if algo_config.algorithm_type == "sft":
+            for _ in range(self.config.synchronizer.sync_interval):
+                self.step_num += 1
+                if self.algorithm_manager.need_save(self.step_num):
+                    break
+            return True, self.step_num
+
         task_num_per_period = self.config.synchronizer.sync_interval * self.config.buffer.batch_size
 
         st = time.time()

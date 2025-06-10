@@ -1,42 +1,55 @@
-from abc import ABC, abstractmethod
+# -*- coding: utf-8 -*-
+"""Algorithm classes."""
+
+from abc import ABC, ABCMeta
 from typing import Dict
 
-from trinity.buffer.schema.sql_schema import (
-    SCHEMA_REGISTRY,
-    DPODataModel,
-    ExperienceModel,
-    SFTDataModel,
-)
+from trinity.buffer.schema.sql_schema import DPODataModel, ExperienceModel, SFTDataModel
+from trinity.common.config import Config
+from trinity.common.constants import SyncMethod
 from trinity.common.experience import Experience, Experiences
+from trinity.utils.log import get_logger
 from trinity.utils.registry import Registry
 
-ALGORITHM = Registry("algorithm")
+logger = get_logger(__name__)
+
+ALGORITHM_TYPE = Registry("algorithm")
 
 
-class Algorithm(ABC):
+class ConstantMeta(ABCMeta):
+    def __setattr__(cls, name, value):
+        if name in cls.__dict__:
+            raise AttributeError(f"{name} is already defined in {cls.__name__}")
+        return super().__setattr__(name, value)
+
+
+class AlgorithmType(ABC, metaclass=ConstantMeta):
     use_critic: bool
     use_reference: bool
     use_advantage: bool
     use_rollout: bool
     can_balance_batch: bool
+    schema: type
 
     @classmethod
     def gather_experience(cls, exps: list[Experience], pad_token_id: int = 0) -> Experiences:
         return Experiences.gather_experiences(exps, pad_token_id)
 
-    @abstractmethod
     @classmethod
     def get_default_config(cls) -> Dict:
-        pass
+        raise NotImplementedError
 
     @classmethod
     def name(cls) -> str:
         return cls._name
 
+    @classmethod
+    def check_config(cls, config: Config) -> None:
+        pass
 
-@SCHEMA_REGISTRY(SFTDataModel)
-@ALGORITHM.register_module("sft")
-class SFTAlgorithm(Algorithm):
+
+@ALGORITHM_TYPE.register_module("sft")
+class SFTAlgorithm(AlgorithmType):
     """SFT Algorithm."""
 
     use_critic: bool = False
@@ -44,19 +57,19 @@ class SFTAlgorithm(Algorithm):
     use_advantage: bool = False
     use_rollout: bool = False
     can_balance_batch: bool = True
+    schema: type = SFTDataModel
 
     @classmethod
     def get_default_config(cls) -> Dict:
         return {
             "policy_loss_fn": "sft",
             "kl_loss_fn": "none",
-            "entropy_loss_fn": "basic",
+            "entropy_loss_fn": "none",
         }
 
 
-@SCHEMA_REGISTRY(ExperienceModel)
-@ALGORITHM.register_module("ppo")
-class PPOAlgorithm(Algorithm):
+@ALGORITHM_TYPE.register_module("ppo")
+class PPOAlgorithm(AlgorithmType):
     """PPO Algorithm."""
 
     use_critic: bool = True
@@ -64,6 +77,7 @@ class PPOAlgorithm(Algorithm):
     use_advantage: bool = True
     use_rollout: bool = True
     can_balance_batch: bool = True
+    schema: type = ExperienceModel
 
     @classmethod
     def get_default_config(cls) -> Dict:
@@ -71,15 +85,14 @@ class PPOAlgorithm(Algorithm):
             "repeat_times": 1,
             "policy_loss_fn": "ppo",
             "advantage_fn": "ppo",
-            "kl_penalty_fn": "k3",
+            "kl_penalty_fn": "none",
             "kl_loss_fn": "k2",
             "entropy_loss_fn": "basic",
         }
 
 
-@SCHEMA_REGISTRY(ExperienceModel)
-@ALGORITHM.register_module("grpo")
-class GRPOAlgorithm(Algorithm):
+@ALGORITHM_TYPE.register_module("grpo")
+class GRPOAlgorithm(AlgorithmType):
     """GRPO algorithm."""
 
     use_critic: bool = False
@@ -87,6 +100,7 @@ class GRPOAlgorithm(Algorithm):
     use_advantage: bool = True
     use_rollout: bool = True
     can_balance_batch: bool = True
+    schema: type = ExperienceModel
 
     @classmethod
     def get_default_config(cls) -> Dict:
@@ -94,15 +108,14 @@ class GRPOAlgorithm(Algorithm):
             "repeat_times": 2,
             "policy_loss_fn": "ppo",
             "advantage_fn": "grpo",
-            "kl_penalty_fn": "k3",
+            "kl_penalty_fn": "none",
             "kl_loss_fn": "k2",
             "entropy_loss_fn": "basic",
         }
 
 
-@SCHEMA_REGISTRY(ExperienceModel)
-@ALGORITHM.register_module("opmd")
-class OPMDAlgorithm(Algorithm):
+@ALGORITHM_TYPE.register_module("opmd")
+class OPMDAlgorithm(AlgorithmType):
     """OPMD algorithm."""
 
     use_critic: bool = False
@@ -110,6 +123,7 @@ class OPMDAlgorithm(Algorithm):
     use_advantage: bool = True
     use_rollout: bool = True
     can_balance_batch: bool = True
+    schema: type = ExperienceModel
 
     @classmethod
     def get_default_config(cls) -> Dict:
@@ -117,15 +131,14 @@ class OPMDAlgorithm(Algorithm):
             "repeat_times": 2,
             "policy_loss_fn": "opmd",
             "advantage_fn": "opmd",
-            "kl_penalty_fn": "k3",
+            "kl_penalty_fn": "none",
             "kl_loss_fn": "k2",
             "entropy_loss_fn": "basic",
         }
 
 
-@SCHEMA_REGISTRY(DPODataModel)
-@ALGORITHM.register_module("dpo")
-class DPOAlgorithm(Algorithm):
+@ALGORITHM_TYPE.register_module("dpo")
+class DPOAlgorithm(AlgorithmType):
     """DPO algorithm."""
 
     use_critic: bool = False
@@ -133,6 +146,7 @@ class DPOAlgorithm(Algorithm):
     use_advantage: bool = False
     use_rollout: bool = False
     can_balance_batch: bool = False
+    schema: type = DPODataModel
 
     @classmethod
     def gather_experience(cls, exps: list[Experience], pad_token_id: int = 0) -> Experiences:
@@ -146,3 +160,27 @@ class DPOAlgorithm(Algorithm):
             "kl_loss_fn": "k2",
             "entropy_loss_fn": "basic",
         }
+
+    @classmethod
+    def check_config(cls, config: Config) -> None:
+        if config.model == "train":
+            if (
+                config.buffer.trainer_input.experience_buffer is None
+                or not config.buffer.trainer_input.experience_buffer.path
+            ):
+                raise ValueError(
+                    "`buffer.trainer_input.experience_buffer.path` is required when `algorithm.algorithm_type == dpo`"
+                )
+        elif config.mode in ["both", "explore"]:
+            raise ValueError(f"DPO does not support `{config.mode}` mode")
+
+        if config.synchronizer.sync_method != SyncMethod.CHECKPOINT:
+            config.synchronizer.sync_method = SyncMethod.CHECKPOINT
+            logger.warning(
+                "DPO only supports checkpoint synchronization, set `synchronizer.sync_method` to `checkpoint`."
+            )
+        if config.algorithm.repeat_times != 2:
+            config.algorithm.repeat_times = 2
+            logger.warning(
+                "DPO only supports 2 repeat times, set `algorithm.repeat_times` to 2."
+            )  # no need to warn

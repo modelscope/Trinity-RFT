@@ -5,6 +5,7 @@ from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import NullPool
 
+from trinity.algorithm.algorithm import ALGORITHM_TYPE
 from trinity.buffer.buffer_writer import BufferWriter
 from trinity.buffer.schema import Base, create_dynamic_table
 from trinity.buffer.utils import retry_session
@@ -22,7 +23,8 @@ class SQLWriter(BufferWriter):
         assert meta.storage_type == StorageType.SQL
         # we only support write RFT algorithm buffer for now
         # TODO: support other algorithms
-        assert meta.algorithm_type.use_rollout, "Only RFT buffer is supported for writing."
+        algorithm = ALGORITHM_TYPE.get(meta.algorithm_type)
+        assert algorithm.use_rollout, "Only RFT buffer is supported for writing."
         self.engine = create_engine(meta.path, poolclass=NullPool)
         self.table_model_cls = create_dynamic_table(meta.algorithm_type, meta.name)
 

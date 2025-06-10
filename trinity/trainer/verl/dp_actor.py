@@ -31,6 +31,8 @@ from verl.utils.ulysses import gather_outpus_and_unpad, ulysses_pad_and_slice_in
 from verl.workers.actor import BasePPOActor
 
 from trinity.algorithm import ENTROPY_LOSS_FN, KL_FN, POLICY_LOSS_FN
+from trinity.algorithm.entropy_loss_fn.entropy_loss_fn import DummyEntropyLossFn
+from trinity.algorithm.kl_fn.kl_fn import DummyKLFn
 from trinity.algorithm.utils import prefix_metrics
 from trinity.common.config import AlgorithmConfig
 
@@ -298,7 +300,7 @@ class DataParallelPPOActor(BasePPOActor):
         for trinity_key in self.policy_loss_fn.select_keys:
             verl_key = select_keys_trinity2verl[trinity_key]
             select_keys.append(verl_key)
-        if self.config.use_kl_loss:
+        if not isinstance(self.kl_loss_fn, DummyKLFn):
             select_keys.append("ref_log_prob")
         select_keys = list(set(select_keys))
         batch = data.select(batch_keys=select_keys).batch
@@ -386,29 +388,35 @@ class DataParallelPPOActor(BasePPOActor):
                         src_metrics=pg_loss_metrics, prefix="actor", dst_metrics=micro_batch_metrics
                     )
 
-                    # compute entropy loss from entropy
-                    entropy_loss, entropy_loss_metrics = self.entropy_loss_fn(
-                        entropy=entropy,
-                        action_mask=response_mask,
-                    )
-                    prefix_metrics(
-                        src_metrics=entropy_loss_metrics,
-                        prefix="actor",
-                        dst_metrics=micro_batch_metrics,
-                    )
+                    if isinstance(self.entropy_loss_fn, DummyEntropyLossFn):
+                        policy_loss = pg_loss
+                    else:
+                        # compute entropy loss from entropy
+                        entropy_loss, entropy_loss_metrics = self.entropy_loss_fn(
+                            entropy=entropy,
+                            action_mask=response_mask,
+                        )
+                        prefix_metrics(
+                            src_metrics=entropy_loss_metrics,
+                            prefix="actor",
+                            dst_metrics=micro_batch_metrics,
+                        )
 
-                    # compute policy loss
-                    policy_loss = pg_loss - entropy_loss
+                        # compute policy loss
+                        policy_loss = pg_loss - entropy_loss
 
-                    kl_loss, kl_loss_metrics = self.kl_loss_fn.calculate_kl_loss(
-                        logprob=log_prob,
-                        ref_logprob=data["ref_log_prob"],
-                        response_mask=response_mask,
-                    )
-                    prefix_metrics(
-                        src_metrics=kl_loss_metrics, prefix="actor", dst_metrics=micro_batch_metrics
-                    )
-                    policy_loss = policy_loss + kl_loss
+                    if not isinstance(self.kl_loss_fn, DummyKLFn):
+                        kl_loss, kl_loss_metrics = self.kl_loss_fn.calculate_kl_loss(
+                            logprob=log_prob,
+                            ref_logprob=data["ref_log_prob"],
+                            response_mask=response_mask,
+                        )
+                        prefix_metrics(
+                            src_metrics=kl_loss_metrics,
+                            prefix="actor",
+                            dst_metrics=micro_batch_metrics,
+                        )
+                        policy_loss = policy_loss + kl_loss
 
                     if self.config.use_dynamic_bsz:
                         # relative to the dynamic bsz

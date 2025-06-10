@@ -102,7 +102,7 @@ class KLFn(ABC):
 
 
 @KL_FN.register_module("none")
-class DummyFn(KLFn):
+class DummyKLFn(KLFn):
     """
     Dummy KL function.
     """

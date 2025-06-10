@@ -12,7 +12,8 @@ from typing import Tuple
 
 import ray
 
-from trinity.algorithm.algorithm import SFTAlgorithm
+from trinity.algorithm.algorithm import ALGORITHM_TYPE, SFTAlgorithm
+from trinity.algorithm.algorithm_manager import AlgorithmManager
 from trinity.buffer import get_buffer_reader
 from trinity.common.config import Config
 from trinity.common.constants import SyncMethod
@@ -26,6 +27,7 @@ class Trainer:
     def __init__(self, config: Config) -> None:
         self.config = config
         self.logger = get_logger(__name__)
+        self.algorithm_manager = AlgorithmManager(config)
         self.train_buffer = get_buffer_reader(
             self.config.buffer.trainer_input.experience_buffer,  # type: ignore
             self.config.buffer,
@@ -69,16 +71,17 @@ class Trainer:
         Returns:
             bool: Whether to continue training.
         """
-        algo_config = self.config.algorithm.get_current_algorithm_config(
+        algo_config = self.algorithm_manager.get_current_algorithm_config(
             self.engine.train_step_num + 1
         )
         algo_type = algo_config.algorithm_type
-        if algo_type.use_rollout:
+        algorithm = ALGORITHM_TYPE.get(algo_type)
+        if algorithm.use_rollout:
             strategy = self.config.buffer.trainer_input.read_experience_strategy
         else:
             strategy = None
         try:
-            if isinstance(algo_type, SFTAlgorithm):
+            if algorithm == SFTAlgorithm:
                 exps = self.sft_warmup_buffer.read()
             else:
                 exps = self.train_buffer.read(strategy=strategy)
@@ -86,7 +89,7 @@ class Trainer:
             self.logger.warning("No more data to train. Stop training.")
             return False, self.engine.train_step_num
 
-        experiences = algo_type.gather_experience(
+        experiences = algorithm.gather_experience(
             exps,
             pad_token_id=self.config.buffer.pad_token_id,  # type: ignore
         )
@@ -103,7 +106,7 @@ class Trainer:
 
     def shutdown(self) -> None:
         # if checkpoint not saved, save the last checkpoint
-        step_num = self.engine.global_steps - 1
+        step_num = self.engine.train_step_num
         path = os.path.join(self.config.checkpoint_job_dir, f"global_step_{step_num}")
         if not os.path.isdir(path) or len(os.listdir(path)) == 0:
             self.engine.save_checkpoint()
@@ -117,26 +120,14 @@ class TrainEngineWrapper(ABC):
     def prepare(self) -> None:
         """Do some preparation before training started."""
 
-    @abstractmethod
     @property
+    @abstractmethod
     def train_step_num(self) -> int:
         """Get the current training step number."""
 
     @abstractmethod
     def train_step(self, experiences) -> Tuple[bool, int]:
         """Training."""
-
-    # @abstractmethod
-    # def train_rft_step(self, experiences) -> Tuple[bool, int]:
-    #     """Train on the RFT data."""
-
-    # @abstractmethod
-    # def train_sft_step(self, experiences) -> Tuple[bool, int]:
-    #     """Train on the SFT data."""
-
-    # @abstractmethod
-    # def train_dpo_step(self, experiences) -> Tuple[bool, int]:
-    #     """Train on the DPO data."""
 
     @abstractmethod
     def save_checkpoint(self) -> None:

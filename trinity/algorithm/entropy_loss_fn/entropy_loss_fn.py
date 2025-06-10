@@ -61,3 +61,25 @@ class BasicEntropyLossFn(EntropyLossFn):
     @classmethod
     def default_args(cls) -> Dict:
         return {"entropy_coef": 0.0}
+
+
+@ENTROPY_LOSS_FN.register_module("none")
+class DummyEntropyLossFn(EntropyLossFn):
+    """
+    Dummy entropy loss function.
+    """
+
+    def __init__(self):
+        pass
+
+    def __call__(
+        self,
+        entropy: torch.Tensor,
+        action_mask: torch.Tensor,
+        **kwargs,
+    ) -> Tuple[torch.Tensor, Dict]:
+        return torch.tensor(0.0), {}
+
+    @classmethod
+    def default_args(cls) -> Dict:
+        return {}

@@ -43,7 +43,7 @@ def get_buffer_reader(storage_config: StorageConfig, buffer_config: BufferConfig
 
         algorithm_type = storage_config.algorithm_type
         if algorithm_type is not None:
-            file_read_type = algorithm_type.name()
+            file_read_type = algorithm_type
         else:
             file_read_type = "rollout"
         return FILE_READERS.get(file_read_type)(storage_config, buffer_config)

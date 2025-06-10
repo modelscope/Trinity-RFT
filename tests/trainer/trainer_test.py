@@ -15,7 +15,7 @@ from tests.tools import (
     get_unittest_dataset_config,
 )
 from trinity.cli.launcher import bench, both, train
-from trinity.common.constants import AlgorithmType, MonitorType, SyncMethod
+from trinity.common.constants import MonitorType, SyncMethod
 
 
 class BaseTrainerCase(RayUnittestBase):
@@ -119,7 +119,7 @@ class TestTrainerGSM8K(BaseTrainerCase):
     def test_trainer(self):
         """Test GSM8K."""
         # test both mode
-        self.config.algorithm.algorithm_type = AlgorithmType.GRPO
+        self.config.algorithm.algorithm_type = "grpo"
         self.config.algorithm.repeat_times = 4
         # self.config.algorithm.repeat_times = 8  # TODO: used for real testing
         self.config.algorithm.advantage_fn = "grpo"
@@ -157,7 +157,7 @@ class TestTrainerGSM8KWithSFT(BaseTrainerCase):
     def test_trainer(self):
         """Test GSM8K With SFT."""
         # test both mode
-        self.config.algorithm.algorithm_type = AlgorithmType.GRPO
+        self.config.algorithm.algorithm_type = "grpo"
         self.config.algorithm.repeat_times = 4
         self.config.algorithm.advantage_fn = "grpo"
         self.config.algorithm.advantage_fn_args = {}
@@ -174,7 +174,7 @@ class TestTrainerGSM8KWithSFT(BaseTrainerCase):
         parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
         rollout_metrics = parser.metric_list("rollout")
         self.assertTrue(len(rollout_metrics) > 0)
-        self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 2)
+        self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 4)
         actor_metrics = parser.metric_list("actor")
         self.assertTrue(len(actor_metrics) > 0)
         self.assertEqual(parser.metric_max_step(actor_metrics[0]), 2)  # SFT
@@ -193,7 +193,7 @@ class TestTrainerDPO(BaseTrainerCase):
         """Test DPO."""
         # test both mode
         self.config.mode = "train"
-        self.config.algorithm.algorithm_type = AlgorithmType.DPO
+        self.config.algorithm.algorithm_type = "dpo"
         self.config.algorithm.policy_loss_fn = "dpo"
         self.config.algorithm.policy_loss_fn_args = {}
         # self.config.buffer.batch_size = 32
