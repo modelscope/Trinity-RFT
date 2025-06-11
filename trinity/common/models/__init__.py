@@ -103,6 +103,7 @@ def create_inference_models(
                 num_gpus=0 if config.explorer.rollout_model.tensor_parallel_size > 1 else 1,
                 scheduling_strategy=PlacementGroupSchedulingStrategy(
                     placement_group=pg,
+                    placement_group_capture_child_tasks=True,
                     placement_group_bundle_index=bundles_for_engine[0],
                 ),
             )
@@ -128,6 +129,7 @@ def create_inference_models(
                     num_gpus=0 if model_config.tensor_parallel_size > 1 else 1,
                     scheduling_strategy=PlacementGroupSchedulingStrategy(
                         placement_group=pg,
+                        placement_group_capture_child_tasks=True,
                         placement_group_bundle_index=bundles_for_engine[0],
                     ),
                 )

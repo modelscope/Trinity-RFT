@@ -314,11 +314,6 @@ class DataParallelPPOActor(BasePPOActor):
         else:
             dataloader = batch.split(self.config.ppo_mini_batch_size)
 
-        # TODO: for pairwise_opmd and use_uid, is it necessary to somehow sort samples within batch by uid,
-        # to ensure that there are samples with the same uid within each micro-batch
-        # (at which level pairwise loss is computed)?
-        # (In comparison, advantage is computed at the level of batch, same for opmd, grpo, etc.)
-
         metrics = {}
         for epoch in range(self.config.ppo_epochs):
             for batch_idx, data in enumerate(dataloader):
