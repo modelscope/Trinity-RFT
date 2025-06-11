@@ -16,10 +16,10 @@ class EntropyLossFn(ABC):
 
     @abstractmethod
     def __call__(
-        self,
-        entropy: torch.Tensor,
-        action_mask: torch.Tensor,
-        **kwargs,
+            self,
+            entropy: torch.Tensor,
+            action_mask: torch.Tensor,
+            **kwargs,
     ) -> Tuple[torch.Tensor, Dict]:
         """
         Args:
@@ -32,7 +32,6 @@ class EntropyLossFn(ABC):
         """
 
     @classmethod
-    @abstractmethod
     def default_args(cls) -> Dict:
         """
         Returns:
@@ -51,17 +50,13 @@ class BasicEntropyLossFn(EntropyLossFn):
         self.entropy_coef = entropy_coef
 
     def __call__(
-        self,
-        entropy: torch.Tensor,
-        action_mask: torch.Tensor,
-        **kwargs,
+            self,
+            entropy: torch.Tensor,
+            action_mask: torch.Tensor,
+            **kwargs,
     ) -> Tuple[torch.Tensor, Dict]:
         entropy_loss = masked_mean(entropy, action_mask)
         return entropy_loss * self.entropy_coef, {"entropy_loss": entropy_loss.detach().item()}
-
-    @classmethod
-    def default_args(cls) -> Dict:
-        return {"entropy_coef": 0.0}
 
 
 @ENTROPY_LOSS_FN.register_module("none")
@@ -74,13 +69,9 @@ class DummyEntropyLossFn(EntropyLossFn):
         pass
 
     def __call__(
-        self,
-        entropy: torch.Tensor,
-        action_mask: torch.Tensor,
-        **kwargs,
+            self,
+            entropy: torch.Tensor,
+            action_mask: torch.Tensor,
+            **kwargs,
     ) -> Tuple[torch.Tensor, Dict]:
         return torch.tensor(0.0), {}
-
-    @classmethod
-    def default_args(cls) -> Dict:
-        return {}
