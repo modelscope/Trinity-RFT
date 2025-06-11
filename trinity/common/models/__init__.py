@@ -122,6 +122,7 @@ def create_inference_models(
             bundles_for_engine = allocator.allocate(model_config.tensor_parallel_size)
             model_config.enable_openai_api = True
             model_config.engine_type = "vllm_async"
+            model_config.bundle_indices = ",".join([str(bid) for bid in bundles_for_engine])
             engines.append(
                 ray.remote(vLLMAysncRolloutModel)
                 .options(
