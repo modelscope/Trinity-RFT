@@ -43,7 +43,7 @@ class Registry(object):
         for m in self._modules.keys():
             logger.info(f"{self._name}\t{m}")
 
-    def get(self, module_key: str) -> Any:
+    def get(self, module_key) -> Any:
         """
         Get module named module_key from in current registry. If not found,
         return None.
