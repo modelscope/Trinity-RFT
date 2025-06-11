@@ -15,12 +15,19 @@ def simple_answer_parser(response: str) -> str:
     return parse(response)
 
 
-def find_boxed_answer(string):
+def find_boxed_answer(raw_answer, timeout=10):
     """
-    Find answers from solutions where the answers are enclosed in LaTeX's `\boxed` tag
+    Find answers from solutions where the answers are enclosed in LaTeX's `\\boxed` tag
+
+    Args:
+        raw_answer (`str`): raw answer from model
+        timeout (`int`): timeout in seconds for regex
+
+    Returns:
+        `str`: answer if found, otherwise None
     """
     pattern = r"\\boxed\s*(({(?:\\.|[^{}]|(?2))*})|(.))"
-    res = re.findall(pattern, string)
+    res = re.findall(pattern, raw_answer, timeout=timeout)
     if res:
         answer = res[-1][0]  # regard the last boxed as the answer
         if answer.startswith("{"):

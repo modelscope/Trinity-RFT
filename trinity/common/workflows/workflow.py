@@ -28,8 +28,9 @@ class Task:
     """A Task class that defines a task and its associated reward function / workflow."""
 
     workflow: Type[Workflow]
-    format_args: FormatConfig
+    format_args: FormatConfig = field(default_factory=FormatConfig)
     rollout_args: GenerationConfig = field(default_factory=GenerationConfig)
+    workflow_args: dict = field(default_factory=dict)
     is_eval: bool = False
     reward_fn: Optional[Type[RewardFn]] = None
     raw_task: Optional[dict] = None  # The raw data sample
@@ -41,6 +42,10 @@ class Task:
 
         Args:
             model (ModelWrapper): The rollout model for the workflow.
+            auxiliary_models (List[openai.OpenAI]): The auxiliary models for the workflow.
+
+        Note:
+            `model_path` attribute is added to the `auxiliary_models` for use within the workflow.
 
         Returns:
             Workflow: The generated workflow object.

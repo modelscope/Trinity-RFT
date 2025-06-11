@@ -196,8 +196,8 @@ class RolloutDataReader(BufferReader):
         self.reward_fn_key = meta.format.reward_fn_key
 
         self.task_type = meta.task_type
-        self.default_workflow_cls = WORKFLOWS.get(meta.default_workflow_type)
-        self.default_reward_fn_cls = REWARD_FUNCTIONS.get(meta.default_reward_fn_type)
+        self.default_workflow_cls = WORKFLOWS.get(meta.default_workflow_type)  # type: ignore
+        self.default_reward_fn_cls = REWARD_FUNCTIONS.get(meta.default_reward_fn_type)  # type: ignore
         self.total_epochs = meta.total_epochs if self.task_type == TaskType.EXPLORE else 1
 
     def __len__(self):
@@ -217,11 +217,12 @@ class RolloutDataReader(BufferReader):
             if self.reward_fn_key in sample
             else self.default_reward_fn_cls
         )
-        assert workflow_class is not None, "`default_reward_fn_type` or `workflow_key` is required"
+        assert workflow_class is not None, "`default_workflow_type` or `workflow_key` is required"
         task = Task(
             workflow=workflow_class,
             format_args=self.meta.format,
             rollout_args=self.meta.rollout_args,
+            workflow_args=self.meta.workflow_args,
             is_eval=self.meta.task_type == TaskType.EVAL,
             reward_fn=reward_fn,
             raw_task=sample,

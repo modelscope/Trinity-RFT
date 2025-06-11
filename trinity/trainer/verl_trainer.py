@@ -40,7 +40,7 @@ from trinity.algorithm.utils import prefix_metrics
 from trinity.common.config import Config
 from trinity.common.experience import Experiences
 from trinity.trainer.trainer import TrainEngineWrapper
-from trinity.utils.monitor import Monitor
+from trinity.utils.monitor import MONITOR
 
 
 class _InternalDataLoader:
@@ -145,7 +145,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         )
         self.init_workers()
 
-        self.logger = Monitor(
+        self.logger = MONITOR.get(global_config.monitor.monitor_type)(
             project=config.trainer.project_name,
             name=config.trainer.experiment_name,
             role="trainer",

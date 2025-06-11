@@ -23,6 +23,9 @@ class CaseInsensitiveEnumMeta(EnumMeta):
             return cls[name.upper()]
         return super().__getattr__(name)
 
+    def __call__(cls, value, *args, **kwargs):
+        return super().__call__(value.lower(), *args, **kwargs)
+
 
 class CaseInsensitiveEnum(Enum, metaclass=CaseInsensitiveEnumMeta):
     pass
@@ -47,11 +50,11 @@ class ReadStrategy(CaseInsensitiveEnum):
     """Pop Strategy."""
 
     DEFAULT = None
-    FIFO = "FIFO"
-    RANDOM = "RANDOM"
-    LRU = "LRU"
-    LFU = "LFU"
-    PRIORITY = "PRIORITY"
+    FIFO = "fifo"
+    RANDOM = "random"
+    LRU = "lru"
+    LFU = "lfu"
+    PRIORITY = "priority"
 
 
 class StorageType(CaseInsensitiveEnum):

@@ -64,9 +64,9 @@ def create_inference_models(
     else:
         raise ValueError(f"Unknown engine type: {config.explorer.rollout_model.engine_type}")
 
-    main_bundles = [{"GPU": 1, "CPU": 1} for _ in range(engine_num * tensor_parallel_size)]
+    main_bundles = [{"GPU": 1} for _ in range(engine_num * tensor_parallel_size)]
     auxiliary_bundles = [
-        {"GPU": 1, "CPU": 1}
+        {"GPU": 1}
         for _ in range(
             sum(
                 [

@@ -16,13 +16,13 @@ logger = get_logger(__name__)
 class QueueReader(BufferReader):
     """Reader of the Queue buffer."""
 
-    def __init__(self, meta: StorageConfig, config: BufferConfig):
-        assert meta.storage_type == StorageType.QUEUE
+    def __init__(self, storage_config: StorageConfig, config: BufferConfig):
+        assert storage_config.storage_type == StorageType.QUEUE
         self.config = config
         self.queue = QueueActor.options(
-            name=f"queue-{meta.name}",
+            name=f"queue-{storage_config.name}",
             get_if_exists=True,
-        ).remote(meta, config)
+        ).remote(storage_config, config)
 
     def read(self, strategy: Optional[ReadStrategy] = None) -> List:
         if strategy is not None and strategy != ReadStrategy.FIFO:

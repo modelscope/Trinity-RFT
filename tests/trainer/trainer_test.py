@@ -15,7 +15,7 @@ from tests.tools import (
     get_unittest_dataset_config,
 )
 from trinity.cli.launcher import bench, both, train
-from trinity.common.constants import MonitorType, SyncMethod
+from trinity.common.constants import SyncMethod
 
 
 class BaseTrainerCase(RayUnittestBase):
@@ -30,7 +30,7 @@ class BaseTrainerCase(RayUnittestBase):
         self.config.explorer.rollout_model.use_v1 = False
         self.config.project = "Trainer-unittest"
         self.config.name = f"trainer-{datetime.now().strftime('%Y%m%d%H%M%S')}"
-        self.config.monitor.monitor_type = MonitorType.TENSORBOARD
+        self.config.monitor.monitor_type = "tensorboard"
         self.config.checkpoint_root_dir = get_checkpoint_path()
         self.config.synchronizer.sync_interval = 2
         self.config.synchronizer.sync_method = SyncMethod.NCCL

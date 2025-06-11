@@ -1,5 +1,7 @@
 """Monitor"""
+
 import os
+from abc import ABC, abstractmethod
 from typing import List, Optional, Union
 
 import numpy as np
@@ -8,11 +10,13 @@ import wandb
 from torch.utils.tensorboard import SummaryWriter
 
 from trinity.common.config import Config
-from trinity.common.constants import MonitorType
 from trinity.utils.log import get_logger
+from trinity.utils.registry import Registry
+
+MONITOR = Registry("monitor")
 
 
-class Monitor:
+class Monitor(ABC):
     """Monitor"""
 
     def __init__(
@@ -22,15 +26,25 @@ class Monitor:
         role: str,
         config: Config = None,  # pass the global Config for recording
     ) -> None:
-        if config.monitor.monitor_type == MonitorType.WANDB:
-            self.logger = WandbLogger(project, name, role, config)
-        elif config.monitor.monitor_type == MonitorType.TENSORBOARD:
-            self.logger = TensorboardLogger(project, name, role, config)
-        else:
-            raise ValueError(f"Unknown monitor type: {config.monitor.monitor_type}")
+        self.project = project
+        self.name = name
+        self.role = role
+        self.config = config
 
+    @abstractmethod
     def log_table(self, table_name: str, experiences_table: pd.DataFrame, step: int):
-        self.logger.log_table(table_name, experiences_table, step=step)
+        """Log a table"""
+
+    @abstractmethod
+    def log(self, data: dict, step: int, commit: bool = False) -> None:
+        """Log metrics."""
+
+    @abstractmethod
+    def close(self) -> None:
+        """Close the monitor"""
+
+    def __del__(self) -> None:
+        self.close()
 
     def calculate_metrics(
         self, data: dict[str, Union[List[float], float]], prefix: Optional[str] = None
@@ -51,15 +65,9 @@ class Monitor:
                 metrics[key] = val
         return metrics
 
-    def log(self, data: dict, step: int, commit: bool = False) -> None:
-        """Log metrics."""
-        self.logger.log(data, step=step, commit=commit)
 
-    def close(self) -> None:
-        self.logger.close()
-
-
-class TensorboardLogger:
+@MONITOR.register_module("tensorboard")
+class TensorboardMonitor(Monitor):
     def __init__(self, project: str, name: str, role: str, config: Config = None) -> None:
         self.tensorboard_dir = os.path.join(config.monitor.cache_dir, "tensorboard")
         os.makedirs(self.tensorboard_dir, exist_ok=True)
@@ -77,11 +85,9 @@ class TensorboardLogger:
     def close(self) -> None:
         self.logger.close()
 
-    def __del__(self) -> None:
-        self.logger.close()
 
-
-class WandbLogger:
+@MONITOR.register_module("wandb")
+class WandbMonitor(Monitor):
     def __init__(self, project: str, name: str, role: str, config: Config = None) -> None:
         self.logger = wandb.init(
             project=project,
@@ -103,7 +109,4 @@ class WandbLogger:
         self.console_logger.info(f"Step {step}: {data}")
 
     def close(self) -> None:
-        self.logger.finish()
-
-    def __del__(self) -> None:
         self.logger.finish()

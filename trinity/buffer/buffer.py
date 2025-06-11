@@ -46,7 +46,7 @@ def get_buffer_reader(storage_config: StorageConfig, buffer_config: BufferConfig
             file_read_type = algorithm_type
         else:
             file_read_type = "rollout"
-        return FILE_READERS.get(file_read_type)(storage_config, buffer_config)
+        return FILE_READERS.get(file_read_type)(storage_config, buffer_config)  # type: ignore
     else:
         raise ValueError(f"{storage_config.storage_type} not supported.")
 

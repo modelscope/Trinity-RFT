@@ -45,6 +45,15 @@ To handle differences in `Task` contents, Trinity-RFT provides a unified `Task` 
   - **`raw_task`** (`Dict`): An record of raw data in `Dict` format. For highly customized workflow, you can directly use `raw_task` to initialize your `Workflow` instance without relying on the following fields.
   - **`format_args`** ({class}`trinity.common.config.FormatConfig`): Parameters to facilitate the construction of `Workflow` instances. For example, the `prompt_key` and `response_key` can be used to get the prompt and response from `raw_task`. These settings come from the YAML configuration file and can be set in `buffer.explorer_input.task_set.format`.
   - **`rollout_args`** ({class}`trinity.common.config.GenerationConfig`): Parameters that control the rollout process, such as `temperature`. This field also comes from the YAML configuration file and can be set in `buffer.explorer_input.task_set.rollout_args`.
+  - **`workflow_args`** (`Dict`): A dictionary of parameters to facilitate the construction of `Workflow` instances. Provides more flexibility than `format_args` and `rollout_args` by using a dictionary. This field also comes from the YAML configuration file and can be set in `buffer.explorer_input.task_set.workflow_args`. Normally, you do not need to set this field.
+
+```{tip}
+`workflow`, `workflow_args` and `raw_task` provide different levels of customization.
+
+- `workflow` provides the global settings for all tasks that uses the same workflow. (Global Level)
+- `workflow_args` can be set for each task dataset, allowing different task datasets using the same workflow to behave differently. (Dataset Level)
+- `raw_task` provides the ability to customize the behavior of each task, which is most flexible. (Data Sample Level)
+```
 
 In the math problem scenario, the `Task` dataset can be a `jsonl` file, where each line contains JSON with `question` and `answer` fields representing the problem description and standard answer, respectively. For example:
 
@@ -111,7 +120,7 @@ During initialization, `Workflow` receives the following parameters:
 You can switch to using the OpenAI API by setting `explorer.rollout_model.enable_openai_api` to `true` in your config file and calling `model.get_openai_client()` to get an `openai.OpenAI` instance in your workflow.
 ```
 
-Here’s an example of initializing a simple workflow using only `raw_task` and `rollout_args`. In more complex cases, you can use the `format_args` for further customization.
+Here's an example of initializing a simple workflow using only `raw_task` and `rollout_args`. In more complex cases, you can use the `format_args` for further customization.
 
 ```python
 class ExampleWorkflow(Workflow):
@@ -187,6 +196,25 @@ from trinity.common.workflows.workflow import WORKFLOWS
 class ExampleWorkflow(Workflow):
     pass
 ```
+
+For workflows that are prepared to be contributed to Trinity-RFT project, you need to place the above code in `trinity/common/workflows` folder, e.g., `trinity/common/workflows/example_workflow.py`. And add the following line to `trinity/common/workflows/__init__.py`:
+
+```python
+# existing import lines
+from .example_workflow import ExampleWorkflow
+
+__all__ = [
+    # existing __all__ lines
+    "ExampleWorkflow",
+]
+```
+
+For workflows that are not intended to be contributed to Trinity-RFT project, you can just place the above code in `trinity/plugins`. Trinity-RFT will automatically detect and load all custom modules in this folder.
+
+```{tip}
+You can specify the directory where your custom modules are located by setting `--plugin-dir` when starting Trinity-RFT. If you don't specify `--plugin-dir`, Trinity-RFT will use `<Trinity_RFT_ROOT_DIR>/trinity/plugins` as the default directory.
+```
+
 
 #### Avoid Re-initialization
 
@@ -283,6 +311,126 @@ Now you can run your workflow in Trinity-RFT using the command:
 ```
 trinity run --config <your_yaml_file>
 ```
+
+---
+
+## Adding New Config Entries for the Config Generator (Advanced)
+
+### Step 0: Understanding Streamlit
+
+Before adding new parameters to the Config Generator page, it is essential to familiarize yourself with the relevant API and mechanisms of [Streamlit](https://docs.streamlit.io/develop/api-reference). This project primarily utilizes various input components from Streamlit and employs `st.session_state` to store user-input parameters.
+
+### Step 1: Implement New Config Entries
+
+To illustrate the process of creating a new parameter setting for the Config Generator page, we will use `train_batch_size` as an example.
+
+1. Determine the appropriate scope for the parameter. Currently, parameters are categorized into four files:
+   - `trinity/manager/config_registry/buffer_config_manager.py`
+   - `trinity/manager/config_registry/explorer_config_manager.py`
+   - `trinity/manager/config_registry/model_config_manager.py`
+   - `trinity/manager/config_registry/trainer_config_manager.py`
+
+   In this case, `train_batch_size` should be placed in the `buffer_config_manager.py` file.
+
+2. Create a parameter setting function using Streamlit. The function name must follow the convention of starting with 'set_', and the remainder of the name becomes the config name.
+
+3. Decorate the parameter setting function with the `CONFIG_GENERATORS.register_config` decorator. This decorator requires the following information:
+   - Default value of the parameter
+   - Visibility condition (if applicable)
+   - Additional config parameters (if needed)
+
+```{note}
+The `CONFIG_GENERATORS.register_config` decorator automatically passes `key=config_name` as an argument to the registered configuration function. Ensure that your function accepts this keyword argument.
+```
+
+For `train_batch_size`, we will use the following settings:
+- Default value: 96
+- Visibility condition: `lambda: st.session_state["trainer_gpu_num"] > 0`
+- Additional config: `{"_train_batch_size_per_gpu": 16}`
+
+
+Here's the complete code for the `train_batch_size` parameter:
+
+```python
+@CONFIG_GENERATORS.register_config(
+    default_value=96,
+    visible=lambda: st.session_state["trainer_gpu_num"] > 0,
+    other_configs={"_train_batch_size_per_gpu": 16},
+)
+def set_train_batch_size(**kwargs):
+    key = kwargs.get("key")
+    trainer_gpu_num = st.session_state["trainer_gpu_num"]
+    st.session_state[key] = (
+        st.session_state["_train_batch_size_per_gpu"] * st.session_state["trainer_gpu_num"]
+    )
+
+    def on_change():
+        st.session_state["_train_batch_size_per_gpu"] = max(
+            st.session_state[key] // st.session_state["trainer_gpu_num"], 1
+        )
+
+    st.number_input(
+        "Train Batch Size",
+        min_value=trainer_gpu_num,
+        step=trainer_gpu_num,
+        help=_str_for_train_batch_size(),
+        on_change=on_change,
+        **kwargs,
+    )
+```
+
+If the parameter requires validation, create a check function. For `train_batch_size`, we need to ensure it is divisible by `trainer_gpu_num`. If not, a warning should be displayed, and the parameter should be added to `unfinished_fields`.
+
+Decorate the check function with the `CONFIG_GENERATORS.register_check` decorator:
+
+```python
+@CONFIG_GENERATORS.register_check()
+def check_train_batch_size(unfinished_fields: set, key: str):
+    if st.session_state[key] % st.session_state["trainer_gpu_num"] != 0:
+        unfinished_fields.add(key)
+        st.warning(_str_for_train_batch_size())
+```
+
+```{note}
+The `CONFIG_GENERATORS.register_check` decorator automatically receives `key=config_name` and `unfinished_fields=self.unfinished_fields` as arguments. Ensure your function accepts these keyword arguments.
+```
+
+### Step 2: Integrating New Parameters into `config_manager.py`
+
+To successfully integrate new parameters into the `config_manager.py` file, please adhere to the following procedure:
+
+1. Parameter Categorization:
+   Determine the appropriate section for the new parameter based on its functionality. The config generator page is structured into two primary modes:
+   - Beginner Mode: Comprises "Essential Configs" and "Important Configs" sections.
+   - Expert Mode: Includes "Model", "Buffer", "Explorer and Synchronizer", and "Trainer" sections.
+
+2. Parameter Addition:
+   Incorporate the new parameter into the relevant section using the `self.get_configs` method within the `ConfigManager` class.
+
+   Example:
+   ```python
+   class ConfigManager:
+       def _expert_buffer_part(self):
+           self.get_configs("total_epochs", "train_batch_size")
+   ```
+
+3. YAML File Integration:
+   Locate the appropriate position for the new parameter within the YAML file structure. This should be done in the `generate_config` function and its associated sub-functions.
+
+4. Parameter Value Assignment:
+   Utilize `st.session_state` to retrieve the parameter value from the config generator page and assign it to the corresponding field in the YAML.
+
+   Example:
+   ```python
+   class ConfigManager:
+       def _gen_buffer_config(self):
+           buffer_config = {
+               "batch_size": st.session_state["train_batch_size"],
+               # Additional configuration parameters
+           }
+   ```
+
+By meticulously following these steps, you can ensure that new parameters are successfully added to the Config Generator page and properly integrated into the configuration system. This process maintains the integrity and functionality of the configuration management framework.
 
 ---
 

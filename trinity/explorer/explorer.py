@@ -21,7 +21,7 @@ from trinity.common.models.utils import (
 from trinity.explorer.runner_pool import RunnerPool
 from trinity.manager.manager import CacheManager
 from trinity.utils.log import get_logger
-from trinity.utils.monitor import Monitor
+from trinity.utils.monitor import MONITOR
 
 
 @ray.remote(name="explorer", concurrency_groups={"get_weight": 32, "setup_weight_sync_group": 1})
@@ -49,7 +49,7 @@ class Explorer:
         for eval_taskset_config in self.config.buffer.explorer_input.eval_tasksets:
             self.eval_tasksets.append(get_buffer_reader(eval_taskset_config, self.config.buffer))
         self.runner_pool = self._init_runner_pool()
-        self.monitor = Monitor(
+        self.monitor = MONITOR.get(self.config.monitor.monitor_type)(
             project=self.config.project,
             name=self.config.name,
             role="explorer",

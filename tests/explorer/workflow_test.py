@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from unittest.mock import MagicMock
 
 from tests.tools import get_unittest_dataset_config
-from trinity.common.workflows import MathWorkflow
+from trinity.common.workflows import MathWorkflow, Workflow
 from trinity.common.workflows.workflow import Task
 
 
@@ -13,6 +13,33 @@ from trinity.common.workflows.workflow import Task
 class MockResponse:
     response_text: str
     reward: float = 0.0
+
+
+class DummyWorkflow(Workflow):
+    def __init__(self, model, task: Task, auxiliary_models=None):
+        super().__init__(model, task, auxiliary_models)
+        self.obj = task.raw_task
+        self.output_format = task.workflow_args["output_format"]
+
+    @property
+    def resettable(self):
+        return True
+
+    def reset(self, task: Task):
+        self.obj = task.raw_task
+        self.output_format = task.workflow_args["output_format"]
+
+    def run(self):
+        if self.output_format == "json":
+            import json
+
+            return [json.dumps(self.obj)]
+        elif self.output_format == "yaml":
+            import yaml
+
+            return [yaml.safe_dump(self.obj)]
+        else:
+            raise ValueError("Invalid output format")
 
 
 class WorkflowTest(unittest.TestCase):
@@ -150,3 +177,18 @@ class WorkflowTest(unittest.TestCase):
         self.assertEqual(experiences[1].reward, -0.1)
         self.assertEqual(experiences[2].reward, -0.1)
         self.assertEqual(experiences[3].reward, 1.1)
+
+    def test_workflow_resettable(self) -> None:
+        model = MagicMock()
+        json_task = Task(
+            workflow=DummyWorkflow, raw_task={"a": 1}, workflow_args={"output_format": "json"}
+        )
+        yaml_task = Task(
+            workflow=DummyWorkflow, raw_task={"a": 1}, workflow_args={"output_format": "yaml"}
+        )
+        workflow = json_task.to_workflow(model)
+        answer = workflow.run()
+        self.assertEqual(answer[0], '{"a": 1}')
+        workflow.reset(yaml_task)
+        answer = workflow.run()
+        self.assertEqual(answer[0], "a: 1\n")

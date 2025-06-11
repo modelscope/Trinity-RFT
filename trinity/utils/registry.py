@@ -1,21 +1,4 @@
-# Copyright (c) Alibaba, Inc. and its affiliates.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-# --------------------------------------------------------
-# Most of the code here has been modified from:
-#  https://github.com/modelscope/modelscope/blob/master/modelscope/utils/registry.py
-# --------------------------------------------------------
+from typing import Any, Type
 
 from trinity.utils.log import get_logger
 
@@ -25,59 +8,57 @@ logger = get_logger(__name__)
 # TODO: support lazy load
 # e.g. @MODULES.register_module("name", lazy=True)
 class Registry(object):
-    """This class is used to register some modules to registry by a repo
-    name."""
+    """A class for registry."""
 
     def __init__(self, name: str):
         """
-        Initialization method.
-
-        :param name: a registry repo name
+        Args:
+            name (`str`): The name of the registry.
         """
         self._name = name
         self._modules = {}
 
     @property
-    def name(self):
+    def name(self) -> str:
         """
         Get name of current registry.
 
-        :return: name of current registry.
+        Returns:
+            `str`: The name of current registry.
         """
         return self._name
 
     @property
-    def modules(self):
+    def modules(self) -> dict:
         """
         Get all modules in current registry.
 
-        :return: a dict storing modules in current registry.
+        Returns:
+            `dict`: A dict storing modules in current registry.
         """
         return self._modules
 
-    def list(self):
+    def list(self) -> None:
         """Logging the list of module in current registry."""
         for m in self._modules.keys():
             logger.info(f"{self._name}\t{m}")
 
-    def get(self, module_key):
+    def get(self, module_key: str) -> Any:
         """
         Get module named module_key from in current registry. If not found,
         return None.
 
-        :param module_key: specified module name
-        :return: module named module_key
+        Args:
+            module_key (`str`): specified module name
+
+        Returns:
+            `Any`: the module object
         """
         return self._modules.get(module_key, None)
 
     def _register_module(self, module_name=None, module_cls=None, force=False):
         """
         Register module to registry.
-
-        :param module_name: module name
-        :param module_cls: module class object
-        :param force: Whether to override an existing class with the
-            same name. Default: False.
         """
 
         if module_name is None:
@@ -89,25 +70,35 @@ class Registry(object):
         self._modules[module_name] = module_cls
         module_cls._name = module_name
 
-    def register_module(self, module_name: str = None, module_cls: type = None, force=False):
+    def register_module(self, module_name: str, module_cls: Type = None, force=False, lazy=False):
         """
-        Register module class object to registry with the specified modulename.
+        Register module class object to registry with the specified module name.
 
-        :param module_name: module name
-        :param module_cls: module class object
-        :param force: Whether to override an existing class with
-                the same name. Default: False.
+        Args:
+            module_name (`str`): The module name.
+            module_cls (`Type`): module class object
+            force (`bool`): Whether to override an existing class with
+                    the same name. Default: False.
+            lazy (`bool`): Whether to register the module class object lazily.
+                    Default: False.
 
         Example:
-            >>> registry = Registry()
-            >>> @registry.register_module()
-            >>> class TextFormatter:
-            >>>     pass
+            ```python
+            WORKFLOWS = Registry("workflows")
 
-            >>> class TextFormatter2:
-            >>>     pass
-            >>> registry.register_module( module_name='text_formatter2',
-                                        module_cls=TextFormatter2)
+            # register a module using decorator
+            @WORKFLOWS.register_module(name="workflow_name")
+            class MyWorkflow(Workflow):
+                pass
+
+            # or register a module directly
+            WORKFLOWS.register_module(
+                name="workflow_name",
+                module_cls=MyWorkflow,
+                force=True,
+            )
+            ```
+
         """
         if not (module_name is None or isinstance(module_name, str)):
             raise TypeError(f"module_name must be either of None, str," f"got {type(module_name)}")
@@ -120,8 +111,10 @@ class Registry(object):
             """
             Register module class object to registry.
 
-            :param module_cls: module class object
-            :return: module class object.
+            Args:
+                module_cls (`Type`): module class object
+            Returns:
+                `Type`: Decorated module class object.
             """
             self._register_module(module_name=module_name, module_cls=module_cls, force=force)
             return module_cls

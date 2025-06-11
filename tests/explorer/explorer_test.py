@@ -12,7 +12,6 @@ from tests.tools import (
     get_unittest_dataset_config,
 )
 from trinity.cli.launcher import explore
-from trinity.common.constants import MonitorType
 
 
 class BaseExplorerCase(RayUnittestBase):
@@ -23,7 +22,7 @@ class BaseExplorerCase(RayUnittestBase):
         self.config.model.model_path = get_model_path()
         self.config.explorer.rollout_model.engine_type = "vllm_async"
         self.config.algorithm.repeat_times = 2
-        self.config.monitor.monitor_type = MonitorType.TENSORBOARD
+        self.config.monitor.monitor_type = "tensorboard"
         self.config.project = "Trinity-unittest"
         self.config.checkpoint_root_dir = get_checkpoint_path()
         self.config.synchronizer.sync_interval = 2

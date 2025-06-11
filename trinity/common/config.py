@@ -7,7 +7,6 @@ from typing import Any, Dict, List, Optional
 from omegaconf import OmegaConf
 
 from trinity.common.constants import (
-    MonitorType,
     PromptType,
     ReadStrategy,
     StorageType,
@@ -77,10 +76,14 @@ class StorageConfig:
     format: FormatConfig = field(default_factory=FormatConfig)
     index: int = 0
 
+    # used for StorageType.SQL
+    wrap_in_ray: bool = True
+
     # used for rollout tasks
     default_workflow_type: Optional[str] = None
     default_reward_fn_type: Optional[str] = None
     rollout_args: GenerationConfig = field(default_factory=GenerationConfig)
+    workflow_args: dict = field(default_factory=dict)
 
     # ! DO NOT SET, automatically set from algorithm.algorithm_type
     algorithm_type: Optional[str] = None
@@ -303,8 +306,10 @@ class TrainerConfig:
 
 @dataclass
 class MonitorConfig:
-    # TODO: support multiple monitors (List[MonitorType])
-    monitor_type: MonitorType = MonitorType.WANDB
+    # TODO: support multiple monitors (List[str])
+    monitor_type: str = "tensorboard"
+    # the default args for monitor
+    monitor_args: Dict = field(default_factory=dict)
     # ! DO NOT SET, automatically generated as checkpoint_job_dir/monitor
     cache_dir: str = ""
 
