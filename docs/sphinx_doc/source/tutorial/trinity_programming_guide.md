@@ -299,7 +299,7 @@ pip install -e .[dev]
 # pip install -e .\[dev\]
 
 # Run code style checks
-pre-commit --all-files
+pre-commit run --all-files
 
 # Commit the code after all checks pass
 git commit -am "create example workflow"

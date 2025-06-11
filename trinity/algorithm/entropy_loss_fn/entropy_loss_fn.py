@@ -38,6 +38,7 @@ class EntropyLossFn(ABC):
         Returns:
             `Dict`: The default arguments for the entropy loss function.
         """
+        return {"entropy_coef": 0.0}
 
 
 @ENTROPY_LOSS_FN.register_module("basic")
