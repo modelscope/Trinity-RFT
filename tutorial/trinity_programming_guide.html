@@ -284,6 +284,21 @@ Ensure the name does not conflict with existing workflows.</p>
     <span class="k">pass</span>
 </pre></div>
 </div>
+<p>For workflows that are prepared to be contributed to Trinity-RFT project, you need to place the above code in <code class="docutils literal notranslate"><span class="pre">trinity/common/workflows</span></code> folder, e.g., <code class="docutils literal notranslate"><span class="pre">trinity/common/workflows/example_workflow.py</span></code>. And add the following line to <code class="docutils literal notranslate"><span class="pre">trinity/common/workflows/__init__.py</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># existing import lines</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.example_workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExampleWorkflow</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="c1"># existing __all__ lines</span>
+    <span class="s2">&quot;ExampleWorkflow&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>For workflows that are not intended to be contributed to Trinity-RFT project, you can just place the above code in <code class="docutils literal notranslate"><span class="pre">trinity/plugins</span></code>. Trinity-RFT will automatically detect and load all custom modules in this folder.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>You can specify the directory where your custom modules are located by setting <code class="docutils literal notranslate"><span class="pre">--plugin-dir</span></code> when starting Trinity-RFT. If you don’t specify <code class="docutils literal notranslate"><span class="pre">--plugin-dir</span></code>, Trinity-RFT will use <code class="docutils literal notranslate"><span class="pre">&lt;Trinity_RFT_ROOT_DIR&gt;/trinity/plugins</span></code> as the default directory.</p>
+</div>
 </section>
 <section id="avoid-re-initialization">
 <h4>Avoid Re-initialization<a class="headerlink" href="#avoid-re-initialization" title="Link to this heading"></a></h4>

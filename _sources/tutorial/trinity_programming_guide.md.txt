@@ -120,7 +120,7 @@ During initialization, `Workflow` receives the following parameters:
 You can switch to using the OpenAI API by setting `explorer.rollout_model.enable_openai_api` to `true` in your config file and calling `model.get_openai_client()` to get an `openai.OpenAI` instance in your workflow.
 ```
 
-Here’s an example of initializing a simple workflow using only `raw_task` and `rollout_args`. In more complex cases, you can use the `format_args` for further customization.
+Here's an example of initializing a simple workflow using only `raw_task` and `rollout_args`. In more complex cases, you can use the `format_args` for further customization.
 
 ```python
 class ExampleWorkflow(Workflow):
@@ -196,6 +196,25 @@ from trinity.common.workflows.workflow import WORKFLOWS
 class ExampleWorkflow(Workflow):
     pass
 ```
+
+For workflows that are prepared to be contributed to Trinity-RFT project, you need to place the above code in `trinity/common/workflows` folder, e.g., `trinity/common/workflows/example_workflow.py`. And add the following line to `trinity/common/workflows/__init__.py`:
+
+```python
+# existing import lines
+from .example_workflow import ExampleWorkflow
+
+__all__ = [
+    # existing __all__ lines
+    "ExampleWorkflow",
+]
+```
+
+For workflows that are not intended to be contributed to Trinity-RFT project, you can just place the above code in `trinity/plugins`. Trinity-RFT will automatically detect and load all custom modules in this folder.
+
+```{tip}
+You can specify the directory where your custom modules are located by setting `--plugin-dir` when starting Trinity-RFT. If you don't specify `--plugin-dir`, Trinity-RFT will use `<Trinity_RFT_ROOT_DIR>/trinity/plugins` as the default directory.
+```
+
 
 #### Avoid Re-initialization
 

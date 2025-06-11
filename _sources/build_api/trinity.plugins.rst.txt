@@ -1,0 +1,9 @@
+trinity.plugins
+===============
+Module contents
+---------------
+
+.. automodule:: trinity.plugins
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -304,8 +304,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">reward_fn_key</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">format</span><span class="o">.</span><span class="n">reward_fn_key</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">task_type</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">task_type</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">default_workflow_cls</span> <span class="o">=</span> <span class="n">WORKFLOWS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">default_workflow_type</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">default_reward_fn_cls</span> <span class="o">=</span> <span class="n">REWARD_FUNCTIONS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">default_reward_fn_type</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_workflow_cls</span> <span class="o">=</span> <span class="n">WORKFLOWS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">default_workflow_type</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_reward_fn_cls</span> <span class="o">=</span> <span class="n">REWARD_FUNCTIONS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">default_reward_fn_type</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">total_epochs</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">total_epochs</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task_type</span> <span class="o">==</span> <span class="n">TaskType</span><span class="o">.</span><span class="n">EXPLORE</span> <span class="k">else</span> <span class="mi">1</span></div>
 
 
@@ -328,7 +328,7 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reward_fn_key</span> <span class="ow">in</span> <span class="n">sample</span>
             <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_reward_fn_cls</span>
         <span class="p">)</span>
-        <span class="k">assert</span> <span class="n">workflow_class</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;`default_reward_fn_type` or `workflow_key` is required&quot;</span>
+        <span class="k">assert</span> <span class="n">workflow_class</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;`default_workflow_type` or `workflow_key` is required&quot;</span>
         <span class="n">task</span> <span class="o">=</span> <span class="n">Task</span><span class="p">(</span>
             <span class="n">workflow</span><span class="o">=</span><span class="n">workflow_class</span><span class="p">,</span>
             <span class="n">format_args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">format</span><span class="p">,</span>

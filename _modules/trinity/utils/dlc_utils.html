@@ -204,8 +204,11 @@
             <span class="p">)</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span>
             <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cluster_status</span><span class="o">.</span><span class="n">running</span><span class="o">.</span><span class="n">remote</span><span class="p">()):</span>
+                    <span class="n">ret</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s2">&quot;ray status&quot;</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
                     <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Ray cluster is not running, exiting.&quot;</span><span class="p">)</span>
                     <span class="k">break</span>
             <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
 
@@ -221,7 +224,8 @@
         <span class="n">name</span><span class="o">=</span><span class="n">CLUSTER_ACTOR_NAME</span><span class="p">,</span>
         <span class="n">get_if_exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span>
-    <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cluster_status</span><span class="o">.</span><span class="n">finish</span><span class="o">.</span><span class="n">remote</span><span class="p">())</span></div>
+    <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cluster_status</span><span class="o">.</span><span class="n">finish</span><span class="o">.</span><span class="n">remote</span><span class="p">())</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Stopping ray cluster...&quot;</span><span class="p">)</span></div>
 
 </pre></div>
 

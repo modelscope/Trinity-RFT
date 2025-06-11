@@ -10,6 +10,7 @@ Subpackages
    trinity.common
    trinity.explorer
    trinity.manager
+   trinity.plugins
    trinity.trainer
    trinity.utils
 
