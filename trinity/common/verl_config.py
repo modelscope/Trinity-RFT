@@ -82,6 +82,7 @@ class Actor:
     tau: float = 0.001  # strength of regularization w.r.t. old / ref policy
     opmd_baseline: str = "mean"  # mean / logavgexp, applicable to opmd
     use_uid: bool = False  # True / False, applicable to pairwise_opmd
+    loss_agg_mode: str = "token-mean"  # do not set
 
 
 @dataclass
@@ -100,9 +101,15 @@ class _ValKwargs:
 
 
 @dataclass
+class _MultiTurn:
+    enable: bool = False
+
+
+@dataclass
 class Rollout:
     # do not set
     val_kwargs: _ValKwargs = field(default_factory=_ValKwargs)
+    multi_turn: _MultiTurn = field(default_factory=_MultiTurn)
     temperature: float = 1.0
     n: int = 1  # > 1 for grpo
 
