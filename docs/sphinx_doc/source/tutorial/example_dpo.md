@@ -70,9 +70,6 @@ buffer:
         prompt_key: prompt
         chosen_key: chosen
         rejected_key: rejected
-explorer:
-  rollout_model:
-    engine_num: 0
 trainer:
   trainer_config_path: 'examples/dpo_humanlike/train_dpo.yaml'
   save_interval: 30
@@ -109,9 +106,6 @@ buffer:
         messages_key: messages
     default_workflow_type: math_workflow
     default_reward_fn_type: math_reward
-explorer:
-  rollout_model:
-    engine_num: 0
 trainer:
   trainer_config_path: /PATH/TO/TRAIN_CONFIG_YAML/
   save_interval: 50
