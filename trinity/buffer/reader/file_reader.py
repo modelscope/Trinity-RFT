@@ -230,3 +230,17 @@ class RolloutDataReader(BufferReader):
         if self.task_type == TaskType.EVAL and self.index == len(self.dataset):
             self.index = 0
         return task
+
+@FILE_READERS.register_module("raw")
+class RawDataReader(BufferReader):
+
+    def __init__(self, meta: StorageConfig, config: BufferConfig):
+        self.dataset = load_dataset(
+            meta.path, name=meta.subset_name, split=meta.split
+        )
+
+    def __len__(self):
+        return len(self.dataset)
+
+    def read(self, strategy: Optional[ReadStrategy] = None) -> List:
+        return self.dataset.to_list()

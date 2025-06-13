@@ -6,7 +6,7 @@ import agentscope
 from agentscope.models import DashScopeChatWrapper
 from loguru import logger
 
-from trinity.common.config import Config
+from trinity.common.config import DataPipelineConfig
 from trinity.data.controllers.task_parser import DataTaskParser
 
 
@@ -50,18 +50,18 @@ class TestTaskParser(unittest.TestCase):
             logger.info(op_weights)
 
     def test_instruction1(self):
-        rft_config = Config()
-        rft_config.data.dj_process_desc = "Please recommend a data filtering strategy for me."
+        rft_config = DataPipelineConfig()
+        rft_config.dj_process_desc = "Please recommend a data filtering strategy for me."
         self._run_test(rft_config)
 
     def test_instruction2(self):
-        rft_config = Config()
-        rft_config.data.dj_process_desc = "Do nothing."
+        rft_config = DataPipelineConfig()
+        rft_config.dj_process_desc = "Do nothing."
         self._run_test(rft_config, return_none=True)
 
     def test_instruction3(self):
-        rft_config = Config()
-        rft_config.data.dj_process_desc = "Remove samples with repeat contents."
+        rft_config = DataPipelineConfig()
+        rft_config.dj_process_desc = "Remove samples with repeat contents."
         self._run_test(rft_config)
 
 

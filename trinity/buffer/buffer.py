@@ -42,7 +42,9 @@ def get_buffer_reader(storage_config: StorageConfig, buffer_config: BufferConfig
         from trinity.buffer.reader.file_reader import FILE_READERS
 
         file_read_type = storage_config.algorithm_type
-        if file_read_type is not None:
+        if storage_config.raw:
+            file_read_type = "raw"
+        elif file_read_type is not None:
             file_read_type = file_read_type.value
         else:
             file_read_type = "rollout"
@@ -61,5 +63,9 @@ def get_buffer_writer(storage_config: StorageConfig, buffer_config: BufferConfig
         from trinity.buffer.writer.queue_writer import QueueWriter
 
         return QueueWriter(storage_config, buffer_config)
+    elif storage_config.storage_type == StorageType.FILE:
+        from trinity.buffer.writer.file_writer import RawFileWriter
+
+        return RawFileWriter(storage_config, buffer_config)
     else:
         raise ValueError(f"{storage_config.storage_type} not supported.")

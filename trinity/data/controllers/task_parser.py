@@ -7,7 +7,7 @@ from data_juicer.config import get_init_configs, prepare_side_configs
 from jsonargparse import Namespace
 from loguru import logger
 
-from trinity.common.config import Config
+from trinity.common.config import DataPipelineConfig
 from trinity.data.core.dataset import RftDataset
 
 from .default_ops import (
@@ -128,7 +128,7 @@ class DataTaskParser:
 
     def __init__(
         self,
-        rft_config: Config,
+        data_pipeline_config: DataPipelineConfig,
         llm_agent: DashScopeChatWrapper = None,
         dataset: RftDataset = None,
         validate_config: bool = True,
@@ -136,12 +136,12 @@ class DataTaskParser:
         """
         Initialization method.
 
-        :param rft_config: All configs.
+        :param data_pipeline_config: All configs of specified data pipeline.
         :param llm_agent: The LLM agent for natural language parsing.
         :param dataset: The dataset to be processed.
         :param validate_config: If execute the config validation check.
         """
-        self.config = rft_config.data
+        self.config = data_pipeline_config
         self.llm_agent = llm_agent
         self.validate_config = validate_config
         # TODO: refer dataset to support natural language parsing.
@@ -185,20 +185,10 @@ class DataTaskParser:
             print(op)
         return dj_config
 
-    def _add_extra_args(self, dj_config: Namespace, op_weights: Dict = {}) -> Namespace:
-        """Add extra argument for RFT project"""
-        for op in dj_config.process:
-            op_name = list(op.keys())[0]
-            if "op_weight" not in op[op_name]:
-                op[op_name]["op_weight"] = op_weights[op_name] if op_name in op_weights else 1
-            op[op_name]["op_weight"] = max(0, op[op_name]["op_weight"])
-        return dj_config
-
     def _direct_mapping(self) -> Namespace:
         """Direct mapping from RFT config to DJ config"""
         dj_config = prepare_side_configs(self.config.dj_config_path)
         dj_config = get_init_configs(dj_config)
-        dj_config = self._add_extra_args(dj_config)
         return dj_config
 
     def _agent_based_parsing(self, extra_op_args=None, try_num=3) -> Namespace:
@@ -251,13 +241,11 @@ class DataTaskParser:
         other_op_args = DEFAULT_OP_ARGS
 
         dj_process = []
-        op_weights = {}
 
         def json_to_dj_config(parsed_json):
             for dim in set(parsed_json.keys()) & set(cleaners.keys()):
                 for op_name in set(parsed_json[dim].keys()) & set(cleaners[dim].keys()):
                     dj_process.append({op_name: {}})
-                    op_weights[op_name] = float(parsed_json[dim][op_name])
 
         json_match = re.search(r"```json\n(.*?)\n```", response.text, re.DOTALL)
         if json_match:
@@ -284,20 +272,5 @@ class DataTaskParser:
                     op[op_name][key] = val
         dj_config = Namespace(process=dj_process)
         dj_config = get_init_configs(dj_config)
-        dj_config = self._add_extra_args(dj_config, op_weights)
-
-        if self.validate_config and not self._validate_config(dj_config):
-            return None
 
         return dj_config
-
-    def _validate_config(self, config: Namespace) -> bool:
-        """Validate generated DJ config"""
-        try:
-            for op in config.process:
-                op_name = list(op.keys())[0]
-                weight = float(op[op_name]["op_weight"])
-                assert 0 <= weight and weight <= 1
-        except Exception:
-            return False
-        return True

@@ -1,10 +1,10 @@
 data_processor:
-  source_data_path: './tests/test_data/test_human_annotator'
-  load_kwargs: {"split": "train"}
-  dj_config_path: './tests/test_configs/human_annotator_test_dj_cfg.yaml'
-  format:
-    prompt_key: 'prompt'
-    chosen_key: 'chosen'
-    rejected_key: 'rejected'
-  # db related
-  db_url: 'postgresql://{user_name}@localhost:5432/{db_name}'
+  task_pipeline:
+    input_buffers:
+      - path: './tests/test_data/test_human_annotator'
+        raw: true
+    dj_config_path: './tests/test_configs/human_annotator_test_dj_cfg.yaml'
+    format:
+      prompt_key: 'prompt'
+      chosen_key: 'chosen'
+      rejected_key: 'rejected'

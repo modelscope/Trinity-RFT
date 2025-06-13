@@ -3,7 +3,5 @@ project_name: 'demo-process'
 export_path: './outputs/demo-process/demo-processed.jsonl'
 
 process:
-  - text_length_filter:
-      min_len: 10
-      max_len: 50
+  - alphanumeric_filter:
   - clean_email_mapper:

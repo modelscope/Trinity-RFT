@@ -4,11 +4,10 @@ from typing import Any, Dict, List
 
 import ray
 
-from trinity.common.config import Config
+from trinity.common.config import DataPipelineConfig, BufferConfig
 from trinity.data.controllers.default_ops import DIMENSION_STATS_KEYS
 from trinity.data.controllers.task_parser import DataTaskParser
 from trinity.data.core.dataset import RftDataset
-from trinity.data.core.dataset_db import RftDatasetDB
 from trinity.data.processors.cleaner import DataCleaner
 from trinity.data.processors.human_annotator import DataHumanAnnotator
 from trinity.data.processors.synthesizer import DataSynthesizer
@@ -21,13 +20,14 @@ class DataActiveIterator:
 
     def __init__(
         self,
-        config: Config,
+        config: DataPipelineConfig,
+        buffer_config: BufferConfig,
     ):
         self.config = config
-        self.data_config = config.data
+        self.buffer_config = buffer_config
         if (
-            self.data_config.agent_model_name is not None
-            and self.data_config.agent_model_config is not None
+            self.config.agent_model_name is not None
+            and self.config.agent_model_config is not None
         ):
             # get the api key
             api_key = os.environ.get("OPENAI_API_KEY")
@@ -35,28 +35,27 @@ class DataActiveIterator:
             import agentscope
             from agentscope.models import DashScopeChatWrapper
 
-            agentscope.init(model_configs=[self.data_config.agent_model_config])
+            agentscope.init(model_configs=[self.config.agent_model_config])
             self.llm_agent = DashScopeChatWrapper(
                 config_name="_",
-                model_name=self.data_config.agent_model_name,
+                model_name=self.config.agent_model_name,
                 api_key=api_key,
                 stream=False,
             )
         else:
             self.llm_agent = None
         self.task_parser = DataTaskParser(config, self.llm_agent)
-        self.dsdb = RftDatasetDB(self.data_config)
 
         # Priority weights
         # larger positive values means larger scores --> higher priority
         # smaller negative values means lower scores --> higher priority
-        self.priority_weights = self.data_config.priority_weights or {
+        self.priority_weights = self.config.priority_weights or {
             "difficulty": -0.7,
             "diversity": 0.8,
             "usage_frequency": -0.5,
             "quality": 1.0,
         }
-        self.min_priority_score = self.data_config.min_priority_score
+        self.min_priority_score = self.config.min_priority_score
 
         # Statistics tracking
         self.state = {"iterations": 0, "samples_selected": 0, "avg_priority_score": 0.0}
@@ -67,17 +66,17 @@ class DataActiveIterator:
         #   2. input_keys: [prompt_key, response_key] if they are available
         #   3. field_names: [prompt_key, response_key] if they are available
         self.updated_op_args = {
-            "text_key": self.data_config.format.prompt_key,
+            "text_key": self.config.format.prompt_key,
             "input_keys": [
-                self.data_config.format.prompt_key,
+                self.config.format.prompt_key,
             ],
             "field_names": [
-                self.data_config.format.prompt_key,
+                self.config.format.prompt_key,
             ],
         }
-        if self.data_config.format.response_key != "":
-            self.updated_op_args["input_keys"].append(self.data_config.format.response_key)
-            self.updated_op_args["field_names"].append(self.data_config.format.response_key)
+        if self.config.format.response_key != "":
+            self.updated_op_args["input_keys"].append(self.config.format.response_key)
+            self.updated_op_args["field_names"].append(self.config.format.response_key)
 
     # flake8: noqa: C901
     def run(self):
@@ -94,9 +93,9 @@ class DataActiveIterator:
             traceback.print_exc()
             return 1, "config parsing failed."
 
-        # step 2. load dataset
+        # step 2. load data from the input buffers
         try:
-            dataset = RftDataset(self.data_config)
+            dataset = RftDataset(self.config, self.buffer_config)
         except Exception:
             traceback.print_exc()
             return 2, "RftDataset loading failed."
@@ -106,9 +105,9 @@ class DataActiveIterator:
             if hit_cleaner:
                 cleaner = DataCleaner(
                     dj_config,
-                    clean_strategy=self.data_config.clean_strategy,
-                    min_size_ratio=self.data_config.min_size_ratio,
-                    data_dist=self.data_config.data_dist,
+                    clean_strategy=self.config.clean_strategy,
+                    min_size_ratio=self.config.min_size_ratio,
+                    data_dist=self.config.data_dist,
                 )
             if hit_synthesizer:
                 synthesizer = DataSynthesizer(
@@ -153,12 +152,12 @@ class DataActiveIterator:
             traceback.print_exc()
             return 6, "Tracking lineage failed."
 
-        # step 7. export the result to the database
+        # step 7. export the result to the output buffer
         try:
-            self.dsdb.add_entries(res_dataset)
+            res_dataset.write_to_buffer()
         except Exception:
             traceback.print_exc()
-            return 7, "Exporting result to database failed."
+            return 7, "Exporting result to output buffer failed."
 
         return 0, "success"
 

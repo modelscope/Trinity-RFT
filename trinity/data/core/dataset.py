@@ -3,13 +3,10 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Union
 
 import networkx as nx
-from data_juicer.core.data.dj_dataset import Dataset
-from datasets import load_dataset
+from datasets import Dataset, concatenate_datasets
 
-from trinity.common.config import DataProcessorConfig
-from trinity.common.rewards import REWARD_FUNCTIONS
-from trinity.common.task import TaskSet
-from trinity.common.workflows import WORKFLOWS
+from trinity.common.config import DataPipelineConfig, BufferConfig, StorageConfig
+from trinity.buffer import get_buffer_reader, get_buffer_writer
 from trinity.data.core.formatter import BaseDataFormatter
 
 
@@ -31,25 +28,28 @@ class RftDataset:
     4. Basic statistics and metrics computation
 
     Args:
-        config (Dict): Configuration dict including DJ config
+        data_pipeline_config (DataPipelineConfig): Configuration including DJ config
         reward_schema (Union[str, Dict]): Schema definition for reward fields
         track_lineage (bool): Whether to track data lineage
     """
 
     def __init__(
         self,
-        data_config: DataProcessorConfig,
+        data_pipeline_config: DataPipelineConfig,
+        buffer_config: BufferConfig = None,
         reward_schema: Union[str, Dict] = "default",
         track_lineage: bool = True,
     ):
-        self.config = data_config
-        source_data_path = data_config.source_data_path
-        if not source_data_path:
-            raise ValueError("source_data_path is not specified in DJ config")
-        load_kwargs = data_config.load_kwargs
-        self.data = load_dataset(source_data_path, trust_remote_code=True, **load_kwargs)
-
-        self.format = data_config.format
+        self.config = data_pipeline_config
+        self.buffer_config = buffer_config
+        input_buffer_configs = self.config.input_buffers
+        if len(input_buffer_configs) == 0:
+            raise ValueError("input_buffers is empty in data pipeline config")
+        self.data = []
+        for input_buffer_config in input_buffer_configs:
+            input_buffer = get_buffer_reader(input_buffer_config, self.buffer_config)
+            self.data.append(Dataset.from_list(input_buffer.read()))
+        self.data = concatenate_datasets(self.data)
 
         self.reward_schema = self._init_reward_schema(reward_schema)
         self.stats: Dict[str, Any] = {}
@@ -65,15 +65,14 @@ class RftDataset:
         for formatter in formatters:
             self.data = formatter(self.data, num_proc)
 
-    def to_taskset(self, **kwargs) -> TaskSet:
-        default_workflow_cls = WORKFLOWS.get(self.config.default_workflow_type)
-        default_reward_fn_cls = REWARD_FUNCTIONS.get(self.config.default_reward_fn_type)
-        return TaskSet(
-            dataset=self.data,
-            config=self.config,
-            workflow=default_workflow_cls,
-            reward_fn=default_reward_fn_cls,
-        )
+    def write_to_buffer(self, output_storage_config: StorageConfig = None, buffer_config: BufferConfig = None):
+        if output_storage_config is None:
+            output_storage_config = self.config.output_buffer
+        if buffer_config is None:
+            buffer_config = self.buffer_config
+        output_buffer = get_buffer_writer(output_storage_config, buffer_config)
+        output_buffer.write(self.data.to_list())
+        output_buffer.finish()
 
     def to_parquet(self, path: str):
         self.data.to_parquet(path)

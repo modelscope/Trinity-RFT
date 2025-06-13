@@ -1,5 +1,7 @@
 data_processor:
-  source_data_path: './tests/test_data/test_cleaner'
-  load_kwargs: {"split": "train"}
-  dj_config_path: './tests/test_configs/cleaner_test_dj_cfg.yaml'
-  clean_strategy: 'iterative'
+  task_pipeline:
+    input_buffers:
+      - path: './tests/test_data/test_cleaner'
+        raw: true
+    dj_config_path: './tests/test_configs/cleaner_test_dj_cfg.yaml'
+    clean_strategy: 'iterative'

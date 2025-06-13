@@ -71,6 +71,9 @@ class StorageConfig:
     storage_type: StorageType = StorageType.FILE
     path: Optional[str] = None
 
+    # only available for StorageType.FILE. When requiring data processing on raw data, set the raw to True.
+    raw: bool = False
+
     # used for StorageType.FILE
     split: str = "train"
     subset_name: Optional[str] = None
@@ -95,18 +98,18 @@ class StorageConfig:
     # ! DO NOT SET,  automatically set corresponding to train/eval
     task_type: TaskType = TaskType.EXPLORE
 
-
 @dataclass
-class DataProcessorConfig:
-    """Data-Juicer config"""
+class DataPipelineConfig:
+    """Config for data pipeline."""
 
-    data_workflow_url: Optional[str] = None
+    # I/O buffer
+    input_buffers: List[StorageConfig] = field(default_factory=list)
+    output_buffer: StorageConfig = field(default_factory=StorageConfig)
 
-    source_data_path: str = ""
+    # data format
     format: FormatConfig = field(default_factory=FormatConfig)
 
     # data active iterator related
-    load_kwargs: Dict[str, Any] = field(default_factory=dict)
     dj_config_path: Optional[str] = None  # The path to Data-Juicer config file.
     dj_process_desc: Optional[
         str
@@ -119,10 +122,17 @@ class DataProcessorConfig:
     priority_weights: Optional[Dict[str, float]] = None
     data_dist: Optional[str] = "gaussian"  # one of ["gaussian", "uniform"]
 
-    # dataset database related
-    db_url: str = ""
-    max_retry_times: int = 3
-    max_retry_interval: int = 1
+@dataclass
+class DataProcessorConfig:
+    """Data-Juicer config"""
+
+    data_workflow_url: Optional[str] = None
+
+    # support two types of data pipelines for now
+    # 1. For task. Data preprocessing from raw dataset to the task set
+    task_pipeline: Optional[DataPipelineConfig] = None
+    # 2. For experience. Data processing for rollouts
+    experience_pipeline: Optional[DataPipelineConfig] = None
 
 
 @dataclass

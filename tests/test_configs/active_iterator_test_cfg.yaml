@@ -1,13 +1,12 @@
 data_processor:
   # basic info
-  source_data_path: 'tests/test_data/test_10/'
-  load_kwargs:
-    split: 'train'
-  format:
-    prompt_key: 'problem'
-    response_key: 'solution'
-  # cleaner related
-  dj_config_path: 'tests/test_configs/active_iterator_test_dj_cfg.yaml'
-  clean_strategy: 'iterative'
-  # db related
-  db_url: 'postgresql://{username}@localhost:5432/{db_name}'
+  task_pipeline:
+    input_buffers:
+      - path: 'tests/test_data/test_10/'
+        raw: true
+    format:
+      prompt_key: 'problem'
+      response_key: 'solution'
+    # cleaner related
+    dj_config_path: 'tests/test_configs/active_iterator_test_dj_cfg.yaml'
+    clean_strategy: 'iterative'

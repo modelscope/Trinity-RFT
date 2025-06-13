@@ -39,6 +39,7 @@ dependencies = [
     "requests",
     "tensorboard",
     "openai",
+    "jsonlines",
 ]
 
 [project.scripts]

@@ -3,7 +3,7 @@
 import os
 import unittest
 
-from trinity.common.config import DataProcessorConfig, FormatConfig
+from trinity.common.config import DataPipelineConfig, FormatConfig, StorageConfig
 from trinity.data.core.dataset import RftDataset
 from trinity.data.core.formatter import (
     BoxedMathAnswerFormatter,
@@ -18,14 +18,17 @@ class TestBoxedMathDataset(unittest.TestCase):
     """Test cases for RftDataset"""
 
     def setUp(self) -> None:
-        self.data_config = DataProcessorConfig(
-            source_data_path=os.path.join(
-                os.path.dirname(os.path.realpath(__file__)),
-                "..",
-                "..",
-                "test_data",
-                "test_10",
-            ),
+        self.data_config = DataPipelineConfig(
+            input_buffers=[StorageConfig(
+                path=os.path.join(
+                    os.path.dirname(os.path.realpath(__file__)),
+                    "..",
+                    "..",
+                    "test_data",
+                    "test_10",
+                ),
+                raw=True,
+            )],
             format=FormatConfig(
                 prompt_key="problem",
                 response_key="answer",
@@ -43,12 +46,12 @@ class TestBoxedMathDataset(unittest.TestCase):
         self.assertEqual(formatter.config.chat_template, "User: {}\nAssistant: ")
         # test for default configs
         self.assertEqual(formatter.config.reward_key, "")
-        self.assertEqual(formatter.config.chosen_key, "")
-        self.assertEqual(formatter.config.rejected_key, "")
+        self.assertEqual(formatter.config.chosen_key, "chosen")
+        self.assertEqual(formatter.config.rejected_key, "rejected")
         self.assertEqual(formatter.config.label_key, "")
 
     def test_transform(self):
-        dataset = RftDataset(data_config=self.data_config, reward_schema="default")
+        dataset = RftDataset(data_pipeline_config=self.data_config, reward_schema="default")
         formatter = BoxedMathAnswerFormatter(config=self.data_config.format)
         self.assertNotIn(formatter.config.response_key, dataset.data.column_names)
         dataset.format(formatter)
@@ -59,14 +62,17 @@ class TestRLHFFormatter(unittest.TestCase):
     """Test cases for RLHFFormatter"""
 
     def setUp(self) -> None:
-        self.data_config = DataProcessorConfig(
-            source_data_path=os.path.join(
-                os.path.dirname(os.path.realpath(__file__)),
-                "..",
-                "..",
-                "test_data",
-                "test_10",
-            ),
+        self.data_config = DataPipelineConfig(
+            input_buffers=[StorageConfig(
+                path=os.path.join(
+                    os.path.dirname(os.path.realpath(__file__)),
+                    "..",
+                    "..",
+                    "test_data",
+                    "test_10",
+                ),
+                raw=True,
+            )],
             format=FormatConfig(
                 prompt_key="problem",
                 chat_template="User: {}\nAssistant: ",
@@ -107,14 +113,17 @@ class TestRewardFormatter(unittest.TestCase):
     """Test cases for RewardFormatter"""
 
     def setUp(self) -> None:
-        self.data_config = DataProcessorConfig(
-            source_data_path=os.path.join(
-                os.path.dirname(os.path.realpath(__file__)),
-                "..",
-                "..",
-                "test_data",
-                "test_10",
-            ),
+        self.data_config = DataPipelineConfig(
+            input_buffers=[StorageConfig(
+                path=os.path.join(
+                    os.path.dirname(os.path.realpath(__file__)),
+                    "..",
+                    "..",
+                    "test_data",
+                    "test_10",
+                ),
+                raw=True,
+            )],
             format=FormatConfig(
                 prompt_key="problem",
                 chosen_key="chosen",
@@ -164,14 +173,17 @@ class TestSFTFormatter(unittest.TestCase):
     """Test cases for SFTFormatter"""
 
     def setUp(self) -> None:
-        self.data_config = DataProcessorConfig(
-            source_data_path=os.path.join(
-                os.path.dirname(os.path.realpath(__file__)),
-                "..",
-                "..",
-                "test_data",
-                "test_10",
-            ),
+        self.data_config = DataPipelineConfig(
+            input_buffers=[StorageConfig(
+                path=os.path.join(
+                    os.path.dirname(os.path.realpath(__file__)),
+                    "..",
+                    "..",
+                    "test_data",
+                    "test_10",
+                ),
+                raw=True,
+            )],
             format=FormatConfig(
                 prompt_key="problem",
                 response_key="answer",
@@ -217,14 +229,17 @@ class TestComposedFormatter(unittest.TestCase):
     """Test cases for ComposedFormatter"""
 
     def setUp(self) -> None:
-        self.data_config = DataProcessorConfig(
-            source_data_path=os.path.join(
-                os.path.dirname(os.path.realpath(__file__)),
-                "..",
-                "..",
-                "test_data",
-                "test_10",
-            ),
+        self.data_config = DataPipelineConfig(
+            input_buffers=[StorageConfig(
+                path=os.path.join(
+                    os.path.dirname(os.path.realpath(__file__)),
+                    "..",
+                    "..",
+                    "test_data",
+                    "test_10",
+                ),
+                raw=True,
+            )],
             format=FormatConfig(
                 prompt_key="problem",
                 response_key="answer",
