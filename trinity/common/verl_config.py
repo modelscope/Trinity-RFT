@@ -105,6 +105,8 @@ class Rollout:
     val_kwargs: _ValKwargs = field(default_factory=_ValKwargs)
     temperature: float = 1.0
     n: int = 1  # > 1 for grpo
+    log_prob_micro_batch_size: Optional[int] = None
+    log_prob_micro_batch_size_per_gpu: int = 1
 
 
 @dataclass
@@ -351,12 +353,11 @@ class veRLConfig:
             read_batch_size_expert = math.ceil(config.buffer.expert_data_ratio * tot_batch_size)
             read_batch_size_usual = tot_batch_size - read_batch_size_expert
             loss_kwargs = {
-                "use_dynamic_bsz": config.trainer.trainer_config.actor_rollout_ref.actor.use_dynamic_bsz,
-                "ppo_mini_batch_size": config.trainer.trainer_config.actor_rollout_ref.actor.ppo_mini_batch_size,
-                "gradient_accumulation": (
-                    config.trainer.trainer_config.actor_rollout_ref.actor.ppo_mini_batch_size
-                    // config.trainer.trainer_config.actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu,
-                ),
+                "use_dynamic_bsz": self.actor_rollout_ref.actor.use_dynamic_bsz,
+                "ppo_mini_batch_size": self.actor_rollout_ref.actor.ppo_mini_batch_size * self.actor_rollout_ref.rollout.n // world_size, # TODO: check
+                "gradient_accumulation":
+                    self.actor_rollout_ref.actor.ppo_mini_batch_size * self.actor_rollout_ref.rollout.n
+                    // self.actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu,
                 "read_batch_size_usual": read_batch_size_usual,
                 "read_batch_size_expert": read_batch_size_expert,
             }
@@ -364,7 +365,8 @@ class veRLConfig:
             config.algorithm.policy_loss_fn_args.update(
                 {"use_token_level_loss_in_sft": config.algorithm.use_token_level_loss}
             )
-
+            print(f"{config.buffer.read_batch_size=}, {loss_kwargs['ppo_mini_batch_size']=}")
+        print(f"{self.actor_rollout_ref.actor.ppo_mini_batch_size=}")
 def load_config(config_path: str) -> veRLConfig:
     schema = OmegaConf.structured(veRLConfig)
     yaml_config = OmegaConf.load(config_path)

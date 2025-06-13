@@ -1,3 +1,4 @@
+import copy
 import torch
 import numpy as np
 
@@ -21,21 +22,26 @@ class MixSampleStrategy(SampleStrategy):
     def __init__(self, buffer_config: BufferConfig, trainer_type: str, **kwargs):
         super().__init__(buffer_config, trainer_type)
         self.expert_data_ratio = buffer_config.expert_data_ratio
-        self.usual_exp_buffer = get_buffer_reader(
-            buffer_config.trainer_input.experience_buffer, buffer_config  # type: ignore
-        )
-        if buffer_config.trainer_input.sft_warmup_dataset is None:
-            raise ValueError("`buffer_config.trainer_input.expert_dataset` is required in MIX algorithm")
-
-        self.expert_exp_buffer = get_buffer_reader(
-            buffer_config.trainer_input.sft_warmup_dataset, buffer_config
-        )
         tot_batch_size = buffer_config.read_batch_size
         expert_batch_size = ceil(self.expert_data_ratio * tot_batch_size)
-        self.expert_exp_buffer.read_batch_size = expert_batch_size
-        self.usual_exp_buffer.read_batch_size = tot_batch_size - expert_batch_size
-        print(f"debug: {self.usual_exp_buffer.read_batch_size=}, {self.expert_exp_buffer.read_batch_size=}")
-            
+        
+        # experience buffer
+        usual_buffer_config = copy.deepcopy(buffer_config)
+        usual_buffer_config.read_batch_size = tot_batch_size - expert_batch_size
+        self.usual_exp_buffer = get_buffer_reader(
+            buffer_config.trainer_input.experience_buffer, usual_buffer_config  # type: ignore
+        )
+        
+        if buffer_config.trainer_input.sft_warmup_dataset is None:
+            raise ValueError("`buffer_config.trainer_input.sft_warmup_dataset` is required in MIX algorithm")
+
+        # expert experience buffer
+        expert_buffer_config = copy.deepcopy(buffer_config)
+        expert_buffer_config.read_batch_size = expert_batch_size
+        self.expert_exp_buffer = get_buffer_reader(
+            buffer_config.trainer_input.sft_warmup_dataset, expert_buffer_config
+        )
+
     def sample(self, step: int) -> Tuple[Any, Dict, List]:
         metrics = {}
         with Timer(metrics, "read_time"):
@@ -57,7 +63,6 @@ class MixSampleStrategy(SampleStrategy):
             repr_samples = representative_sample(exp_list)
         
         is_expert_mask = torch.tensor([exp.info["is_expert"] for exp in exp_list], dtype=torch.bool)
-        print(f"debug: {len(usual_exp_list)=}, {len(expert_exp_list)=}")
 
         with Timer(metrics, "gather_time"):
             exps = Experiences.gather_experiences(exp_list, self.pad_token_id)  # type: ignore
@@ -93,8 +98,6 @@ def to_data_proto_mix(experiences: Experiences, is_expert_mask: torch.tensor) ->
         ),
         "is_expert_mask": is_expert_mask,
     }
-    # print(f"debug: the last one {uid=}")
-    print(f"debug: (to_data_proto_mix) {is_expert_mask=}")
     if experiences.rewards is not None:
         token_level_rewards = torch.zeros(attention_mask.shape, dtype=experiences.rewards.dtype)
         eos_mask_idx = cumsum.argmax(dim=-1)
