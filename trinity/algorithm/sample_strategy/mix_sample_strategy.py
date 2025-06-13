@@ -1,14 +1,13 @@
 import copy
-import torch
-import numpy as np
-
 from math import ceil
 from typing import Any, Dict, List, Tuple
 
+import numpy as np
+import torch
 from verl.trainer.ppo.ray_trainer import DataProto
 
-from trinity.algorithm.sample_strategy.utils import representative_sample
 from trinity.algorithm.sample_strategy import SAMPLE_STRATEGY, SampleStrategy
+from trinity.algorithm.sample_strategy.utils import representative_sample
 from trinity.buffer import get_buffer_reader
 from trinity.common.config import BufferConfig
 from trinity.common.experience import Experiences
@@ -24,16 +23,18 @@ class MixSampleStrategy(SampleStrategy):
         self.expert_data_ratio = buffer_config.expert_data_ratio
         tot_batch_size = buffer_config.read_batch_size
         expert_batch_size = ceil(self.expert_data_ratio * tot_batch_size)
-        
+
         # experience buffer
         usual_buffer_config = copy.deepcopy(buffer_config)
         usual_buffer_config.read_batch_size = tot_batch_size - expert_batch_size
         self.usual_exp_buffer = get_buffer_reader(
             buffer_config.trainer_input.experience_buffer, usual_buffer_config  # type: ignore
         )
-        
+
         if buffer_config.trainer_input.sft_warmup_dataset is None:
-            raise ValueError("`buffer_config.trainer_input.sft_warmup_dataset` is required in MIX algorithm")
+            raise ValueError(
+                "`buffer_config.trainer_input.sft_warmup_dataset` is required in MIX algorithm"
+            )
 
         # expert experience buffer
         expert_buffer_config = copy.deepcopy(buffer_config)
@@ -61,19 +62,19 @@ class MixSampleStrategy(SampleStrategy):
 
             exp_list = usual_exp_list + expert_exp_list
             repr_samples = representative_sample(exp_list)
-        
+
         is_expert_mask = torch.tensor([exp.info["is_expert"] for exp in exp_list], dtype=torch.bool)
 
         with Timer(metrics, "gather_time"):
             exps = Experiences.gather_experiences(exp_list, self.pad_token_id)  # type: ignore
-        
+
         if self.trainer_type == "verl":
             with Timer(metrics, "convert_time"):
                 data = to_data_proto_mix(exps, is_expert_mask)
             return data, metrics, repr_samples
         else:
             raise NotImplementedError(f"backend {self.trainer_type} is not supported")
-    
+
     @classmethod
     def get_default_config(cls) -> Dict:
         return {

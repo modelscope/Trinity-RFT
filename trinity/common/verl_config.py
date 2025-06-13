@@ -354,10 +354,12 @@ class veRLConfig:
             read_batch_size_usual = tot_batch_size - read_batch_size_expert
             loss_kwargs = {
                 "use_dynamic_bsz": self.actor_rollout_ref.actor.use_dynamic_bsz,
-                "ppo_mini_batch_size": self.actor_rollout_ref.actor.ppo_mini_batch_size * self.actor_rollout_ref.rollout.n // world_size, # TODO: check
-                "gradient_accumulation":
-                    self.actor_rollout_ref.actor.ppo_mini_batch_size * self.actor_rollout_ref.rollout.n
-                    // self.actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu,
+                "ppo_mini_batch_size": self.actor_rollout_ref.actor.ppo_mini_batch_size
+                * self.actor_rollout_ref.rollout.n
+                // world_size,
+                "gradient_accumulation": self.actor_rollout_ref.actor.ppo_mini_batch_size
+                * self.actor_rollout_ref.rollout.n
+                // self.actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu,
                 "read_batch_size_usual": read_batch_size_usual,
                 "read_batch_size_expert": read_batch_size_expert,
             }
@@ -367,6 +369,8 @@ class veRLConfig:
             )
             print(f"{config.buffer.read_batch_size=}, {loss_kwargs['ppo_mini_batch_size']=}")
         print(f"{self.actor_rollout_ref.actor.ppo_mini_batch_size=}")
+
+
 def load_config(config_path: str) -> veRLConfig:
     schema = OmegaConf.structured(veRLConfig)
     yaml_config = OmegaConf.load(config_path)

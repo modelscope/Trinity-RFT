@@ -194,10 +194,6 @@ class MIXAlgorithm(AlgorithmType):
     schema: type = ExperienceModel
 
     @classmethod
-    def check_config(cls, config: Config) -> None:
-        pass
-
-    @classmethod
     def get_default_config(cls) -> Dict:
         return {
             "repeat_times": 8,

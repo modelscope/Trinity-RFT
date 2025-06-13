@@ -22,7 +22,7 @@ class MIXPolicyLossFn(PolicyLossFn):
         gradient_accumulation: Optional[int] = None,
         read_batch_size_usual: Optional[int] = None,
         read_batch_size_expert: Optional[int] = None,
-        use_token_level_loss_in_sft: Optional[bool] = True
+        use_token_level_loss_in_sft: Optional[bool] = True,
     ) -> None:
         self.mu = mu
         self.use_dynamic_bsz = use_dynamic_bsz
@@ -35,10 +35,8 @@ class MIXPolicyLossFn(PolicyLossFn):
             clip_range_low=clip_range_low,
             clip_range_high=clip_range_high,
         )
-        self.sft_loss_fn = SFTLossFn(
-            use_token_level_loss=use_token_level_loss_in_sft
-        )
-        
+        self.sft_loss_fn = SFTLossFn(use_token_level_loss=use_token_level_loss_in_sft)
+
     def __call__(  # type: ignore
         self,
         logprob: torch.Tensor,
@@ -50,17 +48,23 @@ class MIXPolicyLossFn(PolicyLossFn):
         is_expert_mask = kwargs.get("is_expert_mask", None)
         if is_expert_mask is None:
             raise ValueError("is_expert_mask is required in MIX")
-        assert len(is_expert_mask) == logprob.shape[0], f"Error: {len(is_expert_mask)=} != {logprob.shape[0]=}"
-        
+        assert (
+            len(is_expert_mask) == logprob.shape[0]
+        ), f"Error: {len(is_expert_mask)=} != {logprob.shape[0]=}"
+
         n_usual_exp = torch.sum(~is_expert_mask).item()
         n_expert_exp = torch.sum(is_expert_mask).item()
 
         if self.use_dynamic_bsz:
-            per_micro_batch_weight_usual = self.ppo_mini_batch_size / (logprob.shape[0] * self.read_batch_size_usual)
-            per_micro_batch_weight_expert = self.ppo_mini_batch_size / (logprob.shape[0] * self.read_batch_size_expert)
+            per_micro_batch_weight_usual = self.ppo_mini_batch_size / (
+                logprob.shape[0] * self.read_batch_size_usual
+            )
+            per_micro_batch_weight_expert = self.ppo_mini_batch_size / (
+                logprob.shape[0] * self.read_batch_size_expert
+            )
         else:
             per_micro_batch_weight_usual = self.gradient_accumulation / self.read_batch_size_usual
-            per_micro_batch_weight_expert = self.gradient_accumulation /  self.read_batch_size_expert
+            per_micro_batch_weight_expert = self.gradient_accumulation / self.read_batch_size_expert
 
         if n_usual_exp > 0:
             grpo_loss, grpo_metrics = self.grpo_loss_fn(
@@ -71,7 +75,9 @@ class MIXPolicyLossFn(PolicyLossFn):
                 **kwargs,
             )
             grpo_loss = grpo_loss * n_usual_exp * per_micro_batch_weight_usual
-            grpo_metrics = {k: v * n_usual_exp * per_micro_batch_weight_usual for k, v in grpo_metrics.items()}
+            grpo_metrics = {
+                k: v * n_usual_exp * per_micro_batch_weight_usual for k, v in grpo_metrics.items()
+            }
         else:
             grpo_loss = torch.tensor(0.0, device=logprob.device)
             grpo_metrics = {}
@@ -83,7 +89,9 @@ class MIXPolicyLossFn(PolicyLossFn):
                 action_mask[is_expert_mask],
             )
             sft_loss = sft_loss * n_expert_exp * per_micro_batch_weight_expert
-            sft_metrics = {k: v * n_expert_exp * per_micro_batch_weight_expert for k, v in sft_metrics.items()}
+            sft_metrics = {
+                k: v * n_expert_exp * per_micro_batch_weight_expert for k, v in sft_metrics.items()
+            }
         else:
             sft_loss = torch.tensor(0.0, device=logprob.device)
             sft_metrics = {}
@@ -92,7 +100,7 @@ class MIXPolicyLossFn(PolicyLossFn):
 
         metrics = {f"usual/{k}": v for k, v in grpo_metrics.items()}
         sft_metrics.update({f"expert/{k}": v for k, v in sft_metrics.items()})
-        
+
         return loss, metrics
 
     @classmethod
@@ -104,9 +112,4 @@ class MIXPolicyLossFn(PolicyLossFn):
 
     @property
     def select_keys(self) -> List[str]:
-        return [
-            "old_logprob",
-            "action_mask",
-            "advantages",
-            "is_expert_mask"
-        ]
+        return ["old_logprob", "action_mask", "advantages", "is_expert_mask"]

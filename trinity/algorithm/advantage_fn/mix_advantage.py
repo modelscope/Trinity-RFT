@@ -3,7 +3,6 @@
 from typing import Dict, Tuple
 
 import torch
-
 from verl import DataProto
 
 from trinity.algorithm.advantage_fn import ADVANTAGE_FN
@@ -30,9 +29,7 @@ class MIXAdvantageFn(GRPOAdvantageFn):
         batch_size = is_expert_mask.shape[0]
 
         # Process tensors
-        tensors = {
-            k: tensor[~is_expert_mask] for k, tensor in exps.batch.items()
-        }
+        tensors = {k: tensor[~is_expert_mask] for k, tensor in exps.batch.items()}
 
         # Process non-tensors
         non_tensors = {
@@ -41,14 +38,14 @@ class MIXAdvantageFn(GRPOAdvantageFn):
 
         # Build new DataProto
         new_exps = DataProto.from_dict(
-            tensors=tensors,
-            non_tensors=non_tensors,
-            meta_info=exps.meta_info
+            tensors=tensors, non_tensors=non_tensors, meta_info=exps.meta_info
         )
         new_exps, new_metrics = super().__call__(new_exps, **kwargs)
 
         # Get full advantages
-        full_advantages = torch.zeros((batch_size, new_exps.batch["advantages"].shape[1]), device=device)
+        full_advantages = torch.zeros(
+            (batch_size, new_exps.batch["advantages"].shape[1]), device=device
+        )
         full_returns = torch.zeros((batch_size, new_exps.batch["returns"].shape[1]), device=device)
 
         # Fill in the non-expert parts with computed values
@@ -60,6 +57,7 @@ class MIXAdvantageFn(GRPOAdvantageFn):
         exps.batch["returns"] = full_returns
         # TODO: change new_metrics
         return exps, new_metrics
+
     @classmethod
     def default_args(cls) -> Dict:
         return {
