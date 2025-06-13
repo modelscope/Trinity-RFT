@@ -1,6 +1,6 @@
 # Offline DPO and SFT
 
-This example describes DPO and SFT based on the Qwen-2.5-1.5B-Instruct model and [Human-like-DPO-dataset](https://huggingface.co/datasets/HumanLLMs/Human-Like-DPO-Dataset).
+This example describes DPO and SFT based on the Qwen-2.5-1.5B-Instruct model.
 
 ## Step 1: Model and Data Preparation
 
@@ -20,7 +20,7 @@ More details of model downloading are referred to [ModelScope](https://modelscop
 
 ### Data Preparation
 
-Download the Human-Like-DPO-Dataset dataset to the local directory `$DATASET_PATH/human_like_dpo_dataset`:
+For DPO, we download the [Human-like-DPO-dataset](https://huggingface.co/datasets/HumanLLMs/Human-Like-DPO-Dataset) to the local directory `$DATASET_PATH/human_like_dpo_dataset`:
 
 ```shell
 # Using Modelscope
@@ -33,6 +33,8 @@ huggingface-cli download HumanLLMs/Human-Like-DPO-Dataset --repo-type dataset --
 More details of dataset downloading are referred to [ModelScope](https://modelscope.cn/docs/datasets/download) or [Huggingface](https://huggingface.co/docs/huggingface_hub/main/en/guides/cli#download-a-dataset-or-a-space).
 
 Note that the dataset has the keys `prompt`, `chosen` and `rejected`. If not, pass the proper keys to the config.
+
+For SFT, we download the dataset to the local directory `/PATH/TO/SFT_DATASET/`, which usually contains message-based data.
 
 ## Step 2: Setup Configuration
 
@@ -53,7 +55,7 @@ algorithm:
     kl_coef: 0.1  # value of beta in DPO
 checkpoint_root_dir: /PATH/TO/CHECKPOINT/
 model:
-  model_path: /PATH/TO/MODEL/
+  model_path: $MODEL_PATH/Qwen2.5-1.5B-Instruct
 cluster:
   node_num: 1
   gpu_per_node: 8
@@ -62,9 +64,9 @@ buffer:
   batch_size: 64
   trainer_input:
     experience_buffer:
-      name: dpo_buffer
+      name: human_like_dpo
       storage_type: file
-      path: /PATH/TO/DATASET/
+      path: $DATASET_PATH/human_like_dpo_dataset
       format:
         prompt_type: plaintext # plaintext/messages/chatpair
         prompt_key: prompt
@@ -77,8 +79,7 @@ trainer:
 
 ### Configuration for SFT
 
-We set the `algorithm_type` as `sft` to run SFT process.
-Then we modify the config file `sft.yaml` with the following changes:
+We set the `algorithm_type` as `sft` to run SFT process. Then we modify the config file `sft.yaml` with the following changes:
 
 ```yaml
 project: <project_name>
@@ -99,13 +100,11 @@ buffer:
     experience_buffer:
       name: <sft_dataset_name>
       storage_type: file
-      path: /PATH/TO/DATASET/
+      path: /PATH/TO/SFT_DATASET/
       split: train
       format:
         prompt_type: messages
         messages_key: messages
-    default_workflow_type: math_workflow
-    default_reward_fn_type: math_reward
 trainer:
   trainer_config_path: /PATH/TO/TRAIN_CONFIG_YAML/
   save_interval: 50
