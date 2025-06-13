@@ -1,6 +1,6 @@
-# Offline DPO
+# Offline DPO and SFT
 
-This example describes DPO based on the Qwen-2.5-1.5B-Instruct model and [Human-like-DPO-dataset](https://huggingface.co/datasets/HumanLLMs/Human-Like-DPO-Dataset).
+This example describes DPO and SFT based on the Qwen-2.5-1.5B-Instruct model and [Human-like-DPO-dataset](https://huggingface.co/datasets/HumanLLMs/Human-Like-DPO-Dataset).
 
 ## Step 1: Model and Data Preparation
 
@@ -34,9 +34,9 @@ More details of dataset downloading are referred to [ModelScope](https://modelsc
 
 Note that the dataset has the keys `prompt`, `chosen` and `rejected`. If not, pass the proper keys to the config.
 
-## Step 2: Setup Configuration and Run Experiment
+## Step 2: Setup Configuration
 
-### Configuration
+### Configuration for DPO
 
 We use the configurations in [`dpo.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/dpo_humanlike/dpo.yaml) and [`train_dpo.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/dpo_humanlike/train_dpo.yaml) for this experiment. Some important setups are listed in the following:
 
@@ -70,15 +70,62 @@ buffer:
         prompt_key: prompt
         chosen_key: chosen
         rejected_key: rejected
+explorer:
+  rollout_model:
+    engine_num: 0
 trainer:
   trainer_config_path: 'examples/dpo_humanlike/train_dpo.yaml'
   save_interval: 30
 ```
 
-### Run the Experiment
+### Configuration for SFT
 
-Run RFT process with the following command:
+We set the `algorithm_type` as `sft` to run SFT process.
+Then we modify the config file `sft.yaml` with the following changes:
+
+```yaml
+project: <project_name>
+name: <experiment_name>
+mode: train
+algorithm:
+  algorithm_type: sft
+checkpoint_root_dir: /PATH/TO/CHECKPOINT/
+model:
+  model_path: /PATH/TO/MODEL/
+cluster:
+  node_num: 1
+  gpu_per_node: 2
+buffer:
+  total_epochs: 5
+  batch_size: 64
+  trainer_input:
+    experience_buffer:
+      name: <sft_dataset_name>
+      storage_type: file
+      path: /PATH/TO/DATASET/
+      split: train
+      format:
+        prompt_type: messages
+        messages_key: messages
+    default_workflow_type: math_workflow
+    default_reward_fn_type: math_reward
+explorer:
+  rollout_model:
+    engine_num: 0
+trainer:
+  trainer_config_path: /PATH/TO/TRAIN_CONFIG_YAML/
+  save_interval: 50
+```
+
+## Step 3: Run the Experiment
+
+Run DPO process with the following command:
 
 ```shell
 trinity run --config examples/dpo_humanlike/dpo.yaml
+```
+or, for SFT:
+
+```shell
+trinity run --config /PATH/TO/sft.yaml
 ```
