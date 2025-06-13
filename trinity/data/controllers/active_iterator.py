@@ -159,8 +159,9 @@ class DataActiveIterator:
                 traceback.print_exc()
                 return 7, "Tracking lineage failed."
 
-            # step 8. export the result to the output buffer
+            # step 8. sort and export the result to the output buffer
             try:
+                res_dataset.sort_by("priority", reverse=True)
                 res_dataset.write_to_buffer()
             except Exception:
                 traceback.print_exc()
@@ -246,7 +247,7 @@ class DataActiveIterator:
             difficulty = stats.get("difficulty_score", 0.5)
             score += self.priority_weights["difficulty"] * difficulty
 
-        sample["priority"] = [score]
+        sample["priority"] = score
         return sample
 
     def _compute_diversity_score(self) -> float:
@@ -257,10 +258,6 @@ class DataActiveIterator:
         """Compute utility scores for all samples in dataset"""
         dataset.data = dataset.data.map(self._compute_combined_score)
         return dataset
-
-    def _select_top_k(self, dataset: RftDataset, k: int) -> List:
-        """Select top-k samples based on utility scores"""
-        return dataset.data.sort("priority", reverse=True).take(k).to_list()
 
     @ray.method(num_returns=1)
     def select_batch(self, dataset: RftDataset, batch_size: int) -> List[Dict[str, Any]]:
@@ -273,7 +270,8 @@ class DataActiveIterator:
         dataset.data = dataset.data.filter(lambda s: s["priority"] >= self.min_priority_score)
 
         # Select top-k samples
-        selected_samples = self._select_top_k(dataset, batch_size)
+        dataset.sort_by("priority", reverse=True, top_k=batch_size)
+        selected_samples = dataset.data.to_list()
 
         # Update state
         self._update_state(selected_samples, dataset.data["priority"])

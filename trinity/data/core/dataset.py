@@ -64,6 +64,11 @@ class RftDataset:
         for formatter in formatters:
             self.data = formatter(self.data, num_proc)
 
+    def sort_by(self, key: str, reverse: bool = False, top_k: int = -1):
+        if top_k == -1:
+            top_k = len(self.data)
+        self.data = self.data.sort(key, reverse=reverse).take(top_k)
+
     def read_from_buffer(self):
         datasets = []
         for buffer in self.buffers:
