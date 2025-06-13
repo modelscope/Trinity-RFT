@@ -45,11 +45,10 @@ class RftDataset:
         input_buffer_configs = self.config.input_buffers
         if len(input_buffer_configs) == 0:
             raise ValueError("input_buffers is empty in data pipeline config")
-        datasets = []
+        self.buffers = []
         for input_buffer_config in input_buffer_configs:
-            input_buffer = get_buffer_reader(input_buffer_config, self.buffer_config)
-            datasets.append(Dataset.from_list(input_buffer.read()))
-        self.data = concatenate_datasets(datasets)
+            self.buffers.append(get_buffer_reader(input_buffer_config, self.buffer_config))
+        self.data = Dataset.from_list([])
 
         self.reward_schema = self._init_reward_schema(reward_schema)
         self.stats: Dict[str, Any] = {}
@@ -65,6 +64,12 @@ class RftDataset:
         for formatter in formatters:
             self.data = formatter(self.data, num_proc)
 
+    def read_from_buffer(self):
+        datasets = []
+        for buffer in self.buffers:
+            datasets.append(Dataset.from_list(buffer.read()))
+        self.data = concatenate_datasets(datasets)
+
     def write_to_buffer(
         self, output_storage_config: StorageConfig = None, buffer_config: BufferConfig = None
     ):
@@ -75,6 +80,7 @@ class RftDataset:
         output_buffer = get_buffer_writer(output_storage_config, buffer_config)
         output_buffer.write(self.data.to_list())
         output_buffer.finish()
+        self.data = Dataset.from_list([])
 
     def to_parquet(self, path: str):
         self.data.to_parquet(path)

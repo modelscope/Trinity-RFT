@@ -118,43 +118,53 @@ class DataActiveIterator:
             traceback.print_exc()
             return 3, "DataCleaner loading failed."
 
-        # step 4. apply processors to calculate scores of different dimensions
-        try:
-            res_dataset = dataset
-            if hit_cleaner:
-                res_dataset = cleaner.process([res_dataset])
-            if hit_synthesizer:
-                res_dataset = synthesizer.process([res_dataset])
-            if hit_human_annotator:
-                res_dataset = human_annotator.process([res_dataset])
-        except Exception:
-            traceback.print_exc()
-            return 4, "DataProcessors processing failed."
+        while True:
+            # step 4. load data from the input buffers for the next batch
+            try:
+                dataset.read_from_buffer()
+            except StopIteration:
+                break
+            except Exception:
+                traceback.print_exc()
+                return 4, "RftDataset loading from buffers failed."
 
-        # step 5. calculate the average and final scores, including priority
-        try:
-            if hit_cleaner:
-                scored_dataset = self._group_scores(res_dataset)
-                scored_dataset = self._compute_priority_scores(scored_dataset)
-            else:
-                scored_dataset = res_dataset
-        except Exception:
-            traceback.print_exc()
-            return 5, "Grouping and computing priority score failed."
+            # step 5. apply processors to calculate scores of different dimensions
+            try:
+                res_dataset = dataset
+                if hit_cleaner:
+                    res_dataset = cleaner.process([res_dataset])
+                if hit_synthesizer:
+                    res_dataset = synthesizer.process([res_dataset])
+                if hit_human_annotator:
+                    res_dataset = human_annotator.process([res_dataset])
+            except Exception:
+                traceback.print_exc()
+                return 5, "DataProcessors processing failed."
 
-        # step 6. track lineage if they are changed
-        try:
-            res_dataset = scored_dataset
-        except Exception:
-            traceback.print_exc()
-            return 6, "Tracking lineage failed."
+            # step 6. calculate the average and final scores, including priority
+            try:
+                if hit_cleaner:
+                    scored_dataset = self._group_scores(res_dataset)
+                    scored_dataset = self._compute_priority_scores(scored_dataset)
+                else:
+                    scored_dataset = res_dataset
+            except Exception:
+                traceback.print_exc()
+                return 6, "Grouping and computing priority score failed."
 
-        # step 7. export the result to the output buffer
-        try:
-            res_dataset.write_to_buffer()
-        except Exception:
-            traceback.print_exc()
-            return 7, "Exporting result to output buffer failed."
+            # step 7. track lineage if they are changed
+            try:
+                res_dataset = scored_dataset
+            except Exception:
+                traceback.print_exc()
+                return 7, "Tracking lineage failed."
+
+            # step 8. export the result to the output buffer
+            try:
+                res_dataset.write_to_buffer()
+            except Exception:
+                traceback.print_exc()
+                return 8, "Exporting result to output buffer failed."
 
         return 0, "success"
 

@@ -22,7 +22,7 @@ class RawFileWriter(BufferWriter):
         ext = os.path.splitext(meta.path)[-1]
         if ext != ".jsonl":
             raise ValueError(f"File path must end with .json or .jsonl, got {meta.path}")
-        self.writer = jl.open(meta.path, mode="w")
+        self.writer = jl.open(meta.path, mode="a")
 
     def write(self, data: List) -> None:
         self.writer.write_all(data)

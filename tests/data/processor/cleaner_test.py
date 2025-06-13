@@ -41,6 +41,7 @@ class TestDataCleaner(unittest.TestCase):
         )
 
         dataset = RftDataset(self.rft_config.data_processor.task_pipeline)
+        dataset.read_from_buffer()
         dataset = cleaner.process([dataset])
 
         res_list = dataset.data.select_columns("text").to_list()

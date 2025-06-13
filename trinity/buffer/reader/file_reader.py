@@ -235,10 +235,14 @@ class RolloutDataReader(BufferReader):
 @FILE_READERS.register_module("raw")
 class RawDataReader(BufferReader):
     def __init__(self, meta: StorageConfig, config: BufferConfig):
+        self.returned = False
         self.dataset = load_dataset(meta.path, name=meta.subset_name, split=meta.split)
 
     def __len__(self):
         return len(self.dataset)
 
     def read(self, strategy: Optional[ReadStrategy] = None) -> List:
+        if self.returned:
+            raise StopIteration
+        self.returned = True
         return self.dataset.to_list()

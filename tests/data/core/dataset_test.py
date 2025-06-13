@@ -57,6 +57,7 @@ class TestRftDataset(unittest.TestCase):
         dataset = RftDataset(
             data_pipeline_config=self.data_pipeline_config, reward_schema="default"
         )
+        dataset.read_from_buffer()
 
         self.assertEqual(len(dataset), 10)
         self.assertIsInstance(dataset.reward_schema, RewardSchema)
@@ -65,6 +66,7 @@ class TestRftDataset(unittest.TestCase):
         dataset = RftDataset(
             data_pipeline_config=self.data_pipeline_config, reward_schema="default"
         )
+        dataset.read_from_buffer()
         original_data = dataset.data
         # no formatter
         dataset.format(formatters=[])

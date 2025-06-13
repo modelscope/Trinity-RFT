@@ -43,11 +43,6 @@ class TestTaskParser(unittest.TestCase):
             logger.info("None dj config.")
         else:
             self.assertIsNotNone(dj_config)
-            op_weights = {}
-            for op in dj_config.process:
-                op_name = list(op.keys())[0]
-                op_weights[op_name] = op[op_name]["op_weight"]
-            logger.info(op_weights)
 
     def test_instruction1(self):
         rft_config = DataPipelineConfig()

@@ -54,6 +54,7 @@ class TestBoxedMathDataset(unittest.TestCase):
 
     def test_transform(self):
         dataset = RftDataset(data_pipeline_config=self.data_config, reward_schema="default")
+        dataset.read_from_buffer()
         formatter = BoxedMathAnswerFormatter(config=self.data_config.format)
         self.assertNotIn(formatter.config.response_key, dataset.data.column_names)
         dataset.format(formatter)
