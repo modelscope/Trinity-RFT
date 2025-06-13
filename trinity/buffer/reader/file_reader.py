@@ -234,7 +234,7 @@ class RolloutDataReader(BufferReader):
 
 @FILE_READERS.register_module("raw")
 class RawDataReader(BufferReader):
-    def __init__(self, meta: StorageConfig, config: BufferConfig):
+    def __init__(self, meta: StorageConfig, config: Optional[BufferConfig]):
         self.returned = False
         self.dataset = load_dataset(meta.path, name=meta.subset_name, split=meta.split)
 

@@ -1,6 +1,6 @@
 """Writer of the File buffer."""
 import os
-from typing import List
+from typing import List, Optional
 
 import jsonlines as jl
 
@@ -15,13 +15,13 @@ logger = get_logger(__name__)
 class RawFileWriter(BufferWriter):
     """Writer of the Queue buffer."""
 
-    def __init__(self, meta: StorageConfig, config: BufferConfig):
+    def __init__(self, meta: StorageConfig, config: Optional[BufferConfig]):
         assert meta.storage_type == StorageType.FILE
         if meta.path is None:
             raise ValueError("File path cannot be None for RawFileWriter")
         ext = os.path.splitext(meta.path)[-1]
         if ext != ".jsonl":
-            raise ValueError(f"File path must end with .json or .jsonl, got {meta.path}")
+            raise ValueError(f"File path must end with .jsonl, got {meta.path}")
         self.writer = jl.open(meta.path, mode="a")
 
     def write(self, data: List) -> None:
