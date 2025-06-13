@@ -675,6 +675,12 @@ class ActorRolloutRefWorker(Worker):
             self.ref_policy = DataParallelPPOActor(
                 config=self.config.ref, actor_module=self.ref_module_fsdp
             )
+            self.checkpoint_manager = FSDPCheckpointManager(
+                model=self.ref_module_fsdp,
+                optimizer=None,
+                lr_scheduler=None,
+                processing_class=self.processor if self.processor is not None else self.tokenizer,
+            )
 
         if self._is_actor:
             self.flops_counter = FlopsCounter(self.actor_model_config)
