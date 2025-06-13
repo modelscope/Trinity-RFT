@@ -61,10 +61,6 @@ class MIXPolicyLossFn(PolicyLossFn):
         else:
             per_micro_batch_weight_usual = self.gradient_accumulation / self.read_batch_size_usual
             per_micro_batch_weight_expert = self.gradient_accumulation /  self.read_batch_size_expert
-        
-        print(f"debug: {per_micro_batch_weight_usual=}, = {self.ppo_mini_batch_size} / ({logprob.shape[0]} * {self.read_batch_size_usual})")
-        print(f"debug: {per_micro_batch_weight_expert=}, = {self.ppo_mini_batch_size} / ({logprob.shape[0]} * {self.read_batch_size_expert})")
-        print(f"debug: {n_usual_exp=}, {n_expert_exp=}")
 
         if n_usual_exp > 0:
             grpo_loss, grpo_metrics = self.grpo_loss_fn(
@@ -92,7 +88,7 @@ class MIXPolicyLossFn(PolicyLossFn):
             sft_loss = torch.tensor(0.0, device=logprob.device)
             sft_metrics = {}
 
-        loss = grpo_loss + self.mu * sft_loss
+        loss = (1 - self.mu) * grpo_loss + self.mu * sft_loss
 
         metrics = {f"usual/{k}": v for k, v in grpo_metrics.items()}
         sft_metrics.update({f"expert/{k}": v for k, v in sft_metrics.items()})

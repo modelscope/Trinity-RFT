@@ -411,11 +411,9 @@ class DataParallelPPOActor(BasePPOActor):
 
                     if self.config.use_dynamic_bsz:
                         # relative to the dynamic bsz
-                        print(f"debug: use_dynamic_bsz: {len(data)} / {self.config.ppo_mini_batch_size} = ", len(data) / self.config.ppo_mini_batch_size)
                         loss = policy_loss * (len(data) / self.config.ppo_mini_batch_size)
                     else:
                         loss = policy_loss / self.gradient_accumulation
-                        print(f"debug: gradient_accumulation: 1/{self.gradient_accumulation} = ", 1.0/self.gradient_accumulation)
                     loss.backward()
 
                     append_to_dict(metrics, micro_batch_metrics)
