@@ -12,10 +12,9 @@ from typing import Tuple
 
 import ray
 
-from trinity.buffer import get_buffer_reader
+from trinity.algorithm.algorithm_manager import AlgorithmManager
 from trinity.common.config import Config
-from trinity.common.constants import AlgorithmType, SyncMethod
-from trinity.common.experience import Experiences
+from trinity.common.constants import SyncMethod
 from trinity.utils.log import get_logger
 
 
@@ -26,90 +25,39 @@ class Trainer:
     def __init__(self, config: Config) -> None:
         self.config = config
         self.logger = get_logger(__name__)
-        self.train_buffer = get_buffer_reader(
-            self.config.buffer.trainer_input.experience_buffer,  # type: ignore
-            self.config.buffer,
-        )
-        self.sft_warmup_buffer = (
-            get_buffer_reader(
-                self.config.buffer.trainer_input.sft_warmup_dataset,  # type: ignore
-                self.config.buffer,
-            )
-            if self.config.buffer.trainer_input.sft_warmup_steps > 0
-            else None
-        )
+        self.algorithm_manager = AlgorithmManager(config)
         self.engine = get_trainer_wrapper(config)
 
     def prepare(self) -> None:
         """Prepare the trainer."""
         self.engine.prepare()
 
-    def train(self, algo_type: AlgorithmType = AlgorithmType.PPO):
+    def train(self):
         """Train the model."""
         while True:
-            train_status, _ = self.train_step(algo_type)
+            train_status, _ = self.train_step()
             if not train_status:
                 break
 
-    def train_one_period(self, algo_type: AlgorithmType = AlgorithmType.PPO) -> Tuple[bool, int]:
+    def train_one_period(self) -> Tuple[bool, int]:
         """Train for one period. Each period contains `sync_interval` steps.
         Returns:
             train_status: Whether to continue training.
             train_step_num: The number of training steps"""
         for _ in range(self.config.synchronizer.sync_interval):
-            train_status, train_step_num = self.train_step(algo_type)
+            train_status, train_step_num = self.train_step()
             if not train_status:
                 return False, train_step_num
         self.logger.info(f"Train step {train_step_num} finished.")
         return True, train_step_num
 
-    def train_step(self, algo_type: AlgorithmType = AlgorithmType.PPO) -> Tuple[bool, int]:
+    def train_step(self) -> Tuple[bool, int]:
         """Train one step.
-
-        Args:
-            algo_type (AlgorithmType): The type of data to be used for training.
-                Defaults to AlgorithmType.PPO.
 
         Returns:
             bool: Whether to continue training.
         """
-        self.engine.set_mode(algo_type)
-        if algo_type.is_rft() and self.config.buffer.trainer_input.read_experience_strategy:
-            strategy = self.config.buffer.trainer_input.read_experience_strategy
-        else:
-            strategy = None
-        try:
-            if algo_type.is_sft():
-                exps = self.sft_warmup_buffer.read()
-            else:
-                exps = self.train_buffer.read(strategy=strategy)
-        except StopIteration:
-            self.logger.warning("No more data to train. Stop training.")
-            return False, 0  # TODO: get the actual step number
-
-        if algo_type.is_sft():
-            return self.engine.train_sft_step(
-                Experiences.gather_experiences(
-                    exps,
-                    pad_token_id=self.config.buffer.pad_token_id,  # type: ignore
-                )
-            )
-        elif algo_type.is_rft():
-            return self.engine.train_rft_step(
-                Experiences.gather_experiences(
-                    exps,
-                    pad_token_id=self.config.buffer.pad_token_id,  # type: ignore
-                )
-            )
-        elif algo_type.is_dpo():
-            return self.engine.train_dpo_step(
-                Experiences.gather_dpo_experiences(
-                    exps,
-                    pad_token_id=self.config.buffer.pad_token_id,  # type: ignore
-                )
-            )
-        else:
-            raise ValueError(f"Unsupported algorithm type: {algo_type}")
+        return self.engine.train_step()
 
     def sync_weight(self) -> None:
         """Sync the model weight."""
@@ -122,7 +70,7 @@ class Trainer:
 
     def shutdown(self) -> None:
         # if checkpoint not saved, save the last checkpoint
-        step_num = self.engine.global_steps - 1
+        step_num = self.engine.train_step_num
         path = os.path.join(self.config.checkpoint_job_dir, f"global_step_{step_num}")
         if not os.path.isdir(path) or len(os.listdir(path)) == 0:
             self.engine.save_checkpoint()
@@ -136,17 +84,14 @@ class TrainEngineWrapper(ABC):
     def prepare(self) -> None:
         """Do some preparation before training started."""
 
+    @property
     @abstractmethod
-    def train_rft_step(self, experiences) -> Tuple[bool, int]:
-        """Train on the RFT data."""
+    def train_step_num(self) -> int:
+        """Get the current training step number."""
 
     @abstractmethod
-    def train_sft_step(self, experiences) -> Tuple[bool, int]:
-        """Train on the SFT data."""
-
-    @abstractmethod
-    def train_dpo_step(self, experiences) -> Tuple[bool, int]:
-        """Train on the DPO data."""
+    def train_step(self) -> Tuple[bool, int]:
+        """Training."""
 
     @abstractmethod
     def save_checkpoint(self) -> None:
@@ -155,10 +100,6 @@ class TrainEngineWrapper(ABC):
     @abstractmethod
     def sync_weight(self) -> None:
         """Sync the model weight."""
-
-    @abstractmethod
-    def set_mode(self, algo_type: AlgorithmType) -> None:
-        """Set training mode."""
 
     @abstractmethod
     def shutdown(self) -> None:

@@ -79,14 +79,25 @@ Specifies the algorithm type and its related hyperparameters.
 algorithm:
   algorithm_type: grpo
   repeat_times: 1
-  gamma: 1.0
-  lam: 1.0
+
+  # The following parameters are optional
+  # If not specified, they will automatically be set based on the `algorithm_type`
+  sample_strategy: "default"
+  advantage_fn: "ppo"
+  kl_penalty_fn: "none"
+  kl_loss_fn: "k2"
+  entropy_loss_fn: "default"
 ```
 
 - `algorithm_type`: Type of reinforcement learning algorithm. Supported types: `ppo`, `grpo`, `opmd`, `dpo`.
 - `repeat_times`: Number of times each task is repeated. Default is `1`. In `dpo`, this is automatically set to `2`.
-- `gamma`: Discount factor for future rewards. Default is `1.0`.
-- `lam`: Lambda value for Generalized Advantage Estimation (GAE). Default is `1.0`.
+
+- `sample_strategy`: The sampling strategy used for loading experiences from experience buffer.
+- `advantage_fn`: The advantage function used for computing advantages.
+- `kl_penalty_fn`: The KL penalty function used for computing KL penalty.
+- `kl_loss_fn`: The KL loss function used for computing KL loss.
+- `entropy_loss_fn`: The entropy loss function used for computing entropy loss.
+
 
 ---
 

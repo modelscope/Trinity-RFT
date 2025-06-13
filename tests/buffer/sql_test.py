@@ -7,7 +7,7 @@ import torch
 from trinity.buffer.reader.sql_reader import SQLReader
 from trinity.buffer.writer.sql_writer import SQLWriter
 from trinity.common.config import BufferConfig, StorageConfig
-from trinity.common.constants import AlgorithmType, StorageType
+from trinity.common.constants import StorageType
 from trinity.common.experience import Experience
 
 db_path = os.path.join(os.path.dirname(__file__), "test.db")
@@ -20,7 +20,7 @@ class TestSQLBuffer(unittest.TestCase):
         read_batch_size = 4
         meta = StorageConfig(
             name="test_buffer",
-            algorithm_type=AlgorithmType.PPO,
+            algorithm_type="ppo",
             path=f"sqlite:///{db_path}",
             storage_type=StorageType.SQL,
             wrap_in_ray=True,

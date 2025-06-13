@@ -2,6 +2,7 @@
 
 import ray
 
+from trinity.algorithm.algorithm import ALGORITHM_TYPE
 from trinity.buffer.buffer_writer import BufferWriter
 from trinity.buffer.db_wrapper import DBWrapper
 from trinity.common.config import BufferConfig, StorageConfig
@@ -15,7 +16,8 @@ class SQLWriter(BufferWriter):
         assert meta.storage_type == StorageType.SQL
         # we only support write RFT algorithm buffer for now
         # TODO: support other algorithms
-        assert meta.algorithm_type.is_rft(), "Only RFT buffer is supported for writing."
+        algorithm = ALGORITHM_TYPE.get(meta.algorithm_type)
+        assert algorithm.use_rollout, "Only RFT buffer is supported for writing."
         self.wrap_in_ray = meta.wrap_in_ray
         self.db_wrapper = DBWrapper.get_wrapper(meta, config)
 
