@@ -112,6 +112,8 @@ class Rollout:
     multi_turn: _MultiTurn = field(default_factory=_MultiTurn)
     temperature: float = 1.0
     n: int = 1  # > 1 for grpo
+    log_prob_micro_batch_size: Optional[int] = None
+    log_prob_micro_batch_size_per_gpu: int = 1
 
 
 @dataclass
@@ -155,6 +157,7 @@ class Critic:
     cliprange_value: float = 0.0
     checkpoint: Checkpoint = field(default_factory=Checkpoint)
     rollout_n: int = 1
+    loss_agg_mode: str = "token-mean"
 
 
 @dataclass
