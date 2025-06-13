@@ -98,6 +98,7 @@ class StorageConfig:
     # ! DO NOT SET,  automatically set corresponding to train/eval
     task_type: TaskType = TaskType.EXPLORE
 
+
 @dataclass
 class DataPipelineConfig:
     """Config for data pipeline."""
@@ -121,6 +122,7 @@ class DataPipelineConfig:
     min_priority_score: Optional[float] = 0.0
     priority_weights: Optional[Dict[str, float]] = None
     data_dist: Optional[str] = "gaussian"  # one of ["gaussian", "uniform"]
+
 
 @dataclass
 class DataProcessorConfig:

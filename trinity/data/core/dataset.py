@@ -5,8 +5,8 @@ from typing import Any, Dict, List, Optional, Union
 import networkx as nx
 from datasets import Dataset, concatenate_datasets
 
-from trinity.common.config import DataPipelineConfig, BufferConfig, StorageConfig
 from trinity.buffer import get_buffer_reader, get_buffer_writer
+from trinity.common.config import BufferConfig, DataPipelineConfig, StorageConfig
 from trinity.data.core.formatter import BaseDataFormatter
 
 
@@ -45,11 +45,11 @@ class RftDataset:
         input_buffer_configs = self.config.input_buffers
         if len(input_buffer_configs) == 0:
             raise ValueError("input_buffers is empty in data pipeline config")
-        self.data = []
+        datasets = []
         for input_buffer_config in input_buffer_configs:
             input_buffer = get_buffer_reader(input_buffer_config, self.buffer_config)
-            self.data.append(Dataset.from_list(input_buffer.read()))
-        self.data = concatenate_datasets(self.data)
+            datasets.append(Dataset.from_list(input_buffer.read()))
+        self.data = concatenate_datasets(datasets)
 
         self.reward_schema = self._init_reward_schema(reward_schema)
         self.stats: Dict[str, Any] = {}
@@ -65,7 +65,9 @@ class RftDataset:
         for formatter in formatters:
             self.data = formatter(self.data, num_proc)
 
-    def write_to_buffer(self, output_storage_config: StorageConfig = None, buffer_config: BufferConfig = None):
+    def write_to_buffer(
+        self, output_storage_config: StorageConfig = None, buffer_config: BufferConfig = None
+    ):
         if output_storage_config is None:
             output_storage_config = self.config.output_buffer
         if buffer_config is None:

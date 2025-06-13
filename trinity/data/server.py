@@ -18,10 +18,12 @@ def data_workflow(pipeline_type):
 
     pipeline_config = getattr(config, pipeline_type)
     if pipeline_config is None:
-        return jsonify({
-            "return_code": -1,
-            "message": f"{pipeline_type} is not supported or the corresponding config is empty"
-        })
+        return jsonify(
+            {
+                "return_code": -1,
+                "message": f"{pipeline_type} is not supported or the corresponding config is empty",
+            }
+        )
 
     iterator = DataActiveIterator(pipeline_config, config.buffer)
     ret, msg = iterator.run()

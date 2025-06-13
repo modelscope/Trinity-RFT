@@ -19,16 +19,18 @@ class TestBoxedMathDataset(unittest.TestCase):
 
     def setUp(self) -> None:
         self.data_config = DataPipelineConfig(
-            input_buffers=[StorageConfig(
-                path=os.path.join(
-                    os.path.dirname(os.path.realpath(__file__)),
-                    "..",
-                    "..",
-                    "test_data",
-                    "test_10",
-                ),
-                raw=True,
-            )],
+            input_buffers=[
+                StorageConfig(
+                    path=os.path.join(
+                        os.path.dirname(os.path.realpath(__file__)),
+                        "..",
+                        "..",
+                        "test_data",
+                        "test_10",
+                    ),
+                    raw=True,
+                )
+            ],
             format=FormatConfig(
                 prompt_key="problem",
                 response_key="answer",
@@ -63,16 +65,18 @@ class TestRLHFFormatter(unittest.TestCase):
 
     def setUp(self) -> None:
         self.data_config = DataPipelineConfig(
-            input_buffers=[StorageConfig(
-                path=os.path.join(
-                    os.path.dirname(os.path.realpath(__file__)),
-                    "..",
-                    "..",
-                    "test_data",
-                    "test_10",
-                ),
-                raw=True,
-            )],
+            input_buffers=[
+                StorageConfig(
+                    path=os.path.join(
+                        os.path.dirname(os.path.realpath(__file__)),
+                        "..",
+                        "..",
+                        "test_data",
+                        "test_10",
+                    ),
+                    raw=True,
+                )
+            ],
             format=FormatConfig(
                 prompt_key="problem",
                 chat_template="User: {}\nAssistant: ",
@@ -114,16 +118,18 @@ class TestRewardFormatter(unittest.TestCase):
 
     def setUp(self) -> None:
         self.data_config = DataPipelineConfig(
-            input_buffers=[StorageConfig(
-                path=os.path.join(
-                    os.path.dirname(os.path.realpath(__file__)),
-                    "..",
-                    "..",
-                    "test_data",
-                    "test_10",
-                ),
-                raw=True,
-            )],
+            input_buffers=[
+                StorageConfig(
+                    path=os.path.join(
+                        os.path.dirname(os.path.realpath(__file__)),
+                        "..",
+                        "..",
+                        "test_data",
+                        "test_10",
+                    ),
+                    raw=True,
+                )
+            ],
             format=FormatConfig(
                 prompt_key="problem",
                 chosen_key="chosen",
@@ -174,16 +180,18 @@ class TestSFTFormatter(unittest.TestCase):
 
     def setUp(self) -> None:
         self.data_config = DataPipelineConfig(
-            input_buffers=[StorageConfig(
-                path=os.path.join(
-                    os.path.dirname(os.path.realpath(__file__)),
-                    "..",
-                    "..",
-                    "test_data",
-                    "test_10",
-                ),
-                raw=True,
-            )],
+            input_buffers=[
+                StorageConfig(
+                    path=os.path.join(
+                        os.path.dirname(os.path.realpath(__file__)),
+                        "..",
+                        "..",
+                        "test_data",
+                        "test_10",
+                    ),
+                    raw=True,
+                )
+            ],
             format=FormatConfig(
                 prompt_key="problem",
                 response_key="answer",
@@ -230,16 +238,18 @@ class TestComposedFormatter(unittest.TestCase):
 
     def setUp(self) -> None:
         self.data_config = DataPipelineConfig(
-            input_buffers=[StorageConfig(
-                path=os.path.join(
-                    os.path.dirname(os.path.realpath(__file__)),
-                    "..",
-                    "..",
-                    "test_data",
-                    "test_10",
-                ),
-                raw=True,
-            )],
+            input_buffers=[
+                StorageConfig(
+                    path=os.path.join(
+                        os.path.dirname(os.path.realpath(__file__)),
+                        "..",
+                        "..",
+                        "test_data",
+                        "test_10",
+                    ),
+                    raw=True,
+                )
+            ],
             format=FormatConfig(
                 prompt_key="problem",
                 response_key="answer",

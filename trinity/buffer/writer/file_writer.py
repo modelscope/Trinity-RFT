@@ -1,6 +1,7 @@
 """Writer of the File buffer."""
 import os
 from typing import List
+
 import jsonlines as jl
 
 from trinity.buffer.buffer_writer import BufferWriter
@@ -16,13 +17,15 @@ class RawFileWriter(BufferWriter):
 
     def __init__(self, meta: StorageConfig, config: BufferConfig):
         assert meta.storage_type == StorageType.FILE
-        ext = os.path.splitext(meta.path)
-        if ext != '.jsonl':
+        if meta.path is None:
+            raise ValueError("File path cannot be None for RawFileWriter")
+        ext = os.path.splitext(meta.path)[-1]
+        if ext != ".jsonl":
             raise ValueError(f"File path must end with .json or .jsonl, got {meta.path}")
-        self.writer = jl.open(meta.path, mode='w')
+        self.writer = jl.open(meta.path, mode="w")
 
     def write(self, data: List) -> None:
         self.writer.write_all(data)
 
     def finish(self):
-       self.writer.close()
+        self.writer.close()

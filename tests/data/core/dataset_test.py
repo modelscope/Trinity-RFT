@@ -4,8 +4,6 @@ import os
 import unittest
 
 from trinity.common.config import DataPipelineConfig, FormatConfig, StorageConfig
-from trinity.common.rewards import AccuracyReward
-from trinity.common.workflows import MathWorkflow, SimpleWorkflow
 from trinity.data.core.dataset import RewardSchema, RftDataset
 from trinity.data.core.formatter import BoxedMathAnswerFormatter, RLHFFormatter
 
@@ -15,16 +13,18 @@ class TestRftDataset(unittest.TestCase):
 
     def setUp(self) -> None:
         self.data_pipeline_config = DataPipelineConfig(
-            input_buffers=[StorageConfig(
-                path=os.path.join(
-                    os.path.dirname(os.path.realpath(__file__)),
-                    "..",
-                    "..",
-                    "test_data",
-                    "test_10",
-                ),
-                raw=True,
-            )],
+            input_buffers=[
+                StorageConfig(
+                    path=os.path.join(
+                        os.path.dirname(os.path.realpath(__file__)),
+                        "..",
+                        "..",
+                        "test_data",
+                        "test_10",
+                    ),
+                    raw=True,
+                )
+            ],
             format=FormatConfig(
                 prompt_key="problem",
                 response_key="solution",
@@ -32,16 +32,18 @@ class TestRftDataset(unittest.TestCase):
             ),
         )
         self.data_pipeline_config_sample_level_setting = DataPipelineConfig(
-            input_buffers=[StorageConfig(
-                path=os.path.join(
-                    os.path.dirname(os.path.realpath(__file__)),
-                    "..",
-                    "..",
-                    "test_data",
-                    "test_10_with_rewfn_workflow",
-                ),
-                raw=True,
-            )],
+            input_buffers=[
+                StorageConfig(
+                    path=os.path.join(
+                        os.path.dirname(os.path.realpath(__file__)),
+                        "..",
+                        "..",
+                        "test_data",
+                        "test_10_with_rewfn_workflow",
+                    ),
+                    raw=True,
+                )
+            ],
             format=FormatConfig(
                 prompt_key="problem",
                 response_key="solution",
@@ -52,13 +54,17 @@ class TestRftDataset(unittest.TestCase):
         )
 
     def test_rft_dataset_init(self):
-        dataset = RftDataset(data_pipeline_config=self.data_pipeline_config, reward_schema="default")
+        dataset = RftDataset(
+            data_pipeline_config=self.data_pipeline_config, reward_schema="default"
+        )
 
         self.assertEqual(len(dataset), 10)
         self.assertIsInstance(dataset.reward_schema, RewardSchema)
 
     def test_format_dataset(self):
-        dataset = RftDataset(data_pipeline_config=self.data_pipeline_config, reward_schema="default")
+        dataset = RftDataset(
+            data_pipeline_config=self.data_pipeline_config, reward_schema="default"
+        )
         original_data = dataset.data
         # no formatter
         dataset.format(formatters=[])

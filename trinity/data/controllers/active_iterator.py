@@ -4,7 +4,7 @@ from typing import Any, Dict, List
 
 import ray
 
-from trinity.common.config import DataPipelineConfig, BufferConfig
+from trinity.common.config import BufferConfig, DataPipelineConfig
 from trinity.data.controllers.default_ops import DIMENSION_STATS_KEYS
 from trinity.data.controllers.task_parser import DataTaskParser
 from trinity.data.core.dataset import RftDataset
@@ -25,10 +25,7 @@ class DataActiveIterator:
     ):
         self.config = config
         self.buffer_config = buffer_config
-        if (
-            self.config.agent_model_name is not None
-            and self.config.agent_model_config is not None
-        ):
+        if self.config.agent_model_name is not None and self.config.agent_model_config is not None:
             # get the api key
             api_key = os.environ.get("OPENAI_API_KEY")
             # initialize the agent

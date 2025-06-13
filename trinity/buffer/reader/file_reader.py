@@ -231,13 +231,11 @@ class RolloutDataReader(BufferReader):
             self.index = 0
         return task
 
+
 @FILE_READERS.register_module("raw")
 class RawDataReader(BufferReader):
-
     def __init__(self, meta: StorageConfig, config: BufferConfig):
-        self.dataset = load_dataset(
-            meta.path, name=meta.subset_name, split=meta.split
-        )
+        self.dataset = load_dataset(meta.path, name=meta.subset_name, split=meta.split)
 
     def __len__(self):
         return len(self.dataset)
