@@ -47,5 +47,21 @@ class TestSQLBuffer(unittest.TestCase):
         for _ in range(total_num // read_batch_size):
             exps = sql_reader.read()
             self.assertEqual(len(exps), read_batch_size)
+
+        # dynamic read/write
+        sql_writer.write(
+            [
+                Experience(
+                    tokens=torch.tensor([float(j) for j in range(i + 1)]),
+                    prompt_length=i,
+                    reward=float(i),
+                    logprobs=torch.tensor([0.1]),
+                    action_mask=torch.tensor([j % 2 for j in range(i + 1)]),
+                )
+                for i in range(1, put_batch_size * 2 + 1)
+            ]
+        )
+        exps = sql_reader.read(batch_size=put_batch_size * 2)
+        self.assertEqual(len(exps), put_batch_size * 2)
         db_wrapper = ray.get_actor("sql-test_buffer")
         self.assertIsNotNone(db_wrapper)

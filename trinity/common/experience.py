@@ -43,6 +43,23 @@ class Experience:
         """Deserialize the experience from bytes."""
         return pickle.loads(data)
 
+    def to_dict(self) -> dict:
+        """Convert the experience to a dictionary."""
+        res = {
+            "prompt_text": self.prompt_text,
+            "info": self.info,
+            "metrics": self.metrics,
+        }
+        if self.response_text is not None:
+            res["response_text"] = self.response_text
+        if self.chosen is not None:
+            res["chosen"] = self.chosen.tolist()
+        if self.rejected is not None:
+            res["rejected"] = self.rejected.tolist()
+        if self.reward is not None:
+            res["reward"] = float(self.reward)
+        return res
+
 
 @dataclass(frozen=True)
 class Experiences:

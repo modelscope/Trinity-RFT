@@ -61,7 +61,9 @@ class DBWrapper:
             experience_models = [self.table_model_cls.from_experience(exp) for exp in data]
             session.add_all(experience_models)
 
-    def read(self, strategy: Optional[ReadStrategy] = None) -> List:
+    def read(
+        self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
+    ) -> List:
         if strategy is None:
             strategy = ReadStrategy.LFU
 
@@ -78,7 +80,8 @@ class DBWrapper:
             raise NotImplementedError(f"Unsupported strategy {strategy} by SQLStorage")
 
         exp_list = []
-        while len(exp_list) < self.batch_size:
+        batch_size = batch_size or self.batch_size
+        while len(exp_list) < batch_size:
             if len(exp_list):
                 self.logger.info("waiting for experiences...")
                 time.sleep(1)
@@ -90,7 +93,7 @@ class DBWrapper:
                     session.query(self.table_model_cls)
                     .filter(self.table_model_cls.reward.isnot(None))
                     .order_by(*sortOrder)  # TODO: very slow
-                    .limit(self.batch_size - len(exp_list))
+                    .limit(batch_size - len(exp_list))
                     .with_for_update()
                     .all()
                 )

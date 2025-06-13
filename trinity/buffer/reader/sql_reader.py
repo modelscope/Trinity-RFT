@@ -18,8 +18,10 @@ class SQLReader(BufferReader):
         self.wrap_in_ray = meta.wrap_in_ray
         self.db_wrapper = DBWrapper.get_wrapper(meta, config)
 
-    def read(self, strategy: Optional[ReadStrategy] = None) -> List:
+    def read(
+        self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
+    ) -> List:
         if self.wrap_in_ray:
-            return ray.get(self.db_wrapper.read.remote(strategy))
+            return ray.get(self.db_wrapper.read.remote(batch_size, strategy))
         else:
-            return self.db_wrapper.read(strategy)
+            return self.db_wrapper.read(batch_size, strategy)

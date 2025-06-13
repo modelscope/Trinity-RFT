@@ -43,9 +43,6 @@ class Explorer:
         self.taskset = get_buffer_reader(
             self.config.buffer.explorer_input.taskset, self.config.buffer
         )
-        self.eval_tasksets = []
-        for eval_taskset_config in self.config.buffer.explorer_input.eval_tasksets:
-            self.eval_tasksets.append(get_buffer_reader(eval_taskset_config, self.config.buffer))
         self.runner_pool = self._init_runner_pool()
         self.monitor = MONITOR.get(self.config.monitor.monitor_type)(
             project=self.config.project,
@@ -177,14 +174,14 @@ class Explorer:
             explore_status: whether there are more tasks to explore.
             explore_step_num: the number of explore steps
         """
-        task_num_per_period = self.config.synchronizer.sync_interval * self.config.buffer.batch_size
-
         st = time.time()
         all_metrics = defaultdict(list)
 
         # submit tasks of this step
         try:
-            tasks = [self.taskset.read() for _ in range(task_num_per_period)]
+            tasks = []
+            for _ in range(self.config.synchronizer.sync_interval):
+                tasks.extend(self.taskset.read())
             self.runner_pool.run_tasks(tasks)  # type: ignore
         except StopIteration:
             self.experience_buffer.finish()
@@ -218,7 +215,8 @@ class Explorer:
         # save explore checkpoint
         self.cache.save_explorer(
             current_step=self.step_num,
-            current_task_index=self.taskset.index,
+            current_task_index=self.step_num * self.config.buffer.batch_size,
+            # TODO: remove current_task_index
         )
 
         self.logger.info(f"Explore step {self.step_num} finished.")
@@ -226,13 +224,16 @@ class Explorer:
 
     def eval(self) -> Tuple[bool, int]:
         """Evaluation on all evaluation data samples."""
-        if len(self.eval_tasksets) == 0:
+        eval_tasksets = []
+        for eval_taskset_config in self.config.buffer.explorer_input.eval_tasksets:
+            eval_tasksets.append(get_buffer_reader(eval_taskset_config, self.config.buffer))
+        if len(eval_tasksets) == 0:
             self.logger.warning("No evaluation data samples. Skip evaluation.")
             return True, self.step_num
         self.logger.info("Evaluation started.")
         all_st = time.time()
         log_metrics = {}
-        for eval_taskset in self.eval_tasksets:
+        for eval_taskset in eval_tasksets:
             st = time.time()
             all_metrics = defaultdict(list)
 
@@ -247,10 +248,13 @@ class Explorer:
                         for metric_name, metric_value in status.metric.items():
                             all_metrics[metric_name].append(metric_value)
 
-            for _ in range(len(eval_taskset)):  # type: ignore
+            while True:
                 if not self.runner_pool.has_free():
                     wait()
-                self.runner_pool.run_tasks([eval_taskset.read()])  # type: ignore
+                try:
+                    self.runner_pool.run_tasks(eval_taskset.read())
+                except StopIteration:
+                    break
             while self.runner_pool.has_next():
                 wait()
             metrics = self.monitor.calculate_metrics(all_metrics, prefix=f"eval/{eval_taskset.name}")  # type: ignore
