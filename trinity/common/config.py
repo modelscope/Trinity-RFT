@@ -175,6 +175,7 @@ class AlgorithmConfig:
     algorithm_type: str = "ppo"
     # for GRPO-like algorithms, repeat each task for `repeat_times` times
     repeat_times: int = 1
+    mu: float = 0.1  # for mix training
 
     sample_strategy: Optional[str] = None
     sample_strategy_args: Optional[dict] = None
@@ -250,6 +251,7 @@ class BufferConfig:
 
     batch_size: int = 1
     total_epochs: int = 1
+    expert_data_ratio: float = 0.0
 
     # for explorer
     explorer_input: ExplorerInput = field(default_factory=ExplorerInput)
