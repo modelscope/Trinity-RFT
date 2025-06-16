@@ -200,5 +200,4 @@ class MIXAlgorithm(AlgorithmType):
             "policy_loss_fn": "mix",
             "advantage_fn": "grpo",
             "sample_strategy": "mix",
-            "mu": 0.1,
         }

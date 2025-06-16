@@ -128,7 +128,7 @@ class MixSampleStrategy(SampleStrategy):
 
     def __init__(self, buffer_config: BufferConfig, trainer_type: str, **kwargs):
         super().__init__(buffer_config, trainer_type)
-        self.expert_data_ratio = buffer_config.expert_data_ratio
+        self.expert_data_ratio = kwargs.get("expert_data_ratio", 0.5)
         tot_batch_size = buffer_config.read_batch_size
         expert_batch_size = ceil(self.expert_data_ratio * tot_batch_size)
 

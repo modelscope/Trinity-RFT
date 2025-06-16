@@ -53,19 +53,9 @@ class MIXAlgorithm(AlgorithmType):
             "policy_loss_fn": "mix",
             "advantage_fn": "grpo",
             "sample_strategy": "mix",
-            "mu": 0.1,
         }
 ```
 
-We also define some necessary configuration parameters for later use, including the weighting factor $\mu$ and the batch size of expert experiences $B'$, calculated as the product of `buffer.batch_size`, `buffer.expert_data_ratio` and `algorithm.repeat_times`.
-
-
-```python
-class BufferConfig:
-    """Config for algorithm."""
-    ...
-    expert_data_ratio: float = 0.5
-```
 
 ## Step 2: Define the Sampling Strategy
 
@@ -78,7 +68,7 @@ class MixSampleStrategy(SampleStrategy):
 
     def __init__(self, buffer_config: BufferConfig, trainer_type: str, **kwargs):
         super().__init__(buffer_config, trainer_type)
-        self.expert_data_ratio = buffer_config.expert_data_ratio
+        self.expert_data_ratio = kwargs.get("expert_data_ratio", 0.5)
         tot_batch_size = buffer_config.read_batch_size
         expert_batch_size = ceil(self.expert_data_ratio * tot_batch_size)
 
@@ -286,16 +276,16 @@ class MIXPolicyLossFn(PolicyLossFn):
 ## Step 4: Run the Experiment
 
 With the above newly-defined classes and functions, we can run the experiments without modifying other process.
-An example showing some important configurations is shown below.
+An example showing some important configurations is shown below, including the weighting factor $\mu$ as `algorithm.policy_loss_fn_args['mu']` and the batch size of expert experiences $B'$, calculated as the product of `buffer.batch_size`, `algorithm.sample_strategy_args['expert_data_ratio']` and `algorithm.repeat_times`.
 
 ```yaml
 algorithm:
   algorithm_type: mix
   repeat_times: 8
+  sample_strategy_args:
+    expert_data_ratio: 0.25
   policy_loss_fn_args:
-    mu: 0.5
+    mu: 0.5 # NEW
     clip_range: 0.2
     use_token_level_loss_in_sft: False
-buffer:
-  expert_data_ratio: 0.25
 ```

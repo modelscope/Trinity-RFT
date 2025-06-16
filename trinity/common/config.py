@@ -250,7 +250,6 @@ class BufferConfig:
 
     batch_size: int = 1
     total_epochs: int = 1
-    expert_data_ratio: float = 0.0
 
     # for explorer
     explorer_input: ExplorerInput = field(default_factory=ExplorerInput)

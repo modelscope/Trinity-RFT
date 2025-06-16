@@ -350,7 +350,9 @@ class veRLConfig:
 
         if config.algorithm.algorithm_type == "mix":
             tot_batch_size = config.buffer.read_batch_size
-            read_batch_size_expert = math.ceil(config.buffer.expert_data_ratio * tot_batch_size)
+            read_batch_size_expert = math.ceil(
+                config.algorithm.sample_strategy_args["expert_data_ratio"] * tot_batch_size
+            )
             read_batch_size_usual = tot_batch_size - read_batch_size_expert
             loss_kwargs = {
                 "use_dynamic_bsz": self.actor_rollout_ref.actor.use_dynamic_bsz,
