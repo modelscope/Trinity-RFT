@@ -14,7 +14,7 @@ $$
     \log \pi_\theta(o'_{b,t} \mid q'_b, o'_{b,<t})
 \right]}_{\text{Auxiliary Loss on Expert Data}}.
 $$
-The first two terms corresponds to the standard GRPO objective, which aims to maximize the expected reward. The last term is an auxiliary loss defined on expert data, encouraging the policy to imitate expert behavior. $\mu$ is a weighting factor that controls the relative importance of the two terms.
+The first term corresponds to the standard GRPO objective, which aims to maximize the expected reward. The last term is an auxiliary loss defined on expert data, encouraging the policy to imitate expert behavior. $\mu$ is a weighting factor that controls the relative importance of the two terms.
 
 
 ## Step 0: Prepare the Expert Data
@@ -57,7 +57,7 @@ class MIXAlgorithm(AlgorithmType):
         }
 ```
 
-We also define some necessary configuration parameters for later use, including the weighting factor $\mu$ and the batch size of expert experiences $B'$, calculated by the product of `expert_data_ratio` and `batch_size`.
+We also define some necessary configuration parameters for later use, including the weighting factor $\mu$ and the batch size of expert experiences $B'$, calculated as the product of `buffer.expert_data_ratio`, `buffer.expert_data_ratio` and `algorithm.repeat_times`.
 
 
 ```python
@@ -253,7 +253,7 @@ class MIXPolicyLossFn(PolicyLossFn):
         gradient_accumulation: Optional[int] = None,
         read_batch_size_usual: Optional[int] = None,
         read_batch_size_expert: Optional[int] = None,
-        use_token_level_loss_in_sft: Optional[bool] = True,
+        use_token_level_loss_in_sft: Optional[bool] = False,
     ) -> None:
         self.mu = mu
         self.use_dynamic_bsz = use_dynamic_bsz
@@ -330,7 +330,8 @@ class MIXPolicyLossFn(PolicyLossFn):
         loss = (1 - self.mu) * grpo_loss + self.mu * sft_loss
 
         metrics = {f"usual/{k}": v for k, v in grpo_metrics.items()}
-        sft_metrics.update({f"expert/{k}": v for k, v in sft_metrics.items()})
+        metrics.update({f"expert/{k}": v for k, v in sft_metrics.items()})
+        metrics.update({"loss": loss.item()})
 
         return loss, metrics
 
@@ -355,6 +356,8 @@ An example showing some important configurations is shown below.
 algorithm:
   algorithm_type: mix
   mu: 0.5
+  repeat_times: 8
+  use_token_level_loss: False
 buffer:
   expert_data_ratio: 0.25
 ```

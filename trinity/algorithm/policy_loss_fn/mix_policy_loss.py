@@ -22,7 +22,7 @@ class MIXPolicyLossFn(PolicyLossFn):
         gradient_accumulation: Optional[int] = None,
         read_batch_size_usual: Optional[int] = None,
         read_batch_size_expert: Optional[int] = None,
-        use_token_level_loss_in_sft: Optional[bool] = True,
+        use_token_level_loss_in_sft: bool = False,
     ) -> None:
         self.mu = mu
         self.use_dynamic_bsz = use_dynamic_bsz
@@ -63,8 +63,8 @@ class MIXPolicyLossFn(PolicyLossFn):
                 logprob.shape[0] * self.read_batch_size_expert
             )
         else:
-            per_micro_batch_weight_usual = self.gradient_accumulation / self.read_batch_size_usual
-            per_micro_batch_weight_expert = self.gradient_accumulation / self.read_batch_size_expert
+            per_micro_batch_weight_usual = self.gradient_accumulation / self.read_batch_size_usual  # type: ignore
+            per_micro_batch_weight_expert = self.gradient_accumulation / self.read_batch_size_expert  # type: ignore
 
         if n_usual_exp > 0:
             grpo_loss, grpo_metrics = self.grpo_loss_fn(
@@ -99,7 +99,8 @@ class MIXPolicyLossFn(PolicyLossFn):
         loss = (1 - self.mu) * grpo_loss + self.mu * sft_loss
 
         metrics = {f"usual/{k}": v for k, v in grpo_metrics.items()}
-        sft_metrics.update({f"expert/{k}": v for k, v in sft_metrics.items()})
+        metrics.update({f"expert/{k}": v for k, v in sft_metrics.items()})
+        metrics.update({"loss": loss.item()})
 
         return loss, metrics
 
