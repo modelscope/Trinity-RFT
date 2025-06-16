@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Test cases for data task parser."""
+import os
 import unittest
 
 import agentscope
@@ -16,7 +17,7 @@ class TestTaskParser(unittest.TestCase):
     def setUp(self) -> None:
         print("setup", flush=True)
 
-        api_key = "your_dashscope_key"
+        api_key = os.environ.get("OPENAI_API_KEY", None)
 
         agentscope.init(
             model_configs=[

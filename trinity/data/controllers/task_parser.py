@@ -164,8 +164,11 @@ class DataTaskParser:
         return dj_config, hit_cleaner, hit_synthesizer, hit_human_annotator
 
     def _check_types_of_processors(self, dj_config):
+        if dj_config is None:
+            return False, False, False
         hit_cleaner, hit_synthesizer, hit_human_annotator = False, False, False
-        for op in dj_config.process:
+        process_list = dj_config.get('process', [])
+        for op in process_list:
             op_name = list(op.keys())[0]
             if op_name in DEFAULT_CLEANER:
                 hit_cleaner = True
