@@ -84,6 +84,7 @@ ENV/
 logs/
 
 # data-juicer
+tmp/
 outputs/
 # agentscope
 runs/
