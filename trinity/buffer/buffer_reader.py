@@ -9,5 +9,7 @@ class BufferReader(ABC):
     """Interface of the buffer reader."""
 
     @abstractmethod
-    def read(self, strategy: Optional[ReadStrategy] = None) -> List:
+    def read(
+        self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
+    ) -> List:
         """Read from buffer."""

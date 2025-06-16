@@ -68,6 +68,9 @@ class Task:
         response_key = self.format_args.response_key
         return self.raw_task[response_key] if response_key in self.raw_task else None  # type: ignore
 
+    def to_dict(self) -> dict:
+        return self.raw_task  # type: ignore
+
 
 class Workflow(ABC):
     """The base workflow class.
