@@ -3,14 +3,13 @@ import unittest
 
 from tests.tools import get_template_config, get_unittest_dataset_config
 from trinity.buffer.buffer import get_buffer_reader
-from trinity.common.config import StorageConfig, StorageType
-from trinity.buffer.writer.file_writer import JSONWriter
 from trinity.buffer.reader.file_reader import RawDataReader
+from trinity.buffer.writer.file_writer import JSONWriter
+from trinity.common.config import StorageConfig, StorageType
 
 
 class TestFileReader(unittest.TestCase):
-
-    temp_output_path = 'tmp/test_file_buffer/'
+    temp_output_path = "tmp/test_file_buffer/"
 
     @classmethod
     def setUpClass(cls):
@@ -21,7 +20,7 @@ class TestFileReader(unittest.TestCase):
     def tearDownClass(cls):
         super().tearDownClass()
         if os.path.exists(cls.temp_output_path):
-            os.system(f'rm -rf {cls.temp_output_path}')
+            os.system(f"rm -rf {cls.temp_output_path}")
 
     def test_file_buffer(self):
         meta = StorageConfig(
@@ -31,10 +30,10 @@ class TestFileReader(unittest.TestCase):
             raw=True,
         )
         data = [
-            {'key1': 1, 'key2': 2},
-            {'key1': 3, 'key2': 4},
-            {'key1': 5, 'key2': 6},
-            {'key1': 7, 'key2': 8},
+            {"key1": 1, "key2": 2},
+            {"key1": 3, "key2": 4},
+            {"key1": 5, "key2": 6},
+            {"key1": 7, "key2": 8},
         ]
 
         # test writer
@@ -49,6 +48,7 @@ class TestFileReader(unittest.TestCase):
         self.assertEqual(len(loaded_data), 4)
         self.assertEqual(loaded_data, data)
         self.assertRaises(StopIteration, reader.read)
+
     def test_file_reader(self):
         """Test file reader."""
         config = get_template_config()
@@ -74,5 +74,3 @@ class TestFileReader(unittest.TestCase):
             except StopIteration:
                 break
         self.assertEqual(len(tasks), 16 * 2 - 4)
-
-

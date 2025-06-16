@@ -271,7 +271,9 @@ class RawDataReader(BufferReader):
     def __len__(self):
         return len(self.dataset)
 
-    def read(self, strategy: Optional[ReadStrategy] = None) -> List:
+    def read(
+        self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
+    ) -> List:
         if self.returned:
             raise StopIteration
         self.returned = True
