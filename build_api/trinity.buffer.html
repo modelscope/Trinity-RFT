@@ -80,7 +80,11 @@
 <li class="toctree-l3"><a class="reference internal" href="#trinity.buffer.db_wrapper.DBWrapper"><code class="docutils literal notranslate"><span class="pre">DBWrapper</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#module-trinity.buffer.queue">trinity.buffer.queue module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-trinity.buffer.queue">trinity.buffer.queue module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#trinity.buffer.queue.is_database_url"><code class="docutils literal notranslate"><span class="pre">is_database_url()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#trinity.buffer.queue.is_json_file"><code class="docutils literal notranslate"><span class="pre">is_json_file()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#module-trinity.buffer.utils">trinity.buffer.utils module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#trinity.buffer.utils.retry_session"><code class="docutils literal notranslate"><span class="pre">retry_session()</span></code></a></li>
 </ul>
@@ -225,6 +229,15 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="trinity.buffer.writer.html">trinity.buffer.writer</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="trinity.buffer.writer.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.buffer.writer.html#module-trinity.buffer.writer.file_writer">trinity.buffer.writer.file_writer module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.buffer.writer.html#trinity.buffer.writer.file_writer.JSONWriter"><code class="docutils literal notranslate"><span class="pre">JSONWriter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="trinity.buffer.writer.html#trinity.buffer.writer.file_writer.JSONWriter.__init__"><code class="docutils literal notranslate"><span class="pre">JSONWriter.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.buffer.writer.html#trinity.buffer.writer.file_writer.JSONWriter.write"><code class="docutils literal notranslate"><span class="pre">JSONWriter.write()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.buffer.writer.html#trinity.buffer.writer.file_writer.JSONWriter.finish"><code class="docutils literal notranslate"><span class="pre">JSONWriter.finish()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="trinity.buffer.writer.html#module-trinity.buffer.writer.queue_writer">trinity.buffer.writer.queue_writer module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="trinity.buffer.writer.html#trinity.buffer.writer.queue_writer.QueueWriter"><code class="docutils literal notranslate"><span class="pre">QueueWriter</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="trinity.buffer.writer.html#trinity.buffer.writer.queue_writer.QueueWriter.__init__"><code class="docutils literal notranslate"><span class="pre">QueueWriter.__init__()</span></code></a></li>
@@ -278,7 +291,7 @@
 <p>Interface of the buffer reader.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.buffer.buffer_reader.BufferReader.read">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.constants.ReadStrategy" title="trinity.common.constants.ReadStrategy"><span class="pre">ReadStrategy</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/buffer_reader.html#BufferReader.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.buffer_reader.BufferReader.read" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.constants.ReadStrategy" title="trinity.common.constants.ReadStrategy"><span class="pre">ReadStrategy</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/buffer_reader.html#BufferReader.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.buffer_reader.BufferReader.read" title="Link to this definition"></a></dt>
 <dd><p>Read from buffer.</p>
 </dd></dl>
 
@@ -336,7 +349,7 @@ recommend setting <cite>wrap_in_ray</cite> to <cite>True</cite></p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.buffer.db_wrapper.DBWrapper.read">
-<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.constants.ReadStrategy" title="trinity.common.constants.ReadStrategy"><span class="pre">ReadStrategy</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/db_wrapper.html#DBWrapper.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.db_wrapper.DBWrapper.read" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.constants.ReadStrategy" title="trinity.common.constants.ReadStrategy"><span class="pre">ReadStrategy</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/db_wrapper.html#DBWrapper.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.db_wrapper.DBWrapper.read" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -345,6 +358,16 @@ recommend setting <cite>wrap_in_ray</cite> to <cite>True</cite></p>
 <section id="module-trinity.buffer.queue">
 <span id="trinity-buffer-queue-module"></span><h2>trinity.buffer.queue module<a class="headerlink" href="#module-trinity.buffer.queue" title="Link to this heading"></a></h2>
 <p>A queue implemented by Ray Actor.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.buffer.queue.is_database_url">
+<span class="sig-prename descclassname"><span class="pre">trinity.buffer.queue.</span></span><span class="sig-name descname"><span class="pre">is_database_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/queue.html#is_database_url"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.queue.is_database_url" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.buffer.queue.is_json_file">
+<span class="sig-prename descclassname"><span class="pre">trinity.buffer.queue.</span></span><span class="sig-name descname"><span class="pre">is_json_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/queue.html#is_json_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.queue.is_json_file" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </section>
 <section id="module-trinity.buffer.utils">
 <span id="trinity-buffer-utils-module"></span><h2>trinity.buffer.utils module<a class="headerlink" href="#module-trinity.buffer.utils" title="Link to this heading"></a></h2>

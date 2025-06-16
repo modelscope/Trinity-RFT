@@ -91,7 +91,7 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">datasets</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">transformers</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dataset</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">load_dataset</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.buffer_reader</span><span class="w"> </span><span class="kn">import</span> <span class="n">BufferReader</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">BufferConfig</span><span class="p">,</span> <span class="n">StorageConfig</span>
@@ -102,6 +102,42 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Registry</span>
 
 <span class="n">FILE_READERS</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span><span class="s2">&quot;file_readers&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_HFBatchReader</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">max_epoch</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_batch_size</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_epoch</span> <span class="o">=</span> <span class="n">max_epoch</span>
+        <span class="k">if</span> <span class="n">offset</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_size</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_epoch</span> <span class="o">=</span> <span class="n">offset</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_size</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_offset</span> <span class="o">=</span> <span class="n">offset</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_size</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_epoch</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_offset</span> <span class="o">=</span> <span class="n">offset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iter</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_offset</span><span class="p">):</span>
+            <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iter</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">read_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+        <span class="n">batch</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">batch_size</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">item</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iter</span><span class="p">)</span>
+                <span class="n">batch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">current_offset</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">current_epoch</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">current_offset</span> <span class="o">=</span> <span class="mi">0</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_epoch</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_epoch</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">StopIteration</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">iter</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">batch</span>
 
 
 <div class="viewcode-block" id="SFTDataReader">
@@ -120,8 +156,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">prompt_key</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">format</span><span class="o">.</span><span class="n">prompt_key</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">response_key</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">format</span><span class="o">.</span><span class="n">response_key</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">read_batch_size</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span>
-            <span class="n">meta</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">subset_name</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">split</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">_HFBatchReader</span><span class="p">(</span>
+            <span class="n">load_dataset</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">subset_name</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">split</span><span class="p">)</span>
         <span class="p">)</span>  <span class="c1"># TODO: support resume</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_iter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size</span><span class="p">,</span> <span class="n">drop_last_batch</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">transformers</span><span class="o">.</span><span class="n">AutoTokenizer</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">tokenizer_path</span><span class="p">)</span></div>
@@ -129,16 +165,14 @@
 
 <div class="viewcode-block" id="SFTDataReader.read">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.html#trinity.buffer.reader.file_reader.SFTDataReader.read">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strategy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ReadStrategy</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">batch_data</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_iter</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">shuffle</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data_iter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size</span><span class="p">,</span> <span class="n">drop_last_batch</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">batch_data</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_iter</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">strategy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ReadStrategy</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+        <span class="n">samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">read_batch</span><span class="p">(</span><span class="n">batch_size</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size</span><span class="p">)</span>
         <span class="n">exp_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_type</span> <span class="o">==</span> <span class="n">PromptType</span><span class="o">.</span><span class="n">MESSAGES</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">messages</span> <span class="ow">in</span> <span class="n">batch_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">messages_key</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">samples</span><span class="p">:</span>
+                <span class="n">messages</span> <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">messages_key</span><span class="p">]</span>
                 <span class="n">tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">apply_chat_template</span><span class="p">(</span>
                     <span class="n">messages</span><span class="p">,</span> <span class="n">add_generation_prompt</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s2">&quot;pt&quot;</span>
                 <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
@@ -152,9 +186,9 @@
                 <span class="n">exp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">experience</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_type</span> <span class="o">==</span> <span class="n">PromptType</span><span class="o">.</span><span class="n">CHATPAIR</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">prompt_messages</span><span class="p">,</span> <span class="n">response_messages</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
-                <span class="n">batch_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt_key</span><span class="p">],</span> <span class="n">batch_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">response_key</span><span class="p">]</span>
-            <span class="p">):</span>
+            <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">samples</span><span class="p">:</span>
+                <span class="n">prompt_messages</span> <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt_key</span><span class="p">]</span>
+                <span class="n">response_messages</span> <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">response_key</span><span class="p">]</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prompt_messages</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
                     <span class="n">prompt_messages</span> <span class="o">=</span> <span class="p">[</span><span class="n">prompt_messages</span><span class="p">]</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">response_messages</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
@@ -177,7 +211,9 @@
 
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_type</span> <span class="o">==</span> <span class="n">PromptType</span><span class="o">.</span><span class="n">PLAINTEXT</span><span class="p">:</span>
             <span class="c1"># TODO: support HF format without chat template</span>
-            <span class="k">for</span> <span class="n">prompt</span><span class="p">,</span> <span class="n">response</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">batch_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt_key</span><span class="p">],</span> <span class="n">batch_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">response_key</span><span class="p">]):</span>
+            <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">samples</span><span class="p">:</span>
+                <span class="n">prompt</span> <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt_key</span><span class="p">]</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">response_key</span><span class="p">]</span>
                 <span class="n">tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">(</span><span class="n">prompt</span> <span class="o">+</span> <span class="n">response</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s2">&quot;pt&quot;</span><span class="p">)[</span><span class="s2">&quot;input_ids&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
                 <span class="n">prompt_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s2">&quot;pt&quot;</span><span class="p">)[</span><span class="s2">&quot;input_ids&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
                 <span class="n">experience</span> <span class="o">=</span> <span class="n">Experience</span><span class="p">(</span>
@@ -206,8 +242,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">chosen_key</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">format</span><span class="o">.</span><span class="n">chosen_key</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rejected_key</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">format</span><span class="o">.</span><span class="n">rejected_key</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">read_batch_size</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span>
-            <span class="n">meta</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">subset_name</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">split</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">_HFBatchReader</span><span class="p">(</span>
+            <span class="n">load_dataset</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">subset_name</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">split</span><span class="p">)</span>
         <span class="p">)</span>  <span class="c1"># TODO: support resume</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_iter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size</span><span class="p">,</span> <span class="n">drop_last_batch</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">transformers</span><span class="o">.</span><span class="n">AutoTokenizer</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">tokenizer_path</span><span class="p">)</span></div>
@@ -223,17 +259,16 @@
 
 <div class="viewcode-block" id="DPODataReader.read">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.html#trinity.buffer.reader.file_reader.DPODataReader.read">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strategy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ReadStrategy</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">batch_data</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_iter</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">shuffle</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data_iter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size</span><span class="p">,</span> <span class="n">drop_last_batch</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">batch_data</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_iter</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">strategy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ReadStrategy</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+        <span class="n">batch_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">read_batch</span><span class="p">(</span><span class="n">batch_size</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size</span><span class="p">)</span>
         <span class="n">exp_list</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">prompt</span><span class="p">,</span> <span class="n">chosen</span><span class="p">,</span> <span class="n">rejected</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
-            <span class="n">batch_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt_key</span><span class="p">],</span> <span class="n">batch_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">chosen_key</span><span class="p">],</span> <span class="n">batch_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">rejected_key</span><span class="p">]</span>
-        <span class="p">):</span>
+        <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">batch_data</span><span class="p">:</span>
+            <span class="n">prompt</span> <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt_key</span><span class="p">]</span>
+            <span class="n">chosen</span> <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">chosen_key</span><span class="p">]</span>
+            <span class="n">rejected</span> <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">rejected_key</span><span class="p">]</span>
+
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_type</span> <span class="o">==</span> <span class="n">PromptType</span><span class="o">.</span><span class="n">MESSAGES</span><span class="p">:</span>
                 <span class="n">prompt_messages</span> <span class="o">=</span> <span class="n">prompt</span>
 
@@ -286,18 +321,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">split</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">split</span>
         <span class="n">subset_name</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">subset_name</span>
         <span class="c1"># disable datasets caching to avoid reuse old-version dataset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epoch</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">datasets</span><span class="o">.</span><span class="n">disable_caching</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span>
-            <span class="n">meta</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">subset_name</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">split</span>
-        <span class="p">)</span>  <span class="c1"># TODO: may from db_url</span>
-        <span class="c1"># if task_type != TaskType.EVAL and config.db_url != &quot;&quot;:</span>
-        <span class="c1">#     logger.info(f&quot;Loading dataset from database with url: {config.db_url}&quot;)</span>
-        <span class="c1">#     db_type = config.db_url.split(&quot;:&quot;)[0]</span>
-        <span class="c1">#     db_name = config.db_url.split(&quot;/&quot;)[-1]</span>
-        <span class="c1">#     dataset = Dataset.from_sql(RftDatasetModel.__tablename__, f&quot;{db_type}:///{db_name}&quot;)</span>
-        <span class="n">datasets</span><span class="o">.</span><span class="n">enable_caching</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">index</span>  <span class="c1"># TODO: apply shuffle</span>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">_HFBatchReader</span><span class="p">(</span>
+            <span class="n">load_dataset</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">subset_name</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">split</span><span class="p">),</span>
+            <span class="n">max_epoch</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">total_epochs</span> <span class="k">if</span> <span class="n">meta</span><span class="o">.</span><span class="n">task_type</span> <span class="o">==</span> <span class="n">TaskType</span><span class="o">.</span><span class="n">EXPLORE</span> <span class="k">else</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">offset</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">batch_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prompt_key</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">format</span><span class="o">.</span><span class="n">prompt_key</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">response_key</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">format</span><span class="o">.</span><span class="n">response_key</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">workflow_key</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">format</span><span class="o">.</span><span class="n">workflow_key</span>
@@ -305,43 +336,42 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">task_type</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">task_type</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">default_workflow_cls</span> <span class="o">=</span> <span class="n">WORKFLOWS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">default_workflow_type</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">default_reward_fn_cls</span> <span class="o">=</span> <span class="n">REWARD_FUNCTIONS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">default_reward_fn_type</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">total_epochs</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">total_epochs</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task_type</span> <span class="o">==</span> <span class="n">TaskType</span><span class="o">.</span><span class="n">EXPLORE</span> <span class="k">else</span> <span class="mi">1</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_reward_fn_cls</span> <span class="o">=</span> <span class="n">REWARD_FUNCTIONS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">default_reward_fn_type</span><span class="p">)</span>  <span class="c1"># type: ignore</span></div>
 
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span>
 
 <div class="viewcode-block" id="RolloutDataReader.read">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.html#trinity.buffer.reader.file_reader.RolloutDataReader.read">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strategy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ReadStrategy</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_epochs</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">StopIteration</span>
-        <span class="n">sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">)]</span>
-        <span class="n">workflow_class</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">WORKFLOWS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">workflow_key</span><span class="p">])</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflow_key</span> <span class="ow">in</span> <span class="n">sample</span>
-            <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_workflow_cls</span>
-        <span class="p">)</span>
-        <span class="n">reward_fn</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">REWARD_FUNCTIONS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">reward_fn_key</span><span class="p">])</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reward_fn_key</span> <span class="ow">in</span> <span class="n">sample</span>
-            <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_reward_fn_cls</span>
-        <span class="p">)</span>
-        <span class="k">assert</span> <span class="n">workflow_class</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;`default_workflow_type` or `workflow_key` is required&quot;</span>
-        <span class="n">task</span> <span class="o">=</span> <span class="n">Task</span><span class="p">(</span>
-            <span class="n">workflow</span><span class="o">=</span><span class="n">workflow_class</span><span class="p">,</span>
-            <span class="n">format_args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">format</span><span class="p">,</span>
-            <span class="n">rollout_args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">rollout_args</span><span class="p">,</span>
-            <span class="n">workflow_args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">workflow_args</span><span class="p">,</span>
-            <span class="n">is_eval</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">task_type</span> <span class="o">==</span> <span class="n">TaskType</span><span class="o">.</span><span class="n">EVAL</span><span class="p">,</span>
-            <span class="n">reward_fn</span><span class="o">=</span><span class="n">reward_fn</span><span class="p">,</span>
-            <span class="n">raw_task</span><span class="o">=</span><span class="n">sample</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task_type</span> <span class="o">==</span> <span class="n">TaskType</span><span class="o">.</span><span class="n">EVAL</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">return</span> <span class="n">task</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">strategy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ReadStrategy</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+        <span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size</span>
+        <span class="n">tasks</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">read_batch</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">samples</span><span class="p">:</span>
+            <span class="n">workflow_class</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">WORKFLOWS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">workflow_key</span><span class="p">])</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflow_key</span> <span class="ow">in</span> <span class="n">sample</span>
+                <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_workflow_cls</span>
+            <span class="p">)</span>
+            <span class="n">reward_fn</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">REWARD_FUNCTIONS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">reward_fn_key</span><span class="p">])</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reward_fn_key</span> <span class="ow">in</span> <span class="n">sample</span>
+                <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_reward_fn_cls</span>
+            <span class="p">)</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="n">workflow_class</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="p">),</span> <span class="s2">&quot;`default_workflow_type` or `workflow_key` is required&quot;</span>
+            <span class="n">task</span> <span class="o">=</span> <span class="n">Task</span><span class="p">(</span>
+                <span class="n">workflow</span><span class="o">=</span><span class="n">workflow_class</span><span class="p">,</span>
+                <span class="n">format_args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">format</span><span class="p">,</span>
+                <span class="n">rollout_args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">rollout_args</span><span class="p">,</span>
+                <span class="n">workflow_args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">workflow_args</span><span class="p">,</span>
+                <span class="n">is_eval</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">task_type</span> <span class="o">==</span> <span class="n">TaskType</span><span class="o">.</span><span class="n">EVAL</span><span class="p">,</span>
+                <span class="n">reward_fn</span><span class="o">=</span><span class="n">reward_fn</span><span class="p">,</span>
+                <span class="n">raw_task</span><span class="o">=</span><span class="n">sample</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tasks</span></div>
 </div>
 
 </pre></div>

@@ -98,6 +98,7 @@
  | <a href="#G"><strong>G</strong></a>
  | <a href="#H"><strong>H</strong></a>
  | <a href="#I"><strong>I</strong></a>
+ | <a href="#J"><strong>J</strong></a>
  | <a href="#K"><strong>K</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
@@ -130,6 +131,8 @@
         <li><a href="build_api/trinity.buffer.reader.html#trinity.buffer.reader.sql_reader.SQLReader.__init__">(trinity.buffer.reader.sql_reader.SQLReader method)</a>
 </li>
         <li><a href="build_api/trinity.buffer.schema.html#trinity.buffer.schema.Base.__init__">(trinity.buffer.schema.Base method)</a>
+</li>
+        <li><a href="build_api/trinity.buffer.writer.html#trinity.buffer.writer.file_writer.JSONWriter.__init__">(trinity.buffer.writer.file_writer.JSONWriter method)</a>
 </li>
         <li><a href="build_api/trinity.buffer.writer.html#trinity.buffer.writer.queue_writer.QueueWriter.__init__">(trinity.buffer.writer.queue_writer.QueueWriter method)</a>
 </li>
@@ -851,6 +854,8 @@
       <li><a href="build_api/trinity.buffer.html#trinity.buffer.buffer_writer.BufferWriter.finish">finish() (trinity.buffer.buffer_writer.BufferWriter method)</a>
 
       <ul>
+        <li><a href="build_api/trinity.buffer.writer.html#trinity.buffer.writer.file_writer.JSONWriter.finish">(trinity.buffer.writer.file_writer.JSONWriter method)</a>
+</li>
         <li><a href="build_api/trinity.buffer.writer.html#trinity.buffer.writer.queue_writer.QueueWriter.finish">(trinity.buffer.writer.queue_writer.QueueWriter method)</a>
 </li>
         <li><a href="build_api/trinity.buffer.writer.html#trinity.buffer.writer.sql_writer.SQLWriter.finish">(trinity.buffer.writer.sql_writer.SQLWriter method)</a>
@@ -1176,6 +1181,8 @@
       </ul></li>
       <li><a href="build_api/trinity.trainer.verl.html#trinity.trainer.verl.ray_trainer.RayPPOTrainer.init_workers">init_workers() (trinity.trainer.verl.ray_trainer.RayPPOTrainer method)</a>
 </li>
+      <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.is_database_url">is_database_url() (in module trinity.buffer.queue)</a>
+</li>
       <li><a href="build_api/trinity.common.html#trinity.common.constants.AlgorithmType.is_dpo">is_dpo() (trinity.common.constants.AlgorithmType method)</a>
 </li>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.Task.is_eval">is_eval (trinity.common.workflows.Task attribute)</a>
@@ -1186,11 +1193,21 @@
       </ul></li>
       <li><a href="build_api/trinity.utils.html#trinity.utils.distributed.is_ipv6_address">is_ipv6_address() (in module trinity.utils.distributed)</a>
 </li>
+      <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.is_json_file">is_json_file() (in module trinity.buffer.queue)</a>
+</li>
       <li><a href="build_api/trinity.common.html#trinity.common.constants.AlgorithmType.is_rft">is_rft() (trinity.common.constants.AlgorithmType method)</a>
 </li>
       <li><a href="build_api/trinity.utils.html#trinity.utils.dlc_utils.is_running">is_running() (in module trinity.utils.dlc_utils)</a>
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.constants.AlgorithmType.is_sft">is_sft() (trinity.common.constants.AlgorithmType method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="J">J</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="build_api/trinity.buffer.writer.html#trinity.buffer.writer.file_writer.JSONWriter">JSONWriter (class in trinity.buffer.writer.file_writer)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1461,6 +1478,8 @@
         <li><a href="build_api/trinity.buffer.html#module-trinity.buffer.utils">trinity.buffer.utils</a>
 </li>
         <li><a href="build_api/trinity.buffer.writer.html#module-trinity.buffer.writer">trinity.buffer.writer</a>
+</li>
+        <li><a href="build_api/trinity.buffer.writer.html#module-trinity.buffer.writer.file_writer">trinity.buffer.writer.file_writer</a>
 </li>
         <li><a href="build_api/trinity.buffer.writer.html#module-trinity.buffer.writer.queue_writer">trinity.buffer.writer.queue_writer</a>
 </li>
@@ -2525,8 +2544,16 @@
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Trainer.test_freq">test_freq (trinity.common.verl_config.Trainer attribute)</a>
 </li>
-      <li><a href="build_api/trinity.common.html#trinity.common.schema.RftDatasetModel.to_dict">to_dict() (trinity.common.schema.RftDatasetModel method)</a>
+      <li><a href="build_api/trinity.common.html#trinity.common.experience.Experience.to_dict">to_dict() (trinity.common.experience.Experience method)</a>
+
+      <ul>
+        <li><a href="build_api/trinity.common.html#trinity.common.schema.RftDatasetModel.to_dict">(trinity.common.schema.RftDatasetModel method)</a>
 </li>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.Task.to_dict">(trinity.common.workflows.Task method)</a>
+</li>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.Task.to_dict">(trinity.common.workflows.workflow.Task method)</a>
+</li>
+      </ul></li>
       <li><a href="build_api/trinity.buffer.schema.html#trinity.buffer.schema.sql_schema.DPODataModel.to_experience">to_experience() (trinity.buffer.schema.sql_schema.DPODataModel method)</a>
 
       <ul>
@@ -2749,6 +2776,13 @@
 </li>
       </ul></li>
       <li>
+    trinity.buffer.writer.file_writer
+
+      <ul>
+        <li><a href="build_api/trinity.buffer.writer.html#module-trinity.buffer.writer.file_writer">module</a>
+</li>
+      </ul></li>
+      <li>
     trinity.buffer.writer.queue_writer
 
       <ul>
@@ -2769,6 +2803,8 @@
         <li><a href="build_api/trinity.common.html#module-trinity.common">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     trinity.common.config
 
@@ -2776,8 +2812,6 @@
         <li><a href="build_api/trinity.common.html#module-trinity.common.config">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     trinity.common.constants
 
@@ -3299,6 +3333,8 @@
 
       <ul>
         <li><a href="build_api/trinity.buffer.html#trinity.buffer.db_wrapper.DBWrapper.write">(trinity.buffer.db_wrapper.DBWrapper method)</a>
+</li>
+        <li><a href="build_api/trinity.buffer.writer.html#trinity.buffer.writer.file_writer.JSONWriter.write">(trinity.buffer.writer.file_writer.JSONWriter method)</a>
 </li>
         <li><a href="build_api/trinity.buffer.writer.html#trinity.buffer.writer.queue_writer.QueueWriter.write">(trinity.buffer.writer.queue_writer.QueueWriter method)</a>
 </li>

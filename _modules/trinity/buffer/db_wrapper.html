@@ -161,7 +161,9 @@
 
 <div class="viewcode-block" id="DBWrapper.read">
 <a class="viewcode-back" href="../../../build_api/trinity.buffer.html#trinity.buffer.db_wrapper.DBWrapper.read">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strategy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ReadStrategy</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">strategy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ReadStrategy</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">strategy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">strategy</span> <span class="o">=</span> <span class="n">ReadStrategy</span><span class="o">.</span><span class="n">LFU</span>
 
@@ -178,7 +180,8 @@
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported strategy </span><span class="si">{</span><span class="n">strategy</span><span class="si">}</span><span class="s2"> by SQLStorage&quot;</span><span class="p">)</span>
 
         <span class="n">exp_list</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">exp_list</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">:</span>
+        <span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">exp_list</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">batch_size</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">exp_list</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;waiting for experiences...&quot;</span><span class="p">)</span>
                 <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
@@ -190,7 +193,7 @@
                     <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table_model_cls</span><span class="p">)</span>
                     <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table_model_cls</span><span class="o">.</span><span class="n">reward</span><span class="o">.</span><span class="n">isnot</span><span class="p">(</span><span class="kc">None</span><span class="p">))</span>
                     <span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="o">*</span><span class="n">sortOrder</span><span class="p">)</span>  <span class="c1"># TODO: very slow</span>
-                    <span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">exp_list</span><span class="p">))</span>
+                    <span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="n">batch_size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">exp_list</span><span class="p">))</span>
                     <span class="o">.</span><span class="n">with_for_update</span><span class="p">()</span>
                     <span class="o">.</span><span class="n">all</span><span class="p">()</span>
                 <span class="p">)</span>

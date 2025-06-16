@@ -136,6 +136,26 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">deserialize</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Experience</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Deserialize the experience from bytes.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">pickle</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Experience.to_dict">
+<a class="viewcode-back" href="../../../build_api/trinity.common.html#trinity.common.experience.Experience.to_dict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert the experience to a dictionary.&quot;&quot;&quot;</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;prompt_text&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_text</span><span class="p">,</span>
+            <span class="s2">&quot;info&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">,</span>
+            <span class="s2">&quot;metrics&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">response_text</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">res</span><span class="p">[</span><span class="s2">&quot;response_text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">response_text</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">chosen</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">res</span><span class="p">[</span><span class="s2">&quot;chosen&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chosen</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rejected</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">res</span><span class="p">[</span><span class="s2">&quot;rejected&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rejected</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reward</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">res</span><span class="p">[</span><span class="s2">&quot;reward&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reward</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">res</span></div>
 </div>
 
 
