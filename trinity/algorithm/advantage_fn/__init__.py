@@ -1,6 +1,5 @@
 from trinity.algorithm.advantage_fn.advantage_fn import ADVANTAGE_FN, AdvantageFn
 from trinity.algorithm.advantage_fn.grpo_advantage import GRPOAdvantageFn
-from trinity.algorithm.advantage_fn.mix_advantage import MIXAdvantageFn
 from trinity.algorithm.advantage_fn.opmd_advantage import OPMDAdvantageFn
 from trinity.algorithm.advantage_fn.ppo_advantage import PPOAdvantageFn
 from trinity.algorithm.advantage_fn.reinforce_plus_plus_advantage import (
@@ -18,5 +17,4 @@ __all__ = [
     "REMAXAdvantageFn",
     "RLOOAdvantageFn",
     "OPMDAdvantageFn",
-    "MIXAdvantageFn",
 ]

@@ -51,20 +51,19 @@ class MIXAlgorithm(AlgorithmType):
         return {
             "repeat_times": 8,
             "policy_loss_fn": "mix",
-            "advantage_fn": "mix",
+            "advantage_fn": "grpo",
             "sample_strategy": "mix",
             "mu": 0.1,
         }
 ```
 
-We also define some necessary configuration parameters for later use, including the weighting factor $\mu$ and the batch size of expert experiences $B'$, calculated as the product of `buffer.expert_data_ratio`, `buffer.expert_data_ratio` and `algorithm.repeat_times`.
+We also define some necessary configuration parameters for later use, including the weighting factor $\mu$ and the batch size of expert experiences $B'$, calculated as the product of `buffer.batch_size`, `buffer.expert_data_ratio` and `algorithm.repeat_times`.
 
 
 ```python
-class AlgorithmConfig:
+class BufferConfig:
     """Config for algorithm."""
     ...
-    mu: float = 0.1
     expert_data_ratio: float = 0.5
 ```
 
@@ -172,70 +171,7 @@ def to_data_proto_mix(experiences: Experiences, is_expert_mask: torch.tensor) ->
 ```
 
 
-
-## Step 3: Define the Avantage Function
-
-We define a `MIXAdvantageFn` class in `trinity/algorithm/advantage_fn/mix_advantage.py`, which computes the advantage function for only usual experiences.
-
-```python
-@ADVANTAGE_FN.register_module("mix")
-class MIXAdvantageFn(GRPOAdvantageFn):
-    """MIX advantage computation"""
-
-    def __init__(
-        self,
-        epsilon: float = 1e-6,
-    ) -> None:
-        super().__init__(epsilon)
-
-    def __call__(
-        self,
-        exps: DataProto,
-        **kwargs,
-    ) -> Tuple[DataProto, Dict]:
-        is_expert_mask = exps.batch["is_expert_mask"]
-        device = is_expert_mask.device
-        batch_size = is_expert_mask.shape[0]
-
-        # Process tensors
-        tensors = {k: tensor[~is_expert_mask] for k, tensor in exps.batch.items()}
-
-        # Process non-tensors
-        non_tensors = {
-            k: v[~is_expert_mask.detach().cpu().numpy()] for k, v in exps.non_tensor_batch.items()
-        }
-
-        # Build new DataProto
-        new_exps = DataProto.from_dict(
-            tensors=tensors, non_tensors=non_tensors, meta_info=exps.meta_info
-        )
-        new_exps, new_metrics = super().__call__(new_exps, **kwargs)
-
-        # Get full advantages
-        full_advantages = torch.zeros(
-            (batch_size, new_exps.batch["advantages"].shape[1]), device=device
-        )
-        full_returns = torch.zeros((batch_size, new_exps.batch["returns"].shape[1]), device=device)
-
-        # Fill in the non-expert parts with computed values
-        full_advantages[~is_expert_mask] = new_exps.batch["advantages"]
-        full_returns[~is_expert_mask] = new_exps.batch["returns"]
-
-        # Write back to original exps
-        exps.batch["advantages"] = full_advantages
-        exps.batch["returns"] = full_returns
-        # TODO: change new_metrics
-        return exps, new_metrics
-
-    @classmethod
-    def default_args(cls) -> Dict:
-        return {
-            "epsilon": 1e-6,
-        }
-```
-
-
-## Step 4: Define the Policy Loss Function
+## Step 3: Define the Policy Loss Function
 
 We define a `MixPolicyLoss` class in `trinity/algorithm/policy_loss_fn/mix_policy_loss.py`, which computes the sum of two loss terms regarding usual and expert experiences, respectively.
 
@@ -248,7 +184,7 @@ class MIXPolicyLossFn(PolicyLossFn):
         clip_range: Optional[float] = None,
         clip_range_low: Optional[float] = None,
         clip_range_high: Optional[float] = None,
-        use_dynamic_bsz: Optional[int] = None,
+        use_dynamic_bsz: Optional[bool] = None,
         ppo_mini_batch_size: Optional[int] = None,
         gradient_accumulation: Optional[int] = None,
         read_batch_size_usual: Optional[int] = None,
@@ -347,17 +283,19 @@ class MIXPolicyLossFn(PolicyLossFn):
         return ["old_logprob", "action_mask", "advantages", "is_expert_mask"]
 ```
 
-## Step 5: Run the Experiment
+## Step 4: Run the Experiment
 
-With the above newly-defined classes, we can run the experiments without modifying other process.
+With the above newly-defined classes and functions, we can run the experiments without modifying other process.
 An example showing some important configurations is shown below.
 
 ```yaml
 algorithm:
   algorithm_type: mix
-  mu: 0.5
   repeat_times: 8
-  use_token_level_loss: False
+  policy_loss_fn_args:
+    mu: 0.5
+    clip_range: 0.2
+    use_token_level_loss_in_sft: False
 buffer:
   expert_data_ratio: 0.25
 ```

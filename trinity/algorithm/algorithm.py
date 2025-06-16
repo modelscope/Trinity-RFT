@@ -198,7 +198,7 @@ class MIXAlgorithm(AlgorithmType):
         return {
             "repeat_times": 8,
             "policy_loss_fn": "mix",
-            "advantage_fn": "mix",
+            "advantage_fn": "grpo",
             "sample_strategy": "mix",
             "mu": 0.1,
         }

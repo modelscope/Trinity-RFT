@@ -175,7 +175,6 @@ class AlgorithmConfig:
     algorithm_type: str = "ppo"
     # for GRPO-like algorithms, repeat each task for `repeat_times` times
     repeat_times: int = 1
-    mu: float = 0.1  # for mix training
 
     sample_strategy: Optional[str] = None
     sample_strategy_args: Optional[dict] = None

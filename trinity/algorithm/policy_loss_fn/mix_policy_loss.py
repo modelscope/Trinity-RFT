@@ -17,7 +17,7 @@ class MIXPolicyLossFn(PolicyLossFn):
         clip_range: Optional[float] = None,
         clip_range_low: Optional[float] = None,
         clip_range_high: Optional[float] = None,
-        use_dynamic_bsz: Optional[int] = None,
+        use_dynamic_bsz: Optional[bool] = None,
         ppo_mini_batch_size: Optional[int] = None,
         gradient_accumulation: Optional[int] = None,
         read_batch_size_usual: Optional[int] = None,

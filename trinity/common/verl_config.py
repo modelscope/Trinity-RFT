@@ -353,7 +353,6 @@ class veRLConfig:
             read_batch_size_expert = math.ceil(config.buffer.expert_data_ratio * tot_batch_size)
             read_batch_size_usual = tot_batch_size - read_batch_size_expert
             loss_kwargs = {
-                "mu": config.algorithm.mu,
                 "use_dynamic_bsz": self.actor_rollout_ref.actor.use_dynamic_bsz,
                 "ppo_mini_batch_size": self.actor_rollout_ref.actor.ppo_mini_batch_size
                 * self.actor_rollout_ref.rollout.n
@@ -365,9 +364,6 @@ class veRLConfig:
                 "read_batch_size_expert": read_batch_size_expert,
             }
             config.algorithm.policy_loss_fn_args.update(loss_kwargs)
-            config.algorithm.policy_loss_fn_args.update(
-                {"use_token_level_loss_in_sft": config.algorithm.use_token_level_loss}
-            )
 
 
 def load_config(config_path: str) -> veRLConfig:
