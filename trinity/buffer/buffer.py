@@ -64,8 +64,8 @@ def get_buffer_writer(storage_config: StorageConfig, buffer_config: BufferConfig
 
         return QueueWriter(storage_config, buffer_config)
     elif storage_config.storage_type == StorageType.FILE:
-        from trinity.buffer.writer.file_writer import RawFileWriter
+        from trinity.buffer.writer.file_writer import JSONWriter
 
-        return RawFileWriter(storage_config, buffer_config)
+        return JSONWriter(storage_config, buffer_config)
     else:
         raise ValueError(f"{storage_config.storage_type} not supported.")
