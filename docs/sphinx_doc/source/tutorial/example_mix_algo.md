@@ -1,4 +1,4 @@
-# Integrate An New Algorithm
+# Integrate A New Algorithm
 
 
 This guide introduces how to integrate a new algorithm to Trinity-RFT.

@@ -24,6 +24,7 @@ Welcome to Trinity-RFT's documentation!
    tutorial/example_data_functionalities.md
    tutorial/trinity_configs.md
    tutorial/trinity_programming_guide.md
+   tutorial/example_mix_algo.md
 
 .. toctree::
    :maxdepth: 1

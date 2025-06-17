@@ -82,7 +82,7 @@ synchronizer:
   sync_timeout: 1200
 trainer:
   trainer_type: 'verl'
-  trainer_config_path: 'examples/mix_math/train_math.yaml'
+  trainer_config_path: 'examples/mix_math/train_mix_math.yaml'
   save_interval: 50
 monitor:
   monitor_type: wandb
