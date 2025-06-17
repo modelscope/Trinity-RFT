@@ -26,6 +26,7 @@ import psutil
 import torch
 import torch.distributed
 import torch.distributed as dist
+import vllm  # noqa: F401 ; import vllm to avoid "Cuda failure 1 'invalid argument'"
 from codetiming import Timer
 from omegaconf import DictConfig, open_dict
 from peft import LoraConfig, TaskType, get_peft_model
