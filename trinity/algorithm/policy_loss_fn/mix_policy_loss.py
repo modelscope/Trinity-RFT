@@ -11,6 +11,19 @@ from trinity.algorithm.policy_loss_fn.sft_loss import SFTLossFn
 
 @POLICY_LOSS_FN.register_module("mix")
 class MIXPolicyLossFn(PolicyLossFn):
+    """Implements a mixed policy loss combining GRPO and SFT losses.
+
+    This loss function applies different loss components to data based on whether
+    it comes from an expert or not, as indicated by `is_expert_mask`. It combines:
+    - GRPO loss (self.grpo_loss_fn) for non-expert data
+    - SFT loss (self.sft_loss_fn) for expert data
+    - Weighting parameter `mu`
+
+    The per-sample weights are normalized using either `experience_per_gpu` or
+    `gradient_accumulation`, depending on whether dynamic batch sizing is enabled,
+    to ensure consistent weighting across different batches of the same type experiences.
+    """
+
     def __init__(
         self,
         mu: float = 0.1,
@@ -18,16 +31,20 @@ class MIXPolicyLossFn(PolicyLossFn):
         clip_range_low: Optional[float] = None,
         clip_range_high: Optional[float] = None,
         use_dynamic_bsz: Optional[bool] = None,
+        repeat_times: Optional[int] = None,
         ppo_mini_batch_size: Optional[int] = None,
-        gradient_accumulation: Optional[int] = None,
+        ppo_micro_batch_size_per_gpu: Optional[int] = None,
+        ngpus_trainer: Optional[int] = None,
         read_batch_size_usual: Optional[int] = None,
         read_batch_size_expert: Optional[int] = None,
-        use_token_level_loss_in_sft: bool = False,
+        use_token_level_loss_in_sft: bool = True,
     ) -> None:
         self.mu = mu
         self.use_dynamic_bsz = use_dynamic_bsz
-        self.ppo_mini_batch_size = ppo_mini_batch_size
-        self.gradient_accumulation = gradient_accumulation
+        self.experience_per_gpu = ppo_mini_batch_size * repeat_times // ngpus_trainer  # type: ignore
+        self.gradient_accumulation = (
+            ppo_mini_batch_size * repeat_times // ppo_micro_batch_size_per_gpu  # type: ignore
+        )
         self.read_batch_size_usual = read_batch_size_usual
         self.read_batch_size_expert = read_batch_size_expert
         self.grpo_loss_fn = PPOPolicyLossFn(
@@ -56,10 +73,10 @@ class MIXPolicyLossFn(PolicyLossFn):
         n_expert_exp = torch.sum(is_expert_mask).item()
 
         if self.use_dynamic_bsz:
-            per_micro_batch_weight_usual = self.ppo_mini_batch_size / (
+            per_micro_batch_weight_usual = self.experience_per_gpu / (
                 logprob.shape[0] * self.read_batch_size_usual
             )
-            per_micro_batch_weight_expert = self.ppo_mini_batch_size / (
+            per_micro_batch_weight_expert = self.experience_per_gpu / (
                 logprob.shape[0] * self.read_batch_size_expert
             )
         else:

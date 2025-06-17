@@ -127,7 +127,7 @@ class MixSampleStrategy(SampleStrategy):
 We also need to add an `is_expert_mask` field when transforming to DataProto to indicate the data type.
 
 ```diff
-def to_data_proto_mix(experiences: Experiences, is_expert_mask: torch.tensor) -> DataProto:
++ def to_data_proto_mix(experiences: Experiences, is_expert_mask: torch.tensor) -> DataProto:
     attention_mask = experiences.attention_masks
     cumsum = torch.cumsum(attention_mask, dim=-1)
     position_ids = torch.clip(cumsum - 1, 0, None).long()
@@ -175,16 +175,20 @@ class MIXPolicyLossFn(PolicyLossFn):
         clip_range_low: Optional[float] = None,
         clip_range_high: Optional[float] = None,
         use_dynamic_bsz: Optional[bool] = None,
+        repeat_times: Optional[int] = None,
         ppo_mini_batch_size: Optional[int] = None,
-        gradient_accumulation: Optional[int] = None,
+        ppo_micro_batch_size_per_gpu: Optional[int] = None,
+        ngpus_trainer: Optional[int] = None,
         read_batch_size_usual: Optional[int] = None,
         read_batch_size_expert: Optional[int] = None,
-        use_token_level_loss_in_sft: Optional[bool] = False,
+        use_token_level_loss_in_sft: bool = True,
     ) -> None:
         self.mu = mu
         self.use_dynamic_bsz = use_dynamic_bsz
-        self.ppo_mini_batch_size = ppo_mini_batch_size
-        self.gradient_accumulation = gradient_accumulation
+        self.experience_per_gpu = ppo_mini_batch_size * repeat_times // ngpus_trainer  # type: ignore
+        self.gradient_accumulation = (
+            ppo_mini_batch_size * repeat_times // ppo_micro_batch_size_per_gpu  # type: ignore
+        )
         self.read_batch_size_usual = read_batch_size_usual
         self.read_batch_size_expert = read_batch_size_expert
         self.grpo_loss_fn = PPOPolicyLossFn(
@@ -213,15 +217,15 @@ class MIXPolicyLossFn(PolicyLossFn):
         n_expert_exp = torch.sum(is_expert_mask).item()
 
         if self.use_dynamic_bsz:
-            per_micro_batch_weight_usual = self.ppo_mini_batch_size / (
+            per_micro_batch_weight_usual = self.experience_per_gpu / (
                 logprob.shape[0] * self.read_batch_size_usual
             )
-            per_micro_batch_weight_expert = self.ppo_mini_batch_size / (
+            per_micro_batch_weight_expert = self.experience_per_gpu / (
                 logprob.shape[0] * self.read_batch_size_expert
             )
         else:
-            per_micro_batch_weight_usual = self.gradient_accumulation / self.read_batch_size_usual
-            per_micro_batch_weight_expert = self.gradient_accumulation / self.read_batch_size_expert
+            per_micro_batch_weight_usual = self.gradient_accumulation / self.read_batch_size_usual  # type: ignore
+            per_micro_batch_weight_expert = self.gradient_accumulation / self.read_batch_size_expert  # type: ignore
 
         if n_usual_exp > 0:
             grpo_loss, grpo_metrics = self.grpo_loss_fn(
@@ -285,7 +289,14 @@ algorithm:
   sample_strategy_args:
     expert_data_ratio: 0.25
   policy_loss_fn_args:
-    mu: 0.5 # NEW
+    mu: 0.5
     clip_range: 0.2
     use_token_level_loss_in_sft: False
+    use_dynamic_bsz: False
+    repeat_times: 8
+    ppo_mini_batch_size: 32
+    ppo_micro_batch_size_per_gpu: 4
+    ngpus_trainer: 4
+    read_batch_size_expert: 64
+    read_batch_size_usual: 192
 ```
