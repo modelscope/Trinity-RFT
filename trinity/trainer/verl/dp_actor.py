@@ -32,6 +32,7 @@ from verl.utils.seqlen_balancing import get_reverse_idx, rearrange_micro_batches
 from verl.workers.actor.dp_actor import DataParallelPPOActor as DPActor
 
 from trinity.algorithm import ENTROPY_LOSS_FN, KL_FN, POLICY_LOSS_FN
+from trinity.algorithm.entropy_loss_fn.entropy_loss_fn import DummyEntropyLossFn
 from trinity.algorithm.kl_fn.kl_fn import DummyKLFn
 from trinity.algorithm.utils import prefix_metrics
 from trinity.common.config import AlgorithmConfig
@@ -232,8 +233,11 @@ class DataParallelPPOActor(DPActor):
                     assert response_mask.shape == attention_mask[:, -response_length:].shape
 
                     # all return: (bsz, response_length)
+                    calculate_entropy = self.entropy_loss_fn != DummyEntropyLossFn
                     entropy, log_prob = self._forward_micro_batch(
-                        micro_batch=data, temperature=temperature, calculate_entropy=True
+                        micro_batch=data,
+                        temperature=temperature,
+                        calculate_entropy=calculate_entropy,
                     )
 
                     kwargs = {
