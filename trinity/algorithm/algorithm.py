@@ -180,3 +180,24 @@ class DPOAlgorithm(AlgorithmType):
             logger.warning(
                 "DPO only supports 2 repeat times, set `algorithm.repeat_times` to 2."
             )  # no need to warn
+
+
+@ALGORITHM_TYPE.register_module("mix")
+class MIXAlgorithm(AlgorithmType):
+    """MIX algorithm."""
+
+    use_critic: bool = False
+    use_reference: bool = True
+    use_advantage: bool = True
+    use_rollout: bool = True
+    can_balance_batch: bool = True
+    schema: type = ExperienceModel
+
+    @classmethod
+    def get_default_config(cls) -> Dict:
+        return {
+            "repeat_times": 8,
+            "policy_loss_fn": "mix",
+            "advantage_fn": "grpo",
+            "sample_strategy": "mix",
+        }

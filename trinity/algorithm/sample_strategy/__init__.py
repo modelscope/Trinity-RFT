@@ -1,3 +1,4 @@
+from trinity.algorithm.sample_strategy.mix_sample_strategy import MixSampleStrategy
 from trinity.algorithm.sample_strategy.sample_strategy import (
     SAMPLE_STRATEGY,
     DefaultSampleStrategy,
@@ -10,4 +11,5 @@ __all__ = [
     "SampleStrategy",
     "DefaultSampleStrategy",
     "WarmupSampleStrategy",
+    "MixSampleStrategy",
 ]
