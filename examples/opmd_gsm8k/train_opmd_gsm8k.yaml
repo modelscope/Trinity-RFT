@@ -15,8 +15,8 @@
 #     entropy_coeff: default to 0.0 for now
 #
 #   optimizer:
-#     beta1, beta2: 0.0, 0.95  # smaller than default values (0.9, 0.999), as a remedy for abrupt distribution shift
-#     lr: set smaller to account for beta1 = 0.0
+#     betas: [0.0, 0.95]  # smaller than default values (0.9, 0.999), as a remedy for abrupt distribution shift
+#     lr: set smaller to account for betas[0] = 0.0
 #
 #   misc:
 #     adv_estimator: grpo  # merely to disable critic model, doesn't affect adv compute when algorithm_type is opmd
