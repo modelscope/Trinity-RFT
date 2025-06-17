@@ -1,8 +1,6 @@
 import os
 import unittest
 
-from trinity.buffer.reader.file_reader import RawDataReader
-from trinity.buffer.writer.file_writer import JSONWriter
 import ray
 
 from tests.tools import (
@@ -11,9 +9,12 @@ from tests.tools import (
     get_unittest_dataset_config,
 )
 from trinity.buffer.buffer import get_buffer_reader, get_buffer_writer
+from trinity.buffer.reader.file_reader import RawDataReader
 from trinity.buffer.utils import default_storage_path
+from trinity.buffer.writer.file_writer import JSONWriter
 from trinity.common.config import StorageConfig
 from trinity.common.constants import StorageType
+
 
 class TestFileReader(unittest.TestCase):
     temp_output_path = "tmp/test_file_buffer/"
@@ -56,8 +57,6 @@ class TestFileReader(unittest.TestCase):
         self.assertEqual(loaded_data, data)
         self.assertRaises(StopIteration, reader.read)
 
-
-class TestFileBuffer(unittest.TestCase):
     def test_file_reader(self):
         """Test file reader."""
         reader = get_buffer_reader(self.config.buffer.explorer_input.taskset, self.config.buffer)
