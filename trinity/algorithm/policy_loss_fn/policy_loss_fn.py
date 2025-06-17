@@ -23,16 +23,14 @@ class PolicyLossFnMeta(ABCMeta):
         dct["_select_keys"] = param_names
 
         def select_keys(self):
-            mapper = ALL_MAPPERS[self.backend]
-            keys = [mapper.from_trinity(key) for key in self._select_keys]
+            keys = [self.mapper.from_trinity(key) for key in self._select_keys]
             return keys
 
         def decorator(func):
             def wrapper(self, *args, **kwargs):
-                mapper = ALL_MAPPERS[self.backend]
                 new_kwargs = {}
                 for key, value in kwargs.items():
-                    key = mapper.from_trinity(key)
+                    key = self.mapper.to_trinity(key)
                     if key in self._select_keys:  # remove unused keys
                         new_kwargs[key] = value
                 kwargs = new_kwargs
@@ -52,6 +50,7 @@ class PolicyLossFn(ABC, metaclass=PolicyLossFnMeta):
 
     def __init__(self, backend: str = "verl"):
         self.backend = backend
+        self.mapper = ALL_MAPPERS[self.backend]
 
     @abstractmethod
     def __call__(

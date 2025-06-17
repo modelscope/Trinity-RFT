@@ -1,5 +1,5 @@
+# -*- coding: utf-8 -*-
 """Key Mapper"""
-
 
 from typing import Dict
 
