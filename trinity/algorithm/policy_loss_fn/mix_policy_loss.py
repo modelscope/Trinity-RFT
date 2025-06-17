@@ -1,6 +1,6 @@
 """Mix policy loss function."""
 
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Optional, Tuple
 
 import torch
 
@@ -62,11 +62,9 @@ class MIXPolicyLossFn(PolicyLossFn):
         old_logprob: torch.Tensor,
         action_mask: torch.Tensor,
         advantages: torch.Tensor,
+        is_expert_mask: torch.Tensor,
         **kwargs,
     ) -> Tuple[torch.Tensor, Dict]:
-        is_expert_mask = kwargs.get("is_expert_mask", None)
-        if is_expert_mask is None:
-            raise ValueError("is_expert_mask is required in MIX")
         assert (
             len(is_expert_mask) == logprob.shape[0]
         ), f"Error: {len(is_expert_mask)=} != {logprob.shape[0]=}"

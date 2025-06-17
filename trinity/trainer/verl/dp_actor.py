@@ -227,7 +227,7 @@ class DataParallelPPOActor(DPActor):
                     )
 
                     pg_loss, pg_loss_metrics = self.policy_loss_fn(  # type: ignore
-                        logprob=log_prob, **data  # [self.policy_loss_fn.select_keys] # .items(),
+                        logprob=log_prob, **data
                     )
                     prefix_metrics(
                         src_metrics=pg_loss_metrics, prefix="actor", dst_metrics=micro_batch_metrics

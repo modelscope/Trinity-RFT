@@ -170,6 +170,7 @@ We define a `MixPolicyLoss` class in `trinity/algorithm/policy_loss_fn/mix_polic
 class MIXPolicyLossFn(PolicyLossFn):
     def __init__(
         self,
+        backend: str = "verl",
         mu: float = 0.1,
         clip_range: Optional[float] = None,
         clip_range_low: Optional[float] = None,
@@ -183,6 +184,7 @@ class MIXPolicyLossFn(PolicyLossFn):
         read_batch_size_expert: Optional[int] = None,
         use_token_level_loss_in_sft: bool = True,
     ) -> None:
+        super().__init__(backend=backend)
         self.mu = mu
         self.use_dynamic_bsz = use_dynamic_bsz
         self.experience_per_gpu = ppo_mini_batch_size * repeat_times // ngpus_trainer  # type: ignore
@@ -204,11 +206,9 @@ class MIXPolicyLossFn(PolicyLossFn):
         old_logprob: torch.Tensor,
         action_mask: torch.Tensor,
         advantages: torch.Tensor,
+        is_expert_mask: torch.Tensor,
         **kwargs,
     ) -> Tuple[torch.Tensor, Dict]:
-        is_expert_mask = kwargs.get("is_expert_mask", None)
-        if is_expert_mask is None:
-            raise ValueError("is_expert_mask is required in MIX")
         assert (
             len(is_expert_mask) == logprob.shape[0]
         ), f"Error: {len(is_expert_mask)=} != {logprob.shape[0]=}"
@@ -271,10 +271,6 @@ class MIXPolicyLossFn(PolicyLossFn):
             "mu": 0.1,
             "clip_range": 0.2,
         }
-
-    @property
-    def select_keys(self) -> List[str]:
-        return ["old_logprob", "action_mask", "advantages", "is_expert_mask"]
 ```
 
 ## Step 4: Run the Experiment
