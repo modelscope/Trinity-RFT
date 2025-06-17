@@ -56,7 +56,7 @@ class DataParallelPPOActor(DPActor):
 
     def set_algorithm(self, algorithm_config: AlgorithmConfig):
         self.policy_loss_fn = POLICY_LOSS_FN.get(algorithm_config.policy_loss_fn)(
-            **algorithm_config.policy_loss_fn_args
+            backend="verl", **algorithm_config.policy_loss_fn_args
         )
         self.kl_loss_fn = KL_FN.get(algorithm_config.kl_loss_fn)(**algorithm_config.kl_loss_fn_args)
         self.entropy_loss_fn = ENTROPY_LOSS_FN.get(algorithm_config.entropy_loss_fn)(
@@ -152,16 +152,7 @@ class DataParallelPPOActor(DPActor):
             "responses",
             "response_mask",
         ]
-        select_keys_verl2trinity = {
-            "old_log_probs": "old_logprob",
-            "ref_log_prob": "ref_logprob",
-            "response_mask": "action_mask",
-            "advantages": "advantages",
-        }
-        select_keys_trinity2verl = {value: key for key, value in select_keys_verl2trinity.items()}
-        for trinity_key in self.policy_loss_fn.select_keys:
-            verl_key = select_keys_trinity2verl[trinity_key]
-            select_keys.append(verl_key)
+        select_keys.extend(self.policy_loss_fn.select_keys)
         if not isinstance(self.kl_loss_fn, DummyKLFn):
             select_keys.append("ref_log_prob")
         select_keys = list(set(select_keys))
@@ -235,14 +226,8 @@ class DataParallelPPOActor(DPActor):
                         calculate_entropy=calculate_entropy,
                     )
 
-                    kwargs = {
-                        select_keys_verl2trinity[verl_key]: value
-                        for verl_key, value in data.items()
-                        if verl_key in select_keys_verl2trinity
-                    }
                     pg_loss, pg_loss_metrics = self.policy_loss_fn(  # type: ignore
-                        logprob=log_prob,
-                        **kwargs,
+                        logprob=log_prob, **data  # [self.policy_loss_fn.select_keys] # .items(),
                     )
                     prefix_metrics(
                         src_metrics=pg_loss_metrics, prefix="actor", dst_metrics=micro_batch_metrics

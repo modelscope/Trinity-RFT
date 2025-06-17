@@ -4,6 +4,7 @@ from typing import Dict, Tuple
 
 import torch
 
+from trinity.algorithm.key_mapper import ALL_MAPPERS
 from trinity.utils.registry import Registry
 
 POLICY_LOSS_FN = Registry("policy_loss_fn")
@@ -19,7 +20,28 @@ class PolicyLossFnMeta(ABCMeta):
         param_names = [
             key for key in signature.parameters.keys() if key not in PolicyLossFnMeta.ignore_keys
         ]
-        dct["select_keys"] = property(lambda self: param_names)
+        dct["_select_keys"] = param_names
+
+        def select_keys(self):
+            mapper = ALL_MAPPERS[self.backend]
+            keys = [mapper.from_trinity(key) for key in self._select_keys]
+            return keys
+
+        def decorator(func):
+            def wrapper(self, *args, **kwargs):
+                mapper = ALL_MAPPERS[self.backend]
+                new_kwargs = {}
+                for key, value in kwargs.items():
+                    key = mapper.from_trinity(key)
+                    if key in self._select_keys:  # remove unused keys
+                        new_kwargs[key] = value
+                kwargs = new_kwargs
+                return func(self, *args, **new_kwargs)
+
+            return wrapper
+
+        dct["select_keys"] = property(select_keys)
+        dct["__call__"] = decorator(dct["__call__"])
         return super().__new__(cls, name, bases, dct)
 
 
@@ -27,6 +49,9 @@ class PolicyLossFn(ABC, metaclass=PolicyLossFnMeta):
     """
     Policy Loss Function
     """
+
+    def __init__(self, backend: str = "verl"):
+        self.backend = backend
 
     @abstractmethod
     def __call__(

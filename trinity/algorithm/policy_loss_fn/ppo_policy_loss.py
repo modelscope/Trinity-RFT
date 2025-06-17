@@ -15,10 +15,12 @@ from trinity.algorithm.utils import masked_mean
 class PPOPolicyLossFn(PolicyLossFn):
     def __init__(
         self,
+        backend: str = "verl",
         clip_range: Optional[float] = None,
         clip_range_low: Optional[float] = None,
         clip_range_high: Optional[float] = None,
     ) -> None:
+        super().__init__(backend=backend)
         if clip_range_low is None:
             self.clip_range_low = clip_range
         else:

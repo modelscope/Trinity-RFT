@@ -10,7 +10,8 @@ from trinity.algorithm.utils import masked_mean
 
 @POLICY_LOSS_FN.register_module("opmd")
 class OPMDPolicyLossFn(PolicyLossFn):
-    def __init__(self, tau: float = 1.0) -> None:
+    def __init__(self, backend: str = "verl", tau: float = 1.0) -> None:
+        super().__init__(backend=backend)
         self.tau = tau
 
     def __call__(  # type: ignore
