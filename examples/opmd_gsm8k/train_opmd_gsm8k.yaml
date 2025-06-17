@@ -50,8 +50,7 @@ actor_rollout_ref:
       # min_lr_ratio: null   # only useful for warmup with cosine
       warmup_style: constant  # select from constant/cosine
       total_training_steps: -1  # must be override by program
-      beta1: 0.0  # set to smaller value for scenarios with abrupt distribution shift (e.g., large sync_interval)
-      beta2: 0.95  # set to smaller value for scenarios with abrupt distribution shift (e.g., large sync_interval)
+      betas: [0.0, 0.95]  # set to smaller value for scenarios with abrupt distribution shift (e.g., large sync_interval)
     fsdp_config:
       wrap_policy:
         # transformer_layer_cls_to_wrap: None
