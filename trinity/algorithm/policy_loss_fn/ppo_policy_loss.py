@@ -3,7 +3,7 @@
 Modified from https://github.com/volcengine/verl/blob/main/verl/trainer/ppo/core_algos.py
 """
 
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Optional, Tuple
 
 import torch
 
@@ -61,11 +61,3 @@ class PPOPolicyLossFn(PolicyLossFn):
         return {
             "clip_range": 0.2,
         }
-
-    @property
-    def select_keys(self) -> List[str]:
-        return [
-            "old_logprob",
-            "action_mask",
-            "advantages",
-        ]

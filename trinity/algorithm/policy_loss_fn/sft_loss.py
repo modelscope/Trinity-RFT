@@ -1,6 +1,6 @@
 """SFT loss function."""
 
-from typing import Dict, List, Tuple
+from typing import Dict, Tuple
 
 import torch
 
@@ -30,7 +30,3 @@ class SFTLossFn(PolicyLossFn):
         return {
             "use_token_level_loss": True,
         }
-
-    @property
-    def select_keys(self) -> List[str]:
-        return ["action_mask"]

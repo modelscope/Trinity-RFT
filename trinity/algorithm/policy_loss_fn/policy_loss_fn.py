@@ -1,5 +1,6 @@
-from abc import ABC, abstractmethod
-from typing import Dict, List, Tuple
+import inspect
+from abc import ABC, ABCMeta, abstractmethod
+from typing import Dict, Tuple
 
 import torch
 
@@ -8,7 +9,21 @@ from trinity.utils.registry import Registry
 POLICY_LOSS_FN = Registry("policy_loss_fn")
 
 
-class PolicyLossFn(ABC):
+class PolicyLossFnMeta(ABCMeta):
+    """Meta class for policy loss function."""
+
+    ignore_keys = {"self", "kwargs", "logprob"}
+
+    def __new__(cls, name, bases, dct):
+        signature = inspect.signature(dct["__call__"])
+        param_names = [
+            key for key in signature.parameters.keys() if key not in PolicyLossFnMeta.ignore_keys
+        ]
+        dct["select_keys"] = property(lambda self: param_names)
+        return super().__new__(cls, name, bases, dct)
+
+
+class PolicyLossFn(ABC, metaclass=PolicyLossFnMeta):
     """
     Policy Loss Function
     """
@@ -38,12 +53,4 @@ class PolicyLossFn(ABC):
         """
         Returns:
             `Dict`: The default init arguments for the policy loss function.
-        """
-
-    @property
-    @abstractmethod
-    def select_keys(self) -> List[str]:
-        """
-        Returns:
-            `List[str]`: The keys to select from input data.
         """

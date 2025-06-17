@@ -1,6 +1,6 @@
 """OPMD policy loss function."""
 
-from typing import Dict, List, Tuple
+from typing import Dict, Tuple
 
 import torch
 
@@ -29,11 +29,3 @@ class OPMDPolicyLossFn(PolicyLossFn):
     @classmethod
     def default_args(cls) -> Dict:
         return {"tau": 1.0}
-
-    @property
-    def select_keys(self) -> List[str]:
-        return [
-            "old_logprob",
-            "action_mask",
-            "advantages",
-        ]
