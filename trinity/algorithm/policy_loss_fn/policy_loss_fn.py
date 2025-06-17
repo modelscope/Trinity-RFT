@@ -13,7 +13,7 @@ POLICY_LOSS_FN = Registry("policy_loss_fn")
 class PolicyLossFnMeta(ABCMeta):
     """Metaclass for policy loss functions that handles parameter name mapping and filtering."""
 
-    ignore_keys = {"self", "kwargs"}  # Keys to exclude from parameter selection
+    ignore_keys = {"self", "kwargs", "logprob"}  # Keys to exclude from parameter selection
 
     def __new__(cls, name, bases, dct):
         """
@@ -57,7 +57,7 @@ class PolicyLossFnMeta(ABCMeta):
                 new_kwargs = {}
                 for key, value in kwargs.items():
                     key = self.mapper.to_trinity(key)
-                    if key in self._select_keys:  # remove unused keys
+                    if key == "logprob" or key in self._select_keys:  # remove unused keys
                         new_kwargs[key] = value
                 return func(self, *args, **new_kwargs)
 

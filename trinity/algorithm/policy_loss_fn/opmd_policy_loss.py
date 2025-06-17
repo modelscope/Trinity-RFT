@@ -17,7 +17,6 @@ class OPMDPolicyLossFn(PolicyLossFn):
     def __call__(  # type: ignore
         self,
         logprob: torch.Tensor,
-        old_logprob: torch.Tensor,  # NOT USED!
         action_mask: torch.Tensor,
         advantages: torch.Tensor,
         **kwargs,
