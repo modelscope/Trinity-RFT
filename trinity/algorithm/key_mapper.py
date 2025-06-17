@@ -19,6 +19,7 @@ class KeyMapper:
 ALL_MAPPERS = {
     "verl": KeyMapper(
         {
+            "log_prob": "logprob",
             "old_log_probs": "old_logprob",
             "ref_log_prob": "ref_logprob",
             "response_mask": "action_mask",
