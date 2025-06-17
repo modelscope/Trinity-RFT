@@ -10,7 +10,7 @@ actor_rollout_ref:
     ppo_mini_batch_size: 128
     ppo_micro_batch_size_per_gpu: 4
     use_dynamic_bsz: True # False
-    ppo_max_token_len_per_gpu: 16384 # n * ${data.max_prompt_length} + ${data.max_response_length}
+    ppo_max_token_len_per_gpu: 25600 # n * ${data.max_prompt_length} + ${data.max_response_length}
     grad_clip: 1.0
     clip_ratio: 0.2
     entropy_coeff: 0.001
@@ -21,7 +21,7 @@ actor_rollout_ref:
     shuffle: False
     ulysses_sequence_parallel_size: 1 # sp size
     optim:
-      lr: 5e-7
+      lr: 1e-6
       lr_warmup_steps_ratio: 0.  # the total steps will be injected during runtime
       # min_lr_ratio: null   # only useful for warmup with cosine
       warmup_style: constant  # select from constant/cosine
