@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>trinity.buffer.db_wrapper &mdash; Trinity-RFT 0.1.0 documentation</title>
+  <title>trinity.buffer.ray_wrapper &mdash; Trinity-RFT 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
@@ -75,7 +75,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
-      <li class="breadcrumb-item active">trinity.buffer.db_wrapper</li>
+      <li class="breadcrumb-item active">trinity.buffer.ray_wrapper</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -84,8 +84,10 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for trinity.buffer.db_wrapper</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+  <h1>Source code for trinity.buffer.ray_wrapper</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">ray</span>
@@ -95,14 +97,16 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy.pool</span><span class="w"> </span><span class="kn">import</span> <span class="n">NullPool</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Base</span><span class="p">,</span> <span class="n">create_dynamic_table</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">retry_session</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">default_storage_path</span><span class="p">,</span> <span class="n">retry_session</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">BufferConfig</span><span class="p">,</span> <span class="n">StorageConfig</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReadStrategy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows</span><span class="w"> </span><span class="kn">import</span> <span class="n">Task</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
 
 <div class="viewcode-block" id="DBWrapper">
-<a class="viewcode-back" href="../../../build_api/trinity.buffer.html#trinity.buffer.db_wrapper.DBWrapper">[docs]</a>
+<a class="viewcode-back" href="../../../build_api/trinity.buffer.html#trinity.buffer.ray_wrapper.DBWrapper">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">DBWrapper</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A wrapper of a SQL database.</span>
@@ -115,9 +119,11 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="DBWrapper.__init__">
-<a class="viewcode-back" href="../../../build_api/trinity.buffer.html#trinity.buffer.db_wrapper.DBWrapper.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../build_api/trinity.buffer.html#trinity.buffer.ray_wrapper.DBWrapper.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">storage_config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">storage_config</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">default_storage_path</span><span class="p">(</span><span class="n">storage_config</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">engine</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="n">storage_config</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">poolclass</span><span class="o">=</span><span class="n">NullPool</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">table_model_cls</span> <span class="o">=</span> <span class="n">create_dynamic_table</span><span class="p">(</span>
             <span class="n">storage_config</span><span class="o">.</span><span class="n">algorithm_type</span><span class="p">,</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">name</span>
@@ -135,7 +141,7 @@
 
 
 <div class="viewcode-block" id="DBWrapper.get_wrapper">
-<a class="viewcode-back" href="../../../build_api/trinity.buffer.html#trinity.buffer.db_wrapper.DBWrapper.get_wrapper">[docs]</a>
+<a class="viewcode-back" href="../../../build_api/trinity.buffer.html#trinity.buffer.ray_wrapper.DBWrapper.get_wrapper">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_wrapper</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">storage_config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">wrap_in_ray</span><span class="p">:</span>
@@ -152,7 +158,7 @@
 
 
 <div class="viewcode-block" id="DBWrapper.write">
-<a class="viewcode-back" href="../../../build_api/trinity.buffer.html#trinity.buffer.db_wrapper.DBWrapper.write">[docs]</a>
+<a class="viewcode-back" href="../../../build_api/trinity.buffer.html#trinity.buffer.ray_wrapper.DBWrapper.write">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">with</span> <span class="n">retry_session</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_retry_times</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_retry_interval</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
             <span class="n">experience_models</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">table_model_cls</span><span class="o">.</span><span class="n">from_experience</span><span class="p">(</span><span class="n">exp</span><span class="p">)</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
@@ -160,7 +166,7 @@
 
 
 <div class="viewcode-block" id="DBWrapper.read">
-<a class="viewcode-back" href="../../../build_api/trinity.buffer.html#trinity.buffer.db_wrapper.DBWrapper.read">[docs]</a>
+<a class="viewcode-back" href="../../../build_api/trinity.buffer.html#trinity.buffer.ray_wrapper.DBWrapper.read">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">strategy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ReadStrategy</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
@@ -206,6 +212,78 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;first prompt_text = </span><span class="si">{</span><span class="n">exp_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">prompt_text</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;first response_text = </span><span class="si">{</span><span class="n">exp_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">response_text</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">exp_list</span></div>
+</div>
+
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_Encoder</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">JSONEncoder</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">Experience</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">o</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">Task</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">o</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">default</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="FileWrapper">
+<a class="viewcode-back" href="../../../build_api/trinity.buffer.html#trinity.buffer.ray_wrapper.FileWrapper">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FileWrapper</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A wrapper of a local jsonl file.</span>
+
+<span class="sd">    If `wrap_in_ray` in `StorageConfig` is `True`, this class will be run as</span>
+<span class="sd">    a Ray Actor, and provide a remote interface to the local file.</span>
+
+<span class="sd">    This wrapper is only for writing, if you want to read from the file, use</span>
+<span class="sd">    StorageType.QUEUE instead.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="FileWrapper.__init__">
+<a class="viewcode-back" href="../../../build_api/trinity.buffer.html#trinity.buffer.ray_wrapper.FileWrapper.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">storage_config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">storage_config</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">default_storage_path</span><span class="p">(</span><span class="n">storage_config</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+        <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">storage_config</span><span class="o">.</span><span class="n">path</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">ext</span> <span class="o">!=</span> <span class="s2">&quot;.jsonl&quot;</span> <span class="ow">and</span> <span class="n">ext</span> <span class="o">!=</span> <span class="s2">&quot;.json&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;File path must end with &#39;.json&#39; or &#39;.jsonl&#39;, got </span><span class="si">{</span><span class="n">storage_config</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">storage_config</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span> <span class="o">=</span> <span class="n">_Encoder</span><span class="p">(</span><span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FileWrapper.get_wrapper">
+<a class="viewcode-back" href="../../../build_api/trinity.buffer.html#trinity.buffer.ray_wrapper.FileWrapper.get_wrapper">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_wrapper</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">storage_config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">wrap_in_ray</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="n">ray</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">options</span><span class="p">(</span>
+                    <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;json-</span><span class="si">{</span><span class="n">storage_config</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">get_if_exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">storage_config</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">storage_config</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FileWrapper.write">
+<a class="viewcode-back" href="../../../build_api/trinity.buffer.html#trinity.buffer.ray_wrapper.FileWrapper.write">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">List</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="n">json_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">json_str</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="FileWrapper.read">
+<a class="viewcode-back" href="../../../build_api/trinity.buffer.html#trinity.buffer.ray_wrapper.FileWrapper.read">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s2">&quot;read() is not implemented for FileWrapper, please use QUEUE instead&quot;</span>
+        <span class="p">)</span></div>
 </div>
 
 </pre></div>

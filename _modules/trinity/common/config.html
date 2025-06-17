@@ -175,6 +175,9 @@
     <span class="c1"># used for StorageType.SQL</span>
     <span class="n">wrap_in_ray</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
+    <span class="c1"># used for StorageType.QUEUE</span>
+    <span class="n">capacity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10000</span>
+
     <span class="c1"># used for rollout tasks</span>
     <span class="n">default_workflow_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">default_reward_fn_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -352,7 +355,8 @@
     <span class="c1"># ! DO NOT SET FOLLOWING FIELDS</span>
     <span class="n">read_batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># automatically set</span>
     <span class="n">tokenizer_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># automatically set</span>
-    <span class="n">pad_token_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># automatically set</span></div>
+    <span class="n">pad_token_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># automatically set</span>
+    <span class="n">cache_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># automatically set</span></div>
 
 
 
@@ -503,6 +507,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">save_interval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_interval</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_check_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># noqa: C901</span>
+        <span class="c1"># TODO: split this function into different buffer read/writer</span>
         <span class="c1"># check explorer_input</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">!=</span> <span class="s2">&quot;train&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_input</span><span class="o">.</span><span class="n">taskset</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -563,6 +568,11 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;Auto set `buffer.trainer_input.experience_buffer` to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="o">.</span><span class="n">storage_type</span> <span class="ow">is</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">FILE</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s2">&quot;`FILE` storage is not supported to use as experience_buffer in `both` mode, use `QUEUE` instead.&quot;</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="o">.</span><span class="n">storage_type</span> <span class="o">=</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">QUEUE</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;train&quot;</span><span class="p">:</span>  <span class="c1"># TODO: to be check</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">algorithm_type</span><span class="o">.</span><span class="n">is_dpo</span><span class="p">():</span>
                 <span class="k">if</span> <span class="p">(</span>
@@ -607,6 +617,15 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to get pad token id from model </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">model_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">pad_token_id</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">tokenizer_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">model_path</span>
+        <span class="c1"># create buffer.cache_dir at &lt;checkpoint_root_dir&gt;/&lt;project&gt;/&lt;name&gt;/buffer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">cache_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_job_dir</span><span class="p">,</span> <span class="s2">&quot;buffer&quot;</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">cache_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Failed to create buffer dir </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">cache_dir</span><span class="si">}</span><span class="s2">, please check &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;your checkpoint directory: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_job_dir</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
 
 <div class="viewcode-block" id="Config.check_and_update">
 <a class="viewcode-back" href="../../../build_api/trinity.common.html#trinity.common.config.Config.check_and_update">[docs]</a>
@@ -671,14 +690,14 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_interval</span><span class="p">()</span>
 
-        <span class="c1"># create a job dir in &lt;checkpoint_job_dir&gt;/monitor</span>
+        <span class="c1"># create a job dir in &lt;checkpoint_root_dir&gt;/&lt;project&gt;/&lt;name&gt;/monitor</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">cache_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_job_dir</span><span class="p">,</span> <span class="s2">&quot;monitor&quot;</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">cache_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Failed to create monitor dir </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">cache_dir</span><span class="si">}</span><span class="s2">, please check &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;your checkpoint directory: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_root_dir</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;your checkpoint directory: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_job_dir</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
 
         <span class="c1"># check buffer</span>

@@ -153,6 +153,10 @@
         <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.writer.queue_writer</span><span class="w"> </span><span class="kn">import</span> <span class="n">QueueWriter</span>
 
         <span class="k">return</span> <span class="n">QueueWriter</span><span class="p">(</span><span class="n">storage_config</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">storage_type</span> <span class="o">==</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">FILE</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.writer.file_writer</span><span class="w"> </span><span class="kn">import</span> <span class="n">JSONWriter</span>
+
+        <span class="k">return</span> <span class="n">JSONWriter</span><span class="p">(</span><span class="n">storage_config</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">storage_config</span><span class="o">.</span><span class="n">storage_type</span><span class="si">}</span><span class="s2"> not supported.&quot;</span><span class="p">)</span></div>
 

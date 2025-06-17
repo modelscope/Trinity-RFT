@@ -85,24 +85,14 @@
            <div itemprop="articleBody">
              
   <h1>Source code for trinity.buffer.writer.file_writer</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">ray</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.buffer_writer</span><span class="w"> </span><span class="kn">import</span> <span class="n">BufferWriter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.ray_wrapper</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileWrapper</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">BufferConfig</span><span class="p">,</span> <span class="n">StorageConfig</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">StorageType</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows</span><span class="w"> </span><span class="kn">import</span> <span class="n">Task</span>
-
-
-<span class="k">class</span><span class="w"> </span><span class="nc">_Encoder</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">JSONEncoder</span><span class="p">):</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">Experience</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">o</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">Task</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">o</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">default</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="JSONWriter">
@@ -112,28 +102,26 @@
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.writer.html#trinity.buffer.writer.file_writer.JSONWriter.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meta</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">):</span>
         <span class="k">assert</span> <span class="n">meta</span><span class="o">.</span><span class="n">storage_type</span> <span class="o">==</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">FILE</span>
-        <span class="k">if</span> <span class="n">meta</span><span class="o">.</span><span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;File path cannot be None for RawFileWriter&quot;</span><span class="p">)</span>
-        <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">path</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">ext</span> <span class="o">!=</span> <span class="s2">&quot;.jsonl&quot;</span> <span class="ow">and</span> <span class="n">ext</span> <span class="o">!=</span> <span class="s2">&quot;.json&quot;</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File path must end with .json or .jsonl, got </span><span class="si">{</span><span class="n">meta</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span> <span class="o">=</span> <span class="n">_Encoder</span><span class="p">(</span><span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writer</span> <span class="o">=</span> <span class="n">FileWrapper</span><span class="o">.</span><span class="n">get_wrapper</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrap_in_ray</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">wrap_in_ray</span></div>
 
 
 <div class="viewcode-block" id="JSONWriter.write">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.writer.html#trinity.buffer.writer.file_writer.JSONWriter.write">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">List</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
-            <span class="n">json_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">json_str</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span></div>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_in_ray</span><span class="p">:</span>
+            <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="JSONWriter.finish">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.writer.html#trinity.buffer.writer.file_writer.JSONWriter.finish">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">finish</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_in_ray</span><span class="p">:</span>
+            <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">finish</span><span class="o">.</span><span class="n">remote</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">finish</span><span class="p">()</span></div>
 </div>
 
 </pre></div>
