@@ -9,7 +9,7 @@ from trinity.common.config import BufferConfig, StorageConfig
 from trinity.common.constants import AlgorithmType, StorageType
 from trinity.common.experience import Experience
 
-file_path = os.path.join(os.path.dirname(__file__), "test_queue_buffer.jsonl")
+BUFFER_FILE_PATH = os.path.join(os.path.dirname(__file__), "test_queue_buffer.jsonl")
 
 
 class TestQueueBuffer(RayUnittestBase):
@@ -21,7 +21,7 @@ class TestQueueBuffer(RayUnittestBase):
             name="test_buffer",
             algorithm_type=AlgorithmType.PPO,
             storage_type=StorageType.QUEUE,
-            path=file_path,
+            path=BUFFER_FILE_PATH,
         )
         config = BufferConfig(
             max_retry_times=3,
@@ -61,9 +61,9 @@ class TestQueueBuffer(RayUnittestBase):
         self.assertEqual(len(exps), put_batch_size * 2)
         writer.finish()
         self.assertRaises(StopIteration, reader.read)
-        with open(file_path, "r") as f:
+        with open(BUFFER_FILE_PATH, "r") as f:
             self.assertEqual(len(f.readlines()), total_num + put_batch_size * 2)
 
     def setUp(self):
-        if os.path.exists(file_path):
-            os.remove(file_path)
+        if os.path.exists(BUFFER_FILE_PATH):
+            os.remove(BUFFER_FILE_PATH)

@@ -106,6 +106,7 @@ class RunnerPoolTest(unittest.TestCase):
             name="test",
             storage_type=StorageType.QUEUE,
             algorithm_type=AlgorithmType.PPO,
+            path="",
         )
         self.queue = QueueReader(
             self.config.buffer.trainer_input.experience_buffer, self.config.buffer

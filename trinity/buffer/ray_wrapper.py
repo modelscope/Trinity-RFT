@@ -1,3 +1,5 @@
+import json
+import os
 import time
 from typing import List, Optional
 
@@ -8,9 +10,11 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import NullPool
 
 from trinity.buffer.schema import Base, create_dynamic_table
-from trinity.buffer.utils import retry_session
+from trinity.buffer.utils import default_storage_path, retry_session
 from trinity.common.config import BufferConfig, StorageConfig
 from trinity.common.constants import ReadStrategy
+from trinity.common.experience import Experience
+from trinity.common.workflows import Task
 from trinity.utils.log import get_logger
 
 
@@ -27,6 +31,8 @@ class DBWrapper:
 
     def __init__(self, storage_config: StorageConfig, config: BufferConfig) -> None:
         self.logger = get_logger(__name__)
+        if storage_config.path is None:
+            storage_config.path = default_storage_path(storage_config, config)
         self.engine = create_engine(storage_config.path, poolclass=NullPool)
         self.table_model_cls = create_dynamic_table(
             storage_config.algorithm_type, storage_config.name
@@ -106,3 +112,60 @@ class DBWrapper:
         self.logger.info(f"first prompt_text = {exp_list[0].prompt_text}")
         self.logger.info(f"first response_text = {exp_list[0].response_text}")
         return exp_list
+
+
+class _Encoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, Experience):
+            return o.to_dict()
+        if isinstance(o, Task):
+            return o.to_dict()
+        return super().default(o)
+
+
+class FileWrapper:
+    """
+    A wrapper of a local jsonl file.
+
+    If `wrap_in_ray` in `StorageConfig` is `True`, this class will be run as
+    a Ray Actor, and provide a remote interface to the local file.
+
+    This wrapper is only for writing, if you want to read from the file, use
+    StorageType.QUEUE instead.
+    """
+
+    def __init__(self, storage_config: StorageConfig, config: BufferConfig) -> None:
+        if storage_config.path is None:
+            storage_config.path = default_storage_path(storage_config, config)
+        ext = os.path.splitext(storage_config.path)[-1]
+        if ext != ".jsonl" and ext != ".json":
+            raise ValueError(
+                f"File path must end with '.json' or '.jsonl', got {storage_config.path}"
+            )
+        self.file = open(storage_config.path, "a", encoding="utf-8")
+        self.encoder = _Encoder(ensure_ascii=False)
+
+    @classmethod
+    def get_wrapper(cls, storage_config: StorageConfig, config: BufferConfig):
+        if storage_config.wrap_in_ray:
+            return (
+                ray.remote(cls)
+                .options(
+                    name=f"json-{storage_config.name}",
+                    get_if_exists=True,
+                )
+                .remote(storage_config, config)
+            )
+        else:
+            return cls(storage_config, config)
+
+    def write(self, data: List) -> None:
+        for item in data:
+            json_str = self.encoder.encode(item)
+            self.file.write(json_str + "\n")
+        self.file.flush()
+
+    def read(self) -> List:
+        raise NotImplementedError(
+            "read() is not implemented for FileWrapper, please use QUEUE instead"
+        )

@@ -5,7 +5,7 @@ from typing import List, Optional
 import ray
 
 from trinity.buffer.buffer_reader import BufferReader
-from trinity.buffer.db_wrapper import DBWrapper
+from trinity.buffer.ray_wrapper import DBWrapper
 from trinity.common.config import BufferConfig, StorageConfig
 from trinity.common.constants import ReadStrategy, StorageType
 
