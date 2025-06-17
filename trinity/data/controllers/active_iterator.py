@@ -159,13 +159,20 @@ class DataActiveIterator:
                 traceback.print_exc()
                 return 7, "Tracking lineage failed."
 
-            # step 8. sort and export the result to the output buffer
+            # step 8
             try:
-                res_dataset.sort_by("priority", reverse=True)
+                if "priority" in res_dataset.data.features:
+                    res_dataset.sort_by("priority", reverse=True)
+            except Exception:
+                traceback.print_exc()
+                return 8, "Sorting results by priority failed."
+
+            # step 9. sort and export the result to the output buffer
+            try:
                 res_dataset.write_to_buffer()
             except Exception:
                 traceback.print_exc()
-                return 8, "Exporting result to output buffer failed."
+                return 9, "Exporting result to output buffer failed."
 
         return 0, "success"
 
@@ -247,7 +254,7 @@ class DataActiveIterator:
             difficulty = stats.get("difficulty_score", 0.5)
             score += self.priority_weights["difficulty"] * difficulty
 
-        sample["priority"] = score
+        sample["priority"] = [score]
         return sample
 
     def _compute_diversity_score(self) -> float:

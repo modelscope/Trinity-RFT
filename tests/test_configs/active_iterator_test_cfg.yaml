@@ -2,8 +2,14 @@ data_processor:
   # basic info
   task_pipeline:
     input_buffers:
-      - path: 'tests/test_data/test_10/'
+      - name: 'raw_input'
+        path: 'tests/test_data/test_10/'
+        storage_type: 'file'
         raw: true
+    output_buffer:
+      name: 'raw_output'
+      path: './outputs/task_pipelien_output/processed.jsonl'
+      storage_type: 'file'
     format:
       prompt_key: 'problem'
       response_key: 'solution'

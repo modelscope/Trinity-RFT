@@ -170,12 +170,15 @@ class DataTaskParser:
         process_list = dj_config.get("process", [])
         for op in process_list:
             op_name = list(op.keys())[0]
-            if op_name in DEFAULT_CLEANER:
-                hit_cleaner = True
-            elif op_name in DEFAULT_SYNTHESIZER:
+            if op_name in DEFAULT_SYNTHESIZER:
                 hit_synthesizer = True
             elif op_name in DEFAULT_HUMAN_ANNOTATOR:
                 hit_human_annotator = True
+            else:
+                for dimension in DEFAULT_CLEANER:
+                    if op_name in DEFAULT_CLEANER[dimension]:
+                        hit_cleaner = True
+                        break
         return hit_cleaner, hit_synthesizer, hit_human_annotator
 
     def _update_common_op_args(self, dj_config: Namespace, extra_op_args: Dict) -> Namespace:

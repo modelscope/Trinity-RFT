@@ -166,7 +166,7 @@ class DataCleaner(BaseDataProcessor):
         else:
             logger.info("Executing Data-Juicer analyzer...")
             analyzer = Analyzer(self.dj_cfg)
-            analyzer.run(dataset)
+            analyzer.run(dataset, skip_export=True)
             df = analyzer.overall_result
             mean_series = df[df.index == "mean"]
             stats_key_to_mean = mean_series.iloc[0, :].to_dict()
@@ -174,7 +174,6 @@ class DataCleaner(BaseDataProcessor):
             stats_key_to_std = std_series.iloc[0, :].to_dict()
 
             tmp_cfg = copy.deepcopy(self.dj_cfg)
-            print(tmp_cfg)
             self.op_name_to_stats_key = StatsKeys.get_access_log(dj_cfg=tmp_cfg, dataset=dataset)
 
         for try_idx in range(max_tries):

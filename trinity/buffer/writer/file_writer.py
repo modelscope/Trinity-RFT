@@ -26,6 +26,8 @@ class JSONWriter(BufferWriter):
         ext = os.path.splitext(meta.path)[-1]
         if ext != ".jsonl" and ext != ".json":
             raise ValueError(f"File path must end with .json or .jsonl, got {meta.path}")
+        path_dir = os.path.dirname(meta.path)
+        os.makedirs(path_dir, exist_ok=True)
         self.file = open(meta.path, "a", encoding="utf-8")
         self.encoder = _Encoder(ensure_ascii=False)
 
