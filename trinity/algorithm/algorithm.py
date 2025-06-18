@@ -150,7 +150,6 @@ class DPOAlgorithm(AlgorithmType):
     @classmethod
     def get_default_config(cls) -> Dict:
         return {
-            "repeat_times": 2,  # fake repeat times
             "sample_strategy": "dpo",
             "policy_loss_fn": "dpo",
             "kl_loss_fn": "k2",
@@ -177,9 +176,6 @@ class DPOAlgorithm(AlgorithmType):
             )
         if config.algorithm.repeat_times != 2:
             config.algorithm.repeat_times = 2
-            logger.warning(
-                "DPO only supports 2 repeat times, set `algorithm.repeat_times` to 2."
-            )  # no need to warn
 
 
 @ALGORITHM_TYPE.register_module("mix")

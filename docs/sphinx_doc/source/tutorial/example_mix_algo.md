@@ -47,7 +47,7 @@ class MIXAlgorithm(AlgorithmType):
     schema: type = ExperienceModel
 
     @classmethod
-    def get_default_config(cls) -> Dict:
+    def default_args(cls) -> Dict:
         return {
             "repeat_times": 8,
             "policy_loss_fn": "mix",

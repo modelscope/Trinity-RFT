@@ -323,8 +323,6 @@ class veRLConfig:
 
         if config.trainer.actor_grad_clip is not None:
             self.actor_rollout_ref.actor.grad_clip = config.trainer.actor_grad_clip
-        if config.trainer.actor_clip_ratio is not None:
-            self.actor_rollout_ref.actor.clip_ratio = config.trainer.actor_clip_ratio
 
         # Algorithm related config
         adv_fn_args = config.algorithm.advantage_fn_args

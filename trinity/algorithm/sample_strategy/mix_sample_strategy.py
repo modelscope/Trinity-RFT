@@ -79,7 +79,7 @@ class MixSampleStrategy(SampleStrategy):
             raise NotImplementedError(f"backend {self.trainer_type} is not supported")
 
     @classmethod
-    def get_default_config(cls) -> Dict:
+    def default_args(cls) -> Dict:
         return {
             "expert_data_ratio": 0.5,
         }

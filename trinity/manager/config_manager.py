@@ -7,9 +7,24 @@ from typing import List
 import streamlit as st
 import yaml
 
-from trinity.common.constants import AlgorithmType, StorageType
+from trinity.algorithm.advantage_fn.advantage_fn import ADVANTAGE_FN
+from trinity.algorithm.algorithm import ALGORITHM_TYPE
+from trinity.algorithm.entropy_loss_fn.entropy_loss_fn import ENTROPY_LOSS_FN
+from trinity.algorithm.kl_fn.kl_fn import KL_FN
+from trinity.algorithm.policy_loss_fn.policy_loss_fn import POLICY_LOSS_FN
+from trinity.algorithm.sample_strategy.sample_strategy import SAMPLE_STRATEGY
+from trinity.common.constants import StorageType
 from trinity.manager.config_registry.config_registry import CONFIG_GENERATORS
 from trinity.manager.config_registry.trainer_config_manager import use_critic
+
+register_map = {
+    "sample_strategy": SAMPLE_STRATEGY,
+    "policy_loss_fn": POLICY_LOSS_FN,
+    "advantage_fn": ADVANTAGE_FN,
+    "kl_loss_fn": KL_FN,
+    "kl_penalty_fn": KL_FN,
+    "entropy_loss_fn": ENTROPY_LOSS_FN,
+}
 
 
 class ConfigManager:
@@ -108,7 +123,7 @@ class ConfigManager:
 
         self.get_configs("checkpoint_root_dir")
 
-        if st.session_state["algorithm_type"] != AlgorithmType.DPO.value:
+        if st.session_state["algorithm_type"] != "dpo":
             self.get_configs("taskset_path")
         else:
             self.get_configs("experience_buffer_path")
@@ -126,7 +141,7 @@ class ConfigManager:
 
         self.get_configs("sync_interval", "eval_interval", "save_interval")
 
-        if st.session_state["algorithm_type"] != AlgorithmType.DPO.value:
+        if st.session_state["algorithm_type"] != "dpo":
             self.get_configs("taskset_args")
         else:
             self.get_configs("dpo_dataset_kwargs")
@@ -135,9 +150,6 @@ class ConfigManager:
             self.get_configs("sft_warmup_dataset_args")
 
         self.get_configs("default_workflow_type", "default_reward_fn_type")
-
-        self.get_configs("actor_use_kl_loss")
-        self.get_configs("actor_kl_loss_coef", "actor_kl_loss_type")
 
         self.get_configs(
             "actor_ppo_micro_batch_size_per_gpu",
@@ -165,7 +177,7 @@ class ConfigManager:
         self.get_configs("system_prompt")
         self.get_configs("reply_prefix")
 
-        if st.session_state["algorithm_type"] != AlgorithmType.DPO.value:
+        if st.session_state["algorithm_type"] != "dpo":
             with st.expander("Taskset Configs", expanded=True):
                 self.get_configs("taskset_path")
                 self.get_configs("taskset_args")
@@ -182,7 +194,7 @@ class ConfigManager:
             self.get_configs("sft_warmup_dataset_path")
             self.get_configs("sft_warmup_dataset_args")
 
-        if st.session_state["algorithm_type"] != AlgorithmType.DPO.value:
+        if st.session_state["algorithm_type"] != "dpo":
             with st.expander("Experiences Buffer Configs", expanded=True):
                 self.get_configs("storage_type")
                 self.get_configs("experience_buffer_path")
@@ -213,8 +225,30 @@ class ConfigManager:
             self.get_configs("auxiliary_models")
 
     def _expert_trainer_part(self):
-        self.get_configs("algorithm_type", "gamma", "lam")
-        self.get_configs("repeat_times", "save_interval")
+        self.get_configs("algorithm_type", "repeat_times", "save_interval")
+        self.get_configs("sample_strategy", "advantage_fn", "entropy_loss_fn")
+        self.get_configs("policy_loss_fn", "kl_penalty_fn", "kl_loss_fn")
+
+        with st.expander("Advanced Algorithm Config"):
+            algorithm = ALGORITHM_TYPE.get(st.session_state["algorithm_type"])
+            default_config = algorithm.get_default_config()
+            config_key_list = []
+            for key in default_config.keys():
+                value = st.session_state[key]
+                if key == "repeat_times":
+                    continue
+                default_args = register_map[key].get(value).default_args()
+                for sub_key in default_args.keys():
+                    full_key = sub_key + "_in_" + key
+                    config_key_list.append(full_key)
+
+            idx = 0
+            while idx < len(config_key_list):
+                delta = 3 if len(config_key_list) - idx != 4 else 2
+                key_list = config_key_list[idx : idx + delta]
+                idx += delta
+                self.get_configs(*key_list)
+
         self.get_configs("enable_preview")
 
         if st.session_state["trainer_type"] == "verl":
@@ -238,12 +272,6 @@ class ConfigManager:
 
             self.get_configs("max_actor_ckpt_to_keep", "max_critic_ckpt_to_keep")
 
-    def _expert_verl_algorithm_part(self):
-        st.subheader("RL Algorithm Config")
-        self.get_configs("norm_adv_by_std_in_grpo", "use_kl_in_reward")
-        self.get_configs("kl_penalty", "kl_ctrl_type", "kl_ctrl_coef")
-        self.get_configs("horizon", "target_kl")
-
     def _expert_verl_actor_part(self):
         st.subheader("Actor Model Config")
         self.get_configs(
@@ -254,12 +282,7 @@ class ConfigManager:
 
         self.get_configs("actor_lr", "actor_warmup_style", "actor_lr_warmup_steps_ratio")
 
-        self.get_configs("actor_grad_clip", "actor_clip_ratio", "actor_entropy_coef")
-
-        self.get_configs("actor_use_kl_loss", "actor_use_uid")
-        self.get_configs("actor_kl_loss_coef", "actor_kl_loss_type")
-
-        self.get_configs("actor_tau", "actor_opmd_baseline")
+        self.get_configs("actor_grad_clip")
 
         self.get_configs("actor_checkpoint")
 
@@ -277,7 +300,6 @@ class ConfigManager:
     def _expert_verl_trainer_part(self):
         name2func = {
             "RL Training Config": self._expert_verl_training_part,
-            "RL Algorithm Config": self._expert_verl_algorithm_part,
             "Actor and Ref Config": self._expert_verl_actor_part,
         }
         if use_critic():
@@ -359,9 +381,6 @@ class ConfigManager:
                         ),
                     },
                     "fsdp_config": copy.deepcopy(fsdp_config),
-                    "tau": st.session_state["actor_tau"],
-                    "opmd_baseline": st.session_state["actor_opmd_baseline"],
-                    "use_uid": st.session_state["actor_use_uid"],
                 },
                 "ref": {
                     "fsdp_config": copy.deepcopy(fsdp_config),
@@ -375,14 +394,7 @@ class ConfigManager:
                     ],
                 },
             },
-            "custom_reward_function": {"path": None, "name": "compute_score"},
-            "algorithm": {
-                "kl_penalty": st.session_state["kl_penalty"],
-                "kl_ctrl": {
-                    "type": st.session_state["kl_ctrl_type"],
-                    "kl_coef": st.session_state["kl_ctrl_coef"],
-                },
-            },
+            "critic": {},
             "trainer": {
                 "balance_batch": balance_batch,
                 "resume_mode": st.session_state["resume_mode"],
@@ -436,11 +448,35 @@ class ConfigManager:
                 "cliprange_value": st.session_state["critic_cliprange_value"],
                 "checkpoint": {"contents": st.session_state["critic_checkpoint"]},
             }
+        else:
+            del trainer_config["critic"]
         return trainer_config
+
+    def _gen_algorithm_config(self):
+        algorithm_config = {
+            "algorithm_type": st.session_state["algorithm_type"],
+        }
+        algorithm = ALGORITHM_TYPE.get(st.session_state["algorithm_type"])
+        default_config = algorithm.get_default_config()
+        current_config = {}
+        for key in default_config.keys():
+            current_config[key] = value = st.session_state[key]
+            if key == "repeat_times":
+                continue
+            default_args = register_map[key].get(value).default_args()
+            args = {}
+            for sub_key in default_args.keys():
+                full_key = sub_key + "_in_" + key
+                args[sub_key] = st.session_state.get(full_key, default_args[sub_key])
+            if default_args != args:
+                current_config[key + "_args"] = args
+        if default_config != current_config:
+            algorithm_config.update(current_config)
+        return algorithm_config
 
     def _gen_buffer_config(self):
         experience_buffer_path = st.session_state["experience_buffer_path"].strip()
-        if st.session_state["algorithm_type"] != AlgorithmType.DPO.value:
+        if st.session_state["algorithm_type"] != "dpo":
             if (
                 not experience_buffer_path
                 and st.session_state["storage_type"] == StorageType.SQL.value
@@ -456,6 +492,7 @@ class ConfigManager:
         buffer_config = {
             "batch_size": st.session_state["train_batch_size"],
             "total_epochs": st.session_state["total_epochs"],
+            "explorer_input": {},
             "trainer_input": {
                 "experience_buffer": {
                     "name": "experience_buffer",
@@ -503,7 +540,10 @@ class ConfigManager:
                             "response_key": st.session_state[f"eval_taskset_{idx}_response_key"],
                         }
                     )
-        if st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
+        else:
+            del buffer_config["explorer_input"]
+
+        if st.session_state["algorithm_type"] == "dpo":
             experience_buffer = buffer_config["trainer_input"]["experience_buffer"]
             experience_buffer["split"] = st.session_state["dpo_dataset_train_split"]
             experience_buffer["format"] = {
@@ -550,7 +590,7 @@ class ConfigManager:
                 "enable_thinking": st.session_state["enable_thinking"],
                 "enable_openai_api": st.session_state["enable_openai_api"],
             },
-            "auxiliary_models": [],
+            "auxiliary_models": [],  # TODO: add auxiliary models
             "eval_interval": st.session_state["eval_interval"],
             "eval_on_latest_checkpoint": st.session_state["eval_on_latest_checkpoint"],
         }
@@ -585,12 +625,7 @@ class ConfigManager:
                 "project": st.session_state["project"],
                 "name": st.session_state["exp_name"],
                 "checkpoint_root_dir": st.session_state["checkpoint_root_dir"],
-                "algorithm": {
-                    "algorithm_type": st.session_state["algorithm_type"],
-                    "repeat_times": st.session_state["repeat_times"],
-                    "gamma": st.session_state["gamma"],
-                    "lam": st.session_state["lam"],
-                },
+                "algorithm": self._gen_algorithm_config(),
                 "data_processor": {},  # TODO: Add data processor config
                 "model": {
                     "model_path": st.session_state["model_path"],
@@ -607,11 +642,7 @@ class ConfigManager:
                     "trainer_type": st.session_state["trainer_type"],
                     "save_interval": st.session_state["save_interval"],
                     "enable_preview": st.session_state["enable_preview"],
-                    "actor_use_kl_loss": st.session_state["actor_use_kl_loss"],
-                    "actor_kl_loss_coef": st.session_state["actor_kl_loss_coef"],
-                    "actor_entropy_coef": st.session_state["actor_entropy_coef"],
                     "actor_grad_clip": st.session_state["actor_grad_clip"],
-                    "actor_clip_ratio": st.session_state["actor_clip_ratio"],
                     "trainer_config": trainer_config,
                 },
                 "monitor": {
