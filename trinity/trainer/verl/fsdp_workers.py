@@ -26,7 +26,7 @@ import psutil
 import torch
 import torch.distributed
 import torch.distributed as dist
-import vllm  # noqa: F401 ; import vllm to avoid "Cuda failure 1 'invalid argument'"
+import vllm  # noqa: F401 ; import vllm to set NCCL_CUMEM_ENABLE automatically.
 from codetiming import Timer
 from omegaconf import DictConfig, open_dict
 from peft import LoraConfig, TaskType, get_peft_model
@@ -126,7 +126,6 @@ class ActorRolloutRefWorker(Worker):
         assert self.role in ["actor", "rollout", "ref", "actor_rollout", "actor_rollout_ref"]
 
         self._is_actor = self.role in ["actor", "actor_rollout", "actor_rollout_ref"]
-        self._is_rollout = self.role in ["rollout", "actor_rollout", "actor_rollout_ref"]
         self._is_ref = self.role in ["ref", "actor_rollout_ref"]
 
         self._is_offload_param = False
@@ -170,14 +169,6 @@ class ActorRolloutRefWorker(Worker):
                     > 0
                 ), f"normalized ppo_mini_batch_size {self.config.actor.ppo_mini_batch_size} should be larger than ppo_micro_batch_size_per_gpu {self.config.actor.ppo_micro_batch_size_per_gpu}"
 
-        # normalize rollout config
-        if self._is_rollout and self.config.rollout.log_prob_micro_batch_size is not None:
-            self.config.rollout.log_prob_micro_batch_size //= (
-                self.device_mesh.size() // self.ulysses_sequence_parallel_size
-            )
-            self.config.rollout.log_prob_micro_batch_size_per_gpu = (
-                self.config.rollout.log_prob_micro_batch_size
-            )
         # normalize ref config
         if self._is_ref and self.config.ref.log_prob_micro_batch_size is not None:
             self.config.ref.log_prob_micro_batch_size //= (
@@ -339,10 +330,6 @@ class ActorRolloutRefWorker(Worker):
             is_lora=self.config.model.get("lora_rank", 0) > 0,
         )
 
-        if self._is_rollout and self.config.rollout.name == "hf":
-            # TODO(zhangchi.usc1992, shengguangming) fix me. Current, auto_wrap_policy causes HFRollout to hang in Gemma
-            auto_wrap_policy = None
-
         if self.rank == 0:
             print(f"wrap_policy: {auto_wrap_policy}")
 
@@ -450,136 +437,6 @@ class ActorRolloutRefWorker(Worker):
 
         return actor_module_fsdp, actor_optimizer, actor_lr_scheduler, actor_model_config
 
-    def _build_rollout(self, trust_remote_code=False):
-        from torch.distributed.device_mesh import init_device_mesh
-
-        # TODO(sgm): support FSDP hybrid shard for larger model
-        infer_tp = self.config.rollout.tensor_model_parallel_size
-        dp = self.world_size // infer_tp
-        assert (
-            self.world_size % infer_tp == 0
-        ), f"rollout world_size: {self.world_size} is not divisible by infer_tp: {infer_tp}"
-        rollout_device_mesh = init_device_mesh(
-            device_name, mesh_shape=(dp, infer_tp), mesh_dim_names=["dp", "infer_tp"]
-        )
-        rollout_name = self.config.rollout.name
-        if rollout_name == "hf":
-            from verl.workers.rollout import HFRollout
-            from verl.workers.sharding_manager.base import BaseShardingManager
-
-            rollout = HFRollout(module=self.actor_module_fsdp, config=self.config.rollout)
-            rollout_sharding_manager = BaseShardingManager()
-            # TODO: a sharding manager that do nothing?
-
-        elif rollout_name == "vllm":
-            from verl.workers.rollout.vllm_rollout import vllm_mode, vLLMRollout
-            from verl.workers.sharding_manager.fsdp_vllm import FSDPVLLMShardingManager
-
-            log_gpu_memory_usage(f"Before building {rollout_name} rollout", logger=logger)
-            local_path = copy_to_local(
-                self.config.model.path, use_shm=self.config.model.get("use_shm", False)
-            )
-            lora_kwargs = (
-                {
-                    "lora_kwargs": {
-                        "enable_lora": True,
-                        "max_loras": 1,
-                        "max_lora_rank": self._lora_rank,
-                    }
-                }
-                if self._is_lora
-                else {}
-            )
-            # lora_kwargs = {}
-            if vllm_mode == "customized":
-                rollout = vLLMRollout(
-                    actor_module=self.actor_module_fsdp,
-                    config=self.config.rollout,
-                    tokenizer=self.tokenizer,
-                    model_hf_config=self.actor_model_config,
-                    trust_remote_code=trust_remote_code,
-                    **lora_kwargs,
-                )
-            elif vllm_mode == "spmd":
-                from verl.workers.rollout.vllm_rollout import vLLMAsyncRollout
-
-                vllm_rollout_cls = (
-                    vLLMRollout if self.config.rollout.mode == "sync" else vLLMAsyncRollout
-                )
-                rollout = vllm_rollout_cls(
-                    model_path=local_path,
-                    config=self.config.rollout,
-                    tokenizer=self.tokenizer,
-                    model_hf_config=self.actor_model_config,
-                    device_mesh=rollout_device_mesh,
-                    trust_remote_code=trust_remote_code,
-                    **lora_kwargs,
-                )
-            else:
-                raise NotImplementedError("vllm_mode must be 'customized' or 'spmd'")
-
-            log_gpu_memory_usage(f"After building {rollout_name} rollout", logger=logger)
-            full_params = torch.distributed.get_world_size() == 1
-            rollout_sharding_manager = FSDPVLLMShardingManager(
-                module=self.actor_module_fsdp,
-                inference_engine=rollout.inference_engine,
-                model_config=self.actor_model_config,
-                full_params=full_params,
-                device_mesh=rollout_device_mesh,
-                offload_param=self._is_offload_param,
-                load_format=self.config.rollout.load_format,
-                layered_summon=self.config.rollout.get("layered_summon", False),
-            )
-            log_gpu_memory_usage("After building sharding manager", logger=logger)
-
-        elif rollout_name in ["sglang", "sglang_async"]:
-            if rollout_name == "sglang_async":
-                warnings.warn(
-                    "'sglang_async' has been deprecated and merged into 'sglang'. Please use 'sglang' going forward.",
-                    DeprecationWarning,
-                    stacklevel=2,
-                )
-            from verl.workers.rollout.sglang_rollout import SGLangRollout
-
-            # NOTE(linjunrong): Due to recent fp8 support in SGLang. Now importing any symbol relate to
-            # SGLang's model_runner would check CUDA device capability. However, due to verl's setting,
-            # the main process of ray can not find any CUDA device, which would potentially lead to:
-            # "RuntimeError: No CUDA GPUs are available".
-            # For this reason, sharding_manager.__init__ should not import FSDPSGLangShardingManager and
-            # we import it here use the abs path.
-            # check: https://github.com/sgl-project/sglang/blob/00f42707eaddfc2c0528e5b1e0094025c640b7a0/python/sglang/srt/layers/quantization/fp8_utils.py#L76
-            from verl.workers.sharding_manager.fsdp_sglang import (
-                FSDPSGLangShardingManager,
-            )
-
-            local_path = copy_to_local(self.config.model.path)
-            log_gpu_memory_usage(f"Before building {rollout_name} rollout", logger=logger)
-            rollout = SGLangRollout(
-                actor_module=local_path,
-                config=self.config.rollout,
-                tokenizer=self.tokenizer,
-                model_hf_config=self.actor_model_config,
-                trust_remote_code=trust_remote_code,
-            )
-            log_gpu_memory_usage(f"After building {rollout_name} rollout", logger=logger)
-
-            if torch.distributed.get_world_size() == 1:
-                self.config.rollout.load_format = "dummy_hf"
-            rollout_sharding_manager = FSDPSGLangShardingManager(
-                module=self.actor_module_fsdp,
-                inference_engine=rollout._engine,
-                model_config=self.actor_model_config,
-                full_params="hf" in self.config.rollout.load_format,
-                device_mesh=rollout_device_mesh,
-                offload_param=self._is_offload_param,
-            )
-            log_gpu_memory_usage("After building sharding manager", logger=logger)
-
-        else:
-            raise NotImplementedError(f"Rollout name: {self.config.rollout.name} is not supported")
-
-        return rollout, rollout_sharding_manager
-
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
     def init_model(self):
         from trinity.trainer.verl.dp_actor import DataParallelPPOActor
@@ -597,14 +454,10 @@ class ActorRolloutRefWorker(Worker):
         use_shm = self.config.model.get("use_shm", False)
         use_fused_kernels = self.config.model.get("use_fused_kernels", False)
 
-        if self._is_actor or self._is_rollout:
+        if self._is_actor:
             # we need the model for actor and rollout
-            if self._is_actor:
-                optim_config = self.config.actor.optim
-                fsdp_config = self.config.actor.fsdp_config
-            else:
-                optim_config = None
-                fsdp_config = OmegaConf.create()
+            optim_config = self.config.actor.optim
+            fsdp_config = self.config.actor.fsdp_config
 
             local_path = copy_to_local(self.config.model.path, use_shm=use_shm)
             (
@@ -649,11 +502,6 @@ class ActorRolloutRefWorker(Worker):
                 config=self.config.actor,
                 actor_module=self.actor_module_fsdp,
                 actor_optimizer=self.actor_optimizer,
-            )
-
-        if self._is_rollout:
-            self.rollout, self.rollout_sharding_manager = self._build_rollout(
-                trust_remote_code=self.config.model.get("trust_remote_code", False)
             )
 
         if self._is_ref:
@@ -713,7 +561,9 @@ class ActorRolloutRefWorker(Worker):
                         realname = (
                             name_prefix[len(FSDP_PREFIX) :] + "." + name if name_prefix else name
                         )
-                        self.state_dict_meta.append((realname, param.dtype, param.shape))
+                        self.state_dict_meta.append(
+                            (realname, str(param.dtype), tuple(param.shape))
+                        )
                     param = None
                 torch.cuda.empty_cache()
 
@@ -813,38 +663,6 @@ class ActorRolloutRefWorker(Worker):
             offload_fsdp_optimizer(optimizer=self.actor_optimizer)
             log_gpu_memory_usage("After offload actor optimizer during update_actor", logger=logger)
 
-        return output
-
-    @register(dispatch_mode=Dispatch.DP_COMPUTE_PROTO)
-    def generate_sequences(self, prompts: DataProto):
-        # Support all hardwares
-        prompts = prompts.to(get_torch_device().current_device())
-
-        assert self._is_rollout
-
-        meta_info = {
-            "eos_token_id": self.generation_config.eos_token_id
-            if self.generation_config is not None
-            else self.tokenizer.eos_token_id,
-            "pad_token_id": self.generation_config.pad_token_id
-            if self.generation_config is not None
-            else self.tokenizer.pad_token_id,
-        }
-        prompts.meta_info.update(meta_info)
-        with self.rollout_sharding_manager:
-            log_gpu_memory_usage("After entering rollout sharding manager", logger=logger)
-
-            prompts = self.rollout_sharding_manager.preprocess_data(prompts)
-            output = self.rollout.generate_sequences(prompts=prompts)
-
-            log_gpu_memory_usage("After rollout generation", logger=logger)
-
-            output = self.rollout_sharding_manager.postprocess_data(output)
-
-        output = output.to("cpu")
-
-        # clear kv cache
-        get_torch_device().empty_cache()
         return output
 
     @register(dispatch_mode=Dispatch.DP_COMPUTE_PROTO)

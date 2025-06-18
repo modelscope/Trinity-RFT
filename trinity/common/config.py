@@ -79,6 +79,9 @@ class StorageConfig:
     # used for StorageType.SQL
     wrap_in_ray: bool = True
 
+    # used for StorageType.QUEUE
+    capacity: int = 10000
+
     # used for rollout tasks
     default_workflow_type: Optional[str] = None
     default_reward_fn_type: Optional[str] = None
@@ -257,6 +260,7 @@ class BufferConfig:
     read_batch_size: int = 1  # automatically set
     tokenizer_path: Optional[str] = None  # automatically set
     pad_token_id: Optional[int] = None  # automatically set
+    cache_dir: Optional[str] = None  # automatically set
 
 
 @dataclass
@@ -378,6 +382,7 @@ class Config:
                 self.trainer.save_interval = self.synchronizer.sync_interval
 
     def _check_buffer(self) -> None:  # noqa: C901
+        # TODO: split this function into different buffer read/writer
         # check explorer_input
         if self.mode != "train" and not self.buffer.explorer_input.taskset.path:
             raise ValueError(
@@ -438,6 +443,11 @@ class Config:
                 logger.info(
                     f"Auto set `buffer.trainer_input.experience_buffer` to {self.buffer.trainer_input.experience_buffer}"
                 )
+            elif self.buffer.trainer_input.experience_buffer.storage_type is StorageType.FILE:
+                logger.warning(
+                    "`FILE` storage is not supported to use as experience_buffer in `both` mode, use `QUEUE` instead."
+                )
+                self.buffer.trainer_input.experience_buffer.storage_type = StorageType.QUEUE
         elif self.mode == "train":  # TODO: to be check
             pass
         if self.buffer.trainer_input.experience_buffer is not None:
@@ -475,6 +485,15 @@ class Config:
                 logger.warning(f"Failed to get pad token id from model {self.model.model_path}")
                 self.buffer.pad_token_id = 0
         self.buffer.tokenizer_path = self.model.model_path
+        # create buffer.cache_dir at <checkpoint_root_dir>/<project>/<name>/buffer
+        self.buffer.cache_dir = os.path.abspath(os.path.join(self.checkpoint_job_dir, "buffer"))
+        try:
+            os.makedirs(self.buffer.cache_dir, exist_ok=True)
+        except Exception:
+            logger.warning(
+                f"Failed to create buffer dir {self.buffer.cache_dir}, please check "
+                f"your checkpoint directory: {self.checkpoint_job_dir}"
+            )
 
     def _check_algorithm(self) -> None:
         from trinity.algorithm import (
@@ -589,14 +608,14 @@ class Config:
 
         self._check_interval()
 
-        # create a job dir in <checkpoint_job_dir>/monitor
+        # create a job dir in <checkpoint_root_dir>/<project>/<name>/monitor
         self.monitor.cache_dir = os.path.join(self.checkpoint_job_dir, "monitor")
         try:
             os.makedirs(self.monitor.cache_dir, exist_ok=True)
         except Exception:
             logger.warning(
                 f"Failed to create monitor dir {self.monitor.cache_dir}, please check "
-                f"your checkpoint directory: {self.checkpoint_root_dir}"
+                f"your checkpoint directory: {self.checkpoint_job_dir}"
             )
 
         # check buffer

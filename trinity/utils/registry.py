@@ -83,21 +83,21 @@ class Registry(object):
                     Default: False.
 
         Example:
-            ```python
-            WORKFLOWS = Registry("workflows")
 
-            # register a module using decorator
-            @WORKFLOWS.register_module(name="workflow_name")
-            class MyWorkflow(Workflow):
-                pass
+            .. code-block:: python
+                WORKFLOWS = Registry("workflows")
 
-            # or register a module directly
-            WORKFLOWS.register_module(
-                name="workflow_name",
-                module_cls=MyWorkflow,
-                force=True,
-            )
-            ```
+                # register a module using decorator
+                @WORKFLOWS.register_module(name="workflow_name")
+                class MyWorkflow(Workflow):
+                    pass
+
+                # or register a module directly
+                WORKFLOWS.register_module(
+                    name="workflow_name",
+                    module_cls=MyWorkflow,
+                    force=True,
+                )
 
         """
         if not (module_name is None or isinstance(module_name, str)):

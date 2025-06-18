@@ -148,8 +148,11 @@ pip install -e .\[dev\]
 
 # Install flash-attn after all dependencies are installed
 # Note: flash-attn will take a long time to compile, please be patient.
-pip install flash-attn -v
-# Try the following command if you encounter errors during installation
+# for bash
+pip install -e .[flash_attn]
+# for zsh
+pip install -e .\[flash_attn\]
+# Try the following command if you encounter errors during flash-attn installation
 # pip install flash-attn -v --no-build-isolation
 ```
 

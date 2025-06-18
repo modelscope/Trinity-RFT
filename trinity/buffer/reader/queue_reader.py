@@ -18,17 +18,20 @@ class QueueReader(BufferReader):
 
     def __init__(self, storage_config: StorageConfig, config: BufferConfig):
         assert storage_config.storage_type == StorageType.QUEUE
-        self.config = config
+        self.read_batch_size = config.read_batch_size
         self.queue = QueueActor.options(
             name=f"queue-{storage_config.name}",
             get_if_exists=True,
         ).remote(storage_config, config)
 
-    def read(self, strategy: Optional[ReadStrategy] = None) -> List:
+    def read(
+        self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
+    ) -> List:
         if strategy is not None and strategy != ReadStrategy.FIFO:
             raise NotImplementedError(f"Read strategy {strategy} not supported for Queue Reader.")
         try:
-            exps = ray.get(self.queue.get_batch.remote(self.config.read_batch_size))
+            batch_size = batch_size or self.read_batch_size
+            exps = ray.get(self.queue.get_batch.remote(batch_size))
         except StopAsyncIteration:
             raise StopIteration()
         return exps

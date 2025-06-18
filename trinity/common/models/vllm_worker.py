@@ -57,7 +57,7 @@ class WorkerExtension:
         )
         self._explorer_actor = None
 
-    def update_weight(self, name, dtype, shape, empty_cache=False):
+    def update_weight(self, name: str, dtype_str: str, shape: tuple, empty_cache=False):
         """Broadcast weight to all vllm workers from source rank 0 (actor model)"""
         if self._weight_update_rank == 0:
             if self._explorer_actor is None:
@@ -65,8 +65,8 @@ class WorkerExtension:
             weight = ray.get(self._explorer_actor.get_weight.remote(name))
             weight = weight.to(self.device)
         else:
-            weight = torch.empty(shape, dtype=dtype, device="cuda")
-
+            dtype = getattr(torch, dtype_str.split(".")[-1])
+            weight = torch.empty(shape, dtype=dtype, device=self.device)
         torch.distributed.broadcast(weight, 0, group=self._model_update_group)
         weight = weight.type(self.model_config.dtype)
 

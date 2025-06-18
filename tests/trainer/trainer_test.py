@@ -184,7 +184,7 @@ class TestTrainerGSM8KWithSFT(BaseTrainerCase):
         self.assertEqual(parser.metric_max_step(response_metrics[0]), 4)
 
     def tearDown(self):
-        # remove dir only when the test passed
+        # TODO: remove dir only when the test passed
         shutil.rmtree(self.config.checkpoint_job_dir)
 
 

@@ -26,7 +26,6 @@ class AlgorithmType(ABC, metaclass=ConstantMeta):
     use_critic: bool
     use_reference: bool
     use_advantage: bool
-    use_rollout: bool
     can_balance_batch: bool
     schema: type
 
@@ -50,7 +49,6 @@ class SFTAlgorithm(AlgorithmType):
     use_critic: bool = False
     use_reference: bool = False
     use_advantage: bool = False
-    use_rollout: bool = False
     can_balance_batch: bool = True
     schema: type = SFTDataModel
 
@@ -71,7 +69,6 @@ class PPOAlgorithm(AlgorithmType):
     use_critic: bool = True
     use_reference: bool = True
     use_advantage: bool = True
-    use_rollout: bool = True
     can_balance_batch: bool = True
     schema: type = ExperienceModel
 
@@ -95,7 +92,6 @@ class GRPOAlgorithm(AlgorithmType):
     use_critic: bool = False
     use_reference: bool = True
     use_advantage: bool = True
-    use_rollout: bool = True
     can_balance_batch: bool = True
     schema: type = ExperienceModel
 
@@ -119,7 +115,6 @@ class OPMDAlgorithm(AlgorithmType):
     use_critic: bool = False
     use_reference: bool = True
     use_advantage: bool = True
-    use_rollout: bool = True
     can_balance_batch: bool = True
     schema: type = ExperienceModel
 
@@ -143,7 +138,6 @@ class DPOAlgorithm(AlgorithmType):
     use_critic: bool = False
     use_reference: bool = True
     use_advantage: bool = False
-    use_rollout: bool = False
     can_balance_batch: bool = False
     schema: type = DPODataModel
 
