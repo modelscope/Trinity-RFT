@@ -67,7 +67,8 @@ class SFTDataReader(BufferReader):
         self.response_key = meta.format.response_key
         self.read_batch_size = config.read_batch_size
         self.dataset = _HFBatchReader(
-            load_dataset(meta.path, name=subset_name, split=self.split)
+            load_dataset(meta.path, name=subset_name, split=self.split),
+            max_epoch=meta.total_epochs,
         )  # TODO: support resume
         self.tokenizer = transformers.AutoTokenizer.from_pretrained(config.tokenizer_path)
 
@@ -143,7 +144,8 @@ class DPODataReader(BufferReader):
         self.rejected_key = meta.format.rejected_key
         self.read_batch_size = config.read_batch_size
         self.dataset = _HFBatchReader(
-            load_dataset(meta.path, name=subset_name, split=self.split)
+            load_dataset(meta.path, name=subset_name, split=self.split),
+            max_epoch=meta.total_epochs,
         )  # TODO: support resume
         self.tokenizer = transformers.AutoTokenizer.from_pretrained(config.tokenizer_path)
 
