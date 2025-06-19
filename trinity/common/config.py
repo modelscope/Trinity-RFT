@@ -515,7 +515,7 @@ class Config:
             "kl_loss_fn": "k2",
             "entropy_loss_fn": "default",
         }
-        default_config.update(algorithm.get_default_config())
+        default_config.update(algorithm.default_config())
         for key, value in default_config.items():
             if getattr(self.algorithm, key, None) is None:
                 setattr(self.algorithm, key, value)

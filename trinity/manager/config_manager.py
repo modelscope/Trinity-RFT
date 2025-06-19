@@ -224,7 +224,7 @@ class ConfigManager:
 
         with st.expander("Advanced Algorithm Config"):
             algorithm = ALGORITHM_TYPE.get(st.session_state["algorithm_type"])
-            default_config = algorithm.get_default_config()
+            default_config = algorithm.default_config()
             config_key_list = []
             for key in default_config.keys():
                 value = st.session_state[key]
@@ -450,7 +450,7 @@ class ConfigManager:
             "algorithm_type": st.session_state["algorithm_type"],
         }
         algorithm = ALGORITHM_TYPE.get(st.session_state["algorithm_type"])
-        default_config = algorithm.get_default_config()
+        default_config = algorithm.default_config()
         current_config = {}
         for key in default_config.keys():
             current_config[key] = value = st.session_state[key]

@@ -443,13 +443,13 @@ The `AlgorithmType` class includes the following attributes and methods:
 - `use_advantage`: Whether to calculate Advantage; if False, the `AdvantageFn` call will be skipped
 - `can_balance_batch`: Whether the algorithm allows automatic balancing when splitting a batch into microbatches (which permute the order of samples)
 - `schema`: The format of experience data corresponding to the algorithm
-- `get_default_config`: Gets the default configuration of the algorithm, which will override attributes with the same name in `ALGORITHM_TYPE`
+- `default_config`: Gets the default configuration of the algorithm, which will override attributes with the same name in `ALGORITHM_TYPE`
 
 Similarly, after implementation, you need to register this module through `ALGORITHM_TYPE`.
 
 Below is the implementation for the OPMD algorithm.
 Since the OPMD algorithm doesn't need to use the Critic model, `use_critic` is set to `False`.
-The dictionary returned by the `get_default_config` method indicates that OPMD will use the `opmd` type `AdvantageFn` and `PolicyLossFn` implemented in Step 1, will not apply KL Penalty on rewards, but will add a `k2` type KL loss when calculating the final loss.
+The dictionary returned by the `default_config` method indicates that OPMD will use the `opmd` type `AdvantageFn` and `PolicyLossFn` implemented in Step 1, will not apply KL Penalty on rewards, but will add a `k2` type KL loss when calculating the final loss.
 
 ```python
 @ALGORITHM_TYPE.register_module("opmd")
@@ -463,7 +463,7 @@ class OPMDAlgorithm(AlgorithmType):
     schema: type = ExperienceModel
 
     @classmethod
-    def get_default_config(cls) -> Dict:
+    def default_config(cls) -> Dict:
         return {
             "repeat_times": 2,
             "sample_strategy": "warmup",

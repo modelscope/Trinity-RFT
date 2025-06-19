@@ -27,7 +27,7 @@ from trinity.manager.config_registry.model_config_manager import set_trainer_gpu
 
 @CONFIG_GENERATORS.register_config(
     default_value="ppo",
-    other_configs={"mode": "both", "_current_default_config": PPOAlgorithm.get_default_config()},
+    other_configs={"mode": "both", "_current_default_config": PPOAlgorithm.default_config()},
 )
 def set_algorithm_type(**kwargs):
     def on_change():
@@ -36,7 +36,7 @@ def set_algorithm_type(**kwargs):
         else:
             st.session_state["mode"] = "both"
         algorithm = ALGORITHM_TYPE.get(st.session_state["algorithm_type"])
-        default_config = algorithm.get_default_config()
+        default_config = algorithm.default_config()
         st.session_state["_current_default_config"] = default_config
         for key, value in default_config.items():
             st.session_state[key] = value
@@ -52,7 +52,7 @@ def set_algorithm_type(**kwargs):
 
 
 @CONFIG_GENERATORS.register_config(
-    default_value=PPOAlgorithm.get_default_config()["repeat_times"],
+    default_value=PPOAlgorithm.default_config()["repeat_times"],
     visible=lambda: "repeat_times" in st.session_state["_current_default_config"],
     other_configs={
         "_grouped_adv_repeat_times": 2,
@@ -92,7 +92,7 @@ def set_repeat_times(**kwargs):  # TODO
 
 
 @CONFIG_GENERATORS.register_config(
-    default_value=PPOAlgorithm.get_default_config()["sample_strategy"],
+    default_value=PPOAlgorithm.default_config()["sample_strategy"],
     visible=lambda: "sample_strategy" in st.session_state["_current_default_config"],
 )
 def set_sample_strategy(**kwargs):
@@ -124,7 +124,7 @@ def set_expert_data_ratio_in_sample_strategy(**kwargs):
 
 
 @CONFIG_GENERATORS.register_config(
-    default_value=PPOAlgorithm.get_default_config()["advantage_fn"],
+    default_value=PPOAlgorithm.default_config()["advantage_fn"],
     visible=lambda: "advantage_fn" in st.session_state["_current_default_config"],
 )
 def set_advantage_fn(**kwargs):
@@ -194,7 +194,7 @@ def set_tau_in_advantage_fn(**kwargs):
 
 
 @CONFIG_GENERATORS.register_config(
-    default_value=PPOAlgorithm.get_default_config()["kl_loss_fn"],
+    default_value=PPOAlgorithm.default_config()["kl_loss_fn"],
     visible=lambda: "kl_loss_fn" in st.session_state["_current_default_config"],
 )
 def set_kl_loss_fn(**kwargs):
@@ -224,7 +224,7 @@ def set_kl_coef_in_kl_loss_fn(**kwargs):
 
 
 @CONFIG_GENERATORS.register_config(
-    default_value=PPOAlgorithm.get_default_config()["kl_penalty_fn"],
+    default_value=PPOAlgorithm.default_config()["kl_penalty_fn"],
     visible=lambda: "kl_penalty_fn" in st.session_state["_current_default_config"],
 )
 def set_kl_penalty_fn(**kwargs):
@@ -267,7 +267,7 @@ def set_kl_coef_in_kl_penalty_fn(**kwargs):
 
 
 @CONFIG_GENERATORS.register_config(
-    default_value=PPOAlgorithm.get_default_config()["policy_loss_fn"],
+    default_value=PPOAlgorithm.default_config()["policy_loss_fn"],
     visible=lambda: "policy_loss_fn" in st.session_state["_current_default_config"],
 )
 def set_policy_loss_fn(**kwargs):
@@ -349,7 +349,7 @@ def set_mu_in_policy_loss_fn(**kwargs):
 
 
 @CONFIG_GENERATORS.register_config(
-    default_value=PPOAlgorithm.get_default_config()["entropy_loss_fn"],
+    default_value=PPOAlgorithm.default_config()["entropy_loss_fn"],
     visible=lambda: "entropy_loss_fn" in st.session_state["_current_default_config"],
 )
 def set_entropy_loss_fn(**kwargs):
