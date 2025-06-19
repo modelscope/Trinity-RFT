@@ -121,7 +121,7 @@ class Explorer:
         self.state_dict = state_dict
         update_weight_args_list = []
         for name, param in state_dict.items():
-            update_weight_args_list.append((name, param.dtype, param.shape))
+            update_weight_args_list.append((name, str(param.dtype), tuple(param.shape)))
         ray.get([model.sync_model.remote(update_weight_args_list) for model in self.models])
         self.state_dict.clear()
 
