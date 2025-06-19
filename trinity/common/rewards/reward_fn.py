@@ -9,10 +9,12 @@ from latex2sympy2_extended import NormalizationConfig
 from math_verify import LatexExtractionConfig, parse, verify
 
 from trinity.utils.eval_utils import (
+    compute_score,
     evaluate_equation,
     extract_solution,
     simple_answer_parser,
     validate_equation,
+    validate_think_pattern,
 )
 from trinity.utils.log import get_logger
 from trinity.utils.registry import Registry
@@ -195,3 +197,33 @@ class CountDownRewardFn(RewardFn):
                 return format_score
         except Exception as e:  # noqa: F841
             return format_score
+
+
+@REWARD_FUNCTIONS.register_module("math_boxed_reward")
+class MathBoxedRewardFn(RewardFn):
+    """A reward function that rewards for math task."""
+
+    def __init__(
+        self,
+    ) -> None:
+        pass
+
+    def __call__(  # type: ignore
+        self,
+        response: str,
+        prompt: Optional[str] = None,
+        truth: Optional[str] = None,
+        return_dict: Optional[bool] = False,
+        with_think: Optional[bool] = False,
+        format_score_coef: Optional[float] = 0.1,
+    ) -> Union[float, dict]:
+        accuracy_score = compute_score(response, truth)
+
+        format_score = 0.0
+        if with_think and not validate_think_pattern(response):
+            format_score = (format_score_coef or 0.1) * -1.0
+
+        if return_dict:
+            return {"accuracy": accuracy_score, "format_score": format_score}
+
+        return accuracy_score + format_score

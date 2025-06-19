@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from unittest.mock import MagicMock
 
 from tests.tools import get_unittest_dataset_config
-from trinity.common.workflows import MathWorkflow, Workflow
+from trinity.common.workflows import MathBoxedWorkflow, MathWorkflow, Workflow
 from trinity.common.workflows.workflow import Task
 
 
@@ -133,6 +133,57 @@ class WorkflowTest(unittest.TestCase):
         experiences = workflow.run()
         self.assertEqual(len(experiences), 1)
         self.assertEqual(experiences[0].reward, 0.9)
+
+    def test_math_boxed_workflow(self) -> None:
+        model = MagicMock()
+        model.chat.return_value = [
+            MockResponse("<think> balabalabala 99 </think>\n \\boxed{36}"),
+            MockResponse("answer is \\boxed{36 }"),
+            MockResponse("Kim's total points are 6 + 30 =\\boxed{36}"),
+            MockResponse("<think> balalaba </think> \\boxed{35.00}"),
+        ]
+        taskset_config = get_unittest_dataset_config("countdown")
+        task = Task(
+            workflow=MathBoxedWorkflow,
+            format_args=taskset_config.format,
+            rollout_args=taskset_config.rollout_args,
+            workflow_args={
+                "with_think": False,
+                "format_score_coef": 0.2,
+            },
+            is_eval=False,
+            raw_task={
+                taskset_config.format.prompt_key: "",
+                taskset_config.format.response_key: r"36",
+            },
+        )
+        workflow = task.to_workflow(model=model)
+        experiences = workflow.run()
+        self.assertEqual(experiences[0].reward, 1.0)
+        self.assertEqual(experiences[1].reward, 1.0)
+        self.assertEqual(experiences[2].reward, 1.0)
+        self.assertEqual(experiences[3].reward, 0.0)
+        task_new = Task(
+            workflow=MathBoxedWorkflow,
+            format_args=taskset_config.format,
+            rollout_args=taskset_config.rollout_args,
+            workflow_args={
+                "with_think": True,
+                "format_score_coef": 0.2,
+            },
+            is_eval=False,
+            raw_task={
+                taskset_config.format.prompt_key: "",
+                taskset_config.format.response_key: r"36",
+            },
+        )
+        workflow.reset(task_new)
+        workflow_new = task_new.to_workflow(model=model)
+        experiences = workflow_new.run()
+        self.assertEqual(experiences[0].reward, 1.0)
+        self.assertEqual(experiences[1].reward, 0.8)
+        self.assertEqual(experiences[2].reward, 0.8)
+        self.assertEqual(experiences[3].reward, 0.0)
 
     def test_gsm8k_workflow(self) -> None:
         model = MagicMock()
