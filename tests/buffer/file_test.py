@@ -16,7 +16,7 @@ from trinity.common.config import StorageConfig
 from trinity.common.constants import StorageType
 
 
-class TestFileReader(unittest.TestCase):
+class TestFileBuffer(unittest.TestCase):
     temp_output_path = "tmp/test_file_buffer/"
 
     @classmethod
