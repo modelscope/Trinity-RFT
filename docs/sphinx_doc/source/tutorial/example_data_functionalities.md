@@ -26,14 +26,14 @@ python scripts/start_servers.py
 
 ### Configure the Data Module
 
-Trinity-RFT uses a unified config file to manage all config items. For the data module, you need to focus on the `data` section in the config file.
+Trinity-RFT uses a unified config file to manage all config items. For the data module, you need to focus on the `data_processor` section in the config file.
 
 In this example, assume that you need to rank all math questions and corresponding answers by their difficulties. So you can set these config items like the following example:
 
 ```yaml
 data_processor:
   # basic info
-  source_data_path: '/path/to/gsm8k'
+  source_data_path: /PATH/TO/GSM8K/
   load_kwargs:
     split: 'train'  # only need the train split
   format:  # set the field mappings
@@ -58,7 +58,7 @@ If you are not familiar with Data-Juicer, the data module provides a natural-lan
 ```yaml
 data_processor:
   # basic info
-  source_data_path: '/path/to/gsm8k'
+  source_data_path: /PATH/TO/GSM8K/
   load_kwargs:
     split: 'train'  # only need the train split
   format:  # set the field mappings
@@ -100,7 +100,7 @@ After preparing the Data-Juicer data processing recipe, you can set the `dj_conf
 ```yaml
 data_processor:
   # basic info
-  source_data_path: '/path/to/gsm8k'
+  source_data_path: /PATH/TO/GSM8K/
   load_kwargs:
     split: 'train'  # only need the train split
   format:  # set the field mappings
@@ -165,7 +165,7 @@ python scripts/start_servers.py
 
 ### Configure the Data Module
 
-Trinity-RFT uses a unified config file to manage all config items. For the data module, you need to focus on the `data` section in the config file.
+Trinity-RFT uses a unified config file to manage all config items. For the data module, you need to focus on the `data_processor` section in the config file.
 
 In this example, assume that you need to rank all math questions and corresponding answers by their difficulties. So you can set these config items like the following example:
 
@@ -187,7 +187,7 @@ data_processor:
 
 Here you can set the basic information for the example dataset, database information that is used to store the result dataset, and some other items about downstream dataset loading for exploring and training, which is similar to the example above.
 
-For this example, we assume that you are somehow familiar with the basic usage of Data-Juicer, so we need to prepare a Data-Juicer data processing recipe in `tests/test_configs/human_annotator_test_dj_cfg.yaml` that includes an OP of `human_preference_annotation_mapper`. For example:
+For this example, we assume that you are somehow familiar with the basic usage of Data-Juicer, so we need to prepare a Data-Juicer data processing recipe in [`tests/test_configs/human_annotator_test_dj_cfg.yaml`](https://github.com/modelscope/Trinity-RFT/blob/main/tests/test_configs/human_annotator_test_dj_cfg.yaml) that includes an OP of `human_preference_annotation_mapper`. For example:
 
 ```yaml
 project_name: 'demo-human-annotator'

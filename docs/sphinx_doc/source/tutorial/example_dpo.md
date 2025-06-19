@@ -1,12 +1,12 @@
 # Offline DPO and SFT
 
-This example describes DPO and SFT based on the Qwen-2.5-1.5B-Instruct model.
+This example describes DPO and SFT based on the Qwen2.5-1.5B-Instruct model.
 
 ## Step 1: Model and Data Preparation
 
 ### Model Preparation
 
-Download the Qwen-2.5-1.5B-Instruct model to the local directory `$MODEL_PATH/Qwen2.5-1.5B-Instruct`:
+Download the Qwen2.5-1.5B-Instruct model to the local directory `$MODEL_PATH/Qwen2.5-1.5B-Instruct`:
 
 ```shell
 # Using Modelscope

@@ -25,9 +25,15 @@ The first term corresponds to the standard GRPO objective, which aims to maximiz
 We prompt a powerful LLM to generate responses with the CoT process for some pre-defined questions. The collected dta are viewed as some experiences from an expert. We store them in a `jsonl` file `expert_data.jsonl` with the following format:
 
 ```json
-{"question": "What is the average of 4, 6, and 8?","response": "I add the numbers together and divide by the count: 4 + 6 + 8 = 18, divided by 3 gives 6. The answer is 6."}
+{
+    "messages": [
+    { "role": "system", "content": <system_prompt> },
+    { "role": "user", "content": "What is the sum of 4 and 12?" },
+    { "role": "assistant", "content": "<think>thinking process...</think>\n<answer>16</answer>" } ]
+},
 ...
 ```
+The path to expert data is passed to `buffer.trainer_input.sft_warmup_dataset` for later use.
 
 
 ## Step 1: Define the Algorithm
@@ -295,4 +301,10 @@ algorithm:
     ngpus_trainer: 4
     read_batch_size_expert: 64
     read_batch_size_usual: 192
+```
+
+With the above configurations, the experiment can be run with the following command:
+
+```bash
+trinity run --config examples/mix_math/mix_math.yaml
 ```

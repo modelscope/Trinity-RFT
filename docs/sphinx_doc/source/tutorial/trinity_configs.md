@@ -8,7 +8,7 @@ The configuration for **Trinity-RFT** is defined in a `YAML` file and organized 
 
 ```yaml
 project: Trinity-RFT
-name: tutorial
+name: example
 mode: both
 checkpoint_root_dir: /PATH/TO/CHECKPOINT
 
@@ -78,7 +78,7 @@ Specifies the algorithm type and its related hyperparameters.
 ```yaml
 algorithm:
   algorithm_type: grpo
-  repeat_times: 1
+  repeat_times: 8
 
   # The following parameters are optional
   # If not specified, they will automatically be set based on the `algorithm_type`
@@ -89,12 +89,11 @@ algorithm:
   entropy_loss_fn: "default"
 ```
 
-- `algorithm_type`: Type of reinforcement learning algorithm. Supported types: `ppo`, `grpo`, `opmd`, `dpo`.
-- `repeat_times`: Number of times each task is repeated. Default is `1`. In `dpo`, this is automatically set to `2`.
-
+- `algorithm_type`: Type of reinforcement learning algorithm. Supported types: `ppo`, `grpo`, `opmd`, `dpo`, `sft`, `mix`.
+- `repeat_times`: Number of times each task is repeated. Default is `1`. In `dpo`, this is automatically set to `2`. Some algorithms such as GRPO and OPMD require `repeat_times` > 1.
 - `sample_strategy`: The sampling strategy used for loading experiences from experience buffer.
 - `advantage_fn`: The advantage function used for computing advantages.
-- `kl_penalty_fn`: The KL penalty function used for computing KL penalty.
+- `kl_penalty_fn`: The KL penalty function used for computing KL penalty applied in reward.
 - `kl_loss_fn`: The KL loss function used for computing KL loss.
 - `entropy_loss_fn`: The entropy loss function used for computing entropy loss.
 
@@ -111,8 +110,8 @@ monitor:
 ```
 
 - `monitor_type`: Type of monitoring system. Options:
-  - `wandb`: Logs to Weights & Biases. Requires logging in and setting `WANDB_API_KEY`. Project and run names match the `project` and `name` fields in global configs.
-  - `tensorboard`: Logs to TensorBoard. Files are saved under `<checkpoint_root_dir>/<project>/<name>/monitor/tensorboard`.
+  - `wandb`: Logs to [Weights & Biases](https://docs.wandb.ai/quickstart/). Requires logging in and setting `WANDB_API_KEY`. Project and run names match the `project` and `name` fields in global configs.
+  - `tensorboard`: Logs to [TensorBoard](https://www.tensorflow.org/tensorboard). Files are saved under `<checkpoint_root_dir>/<project>/<name>/monitor/tensorboard`.
 
 ---
 
@@ -122,13 +121,13 @@ Defines the model paths and token limits.
 
 ```yaml
 model:
-  model_path: '/PATH/TO/MODEL/CHECKPOINT/'
+  model_path: /PATH/TO/MODEL/
   critic_model_path: ''
   max_prompt_tokens: 4096
   max_response_tokens: 16384
 ```
 
-- `model_path`: Path to the model checkpoint being trained.
+- `model_path`: Path to the model being trained.
 - `critic_model_path`: Optional path to a separate critic model. If empty, defaults to `model_path`.
 - `max_prompt_tokens`: Maximum number of tokens allowed in input prompts.
 - `max_response_tokens`: Maximum number of tokens allowed in generated responses.
@@ -175,8 +174,8 @@ buffer:
   default_reward_fn_type: 'countdown_reward'
 ```
 
-- `batch_size`: Number of samples used per training step. *Please do not multiply this value by the `algorithm.repeat_times` manually*.
-- `total_epochs`: Total number of training epochs. Not applicable for streaming datasets (e.g., queue-based buffers).
+- `batch_size`: Number of tasks used per training step. *Please do not multiply this value by the `algorithm.repeat_times` manually*.
+- `total_epochs`: Total number of training epochs.
 
 ### Explorer Input
 
@@ -227,6 +226,8 @@ The configuration for each task dataset is defined as follows:
   - For `file` storage type, the path is the path to the directory that contains the task dataset files.
   - For `queue` storage type, the path is optional. You can back up the data in the queue by specifying a sqlite database path here.
   - For `sql` storage type, the path is the path to the sqlite database file.
+- `subset_name`: The subset name of the task dataset. Default is `None`.
+- `split`: The split of the task dataset. Default is `train`.
 - `format`: Defines keys for prompts and responses in the dataset.
   - `prompt_key`: Specifies which column in the dataset contains the prompt data.
   - `response_key`: Specifies which column in the dataset contains the response data.
@@ -302,9 +303,9 @@ synchronizer:
 ```
 
 - `sync_method`: Method of synchronization. Options:
-  - `nccl`: Uses NCCL for fast synchronization.
-  - `checkpoint`: Loads latest model from disk.
-- `sync_interval`: Interval (in steps) between synchronizations.
+  - `nccl`: Uses NCCL for fast synchronization. Supported for `both` mode.
+  - `checkpoint`: Loads latest model from disk. Supported for `train`, `explore`, or `bench` mode.
+- `sync_interval`: Interval (in steps) of the synchronizations between trainer and explorer.
 - `sync_timeout`: Timeout duration for synchronization.
 
 ---
@@ -324,7 +325,7 @@ trainer:
 - `trainer_type`: Trainer backend implementation. Currently only supports `verl`.
 - `save_interval`: Frequency (in steps) at which to save model checkpoints.
 - `trainer_config_path`: The path to the trainer configuration file.
-- `train_config`: The configuration of the trainer. Only one needs to be set for `trainer.trainer_config` and `trainer.trainer_config_path`
+- `trainer_config`: The trainer configuration provided inline. Only one of `trainer_config_path` and `trainer_config` should be specified.
 
 ---
 
@@ -334,7 +335,7 @@ Configures preprocessing and data cleaning pipelines.
 
 ```yaml
 data_processor:
-  source_data_path: '/PATH/TO/DATASET'
+  source_data_path: /PATH/TO/DATASET
   load_kwargs:
     split: 'train'
   format:
@@ -345,7 +346,7 @@ data_processor:
   db_url: 'postgresql://{username}@localhost:5432/{db_name}'
 ```
 
-- `source_data_path`: Path to the raw dataset.
+- `source_data_path`: Path to the task dataset.
 - `load_kwargs`: Arguments passed to HuggingFace’s `load_dataset()`.
 - `dj_config_path`: Path to Data-Juicer configuration for cleaning.
 - `clean_strategy`: Strategy for iterative data cleaning.
