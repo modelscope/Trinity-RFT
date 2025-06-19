@@ -96,6 +96,7 @@ class Explorer:
                 group_name=ROLLOUT_WEIGHT_SYNC_GROUP_NAME,
                 timeout=self.config.synchronizer.sync_timeout,
                 update_with_checkpoint=self.use_checkpoint_weights_update,
+                state_dict_meta=state_dict_meta,
             )
             for i, model in enumerate(self.models)
         ]
@@ -119,9 +120,13 @@ class Explorer:
     def _update_model_weight(self, state_dict: dict) -> None:
         # TODO: update model weight
         self.state_dict = state_dict
-        update_weight_args_list = []
-        for name, param in state_dict.items():
-            update_weight_args_list.append((name, str(param.dtype), tuple(param.shape)))
+        if self.state_dict_meta is None:
+            update_weight_args_list = []
+            for name, param in state_dict.items():
+                update_weight_args_list.append((name, str(param.dtype), tuple(param.shape)))
+            self.state_dict_meta = update_weight_args_list
+        else:
+            update_weight_args_list = None
         ray.get([model.sync_model.remote(update_weight_args_list) for model in self.models])
         self.state_dict.clear()
 
@@ -142,7 +147,8 @@ class Explorer:
             self.logger.error(f"Error when loading state_dict: {e}")
 
     def _nccl_weights_update(self):
-        ray.get([model.sync_model.remote(self.state_dict_meta) for model in self.models])
+        assert self.state_dict_meta is not None
+        ray.get([model.sync_model.remote() for model in self.models])
 
     def prepare(self) -> None:
         """Preparation before running."""

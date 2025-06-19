@@ -100,6 +100,7 @@ class vLLMAysncRolloutModel(InferenceModel):
             self.action_mask_method = tokenize_and_mask_messages_default
         else:
             self.action_mask_method = tokenize_and_mask_messages_hf
+        self.state_dict_meta = None
         self.ckp_version = 0  # TODO: resume the value from the checkpoint
         self.api_server_host = None
         self.api_server_port = None
@@ -264,9 +265,11 @@ class vLLMAysncRolloutModel(InferenceModel):
                 method, timeout, args, kwargs
             )
 
-    async def sync_model(self, update_weight_args_list) -> bool:
+    async def sync_model(self, update_weight_args_list: Optional[List[Tuple]] = None) -> bool:
         """Sync model weights to vLLM."""
-        for args in update_weight_args_list:
+        if self.state_dict_meta is None:
+            self.state_dict_meta = update_weight_args_list
+        for args in self.state_dict_meta:
             await self._collective_rpc("update_weight", args=args)
         self.logger.info("Sync model weights to vLLM successfully.")
         self.ckp_version += 1
@@ -282,7 +285,9 @@ class vLLMAysncRolloutModel(InferenceModel):
         backend: str = "nccl",
         timeout: int = 1200,
         update_with_checkpoint: bool = True,
+        state_dict_meta: dict = None,
     ):
+        self.state_dict_meta = state_dict_meta
         return await self._collective_rpc(
             "init_process_group",
             args=(

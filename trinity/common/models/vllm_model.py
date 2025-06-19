@@ -8,7 +8,7 @@ from __future__ import annotations
 import os
 import re
 import threading
-from typing import List
+from typing import List, Optional, Tuple
 
 import torch
 import vllm
@@ -85,6 +85,7 @@ class vLLMRolloutModel(InferenceModel):
         else:
             self.action_mask_method = tokenize_and_mask_messages_hf
         self.lock = threading.Lock()
+        self.state_dict_meta = None
         self.ckp_version = 0  # TODO: resume the value from the checkpoint
 
     def init_process_group(
@@ -97,7 +98,9 @@ class vLLMRolloutModel(InferenceModel):
         backend: str = "nccl",
         timeout: int = 1200,
         update_with_checkpoint: bool = True,
+        state_dict_meta: dict = None,
     ):
+        self.state_dict_meta = state_dict_meta
         return self.llm.collective_rpc(
             "init_process_group",
             args=(
@@ -274,10 +277,12 @@ class vLLMRolloutModel(InferenceModel):
     def has_api_server(self) -> bool:
         return False
 
-    def sync_model(self, update_weight_args_list) -> bool:
+    def sync_model(self, update_weight_args_list: Optional[List[Tuple]] = None) -> bool:
         """Sync model weights to vLLM."""
+        if self.state_dict_meta is None:
+            self.state_dict_meta = update_weight_args_list
         with self.lock:
-            for args in update_weight_args_list:
+            for args in self.state_dict_meta:
                 self.llm.collective_rpc("update_weight", args=args)
         self.logger.info("Sync model weights to vLLM successfully.")
         self.ckp_version += 1
