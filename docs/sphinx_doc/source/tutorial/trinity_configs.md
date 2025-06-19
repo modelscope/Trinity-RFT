@@ -305,7 +305,7 @@ synchronizer:
 - `sync_method`: Method of synchronization. Options:
   - `nccl`: Uses NCCL for fast synchronization. Supported for `both` mode.
   - `checkpoint`: Loads latest model from disk. Supported for `train`, `explore`, or `bench` mode.
-- `sync_interval`: Interval (in steps) of the synchronizations between trainer and explorer.
+- `sync_interval`: Interval (in steps) of model weight synchronization between trainer and explorer.
 - `sync_timeout`: Timeout duration for synchronization.
 
 ---
