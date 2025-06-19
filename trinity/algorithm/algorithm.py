@@ -169,7 +169,10 @@ class DPOAlgorithm(AlgorithmType):
                 "DPO only supports checkpoint synchronization, set `synchronizer.sync_method` to `checkpoint`."
             )
         if config.algorithm.repeat_times != 2:
-            config.algorithm.repeat_times = 2
+            config.algorithm.repeat_times = 2  # Fake repeat times
+        if config.algorithm.kl_loss_fn in {"none", None}:
+            config.algorithm.kl_loss_fn = "k2"
+            logger.warning("DPO must use KL loss. Set `algorithm.kl_loss_fn` to `k2`")
 
 
 @ALGORITHM_TYPE.register_module("mix")
