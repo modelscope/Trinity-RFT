@@ -256,7 +256,7 @@ class DataActiveIterator:
             difficulty = stats.get("difficulty_score", 0.5)
             score += self.priority_weights["difficulty"] * difficulty
 
-        sample["priority"] = [score]
+        sample["priority"] = [score] if isinstance(sample[Fields.stats], list) else score
         return sample
 
     def _compute_diversity_score(self) -> float:

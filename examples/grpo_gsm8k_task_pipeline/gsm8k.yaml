@@ -1,9 +1,35 @@
-project: "Trinity-RFT-gsm8k"
-name: "qwen2.5-1.5B-gsm8k"
+project: "Trinity-RFT-gsm8k-task-pipeline"
+name: "qwen2.5-1.5B-gsm8k-task-pipeline"
 checkpoint_root_dir: /PATH/TO/CHECKPOINT/
 algorithm:
   algorithm_type: grpo
   repeat_times: 8
+data_processor:
+  data_workflow_url: 'http://127.0.0.1:5005/data_workflow'
+  # task pipeline related
+  task_pipeline:
+    # I/O buffers
+    input_buffers:
+      - name: 'raw_input'
+        path: 'openai/gsm8k'
+        storage_type: 'file'
+        raw: true
+    output_buffer:
+      name: 'raw_output'
+      path: './outputs/task_pipeline_output/prioritized_gsm8k.jsonl'
+      storage_type: 'file'
+    # format mapping
+    format:
+      prompt_key: 'question'
+      response_key: 'answer'
+    # data active iterator related
+    dj_process_desc: 'Please compute difficulty scores for these math questions.'
+    agent_model_name: 'qwen-max'
+    agent_model_config:
+      config_name: 'my-qwen-instruction'
+      model_type: 'dashscope_chat'
+      model_name: 'qwen2.5-72b-instruct'
+    clean_strategy: 'iterative'
 
 model:
   model_path: /PATH/TO/MODEL/
@@ -21,8 +47,7 @@ buffer:
     taskset:
       name: gsm8k
       storage_type: file
-      path: 'openai/gsm8k'
-      subset_name: 'main'
+      path: './outputs/task_pipeline_output/'
       split: 'train'
       format:
         prompt_key: 'question'
@@ -68,5 +93,5 @@ synchronizer:
   sync_timeout: 1200
 trainer:
   trainer_type: 'verl'
-  trainer_config_path: 'examples/grpo_gsm8k/train_gsm8k.yaml'
+  trainer_config_path: 'examples/grpo_gsm8k_task_pipeline/train_gsm8k.yaml'
   save_interval: 100

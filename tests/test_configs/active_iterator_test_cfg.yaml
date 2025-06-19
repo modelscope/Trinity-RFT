@@ -8,7 +8,7 @@ data_processor:
         raw: true
     output_buffer:
       name: 'raw_output'
-      path: './outputs/task_pipelien_output/processed.jsonl'
+      path: './outputs/task_pipeline_output/processed.jsonl'
       storage_type: 'file'
     format:
       prompt_key: 'problem'
