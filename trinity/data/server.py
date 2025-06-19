@@ -21,7 +21,15 @@ def data_workflow(pipeline_type):
         return jsonify(
             {
                 "return_code": -1,
-                "message": f"{pipeline_type} is not supported or the corresponding config is empty",
+                "message": f"Error: {pipeline_type} is not supported or the corresponding config is empty",
+            }
+        )
+
+    if pipeline_config.dj_config_path is None and pipeline_config.dj_process_desc is None:
+        return jsonify(
+            {
+                "return_code": -1,
+                "message": "Error: Both dj_config_path and dj_process_desc in the pipeline config are None.",
             }
         )
 

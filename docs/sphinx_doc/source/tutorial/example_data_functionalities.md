@@ -1,80 +1,97 @@
 # Data Processing
 
-## Example: reasoning task
+## Example: Data Processor for Task Pipeline
 
-In this example, you will learn how to apply the data module of Trinity-RFT to prepare the dataset before exploring and training. This example takes GSM-8K dataset as the example dataset to figure out:
+In this example, you will learn how to apply the data processor workflow of Trinity-RFT to prepare and prioritize the dataset before task exploring and training. This example takes GSM-8K dataset as the example dataset to figure out:
 
-1. how to prepare the data module
-2. how to configure the data module
-3. what the data module can do
+1. how to prepare the data workflow
+2. how to configure the data processor
+3. what the data workflow can do
 
-Before getting started, you need to prepare the main environment of Trinity-RFT according to the [installation section of the README file](../main.md), and you need to install [postgresql](https://www.postgresql.org/docs/current/tutorial-install.html) as well.
+Before getting started, you need to prepare the main environment of Trinity-RFT according to the [installation section of the README file](../main.md).
 
 ### Data Preparation
 
-#### Prepare the Data Module
+#### Prepare the Data Workflow
 
-As the overall framework of Trinity-RFT shows, the data module is one of the high-level functions. Trinity-RFT encapsulates the data module as an independent service to avoid dependency conflict issues. Thus you need to prepare a split environment for this module and start the server.
+As the overall framework of Trinity-RFT shows, the data workflow is one of the high-level functions. Trinity-RFT encapsulates the data workflow as an independent service to avoid dependency conflict issues. Thus you need to prepare a split environment for this module and start the server.
 
 ```shell
-# prepare split environments, including the one of data module
+# prepare split environments, including the one of data workflow
 python scripts/install.py
 
 # start all split servers
 python scripts/start_servers.py
 ```
 
-### Configure the Data Module
+### Configure the Data Processor
 
-Trinity-RFT uses a unified config file to manage all config items. For the data module, you need to focus on the `data` section in the config file.
+Trinity-RFT uses a unified config file to manage all config items. For the data processor, you need to focus on the `data_processor` section in the config file.
 
 In this example, assume that you need to rank all math questions and corresponding answers by their difficulties. So you can set these config items like the following example:
 
 ```yaml
 data_processor:
-  # basic info
-  source_data_path: '/path/to/gsm8k'
-  load_kwargs:
-    split: 'train'  # only need the train split
-  format:  # set the field mappings
-    prompt_key: 'question'
-    response_key: 'answer'
-  # database related. The result dataset will be stored in the database.
-  db_url: 'postgresql://{user_name}@localhost:5432/{db_name}'
+  data_workflow_url: 'http://127.0.0.1:5005/data_workflow'
+  # task pipeline related
+  task_pipeline:
+    # I/O buffers
+    input_buffers:
+      - name: 'raw_input'
+        path: 'openai/gsm8k'
+        storage_type: 'file'
+        raw: true
+    output_buffer:
+      name: 'raw_output'
+      path: './outputs/task_pipeline_output/prioritized_gsm8k.jsonl'
+      storage_type: 'file'
+    # format mapping
+    format:
+      prompt_key: 'question'
+      response_key: 'answer'
 ```
 
-Here you can set the basic information for the GSM-8K dataset, database information that is used to store the result dataset, and some other items about downstream dataset loading for exploring and training:
+Here you can set the basic buffers for the GSM-8K dataset input and output and some other items about downstream dataset loading for exploring and training:
 
-+ `source_data_path`: the path to the raw dataset.
-+ `load_kwargs`: extra config arguments for loading the raw dataset. Mainly for the `load_dataset` method in HuggingFace `datasets` library.
-+ `format`: some dataset format config items, which are used to map original data field names to unified ones.
-+ `db_url`: the URL of the postgresql database to store the result dataset.
++ `data_workflow_url`: the URL of the data processor service, which is started in the previous step.
++ `task_pipeline`: the configs for the task pipeline. Task pipeline is used to process the raw dataset. It consists of several inner configs:
+  + `input_buffers`: the input buffers for the task pipeline. We usually load from raw dataset files in this pipeline, thus we need to the dataset `path` and set the `storage_type` to "file" and set `raw` to True. It allows multiple input buffers. We can name each buffer with the `name` field.
+  + `output_buffer`: the output buffer for the task pipeline. We usually store the processed dataset in files as well, thus we need to set the `storage_type` to "file".
+  + `format`: some dataset format config items, which are used to map original data field names to unified ones.
 
-In addition, there are several config items related to the data active iterator, which is used to prepare a better dataset. The core part of the data active iterator, Data-Juicer, provides tens of operators to help clean or calculate key information for each sample in the dataset. You can configure this part depending on how familiar you are with Data-Juicer.
+In addition, there are several config items related to the data active iterator in `task_pipeline` part, which is used to prepare a better dataset. The core part of the data active iterator, Data-Juicer, provides tens of operators to help clean or calculate key information for each sample in the dataset. You can configure this part depending on how familiar you are with Data-Juicer.
 
 #### Not familiar with Data-Juicer
-If you are not familiar with Data-Juicer, the data module provides a natural-language-based method to config the data processing recipe. What you need to do is only describe the demands of how you want to prepare for the raw dataset, and an agent will be invoked to arrange the data processing recipe for you. Here is an example:
+If you are not familiar with Data-Juicer, the data processor provides a natural-language-based method to config the data processing recipe. What you need to do is only describe the demands of how you want to prepare for the raw dataset, and an agent will be invoked to arrange the data processing recipe for you. Here is an example:
 
 ```yaml
 data_processor:
-  # basic info
-  source_data_path: '/path/to/gsm8k'
-  load_kwargs:
-    split: 'train'  # only need the train split
-  format:  # set the field mappings
-    prompt_key: 'question'
-    response_key: 'answer'
-  # database related. The result dataset will be stored in the database.
-  db_url: 'postgresql://{user_name}@localhost:5432/{db_name}'
+  data_workflow_url: 'http://127.0.0.1:5005/data_workflow'
+  # task pipeline related
+  task_pipeline:
+    # I/O buffers
+    input_buffers:
+      - name: 'raw_input'
+        path: 'openai/gsm8k'
+        storage_type: 'file'
+        raw: true
+    output_buffer:
+      name: 'raw_output'
+      path: './outputs/task_pipeline_output/prioritized_gsm8k.jsonl'
+      storage_type: 'file'
+    # format mapping
+    format:
+      prompt_key: 'question'
+      response_key: 'answer'
 
-  #### new part about data active iterator
-  dj_process_desc: 'Please compute difficulty scores for these math questions.'
-  agent_model_name: 'qwen-max'
-  agent_model_config:
-    config_name: 'my-qwen-instruction'
-    model_type: 'dashscope_chat'
-    model_name: 'qwen2.5-72b-instruct'
-  clean_strategy: 'iterative'
+    #### new part about data active iterator
+    dj_process_desc: 'Please compute difficulty scores for these math questions.'
+    agent_model_name: 'qwen-max'
+    agent_model_config:
+      config_name: 'my-qwen-instruction'
+      model_type: 'dashscope_chat'
+      model_name: 'qwen2.5-72b-instruct'
+    clean_strategy: 'iterative'
 ```
 
 You can write your demand description in config item `dj_process_desc`, and set the model name and configs used for the agent in config items `agent_model_name` and `agent_model_config`. Here we use Qwen2.5-72b-Instruct as our recipe managing agent. And you can set the `clean_strategy` to 'iterative' to get a better dataset.
@@ -99,19 +116,27 @@ After preparing the Data-Juicer data processing recipe, you can set the `dj_conf
 
 ```yaml
 data_processor:
-  # basic info
-  source_data_path: '/path/to/gsm8k'
-  load_kwargs:
-    split: 'train'  # only need the train split
-  format:  # set the field mappings
-    prompt_key: 'question'
-    response_key: 'answer'
-  # database related. The result dataset will be stored in the database.
-  db_url: 'postgresql://{user_name}@localhost:5432/{db_name}'
+  data_workflow_url: 'http://127.0.0.1:5005/data_workflow'
+  # task pipeline related
+  task_pipeline:
+    # I/O buffers
+    input_buffers:
+      - name: 'raw_input'
+        path: 'openai/gsm8k'
+        storage_type: 'file'
+        raw: true
+    output_buffer:
+      name: 'raw_output'
+      path: './outputs/task_pipeline_output/prioritized_gsm8k.jsonl'
+      storage_type: 'file'
+    # format mapping
+    format:
+      prompt_key: 'question'
+      response_key: 'answer'
 
-  #### new part about data active iterator
-  dj_config_path: '/path/to/the/Data-Juicer/data/processing/recipe/above.yaml'
-  clean_strategy: 'iterative'
+    #### new part about data active iterator
+    dj_config_path: '/path/to/the/Data-Juicer/data/processing/recipe/above.yaml'
+    clean_strategy: 'iterative'
 ```
 
 And you can set the `clean_strategy` to 'iterative' to get a better dataset.
@@ -123,7 +148,7 @@ All config items in the `data` section can be found [here](trinity_configs.md). 
 
 
 ```{note}
-Only when one of `dj_process_desc` and `dj_config_path` is provided, the data module and the data active iterator will be activated. Otherwise, this part will be skipped and it will enter into the exploring stage directly.
+Only when one of `xxx_pipeline` is provided, and one of `dj_process_desc` and `dj_config_path` in the pipeline config is provided, the data workflow and the data active iterator will be activated. Otherwise, this part will be skipped and it will enter into the exploring stage directly.
 ```
 
 ### Exploring & Training
@@ -140,49 +165,60 @@ ray start --address=<master_address>
 trinity run --config <Trinity-RFT_config_path>
 ```
 
-If you follow the steps above, Trinity-RFT will send a request to the data module server, the data active iterator will be activated and compute difficulty scores for each sample in the raw dataset. After that, the data module server stores the result dataset into the database, when exploring begins, it will load the prepared dataset and continue the downstream steps.
+If you follow the steps above, Trinity-RFT will send a request to the data workflow server, the data active iterator will be activated, compute difficulty scores for each sample in the raw dataset, and rank the dataset according to difficulty scores. After that, the data workflow server stores the result dataset into the output buffer, when exploring begins, it will load the prepared dataset and continue the downstream steps.
 
 
+## Example: Data Processor for Experience Pipeline
 
-## Example: human in the loop
+TBD.
+
+
+## Example: Human in the Loop
 Sometimes, you might need to involve human feedbacks for some raw data. In this example, you will learn how to annotate raw data to get a better dataset before training. This example takes an example Q&A dataset and tries to select the chosen and rejected ones for DPO method.
 
-Before getting started, you need to prepare the main environment of Trinity-RFT according to the installation section of the README file, install postgresql, and [start a label-studio server](https://github.com/modelscope/data-juicer/tree/main/tools/humanops) from Data-Juicer from source.
+Before getting started, you need to prepare the main environment of Trinity-RFT according to the installation section of the README file, and [start a label-studio server](https://github.com/modelscope/data-juicer/tree/main/tools/humanops) from Data-Juicer from source.
 
 ### Data Preparation
 
-#### Prepare the Data Module
+#### Prepare the Data Workflow
 
-As the overall framework of Trinity-RFT shows, the data module is one of the high-level functions. Trinity-RFT encapsulates the data module as an independent service to avoid dependency conflict issues. Thus you need to prepare a split environment for this module and start the server.
+As the overall framework of Trinity-RFT shows, the data workflow is one of the high-level functions. Trinity-RFT encapsulates the data workflow as an independent service to avoid dependency conflict issues. Thus you need to prepare a split environment for this module and start the server.
 
 ```shell
-# prepare split environments, including the one of data module
+# prepare split environments, including the one of data workflow
 python scripts/install.py
 
 # start all split servers
 python scripts/start_servers.py
 ```
 
-### Configure the Data Module
+### Configure the Data Workflow
 
-Trinity-RFT uses a unified config file to manage all config items. For the data module, you need to focus on the `data` section in the config file.
+Trinity-RFT uses a unified config file to manage all config items. For the data workflow, you need to focus on the `data_processor` section in the config file.
 
-In this example, assume that you need to rank all math questions and corresponding answers by their difficulties. So you can set these config items like the following example:
+In this example, assume that you need to select the chosen and rejected responses for DPO method. So you can set these config items like the following example:
 
 ```yaml
 data_processor:
-  # basic info
-  source_data_path: 'tests/test_data/test_human_annotator'
-  load_kwargs:
-    split: 'train'  # only need the train split
-  format:  # set the field mappings
-    prompt_key: 'prompt'
-    chosen_key: 'chosen'
-    rejected_key: 'rejected'
-  #### new part about data active iterator
-  dj_config_path: 'tests/test_configs/human_annotator_test_dj_cfg.yaml'
-  # database related. The result dataset will be stored in the database.
-  db_url: 'postgresql://{user_name}@localhost:5432/{db_name}'
+  data_workflow_url: 'http://127.0.0.1:5005/data_workflow'
+  # task pipeline related
+  task_pipeline:
+    # I/O buffers
+    input_buffers:
+      - name: 'raw_input'
+        path: 'tests/test_data/test_human_annotator'
+        storage_type: 'file'
+        raw: true
+    output_buffer:
+      name: 'raw_output'
+      path: './outputs/task_pipeline_output/prioritized_gsm8k.jsonl'
+      storage_type: 'file'
+    format:  # set the field mappings
+      prompt_key: 'prompt'
+      chosen_key: 'chosen'
+      rejected_key: 'rejected'
+    #### new part about data active iterator
+    dj_config_path: 'tests/test_configs/human_annotator_test_dj_cfg.yaml'
 ```
 
 Here you can set the basic information for the example dataset, database information that is used to store the result dataset, and some other items about downstream dataset loading for exploring and training, which is similar to the example above.
@@ -223,7 +259,7 @@ You can set more config items for this OP (e.g. notification when annotation is 
 
 ### Start Running
 
-When you start running with the RFT config, the data module will start the OP `human_preference_annotation_mapper`, and then you can find a new project on the "Projects" page of the label-studio server.
+When you start running with the RFT config, the data workflow will start the OP `human_preference_annotation_mapper`, and then you can find a new project on the "Projects" page of the label-studio server.
 
 ![](../../assets/data-projects.png)
 
