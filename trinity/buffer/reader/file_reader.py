@@ -266,7 +266,9 @@ class RolloutDataReader(BufferReader):
 class RawDataReader(BufferReader):
     def __init__(self, meta: StorageConfig, config: Optional[BufferConfig]):
         self.returned = False
-        self.dataset = load_dataset(meta.path, name=meta.subset_name, split=meta.split, trust_remote_code=True)
+        self.dataset = load_dataset(
+            meta.path, name=meta.subset_name, split=meta.split, trust_remote_code=True
+        )
 
     def __len__(self):
         return len(self.dataset)
