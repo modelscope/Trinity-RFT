@@ -62,55 +62,48 @@ class ConfigManager:
         for key in CONFIG_GENERATORS.default_config:
             st.session_state[key] = st.session_state[key]
 
-        eval_dataset_keys = [
+        def maintain_list_state(prefix, key_list):
+            last_idx, del_num = 0, 0
+            for idx in range(st.session_state[f"_{prefix}_num"]):
+                if st.session_state.get(f"{prefix}_{idx}_del_flag", False):
+                    del_num += 1
+                    continue
+                for key in key_list:
+                    full_key = f"{prefix}_{idx}_{key}"
+                    last_full_key = f"{prefix}_{last_idx}_{key}"
+                    st.session_state[last_full_key] = st.session_state[full_key]
+                last_idx += 1
+            st.session_state[f"_{prefix}_num"] -= del_num
+
+        self.eval_dataset_keys = [
             "name",
             "path",
-            "subset_name",
             "split",
+            "subset_name",
             "prompt_key",
             "response_key",
             "temperature",
             "logprobs",
             "n",
         ]
-        last_idx, del_num = 0, 0
-        for idx in range(st.session_state["_eval_tasksets_num"]):
-            if st.session_state.get(f"eval_taskset_{idx}_del_flag", False):
-                del_num += 1
-                continue
-            for key in eval_dataset_keys:
-                full_key = f"eval_taskset_{idx}_{key}"
-                last_full_key = f"eval_taskset_{last_idx}_{key}"
-                st.session_state[last_full_key] = st.session_state[full_key]
-            last_idx += 1
-        st.session_state["_eval_tasksets_num"] -= del_num
+        maintain_list_state("eval_tasksets", self.eval_dataset_keys)
 
-        auxiliary_model_keys = [
+        self.inference_model_keys = [
             "model_path",
             "engine_type",
             "engine_num",
             "tensor_parallel_size",
-            "gpu_memory_utilization",
-            "dtype",
-            "seed",
             "use_v1",
             "enforce_eager",
             "enable_prefix_caching",
             "enable_chunked_prefill",
+            "gpu_memory_utilization",
+            "dtype",
+            "seed",
             "enable_thinking",
             "enable_openai_api",
         ]
-        last_idx, del_num = 0, 0
-        for idx in range(st.session_state["_auxiliary_models_num"]):
-            if st.session_state.get(f"auxiliary_model_{idx}_del_flag", False):
-                del_num += 1
-                continue
-            for key in auxiliary_model_keys:
-                full_key = f"auxiliary_model_{idx}_{key}"
-                last_full_key = f"auxiliary_model_{last_idx}_{key}"
-                st.session_state[last_full_key] = st.session_state[full_key]
-            last_idx += 1
-        st.session_state["_auxiliary_models_num"] -= del_num
+        maintain_list_state("auxiliary_models", self.inference_model_keys)
 
     def get_configs(self, *config_names: str, columns_spec: List[int] = None):
         CONFIG_GENERATORS.get_configs(*config_names, columns_spec=columns_spec)
@@ -534,10 +527,19 @@ class ConfigManager:
                         {
                             "name": st.session_state[f"eval_taskset_{idx}_name"],
                             "path": st.session_state[f"eval_taskset_{idx}_path"],
-                            "subset_name": st.session_state[f"eval_taskset_{idx}_subset_name"],
                             "split": st.session_state[f"eval_taskset_{idx}_split"],
-                            "prompt_key": st.session_state[f"eval_taskset_{idx}_prompt_key"],
-                            "response_key": st.session_state[f"eval_taskset_{idx}_response_key"],
+                            "subset_name": st.session_state[f"eval_taskset_{idx}_subset_name"],
+                            "format": {
+                                "prompt_key": st.session_state[f"eval_taskset_{idx}_prompt_key"],
+                                "response_key": st.session_state[
+                                    f"eval_taskset_{idx}_response_key"
+                                ],
+                            },
+                            "rollout_args": {
+                                "temperature": st.session_state[f"eval_taskset_{idx}_temperature"],
+                                "logprobs": st.session_state[f"eval_taskset_{idx}_logprobs"],
+                                "n": st.session_state[f"eval_taskset_{idx}_n"],
+                            },
                         }
                     )
         else:
@@ -574,26 +576,23 @@ class ConfigManager:
             "max_timeout": st.session_state["max_timeout"],
             "max_retry_times": st.session_state["explorer_max_retry_times"],
             "rollout_model": {
-                "engine_type": st.session_state["engine_type"],
-                "engine_num": st.session_state["engine_num"],
-                "tensor_parallel_size": st.session_state["tensor_parallel_size"],
-                "use_v1": st.session_state["use_v1"],
-                "enforce_eager": st.session_state["enforce_eager"],
-                "enable_prefix_caching": st.session_state["enable_prefix_caching"],
-                "enable_chunked_prefill": st.session_state["enable_chunked_prefill"],
-                "gpu_memory_utilization": st.session_state["gpu_memory_utilization"],
-                "dtype": st.session_state["dtype"],
-                "seed": st.session_state["seed"],
+                key: st.session_state[key]
+                for key in self.inference_model_keys
+                if key != "model_path"
                 # "max_prompt_tokens": None,  # TODO
                 # "max_response_tokens": None,  # TODO
                 # "chat_template": None,  # TODO: add chat template
-                "enable_thinking": st.session_state["enable_thinking"],
-                "enable_openai_api": st.session_state["enable_openai_api"],
             },
-            "auxiliary_models": [],  # TODO: add auxiliary models
+            "auxiliary_models": [],
             "eval_interval": st.session_state["eval_interval"],
             "eval_on_latest_checkpoint": st.session_state["eval_on_latest_checkpoint"],
         }
+        for i in range(st.session_state["_auxiliary_models_num"]):
+            auxiliary_model_config = {
+                key: st.session_state[f"auxiliary_model_{i}_{key}"]
+                for key in self.inference_model_keys
+            }
+            explorer_config["auxiliary_models"].append(auxiliary_model_config)
         return explorer_config
 
     def generate_config(self):

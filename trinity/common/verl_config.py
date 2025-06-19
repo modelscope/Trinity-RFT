@@ -4,7 +4,6 @@ from typing import Any, Dict, List, Optional
 
 from omegaconf import OmegaConf
 
-from trinity.algorithm.algorithm import DPOAlgorithm
 from trinity.common.config import BufferConfig, Config, SynchronizerConfig
 from trinity.utils.log import get_logger
 
