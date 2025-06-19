@@ -169,3 +169,6 @@ class FileWrapper:
         raise NotImplementedError(
             "read() is not implemented for FileWrapper, please use QUEUE instead"
         )
+
+    def finish(self) -> None:
+        self.file.close()
