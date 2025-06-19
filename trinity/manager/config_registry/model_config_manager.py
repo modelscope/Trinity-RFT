@@ -2,10 +2,9 @@ import os
 
 import streamlit as st
 
-from trinity.common.constants import AlgorithmType, MonitorType
+from trinity.common.constants import MonitorType
 from trinity.manager.config_registry.config_registry import CONFIG_GENERATORS
 from trinity.manager.config_registry.trainer_config_manager import use_critic
-from trinity.trainer.verl.ray_trainer import AdvantageEstimator
 
 
 def set_total_gpu_num():
@@ -62,91 +61,6 @@ def set_monitor_type(**kwargs):
         options=[monitor_type.value for monitor_type in MonitorType],
         **kwargs,
     )
-
-
-# Algorithm Configs
-
-
-@CONFIG_GENERATORS.register_config(
-    default_value=AlgorithmType.PPO.value,
-    other_configs={"mode": "both", "adv_estimator": AdvantageEstimator.GAE.value},
-)
-def set_algorithm_type(**kwargs):
-    def on_change():
-        if st.session_state["algorithm_type"] == AlgorithmType.PPO.value:
-            st.session_state["mode"] = "both"
-            st.session_state["adv_estimator"] = AdvantageEstimator.GAE.value
-        elif st.session_state["algorithm_type"] == AlgorithmType.GRPO.value:
-            st.session_state["mode"] = "both"
-            st.session_state["adv_estimator"] = AdvantageEstimator.GRPO.value
-        elif st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
-            st.session_state["mode"] = "train"
-            st.session_state["adv_estimator"] = AdvantageEstimator.GRPO.value
-        elif st.session_state["algorithm_type"] == AlgorithmType.OPMD.value:
-            st.session_state["mode"] = "both"
-            st.session_state["adv_estimator"] = AdvantageEstimator.GRPO.value
-        else:  # TODO: add more algorithms
-            pass
-        set_trainer_gpu_num()
-
-    st.selectbox(
-        "Algorithm Type",
-        [
-            AlgorithmType.PPO.value,
-            AlgorithmType.GRPO.value,
-            AlgorithmType.DPO.value,
-            AlgorithmType.OPMD.value,
-        ],
-        key="algorithm_type",
-        on_change=on_change,
-    )
-
-
-@CONFIG_GENERATORS.register_config(
-    default_value=1,
-    visible=lambda: st.session_state["mode"] == "both",
-    other_configs={
-        "_grouped_adv_repeat_times": 2,
-        "_not_grouped_adv_repeat_times": 1,
-    },
-)
-def set_repeat_times(**kwargs):  # TODO
-    key = kwargs.get("key")
-    grouped_adv_algorithms = [
-        AlgorithmType.GRPO.value,
-        AlgorithmType.OPMD.value,  # TODO: may add rloo
-    ]
-    if st.session_state["algorithm_type"] in grouped_adv_algorithms:
-        min_repeat_times = 2
-        st.session_state[key] = st.session_state["_grouped_adv_repeat_times"]
-    else:
-        min_repeat_times = 1
-        st.session_state[key] = st.session_state["_not_grouped_adv_repeat_times"]
-
-    def on_change():
-        if st.session_state["algorithm_type"] in grouped_adv_algorithms:
-            st.session_state["_grouped_adv_repeat_times"] = st.session_state[key]
-        else:
-            st.session_state["_not_grouped_adv_repeat_times"] = st.session_state[key]
-
-    st.number_input(
-        "Repeat Times",
-        min_value=min_repeat_times,
-        help="`repeat_times` is used to set how many experiences each task can generate, "
-        "and it must be greater than `1` when `algorithm_type` is `opmd` or `grpo`.",
-        on_change=on_change,
-        **kwargs,
-    )
-
-
-@CONFIG_GENERATORS.register_config(default_value=1.0)
-def set_gamma(**kwargs):
-    st.number_input(r"Gamma :blue-badge[$\gamma$]", **kwargs)
-
-
-@CONFIG_GENERATORS.register_config(default_value=1.0)
-def set_lam(**kwargs):
-    st.number_input(r"Lambda :blue-badge[$\lambda$]", **kwargs)
 
 
 # Model Configs

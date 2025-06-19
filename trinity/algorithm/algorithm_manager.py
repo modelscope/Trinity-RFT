@@ -12,7 +12,7 @@ class AlgorithmManager:
     def __init__(self, config: Config):
         self.config = config
         sft_type = ALGORITHM_TYPE.get("sft")
-        sft_default_config = sft_type.get_default_config()
+        sft_default_config = sft_type.default_config()
         self.sft_algorithm_config = AlgorithmConfig(
             algorithm_type="sft",
             **sft_default_config,

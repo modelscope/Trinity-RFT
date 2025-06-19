@@ -206,15 +206,6 @@ class AlgorithmConfig:
     # TODO: move this to SFT warmup
     use_token_level_loss: bool = True
 
-    # do not set
-    algorithm_manager: Optional[Any] = None
-
-    def get_current_algorithm_config(self, global_steps: int):
-        return self.algorithm_manager.get_current_algorithm_config(global_steps)
-
-    def need_save(self, global_steps: int):
-        return self.algorithm_manager.need_save(global_steps)
-
 
 @dataclass
 class ClusterConfig:
@@ -303,7 +294,6 @@ class TrainerConfig:
 
     # trainer configs
     actor_grad_clip: Optional[float] = None
-    actor_clip_ratio: Optional[float] = None
     # TODO: extract more train-related params from underlying trainer engine
 
     # Only one needs to be set for `trainer_config` and `trainer_config_path`
@@ -525,7 +515,7 @@ class Config:
             "kl_loss_fn": "k2",
             "entropy_loss_fn": "default",
         }
-        default_config.update(algorithm.get_default_config())
+        default_config.update(algorithm.default_config())
         for key, value in default_config.items():
             if getattr(self.algorithm, key, None) is None:
                 setattr(self.algorithm, key, value)

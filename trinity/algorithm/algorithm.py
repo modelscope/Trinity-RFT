@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Algorithm classes."""
 
-from abc import ABC, ABCMeta
+from abc import ABC, ABCMeta, abstractmethod
 from typing import Dict
 
 from trinity.buffer.schema.sql_schema import DPODataModel, ExperienceModel, SFTDataModel
@@ -30,7 +30,8 @@ class AlgorithmType(ABC, metaclass=ConstantMeta):
     schema: type
 
     @classmethod
-    def get_default_config(cls) -> Dict:
+    @abstractmethod
+    def default_config(cls) -> Dict:
         raise NotImplementedError
 
     @classmethod
@@ -53,7 +54,7 @@ class SFTAlgorithm(AlgorithmType):
     schema: type = SFTDataModel
 
     @classmethod
-    def get_default_config(cls) -> Dict:
+    def default_config(cls) -> Dict:
         return {
             "sample_strategy": "default",
             "policy_loss_fn": "sft",
@@ -73,7 +74,7 @@ class PPOAlgorithm(AlgorithmType):
     schema: type = ExperienceModel
 
     @classmethod
-    def get_default_config(cls) -> Dict:
+    def default_config(cls) -> Dict:
         return {
             "repeat_times": 1,
             "sample_strategy": "warmup",
@@ -96,7 +97,7 @@ class GRPOAlgorithm(AlgorithmType):
     schema: type = ExperienceModel
 
     @classmethod
-    def get_default_config(cls) -> Dict:
+    def default_config(cls) -> Dict:
         return {
             "repeat_times": 2,
             "sample_strategy": "warmup",
@@ -119,7 +120,7 @@ class OPMDAlgorithm(AlgorithmType):
     schema: type = ExperienceModel
 
     @classmethod
-    def get_default_config(cls) -> Dict:
+    def default_config(cls) -> Dict:
         return {
             "repeat_times": 2,
             "sample_strategy": "warmup",
@@ -142,9 +143,8 @@ class DPOAlgorithm(AlgorithmType):
     schema: type = DPODataModel
 
     @classmethod
-    def get_default_config(cls) -> Dict:
+    def default_config(cls) -> Dict:
         return {
-            "repeat_times": 2,  # fake repeat times
             "sample_strategy": "dpo",
             "policy_loss_fn": "dpo",
             "kl_loss_fn": "k2",
@@ -170,10 +170,10 @@ class DPOAlgorithm(AlgorithmType):
                 "DPO only supports checkpoint synchronization, set `synchronizer.sync_method` to `checkpoint`."
             )
         if config.algorithm.repeat_times != 2:
-            config.algorithm.repeat_times = 2
-            logger.warning(
-                "DPO only supports 2 repeat times, set `algorithm.repeat_times` to 2."
-            )  # no need to warn
+            config.algorithm.repeat_times = 2  # Fake repeat times
+        if config.algorithm.kl_loss_fn in {"none", None}:
+            config.algorithm.kl_loss_fn = "k2"
+            logger.warning("DPO must use KL loss. Set `algorithm.kl_loss_fn` to `k2`")
 
 
 @ALGORITHM_TYPE.register_module("mix")
@@ -188,7 +188,7 @@ class MIXAlgorithm(AlgorithmType):
     schema: type = ExperienceModel
 
     @classmethod
-    def get_default_config(cls) -> Dict:
+    def default_config(cls) -> Dict:
         return {
             "repeat_times": 8,
             "policy_loss_fn": "mix",

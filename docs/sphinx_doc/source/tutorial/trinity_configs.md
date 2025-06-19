@@ -377,11 +377,6 @@ actor_rollout_ref:
     use_dynamic_bsz: True
     ppo_max_token_len_per_gpu: 16384 # n * ${data.max_prompt_length} + ${data.max_response_length}
     grad_clip: 1.0
-    clip_ratio: 0.2
-    entropy_coeff: 0.001
-    use_kl_loss: False # True for GRPO
-    kl_loss_coef: 0.001 # for grpo
-    kl_loss_type: low_var_kl # for grpo
     ppo_epochs: 1
     shuffle: False
     ulysses_sequence_parallel_size: 1 # sp size
@@ -400,10 +395,6 @@ actor_rollout_ref:
       param_offload: False
       optimizer_offload: False
       fsdp_size: -1
-    # --- below: opmd ---
-    tau: 0.000  # strength of regularization w.r.t. old / ref policy
-    opmd_baseline: mean  # mean / logavgexp, applicable to opmd
-    use_uid: False  # True / False, applicable to pairwise_opmd
   ref:
     fsdp_config:
       param_offload: False
@@ -448,22 +439,6 @@ critic:
   grad_clip: 1.0
   cliprange_value: 0.5
 
-custom_reward_function:
-  path: null
-  name: compute_score
-
-algorithm:
-  gamma: 1.0
-  lam: 1.0
-  norm_adv_by_std_in_grpo: True
-  use_kl_in_reward: False
-  kl_penalty: kl  # how to estimate kl divergence
-  kl_ctrl:
-    type: fixed
-    kl_coef: 0.001
-    horizon: 10000
-    target_kl: 0.1
-
 trainer:
   balance_batch: True
   # total_training_steps: null
@@ -484,11 +459,7 @@ trainer:
 - `actor_rollout_ref.model.use_remove_padding`: Whether to remove pad tokens, which will reduce training time.
 - `actor_rollout_ref.actor.use_dynamic_bsz`: Whether to reorganize the batch data, specifically to splice the shorter data to reduce the batch size in the actual training process.
 - `actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu`: Batch size for one GPU in one forward pass.
-- `actor_rollout_ref.actor.kl_loss_type`: How to compute kl loss, optional value is `kl`, `abs`, `mse` or `low_var_kl`.
 - `actor_rollout_ref.actor.ulysses_sequence_parallel_size`: Ulysses sequence parallel size.
-- `actor_rollout_ref.actor.tau`: strength of regularization w.r.t. old / ref policy.
-- `actor_rollout_ref.actor.opmd_baseline`: mean / logavgexp, applicable to opmd.
-- `actor_rollout_ref.actor.use_uid`: True / False, applicable to pairwise_opmd.
 - `actor_rollout_ref.actor.optim.lr`: Learning rate for actor model.
 - `actor_rollout_ref.actor.optim.lr_warmup_steps_ratio`: Ratio of warmup steps for learning rate.
 - `actor_rollout_ref.actor.optim.warmup_style`: Warmup style for learning rate.
@@ -505,8 +476,6 @@ trainer:
 - `critic.ulysses_sequence_parallel_size`: Ulysses sequence parallel size.
 - `critic.grad_clip`: Gradient clip for critic model training.
 - `critic.cliprange_value`: Used for compute value loss.
-
-- `algorithm`: Training algorithm settings.
 
 - `trainer.balance_batch`: Whether to balance batch size between GPUs during training.
 - `trainer.resume_mode`: Resume mode for training. Support `disable`, `auto` and `resume_path`.

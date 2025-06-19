@@ -36,11 +36,6 @@ actor_rollout_ref:
     use_dynamic_bsz: True
     ppo_max_token_len_per_gpu: 16384 # n * ${data.max_prompt_length} + ${data.max_response_length}
     grad_clip: 1.0
-    clip_ratio: 0.2
-    entropy_coeff: 0.000
-    use_kl_loss: True
-    kl_loss_coef: 0.001
-    kl_loss_type: mse
     ppo_epochs: 1
     shuffle: False
     ulysses_sequence_parallel_size: 1 # sp size
@@ -58,10 +53,6 @@ actor_rollout_ref:
       param_offload: False
       optimizer_offload: False
       fsdp_size: -1
-    # --- below: opmd ---
-    tau: 4.0        # strength of regularization w.r.t. old / ref policy
-    opmd_baseline: mean  # mean / logavgexp, applicable to opmd
-    use_uid: False  # True / False, applicable to pairwise_opmd
   ref:
     fsdp_config:
       param_offload: False
@@ -72,18 +63,6 @@ actor_rollout_ref:
     log_prob_use_dynamic_bsz: ${actor_rollout_ref.actor.use_dynamic_bsz}
     log_prob_max_token_len_per_gpu: ${actor_rollout_ref.actor.ppo_max_token_len_per_gpu}
     ulysses_sequence_parallel_size: ${actor_rollout_ref.actor.ulysses_sequence_parallel_size} # sp size
-
-custom_reward_function:
-  path: null
-  name: compute_score
-
-algorithm:
-  gamma: 1.0
-  lam: 1.0
-  kl_penalty: kl  # how to estimate kl divergence
-  kl_ctrl:
-    type: fixed
-    kl_coef: 0.000
 
 trainer:
   balance_batch: True

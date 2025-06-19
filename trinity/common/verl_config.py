@@ -4,7 +4,6 @@ from typing import Any, Dict, List, Optional
 
 from omegaconf import OmegaConf
 
-from trinity.algorithm.algorithm import DPOAlgorithm
 from trinity.common.config import BufferConfig, Config, SynchronizerConfig
 from trinity.utils.log import get_logger
 
@@ -66,22 +65,19 @@ class Actor:
         16384  # n * ${data.max_prompt_length} + ${data.max_response_length}
     )
     grad_clip: float = 1.0
-    clip_ratio: float = 0.2
-    entropy_coeff: float = 0.001
-    use_kl_loss: bool = False
-    kl_loss_coef: float = 0.001
-    kl_loss_type: str = "low_var_kl"
     ppo_epochs: int = 1
     shuffle: bool = False
     ulysses_sequence_parallel_size: int = 1
     checkpoint: Checkpoint = field(default_factory=Checkpoint)
     optim: Optim = field(default_factory=Optim)
     fsdp_config: FSDPConfig = field(default_factory=FSDPConfig)
-    algorithm_type: str = "ppo"  # TODO
-    tau: float = 0.001  # strength of regularization w.r.t. old / ref policy
-    opmd_baseline: str = "mean"  # mean / logavgexp, applicable to opmd
-    use_uid: bool = False  # True / False, applicable to pairwise_opmd
-    loss_agg_mode: str = "token-mean"  # do not set
+    # do not set
+    loss_agg_mode: str = "token-mean"
+    clip_ratio: float = 0.2
+    entropy_coeff: float = 0.001
+    use_kl_loss: bool = False
+    kl_loss_coef: float = 0.001
+    kl_loss_type: str = "low_var_kl"
 
 
 @dataclass
@@ -208,10 +204,6 @@ class Algorithm:
     kl_penalty: str = "kl"
     kl_ctrl: KL_Ctrl = field(default_factory=KL_Ctrl)
 
-    # ! DO NOT SET THE FOLLOWING PARAMETERS
-    policy_loss_fn: str = "ppo"
-    policy_loss_fn_args: Optional[dict] = None
-
 
 @dataclass
 class Trainer:
@@ -323,33 +315,19 @@ class veRLConfig:
 
         if config.trainer.actor_grad_clip is not None:
             self.actor_rollout_ref.actor.grad_clip = config.trainer.actor_grad_clip
-        if config.trainer.actor_clip_ratio is not None:
-            self.actor_rollout_ref.actor.clip_ratio = config.trainer.actor_clip_ratio
 
         # Algorithm related config
-        adv_fn_args = config.algorithm.advantage_fn_args
-        if adv_fn_args is not None and "gamma" in adv_fn_args:
-            self.algorithm.gamma = adv_fn_args["gamma"]
-        if adv_fn_args is not None and "lam" in adv_fn_args:
-            self.algorithm.lam = adv_fn_args["lam"]
-        self.actor_rollout_ref.actor.algorithm_type = config.algorithm.algorithm_type
         self.actor_rollout_ref.actor.use_kl_loss = config.algorithm.kl_loss_fn != "none"
-        self.actor_rollout_ref.actor.kl_loss_coef = config.algorithm.kl_loss_fn_args["kl_coef"]  # type: ignore
-        self.actor_rollout_ref.actor.entropy_coeff = config.algorithm.entropy_loss_fn_args[  # type: ignore
-            "entropy_coef"
-        ]
+        self.algorithm.use_kl_in_reward = config.algorithm.kl_penalty_fn != "none"
         # TODO (yanxi): it seems that adv_estimator now only affects whether use_critic is set to
         # True or False in RayPPOTrainer.__init__() (and hence in VerlPPOTrainerWrapper).
         # Need to double check whether this is indeed the case,
         # and see if adv_estimator can be removed completely.
 
-        if isinstance(self.actor_rollout_ref.actor.algorithm_type, DPOAlgorithm):  # for DPO
-            if not self.actor_rollout_ref.actor.use_kl_loss:
-                self.actor_rollout_ref.actor.use_kl_loss = True
-                logger.warning("DPO must use KL loss.")
+        if config.algorithm.algorithm_type == "dpo":  # for DPO
             logger.warning("DPO micro batch size is doubled for computing loss.")
-            self.actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu *= 2  # type: ignore
-            self.actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu *= 2  # type: ignore
+            self.actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu *= 2
+            self.actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu *= 2
             if self.actor_rollout_ref.rollout.n != 2:
                 self.actor_rollout_ref.rollout.n = 2
         # TODO: check other fields

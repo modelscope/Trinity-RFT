@@ -1,12 +1,13 @@
 import streamlit as st
 
-from trinity.common.constants import AlgorithmType, SyncMethod
+from trinity.algorithm.algorithm import ALGORITHM_TYPE
+from trinity.common.constants import SyncMethod
 from trinity.manager.config_registry.config_registry import CONFIG_GENERATORS
-from trinity.trainer.verl.ray_trainer import AdvantageEstimator
 
 
 def use_critic():
-    return st.session_state["adv_estimator"] == AdvantageEstimator.GAE.value
+    algorithm = ALGORITHM_TYPE.get(st.session_state["algorithm_type"])
+    return algorithm.use_critic
 
 
 @CONFIG_GENERATORS.register_config(default_value="verl")
@@ -18,7 +19,7 @@ def set_trainer_type(**kwargs):
 def set_save_interval(**kwargs):
     key = kwargs.get("key")
     if (
-        st.session_state["algorithm_type"] == AlgorithmType.DPO.value
+        st.session_state["algorithm_type"] == "dpo"
         or st.session_state["sync_method"] == SyncMethod.NCCL.value
     ):
         st.session_state[key] = st.session_state["_nccl_save_interval"]
@@ -29,7 +30,7 @@ def set_save_interval(**kwargs):
 
     def on_change():
         if (
-            st.session_state["algorithm_type"] == AlgorithmType.DPO.value
+            st.session_state["algorithm_type"] == "dpo"
             or st.session_state["sync_method"] == SyncMethod.NCCL.value
         ):
             st.session_state["_nccl_save_interval"] = st.session_state[key]
@@ -49,54 +50,6 @@ def set_enable_preview(**kwargs):
     st.checkbox("Enable Preview", **kwargs)
 
 
-def _actor_use_kl_loss_visible():
-    if st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
-        st.session_state["actor_use_kl_loss"] = True
-        return False
-    return True
-
-
-@CONFIG_GENERATORS.register_config(
-    default_value=True,
-    visible=_actor_use_kl_loss_visible,
-    other_configs={"_not_dpo_actor_use_kl_loss": True},
-)
-def set_actor_use_kl_loss(**kwargs):
-    key = kwargs.get("key")
-    st.session_state[key] = st.session_state["_not_dpo_actor_use_kl_loss"]
-
-    def on_change():
-        st.session_state["_not_dpo_actor_use_kl_loss"] = st.session_state[key]
-
-    st.checkbox("Use KL Loss", on_change=on_change, **kwargs)
-
-
-@CONFIG_GENERATORS.register_config(
-    default_value=0.001, visible=lambda: st.session_state["actor_use_kl_loss"]
-)
-def set_actor_kl_loss_coef(**kwargs):
-    st.number_input(
-        r"KL Loss Coef :blue-badge[$\beta$]",
-        min_value=0.0,
-        max_value=1.0,
-        format="%.1e",
-        **kwargs,
-    )
-
-
-@CONFIG_GENERATORS.register_config(
-    default_value=0.001, visible=lambda: st.session_state["actor_use_kl_loss"]
-)
-def set_actor_entropy_coef(**kwargs):
-    st.number_input(
-        "Entropy Coeff",
-        min_value=0.0,
-        max_value=1.0,
-        format="%.1e",
-        **kwargs,
-    )
-
-
 @CONFIG_GENERATORS.register_config(default_value=1.0)
 def set_actor_grad_clip(**kwargs):
     st.number_input(
@@ -104,16 +57,6 @@ def set_actor_grad_clip(**kwargs):
         min_value=0.0,
         max_value=1.0,
         help="Clipping by Norm",
-        **kwargs,
-    )
-
-
-@CONFIG_GENERATORS.register_config(default_value=0.2)
-def set_actor_clip_ratio(**kwargs):
-    st.number_input(
-        r"Clip Ratio :blue-badge[$\epsilon$]",
-        min_value=0.0,
-        max_value=1.0,
         **kwargs,
     )
 
@@ -320,31 +263,6 @@ def set_actor_lr_warmup_steps_ratio(**kwargs):
         max_value=1.0,
         **kwargs,
     )
-
-
-@CONFIG_GENERATORS.register_config(
-    default_value=0.0, visible=lambda: st.session_state["algorithm_type"] == "opmd"
-)
-def set_actor_tau(**kwargs):
-    st.number_input("Tau for OPMD", min_value=0.0, format="%.1e", **kwargs)
-
-
-@CONFIG_GENERATORS.register_config(
-    default_value="mean", visible=lambda: st.session_state["algorithm_type"] == "opmd"
-)
-def set_actor_opmd_baseline(**kwargs):
-    st.selectbox(
-        "OPMD Baseline",
-        ["mean", "logavgexp"],
-        **kwargs,
-    )
-
-
-@CONFIG_GENERATORS.register_config(
-    default_value=False, visible=lambda: st.session_state["algorithm_type"] == "opmd"
-)
-def set_actor_use_uid(**kwargs):
-    st.checkbox("Use UID for OPMD", **kwargs)
 
 
 @CONFIG_GENERATORS.register_config(default_value="low_var_kl")
