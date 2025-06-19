@@ -1,5 +1,6 @@
 import os
 import traceback
+from numbers import Number
 from typing import Any, Dict, List
 
 import ray
@@ -185,7 +186,8 @@ class DataActiveIterator:
             all_stats = [
                 sample[Fields.stats][stats] for sample in dataset.data if Fields.stats in sample
             ]
-            stats_min_max[stats] = [min(all_stats), max(all_stats)]
+            if len(all_stats) > 0 and isinstance(all_stats[0], Number):
+                stats_min_max[stats] = [min(all_stats), max(all_stats)]
 
         def _group_single(sample):
             stats = sample[Fields.stats]

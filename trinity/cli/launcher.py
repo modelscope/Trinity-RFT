@@ -148,7 +148,7 @@ def activate_data_module(data_workflow_url: str, config_path: str):
     """Check whether to activate data module and preprocess datasets."""
     from trinity.cli.client import request
 
-    logger.info("Activating data module...")
+    logger.info(f"Activating data module of {data_workflow_url}...")
     res = request(
         url=data_workflow_url,
         configPath=config_path,
