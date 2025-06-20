@@ -81,6 +81,16 @@
 <li class="toctree-l3"><a class="reference internal" href="#trinity.utils.eval_utils.extract_solution"><code class="docutils literal notranslate"><span class="pre">extract_solution()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#trinity.utils.eval_utils.validate_equation"><code class="docutils literal notranslate"><span class="pre">validate_equation()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#trinity.utils.eval_utils.evaluate_equation"><code class="docutils literal notranslate"><span class="pre">evaluate_equation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.eval_utils.validate_think_pattern"><code class="docutils literal notranslate"><span class="pre">validate_think_pattern()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.eval_utils.compute_score"><code class="docutils literal notranslate"><span class="pre">compute_score()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.eval_utils.is_equiv"><code class="docutils literal notranslate"><span class="pre">is_equiv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.eval_utils.remove_boxed"><code class="docutils literal notranslate"><span class="pre">remove_boxed()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.eval_utils.last_boxed_only_string"><code class="docutils literal notranslate"><span class="pre">last_boxed_only_string()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.eval_utils.fix_fracs"><code class="docutils literal notranslate"><span class="pre">fix_fracs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.eval_utils.fix_a_slash_b"><code class="docutils literal notranslate"><span class="pre">fix_a_slash_b()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.eval_utils.remove_right_units"><code class="docutils literal notranslate"><span class="pre">remove_right_units()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.eval_utils.fix_sqrt"><code class="docutils literal notranslate"><span class="pre">fix_sqrt()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.eval_utils.strip_string"><code class="docutils literal notranslate"><span class="pre">strip_string()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-trinity.utils.log">trinity.utils.log module</a><ul>
@@ -230,6 +240,57 @@
 <span class="sig-prename descclassname"><span class="pre">trinity.utils.eval_utils.</span></span><span class="sig-name descname"><span class="pre">evaluate_equation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">equation_str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/utils/eval_utils.html#evaluate_equation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.eval_utils.evaluate_equation" title="Link to this definition"></a></dt>
 <dd><p>Safely evaluate the arithmetic equation using eval() with precautions.</p>
 </dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.utils.eval_utils.validate_think_pattern">
+<span class="sig-prename descclassname"><span class="pre">trinity.utils.eval_utils.</span></span><span class="sig-name descname"><span class="pre">validate_think_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/utils/eval_utils.html#validate_think_pattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.eval_utils.validate_think_pattern" title="Link to this definition"></a></dt>
+<dd><p>Validate whether the &lt;think&gt; &lt;/think&gt; tag is properly formatted.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.utils.eval_utils.compute_score">
+<span class="sig-prename descclassname"><span class="pre">trinity.utils.eval_utils.</span></span><span class="sig-name descname"><span class="pre">compute_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">solution_str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ground_truth</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/trinity/utils/eval_utils.html#compute_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.eval_utils.compute_score" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.utils.eval_utils.is_equiv">
+<span class="sig-prename descclassname"><span class="pre">trinity.utils.eval_utils.</span></span><span class="sig-name descname"><span class="pre">is_equiv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">str1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">str2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/utils/eval_utils.html#is_equiv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.eval_utils.is_equiv" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.utils.eval_utils.remove_boxed">
+<span class="sig-prename descclassname"><span class="pre">trinity.utils.eval_utils.</span></span><span class="sig-name descname"><span class="pre">remove_boxed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/utils/eval_utils.html#remove_boxed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.eval_utils.remove_boxed" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.utils.eval_utils.last_boxed_only_string">
+<span class="sig-prename descclassname"><span class="pre">trinity.utils.eval_utils.</span></span><span class="sig-name descname"><span class="pre">last_boxed_only_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/utils/eval_utils.html#last_boxed_only_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.eval_utils.last_boxed_only_string" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.utils.eval_utils.fix_fracs">
+<span class="sig-prename descclassname"><span class="pre">trinity.utils.eval_utils.</span></span><span class="sig-name descname"><span class="pre">fix_fracs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/utils/eval_utils.html#fix_fracs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.eval_utils.fix_fracs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.utils.eval_utils.fix_a_slash_b">
+<span class="sig-prename descclassname"><span class="pre">trinity.utils.eval_utils.</span></span><span class="sig-name descname"><span class="pre">fix_a_slash_b</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/utils/eval_utils.html#fix_a_slash_b"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.eval_utils.fix_a_slash_b" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.utils.eval_utils.remove_right_units">
+<span class="sig-prename descclassname"><span class="pre">trinity.utils.eval_utils.</span></span><span class="sig-name descname"><span class="pre">remove_right_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/utils/eval_utils.html#remove_right_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.eval_utils.remove_right_units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.utils.eval_utils.fix_sqrt">
+<span class="sig-prename descclassname"><span class="pre">trinity.utils.eval_utils.</span></span><span class="sig-name descname"><span class="pre">fix_sqrt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/utils/eval_utils.html#fix_sqrt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.eval_utils.fix_sqrt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.utils.eval_utils.strip_string">
+<span class="sig-prename descclassname"><span class="pre">trinity.utils.eval_utils.</span></span><span class="sig-name descname"><span class="pre">strip_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/utils/eval_utils.html#strip_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.eval_utils.strip_string" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </section>
 <section id="module-trinity.utils.log">
