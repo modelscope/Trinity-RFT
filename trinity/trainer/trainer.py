@@ -7,8 +7,15 @@ from __future__ import annotations
 import os
 from abc import ABC, abstractmethod
 
+import ray
+
 from trinity.common.config import Config
-from trinity.common.constants import SyncMethod
+from trinity.common.constants import (
+    EXPLORER_NAME,
+    TRAINER_NAME,
+    RunningStatus,
+    SyncMethod,
+)
 from trinity.utils.log import get_logger
 
 
@@ -19,24 +26,26 @@ class Trainer:
         self.config = config
         self.logger = get_logger(__name__)
         self.engine = get_trainer_wrapper(config)
+        self.explorer_ref = None
 
     def prepare(self) -> None:
         """Prepare the trainer."""
         self.engine.prepare()
 
-    def train(self):
+    def train(self) -> str:
         """Train the model."""
         while True:
             try:
                 train_continue = self.train_step()
-                if self.need_sync():
-                    self.sync_weight()
                 if not train_continue:
                     break
+                if self.need_sync():
+                    self.sync_weight()
             except Exception as e:
                 self.logger.error(f"Error in Trainer: {e}")
                 break
-        self.logger.info("--------------------\n> Trainer finished.\n--------------------\n")
+        self.logger.info("--------------------\n> Trainer finished.\n--------------------")
+        return TRAINER_NAME
 
     def train_step(self) -> bool:
         """Train one step.
@@ -53,6 +62,12 @@ class Trainer:
     def sync_weight(self) -> None:
         """Sync the model weight."""
         if self.config.synchronizer.sync_method == SyncMethod.NCCL:
+            if self.explorer_ref is None:
+                self.explorer_ref = ray.get_actor(EXPLORER_NAME)
+            explorer_status = ray.get(self.explorer_ref.running_status.remote())
+            if explorer_status == RunningStatus.STOPPED:
+                self.logger.warning("Explorer has already stopped. Skipping sync weight.")
+                return
             self.logger.info(f"Trainer synchronizing weights at step {self.engine.train_step_num}.")
             self.engine.sync_weight()
 

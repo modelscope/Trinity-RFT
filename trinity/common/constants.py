@@ -8,6 +8,9 @@ logger = get_logger(__name__)
 
 # names
 
+EXPLORER_NAME = "explorer"
+TRAINER_NAME = "trainer"
+
 ROLLOUT_WEIGHT_SYNC_GROUP_NAME = "rollout_weight_sync"
 
 
@@ -92,3 +95,11 @@ class SyncMethod(CaseInsensitiveEnum, metaclass=SyncMethodEnumMeta):
 
     NCCL = "nccl"
     CHECKPOINT = "checkpoint"
+
+
+class RunningStatus(Enum):
+    """Running status of explorer and trainer."""
+
+    RUNNING = "running"
+    WAITING_SYNC = "waiting_sync"
+    STOPPED = "stopped"

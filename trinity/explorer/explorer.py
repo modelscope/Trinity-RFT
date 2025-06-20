@@ -14,7 +14,12 @@ from trinity.algorithm.algorithm_manager import AlgorithmManager
 from trinity.buffer import get_buffer_writer
 from trinity.buffer.buffer import get_buffer_reader
 from trinity.common.config import Config
-from trinity.common.constants import ROLLOUT_WEIGHT_SYNC_GROUP_NAME, SyncMethod
+from trinity.common.constants import (
+    EXPLORER_NAME,
+    ROLLOUT_WEIGHT_SYNC_GROUP_NAME,
+    RunningStatus,
+    SyncMethod,
+)
 from trinity.common.models import create_inference_models
 from trinity.common.models.utils import (
     get_checkpoint_dir_with_step_num,
@@ -50,7 +55,7 @@ class Explorer:
         self.monitor = MONITOR.get(self.config.monitor.monitor_type)(
             project=self.config.project,
             name=self.config.name,
-            role="explorer",
+            role=EXPLORER_NAME,
             config=config,
         )
         self.batch_size = config.buffer.batch_size
@@ -69,6 +74,7 @@ class Explorer:
             self.state_dict = {}
         else:  # nccl mode
             self.state_dict_meta = []
+        self.status = RunningStatus.RUNNING
         self.logger.info("Finished initializing Explorer.")
 
     async def setup_weight_sync_group(
@@ -162,35 +168,44 @@ class Explorer:
         """Get the weight of the loaded model (For checkpoint weights update)."""
         return self.state_dict[name]
 
-    async def explore(self) -> None:
+    async def explore(self) -> str:
         while True:
             try:
                 explore_contionue = self.explore_step()
+                if not explore_contionue:
+                    break
                 if self.need_sync():
                     self.wait_for_workflow_done()
                     await self.sync_weight()
                 if self.explore_step_num % self.config.explorer.eval_interval == 0:
                     self.wait_for_workflow_done()
                     self.eval()
-                if not explore_contionue:
-                    break
             except Exception as e:
                 self.logger.error(f"Error in Explorer: {e}")
                 break
-        self.logger.info("--------------------\n> Explorer finished.\n--------------------\n")
+        self.logger.info("--------------------\n> Explorer finished.\n--------------------")
+        return EXPLORER_NAME
 
     def explore_step(self) -> bool:
-        self.explore_step_num += 1
-        algo_config = self.algorithm_manager.get_current_algorithm_config(self.explore_step_num)
+        algo_config = self.algorithm_manager.get_current_algorithm_config(self.explore_step_num + 1)
         # skip warmup
         if algo_config.algorithm_type == "sft":
+            self.explore_step_num += 1
             return True
         try:
             tasks = self.taskset.read()
         except StopIteration:
             self.logger.warning("No more tasks to explore. Stop exploring.")
+            self.cache.save_explorer(
+                current_step=self.explore_step_num,
+                current_task_index=self.explore_step_num * self.config.buffer.batch_size,
+            )
+            self.status = RunningStatus.STOPPED
+            self.wait_for_workflow_done()
+            self.experience_buffer.finish()
             return False
         self.runner_pool.run_tasks(tasks)
+        self.explore_step_num += 1
         return True
 
     def need_sync(self) -> bool:
@@ -278,20 +293,25 @@ class Explorer:
                 if not status.ok:
                     self.logger.error(f"Error when running task: {status.message}")
                     # submit another task to replace the failed task
-                    self.runner_pool.run_tasks(self.taskset.read(batch_size=1))
+                    try:
+                        tasks = self.taskset.read(batch_size=1)
+                    except StopIteration:
+                        self.logger.warning("No more tasks in taskset. Stop retrying.")
+                        return
+                    self.runner_pool.run_tasks(tasks)
                 else:
                     for metric_name, metric_value in status.metric.items():
                         all_metrics[metric_name].append(metric_value)
         # calculate metrics
         log_metrics = self.monitor.calculate_metrics(all_metrics, prefix="rollout")  # type: ignore
         self.monitor.log(log_metrics, step=self.explore_step_num)
-
         self.logger.info(f"Explore step {self.explore_step_num} finished.")
 
     async def sync_weight(self) -> None:
         """Synchronize model weights."""
         # call this method before training start to load the latest model weights
-        self.logger.info(f"Explorer synchronizing weights at step {self.explore_step_num}.")
+        self.logger.info(f"Explorer sync weights at step {self.explore_step_num}.")
+        self.status = RunningStatus.WAITING_SYNC
         if self.use_checkpoint_weights_update:
             await self._checkpoint_weights_update()
         else:  # nccl weights update
@@ -301,7 +321,11 @@ class Explorer:
             current_step=self.explore_step_num,
             current_task_index=self.explore_step_num * self.config.buffer.batch_size,
         )
-        self.logger.info(f"Explorer synchronizing at step {self.explore_step_num} finished")
+        self.status = RunningStatus.RUNNING
+        self.logger.info(f"Explorer sync at step {self.explore_step_num} finished")
+
+    async def running_status(self) -> RunningStatus:
+        return self.status
 
     def flush_log(self, step: int) -> None:
         """Flush the log of the current step."""

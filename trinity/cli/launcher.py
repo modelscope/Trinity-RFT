@@ -9,6 +9,7 @@ from pprint import pprint
 import ray
 
 from trinity.common.config import Config, DataPipelineConfig, load_config
+from trinity.common.constants import EXPLORER_NAME, TRAINER_NAME
 from trinity.explorer.explorer import Explorer
 from trinity.trainer.trainer import Trainer
 from trinity.utils.log import get_logger
@@ -19,7 +20,7 @@ logger = get_logger(__name__)
 
 def bench(config: Config) -> None:
     """Evaluate model."""
-    explorer = ray.remote(Explorer).options(name="explorer").remote(config)
+    explorer = ray.remote(Explorer).options(name=EXPLORER_NAME).remote(config)
     try:
         ray.get(explorer.prepare.remote())
         ray.get(explorer.benchmark.remote())
@@ -33,7 +34,7 @@ def bench(config: Config) -> None:
 def explore(config: Config) -> None:
     """Run explorer."""
     try:
-        explorer = ray.remote(Explorer).options(name="explorer").remote(config)
+        explorer = ray.remote(Explorer).options(name=EXPLORER_NAME).remote(config)
         ray.get(explorer.prepare.remote())
         ray.get(explorer.sync_weight.remote())
         ray.get(explorer.explore.remote())
@@ -46,7 +47,7 @@ def explore(config: Config) -> None:
 def train(config: Config) -> None:
     """Run trainer."""
     try:
-        trainer = ray.remote(Trainer).options(name="trainer").remote(config)
+        trainer = ray.remote(Trainer).options(name=TRAINER_NAME).remote(config)
         ray.get(trainer.prepare.remote())
         ray.get(trainer.sync_weight.remote())
         ray.get(trainer.train.remote())
@@ -66,8 +67,8 @@ def both(config: Config) -> None:
     the latest step. The specific number of experiences may vary for different
     algorithms and tasks.
     """
-    explorer = ray.remote(Explorer).options(name="explorer").remote(config)
-    trainer = ray.remote(Trainer).options(name="trainer").remote(config)
+    explorer = ray.remote(Explorer).options(name=EXPLORER_NAME).remote(config)
+    trainer = ray.remote(Trainer).options(name=TRAINER_NAME).remote(config)
     ray.get([explorer.__ray_ready__.remote(), trainer.__ray_ready__.remote()])
     ray.get(
         [
@@ -81,15 +82,34 @@ def both(config: Config) -> None:
             trainer.sync_weight.remote(),
         ]
     )
-    _, _ = ray.wait(
+    ready_ref, wait_ref = ray.wait(
         [
             explorer.explore.remote(),
             trainer.train.remote(),
         ],
         num_returns=1,
     )
-    explorer.shutdown.remote(),
-    trainer.shutdown.remote(),
+
+    ready = ray.get(ready_ref[0])
+    if ready == TRAINER_NAME:
+        logger.info(
+            "===========================================================\n"
+            "> Launcher detected that the `Trainer` process has finished.\n"
+            "> Stopping the explorer process immediately.\n"
+            "==========================================================="
+        )
+        ray.wait(wait_ref, timeout=5)
+    elif ready == EXPLORER_NAME:
+        logger.info(
+            "============================================================\n"
+            "> Launcher detected that the `Explorer` process has finished.\n"
+            f"> Waiting {config.synchronizer.sync_timeout} s for the trainer process...\n"
+            "> You can force stop the Trainer process by pressing Ctrl+C.\n"
+            "============================================================"
+        )
+        ray.wait(wait_ref, timeout=config.synchronizer.sync_timeout)
+    explorer.shutdown.remote()
+    trainer.shutdown.remote()
 
 
 def activate_data_module(data_processor_url: str, config_path: str):

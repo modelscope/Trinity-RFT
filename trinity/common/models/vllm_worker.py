@@ -4,6 +4,7 @@ import ray
 import torch
 import torch.distributed
 
+from trinity.common.constants import EXPLORER_NAME
 from trinity.utils.distributed import init_process_group, is_ipv6_address
 from trinity.utils.log import get_logger
 
@@ -60,7 +61,7 @@ class WorkerExtension:
         """Broadcast weight to all vllm workers from source rank 0 (actor model)"""
         assert self._state_dict_meta is not None
         if self._explorer_actor is None:
-            self._explorer_actor = ray.get_actor(name="explorer")
+            self._explorer_actor = ray.get_actor(name=EXPLORER_NAME)
         for name, dtype_str, shape in self._state_dict_meta:
             if self._weight_update_rank == 0:
                 weight = ray.get(self._explorer_actor.get_weight.remote(name))

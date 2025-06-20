@@ -115,6 +115,56 @@ class TestTrainerCountdown(BaseTrainerCase):
         shutil.rmtree(self.config.checkpoint_job_dir)
 
 
+class TestStepAheadAsyncRL(BaseTrainerCase):
+    def test_trainer(self):
+        """Test the explore step ahead trainer"""
+        # train 4 step, sync_offset=1, sync_interval=2
+        # Explorer:
+        # | 1 | 2 | 3 |sync| 4 |
+        # |---|---|---|sync|---|
+        # Trainer:
+        #     | 1 | 2 |sync| 3 | 4 |
+        #     |---|---|sync|---|---|
+        self.config.buffer.total_epochs = 1
+        self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("countdown")
+        self.config.trainer.save_interval = 4
+        self.config.synchronizer.sync_interval = 2
+        self.config.synchronizer.sync_offset = 1
+        self.config.check_and_update()
+        self.config.trainer.trainer_config.trainer.max_actor_ckpt_to_keep = 1
+        self.config.trainer.trainer_config.trainer.max_critic_ckpt_to_keep = 1
+
+        both(self.config)
+        parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
+        rollout_metrics = parser.metric_list("rollout")
+        self.assertTrue(len(rollout_metrics) > 0)
+        self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 4)
+        actor_metrics = parser.metric_list("actor")
+        self.assertTrue(len(actor_metrics) > 0)
+        self.assertEqual(parser.metric_max_step(actor_metrics[0]), 4)
+        actor_kl_metrics = parser.metric_list("actor/kl")
+        self.assertTrue(len(actor_kl_metrics) > 0)
+        critic_kl_metrics = parser.metric_list("critic/kl")
+        self.assertTrue(len(critic_kl_metrics) > 0)
+        response_metrics = parser.metric_list("response_length")
+        self.assertTrue(len(response_metrics) > 0)
+        self.assertEqual(parser.metric_max_step(response_metrics[0]), 4)
+        ray.shutdown(_exiting_interpreter=True)
+        # check checkpoint
+        from trinity.common.models.utils import get_checkpoint_dir_with_step_num
+
+        checkpoint_step_4 = get_checkpoint_dir_with_step_num(
+            checkpoint_root_path=self.config.checkpoint_job_dir,
+            trainer_type=self.config.trainer.trainer_type,
+            step_num=4,
+        )
+        self.assertTrue(os.path.exists(checkpoint_step_4))
+
+    def tearDown(self):
+        # remove dir only when the test passed
+        shutil.rmtree(self.config.checkpoint_job_dir)
+
+
 class TestTrainerGSM8K(BaseTrainerCase):
     def test_trainer(self):
         """Test GSM8K."""
@@ -153,7 +203,7 @@ class TestTrainerGSM8K(BaseTrainerCase):
         shutil.rmtree(self.config.checkpoint_job_dir)
 
 
-class TestTrainerGSM8KWithSFT(BaseTrainerCase):
+class TestTrainerSFTWarmupGSM8K(BaseTrainerCase):
     def test_trainer(self):
         """Test GSM8K With SFT."""
         # test both mode
