@@ -1,6 +1,6 @@
 import streamlit as st
 
-from trinity.common.constants import AlgorithmType, SyncMethod
+from trinity.common.constants import SyncMethod
 from trinity.manager.config_registry.config_registry import CONFIG_GENERATORS
 from trinity.manager.config_registry.model_config_manager import set_trainer_gpu_num
 
@@ -255,7 +255,7 @@ def check_auxiliary_models(unfinished_fields: set, key: str):
 )
 def set_sync_method(**kwargs):
     key = kwargs.get("key")
-    if st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
+    if st.session_state["algorithm_type"] == "dpo":
         st.session_state[key] = SyncMethod.CHECKPOINT.value
         disabled = True
     else:
@@ -263,7 +263,7 @@ def set_sync_method(**kwargs):
         disabled = False
 
     def on_change():
-        if st.session_state["algorithm_type"] != AlgorithmType.DPO.value:
+        if st.session_state["algorithm_type"] != "dpo":
             st.session_state["_not_dpo_sync_method"] = st.session_state[key]
 
     st.selectbox(

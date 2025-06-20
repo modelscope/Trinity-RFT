@@ -41,11 +41,11 @@ def get_buffer_reader(storage_config: StorageConfig, buffer_config: BufferConfig
     elif storage_config.storage_type == StorageType.FILE:
         from trinity.buffer.reader.file_reader import FILE_READERS
 
-        file_read_type = storage_config.algorithm_type
+        algorithm_type = storage_config.algorithm_type
         if storage_config.raw:
             file_read_type = "raw"
-        elif file_read_type is not None:
-            file_read_type = file_read_type.value
+        elif algorithm_type is not None:
+            file_read_type = algorithm_type
         else:
             file_read_type = "rollout"
         return FILE_READERS.get(file_read_type)(storage_config, buffer_config)  # type: ignore

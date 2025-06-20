@@ -47,6 +47,7 @@ class TestConfig(unittest.TestCase):
                     config_path = os.path.join(example_dir, example_name, filename)
                     try:
                         config = load_config(config_path)
+                        config.checkpoint_root_dir = "./.cache/"
                         config.check_and_update()
                     except Exception as e:
                         print(f"Error loading config {config_path}: {e}")

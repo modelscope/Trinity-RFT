@@ -1,6 +1,6 @@
 import streamlit as st
 
-from trinity.common.constants import AlgorithmType, PromptType, StorageType
+from trinity.common.constants import PromptType, StorageType
 from trinity.common.rewards.reward_fn import REWARD_FUNCTIONS
 from trinity.common.workflows.workflow import WORKFLOWS
 from trinity.manager.config_registry.config_registry import CONFIG_GENERATORS
@@ -264,7 +264,7 @@ def set_reply_prefix(**kwargs):
 )
 def set_storage_type(**kwargs):
     key = kwargs.get("key")
-    if st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
+    if st.session_state["algorithm_type"] == "dpo":
         st.session_state[key] = st.session_state["_dpo_storage_type"]
         storage_candidates = [StorageType.FILE.value, StorageType.SQL.value]
     else:
@@ -272,7 +272,7 @@ def set_storage_type(**kwargs):
         storage_candidates = [StorageType.QUEUE.value, StorageType.SQL.value]
 
     def on_change():
-        if st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
+        if st.session_state["algorithm_type"] == "dpo":
             st.session_state["_dpo_storage_type"] = st.session_state[key]
         else:
             st.session_state["_not_dpo_storage_type"] = st.session_state[key]
@@ -294,7 +294,7 @@ def set_storage_type(**kwargs):
 )
 def set_experience_buffer_path(**kwargs):  # TODO
     key = kwargs.get("key")
-    if st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
+    if st.session_state["algorithm_type"] == "dpo":
         if st.session_state["taskset_path"] and not st.session_state["_dpo_experience_buffer_path"]:
             st.session_state["_dpo_experience_buffer_path"] = st.session_state["taskset_path"]
         st.session_state[key] = st.session_state["_dpo_experience_buffer_path"]
@@ -314,7 +314,7 @@ if `storage_type == StorageType.QUEUE`, default to `None`,
 if `storage_type == StorageType.SQL`, default to `sqlite:///{os.path.join(checkpoint_root_dir, '.cache', project_name, experiment_name)}/data.db`."""
 
     def on_change():
-        if st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
+        if st.session_state["algorithm_type"] == "dpo":
             st.session_state["_dpo_experience_buffer_path"] = st.session_state[key]
         else:
             st.session_state["_not_dpo_experience_buffer_path"] = st.session_state[key]
@@ -324,7 +324,7 @@ if `storage_type == StorageType.SQL`, default to `sqlite:///{os.path.join(checkp
 
 @CONFIG_GENERATORS.register_check()
 def check_experience_buffer_path(unfinished_fields: set, key: str):
-    if st.session_state["algorithm_type"] == AlgorithmType.DPO.value:
+    if st.session_state["algorithm_type"] == "dpo":
         if not st.session_state[key].strip():
             unfinished_fields.add(key)
             st.warning("Please input DPO dataset path.")

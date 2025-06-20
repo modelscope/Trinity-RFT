@@ -5,9 +5,7 @@ from typing import Any, Optional, Union
 from sqlalchemy import Column, Float, Integer, LargeBinary, String
 from sqlalchemy.ext.declarative import declarative_base
 
-from trinity.common.constants import AlgorithmType
 from trinity.common.experience import Experience
-from trinity.common.models.utils import tokenize_and_mask_messages_hf
 
 Base = declarative_base()
 
@@ -85,6 +83,8 @@ class SFTDataModel(Base):  # type: ignore
         chat_template: Optional[str] = None,
     ) -> "SFTDataModel":
         """Convert a list of messages into a single instance of SFT data."""
+        from trinity.common.models.utils import tokenize_and_mask_messages_hf
+
         token_ids, action_mask = tokenize_and_mask_messages_hf(
             tokenizer=tokenizer,
             messages=messages,
@@ -125,22 +125,15 @@ class DPODataModel(Base):  # type: ignore
         return exp
 
 
-SCHEMA_MAPPING = {
-    None: TaskModel,
-    AlgorithmType.SFT: SFTDataModel,
-    AlgorithmType.PPO: ExperienceModel,
-    AlgorithmType.GRPO: ExperienceModel,
-    AlgorithmType.OPMD: ExperienceModel,
-    AlgorithmType.DPO: DPODataModel,
-}
-
-
-def create_dynamic_table(algorithm_type: Union[AlgorithmType | None], table_name: str) -> Any:
+def create_dynamic_table(algorithm_type: Union[str | None], table_name: str) -> Any:
     """Create a dynamic table based on the provided algorithm type and table name."""
-    if algorithm_type not in SCHEMA_MAPPING:
-        raise ValueError(f"Unknown schema: {algorithm_type}")
+    if algorithm_type is None:
+        base_class = TaskModel
+    else:
+        from trinity.algorithm.algorithm import ALGORITHM_TYPE
 
-    base_class = SCHEMA_MAPPING[algorithm_type]
+        algorithm = ALGORITHM_TYPE.get(algorithm_type)
+        base_class = algorithm.schema
 
     table_attrs = {
         "__tablename__": table_name,

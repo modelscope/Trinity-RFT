@@ -14,8 +14,6 @@ class SQLWriter(BufferWriter):
     def __init__(self, meta: StorageConfig, config: BufferConfig) -> None:
         assert meta.storage_type == StorageType.SQL
         # we only support write RFT algorithm buffer for now
-        # TODO: support other algorithms
-        assert meta.algorithm_type.is_rft(), "Only RFT buffer is supported for writing."
         self.wrap_in_ray = meta.wrap_in_ray
         self.db_wrapper = DBWrapper.get_wrapper(meta, config)
 

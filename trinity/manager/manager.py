@@ -47,7 +47,13 @@ class CacheManager:
             try:
                 with open(self.explorer_meta_path, "r", encoding="utf-8") as f:
                     explorer_meta = json.load(f)
-                logger.info(f"Find existing explorer meta: {explorer_meta}")
+                logger.info(
+                    "----------------------------------\n"
+                    "Found existing explorer checkpoint:\n"
+                    f"  > {explorer_meta}\n"
+                    "Continue exploring from this point.\n"
+                    "----------------------------------"
+                )
                 return explorer_meta
             except Exception as e:
                 logger.error(f"Failed to load explore meta file: {e}")
@@ -62,7 +68,13 @@ class CacheManager:
             try:
                 with open(self.trainer_meta_path, "r", encoding="utf-8") as f:
                     trainer_meta = json.load(f)
-                logger.info(f"Find existing trainer meta: {trainer_meta}")
+                logger.info(
+                    "----------------------------------\n"
+                    "Found existing trainer checkpoint:\n"
+                    f"  > {trainer_meta}\n"
+                    "Continue training from this point.\n"
+                    "----------------------------------"
+                )
                 return trainer_meta
             except Exception as e:
                 logger.warning(f"Failed to load trainer meta file: {e}")

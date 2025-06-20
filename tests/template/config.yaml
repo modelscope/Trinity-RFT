@@ -5,13 +5,23 @@ checkpoint_root_dir: ''
 algorithm:
   algorithm_type: ppo
   repeat_times: 1
+  policy_loss_fn: ppo
+  policy_loss_fn_args:
+    clip_range: 0.2
+  advantage_fn: ppo
+  advantage_fn_args:
+    gamma: 1.0
+    lam: 1.0
+  kl_penalty_fn: k3
+  kl_loss_fn: k2
+
 model:
   model_path: ''
   max_prompt_tokens: 2048
   max_response_tokens: 2048
 cluster:  # 2 for explorer, 2 for trainer
-  node_num: 1
-  gpu_per_node: 4
+  node_num: 2
+  gpu_per_node: 2
 buffer:
   total_epochs: 1
   batch_size: 4

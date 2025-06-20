@@ -37,6 +37,12 @@ pip install flash-attn -v
 # pip install flash-attn -v --no-build-isolation
 ```
 
+Installation using pip:
+
+```shell
+pip install trinity-rft
+```
+
 Installation from docker:
 
 We provided a dockerfile for Trinity-RFT.
@@ -60,7 +66,7 @@ docker run -it --gpus all --shm-size="64g" --rm -v $PWD:/workspace -v <root_path
 
 **Model Preparation.**
 
-Download the Qwen-2.5-1.5B-Instruct model to the local directory `$MODEL_PATH/Qwen2.5-1.5B-Instruct`:
+Download the Qwen2.5-1.5B-Instruct model to the local directory `$MODEL_PATH/Qwen2.5-1.5B-Instruct`:
 
 ```bash
 # Using Modelscope

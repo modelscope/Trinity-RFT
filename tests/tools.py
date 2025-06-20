@@ -13,6 +13,7 @@ from trinity.common.config import (
     StorageConfig,
     load_config,
 )
+from trinity.common.constants import PromptType
 
 
 def get_template_config() -> Config:
@@ -59,6 +60,47 @@ def get_unittest_dataset_config(
             default_workflow_type="math_workflow",
             default_reward_fn_type="countdown_reward",
         )
+    elif dataset_name == "gsm8k":
+        return StorageConfig(
+            name=dataset_name,
+            path="openai/gsm8k",
+            split=split,
+            subset_name="main",
+            format=FormatConfig(
+                prompt_key="question",
+                response_key="answer",
+            ),
+            rollout_args=GenerationConfig(
+                n=1,
+                temperature=1.0,
+                logprobs=0,
+            ),
+            default_workflow_type="math_workflow",
+            default_reward_fn_type="math_reward",
+        )
+    elif dataset_name == "sft_for_gsm8k":
+        return StorageConfig(
+            name=dataset_name,
+            path=os.path.join(os.path.dirname(__file__), "template", "data", "sft_for_gsm8k"),
+            split="train",
+            format=FormatConfig(
+                prompt_type=PromptType.PLAINTEXT,
+                prompt_key="prompt",
+                response_key="response",
+            ),
+        )
+    elif dataset_name == "dpo":
+        return StorageConfig(
+            name=dataset_name,
+            path="HumanLLMs/Human-Like-DPO-Dataset",
+            split="train",
+            format=FormatConfig(
+                prompt_type=PromptType.PLAINTEXT,
+                prompt_key="prompt",
+                chosen_key="chosen",
+                rejected_key="rejected",
+            ),
+        )
     else:
         raise ValueError(f"Unknown dataset name: {dataset_name}")
 
@@ -103,6 +145,11 @@ class TensorBoardParser:
         if not self.metric_exist(metric_name):
             raise ValueError(f"Metric '{metric_name}' does not exist.")
         return list(self._metrics[metric_name].keys())
+
+    def metric_values(self, metric_name: str) -> List:
+        if not self.metric_exist(metric_name):
+            raise ValueError(f"Metric '{metric_name}' does not exist.")
+        return list(self._metrics[metric_name].values())
 
     def metric_list(self, metric_prefix: str) -> List[str]:
         return [name for name in self._metrics if name.startswith(metric_prefix)]

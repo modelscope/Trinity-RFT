@@ -21,9 +21,9 @@ classifiers = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "verl==0.3.0.post1",
+    "verl==0.4.0",
     "ray[default]>=2.45.0",
-    "vllm==0.8.5.post1",
+    "vllm==0.9.1",
     "tensordict==0.6.2",
     "wandb",
     "omegaconf",
@@ -68,6 +68,10 @@ doc = [
     "sphinx-autobuild",
     "sphinx_rtd_theme",
     "myst-parser",
+]
+
+flash_attn = [
+    "flash-attn==2.8.0.post2"
 ]
 
 [tool.setuptools.packages.find]

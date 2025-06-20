@@ -21,22 +21,21 @@ class WorkerExtension:
         backend: str = "nccl",
         timeout: int = 1200,
         update_with_checkpoint: bool = True,
+        state_dict_meta: list = None,
     ):
         """Init torch process group for model weights update"""
         assert torch.distributed.is_initialized(), "default torch process group must be initialized"
         assert group_name != "", "group name must not be empty"
+        self.set_state_dict_meta(state_dict_meta)
         self._update_with_checkpoint = update_with_checkpoint
-        if self._update_with_checkpoint:
-            logger.info(
-                f"init_process_group (checkpoint): address={master_address}:{master_port}, rank={torch.distributed.get_rank()}, rank_offset={rank_offset}, world_size={world_size}"
-            )
-            self._weight_update_rank = torch.distributed.get_rank() + rank_offset
-        else:
-            logger.info(
-                f"init_process_group (nccl): rank={torch.distributed.get_rank()}, rank_offset={rank_offset}, world_size={world_size}"
-            )
-            self._weight_update_rank = torch.distributed.get_rank() + rank_offset
-
+        self._weight_update_rank = torch.distributed.get_rank() + rank_offset
+        logger.info(
+            f"vLLM starting init_process_group ({'checkpoint' if self._update_with_checkpoint else 'nccl'}):\n"
+            f"  > address={master_address}:{master_port}\n"
+            f"  > rank={torch.distributed.get_rank()}\n"
+            f"  > rank_offset={rank_offset}\n"
+            f"  > world_size={world_size}"
+        )
         if is_ipv6_address(master_address):
             # using tcp://ipv6:port will lead to ValueError
             init_method = f"tcp://[{master_address}]:{master_port}"
@@ -51,24 +50,28 @@ class WorkerExtension:
             rank=self._weight_update_rank,
             group_name=group_name,
         )
-        logger.info(
-            f"init_process_group: master_address={master_address}, master_port={master_port}, "
-            f"rank={self._weight_update_rank}, world_size={world_size}, group_name={group_name}"
-        )
+        logger.info("vLLM init_process_group finished.")
         self._explorer_actor = None
 
-    def update_weight(self, name, dtype, shape, empty_cache=False):
+    def set_state_dict_meta(self, state_dict_meta):
+        self._state_dict_meta = state_dict_meta
+
+    def update_weight(self):
         """Broadcast weight to all vllm workers from source rank 0 (actor model)"""
-        if self._weight_update_rank == 0:
-            if self._explorer_actor is None:
-                self._explorer_actor = ray.get_actor(name="explorer")
-            weight = ray.get(self._explorer_actor.get_weight.remote(name))
-            weight = weight.to(self.device)
-        else:
-            weight = torch.empty(shape, dtype=dtype, device="cuda")
-
-        torch.distributed.broadcast(weight, 0, group=self._model_update_group)
-        weight = weight.type(self.model_config.dtype)
-
-        self.model_runner.model.load_weights(weights=[(name, weight)])
-        del weight
+        assert self._state_dict_meta is not None
+        if self._explorer_actor is None:
+            self._explorer_actor = ray.get_actor(name="explorer")
+        for name, dtype_str, shape in self._state_dict_meta:
+            if self._weight_update_rank == 0:
+                weight = ray.get(self._explorer_actor.get_weight.remote(name))
+                weight = weight.to(self.device)
+            else:
+                dtype = getattr(torch, dtype_str.split(".")[-1])
+                weight = torch.empty(shape, dtype=dtype, device=self.device)
+            torch.distributed.broadcast(weight, 0, group=self._model_update_group)
+            weight = weight.type(self.model_config.dtype)
+            self.model_runner.model.load_weights(weights=[(name, weight)])
+            del weight
+        torch.distributed.barrier()
+        torch.cuda.synchronize()
+        torch.cuda.empty_cache()

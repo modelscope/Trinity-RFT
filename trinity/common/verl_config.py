@@ -5,8 +5,6 @@ from typing import Any, Dict, List, Optional
 from omegaconf import OmegaConf
 
 from trinity.common.config import BufferConfig, Config, SynchronizerConfig
-from trinity.common.constants import AlgorithmType
-from trinity.trainer.verl.ray_trainer import AdvantageEstimator
 from trinity.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -34,8 +32,7 @@ class Optim:
     min_lr_ratio: Optional[float] = 0.0
     warmup_style: str = "constant"
     total_training_steps: int = -1
-    beta1: float = 0.9
-    beta2: float = 0.999
+    betas: List[float] = field(default_factory=lambda: [0.9, 0.999])
 
 
 @dataclass
@@ -68,21 +65,19 @@ class Actor:
         16384  # n * ${data.max_prompt_length} + ${data.max_response_length}
     )
     grad_clip: float = 1.0
-    clip_ratio: float = 0.2
-    entropy_coeff: float = 0.001
-    use_kl_loss: bool = False
-    kl_loss_coef: float = 0.001
-    kl_loss_type: str = "low_var_kl"
     ppo_epochs: int = 1
     shuffle: bool = False
     ulysses_sequence_parallel_size: int = 1
     checkpoint: Checkpoint = field(default_factory=Checkpoint)
     optim: Optim = field(default_factory=Optim)
     fsdp_config: FSDPConfig = field(default_factory=FSDPConfig)
-    algorithm_type: AlgorithmType = AlgorithmType.PPO
-    tau: float = 0.001  # strength of regularization w.r.t. old / ref policy
-    opmd_baseline: str = "mean"  # mean / logavgexp, applicable to opmd
-    use_uid: bool = False  # True / False, applicable to pairwise_opmd
+    # do not set
+    loss_agg_mode: str = "token-mean"
+    clip_ratio: float = 0.2
+    entropy_coeff: float = 0.001
+    use_kl_loss: bool = False
+    kl_loss_coef: float = 0.001
+    kl_loss_type: str = "low_var_kl"
 
 
 @dataclass
@@ -96,9 +91,24 @@ class Ref:
 
 
 @dataclass
+class _ValKwargs:
+    do_sample: bool = False
+
+
+@dataclass
+class _MultiTurn:
+    enable: bool = False
+
+
+@dataclass
 class Rollout:
+    # do not set
+    val_kwargs: _ValKwargs = field(default_factory=_ValKwargs)
+    multi_turn: _MultiTurn = field(default_factory=_MultiTurn)
     temperature: float = 1.0
     n: int = 1  # > 1 for grpo
+    log_prob_micro_batch_size: Optional[int] = None
+    log_prob_micro_batch_size_per_gpu: int = 1
 
 
 @dataclass
@@ -142,6 +152,7 @@ class Critic:
     cliprange_value: float = 0.0
     checkpoint: Checkpoint = field(default_factory=Checkpoint)
     rollout_n: int = 1
+    loss_agg_mode: str = "token-mean"
 
 
 @dataclass
@@ -182,6 +193,9 @@ class KL_Ctrl:
 
 @dataclass
 class Algorithm:
+    # ! DO NOT SET gamma or lam below; they are kept here merely for compatibility with verl,
+    # and their values will be overwritten by those in AlgorithmConfig.advantage_fn_args
+    # if they are really needed (e.g., for GAE advantage/returns computation)
     gamma: float = 1.0
     lam: float = 1.0
     adv_estimator: str = "gae"
@@ -299,37 +313,21 @@ class veRLConfig:
         self.critic.ppo_mini_batch_size = config.buffer.batch_size
         self.critic.rollout_n = self.actor_rollout_ref.rollout.n
 
-        if config.trainer.actor_use_kl_loss is not None:
-            self.actor_rollout_ref.actor.use_kl_loss = config.trainer.actor_use_kl_loss
-        if config.trainer.actor_kl_loss_coef is not None:
-            self.actor_rollout_ref.actor.kl_loss_coef = config.trainer.actor_kl_loss_coef
-        if config.trainer.actor_entropy_coef is not None:
-            self.actor_rollout_ref.actor.entropy_coeff = config.trainer.actor_entropy_coef
         if config.trainer.actor_grad_clip is not None:
             self.actor_rollout_ref.actor.grad_clip = config.trainer.actor_grad_clip
-        if config.trainer.actor_clip_ratio is not None:
-            self.actor_rollout_ref.actor.clip_ratio = config.trainer.actor_clip_ratio
 
         # Algorithm related config
-        if config.algorithm.gamma is not None:
-            self.algorithm.gamma = config.algorithm.gamma
-        if config.algorithm.lam is not None:
-            self.algorithm.lam = config.algorithm.lam
-        self.actor_rollout_ref.actor.algorithm_type = config.algorithm.algorithm_type
-        if config.algorithm.algorithm_type == AlgorithmType.PPO:
-            logger.info("Using GAE `adv_estimator` for PPO")
-            self.algorithm.adv_estimator = AdvantageEstimator.GAE.value
-        elif config.algorithm.algorithm_type == AlgorithmType.GRPO:
-            logger.info("Using GRPO `adv_estimator` for GRPO")
-            self.algorithm.adv_estimator = AdvantageEstimator.GRPO.value
+        self.actor_rollout_ref.actor.use_kl_loss = config.algorithm.kl_loss_fn != "none"
+        self.algorithm.use_kl_in_reward = config.algorithm.kl_penalty_fn != "none"
+        # TODO (yanxi): it seems that adv_estimator now only affects whether use_critic is set to
+        # True or False in RayPPOTrainer.__init__() (and hence in VerlPPOTrainerWrapper).
+        # Need to double check whether this is indeed the case,
+        # and see if adv_estimator can be removed completely.
 
-        if self.actor_rollout_ref.actor.algorithm_type.is_dpo():  # for DPO
-            if not self.actor_rollout_ref.actor.use_kl_loss:
-                self.actor_rollout_ref.actor.use_kl_loss = True
-                logger.warning("DPO must use KL loss.")
+        if config.algorithm.algorithm_type == "dpo":  # for DPO
             logger.warning("DPO micro batch size is doubled for computing loss.")
-            self.actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu *= 2  # type: ignore
-            self.actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu *= 2  # type: ignore
+            self.actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu *= 2
+            self.actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu *= 2
             if self.actor_rollout_ref.rollout.n != 2:
                 self.actor_rollout_ref.rollout.n = 2
         # TODO: check other fields

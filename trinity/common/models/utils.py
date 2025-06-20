@@ -156,7 +156,6 @@ def get_verl_checkpoint_dir(checkpoint_path: str, step_num: Optional[int] = None
                 iteration = f.read().strip()
                 return os.path.join(checkpoint_path, f"global_step_{iteration}")
         else:
-            logger.error(f"No iteration file found in {checkpoint_path}")
             raise FileNotFoundError(f"No iteration file found in {checkpoint_path}")
     else:
         # load specific iteration checkpoint

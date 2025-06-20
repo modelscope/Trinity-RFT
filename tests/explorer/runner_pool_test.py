@@ -10,7 +10,7 @@ import torch
 from tests.tools import get_unittest_dataset_config
 from trinity.buffer.reader.queue_reader import QueueReader
 from trinity.common.config import InferenceModelConfig, StorageConfig, load_config
-from trinity.common.constants import AlgorithmType, StorageType
+from trinity.common.constants import StorageType
 from trinity.common.experience import Experience
 from trinity.common.models.model import InferenceModel
 from trinity.common.workflows import Task
@@ -105,7 +105,7 @@ class RunnerPoolTest(unittest.TestCase):
         ) = StorageConfig(
             name="test",
             storage_type=StorageType.QUEUE,
-            algorithm_type=AlgorithmType.PPO,
+            algorithm_type="ppo",
             path="",
         )
         self.queue = QueueReader(

@@ -100,6 +100,7 @@ class vLLMAysncRolloutModel(InferenceModel):
             self.action_mask_method = tokenize_and_mask_messages_default
         else:
             self.action_mask_method = tokenize_and_mask_messages_hf
+        self.state_dict_meta = None
         self.ckp_version = 0  # TODO: resume the value from the checkpoint
         self.api_server_host = None
         self.api_server_port = None
@@ -264,10 +265,11 @@ class vLLMAysncRolloutModel(InferenceModel):
                 method, timeout, args, kwargs
             )
 
-    async def sync_model(self, update_weight_args_list) -> bool:
+    async def sync_model(self, update_weight_args_list: Optional[List[Tuple]] = None) -> bool:
         """Sync model weights to vLLM."""
-        for args in update_weight_args_list:
-            await self._collective_rpc("update_weight", args=args)
+        if update_weight_args_list is not None:
+            await self._collective_rpc("set_state_dict_meta", args=(update_weight_args_list,))
+        await self._collective_rpc("update_weight")
         self.logger.info("Sync model weights to vLLM successfully.")
         self.ckp_version += 1
         return True
@@ -282,6 +284,7 @@ class vLLMAysncRolloutModel(InferenceModel):
         backend: str = "nccl",
         timeout: int = 1200,
         update_with_checkpoint: bool = True,
+        state_dict_meta: dict = None,
     ):
         return await self._collective_rpc(
             "init_process_group",
@@ -294,11 +297,9 @@ class vLLMAysncRolloutModel(InferenceModel):
                 backend,
                 timeout,
                 update_with_checkpoint,
+                state_dict_meta,
             ),
         )
-
-    async def update_weight(self, name, dtype, shape, empty_cache=False):
-        return await self._collective_rpc("update_weight", args=(name, dtype, shape, empty_cache))
 
     async def run_api_server(self):
         """Run the OpenAI API server in a Ray actor.

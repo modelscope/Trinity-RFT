@@ -148,8 +148,11 @@ pip install -e .\[dev\]
 
 # Install flash-attn after all dependencies are installed
 # Note: flash-attn will take a long time to compile, please be patient.
-pip install flash-attn -v
-# Try the following command if you encounter errors during installation
+# for bash
+pip install -e .[flash_attn]
+# for zsh
+pip install -e .\[flash_attn\]
+# Try the following command if you encounter errors during flash-attn installation
 # pip install flash-attn -v --no-build-isolation
 ```
 
@@ -263,7 +266,7 @@ Then, for command-line users, run the RFT process with the following command:
 trinity run --config <config_path>
 ```
 
-> For example, below is the command for fine-tuning Qwen-2.5-1.5B-Instruct on GSM8k dataset using GRPO algorithm:
+> For example, below is the command for fine-tuning Qwen2.5-1.5B-Instruct on GSM8k dataset using GRPO algorithm:
 > ```shell
 > trinity run --config examples/grpo_gsm8k/gsm8k.yaml
 > ```
@@ -276,7 +279,7 @@ For more detailed examples about how to use Trinity-RFT, please refer to the fol
 + [Off-policy mode of RFT](./docs/sphinx_doc/source/tutorial/example_reasoning_advanced.md)
 + [Asynchronous mode of RFT](./docs/sphinx_doc/source/tutorial/example_async_mode.md)
 + [Multi-turn tasks](./docs/sphinx_doc/source/tutorial/example_multi_turn.md)
-+ [Offline learning by DPO](./docs/sphinx_doc/source/tutorial/example_dpo.md)
++ [Offline learning by DPO or SFT](./docs/sphinx_doc/source/tutorial/example_dpo.md)
 + [Advanced data processing / human-in-the-loop](./docs/sphinx_doc/source/tutorial/example_data_functionalities.md)
 
 

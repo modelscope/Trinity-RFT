@@ -5,6 +5,8 @@ from trinity.utils.log import get_logger
 logger = get_logger(__name__)
 
 
+# TODO: support lazy load
+# e.g. @MODULES.register_module("name", lazy=True)
 class Registry(object):
     """A class for registry."""
 
@@ -41,7 +43,7 @@ class Registry(object):
         for m in self._modules.keys():
             logger.info(f"{self._name}\t{m}")
 
-    def get(self, module_key: str) -> Any:
+    def get(self, module_key) -> Any:
         """
         Get module named module_key from in current registry. If not found,
         return None.
@@ -81,21 +83,21 @@ class Registry(object):
                     Default: False.
 
         Example:
-            ```python
-            WORKFLOWS = Registry("workflows")
 
-            # register a module using decorator
-            @WORKFLOWS.register_module(name="workflow_name")
-            class MyWorkflow(Workflow):
-                pass
+            .. code-block:: python
+                WORKFLOWS = Registry("workflows")
 
-            # or register a module directly
-            WORKFLOWS.register_module(
-                name="workflow_name",
-                module_cls=MyWorkflow,
-                force=True,
-            )
-            ```
+                # register a module using decorator
+                @WORKFLOWS.register_module(name="workflow_name")
+                class MyWorkflow(Workflow):
+                    pass
+
+                # or register a module directly
+                WORKFLOWS.register_module(
+                    name="workflow_name",
+                    module_cls=MyWorkflow,
+                    force=True,
+                )
 
         """
         if not (module_name is None or isinstance(module_name, str)):

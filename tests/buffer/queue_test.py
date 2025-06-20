@@ -6,7 +6,7 @@ from tests.tools import RayUnittestBase
 from trinity.buffer.reader.queue_reader import QueueReader
 from trinity.buffer.writer.queue_writer import QueueWriter
 from trinity.common.config import BufferConfig, StorageConfig
-from trinity.common.constants import AlgorithmType, StorageType
+from trinity.common.constants import StorageType
 from trinity.common.experience import Experience
 
 BUFFER_FILE_PATH = os.path.join(os.path.dirname(__file__), "test_queue_buffer.jsonl")
@@ -19,7 +19,7 @@ class TestQueueBuffer(RayUnittestBase):
         read_batch_size = 4
         meta = StorageConfig(
             name="test_buffer",
-            algorithm_type=AlgorithmType.PPO,
+            algorithm_type="ppo",
             storage_type=StorageType.QUEUE,
             path=BUFFER_FILE_PATH,
         )

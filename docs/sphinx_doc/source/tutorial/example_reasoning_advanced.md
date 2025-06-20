@@ -6,7 +6,7 @@ Let's continue with the [previous GSM8k example](./example_reasoning_basic.md) a
 
 
 
-
+(OPMD)=
 ## OPMD: a native off-policy RL algorithm
 
 

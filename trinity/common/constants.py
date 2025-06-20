@@ -65,34 +65,6 @@ class StorageType(CaseInsensitiveEnum):
     FILE = "file"
 
 
-class AlgorithmType(CaseInsensitiveEnum):
-    """Algorithm Type."""
-
-    SFT = "sft"
-    PPO = "ppo"
-    GRPO = "grpo"
-    OPMD = "opmd"
-    PAIRWISE_OPMD = "pairwise_opmd"
-    DPO = "dpo"
-
-    def is_rft(self) -> bool:
-        """Check if the algorithm is RFT."""
-        return self in [
-            AlgorithmType.PPO,
-            AlgorithmType.GRPO,
-            AlgorithmType.OPMD,
-            AlgorithmType.PAIRWISE_OPMD,
-        ]
-
-    def is_sft(self) -> bool:
-        """Check if the algorithm is SFT."""
-        return self == AlgorithmType.SFT
-
-    def is_dpo(self) -> bool:
-        """Check if the algorithm is DPO."""
-        return self == AlgorithmType.DPO
-
-
 class MonitorType(CaseInsensitiveEnum):
     """Monitor Type."""
 

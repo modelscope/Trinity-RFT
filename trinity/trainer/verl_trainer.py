@@ -4,36 +4,40 @@
 Modified from verl/trainer/ppo/ray_trainer.py
 """
 import os
-from typing import Tuple
+import sys
+from pprint import pprint
+from typing import Dict, List
 
 import pandas as pd
 import ray
 import torch
 from omegaconf import OmegaConf
-from verl.utils import hf_tokenizer
-from verl.utils.fs import copy_local_path_from_hdfs
-
-from trinity.common.config import Config
-from trinity.common.constants import AlgorithmType
-from trinity.common.experience import Experiences
-from trinity.trainer.trainer import TrainEngineWrapper
-from trinity.trainer.verl.ray_trainer import (
-    DataProto,
+from verl.trainer.ppo.metric_utils import (
+    compute_data_metrics,
+    compute_throughout_metrics,
+    compute_timing_metrics,
+    reduce_metrics,
+)
+from verl.trainer.ppo.ray_trainer import (
+    RayClassWithInitArgs,
     RayPPOTrainer,
     RayWorkerGroup,
     ResourcePoolManager,
     Role,
     _timer,
-    apply_kl_penalty,
-    compute_advantage,
-    compute_data_metrics,
-    compute_throughout_metrics,
-    compute_timing_metrics,
+    create_colocated_worker_cls,
     find_latest_ckpt_path,
-    np,
-    pprint,
-    reduce_metrics,
 )
+from verl.utils import hf_tokenizer
+from verl.utils.fs import copy_local_path_from_hdfs
+
+from trinity.algorithm import ADVANTAGE_FN, KL_FN, SAMPLE_STRATEGY
+from trinity.algorithm.algorithm import ALGORITHM_TYPE, SFTAlgorithm
+from trinity.algorithm.algorithm_manager import AlgorithmManager
+from trinity.algorithm.utils import prefix_metrics
+from trinity.common.config import Config
+from trinity.common.experience import Experiences
+from trinity.trainer.trainer import TrainEngineWrapper
 from trinity.utils.monitor import MONITOR
 
 
@@ -116,7 +120,24 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         resource_pool_manager = ResourcePoolManager(
             resource_pool_spec=resource_pool_spec, mapping=mapping
         )
+        self.algorithm_config = global_config.algorithm
+        self.algorithm = None
+        self.algorithm_manager = AlgorithmManager(global_config)
 
+        # specify advantage function for various rft algorithms
+        algorithm = ALGORITHM_TYPE.get(self.algorithm_config.algorithm_type)
+        if algorithm.use_advantage:
+            self.advantage_fn = ADVANTAGE_FN.get(self.algorithm_config.advantage_fn)(
+                **self.algorithm_config.advantage_fn_args
+            )
+            self.kl_fn = KL_FN.get(self.algorithm_config.kl_penalty_fn)(
+                **self.algorithm_config.kl_penalty_fn_args
+            )
+        self.sample_strategy = SAMPLE_STRATEGY.get(global_config.algorithm.sample_strategy)(
+            buffer_config=global_config.buffer,
+            trainer_type=global_config.trainer.trainer_type,
+            **global_config.algorithm.sample_strategy_args,
+        )
         super().__init__(
             config,
             tokenizer,
@@ -125,9 +146,6 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             ray_worker_group_cls,
         )
         self.init_workers()
-        self.algorithm_type = (
-            AlgorithmType.PPO
-        )  # TODO: initialize algorithm_type according to config
         self.logger = MONITOR.get(global_config.monitor.monitor_type)(
             project=config.trainer.project_name,
             name=config.trainer.experiment_name,
@@ -136,20 +154,122 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         )
         self.reset_experiences_example_table()
 
+    def _validate_config(self):  # TODO
+        algorithm = ALGORITHM_TYPE.get(self.algorithm_config.algorithm_type)
+        self.use_critic = algorithm.use_critic
+        super()._validate_config()
+
+    def init_workers(self):
+        """Initialize distributed training workers using Ray backend.
+
+
+        Creates:
+
+        1. Ray resource pools from configuration
+
+        2. Worker groups for each role (actor, critic, etc.)
+
+        """
+        self.resource_pool_manager.create_resource_pool()
+
+        self.resource_pool_to_cls = {
+            pool: {} for pool in self.resource_pool_manager.resource_pool_dict.values()
+        }
+
+        # create actor and rollout
+        if self.hybrid_engine:
+            resource_pool = self.resource_pool_manager.get_resource_pool(Role.ActorRollout)
+            actor_rollout_cls = RayClassWithInitArgs(
+                cls=self.role_worker_mapping[Role.ActorRollout],
+                config=self.config.actor_rollout_ref,
+                role="actor",
+            )
+            self.resource_pool_to_cls[resource_pool]["actor"] = actor_rollout_cls
+        else:
+            raise NotImplementedError
+
+        # create critic
+        if self.use_critic:
+            resource_pool = self.resource_pool_manager.get_resource_pool(Role.Critic)
+            critic_cls = RayClassWithInitArgs(
+                cls=self.role_worker_mapping[Role.Critic], config=self.config.critic
+            )
+            self.resource_pool_to_cls[resource_pool]["critic"] = critic_cls
+
+        # create reference policy if needed
+        if self.use_reference_policy:
+            resource_pool = self.resource_pool_manager.get_resource_pool(Role.RefPolicy)
+            ref_policy_cls = RayClassWithInitArgs(
+                self.role_worker_mapping[Role.RefPolicy],
+                config=self.config.actor_rollout_ref,
+                role="ref",
+            )
+            self.resource_pool_to_cls[resource_pool]["ref"] = ref_policy_cls
+
+        # create a reward model if reward_fn is None
+        if self.use_rm:
+            # we create a RM here
+            resource_pool = self.resource_pool_manager.get_resource_pool(Role.RewardModel)
+            rm_cls = RayClassWithInitArgs(
+                self.role_worker_mapping[Role.RewardModel], config=self.config.reward_model
+            )
+            self.resource_pool_to_cls[resource_pool]["rm"] = rm_cls
+
+        # initialize WorkerGroup
+        # NOTE: if you want to use a different resource pool for each role, which can support different parallel size,
+        # you should not use `create_colocated_worker_cls`.
+        # Instead, directly pass different resource pool to different worker groups.
+        # See https://github.com/volcengine/verl/blob/master/examples/ray/tutorial.ipynb for more information.
+        all_wg = {}
+        wg_kwargs = {}  # Setting up kwargs for RayWorkerGroup
+        if OmegaConf.select(self.config.trainer, "ray_wait_register_center_timeout") is not None:
+            wg_kwargs[
+                "ray_wait_register_center_timeout"
+            ] = self.config.trainer.ray_wait_register_center_timeout
+        for resource_pool, class_dict in self.resource_pool_to_cls.items():
+            worker_dict_cls = create_colocated_worker_cls(class_dict=class_dict)
+            wg_dict = self.ray_worker_group_cls(
+                resource_pool=resource_pool,
+                ray_cls_with_init=worker_dict_cls,
+                device_name=self.device_name,
+                **wg_kwargs,
+            )
+            spawn_wg = wg_dict.spawn(prefix_set=class_dict.keys())
+            all_wg.update(spawn_wg)
+
+        if self.use_critic:
+            self.critic_wg = all_wg["critic"]
+            self.critic_wg.init_model()
+
+        if self.use_reference_policy and not self.ref_in_actor:
+            self.ref_policy_wg = all_wg["ref"]
+            self.ref_policy_wg.init_model()
+
+        if self.use_rm:
+            self.rm_wg = all_wg["rm"]
+            self.rm_wg.init_model()
+
+        # we should create rollout at the end so that vllm can have a better estimation of kv cache memory
+        self.actor_rollout_wg = all_wg["actor"]
+        self.actor_rollout_wg.init_model()
+
     def reset_experiences_example_table(self):
-        self.experiences_example_table = pd.DataFrame(
-            columns=["step", "reward", "prompt", "response"]
-        )
+        self.sample_exps_to_log = []
+
+    @property
+    def train_step_num(self) -> int:
+        return self.global_steps
 
     def prepare(self):
         self.actor_rollout_wg.setup_weight_sync_group()
 
+        # The global step counter, initialized to 0
+        # It represents the total number of training steps completed so far
+        # We increment this counter at the beginning of each training step
         self.global_steps = 0
-        self.sft_warmup_step_num = 0
 
         # load checkpoint before doing anything
         self._load_checkpoint()
-        self.sft_warmup_step_num = min(self.global_steps, self.config.trainer.sft_warmup_steps)
 
         # perform validation before training
         # currently, we only support validation using the reward_function.
@@ -160,193 +280,33 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             if self.config.trainer.get("val_only", False):
                 return
 
-        # we start from step 1
-        self.global_steps += 1
-
-    def _create_dataloader(self):
+    def _create_dataloader(self, train_dataset, val_dataset, collate_fn, train_sampler):
         self.train_dataloader = _InternalDataLoader(self.config)
         # TODO: compute total training steps
-        # if self.algorithm_type.is_dpo():
-        #     train_batch_size = self.config.buffer.read_batch_size
-        #     total_epochs = self.config.trainer.total_epochs
-        #     from math import ceil
+        self.total_training_steps = self.config.trainer.total_training_steps or sys.maxsize
 
-        #     self.total_training_steps = ceil(
-        #         self.train_dataloader.size() // train_batch_size * total_epochs
-        #     )
-        #     if not self.config.actor_rollout_ref.actor.optim.total_training_steps > 0:
-        #         self.config.actor_rollout_ref.actor.optim.total_training_steps = (
-        #             self.total_training_steps
-        #         )
-        #     if not self.config.critic.optim.total_training_steps > 0:
-        #         self.config.critic.optim.total_training_steps = self.total_training_steps
-        # else:
-        self.total_training_steps = float("inf")
-
-    def train_dpo_step(self, experiences: Experiences) -> Tuple[bool, int]:
+    def train_step(self) -> bool:  # noqa C901
         metrics = {}
-        timing_raw = {}
-
-        with _timer("step", timing_raw):
-            # generate a batch
-            attention_mask = experiences.attention_masks
-            cumsum = torch.cumsum(attention_mask, dim=-1)
-            position_ids = torch.clip(cumsum - 1, 0, None).long()
-
-            batch = DataProto.from_single_dict(
-                {
-                    "uid": np.array(experiences.run_ids),  # useless
-                    "position_ids": position_ids,
-                    "input_ids": experiences.tokens.long(),
-                    "responses": experiences.tokens[:, experiences.prompt_length :].long(),
-                    "attention_mask": attention_mask.long(),
-                    "response_mask": (
-                        experiences.action_masks[:, experiences.prompt_length :].long()
-                        if hasattr(experiences, "action_masks")
-                        and experiences.action_masks is not None
-                        else attention_mask[:, experiences.prompt_length :].long()
-                    ),
-                }
-            )
-            batch.meta_info["temperature"] = self.config.actor_rollout_ref.rollout.temperature
-
-            # self._balance_batch(batch, metrics=metrics)  # _balance_batch will shuffle the batch, which will break DPO
-            # TODO: implement a new _balance_batch for DPO
-
-            # compute global_valid tokens
-            batch.meta_info["global_token_num"] = torch.sum(
-                batch.batch["attention_mask"], dim=-1
-            ).tolist()
-
-            if self.use_reference_policy:
-                # compute reference log_prob
-                with _timer("ref", timing_raw):
-                    ref_log_prob = self.ref_policy_wg.compute_ref_log_prob(batch)
-                    batch = batch.union(ref_log_prob)
-
-            # update actor
-            with _timer("update_actor", timing_raw):
-                actor_output = self.actor_rollout_wg.update_actor(batch)
-            actor_output_metrics = reduce_metrics(actor_output.meta_info["metrics"])
-            metrics.update(actor_output_metrics)
-
-        # collect metrics
-        metrics.update(compute_timing_metrics(batch=batch, timing_raw=timing_raw))
-
-        self.logger.log(data=metrics, step=self.global_steps)
-
-        # save checkpoint
-        if (
-            self.config.trainer.save_freq > 0
-            and self.global_steps % self.config.trainer.save_freq == 0
-        ):
-            with _timer("save_checkpoint", timing_raw):
-                self._save_checkpoint()
-
+        try:
+            batch, sample_metrics, exp_samples = self.sample_strategy.sample(self.global_steps + 1)
+            prefix_metrics(sample_metrics, "sample", metrics)
+        except StopIteration:
+            print("No more data to train. Stop training.")
+            return False
         self.global_steps += 1
-        return True, self.global_steps - 1
-
-    def train_sft_step(self, experiences: Experiences) -> Tuple[bool, int]:
-        if self.sft_warmup_step_num >= self.config.trainer.sft_warmup_steps:
-            return False, self.global_steps - 1
-        metrics = {}
         timing_raw = {}
+        algorithm_config = self.algorithm_manager.get_current_algorithm_config(self.global_steps)
+        algorithm = ALGORITHM_TYPE.get(algorithm_config.algorithm_type)
+        if self.algorithm != algorithm:
+            self.actor_rollout_wg.set_algorithm(algorithm_config)
+            if self.algorithm == SFTAlgorithm:
+                self.sft_to_rft()
+            self.algorithm = algorithm
 
         with _timer("step", timing_raw):
-            # generate a batch
-            attention_mask = experiences.attention_masks
-            cumsum = torch.cumsum(attention_mask, dim=-1)
-            position_ids = torch.clip(cumsum - 1, 0, None).long()
-
-            batch = DataProto.from_single_dict(
-                {
-                    "uid": np.array(experiences.run_ids),
-                    "position_ids": position_ids,
-                    "input_ids": experiences.tokens.long(),
-                    "responses": experiences.tokens[:, experiences.prompt_length :].long(),
-                    "attention_mask": attention_mask.long(),
-                    "response_mask": (
-                        experiences.action_masks[:, experiences.prompt_length :].long()
-                        if hasattr(experiences, "action_masks")
-                        and experiences.action_masks is not None
-                        else attention_mask[:, experiences.prompt_length :].long()
-                    ),
-                }
-            )
             batch.meta_info["temperature"] = self.config.actor_rollout_ref.rollout.temperature
 
-            self._balance_batch(batch, metrics=metrics)  # TODO this may affect multi-turn
-
-            # compute global_valid tokens
-            batch.meta_info["global_token_num"] = torch.sum(
-                batch.batch["attention_mask"], dim=-1
-            ).tolist()
-
-            if self.use_reference_policy:
-                # compute reference log_prob
-                with _timer("ref", timing_raw):
-                    ref_log_prob = self.ref_policy_wg.compute_ref_log_prob(batch)
-                    batch = batch.union(ref_log_prob)
-
-            # update actor
-            with _timer("update_actor", timing_raw):
-                actor_output = self.actor_rollout_wg.update_actor(batch)
-            actor_output_metrics = reduce_metrics(actor_output.meta_info["metrics"])
-            metrics.update(actor_output_metrics)
-
-        # collect metrics
-        metrics.update(compute_timing_metrics(batch=batch, timing_raw=timing_raw))
-
-        # TODO: log as sft metrics
-        self.logger.log(data=metrics, step=self.global_steps)
-        self.sft_warmup_step_num += 1
-        self.global_steps += 1
-        if self.sft_warmup_step_num == self.config.trainer.sft_warmup_steps:
-            self.logger.log(
-                data={"sft_warmup_steps": self.sft_warmup_step_num},
-                step=self.global_steps - 1,
-            )
-            with _timer("save_checkpoint", timing_raw):
-                self._save_checkpoint()
-            return False, self.global_steps - 1
-        return True, self.global_steps - 1
-
-    def train_rft_step(self, experiences: Experiences) -> Tuple[bool, int]:
-        metrics = {}
-        timing_raw = {}
-
-        with _timer("step", timing_raw):
-            # Convert rewards to token_level_rewards
-            attention_mask = experiences.attention_masks
-            token_level_rewards = torch.zeros(attention_mask.shape, dtype=experiences.rewards.dtype)
-            cumsum = torch.cumsum(attention_mask, dim=-1)
-            eos_mask_idx = cumsum.argmax(dim=-1)
-            position_ids = torch.clip(cumsum - 1, 0, None).long()
-            token_level_rewards[
-                torch.arange(experiences.batch_size), eos_mask_idx
-            ] = experiences.rewards
-            token_level_rewards = token_level_rewards[:, experiences.prompt_length :]
-
-            batch = DataProto.from_single_dict(
-                {
-                    "uid": np.array(experiences.run_ids),
-                    "position_ids": position_ids,
-                    "input_ids": experiences.tokens.long(),
-                    "responses": experiences.tokens[:, experiences.prompt_length :].long(),
-                    "attention_mask": attention_mask.long(),
-                    "response_mask": (
-                        experiences.action_masks[:, experiences.prompt_length :].long()
-                        if hasattr(experiences, "action_masks")
-                        and experiences.action_masks is not None
-                        else attention_mask[:, experiences.prompt_length :].long()
-                    ),
-                    "token_level_scores": token_level_rewards,
-                    "old_log_probs": experiences.logprobs[:, experiences.prompt_length :],  # type: ignore
-                }
-            )
-            batch.meta_info["temperature"] = self.config.actor_rollout_ref.rollout.temperature
-
-            if self.config.trainer.balance_batch:
+            if self.algorithm.can_balance_batch and self.config.trainer.balance_batch:
                 self._balance_batch(batch, metrics=metrics)  # TODO this may affect multi-turn
 
             # compute global_valid tokens
@@ -354,61 +314,37 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                 batch.batch["attention_mask"], dim=-1
             ).tolist()
 
-            if self.use_reference_policy:
+            if self.algorithm.use_reference:  # ref_logprob may not be used
                 # compute reference log_prob
                 with _timer("ref", timing_raw):
                     ref_log_prob = self.ref_policy_wg.compute_ref_log_prob(batch)
                     batch = batch.union(ref_log_prob)
 
-            # compute values
-            if self.use_critic:
+            if self.algorithm.use_critic:
                 with _timer("values", timing_raw):
                     values = self.critic_wg.compute_values(batch)
                     batch = batch.union(values)
 
-            with _timer("adv", timing_raw):
-                # compute rewards. apply_kl_penalty if available
-                if not self.config.actor_rollout_ref.actor.get("use_kl_loss", False):
-                    batch, kl_metrics = apply_kl_penalty(
-                        batch,
-                        kl_ctrl=self.kl_ctrl,
-                        kl_penalty=self.config.algorithm.kl_penalty,
-                    )
-                    metrics.update(kl_metrics)
-                else:
-                    batch.batch["token_level_rewards"] = batch.batch["token_level_scores"]
+            if self.algorithm.use_advantage:
+                with _timer("adv", timing_raw):
+                    # compute kl penalty
+                    batch, kl_metrics = self.kl_fn.apply_kl_penalty_to_reward(batch)
+                    metrics.update(prefix_metrics(kl_metrics, prefix="critic"))
+                    # compute advantages, executed on the driver process
+                    batch, _ = self.advantage_fn(batch)
 
-                # compute advantages, executed on the driver process
-                kwargs = {}
-                algorithm_type = self.config.actor_rollout_ref.actor.get(
-                    "algorithm_type", AlgorithmType.PPO
-                )
-                if algorithm_type == AlgorithmType.OPMD:
-                    tau = self.config.actor_rollout_ref.actor.get("tau", 0.0)
-                    opmd_baseline = self.config.actor_rollout_ref.actor.get("opmd_baseline", "mean")
-                    kwargs = {
-                        "algorithm_type": algorithm_type,
-                        "tau": tau,
-                        "opmd_baseline": opmd_baseline,
-                    }
-                batch = compute_advantage(
-                    batch,
-                    adv_estimator=self.config.algorithm.adv_estimator,
-                    gamma=self.config.algorithm.gamma,
-                    lam=self.config.algorithm.lam,
-                    num_repeat=self.config.actor_rollout_ref.rollout.n,
-                    **kwargs,
-                )
-
-            # update critic
-            if self.use_critic:
+                # update critic
+            if self.algorithm.use_critic:
                 with _timer("update_critic", timing_raw):
                     critic_output = self.critic_wg.update_critic(batch)
                 critic_output_metrics = reduce_metrics(critic_output.meta_info["metrics"])
                 metrics.update(critic_output_metrics)
 
             # implement critic warmup
-            if self.config.trainer.critic_warmup <= self.global_steps:
+            if (
+                not self.algorithm.use_critic
+                or self.config.trainer.critic_warmup <= self.global_steps
+            ):
                 # update actor
                 with _timer("update_actor", timing_raw):
                     actor_output = self.actor_rollout_wg.update_actor(batch)
@@ -424,33 +360,29 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                     self._save_checkpoint()
 
         # collect metrics
-        metrics.update(compute_data_metrics(batch=batch, use_critic=self.use_critic))
+        if self.algorithm.use_advantage:  # TODO
+            metrics.update(compute_data_metrics(batch=batch, use_critic=self.use_critic))
         metrics.update(compute_timing_metrics(batch=batch, timing_raw=timing_raw))
         n_gpus = self.resource_pool_manager.get_n_gpus()
         metrics.update(
             compute_throughout_metrics(batch=batch, timing_raw=timing_raw, n_gpus=n_gpus)
         )
 
-        if self.config.enable_preview:
-            self._log_experiences(experiences)
+        if self.algorithm.use_advantage and self.config.enable_preview:  # TODO
+            self._log_experiences(exp_samples)
 
         # TODO: make a canonical logger that supports various backend
         self.logger.log(data=metrics, step=self.global_steps)
 
-        self.global_steps += 1
-
-        if self.global_steps >= self.total_training_steps:
+        train_status = self.global_steps < self.total_training_steps
+        if not train_status or self.algorithm_manager.need_save(self.global_steps):
             if (
-                self.config.trainer.save_freq > 0
-                and (self.global_steps - 1) % self.config.trainer.save_freq != 0
+                self.config.trainer.save_freq == 0
+                or self.global_steps % self.config.trainer.save_freq != 0
             ):
                 with _timer("save_checkpoint", timing_raw):
                     self._save_checkpoint()
-            # stop training
-            return False, self.global_steps - 1
-        else:
-            # continue
-            return True, self.global_steps - 1
+        return train_status
 
     def _log_single_experience(
         self, experiences: Experiences, idx: int, skip_special_tokens: bool
@@ -475,21 +407,13 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                 "response": [response_text],
             }
         )
-        self.experiences_example_table = pd.concat(
-            [self.experiences_example_table, new_row], ignore_index=True
-        )
+        self.sample_exps_to_log = pd.concat([self.sample_exps_to_log, new_row], ignore_index=True)
 
-    def _log_experiences(self, experiences: Experiences) -> None:
-        skip_special_tokens = False
-        reward_max_id = torch.argmax(experiences.rewards)
-        self._log_single_experience(experiences, reward_max_id, skip_special_tokens)
-
-        reward_min_id = torch.argmin(experiences.rewards)
-        self._log_single_experience(experiences, reward_min_id, skip_special_tokens)
-
+    def _log_experiences(self, samples: List[Dict]) -> None:
+        self.sample_exps_to_log.extend(samples)
         if self.global_steps % self.config.trainer.sync_freq == 0:
             self.logger.log_table(
-                "rollout_examples", self.experiences_example_table, self.global_steps
+                "rollout_examples", pd.DataFrame(self.sample_exps_to_log), self.global_steps
             )
             self.reset_experiences_example_table()
 
@@ -498,12 +422,6 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
 
     def sync_weight(self) -> None:
         self.actor_rollout_wg.sync_weight()
-
-    def set_mode(self, algorithm_type: AlgorithmType = AlgorithmType.PPO) -> None:
-        self.actor_rollout_wg.set_mode(algorithm_type)
-        if self.algorithm_type.is_sft() and (not algorithm_type.is_sft()):
-            self.sft_to_rft()
-        self.algorithm_type = algorithm_type
 
     def sft_to_rft(self) -> None:
         # load from hdfs
@@ -535,9 +453,9 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                     global_step_folder = os.path.join(working_dir, global_step_folder)
         print(f"Load from checkpoint folder: {global_step_folder}")
         # set global step
-        self.global_steps = int(global_step_folder.split("global_step_")[-1])
+        global_steps = int(global_step_folder.split("global_step_")[-1])
+        assert self.global_steps == global_steps + 1
 
-        print(f"Setting global step to {self.global_steps}")
         print(f"Resuming from {global_step_folder}")
 
         actor_path = os.path.join(global_step_folder, "actor")

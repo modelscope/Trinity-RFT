@@ -38,12 +38,12 @@ data_processor:
     # I/O buffers
     input_buffers:
       - name: 'raw_input'
-        path: 'openai/gsm8k'
+        path: /PATH/TO/GSM8K/
         storage_type: 'file'
         raw: true
     output_buffer:
       name: 'raw_output'
-      path: './outputs/task_pipeline_output/prioritized_gsm8k.jsonl'
+      path: /PATH/TO/OUTPUT/JSONL/FILE
       storage_type: 'file'
     # format mapping
     format:
@@ -72,12 +72,12 @@ data_processor:
     # I/O buffers
     input_buffers:
       - name: 'raw_input'
-        path: 'openai/gsm8k'
+        path: /PATH/TO/GSM8K/
         storage_type: 'file'
         raw: true
     output_buffer:
       name: 'raw_output'
-      path: './outputs/task_pipeline_output/prioritized_gsm8k.jsonl'
+      path: /PATH/TO/OUTPUT/JSONL/FILE
       storage_type: 'file'
     # format mapping
     format:
@@ -122,12 +122,12 @@ data_processor:
     # I/O buffers
     input_buffers:
       - name: 'raw_input'
-        path: 'openai/gsm8k'
+        path: /PATH/TO/GSM8K/
         storage_type: 'file'
         raw: true
     output_buffer:
       name: 'raw_output'
-      path: './outputs/task_pipeline_output/prioritized_gsm8k.jsonl'
+      path: /PATH/TO/OUTPUT/JSONL/FILE
       storage_type: 'file'
     # format mapping
     format:
@@ -217,7 +217,7 @@ data_processor:
 
 Here you can set the basic information for the example dataset, database information that is used to store the result dataset, and some other items about downstream dataset loading for exploring and training, which is similar to the example above.
 
-For this example, we assume that you are somehow familiar with the basic usage of Data-Juicer, so we need to prepare a Data-Juicer data processing recipe in `tests/test_configs/human_annotator_test_dj_cfg.yaml` that includes an OP of `human_preference_annotation_mapper`. For example:
+For this example, we assume that you are somehow familiar with the basic usage of Data-Juicer, so we need to prepare a Data-Juicer data processing recipe in [`tests/test_configs/human_annotator_test_dj_cfg.yaml`](https://github.com/modelscope/Trinity-RFT/blob/main/tests/test_configs/human_annotator_test_dj_cfg.yaml) that includes an OP of `human_preference_annotation_mapper`. For example:
 
 ```yaml
 project_name: 'demo-human-annotator'
