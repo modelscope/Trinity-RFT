@@ -2,22 +2,22 @@
 
 ## Example: Data Processor for Task Pipeline
 
-In this example, you will learn how to apply the data processor workflow of Trinity-RFT to prepare and prioritize the dataset before task exploring and training. This example takes GSM-8K dataset as the example dataset to figure out:
+In this example, you will learn how to apply the data processor of Trinity-RFT to prepare and prioritize the dataset before task exploring and training. This example takes GSM-8K dataset as the example dataset to figure out:
 
-1. how to prepare the data workflow
+1. how to prepare the data processor
 2. how to configure the data processor
-3. what the data workflow can do
+3. what the data processor can do
 
 Before getting started, you need to prepare the main environment of Trinity-RFT according to the [installation section of the README file](../main.md).
 
 ### Data Preparation
 
-#### Prepare the Data Workflow
+#### Prepare the Data Processor
 
-As the overall framework of Trinity-RFT shows, the data workflow is one of the high-level functions. Trinity-RFT encapsulates the data workflow as an independent service to avoid dependency conflict issues. Thus you need to prepare a split environment for this module and start the server.
+As the overall framework of Trinity-RFT shows, the data processor is one of the high-level functions. Trinity-RFT encapsulates the data processor as an independent service to avoid dependency conflict issues. Thus you need to prepare a split environment for this module and start the server.
 
 ```shell
-# prepare split environments, including the one of data workflow
+# prepare split environments, including the one of data processor
 python scripts/install.py
 
 # start all split servers
@@ -32,7 +32,7 @@ In this example, assume that you need to rank all math questions and correspondi
 
 ```yaml
 data_processor:
-  data_workflow_url: 'http://127.0.0.1:5005/data_workflow'
+  data_processor_url: 'http://127.0.0.1:5005/data_processor'
   # task pipeline related
   task_pipeline:
     # I/O buffers
@@ -53,7 +53,7 @@ data_processor:
 
 Here you can set the basic buffers for the GSM-8K dataset input and output and some other items about downstream dataset loading for exploring and training:
 
-+ `data_workflow_url`: the URL of the data processor service, which is started in the previous step.
++ `data_processor_url`: the URL of the data processor service, which is started in the previous step.
 + `task_pipeline`: the configs for the task pipeline. Task pipeline is used to process the raw dataset. It consists of several inner configs:
   + `input_buffers`: the input buffers for the task pipeline. We usually load from raw dataset files in this pipeline, thus we need to the dataset `path` and set the `storage_type` to "file" and set `raw` to True. It allows multiple input buffers. We can name each buffer with the `name` field.
   + `output_buffer`: the output buffer for the task pipeline. We usually store the processed dataset in files as well, thus we need to set the `storage_type` to "file".
@@ -66,7 +66,7 @@ If you are not familiar with Data-Juicer, the data processor provides a natural-
 
 ```yaml
 data_processor:
-  data_workflow_url: 'http://127.0.0.1:5005/data_workflow'
+  data_processor_url: 'http://127.0.0.1:5005/data_processor'
   # task pipeline related
   task_pipeline:
     # I/O buffers
@@ -116,7 +116,7 @@ After preparing the Data-Juicer data processing recipe, you can set the `dj_conf
 
 ```yaml
 data_processor:
-  data_workflow_url: 'http://127.0.0.1:5005/data_workflow'
+  data_processor_url: 'http://127.0.0.1:5005/data_processor'
   # task pipeline related
   task_pipeline:
     # I/O buffers
@@ -148,7 +148,7 @@ All config items in the `data` section can be found [here](trinity_configs.md). 
 
 
 ```{note}
-Only when one of `xxx_pipeline` is provided, and one of `dj_process_desc` and `dj_config_path` in the pipeline config is provided, the data workflow and the data active iterator will be activated. Otherwise, this part will be skipped and it will enter into the exploring stage directly.
+Only when one of `xxx_pipeline` is provided, and one of `dj_process_desc` and `dj_config_path` in the pipeline config is provided, the data processor and the data active iterator will be activated. Otherwise, this part will be skipped and it will enter into the exploring stage directly.
 ```
 
 ### Exploring & Training
@@ -165,13 +165,7 @@ ray start --address=<master_address>
 trinity run --config <Trinity-RFT_config_path>
 ```
 
-If you follow the steps above, Trinity-RFT will send a request to the data workflow server, the data active iterator will be activated, compute difficulty scores for each sample in the raw dataset, and rank the dataset according to difficulty scores. After that, the data workflow server stores the result dataset into the output buffer, when exploring begins, it will load the prepared dataset and continue the downstream steps.
-
-
-## Example: Data Processor for Experience Pipeline
-
-TBD.
-
+If you follow the steps above, Trinity-RFT will send a request to the data processor server, the data active iterator will be activated, compute difficulty scores for each sample in the raw dataset, and rank the dataset according to difficulty scores. After that, the data processor server stores the result dataset into the output buffer, when exploring begins, it will load the prepared dataset and continue the downstream steps.
 
 ## Example: Human in the Loop
 Sometimes, you might need to involve human feedbacks for some raw data. In this example, you will learn how to annotate raw data to get a better dataset before training. This example takes an example Q&A dataset and tries to select the chosen and rejected ones for DPO method.
@@ -180,27 +174,27 @@ Before getting started, you need to prepare the main environment of Trinity-RFT 
 
 ### Data Preparation
 
-#### Prepare the Data Workflow
+#### Prepare the Data Processor
 
-As the overall framework of Trinity-RFT shows, the data workflow is one of the high-level functions. Trinity-RFT encapsulates the data workflow as an independent service to avoid dependency conflict issues. Thus you need to prepare a split environment for this module and start the server.
+As the overall framework of Trinity-RFT shows, the data processor is one of the high-level functions. Trinity-RFT encapsulates the data processor as an independent service to avoid dependency conflict issues. Thus you need to prepare a split environment for this module and start the server.
 
 ```shell
-# prepare split environments, including the one of data workflow
+# prepare split environments, including the one of data processor
 python scripts/install.py
 
 # start all split servers
 python scripts/start_servers.py
 ```
 
-### Configure the Data Workflow
+### Configure the Data Processor
 
-Trinity-RFT uses a unified config file to manage all config items. For the data workflow, you need to focus on the `data_processor` section in the config file.
+Trinity-RFT uses a unified config file to manage all config items. For the data processor, you need to focus on the `data_processor` section in the config file.
 
 In this example, assume that you need to select the chosen and rejected responses for DPO method. So you can set these config items like the following example:
 
 ```yaml
 data_processor:
-  data_workflow_url: 'http://127.0.0.1:5005/data_workflow'
+  data_processor_url: 'http://127.0.0.1:5005/data_processor'
   # task pipeline related
   task_pipeline:
     # I/O buffers
@@ -259,7 +253,7 @@ You can set more config items for this OP (e.g. notification when annotation is 
 
 ### Start Running
 
-When you start running with the RFT config, the data workflow will start the OP `human_preference_annotation_mapper`, and then you can find a new project on the "Projects" page of the label-studio server.
+When you start running with the RFT config, the data processor will start the OP `human_preference_annotation_mapper`, and then you can find a new project on the "Projects" page of the label-studio server.
 
 ![](../../assets/data-projects.png)
 

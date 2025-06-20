@@ -4,11 +4,11 @@ from markupsafe import escape
 
 app = Flask(__name__)
 
-APP_NAME = "data_workflow"
+APP_NAME = "data_processor"
 
 
 @app.route(f"/{APP_NAME}/<pipeline_type>", methods=["GET"])
-def data_workflow(pipeline_type):
+def data_processor(pipeline_type):
     from trinity.common.config import load_config
     from trinity.data.controllers.active_iterator import DataActiveIterator
 

@@ -88,14 +88,14 @@ synth_data = synthesizer.process(clean_data)
 - Then you need to prepare the `data_processor` section in the config file (e.g. [test_cfg.yaml](tests/test_configs/active_iterator_test_cfg.yaml))
   - For the `dj_config_path` argument in it, you can either specify a data-juicer config file path (e.g. [test_dj_cfg.yaml](tests/test_configs/active_iterator_test_dj_cfg.yaml)), or write the demand in `dj_process_desc` argument in natural language and our agent will help you to organize the data-juicer config.
 - Finally you can send requests to the data server to start an active iterator to process datasets in many ways:
-  - Request with `curl`: `curl "http://127.0.0.1:5000/data_workflow?configPath=tests%2Ftest_configs%2Factive_iterator_test_cfg.yaml"`
+  - Request with `curl`: `curl "http://127.0.0.1:5005/data_processor/task_pipeline?configPath=tests%2Ftest_configs%2Factive_iterator_test_cfg.yaml"`
   - Request using our simple client:
 
   ```python
   from trinity.cli.client import request
 
   res = request(
-    url="http://127.0.0.1:5005/data_workflow",
+    url="http://127.0.0.1:5005/data_processor/task_pipeline",
     configPath="tests/test_configs/active_iterator_test_cfg.yaml"
   )
 

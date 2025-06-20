@@ -144,13 +144,13 @@ def both(config: Config) -> None:
     ray.get(trainer.shutdown.remote())
 
 
-def activate_data_module(data_workflow_url: str, config_path: str):
+def activate_data_module(data_processor_url: str, config_path: str):
     """Check whether to activate data module and preprocess datasets."""
     from trinity.cli.client import request
 
-    logger.info(f"Activating data module of {data_workflow_url}...")
+    logger.info(f"Activating data module of {data_processor_url}...")
     res = request(
-        url=data_workflow_url,
+        url=data_processor_url,
         configPath=config_path,
     )
     if res["return_code"] != 0:
@@ -190,7 +190,7 @@ def validate_data_pipeline(data_pipeline_config: DataPipelineConfig, pipeline_ty
                 return False
     elif pipeline_type == "experience":
         # experience pipeline specific
-        pass
+        raise NotImplementedError("experience_pipeline is not implemented yet.")
     else:
         logger.warning(
             f'Invalid pipeline type: {pipeline_type}. Should be one of ["task", "experience"].'
@@ -207,21 +207,21 @@ def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
     # try to activate task pipeline for raw data
     data_processor_config = config.data_processor
     if (
-        data_processor_config.data_workflow_url
+        data_processor_config.data_processor_url
         and data_processor_config.task_pipeline
         and validate_data_pipeline(data_processor_config.task_pipeline, "task")
     ):
         activate_data_module(
-            f"{data_processor_config.data_workflow_url}/task_pipeline", config_path
+            f"{data_processor_config.data_processor_url}/task_pipeline", config_path
         )
     # try to activate experience pipeline for experiences
     if (
-        data_processor_config.data_workflow_url
+        data_processor_config.data_processor_url
         and data_processor_config.experience_pipeline
         and validate_data_pipeline(data_processor_config.experience_pipeline, "experience")
     ):
         activate_data_module(
-            f"{data_processor_config.data_workflow_url}/experience_pipeline", config_path
+            f"{data_processor_config.data_processor_url}/experience_pipeline", config_path
         )
     ray_namespace = f"{config.project}-{config.name}"
     if dlc:

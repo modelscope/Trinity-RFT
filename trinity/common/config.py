@@ -131,7 +131,7 @@ class DataPipelineConfig:
 class DataProcessorConfig:
     """Data-Juicer config"""
 
-    data_workflow_url: Optional[str] = None
+    data_processor_url: Optional[str] = None
 
     # support two types of data pipelines for now
     # 1. For task. Data preprocessing from raw dataset to the task set
