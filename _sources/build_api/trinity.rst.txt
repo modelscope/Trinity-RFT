@@ -6,6 +6,7 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   trinity.algorithm
    trinity.buffer
    trinity.common
    trinity.explorer

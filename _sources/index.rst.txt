@@ -14,7 +14,7 @@ Welcome to Trinity-RFT's documentation!
    :maxdepth: 1
    :glob:
    :hidden:
-   :caption: Tutorial
+   :caption: Examples
 
    tutorial/example_reasoning_basic.md
    tutorial/example_reasoning_advanced.md
@@ -22,8 +22,16 @@ Welcome to Trinity-RFT's documentation!
    tutorial/example_multi_turn.md
    tutorial/example_dpo.md
    tutorial/example_data_functionalities.md
-   tutorial/trinity_configs.md
+
+.. toctree::
+   :maxdepth: 2
+   :glob:
+   :hidden:
+   :caption: Guidelines
+
    tutorial/trinity_programming_guide.md
+   tutorial/trinity_configs.md
+   tutorial/example_mix_algo.md
 
 .. toctree::
    :maxdepth: 1
@@ -33,6 +41,7 @@ Welcome to Trinity-RFT's documentation!
    build_api/trinity.buffer
    build_api/trinity.explorer
    build_api/trinity.trainer
+   build_api/trinity.algorithm
    build_api/trinity.manager
    build_api/trinity.common
    build_api/trinity.utils

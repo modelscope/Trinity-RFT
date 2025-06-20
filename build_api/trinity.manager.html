@@ -6,21 +6,21 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>trinity.manager &mdash; Trinity-RFT 0.1.1 documentation</title>
+  <title>trinity.manager &mdash; Trinity-RFT 0.2.0.dev0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=a58bc63e"></script>
+      <script src="../_static/documentation_options.js?v=130a53a1"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="trinity.manager.config_registry" href="trinity.manager.config_registry.html" />
-    <link rel="prev" title="trinity.trainer.verl" href="trinity.trainer.verl.html" /> 
+    <link rel="prev" title="trinity.algorithm.sample_strategy" href="trinity.algorithm.sample_strategy.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -42,22 +42,27 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_reasoning_basic.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_reasoning_advanced.html">Off-Policy RFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_async_mode.html">Asynchronous RFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_multi_turn.html">Multi-Turn RFT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tutorial/example_dpo.html">Offline DPO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/example_dpo.html">Offline DPO and SFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_data_functionalities.html">Data Processing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tutorial/trinity_configs.html">Configuration Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Guidelines</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/trinity_programming_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/trinity_configs.html">Configuration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/example_mix_algo.html">Algorithm Development</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="trinity.buffer.html">trinity.buffer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="trinity.explorer.html">trinity.explorer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="trinity.trainer.html">trinity.trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trinity.algorithm.html">trinity.algorithm</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">trinity.manager</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html">trinity.manager.config_registry</a></li>
@@ -73,6 +78,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-trinity.manager">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#trinity.manager.Trainer"><code class="docutils literal notranslate"><span class="pre">Trainer</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#trinity.manager.TrainEngineWrapper"><code class="docutils literal notranslate"><span class="pre">TrainEngineWrapper</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#trinity.manager.get_trainer_wrapper"><code class="docutils literal notranslate"><span class="pre">get_trainer_wrapper()</span></code></a></li>
 </ul>
@@ -115,6 +121,33 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="trinity.manager.config_registry.html">trinity.manager.config_registry</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="trinity.manager.config_registry.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.manager.config_registry.html#module-trinity.manager.config_registry.algorithm_config_manager">trinity.manager.config_registry.algorithm_config_manager module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_algorithm_type"><code class="docutils literal notranslate"><span class="pre">set_algorithm_type()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_repeat_times"><code class="docutils literal notranslate"><span class="pre">set_repeat_times()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_sample_strategy"><code class="docutils literal notranslate"><span class="pre">set_sample_strategy()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_expert_data_ratio_in_sample_strategy"><code class="docutils literal notranslate"><span class="pre">set_expert_data_ratio_in_sample_strategy()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_advantage_fn"><code class="docutils literal notranslate"><span class="pre">set_advantage_fn()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_gamma_in_advantage_fn"><code class="docutils literal notranslate"><span class="pre">set_gamma_in_advantage_fn()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_lam_in_advantage_fn"><code class="docutils literal notranslate"><span class="pre">set_lam_in_advantage_fn()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_epsilon_in_advantage_fn"><code class="docutils literal notranslate"><span class="pre">set_epsilon_in_advantage_fn()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_opmd_baseline_in_advantage_fn"><code class="docutils literal notranslate"><span class="pre">set_opmd_baseline_in_advantage_fn()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_tau_in_advantage_fn"><code class="docutils literal notranslate"><span class="pre">set_tau_in_advantage_fn()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_kl_loss_fn"><code class="docutils literal notranslate"><span class="pre">set_kl_loss_fn()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_kl_coef_in_kl_loss_fn"><code class="docutils literal notranslate"><span class="pre">set_kl_coef_in_kl_loss_fn()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_kl_penalty_fn"><code class="docutils literal notranslate"><span class="pre">set_kl_penalty_fn()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_adaptive_in_kl_penalty_fn"><code class="docutils literal notranslate"><span class="pre">set_adaptive_in_kl_penalty_fn()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_kl_coef_in_kl_penalty_fn"><code class="docutils literal notranslate"><span class="pre">set_kl_coef_in_kl_penalty_fn()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_policy_loss_fn"><code class="docutils literal notranslate"><span class="pre">set_policy_loss_fn()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_clip_range_in_policy_loss_fn"><code class="docutils literal notranslate"><span class="pre">set_clip_range_in_policy_loss_fn()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_use_token_level_loss_in_policy_loss_fn"><code class="docutils literal notranslate"><span class="pre">set_use_token_level_loss_in_policy_loss_fn()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_beta_in_policy_loss_fn"><code class="docutils literal notranslate"><span class="pre">set_beta_in_policy_loss_fn()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_label_smoothing_in_policy_loss_fn"><code class="docutils literal notranslate"><span class="pre">set_label_smoothing_in_policy_loss_fn()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_tau_in_policy_loss_fn"><code class="docutils literal notranslate"><span class="pre">set_tau_in_policy_loss_fn()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_mu_in_policy_loss_fn"><code class="docutils literal notranslate"><span class="pre">set_mu_in_policy_loss_fn()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_entropy_loss_fn"><code class="docutils literal notranslate"><span class="pre">set_entropy_loss_fn()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_entropy_coef_in_entropy_loss_fn"><code class="docutils literal notranslate"><span class="pre">set_entropy_coef_in_entropy_loss_fn()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="trinity.manager.config_registry.html#module-trinity.manager.config_registry.buffer_config_manager">trinity.manager.config_registry.buffer_config_manager module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.set_total_epochs"><code class="docutils literal notranslate"><span class="pre">set_total_epochs()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.set_train_batch_size"><code class="docutils literal notranslate"><span class="pre">set_train_batch_size()</span></code></a></li>
@@ -188,10 +221,6 @@
 <li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.set_checkpoint_root_dir"><code class="docutils literal notranslate"><span class="pre">set_checkpoint_root_dir()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.check_checkpoint_root_dir"><code class="docutils literal notranslate"><span class="pre">check_checkpoint_root_dir()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.set_monitor_type"><code class="docutils literal notranslate"><span class="pre">set_monitor_type()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.set_algorithm_type"><code class="docutils literal notranslate"><span class="pre">set_algorithm_type()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.set_repeat_times"><code class="docutils literal notranslate"><span class="pre">set_repeat_times()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.set_gamma"><code class="docutils literal notranslate"><span class="pre">set_gamma()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.set_lam"><code class="docutils literal notranslate"><span class="pre">set_lam()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.set_model_path"><code class="docutils literal notranslate"><span class="pre">set_model_path()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.check_model_path"><code class="docutils literal notranslate"><span class="pre">check_model_path()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.set_critic_model_path"><code class="docutils literal notranslate"><span class="pre">set_critic_model_path()</span></code></a></li>
@@ -206,11 +235,7 @@
 <li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_trainer_type"><code class="docutils literal notranslate"><span class="pre">set_trainer_type()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_save_interval"><code class="docutils literal notranslate"><span class="pre">set_save_interval()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_enable_preview"><code class="docutils literal notranslate"><span class="pre">set_enable_preview()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_actor_use_kl_loss"><code class="docutils literal notranslate"><span class="pre">set_actor_use_kl_loss()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_actor_kl_loss_coef"><code class="docutils literal notranslate"><span class="pre">set_actor_kl_loss_coef()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_actor_entropy_coef"><code class="docutils literal notranslate"><span class="pre">set_actor_entropy_coef()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_actor_grad_clip"><code class="docutils literal notranslate"><span class="pre">set_actor_grad_clip()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_actor_clip_ratio"><code class="docutils literal notranslate"><span class="pre">set_actor_clip_ratio()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_training_args"><code class="docutils literal notranslate"><span class="pre">set_training_args()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_ppo_epochs"><code class="docutils literal notranslate"><span class="pre">set_ppo_epochs()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_training_strategy"><code class="docutils literal notranslate"><span class="pre">set_training_strategy()</span></code></a></li>
@@ -240,9 +265,6 @@
 <li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_actor_lr"><code class="docutils literal notranslate"><span class="pre">set_actor_lr()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_actor_warmup_style"><code class="docutils literal notranslate"><span class="pre">set_actor_warmup_style()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_actor_lr_warmup_steps_ratio"><code class="docutils literal notranslate"><span class="pre">set_actor_lr_warmup_steps_ratio()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_actor_tau"><code class="docutils literal notranslate"><span class="pre">set_actor_tau()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_actor_opmd_baseline"><code class="docutils literal notranslate"><span class="pre">set_actor_opmd_baseline()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_actor_use_uid"><code class="docutils literal notranslate"><span class="pre">set_actor_use_uid()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_actor_kl_loss_type"><code class="docutils literal notranslate"><span class="pre">set_actor_kl_loss_type()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_actor_checkpoint"><code class="docutils literal notranslate"><span class="pre">set_actor_checkpoint()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_critic_lr"><code class="docutils literal notranslate"><span class="pre">set_critic_lr()</span></code></a></li>
@@ -352,6 +374,67 @@
 <section id="module-trinity.manager">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-trinity.manager" title="Link to this heading"></a></h2>
 <dl class="py class">
+<dt class="sig sig-object py" id="trinity.manager.Trainer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.manager.</span></span><span class="sig-name descname"><span class="pre">Trainer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/trainer/trainer.html#Trainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.manager.Trainer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Consume the experience and train the model.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.manager.Trainer.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/trainer/trainer.html#Trainer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.manager.Trainer.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.manager.Trainer.prepare">
+<span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/trainer/trainer.html#Trainer.prepare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.manager.Trainer.prepare" title="Link to this definition"></a></dt>
+<dd><p>Prepare the trainer.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.manager.Trainer.train">
+<span class="sig-name descname"><span class="pre">train</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/trinity/trainer/trainer.html#Trainer.train"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.manager.Trainer.train" title="Link to this definition"></a></dt>
+<dd><p>Train the model.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.manager.Trainer.train_step">
+<span class="sig-name descname"><span class="pre">train_step</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/trainer/trainer.html#Trainer.train_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.manager.Trainer.train_step" title="Link to this definition"></a></dt>
+<dd><p>Train one step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Whether to continue training.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.manager.Trainer.need_sync">
+<span class="sig-name descname"><span class="pre">need_sync</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/trainer/trainer.html#Trainer.need_sync"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.manager.Trainer.need_sync" title="Link to this definition"></a></dt>
+<dd><p>Whether to sync the model weight.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.manager.Trainer.sync_weight">
+<span class="sig-name descname"><span class="pre">sync_weight</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/trainer/trainer.html#Trainer.sync_weight"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.manager.Trainer.sync_weight" title="Link to this definition"></a></dt>
+<dd><p>Sync the model weight.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.manager.Trainer.flush_log">
+<span class="sig-name descname"><span class="pre">flush_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/trainer/trainer.html#Trainer.flush_log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.manager.Trainer.flush_log" title="Link to this definition"></a></dt>
+<dd><p>Flush the log of the current step.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.manager.Trainer.shutdown">
+<span class="sig-name descname"><span class="pre">shutdown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/trainer/trainer.html#Trainer.shutdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.manager.Trainer.shutdown" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="trinity.manager.TrainEngineWrapper">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.manager.</span></span><span class="sig-name descname"><span class="pre">TrainEngineWrapper</span></span><a class="reference internal" href="../_modules/trinity/trainer/trainer.html#TrainEngineWrapper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.manager.TrainEngineWrapper" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
@@ -362,22 +445,16 @@
 <dd><p>Do some preparation before training started.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.manager.TrainEngineWrapper.train_rft_step">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">train_rft_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiences</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/trainer/trainer.html#TrainEngineWrapper.train_rft_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.manager.TrainEngineWrapper.train_rft_step" title="Link to this definition"></a></dt>
-<dd><p>Train on the RFT data.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="trinity.manager.TrainEngineWrapper.train_step_num">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">train_step_num</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#trinity.manager.TrainEngineWrapper.train_step_num" title="Link to this definition"></a></dt>
+<dd><p>Get the current training step number.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="trinity.manager.TrainEngineWrapper.train_sft_step">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">train_sft_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiences</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/trainer/trainer.html#TrainEngineWrapper.train_sft_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.manager.TrainEngineWrapper.train_sft_step" title="Link to this definition"></a></dt>
-<dd><p>Train on the SFT data.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.manager.TrainEngineWrapper.train_dpo_step">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">train_dpo_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiences</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/trainer/trainer.html#TrainEngineWrapper.train_dpo_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.manager.TrainEngineWrapper.train_dpo_step" title="Link to this definition"></a></dt>
-<dd><p>Train on the DPO data.</p>
+<dt class="sig sig-object py" id="trinity.manager.TrainEngineWrapper.train_step">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">train_step</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/trainer/trainer.html#TrainEngineWrapper.train_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.manager.TrainEngineWrapper.train_step" title="Link to this definition"></a></dt>
+<dd><p>Training.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -393,12 +470,6 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="trinity.manager.TrainEngineWrapper.set_mode">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algo_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.constants.AlgorithmType" title="trinity.common.constants.AlgorithmType"><span class="pre">AlgorithmType</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/trainer/trainer.html#TrainEngineWrapper.set_mode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.manager.TrainEngineWrapper.set_mode" title="Link to this definition"></a></dt>
-<dd><p>Set training mode.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="trinity.manager.TrainEngineWrapper.shutdown">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">shutdown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/trainer/trainer.html#TrainEngineWrapper.shutdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.manager.TrainEngineWrapper.shutdown" title="Link to this definition"></a></dt>
 <dd><p>Shutdown the engine.</p>
@@ -408,7 +479,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="trinity.manager.get_trainer_wrapper">
-<span class="sig-prename descclassname"><span class="pre">trinity.manager.</span></span><span class="sig-name descname"><span class="pre">get_trainer_wrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#trinity.manager.TrainEngineWrapper" title="trinity.trainer.trainer.TrainEngineWrapper"><span class="pre">TrainEngineWrapper</span></a></span></span><a class="reference internal" href="../_modules/trinity/trainer/trainer.html#get_trainer_wrapper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.manager.get_trainer_wrapper" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.</span></span><span class="sig-name descname"><span class="pre">get_trainer_wrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="trinity.trainer.html#trinity.trainer.trainer.TrainEngineWrapper" title="trinity.trainer.trainer.TrainEngineWrapper"><span class="pre">TrainEngineWrapper</span></a></span></span><a class="reference internal" href="../_modules/trinity/trainer/trainer.html#get_trainer_wrapper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.manager.get_trainer_wrapper" title="Link to this definition"></a></dt>
 <dd><p>Get a trainer wrapper.</p>
 </dd></dl>
 
@@ -419,7 +490,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="trinity.trainer.verl.html" class="btn btn-neutral float-left" title="trinity.trainer.verl" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="trinity.algorithm.sample_strategy.html" class="btn btn-neutral float-left" title="trinity.algorithm.sample_strategy" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="trinity.manager.config_registry.html" class="btn btn-neutral float-right" title="trinity.manager.config_registry" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

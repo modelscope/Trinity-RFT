@@ -84,15 +84,18 @@ e.g., utilizing NCCL (when feasible) for model weight synchronization, sequence 
 
 ## Getting started
 
-
-*Note: this project is currently under active development; comments and suggestions are welcome!*
-
+```{note}
+Note: This project is currently under active development; comments and suggestions are welcome!
+```
 
 
 
 ### Step 1: preparations
 
-
+Trinity-RFT requires
+Python version >= 3.10,
+CUDA version >= 12.4,
+and at least 2 GPUs.
 
 
 Installation from source (recommended):
@@ -145,11 +148,6 @@ docker build -f scripts/docker/Dockerfile -t trinity-rft:latest .
 # run the docker image
 docker run -it --gpus all --shm-size="64g" --rm -v $PWD:/workspace -v <root_path_of_data_and_checkpoints>:/data trinity-rft:latest
 ```
-
-Trinity-RFT requires
-Python version >= 3.10,
-CUDA version >= 12.4,
-and at least 2 GPUs.
 
 
 ### Step 2: prepare dataset and model
@@ -243,7 +241,7 @@ trinity run --config <config_path>
 
 
 
-For example, below is the command for fine-tuning Qwen-2.5-1.5B-Instruct on GSM8k dataset using GRPO algorithm:
+For example, below is the command for fine-tuning Qwen2.5-1.5B-Instruct on GSM8k dataset using GRPO algorithm:
 
 ```shell
 trinity run --config examples/grpo_gsm8k/gsm8k.yaml
@@ -251,7 +249,7 @@ trinity run --config examples/grpo_gsm8k/gsm8k.yaml
 
 
 
-More example config files can be found in `examples`.
+More example config files can be found in [`examples`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/).
 
 
 
@@ -260,7 +258,7 @@ For more detailed examples about how to use Trinity-RFT, please refer to the fol
 + [Off-policy mode of RFT](tutorial/example_reasoning_advanced.md)
 + [Asynchronous mode of RFT](tutorial/example_async_mode.md)
 + [Multi-turn tasks](tutorial/example_multi_turn.md)
-+ [Offline learning by DPO](tutorial/example_dpo.md)
++ [Offline learning by DPO or SFT](tutorial/example_dpo.md)
 + [Advanced data processing / human-in-the-loop](tutorial/example_data_functionalities.md)
 
 

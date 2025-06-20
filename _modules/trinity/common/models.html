@@ -5,14 +5,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>trinity.common.models &mdash; Trinity-RFT 0.1.1 documentation</title>
+  <title>trinity.common.models &mdash; Trinity-RFT 0.2.0.dev0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=a58bc63e"></script>
+      <script src="../../../_static/documentation_options.js?v=130a53a1"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -39,22 +39,27 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorial/example_reasoning_basic.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorial/example_reasoning_advanced.html">Off-Policy RFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorial/example_async_mode.html">Asynchronous RFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorial/example_multi_turn.html">Multi-Turn RFT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../tutorial/example_dpo.html">Offline DPO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial/example_dpo.html">Offline DPO and SFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorial/example_data_functionalities.html">Data Processing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../tutorial/trinity_configs.html">Configuration Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Guidelines</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorial/trinity_programming_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial/trinity_configs.html">Configuration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial/example_mix_algo.html">Algorithm Development</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../build_api/trinity.buffer.html">trinity.buffer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../build_api/trinity.explorer.html">trinity.explorer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../build_api/trinity.trainer.html">trinity.trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../build_api/trinity.algorithm.html">trinity.algorithm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../build_api/trinity.manager.html">trinity.manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../build_api/trinity.common.html">trinity.common</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../build_api/trinity.utils.html">trinity.utils</a></li>
@@ -192,6 +197,7 @@
                 <span class="n">num_gpus</span><span class="o">=</span><span class="mi">0</span> <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">rollout_model</span><span class="o">.</span><span class="n">tensor_parallel_size</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">1</span><span class="p">,</span>
                 <span class="n">scheduling_strategy</span><span class="o">=</span><span class="n">PlacementGroupSchedulingStrategy</span><span class="p">(</span>
                     <span class="n">placement_group</span><span class="o">=</span><span class="n">pg</span><span class="p">,</span>
+                    <span class="n">placement_group_capture_child_tasks</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                     <span class="n">placement_group_bundle_index</span><span class="o">=</span><span class="n">bundles_for_engine</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                 <span class="p">),</span>
             <span class="p">)</span>
@@ -210,6 +216,7 @@
             <span class="n">bundles_for_engine</span> <span class="o">=</span> <span class="n">allocator</span><span class="o">.</span><span class="n">allocate</span><span class="p">(</span><span class="n">model_config</span><span class="o">.</span><span class="n">tensor_parallel_size</span><span class="p">)</span>
             <span class="n">model_config</span><span class="o">.</span><span class="n">enable_openai_api</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">model_config</span><span class="o">.</span><span class="n">engine_type</span> <span class="o">=</span> <span class="s2">&quot;vllm_async&quot;</span>
+            <span class="n">model_config</span><span class="o">.</span><span class="n">bundle_indices</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">bid</span><span class="p">)</span> <span class="k">for</span> <span class="n">bid</span> <span class="ow">in</span> <span class="n">bundles_for_engine</span><span class="p">])</span>
             <span class="n">engines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">ray</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">vLLMAysncRolloutModel</span><span class="p">)</span>
                 <span class="o">.</span><span class="n">options</span><span class="p">(</span>
@@ -217,6 +224,7 @@
                     <span class="n">num_gpus</span><span class="o">=</span><span class="mi">0</span> <span class="k">if</span> <span class="n">model_config</span><span class="o">.</span><span class="n">tensor_parallel_size</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">1</span><span class="p">,</span>
                     <span class="n">scheduling_strategy</span><span class="o">=</span><span class="n">PlacementGroupSchedulingStrategy</span><span class="p">(</span>
                         <span class="n">placement_group</span><span class="o">=</span><span class="n">pg</span><span class="p">,</span>
+                        <span class="n">placement_group_capture_child_tasks</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                         <span class="n">placement_group_bundle_index</span><span class="o">=</span><span class="n">bundles_for_engine</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                     <span class="p">),</span>
                 <span class="p">)</span>

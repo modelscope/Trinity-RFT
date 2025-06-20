@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>trinity.manager.config_registry &mdash; Trinity-RFT 0.1.1 documentation</title>
+  <title>trinity.manager.config_registry &mdash; Trinity-RFT 0.2.0.dev0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=a58bc63e"></script>
+      <script src="../_static/documentation_options.js?v=130a53a1"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -42,22 +42,27 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_reasoning_basic.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_reasoning_advanced.html">Off-Policy RFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_async_mode.html">Asynchronous RFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_multi_turn.html">Multi-Turn RFT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tutorial/example_dpo.html">Offline DPO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/example_dpo.html">Offline DPO and SFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_data_functionalities.html">Data Processing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tutorial/trinity_configs.html">Configuration Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Guidelines</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/trinity_programming_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/trinity_configs.html">Configuration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/example_mix_algo.html">Algorithm Development</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="trinity.buffer.html">trinity.buffer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="trinity.explorer.html">trinity.explorer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="trinity.trainer.html">trinity.trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trinity.algorithm.html">trinity.algorithm</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="trinity.manager.html">trinity.manager</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="trinity.manager.html#subpackages">Subpackages</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">trinity.manager.config_registry</a></li>
@@ -102,6 +107,129 @@
 <h1>trinity.manager.config_registry<a class="headerlink" href="#trinity-manager-config-registry" title="Link to this heading"></a></h1>
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-trinity.manager.config_registry.algorithm_config_manager">
+<span id="trinity-manager-config-registry-algorithm-config-manager-module"></span><h2>trinity.manager.config_registry.algorithm_config_manager module<a class="headerlink" href="#module-trinity.manager.config_registry.algorithm_config_manager" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.algorithm_config_manager.set_algorithm_type">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.algorithm_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_algorithm_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.algorithm_config_manager.set_algorithm_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.algorithm_config_manager.set_repeat_times">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.algorithm_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_repeat_times</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.algorithm_config_manager.set_repeat_times" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.algorithm_config_manager.set_sample_strategy">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.algorithm_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_sample_strategy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.algorithm_config_manager.set_sample_strategy" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.algorithm_config_manager.set_expert_data_ratio_in_sample_strategy">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.algorithm_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_expert_data_ratio_in_sample_strategy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.algorithm_config_manager.set_expert_data_ratio_in_sample_strategy" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.algorithm_config_manager.set_advantage_fn">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.algorithm_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_advantage_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.algorithm_config_manager.set_advantage_fn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.algorithm_config_manager.set_gamma_in_advantage_fn">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.algorithm_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_gamma_in_advantage_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.algorithm_config_manager.set_gamma_in_advantage_fn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.algorithm_config_manager.set_lam_in_advantage_fn">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.algorithm_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_lam_in_advantage_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.algorithm_config_manager.set_lam_in_advantage_fn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.algorithm_config_manager.set_epsilon_in_advantage_fn">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.algorithm_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_epsilon_in_advantage_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.algorithm_config_manager.set_epsilon_in_advantage_fn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.algorithm_config_manager.set_opmd_baseline_in_advantage_fn">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.algorithm_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_opmd_baseline_in_advantage_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.algorithm_config_manager.set_opmd_baseline_in_advantage_fn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.algorithm_config_manager.set_tau_in_advantage_fn">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.algorithm_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_tau_in_advantage_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.algorithm_config_manager.set_tau_in_advantage_fn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.algorithm_config_manager.set_kl_loss_fn">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.algorithm_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_kl_loss_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.algorithm_config_manager.set_kl_loss_fn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.algorithm_config_manager.set_kl_coef_in_kl_loss_fn">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.algorithm_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_kl_coef_in_kl_loss_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.algorithm_config_manager.set_kl_coef_in_kl_loss_fn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.algorithm_config_manager.set_kl_penalty_fn">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.algorithm_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_kl_penalty_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.algorithm_config_manager.set_kl_penalty_fn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.algorithm_config_manager.set_adaptive_in_kl_penalty_fn">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.algorithm_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_adaptive_in_kl_penalty_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.algorithm_config_manager.set_adaptive_in_kl_penalty_fn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.algorithm_config_manager.set_kl_coef_in_kl_penalty_fn">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.algorithm_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_kl_coef_in_kl_penalty_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.algorithm_config_manager.set_kl_coef_in_kl_penalty_fn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.algorithm_config_manager.set_policy_loss_fn">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.algorithm_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_policy_loss_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.algorithm_config_manager.set_policy_loss_fn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.algorithm_config_manager.set_clip_range_in_policy_loss_fn">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.algorithm_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_clip_range_in_policy_loss_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.algorithm_config_manager.set_clip_range_in_policy_loss_fn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.algorithm_config_manager.set_use_token_level_loss_in_policy_loss_fn">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.algorithm_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_use_token_level_loss_in_policy_loss_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.algorithm_config_manager.set_use_token_level_loss_in_policy_loss_fn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.algorithm_config_manager.set_beta_in_policy_loss_fn">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.algorithm_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_beta_in_policy_loss_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.algorithm_config_manager.set_beta_in_policy_loss_fn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.algorithm_config_manager.set_label_smoothing_in_policy_loss_fn">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.algorithm_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_label_smoothing_in_policy_loss_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.algorithm_config_manager.set_label_smoothing_in_policy_loss_fn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.algorithm_config_manager.set_tau_in_policy_loss_fn">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.algorithm_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_tau_in_policy_loss_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.algorithm_config_manager.set_tau_in_policy_loss_fn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.algorithm_config_manager.set_mu_in_policy_loss_fn">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.algorithm_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_mu_in_policy_loss_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.algorithm_config_manager.set_mu_in_policy_loss_fn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.algorithm_config_manager.set_entropy_loss_fn">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.algorithm_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_entropy_loss_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.algorithm_config_manager.set_entropy_loss_fn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.algorithm_config_manager.set_entropy_coef_in_entropy_loss_fn">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.algorithm_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_entropy_coef_in_entropy_loss_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.algorithm_config_manager.set_entropy_coef_in_entropy_loss_fn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </section>
 <section id="module-trinity.manager.config_registry.buffer_config_manager">
 <span id="trinity-manager-config-registry-buffer-config-manager-module"></span><h2>trinity.manager.config_registry.buffer_config_manager module<a class="headerlink" href="#module-trinity.manager.config_registry.buffer_config_manager" title="Link to this heading"></a></h2>
@@ -489,26 +617,6 @@ registered configuration function. Ensure your function accepts this keyword arg
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="trinity.manager.config_registry.model_config_manager.set_algorithm_type">
-<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.model_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_algorithm_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.model_config_manager.set_algorithm_type" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.manager.config_registry.model_config_manager.set_repeat_times">
-<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.model_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_repeat_times</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.model_config_manager.set_repeat_times" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.manager.config_registry.model_config_manager.set_gamma">
-<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.model_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_gamma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.model_config_manager.set_gamma" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.manager.config_registry.model_config_manager.set_lam">
-<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.model_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_lam</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.model_config_manager.set_lam" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="trinity.manager.config_registry.model_config_manager.set_model_path">
 <span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.model_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_model_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.model_config_manager.set_model_path" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -567,28 +675,8 @@ registered configuration function. Ensure your function accepts this keyword arg
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_actor_use_kl_loss">
-<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_actor_use_kl_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_use_kl_loss" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_actor_kl_loss_coef">
-<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_actor_kl_loss_coef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_kl_loss_coef" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_actor_entropy_coef">
-<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_actor_entropy_coef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_entropy_coef" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_actor_grad_clip">
 <span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_actor_grad_clip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_grad_clip" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_actor_clip_ratio">
-<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_actor_clip_ratio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_clip_ratio" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -734,21 +822,6 @@ registered configuration function. Ensure your function accepts this keyword arg
 <dl class="py function">
 <dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_actor_lr_warmup_steps_ratio">
 <span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_actor_lr_warmup_steps_ratio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_lr_warmup_steps_ratio" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_actor_tau">
-<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_actor_tau</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_tau" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_actor_opmd_baseline">
-<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_actor_opmd_baseline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_opmd_baseline" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_actor_use_uid">
-<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_actor_use_uid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_actor_use_uid" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">

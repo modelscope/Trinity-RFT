@@ -3,14 +3,6 @@ trinity.trainer.verl
 Submodules
 ----------
 
-trinity.trainer.verl.core\_algos module
----------------------------------------
-
-.. automodule:: trinity.trainer.verl.core_algos
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 trinity.trainer.verl.dp\_actor module
 -------------------------------------
 
@@ -23,14 +15,6 @@ trinity.trainer.verl.fsdp\_workers module
 -----------------------------------------
 
 .. automodule:: trinity.trainer.verl.fsdp_workers
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-trinity.trainer.verl.ray\_trainer module
-----------------------------------------
-
-.. automodule:: trinity.trainer.verl.ray_trainer
    :members:
    :undoc-members:
    :show-inheritance:

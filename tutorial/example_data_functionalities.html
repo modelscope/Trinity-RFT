@@ -6,21 +6,21 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Data Processing &mdash; Trinity-RFT 0.1.1 documentation</title>
+  <title>Data Processing &mdash; Trinity-RFT 0.2.0.dev0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=a58bc63e"></script>
+      <script src="../_static/documentation_options.js?v=130a53a1"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Configuration Guide" href="trinity_configs.html" />
-    <link rel="prev" title="Offline DPO" href="example_dpo.html" /> 
+    <link rel="next" title="Developer Guide" href="trinity_programming_guide.html" />
+    <link rel="prev" title="Offline DPO and SFT" href="example_dpo.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -42,36 +42,41 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="example_reasoning_basic.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_reasoning_advanced.html">Off-Policy RFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_async_mode.html">Asynchronous RFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_multi_turn.html">Multi-Turn RFT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_dpo.html">Offline DPO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_dpo.html">Offline DPO and SFT</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Data Processing</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#example-reasoning-task">Example: reasoning task</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#example-data-processor-for-task-pipeline">Example: Data Processor for Task Pipeline</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#data-preparation">Data Preparation</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#configure-the-data-module">Configure the Data Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configure-the-data-processor">Configure the Data Processor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#exploring-training">Exploring &amp; Training</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#example-human-in-the-loop">Example: human in the loop</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#example-human-in-the-loop">Example: Human in the Loop</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id1">Data Preparation</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id3">Configure the Data Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Configure the Data Processor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#start-running">Start Running</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="trinity_configs.html">Configuration Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Guidelines</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="trinity_programming_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trinity_configs.html">Configuration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_mix_algo.html">Algorithm Development</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.buffer.html">trinity.buffer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.explorer.html">trinity.explorer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.trainer.html">trinity.trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.algorithm.html">trinity.algorithm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.manager.html">trinity.manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.common.html">trinity.common</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.utils.html">trinity.utils</a></li>
@@ -101,23 +106,23 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="data-processing">
+  <section class="tex2jax_ignore mathjax_ignore" id="data-processing">
 <h1>Data Processing<a class="headerlink" href="#data-processing" title="Link to this heading"></a></h1>
-<section id="example-reasoning-task">
-<h2>Example: reasoning task<a class="headerlink" href="#example-reasoning-task" title="Link to this heading"></a></h2>
-<p>In this example, you will learn how to apply the data module of Trinity-RFT to prepare the dataset before exploring and training. This example takes GSM-8K dataset as the example dataset to figure out:</p>
+<section id="example-data-processor-for-task-pipeline">
+<h2>Example: Data Processor for Task Pipeline<a class="headerlink" href="#example-data-processor-for-task-pipeline" title="Link to this heading"></a></h2>
+<p>In this example, you will learn how to apply the data processor of Trinity-RFT to prepare and prioritize the dataset before task exploring and training. This example takes GSM-8K dataset as the example dataset to figure out:</p>
 <ol class="arabic simple">
-<li><p>how to prepare the data module</p></li>
-<li><p>how to configure the data module</p></li>
-<li><p>what the data module can do</p></li>
+<li><p>how to prepare the data processor</p></li>
+<li><p>how to configure the data processor</p></li>
+<li><p>what the data processor can do</p></li>
 </ol>
-<p>Before getting started, you need to prepare the main environment of Trinity-RFT according to the <a class="reference internal" href="../main.html"><span class="std std-doc">installation section of the README file</span></a>, and you need to install <a class="reference external" href="https://www.postgresql.org/docs/current/tutorial-install.html">postgresql</a> as well.</p>
+<p>Before getting started, you need to prepare the main environment of Trinity-RFT according to the <a class="reference internal" href="../main.html"><span class="std std-doc">installation section of the README file</span></a>.</p>
 <section id="data-preparation">
 <h3>Data Preparation<a class="headerlink" href="#data-preparation" title="Link to this heading"></a></h3>
-<section id="prepare-the-data-module">
-<h4>Prepare the Data Module<a class="headerlink" href="#prepare-the-data-module" title="Link to this heading"></a></h4>
-<p>As the overall framework of Trinity-RFT shows, the data module is one of the high-level functions. Trinity-RFT encapsulates the data module as an independent service to avoid dependency conflict issues. Thus you need to prepare a split environment for this module and start the server.</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># prepare split environments, including the one of data module</span>
+<section id="prepare-the-data-processor">
+<h4>Prepare the Data Processor<a class="headerlink" href="#prepare-the-data-processor" title="Link to this heading"></a></h4>
+<p>As the overall framework of Trinity-RFT shows, the data processor is one of the high-level functions. Trinity-RFT encapsulates the data processor as an independent service to avoid dependency conflict issues. Thus you need to prepare a split environment for this module and start the server.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># prepare split environments, including the one of data processor</span>
 python<span class="w"> </span>scripts/install.py
 
 <span class="c1"># start all split servers</span>
@@ -126,52 +131,72 @@ python<span class="w"> </span>scripts/start_servers.py
 </div>
 </section>
 </section>
-<section id="configure-the-data-module">
-<h3>Configure the Data Module<a class="headerlink" href="#configure-the-data-module" title="Link to this heading"></a></h3>
-<p>Trinity-RFT uses a unified config file to manage all config items. For the data module, you need to focus on the <code class="docutils literal notranslate"><span class="pre">data</span></code> section in the config file.</p>
+<section id="configure-the-data-processor">
+<h3>Configure the Data Processor<a class="headerlink" href="#configure-the-data-processor" title="Link to this heading"></a></h3>
+<p>Trinity-RFT uses a unified config file to manage all config items. For the data processor, you need to focus on the <code class="docutils literal notranslate"><span class="pre">data_processor</span></code> section in the config file.</p>
 <p>In this example, assume that you need to rank all math questions and corresponding answers by their difficulties. So you can set these config items like the following example:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">data_processor</span><span class="p">:</span>
-<span class="w">  </span><span class="c1"># basic info</span>
-<span class="w">  </span><span class="nt">source_data_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;/path/to/gsm8k&#39;</span>
-<span class="w">  </span><span class="nt">load_kwargs</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">split</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;train&#39;</span><span class="w">  </span><span class="c1"># only need the train split</span>
-<span class="w">  </span><span class="nt">format</span><span class="p">:</span><span class="w">  </span><span class="c1"># set the field mappings</span>
-<span class="w">    </span><span class="nt">prompt_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;question&#39;</span>
-<span class="w">    </span><span class="nt">response_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;answer&#39;</span>
-<span class="w">  </span><span class="c1"># database related. The result dataset will be stored in the database.</span>
-<span class="w">  </span><span class="nt">db_url</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;postgresql://{user_name}@localhost:5432/{db_name}&#39;</span>
+<span class="w">  </span><span class="nt">data_processor_url</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;http://127.0.0.1:5005/data_processor&#39;</span>
+<span class="w">  </span><span class="c1"># task pipeline related</span>
+<span class="w">  </span><span class="nt">task_pipeline</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># I/O buffers</span>
+<span class="w">    </span><span class="nt">input_buffers</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;raw_input&#39;</span>
+<span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/GSM8K/</span>
+<span class="w">        </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;file&#39;</span>
+<span class="w">        </span><span class="nt">raw</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">output_buffer</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;raw_output&#39;</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/OUTPUT/JSONL/FILE</span>
+<span class="w">      </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;file&#39;</span>
+<span class="w">    </span><span class="c1"># format mapping</span>
+<span class="w">    </span><span class="nt">format</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">prompt_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;question&#39;</span>
+<span class="w">      </span><span class="nt">response_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;answer&#39;</span>
 </pre></div>
 </div>
-<p>Here you can set the basic information for the GSM-8K dataset, database information that is used to store the result dataset, and some other items about downstream dataset loading for exploring and training:</p>
+<p>Here you can set the basic buffers for the GSM-8K dataset input and output and some other items about downstream dataset loading for exploring and training:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">source_data_path</span></code>: the path to the raw dataset.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">load_kwargs</span></code>: extra config arguments for loading the raw dataset. Mainly for the <code class="docutils literal notranslate"><span class="pre">load_dataset</span></code> method in HuggingFace <code class="docutils literal notranslate"><span class="pre">datasets</span></code> library.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">data_processor_url</span></code>: the URL of the data processor service, which is started in the previous step.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">task_pipeline</span></code>: the configs for the task pipeline. Task pipeline is used to process the raw dataset. It consists of several inner configs:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">input_buffers</span></code>: the input buffers for the task pipeline. We usually load from raw dataset files in this pipeline, thus we need to the dataset <code class="docutils literal notranslate"><span class="pre">path</span></code> and set the <code class="docutils literal notranslate"><span class="pre">storage_type</span></code> to “file” and set <code class="docutils literal notranslate"><span class="pre">raw</span></code> to True. It allows multiple input buffers. We can name each buffer with the <code class="docutils literal notranslate"><span class="pre">name</span></code> field.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">output_buffer</span></code>: the output buffer for the task pipeline. We usually store the processed dataset in files as well, thus we need to set the <code class="docutils literal notranslate"><span class="pre">storage_type</span></code> to “file”.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">format</span></code>: some dataset format config items, which are used to map original data field names to unified ones.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">db_url</span></code>: the URL of the postgresql database to store the result dataset.</p></li>
 </ul>
-<p>In addition, there are several config items related to the data active iterator, which is used to prepare a better dataset. The core part of the data active iterator, Data-Juicer, provides tens of operators to help clean or calculate key information for each sample in the dataset. You can configure this part depending on how familiar you are with Data-Juicer.</p>
+</li>
+</ul>
+<p>In addition, there are several config items related to the data active iterator in <code class="docutils literal notranslate"><span class="pre">task_pipeline</span></code> part, which is used to prepare a better dataset. The core part of the data active iterator, Data-Juicer, provides tens of operators to help clean or calculate key information for each sample in the dataset. You can configure this part depending on how familiar you are with Data-Juicer.</p>
 <section id="not-familiar-with-data-juicer">
 <h4>Not familiar with Data-Juicer<a class="headerlink" href="#not-familiar-with-data-juicer" title="Link to this heading"></a></h4>
-<p>If you are not familiar with Data-Juicer, the data module provides a natural-language-based method to config the data processing recipe. What you need to do is only describe the demands of how you want to prepare for the raw dataset, and an agent will be invoked to arrange the data processing recipe for you. Here is an example:</p>
+<p>If you are not familiar with Data-Juicer, the data processor provides a natural-language-based method to config the data processing recipe. What you need to do is only describe the demands of how you want to prepare for the raw dataset, and an agent will be invoked to arrange the data processing recipe for you. Here is an example:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">data_processor</span><span class="p">:</span>
-<span class="w">  </span><span class="c1"># basic info</span>
-<span class="w">  </span><span class="nt">source_data_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;/path/to/gsm8k&#39;</span>
-<span class="w">  </span><span class="nt">load_kwargs</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">split</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;train&#39;</span><span class="w">  </span><span class="c1"># only need the train split</span>
-<span class="w">  </span><span class="nt">format</span><span class="p">:</span><span class="w">  </span><span class="c1"># set the field mappings</span>
-<span class="w">    </span><span class="nt">prompt_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;question&#39;</span>
-<span class="w">    </span><span class="nt">response_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;answer&#39;</span>
-<span class="w">  </span><span class="c1"># database related. The result dataset will be stored in the database.</span>
-<span class="w">  </span><span class="nt">db_url</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;postgresql://{user_name}@localhost:5432/{db_name}&#39;</span>
+<span class="w">  </span><span class="nt">data_processor_url</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;http://127.0.0.1:5005/data_processor&#39;</span>
+<span class="w">  </span><span class="c1"># task pipeline related</span>
+<span class="w">  </span><span class="nt">task_pipeline</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># I/O buffers</span>
+<span class="w">    </span><span class="nt">input_buffers</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;raw_input&#39;</span>
+<span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/GSM8K/</span>
+<span class="w">        </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;file&#39;</span>
+<span class="w">        </span><span class="nt">raw</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">output_buffer</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;raw_output&#39;</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/OUTPUT/JSONL/FILE</span>
+<span class="w">      </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;file&#39;</span>
+<span class="w">    </span><span class="c1"># format mapping</span>
+<span class="w">    </span><span class="nt">format</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">prompt_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;question&#39;</span>
+<span class="w">      </span><span class="nt">response_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;answer&#39;</span>
 
-<span class="w">  </span><span class="c1">#### new part about data active iterator</span>
-<span class="w">  </span><span class="nt">dj_process_desc</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;Please</span><span class="nv"> </span><span class="s">compute</span><span class="nv"> </span><span class="s">difficulty</span><span class="nv"> </span><span class="s">scores</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">these</span><span class="nv"> </span><span class="s">math</span><span class="nv"> </span><span class="s">questions.&#39;</span>
-<span class="w">  </span><span class="nt">agent_model_name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;qwen-max&#39;</span>
-<span class="w">  </span><span class="nt">agent_model_config</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">config_name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;my-qwen-instruction&#39;</span>
-<span class="w">    </span><span class="nt">model_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;dashscope_chat&#39;</span>
-<span class="w">    </span><span class="nt">model_name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;qwen2.5-72b-instruct&#39;</span>
-<span class="w">  </span><span class="nt">clean_strategy</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;iterative&#39;</span>
+<span class="w">    </span><span class="c1">#### new part about data active iterator</span>
+<span class="w">    </span><span class="nt">dj_process_desc</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;Please</span><span class="nv"> </span><span class="s">compute</span><span class="nv"> </span><span class="s">difficulty</span><span class="nv"> </span><span class="s">scores</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">these</span><span class="nv"> </span><span class="s">math</span><span class="nv"> </span><span class="s">questions.&#39;</span>
+<span class="w">    </span><span class="nt">agent_model_name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;qwen-max&#39;</span>
+<span class="w">    </span><span class="nt">agent_model_config</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">config_name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;my-qwen-instruction&#39;</span>
+<span class="w">      </span><span class="nt">model_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;dashscope_chat&#39;</span>
+<span class="w">      </span><span class="nt">model_name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;qwen2.5-72b-instruct&#39;</span>
+<span class="w">    </span><span class="nt">clean_strategy</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;iterative&#39;</span>
 </pre></div>
 </div>
 <p>You can write your demand description in config item <code class="docutils literal notranslate"><span class="pre">dj_process_desc</span></code>, and set the model name and configs used for the agent in config items <code class="docutils literal notranslate"><span class="pre">agent_model_name</span></code> and <code class="docutils literal notranslate"><span class="pre">agent_model_config</span></code>. Here we use Qwen2.5-72b-Instruct as our recipe managing agent. And you can set the <code class="docutils literal notranslate"><span class="pre">clean_strategy</span></code> to ‘iterative’ to get a better dataset.</p>
@@ -193,26 +218,34 @@ python<span class="w"> </span>scripts/start_servers.py
 </div>
 <p>After preparing the Data-Juicer data processing recipe, you can set the <code class="docutils literal notranslate"><span class="pre">dj_config_path</span></code> item in the Trinity-RFT config file to the path to this recipe. For example:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">data_processor</span><span class="p">:</span>
-<span class="w">  </span><span class="c1"># basic info</span>
-<span class="w">  </span><span class="nt">source_data_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;/path/to/gsm8k&#39;</span>
-<span class="w">  </span><span class="nt">load_kwargs</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">split</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;train&#39;</span><span class="w">  </span><span class="c1"># only need the train split</span>
-<span class="w">  </span><span class="nt">format</span><span class="p">:</span><span class="w">  </span><span class="c1"># set the field mappings</span>
-<span class="w">    </span><span class="nt">prompt_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;question&#39;</span>
-<span class="w">    </span><span class="nt">response_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;answer&#39;</span>
-<span class="w">  </span><span class="c1"># database related. The result dataset will be stored in the database.</span>
-<span class="w">  </span><span class="nt">db_url</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;postgresql://{user_name}@localhost:5432/{db_name}&#39;</span>
+<span class="w">  </span><span class="nt">data_processor_url</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;http://127.0.0.1:5005/data_processor&#39;</span>
+<span class="w">  </span><span class="c1"># task pipeline related</span>
+<span class="w">  </span><span class="nt">task_pipeline</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># I/O buffers</span>
+<span class="w">    </span><span class="nt">input_buffers</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;raw_input&#39;</span>
+<span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/GSM8K/</span>
+<span class="w">        </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;file&#39;</span>
+<span class="w">        </span><span class="nt">raw</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">output_buffer</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;raw_output&#39;</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/OUTPUT/JSONL/FILE</span>
+<span class="w">      </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;file&#39;</span>
+<span class="w">    </span><span class="c1"># format mapping</span>
+<span class="w">    </span><span class="nt">format</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">prompt_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;question&#39;</span>
+<span class="w">      </span><span class="nt">response_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;answer&#39;</span>
 
-<span class="w">  </span><span class="c1">#### new part about data active iterator</span>
-<span class="w">  </span><span class="nt">dj_config_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;/path/to/the/Data-Juicer/data/processing/recipe/above.yaml&#39;</span>
-<span class="w">  </span><span class="nt">clean_strategy</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;iterative&#39;</span>
+<span class="w">    </span><span class="c1">#### new part about data active iterator</span>
+<span class="w">    </span><span class="nt">dj_config_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;/path/to/the/Data-Juicer/data/processing/recipe/above.yaml&#39;</span>
+<span class="w">    </span><span class="nt">clean_strategy</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;iterative&#39;</span>
 </pre></div>
 </div>
 <p>And you can set the <code class="docutils literal notranslate"><span class="pre">clean_strategy</span></code> to ‘iterative’ to get a better dataset.</p>
 <p>All config items in the <code class="docutils literal notranslate"><span class="pre">data</span></code> section can be found <a class="reference internal" href="trinity_configs.html"><span class="std std-doc">here</span></a>. A prepared config file for this example of GSM-8K can be found in <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k/gsm8k.yaml">the config file of gsm8k</a>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Only when one of <code class="docutils literal notranslate"><span class="pre">dj_process_desc</span></code> and <code class="docutils literal notranslate"><span class="pre">dj_config_path</span></code> is provided, the data module and the data active iterator will be activated. Otherwise, this part will be skipped and it will enter into the exploring stage directly.</p>
+<p>Only when one of <code class="docutils literal notranslate"><span class="pre">xxx_pipeline</span></code> is provided, and one of <code class="docutils literal notranslate"><span class="pre">dj_process_desc</span></code> and <code class="docutils literal notranslate"><span class="pre">dj_config_path</span></code> in the pipeline config is provided, the data processor and the data active iterator will be activated. Otherwise, this part will be skipped and it will enter into the exploring stage directly.</p>
 </div>
 </section>
 </section>
@@ -229,19 +262,19 @@ ray<span class="w"> </span>start<span class="w"> </span>--address<span class="o"
 trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>&lt;Trinity-RFT_config_path&gt;
 </pre></div>
 </div>
-<p>If you follow the steps above, Trinity-RFT will send a request to the data module server, the data active iterator will be activated and compute difficulty scores for each sample in the raw dataset. After that, the data module server stores the result dataset into the database, when exploring begins, it will load the prepared dataset and continue the downstream steps.</p>
+<p>If you follow the steps above, Trinity-RFT will send a request to the data processor server, the data active iterator will be activated, compute difficulty scores for each sample in the raw dataset, and rank the dataset according to difficulty scores. After that, the data processor server stores the result dataset into the output buffer, when exploring begins, it will load the prepared dataset and continue the downstream steps.</p>
 </section>
 </section>
 <section id="example-human-in-the-loop">
-<h2>Example: human in the loop<a class="headerlink" href="#example-human-in-the-loop" title="Link to this heading"></a></h2>
+<h2>Example: Human in the Loop<a class="headerlink" href="#example-human-in-the-loop" title="Link to this heading"></a></h2>
 <p>Sometimes, you might need to involve human feedbacks for some raw data. In this example, you will learn how to annotate raw data to get a better dataset before training. This example takes an example Q&amp;A dataset and tries to select the chosen and rejected ones for DPO method.</p>
-<p>Before getting started, you need to prepare the main environment of Trinity-RFT according to the installation section of the README file, install postgresql, and <a class="reference external" href="https://github.com/modelscope/data-juicer/tree/main/tools/humanops">start a label-studio server</a> from Data-Juicer from source.</p>
+<p>Before getting started, you need to prepare the main environment of Trinity-RFT according to the installation section of the README file, and <a class="reference external" href="https://github.com/modelscope/data-juicer/tree/main/tools/humanops">start a label-studio server</a> from Data-Juicer from source.</p>
 <section id="id1">
 <h3>Data Preparation<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
 <section id="id2">
-<h4>Prepare the Data Module<a class="headerlink" href="#id2" title="Link to this heading"></a></h4>
-<p>As the overall framework of Trinity-RFT shows, the data module is one of the high-level functions. Trinity-RFT encapsulates the data module as an independent service to avoid dependency conflict issues. Thus you need to prepare a split environment for this module and start the server.</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># prepare split environments, including the one of data module</span>
+<h4>Prepare the Data Processor<a class="headerlink" href="#id2" title="Link to this heading"></a></h4>
+<p>As the overall framework of Trinity-RFT shows, the data processor is one of the high-level functions. Trinity-RFT encapsulates the data processor as an independent service to avoid dependency conflict issues. Thus you need to prepare a split environment for this module and start the server.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># prepare split environments, including the one of data processor</span>
 python<span class="w"> </span>scripts/install.py
 
 <span class="c1"># start all split servers</span>
@@ -251,26 +284,33 @@ python<span class="w"> </span>scripts/start_servers.py
 </section>
 </section>
 <section id="id3">
-<h3>Configure the Data Module<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
-<p>Trinity-RFT uses a unified config file to manage all config items. For the data module, you need to focus on the <code class="docutils literal notranslate"><span class="pre">data</span></code> section in the config file.</p>
-<p>In this example, assume that you need to rank all math questions and corresponding answers by their difficulties. So you can set these config items like the following example:</p>
+<h3>Configure the Data Processor<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<p>Trinity-RFT uses a unified config file to manage all config items. For the data processor, you need to focus on the <code class="docutils literal notranslate"><span class="pre">data_processor</span></code> section in the config file.</p>
+<p>In this example, assume that you need to select the chosen and rejected responses for DPO method. So you can set these config items like the following example:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">data_processor</span><span class="p">:</span>
-<span class="w">  </span><span class="c1"># basic info</span>
-<span class="w">  </span><span class="nt">source_data_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;tests/test_data/test_human_annotator&#39;</span>
-<span class="w">  </span><span class="nt">load_kwargs</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">split</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;train&#39;</span><span class="w">  </span><span class="c1"># only need the train split</span>
-<span class="w">  </span><span class="nt">format</span><span class="p">:</span><span class="w">  </span><span class="c1"># set the field mappings</span>
-<span class="w">    </span><span class="nt">prompt_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;prompt&#39;</span>
-<span class="w">    </span><span class="nt">chosen_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;chosen&#39;</span>
-<span class="w">    </span><span class="nt">rejected_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;rejected&#39;</span>
-<span class="w">  </span><span class="c1">#### new part about data active iterator</span>
-<span class="w">  </span><span class="nt">dj_config_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;tests/test_configs/human_annotator_test_dj_cfg.yaml&#39;</span>
-<span class="w">  </span><span class="c1"># database related. The result dataset will be stored in the database.</span>
-<span class="w">  </span><span class="nt">db_url</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;postgresql://{user_name}@localhost:5432/{db_name}&#39;</span>
+<span class="w">  </span><span class="nt">data_processor_url</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;http://127.0.0.1:5005/data_processor&#39;</span>
+<span class="w">  </span><span class="c1"># task pipeline related</span>
+<span class="w">  </span><span class="nt">task_pipeline</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># I/O buffers</span>
+<span class="w">    </span><span class="nt">input_buffers</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;raw_input&#39;</span>
+<span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;tests/test_data/test_human_annotator&#39;</span>
+<span class="w">        </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;file&#39;</span>
+<span class="w">        </span><span class="nt">raw</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">output_buffer</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;raw_output&#39;</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;./outputs/task_pipeline_output/prioritized_gsm8k.jsonl&#39;</span>
+<span class="w">      </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;file&#39;</span>
+<span class="w">    </span><span class="nt">format</span><span class="p">:</span><span class="w">  </span><span class="c1"># set the field mappings</span>
+<span class="w">      </span><span class="nt">prompt_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;prompt&#39;</span>
+<span class="w">      </span><span class="nt">chosen_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;chosen&#39;</span>
+<span class="w">      </span><span class="nt">rejected_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;rejected&#39;</span>
+<span class="w">    </span><span class="c1">#### new part about data active iterator</span>
+<span class="w">    </span><span class="nt">dj_config_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;tests/test_configs/human_annotator_test_dj_cfg.yaml&#39;</span>
 </pre></div>
 </div>
 <p>Here you can set the basic information for the example dataset, database information that is used to store the result dataset, and some other items about downstream dataset loading for exploring and training, which is similar to the example above.</p>
-<p>For this example, we assume that you are somehow familiar with the basic usage of Data-Juicer, so we need to prepare a Data-Juicer data processing recipe in <code class="docutils literal notranslate"><span class="pre">tests/test_configs/human_annotator_test_dj_cfg.yaml</span></code> that includes an OP of <code class="docutils literal notranslate"><span class="pre">human_preference_annotation_mapper</span></code>. For example:</p>
+<p>For this example, we assume that you are somehow familiar with the basic usage of Data-Juicer, so we need to prepare a Data-Juicer data processing recipe in <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/blob/main/tests/test_configs/human_annotator_test_dj_cfg.yaml"><code class="docutils literal notranslate"><span class="pre">tests/test_configs/human_annotator_test_dj_cfg.yaml</span></code></a> that includes an OP of <code class="docutils literal notranslate"><span class="pre">human_preference_annotation_mapper</span></code>. For example:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">project_name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;demo-human-annotator&#39;</span>
 <span class="nt">np</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w">  </span><span class="c1"># set np to 1 for human annotation OPs</span>
 
@@ -303,7 +343,7 @@ python<span class="w"> </span>scripts/start_servers.py
 </section>
 <section id="start-running">
 <h3>Start Running<a class="headerlink" href="#start-running" title="Link to this heading"></a></h3>
-<p>When you start running with the RFT config, the data module will start the OP <code class="docutils literal notranslate"><span class="pre">human_preference_annotation_mapper</span></code>, and then you can find a new project on the “Projects” page of the label-studio server.</p>
+<p>When you start running with the RFT config, the data processor will start the OP <code class="docutils literal notranslate"><span class="pre">human_preference_annotation_mapper</span></code>, and then you can find a new project on the “Projects” page of the label-studio server.</p>
 <p><img alt="" src="../_images/data-projects.png" /></p>
 <p>You can click and enter into this project, and all the samples that need to be annotated are listed on the page.</p>
 <p><img alt="" src="../_images/data-in-projects.png" /></p>
@@ -320,8 +360,8 @@ python<span class="w"> </span>scripts/start_servers.py
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="example_dpo.html" class="btn btn-neutral float-left" title="Offline DPO" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="trinity_configs.html" class="btn btn-neutral float-right" title="Configuration Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="example_dpo.html" class="btn btn-neutral float-left" title="Offline DPO and SFT" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="trinity_programming_guide.html" class="btn btn-neutral float-right" title="Developer Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

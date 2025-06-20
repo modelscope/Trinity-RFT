@@ -5,14 +5,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>trinity.trainer.verl_trainer &mdash; Trinity-RFT 0.1.1 documentation</title>
+  <title>trinity.trainer.verl_trainer &mdash; Trinity-RFT 0.2.0.dev0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=a58bc63e"></script>
+      <script src="../../../_static/documentation_options.js?v=130a53a1"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -39,22 +39,27 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorial/example_reasoning_basic.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorial/example_reasoning_advanced.html">Off-Policy RFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorial/example_async_mode.html">Asynchronous RFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorial/example_multi_turn.html">Multi-Turn RFT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../tutorial/example_dpo.html">Offline DPO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial/example_dpo.html">Offline DPO and SFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorial/example_data_functionalities.html">Data Processing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../tutorial/trinity_configs.html">Configuration Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Guidelines</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorial/trinity_programming_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial/trinity_configs.html">Configuration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial/example_mix_algo.html">Algorithm Development</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../build_api/trinity.buffer.html">trinity.buffer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../build_api/trinity.explorer.html">trinity.explorer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../build_api/trinity.trainer.html">trinity.trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../build_api/trinity.algorithm.html">trinity.algorithm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../build_api/trinity.manager.html">trinity.manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../build_api/trinity.common.html">trinity.common</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../build_api/trinity.utils.html">trinity.utils</a></li>
@@ -91,36 +96,41 @@
 <span class="sd">Modified from verl/trainer/ppo/ray_trainer.py</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pprint</span><span class="w"> </span><span class="kn">import</span> <span class="n">pprint</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ray</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">omegaconf</span><span class="w"> </span><span class="kn">import</span> <span class="n">OmegaConf</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">hf_tokenizer</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.fs</span><span class="w"> </span><span class="kn">import</span> <span class="n">copy_local_path_from_hdfs</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">AlgorithmType</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experiences</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.trainer.trainer</span><span class="w"> </span><span class="kn">import</span> <span class="n">TrainEngineWrapper</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.trainer.verl.ray_trainer</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">DataProto</span><span class="p">,</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">verl.trainer.ppo.metric_utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">compute_data_metrics</span><span class="p">,</span>
+    <span class="n">compute_throughout_metrics</span><span class="p">,</span>
+    <span class="n">compute_timing_metrics</span><span class="p">,</span>
+    <span class="n">reduce_metrics</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">verl.trainer.ppo.ray_trainer</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">RayClassWithInitArgs</span><span class="p">,</span>
     <span class="n">RayPPOTrainer</span><span class="p">,</span>
     <span class="n">RayWorkerGroup</span><span class="p">,</span>
     <span class="n">ResourcePoolManager</span><span class="p">,</span>
     <span class="n">Role</span><span class="p">,</span>
     <span class="n">_timer</span><span class="p">,</span>
-    <span class="n">apply_kl_penalty</span><span class="p">,</span>
-    <span class="n">compute_advantage</span><span class="p">,</span>
-    <span class="n">compute_data_metrics</span><span class="p">,</span>
-    <span class="n">compute_throughout_metrics</span><span class="p">,</span>
-    <span class="n">compute_timing_metrics</span><span class="p">,</span>
+    <span class="n">create_colocated_worker_cls</span><span class="p">,</span>
     <span class="n">find_latest_ckpt_path</span><span class="p">,</span>
-    <span class="n">np</span><span class="p">,</span>
-    <span class="n">pprint</span><span class="p">,</span>
-    <span class="n">reduce_metrics</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">hf_tokenizer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.fs</span><span class="w"> </span><span class="kn">import</span> <span class="n">copy_local_path_from_hdfs</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm</span><span class="w"> </span><span class="kn">import</span> <span class="n">ADVANTAGE_FN</span><span class="p">,</span> <span class="n">KL_FN</span><span class="p">,</span> <span class="n">SAMPLE_STRATEGY</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.algorithm</span><span class="w"> </span><span class="kn">import</span> <span class="n">ALGORITHM_TYPE</span><span class="p">,</span> <span class="n">SFTAlgorithm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.algorithm_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">AlgorithmManager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">prefix_metrics</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">TRAINER_NAME</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experiences</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.trainer.trainer</span><span class="w"> </span><span class="kn">import</span> <span class="n">TrainEngineWrapper</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.monitor</span><span class="w"> </span><span class="kn">import</span> <span class="n">MONITOR</span>
 
 
@@ -207,7 +217,24 @@
         <span class="n">resource_pool_manager</span> <span class="o">=</span> <span class="n">ResourcePoolManager</span><span class="p">(</span>
             <span class="n">resource_pool_spec</span><span class="o">=</span><span class="n">resource_pool_spec</span><span class="p">,</span> <span class="n">mapping</span><span class="o">=</span><span class="n">mapping</span>
         <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">algorithm_config</span> <span class="o">=</span> <span class="n">global_config</span><span class="o">.</span><span class="n">algorithm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">algorithm_manager</span> <span class="o">=</span> <span class="n">AlgorithmManager</span><span class="p">(</span><span class="n">global_config</span><span class="p">)</span>
 
+        <span class="c1"># specify advantage function for various rft algorithms</span>
+        <span class="n">algorithm</span> <span class="o">=</span> <span class="n">ALGORITHM_TYPE</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">algorithm_config</span><span class="o">.</span><span class="n">algorithm_type</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">algorithm</span><span class="o">.</span><span class="n">use_advantage</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">advantage_fn</span> <span class="o">=</span> <span class="n">ADVANTAGE_FN</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">algorithm_config</span><span class="o">.</span><span class="n">advantage_fn</span><span class="p">)(</span>
+                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">algorithm_config</span><span class="o">.</span><span class="n">advantage_fn_args</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kl_fn</span> <span class="o">=</span> <span class="n">KL_FN</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">algorithm_config</span><span class="o">.</span><span class="n">kl_penalty_fn</span><span class="p">)(</span>
+                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">algorithm_config</span><span class="o">.</span><span class="n">kl_penalty_fn_args</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_strategy</span> <span class="o">=</span> <span class="n">SAMPLE_STRATEGY</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">global_config</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">sample_strategy</span><span class="p">)(</span>
+            <span class="n">buffer_config</span><span class="o">=</span><span class="n">global_config</span><span class="o">.</span><span class="n">buffer</span><span class="p">,</span>
+            <span class="n">trainer_type</span><span class="o">=</span><span class="n">global_config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_type</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">global_config</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">sample_strategy_args</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">config</span><span class="p">,</span>
             <span class="n">tokenizer</span><span class="p">,</span>
@@ -216,37 +243,139 @@
             <span class="n">ray_worker_group_cls</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">init_workers</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">algorithm_type</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">PPO</span>
-        <span class="p">)</span>  <span class="c1"># TODO: initialize algorithm_type according to config</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">MONITOR</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">global_config</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">monitor_type</span><span class="p">)(</span>
             <span class="n">project</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">project_name</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">experiment_name</span><span class="p">,</span>
-            <span class="n">role</span><span class="o">=</span><span class="s2">&quot;trainer&quot;</span><span class="p">,</span>
+            <span class="n">role</span><span class="o">=</span><span class="n">TRAINER_NAME</span><span class="p">,</span>
             <span class="n">config</span><span class="o">=</span><span class="n">global_config</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reset_experiences_example_table</span><span class="p">()</span></div>
 
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># TODO</span>
+        <span class="n">algorithm</span> <span class="o">=</span> <span class="n">ALGORITHM_TYPE</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">algorithm_config</span><span class="o">.</span><span class="n">algorithm_type</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_critic</span> <span class="o">=</span> <span class="n">algorithm</span><span class="o">.</span><span class="n">use_critic</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_validate_config</span><span class="p">()</span>
+
+<div class="viewcode-block" id="VerlPPOTrainerWrapper.init_workers">
+<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.init_workers">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">init_workers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize distributed training workers using Ray backend.</span>
+
+
+<span class="sd">        Creates:</span>
+
+<span class="sd">        1. Ray resource pools from configuration</span>
+
+<span class="sd">        2. Worker groups for each role (actor, critic, etc.)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resource_pool_manager</span><span class="o">.</span><span class="n">create_resource_pool</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">resource_pool_to_cls</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">pool</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">pool</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">resource_pool_manager</span><span class="o">.</span><span class="n">resource_pool_dict</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="p">}</span>
+
+        <span class="c1"># create actor and rollout</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hybrid_engine</span><span class="p">:</span>
+            <span class="n">resource_pool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resource_pool_manager</span><span class="o">.</span><span class="n">get_resource_pool</span><span class="p">(</span><span class="n">Role</span><span class="o">.</span><span class="n">ActorRollout</span><span class="p">)</span>
+            <span class="n">actor_rollout_cls</span> <span class="o">=</span> <span class="n">RayClassWithInitArgs</span><span class="p">(</span>
+                <span class="bp">cls</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">role_worker_mapping</span><span class="p">[</span><span class="n">Role</span><span class="o">.</span><span class="n">ActorRollout</span><span class="p">],</span>
+                <span class="n">config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="p">,</span>
+                <span class="n">role</span><span class="o">=</span><span class="s2">&quot;actor&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resource_pool_to_cls</span><span class="p">[</span><span class="n">resource_pool</span><span class="p">][</span><span class="s2">&quot;actor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">actor_rollout_cls</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+        <span class="c1"># create critic</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_critic</span><span class="p">:</span>
+            <span class="n">resource_pool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resource_pool_manager</span><span class="o">.</span><span class="n">get_resource_pool</span><span class="p">(</span><span class="n">Role</span><span class="o">.</span><span class="n">Critic</span><span class="p">)</span>
+            <span class="n">critic_cls</span> <span class="o">=</span> <span class="n">RayClassWithInitArgs</span><span class="p">(</span>
+                <span class="bp">cls</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">role_worker_mapping</span><span class="p">[</span><span class="n">Role</span><span class="o">.</span><span class="n">Critic</span><span class="p">],</span> <span class="n">config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">critic</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resource_pool_to_cls</span><span class="p">[</span><span class="n">resource_pool</span><span class="p">][</span><span class="s2">&quot;critic&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">critic_cls</span>
+
+        <span class="c1"># create reference policy if needed</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_reference_policy</span><span class="p">:</span>
+            <span class="n">resource_pool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resource_pool_manager</span><span class="o">.</span><span class="n">get_resource_pool</span><span class="p">(</span><span class="n">Role</span><span class="o">.</span><span class="n">RefPolicy</span><span class="p">)</span>
+            <span class="n">ref_policy_cls</span> <span class="o">=</span> <span class="n">RayClassWithInitArgs</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">role_worker_mapping</span><span class="p">[</span><span class="n">Role</span><span class="o">.</span><span class="n">RefPolicy</span><span class="p">],</span>
+                <span class="n">config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="p">,</span>
+                <span class="n">role</span><span class="o">=</span><span class="s2">&quot;ref&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resource_pool_to_cls</span><span class="p">[</span><span class="n">resource_pool</span><span class="p">][</span><span class="s2">&quot;ref&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ref_policy_cls</span>
+
+        <span class="c1"># create a reward model if reward_fn is None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_rm</span><span class="p">:</span>
+            <span class="c1"># we create a RM here</span>
+            <span class="n">resource_pool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resource_pool_manager</span><span class="o">.</span><span class="n">get_resource_pool</span><span class="p">(</span><span class="n">Role</span><span class="o">.</span><span class="n">RewardModel</span><span class="p">)</span>
+            <span class="n">rm_cls</span> <span class="o">=</span> <span class="n">RayClassWithInitArgs</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">role_worker_mapping</span><span class="p">[</span><span class="n">Role</span><span class="o">.</span><span class="n">RewardModel</span><span class="p">],</span> <span class="n">config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">reward_model</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resource_pool_to_cls</span><span class="p">[</span><span class="n">resource_pool</span><span class="p">][</span><span class="s2">&quot;rm&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rm_cls</span>
+
+        <span class="c1"># initialize WorkerGroup</span>
+        <span class="c1"># NOTE: if you want to use a different resource pool for each role, which can support different parallel size,</span>
+        <span class="c1"># you should not use `create_colocated_worker_cls`.</span>
+        <span class="c1"># Instead, directly pass different resource pool to different worker groups.</span>
+        <span class="c1"># See https://github.com/volcengine/verl/blob/master/examples/ray/tutorial.ipynb for more information.</span>
+        <span class="n">all_wg</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">wg_kwargs</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># Setting up kwargs for RayWorkerGroup</span>
+        <span class="k">if</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="p">,</span> <span class="s2">&quot;ray_wait_register_center_timeout&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">wg_kwargs</span><span class="p">[</span>
+                <span class="s2">&quot;ray_wait_register_center_timeout&quot;</span>
+            <span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">ray_wait_register_center_timeout</span>
+        <span class="k">for</span> <span class="n">resource_pool</span><span class="p">,</span> <span class="n">class_dict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">resource_pool_to_cls</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">worker_dict_cls</span> <span class="o">=</span> <span class="n">create_colocated_worker_cls</span><span class="p">(</span><span class="n">class_dict</span><span class="o">=</span><span class="n">class_dict</span><span class="p">)</span>
+            <span class="n">wg_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ray_worker_group_cls</span><span class="p">(</span>
+                <span class="n">resource_pool</span><span class="o">=</span><span class="n">resource_pool</span><span class="p">,</span>
+                <span class="n">ray_cls_with_init</span><span class="o">=</span><span class="n">worker_dict_cls</span><span class="p">,</span>
+                <span class="n">device_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device_name</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">wg_kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">spawn_wg</span> <span class="o">=</span> <span class="n">wg_dict</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="n">prefix_set</span><span class="o">=</span><span class="n">class_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="n">all_wg</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">spawn_wg</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_critic</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">critic_wg</span> <span class="o">=</span> <span class="n">all_wg</span><span class="p">[</span><span class="s2">&quot;critic&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">critic_wg</span><span class="o">.</span><span class="n">init_model</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_reference_policy</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref_in_actor</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ref_policy_wg</span> <span class="o">=</span> <span class="n">all_wg</span><span class="p">[</span><span class="s2">&quot;ref&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ref_policy_wg</span><span class="o">.</span><span class="n">init_model</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_rm</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rm_wg</span> <span class="o">=</span> <span class="n">all_wg</span><span class="p">[</span><span class="s2">&quot;rm&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rm_wg</span><span class="o">.</span><span class="n">init_model</span><span class="p">()</span>
+
+        <span class="c1"># we should create rollout at the end so that vllm can have a better estimation of kv cache memory</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_wg</span> <span class="o">=</span> <span class="n">all_wg</span><span class="p">[</span><span class="s2">&quot;actor&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_wg</span><span class="o">.</span><span class="n">init_model</span><span class="p">()</span></div>
+
+
 <div class="viewcode-block" id="VerlPPOTrainerWrapper.reset_experiences_example_table">
 <a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.reset_experiences_example_table">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">reset_experiences_example_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">experiences_example_table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
-            <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;step&quot;</span><span class="p">,</span> <span class="s2">&quot;reward&quot;</span><span class="p">,</span> <span class="s2">&quot;prompt&quot;</span><span class="p">,</span> <span class="s2">&quot;response&quot;</span><span class="p">]</span>
-        <span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_exps_to_log</span> <span class="o">=</span> <span class="p">[]</span></div>
 
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">train_step_num</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span>
 
 <div class="viewcode-block" id="VerlPPOTrainerWrapper.prepare">
 <a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.prepare">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_wg</span><span class="o">.</span><span class="n">setup_weight_sync_group</span><span class="p">()</span>
 
+        <span class="c1"># The global step counter, initialized to 0</span>
+        <span class="c1"># It represents the total number of training steps completed so far</span>
+        <span class="c1"># We increment this counter at the beginning of each training step</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sft_warmup_step_num</span> <span class="o">=</span> <span class="mi">0</span>
 
         <span class="c1"># load checkpoint before doing anything</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_load_checkpoint</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sft_warmup_step_num</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">sft_warmup_steps</span><span class="p">)</span>
 
         <span class="c1"># perform validation before training</span>
         <span class="c1"># currently, we only support validation using the reward_function.</span>
@@ -255,204 +384,38 @@
             <span class="n">pprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Initial validation metrics: </span><span class="si">{</span><span class="n">val_metrics</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">val_metrics</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;val_only&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
-                <span class="k">return</span>
-
-        <span class="c1"># we start from step 1</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">+=</span> <span class="mi">1</span></div>
+                <span class="k">return</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_create_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_dataset</span><span class="p">,</span> <span class="n">val_dataset</span><span class="p">,</span> <span class="n">collate_fn</span><span class="p">,</span> <span class="n">train_sampler</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">train_dataloader</span> <span class="o">=</span> <span class="n">_InternalDataLoader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
         <span class="c1"># TODO: compute total training steps</span>
-        <span class="c1"># if self.algorithm_type.is_dpo():</span>
-        <span class="c1">#     train_batch_size = self.config.buffer.read_batch_size</span>
-        <span class="c1">#     total_epochs = self.config.trainer.total_epochs</span>
-        <span class="c1">#     from math import ceil</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_training_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">total_training_steps</span> <span class="ow">or</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span>
 
-        <span class="c1">#     self.total_training_steps = ceil(</span>
-        <span class="c1">#         self.train_dataloader.size() // train_batch_size * total_epochs</span>
-        <span class="c1">#     )</span>
-        <span class="c1">#     if not self.config.actor_rollout_ref.actor.optim.total_training_steps &gt; 0:</span>
-        <span class="c1">#         self.config.actor_rollout_ref.actor.optim.total_training_steps = (</span>
-        <span class="c1">#             self.total_training_steps</span>
-        <span class="c1">#         )</span>
-        <span class="c1">#     if not self.config.critic.optim.total_training_steps &gt; 0:</span>
-        <span class="c1">#         self.config.critic.optim.total_training_steps = self.total_training_steps</span>
-        <span class="c1"># else:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">total_training_steps</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
-
-<div class="viewcode-block" id="VerlPPOTrainerWrapper.train_dpo_step">
-<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.train_dpo_step">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">train_dpo_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">experiences</span><span class="p">:</span> <span class="n">Experiences</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<div class="viewcode-block" id="VerlPPOTrainerWrapper.train_step">
+<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.train_step">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">train_step</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>  <span class="c1"># noqa C901</span>
         <span class="n">metrics</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">timing_raw</span> <span class="o">=</span> <span class="p">{}</span>
-
-        <span class="k">with</span> <span class="n">_timer</span><span class="p">(</span><span class="s2">&quot;step&quot;</span><span class="p">,</span> <span class="n">timing_raw</span><span class="p">):</span>
-            <span class="c1"># generate a batch</span>
-            <span class="n">attention_mask</span> <span class="o">=</span> <span class="n">experiences</span><span class="o">.</span><span class="n">attention_masks</span>
-            <span class="n">cumsum</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">attention_mask</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-            <span class="n">position_ids</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">cumsum</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">long</span><span class="p">()</span>
-
-            <span class="n">batch</span> <span class="o">=</span> <span class="n">DataProto</span><span class="o">.</span><span class="n">from_single_dict</span><span class="p">(</span>
-                <span class="p">{</span>
-                    <span class="s2">&quot;uid&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">experiences</span><span class="o">.</span><span class="n">run_ids</span><span class="p">),</span>  <span class="c1"># useless</span>
-                    <span class="s2">&quot;position_ids&quot;</span><span class="p">:</span> <span class="n">position_ids</span><span class="p">,</span>
-                    <span class="s2">&quot;input_ids&quot;</span><span class="p">:</span> <span class="n">experiences</span><span class="o">.</span><span class="n">tokens</span><span class="o">.</span><span class="n">long</span><span class="p">(),</span>
-                    <span class="s2">&quot;responses&quot;</span><span class="p">:</span> <span class="n">experiences</span><span class="o">.</span><span class="n">tokens</span><span class="p">[:,</span> <span class="n">experiences</span><span class="o">.</span><span class="n">prompt_length</span> <span class="p">:]</span><span class="o">.</span><span class="n">long</span><span class="p">(),</span>
-                    <span class="s2">&quot;attention_mask&quot;</span><span class="p">:</span> <span class="n">attention_mask</span><span class="o">.</span><span class="n">long</span><span class="p">(),</span>
-                    <span class="s2">&quot;response_mask&quot;</span><span class="p">:</span> <span class="p">(</span>
-                        <span class="n">experiences</span><span class="o">.</span><span class="n">action_masks</span><span class="p">[:,</span> <span class="n">experiences</span><span class="o">.</span><span class="n">prompt_length</span> <span class="p">:]</span><span class="o">.</span><span class="n">long</span><span class="p">()</span>
-                        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">experiences</span><span class="p">,</span> <span class="s2">&quot;action_masks&quot;</span><span class="p">)</span>
-                        <span class="ow">and</span> <span class="n">experiences</span><span class="o">.</span><span class="n">action_masks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                        <span class="k">else</span> <span class="n">attention_mask</span><span class="p">[:,</span> <span class="n">experiences</span><span class="o">.</span><span class="n">prompt_length</span> <span class="p">:]</span><span class="o">.</span><span class="n">long</span><span class="p">()</span>
-                    <span class="p">),</span>
-                <span class="p">}</span>
-            <span class="p">)</span>
-            <span class="n">batch</span><span class="o">.</span><span class="n">meta_info</span><span class="p">[</span><span class="s2">&quot;temperature&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">rollout</span><span class="o">.</span><span class="n">temperature</span>
-
-            <span class="c1"># self._balance_batch(batch, metrics=metrics)  # _balance_batch will shuffle the batch, which will break DPO</span>
-            <span class="c1"># TODO: implement a new _balance_batch for DPO</span>
-
-            <span class="c1"># compute global_valid tokens</span>
-            <span class="n">batch</span><span class="o">.</span><span class="n">meta_info</span><span class="p">[</span><span class="s2">&quot;global_token_num&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
-                <span class="n">batch</span><span class="o">.</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;attention_mask&quot;</span><span class="p">],</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span>
-            <span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_reference_policy</span><span class="p">:</span>
-                <span class="c1"># compute reference log_prob</span>
-                <span class="k">with</span> <span class="n">_timer</span><span class="p">(</span><span class="s2">&quot;ref&quot;</span><span class="p">,</span> <span class="n">timing_raw</span><span class="p">):</span>
-                    <span class="n">ref_log_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref_policy_wg</span><span class="o">.</span><span class="n">compute_ref_log_prob</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
-                    <span class="n">batch</span> <span class="o">=</span> <span class="n">batch</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">ref_log_prob</span><span class="p">)</span>
-
-            <span class="c1"># update actor</span>
-            <span class="k">with</span> <span class="n">_timer</span><span class="p">(</span><span class="s2">&quot;update_actor&quot;</span><span class="p">,</span> <span class="n">timing_raw</span><span class="p">):</span>
-                <span class="n">actor_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_wg</span><span class="o">.</span><span class="n">update_actor</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
-            <span class="n">actor_output_metrics</span> <span class="o">=</span> <span class="n">reduce_metrics</span><span class="p">(</span><span class="n">actor_output</span><span class="o">.</span><span class="n">meta_info</span><span class="p">[</span><span class="s2">&quot;metrics&quot;</span><span class="p">])</span>
-            <span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">actor_output_metrics</span><span class="p">)</span>
-
-        <span class="c1"># collect metrics</span>
-        <span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">compute_timing_metrics</span><span class="p">(</span><span class="n">batch</span><span class="o">=</span><span class="n">batch</span><span class="p">,</span> <span class="n">timing_raw</span><span class="o">=</span><span class="n">timing_raw</span><span class="p">))</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">metrics</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="p">)</span>
-
-        <span class="c1"># save checkpoint</span>
-        <span class="k">if</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">save_freq</span> <span class="o">&gt;</span> <span class="mi">0</span>
-            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">save_freq</span> <span class="o">==</span> <span class="mi">0</span>
-        <span class="p">):</span>
-            <span class="k">with</span> <span class="n">_timer</span><span class="p">(</span><span class="s2">&quot;save_checkpoint&quot;</span><span class="p">,</span> <span class="n">timing_raw</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_save_checkpoint</span><span class="p">()</span>
-
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">batch</span><span class="p">,</span> <span class="n">sample_metrics</span><span class="p">,</span> <span class="n">exp_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_strategy</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">prefix_metrics</span><span class="p">(</span><span class="n">sample_metrics</span><span class="p">,</span> <span class="s2">&quot;sample&quot;</span><span class="p">,</span> <span class="n">metrics</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No more data to train. Stop training.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">-</span> <span class="mi">1</span></div>
-
-
-<div class="viewcode-block" id="VerlPPOTrainerWrapper.train_sft_step">
-<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.train_sft_step">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">train_sft_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">experiences</span><span class="p">:</span> <span class="n">Experiences</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sft_warmup_step_num</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">sft_warmup_steps</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">-</span> <span class="mi">1</span>
-        <span class="n">metrics</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">timing_raw</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">algorithm_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm_manager</span><span class="o">.</span><span class="n">get_current_algorithm_config</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="p">)</span>
+        <span class="n">algorithm</span> <span class="o">=</span> <span class="n">ALGORITHM_TYPE</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">algorithm_config</span><span class="o">.</span><span class="n">algorithm_type</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span> <span class="o">!=</span> <span class="n">algorithm</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_wg</span><span class="o">.</span><span class="n">set_algorithm</span><span class="p">(</span><span class="n">algorithm_config</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span> <span class="o">==</span> <span class="n">SFTAlgorithm</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sft_to_rft</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span> <span class="o">=</span> <span class="n">algorithm</span>
 
         <span class="k">with</span> <span class="n">_timer</span><span class="p">(</span><span class="s2">&quot;step&quot;</span><span class="p">,</span> <span class="n">timing_raw</span><span class="p">):</span>
-            <span class="c1"># generate a batch</span>
-            <span class="n">attention_mask</span> <span class="o">=</span> <span class="n">experiences</span><span class="o">.</span><span class="n">attention_masks</span>
-            <span class="n">cumsum</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">attention_mask</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-            <span class="n">position_ids</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">cumsum</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">long</span><span class="p">()</span>
-
-            <span class="n">batch</span> <span class="o">=</span> <span class="n">DataProto</span><span class="o">.</span><span class="n">from_single_dict</span><span class="p">(</span>
-                <span class="p">{</span>
-                    <span class="s2">&quot;uid&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">experiences</span><span class="o">.</span><span class="n">run_ids</span><span class="p">),</span>
-                    <span class="s2">&quot;position_ids&quot;</span><span class="p">:</span> <span class="n">position_ids</span><span class="p">,</span>
-                    <span class="s2">&quot;input_ids&quot;</span><span class="p">:</span> <span class="n">experiences</span><span class="o">.</span><span class="n">tokens</span><span class="o">.</span><span class="n">long</span><span class="p">(),</span>
-                    <span class="s2">&quot;responses&quot;</span><span class="p">:</span> <span class="n">experiences</span><span class="o">.</span><span class="n">tokens</span><span class="p">[:,</span> <span class="n">experiences</span><span class="o">.</span><span class="n">prompt_length</span> <span class="p">:]</span><span class="o">.</span><span class="n">long</span><span class="p">(),</span>
-                    <span class="s2">&quot;attention_mask&quot;</span><span class="p">:</span> <span class="n">attention_mask</span><span class="o">.</span><span class="n">long</span><span class="p">(),</span>
-                    <span class="s2">&quot;response_mask&quot;</span><span class="p">:</span> <span class="p">(</span>
-                        <span class="n">experiences</span><span class="o">.</span><span class="n">action_masks</span><span class="p">[:,</span> <span class="n">experiences</span><span class="o">.</span><span class="n">prompt_length</span> <span class="p">:]</span><span class="o">.</span><span class="n">long</span><span class="p">()</span>
-                        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">experiences</span><span class="p">,</span> <span class="s2">&quot;action_masks&quot;</span><span class="p">)</span>
-                        <span class="ow">and</span> <span class="n">experiences</span><span class="o">.</span><span class="n">action_masks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                        <span class="k">else</span> <span class="n">attention_mask</span><span class="p">[:,</span> <span class="n">experiences</span><span class="o">.</span><span class="n">prompt_length</span> <span class="p">:]</span><span class="o">.</span><span class="n">long</span><span class="p">()</span>
-                    <span class="p">),</span>
-                <span class="p">}</span>
-            <span class="p">)</span>
             <span class="n">batch</span><span class="o">.</span><span class="n">meta_info</span><span class="p">[</span><span class="s2">&quot;temperature&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">rollout</span><span class="o">.</span><span class="n">temperature</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">_balance_batch</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="n">metrics</span><span class="p">)</span>  <span class="c1"># TODO this may affect multi-turn</span>
-
-            <span class="c1"># compute global_valid tokens</span>
-            <span class="n">batch</span><span class="o">.</span><span class="n">meta_info</span><span class="p">[</span><span class="s2">&quot;global_token_num&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
-                <span class="n">batch</span><span class="o">.</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;attention_mask&quot;</span><span class="p">],</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span>
-            <span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_reference_policy</span><span class="p">:</span>
-                <span class="c1"># compute reference log_prob</span>
-                <span class="k">with</span> <span class="n">_timer</span><span class="p">(</span><span class="s2">&quot;ref&quot;</span><span class="p">,</span> <span class="n">timing_raw</span><span class="p">):</span>
-                    <span class="n">ref_log_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref_policy_wg</span><span class="o">.</span><span class="n">compute_ref_log_prob</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
-                    <span class="n">batch</span> <span class="o">=</span> <span class="n">batch</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">ref_log_prob</span><span class="p">)</span>
-
-            <span class="c1"># update actor</span>
-            <span class="k">with</span> <span class="n">_timer</span><span class="p">(</span><span class="s2">&quot;update_actor&quot;</span><span class="p">,</span> <span class="n">timing_raw</span><span class="p">):</span>
-                <span class="n">actor_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_wg</span><span class="o">.</span><span class="n">update_actor</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
-            <span class="n">actor_output_metrics</span> <span class="o">=</span> <span class="n">reduce_metrics</span><span class="p">(</span><span class="n">actor_output</span><span class="o">.</span><span class="n">meta_info</span><span class="p">[</span><span class="s2">&quot;metrics&quot;</span><span class="p">])</span>
-            <span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">actor_output_metrics</span><span class="p">)</span>
-
-        <span class="c1"># collect metrics</span>
-        <span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">compute_timing_metrics</span><span class="p">(</span><span class="n">batch</span><span class="o">=</span><span class="n">batch</span><span class="p">,</span> <span class="n">timing_raw</span><span class="o">=</span><span class="n">timing_raw</span><span class="p">))</span>
-
-        <span class="c1"># TODO: log as sft metrics</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">metrics</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sft_warmup_step_num</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sft_warmup_step_num</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">sft_warmup_steps</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
-                <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;sft_warmup_steps&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sft_warmup_step_num</span><span class="p">},</span>
-                <span class="n">step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="k">with</span> <span class="n">_timer</span><span class="p">(</span><span class="s2">&quot;save_checkpoint&quot;</span><span class="p">,</span> <span class="n">timing_raw</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_save_checkpoint</span><span class="p">()</span>
-            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">-</span> <span class="mi">1</span>
-        <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">-</span> <span class="mi">1</span></div>
-
-
-<div class="viewcode-block" id="VerlPPOTrainerWrapper.train_rft_step">
-<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.train_rft_step">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">train_rft_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">experiences</span><span class="p">:</span> <span class="n">Experiences</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
-        <span class="n">metrics</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">timing_raw</span> <span class="o">=</span> <span class="p">{}</span>
-
-        <span class="k">with</span> <span class="n">_timer</span><span class="p">(</span><span class="s2">&quot;step&quot;</span><span class="p">,</span> <span class="n">timing_raw</span><span class="p">):</span>
-            <span class="c1"># Convert rewards to token_level_rewards</span>
-            <span class="n">attention_mask</span> <span class="o">=</span> <span class="n">experiences</span><span class="o">.</span><span class="n">attention_masks</span>
-            <span class="n">token_level_rewards</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">attention_mask</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">experiences</span><span class="o">.</span><span class="n">rewards</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
-            <span class="n">cumsum</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">attention_mask</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-            <span class="n">eos_mask_idx</span> <span class="o">=</span> <span class="n">cumsum</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-            <span class="n">position_ids</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">cumsum</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">long</span><span class="p">()</span>
-            <span class="n">token_level_rewards</span><span class="p">[</span>
-                <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">experiences</span><span class="o">.</span><span class="n">batch_size</span><span class="p">),</span> <span class="n">eos_mask_idx</span>
-            <span class="p">]</span> <span class="o">=</span> <span class="n">experiences</span><span class="o">.</span><span class="n">rewards</span>
-            <span class="n">token_level_rewards</span> <span class="o">=</span> <span class="n">token_level_rewards</span><span class="p">[:,</span> <span class="n">experiences</span><span class="o">.</span><span class="n">prompt_length</span> <span class="p">:]</span>
-
-            <span class="n">batch</span> <span class="o">=</span> <span class="n">DataProto</span><span class="o">.</span><span class="n">from_single_dict</span><span class="p">(</span>
-                <span class="p">{</span>
-                    <span class="s2">&quot;uid&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">experiences</span><span class="o">.</span><span class="n">run_ids</span><span class="p">),</span>
-                    <span class="s2">&quot;position_ids&quot;</span><span class="p">:</span> <span class="n">position_ids</span><span class="p">,</span>
-                    <span class="s2">&quot;input_ids&quot;</span><span class="p">:</span> <span class="n">experiences</span><span class="o">.</span><span class="n">tokens</span><span class="o">.</span><span class="n">long</span><span class="p">(),</span>
-                    <span class="s2">&quot;responses&quot;</span><span class="p">:</span> <span class="n">experiences</span><span class="o">.</span><span class="n">tokens</span><span class="p">[:,</span> <span class="n">experiences</span><span class="o">.</span><span class="n">prompt_length</span> <span class="p">:]</span><span class="o">.</span><span class="n">long</span><span class="p">(),</span>
-                    <span class="s2">&quot;attention_mask&quot;</span><span class="p">:</span> <span class="n">attention_mask</span><span class="o">.</span><span class="n">long</span><span class="p">(),</span>
-                    <span class="s2">&quot;response_mask&quot;</span><span class="p">:</span> <span class="p">(</span>
-                        <span class="n">experiences</span><span class="o">.</span><span class="n">action_masks</span><span class="p">[:,</span> <span class="n">experiences</span><span class="o">.</span><span class="n">prompt_length</span> <span class="p">:]</span><span class="o">.</span><span class="n">long</span><span class="p">()</span>
-                        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">experiences</span><span class="p">,</span> <span class="s2">&quot;action_masks&quot;</span><span class="p">)</span>
-                        <span class="ow">and</span> <span class="n">experiences</span><span class="o">.</span><span class="n">action_masks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                        <span class="k">else</span> <span class="n">attention_mask</span><span class="p">[:,</span> <span class="n">experiences</span><span class="o">.</span><span class="n">prompt_length</span> <span class="p">:]</span><span class="o">.</span><span class="n">long</span><span class="p">()</span>
-                    <span class="p">),</span>
-                    <span class="s2">&quot;token_level_scores&quot;</span><span class="p">:</span> <span class="n">token_level_rewards</span><span class="p">,</span>
-                    <span class="s2">&quot;old_log_probs&quot;</span><span class="p">:</span> <span class="n">experiences</span><span class="o">.</span><span class="n">logprobs</span><span class="p">[:,</span> <span class="n">experiences</span><span class="o">.</span><span class="n">prompt_length</span> <span class="p">:],</span>  <span class="c1"># type: ignore</span>
-                <span class="p">}</span>
-            <span class="p">)</span>
-            <span class="n">batch</span><span class="o">.</span><span class="n">meta_info</span><span class="p">[</span><span class="s2">&quot;temperature&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">rollout</span><span class="o">.</span><span class="n">temperature</span>
-
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">balance_batch</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">can_balance_batch</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">balance_batch</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_balance_batch</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="n">metrics</span><span class="p">)</span>  <span class="c1"># TODO this may affect multi-turn</span>
 
             <span class="c1"># compute global_valid tokens</span>
@@ -460,61 +423,37 @@
                 <span class="n">batch</span><span class="o">.</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;attention_mask&quot;</span><span class="p">],</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span>
             <span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_reference_policy</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">use_reference</span><span class="p">:</span>  <span class="c1"># ref_logprob may not be used</span>
                 <span class="c1"># compute reference log_prob</span>
                 <span class="k">with</span> <span class="n">_timer</span><span class="p">(</span><span class="s2">&quot;ref&quot;</span><span class="p">,</span> <span class="n">timing_raw</span><span class="p">):</span>
                     <span class="n">ref_log_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref_policy_wg</span><span class="o">.</span><span class="n">compute_ref_log_prob</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
                     <span class="n">batch</span> <span class="o">=</span> <span class="n">batch</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">ref_log_prob</span><span class="p">)</span>
 
-            <span class="c1"># compute values</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_critic</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">use_critic</span><span class="p">:</span>
                 <span class="k">with</span> <span class="n">_timer</span><span class="p">(</span><span class="s2">&quot;values&quot;</span><span class="p">,</span> <span class="n">timing_raw</span><span class="p">):</span>
                     <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">critic_wg</span><span class="o">.</span><span class="n">compute_values</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
                     <span class="n">batch</span> <span class="o">=</span> <span class="n">batch</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
 
-            <span class="k">with</span> <span class="n">_timer</span><span class="p">(</span><span class="s2">&quot;adv&quot;</span><span class="p">,</span> <span class="n">timing_raw</span><span class="p">):</span>
-                <span class="c1"># compute rewards. apply_kl_penalty if available</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;use_kl_loss&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
-                    <span class="n">batch</span><span class="p">,</span> <span class="n">kl_metrics</span> <span class="o">=</span> <span class="n">apply_kl_penalty</span><span class="p">(</span>
-                        <span class="n">batch</span><span class="p">,</span>
-                        <span class="n">kl_ctrl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kl_ctrl</span><span class="p">,</span>
-                        <span class="n">kl_penalty</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">kl_penalty</span><span class="p">,</span>
-                    <span class="p">)</span>
-                    <span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kl_metrics</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">batch</span><span class="o">.</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;token_level_rewards&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">batch</span><span class="o">.</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;token_level_scores&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">use_advantage</span><span class="p">:</span>
+                <span class="k">with</span> <span class="n">_timer</span><span class="p">(</span><span class="s2">&quot;adv&quot;</span><span class="p">,</span> <span class="n">timing_raw</span><span class="p">):</span>
+                    <span class="c1"># compute kl penalty</span>
+                    <span class="n">batch</span><span class="p">,</span> <span class="n">kl_metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kl_fn</span><span class="o">.</span><span class="n">apply_kl_penalty_to_reward</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+                    <span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">prefix_metrics</span><span class="p">(</span><span class="n">kl_metrics</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;critic&quot;</span><span class="p">))</span>
+                    <span class="c1"># compute advantages, executed on the driver process</span>
+                    <span class="n">batch</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">advantage_fn</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
 
-                <span class="c1"># compute advantages, executed on the driver process</span>
-                <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
-                <span class="n">algorithm_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                    <span class="s2">&quot;algorithm_type&quot;</span><span class="p">,</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">PPO</span>
-                <span class="p">)</span>
-                <span class="k">if</span> <span class="n">algorithm_type</span> <span class="o">==</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">OPMD</span><span class="p">:</span>
-                    <span class="n">tau</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tau&quot;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
-                    <span class="n">opmd_baseline</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;opmd_baseline&quot;</span><span class="p">,</span> <span class="s2">&quot;mean&quot;</span><span class="p">)</span>
-                    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
-                        <span class="s2">&quot;algorithm_type&quot;</span><span class="p">:</span> <span class="n">algorithm_type</span><span class="p">,</span>
-                        <span class="s2">&quot;tau&quot;</span><span class="p">:</span> <span class="n">tau</span><span class="p">,</span>
-                        <span class="s2">&quot;opmd_baseline&quot;</span><span class="p">:</span> <span class="n">opmd_baseline</span><span class="p">,</span>
-                    <span class="p">}</span>
-                <span class="n">batch</span> <span class="o">=</span> <span class="n">compute_advantage</span><span class="p">(</span>
-                    <span class="n">batch</span><span class="p">,</span>
-                    <span class="n">adv_estimator</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">adv_estimator</span><span class="p">,</span>
-                    <span class="n">gamma</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">gamma</span><span class="p">,</span>
-                    <span class="n">lam</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span>
-                    <span class="n">num_repeat</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">rollout</span><span class="o">.</span><span class="n">n</span><span class="p">,</span>
-                    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-                <span class="p">)</span>
-
-            <span class="c1"># update critic</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_critic</span><span class="p">:</span>
+                <span class="c1"># update critic</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">use_critic</span><span class="p">:</span>
                 <span class="k">with</span> <span class="n">_timer</span><span class="p">(</span><span class="s2">&quot;update_critic&quot;</span><span class="p">,</span> <span class="n">timing_raw</span><span class="p">):</span>
                     <span class="n">critic_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">critic_wg</span><span class="o">.</span><span class="n">update_critic</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
                 <span class="n">critic_output_metrics</span> <span class="o">=</span> <span class="n">reduce_metrics</span><span class="p">(</span><span class="n">critic_output</span><span class="o">.</span><span class="n">meta_info</span><span class="p">[</span><span class="s2">&quot;metrics&quot;</span><span class="p">])</span>
                 <span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">critic_output_metrics</span><span class="p">)</span>
 
             <span class="c1"># implement critic warmup</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">critic_warmup</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">use_critic</span>
+                <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">critic_warmup</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span>
+            <span class="p">):</span>
                 <span class="c1"># update actor</span>
                 <span class="k">with</span> <span class="n">_timer</span><span class="p">(</span><span class="s2">&quot;update_actor&quot;</span><span class="p">,</span> <span class="n">timing_raw</span><span class="p">):</span>
                     <span class="n">actor_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_wg</span><span class="o">.</span><span class="n">update_actor</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
@@ -530,33 +469,29 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">_save_checkpoint</span><span class="p">()</span>
 
         <span class="c1"># collect metrics</span>
-        <span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">compute_data_metrics</span><span class="p">(</span><span class="n">batch</span><span class="o">=</span><span class="n">batch</span><span class="p">,</span> <span class="n">use_critic</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">use_critic</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">use_advantage</span><span class="p">:</span>  <span class="c1"># TODO</span>
+            <span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">compute_data_metrics</span><span class="p">(</span><span class="n">batch</span><span class="o">=</span><span class="n">batch</span><span class="p">,</span> <span class="n">use_critic</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">use_critic</span><span class="p">))</span>
         <span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">compute_timing_metrics</span><span class="p">(</span><span class="n">batch</span><span class="o">=</span><span class="n">batch</span><span class="p">,</span> <span class="n">timing_raw</span><span class="o">=</span><span class="n">timing_raw</span><span class="p">))</span>
         <span class="n">n_gpus</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resource_pool_manager</span><span class="o">.</span><span class="n">get_n_gpus</span><span class="p">()</span>
         <span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
             <span class="n">compute_throughout_metrics</span><span class="p">(</span><span class="n">batch</span><span class="o">=</span><span class="n">batch</span><span class="p">,</span> <span class="n">timing_raw</span><span class="o">=</span><span class="n">timing_raw</span><span class="p">,</span> <span class="n">n_gpus</span><span class="o">=</span><span class="n">n_gpus</span><span class="p">)</span>
         <span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">enable_preview</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_log_experiences</span><span class="p">(</span><span class="n">experiences</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">use_advantage</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">enable_preview</span><span class="p">:</span>  <span class="c1"># TODO</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_log_experiences</span><span class="p">(</span><span class="n">exp_samples</span><span class="p">)</span>
 
         <span class="c1"># TODO: make a canonical logger that supports various backend</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">metrics</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">+=</span> <span class="mi">1</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_training_steps</span><span class="p">:</span>
+        <span class="n">train_status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_training_steps</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">train_status</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm_manager</span><span class="o">.</span><span class="n">need_save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="p">):</span>
             <span class="k">if</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">save_freq</span> <span class="o">&gt;</span> <span class="mi">0</span>
-                <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">save_freq</span> <span class="o">!=</span> <span class="mi">0</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">save_freq</span> <span class="o">==</span> <span class="mi">0</span>
+                <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">save_freq</span> <span class="o">!=</span> <span class="mi">0</span>
             <span class="p">):</span>
                 <span class="k">with</span> <span class="n">_timer</span><span class="p">(</span><span class="s2">&quot;save_checkpoint&quot;</span><span class="p">,</span> <span class="n">timing_raw</span><span class="p">):</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_save_checkpoint</span><span class="p">()</span>
-            <span class="c1"># stop training</span>
-            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">-</span> <span class="mi">1</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># continue</span>
-            <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">-</span> <span class="mi">1</span></div>
+        <span class="k">return</span> <span class="n">train_status</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_log_single_experience</span><span class="p">(</span>
@@ -582,21 +517,13 @@
                 <span class="s2">&quot;response&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">response_text</span><span class="p">],</span>
             <span class="p">}</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">experiences_example_table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
-            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">experiences_example_table</span><span class="p">,</span> <span class="n">new_row</span><span class="p">],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span>
-        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_exps_to_log</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_exps_to_log</span><span class="p">,</span> <span class="n">new_row</span><span class="p">],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_log_experiences</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">experiences</span><span class="p">:</span> <span class="n">Experiences</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">skip_special_tokens</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="n">reward_max_id</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">experiences</span><span class="o">.</span><span class="n">rewards</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_single_experience</span><span class="p">(</span><span class="n">experiences</span><span class="p">,</span> <span class="n">reward_max_id</span><span class="p">,</span> <span class="n">skip_special_tokens</span><span class="p">)</span>
-
-        <span class="n">reward_min_id</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">experiences</span><span class="o">.</span><span class="n">rewards</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log_single_experience</span><span class="p">(</span><span class="n">experiences</span><span class="p">,</span> <span class="n">reward_min_id</span><span class="p">,</span> <span class="n">skip_special_tokens</span><span class="p">)</span>
-
+    <span class="k">def</span><span class="w"> </span><span class="nf">_log_experiences</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">samples</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_exps_to_log</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">sync_freq</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_table</span><span class="p">(</span>
-                <span class="s2">&quot;rollout_examples&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiences_example_table</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span>
+                <span class="s2">&quot;rollout_examples&quot;</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_exps_to_log</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">reset_experiences_example_table</span><span class="p">()</span>
 
@@ -610,15 +537,6 @@
 <a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.sync_weight">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">sync_weight</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_wg</span><span class="o">.</span><span class="n">sync_weight</span><span class="p">()</span></div>
-
-
-<div class="viewcode-block" id="VerlPPOTrainerWrapper.set_mode">
-<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.set_mode">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">set_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">algorithm_type</span><span class="p">:</span> <span class="n">AlgorithmType</span> <span class="o">=</span> <span class="n">AlgorithmType</span><span class="o">.</span><span class="n">PPO</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_wg</span><span class="o">.</span><span class="n">set_mode</span><span class="p">(</span><span class="n">algorithm_type</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm_type</span><span class="o">.</span><span class="n">is_sft</span><span class="p">()</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">algorithm_type</span><span class="o">.</span><span class="n">is_sft</span><span class="p">()):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">sft_to_rft</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">algorithm_type</span> <span class="o">=</span> <span class="n">algorithm_type</span></div>
 
 
 <div class="viewcode-block" id="VerlPPOTrainerWrapper.sft_to_rft">
@@ -653,9 +571,9 @@
                     <span class="n">global_step_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">working_dir</span><span class="p">,</span> <span class="n">global_step_folder</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Load from checkpoint folder: </span><span class="si">{</span><span class="n">global_step_folder</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="c1"># set global step</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">global_step_folder</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;global_step_&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">global_steps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">global_step_folder</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;global_step_&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">==</span> <span class="n">global_steps</span> <span class="o">+</span> <span class="mi">1</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Setting global step to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Resuming from </span><span class="si">{</span><span class="n">global_step_folder</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="n">actor_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">global_step_folder</span><span class="p">,</span> <span class="s2">&quot;actor&quot;</span><span class="p">)</span>

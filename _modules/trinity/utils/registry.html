@@ -5,14 +5,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>trinity.utils.registry &mdash; Trinity-RFT 0.1.1 documentation</title>
+  <title>trinity.utils.registry &mdash; Trinity-RFT 0.2.0.dev0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=a58bc63e"></script>
+      <script src="../../../_static/documentation_options.js?v=130a53a1"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -39,22 +39,27 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorial/example_reasoning_basic.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorial/example_reasoning_advanced.html">Off-Policy RFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorial/example_async_mode.html">Asynchronous RFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorial/example_multi_turn.html">Multi-Turn RFT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../tutorial/example_dpo.html">Offline DPO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial/example_dpo.html">Offline DPO and SFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorial/example_data_functionalities.html">Data Processing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../tutorial/trinity_configs.html">Configuration Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Guidelines</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorial/trinity_programming_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial/trinity_configs.html">Configuration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial/example_mix_algo.html">Algorithm Development</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../build_api/trinity.buffer.html">trinity.buffer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../build_api/trinity.explorer.html">trinity.explorer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../build_api/trinity.trainer.html">trinity.trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../build_api/trinity.algorithm.html">trinity.algorithm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../build_api/trinity.manager.html">trinity.manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../build_api/trinity.common.html">trinity.common</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../build_api/trinity.utils.html">trinity.utils</a></li>
@@ -92,6 +97,8 @@
 <span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
+<span class="c1"># TODO: support lazy load</span>
+<span class="c1"># e.g. @MODULES.register_module(&quot;name&quot;, lazy=True)</span>
 <div class="viewcode-block" id="Registry">
 <a class="viewcode-back" href="../../../build_api/trinity.utils.html#trinity.utils.registry.Registry">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Registry</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -138,7 +145,7 @@
 
 <div class="viewcode-block" id="Registry.get">
 <a class="viewcode-back" href="../../../build_api/trinity.utils.html#trinity.utils.registry.Registry.get">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module_key</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get module named module_key from in current registry. If not found,</span>
 <span class="sd">        return None.</span>
@@ -181,21 +188,21 @@
 <span class="sd">                    Default: False.</span>
 
 <span class="sd">        Example:</span>
-<span class="sd">            ```python</span>
-<span class="sd">            WORKFLOWS = Registry(&quot;workflows&quot;)</span>
 
-<span class="sd">            # register a module using decorator</span>
-<span class="sd">            @WORKFLOWS.register_module(name=&quot;workflow_name&quot;)</span>
-<span class="sd">            class MyWorkflow(Workflow):</span>
-<span class="sd">                pass</span>
+<span class="sd">            .. code-block:: python</span>
+<span class="sd">                WORKFLOWS = Registry(&quot;workflows&quot;)</span>
 
-<span class="sd">            # or register a module directly</span>
-<span class="sd">            WORKFLOWS.register_module(</span>
-<span class="sd">                name=&quot;workflow_name&quot;,</span>
-<span class="sd">                module_cls=MyWorkflow,</span>
-<span class="sd">                force=True,</span>
-<span class="sd">            )</span>
-<span class="sd">            ```</span>
+<span class="sd">                # register a module using decorator</span>
+<span class="sd">                @WORKFLOWS.register_module(name=&quot;workflow_name&quot;)</span>
+<span class="sd">                class MyWorkflow(Workflow):</span>
+<span class="sd">                    pass</span>
+
+<span class="sd">                # or register a module directly</span>
+<span class="sd">                WORKFLOWS.register_module(</span>
+<span class="sd">                    name=&quot;workflow_name&quot;,</span>
+<span class="sd">                    module_cls=MyWorkflow,</span>
+<span class="sd">                    force=True,</span>
+<span class="sd">                )</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">module_name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>

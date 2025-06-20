@@ -1,6 +1,6 @@
 # Asynchronous RFT
 
-This example shows how to run RFT in a fully asynchronous mode with the GRPO algorithm, Qwen-2.5-1.5B-Instruct model and GSM8K dataset.
+This example shows how to run RFT in a fully asynchronous mode with the GRPO algorithm, Qwen2.5-1.5B-Instruct model and GSM8K dataset.
 
 Trinity-RFT supports an asynchronous mode by running the trainer and explorer in separate processes.
 

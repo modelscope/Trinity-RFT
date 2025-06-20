@@ -59,6 +59,14 @@ trinity.utils.registry module
    :undoc-members:
    :show-inheritance:
 
+trinity.utils.timer module
+--------------------------
+
+.. automodule:: trinity.utils.timer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

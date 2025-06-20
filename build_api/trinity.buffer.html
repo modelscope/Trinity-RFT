@@ -6,21 +6,21 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>trinity.buffer &mdash; Trinity-RFT 0.1.1 documentation</title>
+  <title>trinity.buffer &mdash; Trinity-RFT 0.2.0.dev0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=a58bc63e"></script>
+      <script src="../_static/documentation_options.js?v=130a53a1"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="trinity.buffer.reader" href="trinity.buffer.reader.html" />
-    <link rel="prev" title="Developer Guide" href="../tutorial/trinity_programming_guide.html" /> 
+    <link rel="prev" title="Algorithm Development" href="../tutorial/example_mix_algo.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -42,16 +42,20 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_reasoning_basic.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_reasoning_advanced.html">Off-Policy RFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_async_mode.html">Asynchronous RFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_multi_turn.html">Multi-Turn RFT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tutorial/example_dpo.html">Offline DPO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/example_dpo.html">Offline DPO and SFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_data_functionalities.html">Data Processing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tutorial/trinity_configs.html">Configuration Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Guidelines</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/trinity_programming_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/trinity_configs.html">Configuration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/example_mix_algo.html">Algorithm Development</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul class="current">
@@ -100,6 +104,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="trinity.explorer.html">trinity.explorer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="trinity.trainer.html">trinity.trainer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trinity.algorithm.html">trinity.algorithm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="trinity.manager.html">trinity.manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="trinity.common.html">trinity.common</a></li>
 <li class="toctree-l1"><a class="reference internal" href="trinity.utils.html">trinity.utils</a></li>
@@ -151,6 +156,11 @@
 <li class="toctree-l3"><a class="reference internal" href="trinity.buffer.reader.html#trinity.buffer.reader.file_reader.RolloutDataReader"><code class="docutils literal notranslate"><span class="pre">RolloutDataReader</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="trinity.buffer.reader.html#trinity.buffer.reader.file_reader.RolloutDataReader.__init__"><code class="docutils literal notranslate"><span class="pre">RolloutDataReader.__init__()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.buffer.reader.html#trinity.buffer.reader.file_reader.RolloutDataReader.read"><code class="docutils literal notranslate"><span class="pre">RolloutDataReader.read()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.buffer.reader.html#trinity.buffer.reader.file_reader.RawDataReader"><code class="docutils literal notranslate"><span class="pre">RawDataReader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="trinity.buffer.reader.html#trinity.buffer.reader.file_reader.RawDataReader.__init__"><code class="docutils literal notranslate"><span class="pre">RawDataReader.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.buffer.reader.html#trinity.buffer.reader.file_reader.RawDataReader.read"><code class="docutils literal notranslate"><span class="pre">RawDataReader.read()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -442,7 +452,7 @@ StorageType.QUEUE instead.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../tutorial/trinity_programming_guide.html" class="btn btn-neutral float-left" title="Developer Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../tutorial/example_mix_algo.html" class="btn btn-neutral float-left" title="Algorithm Development" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="trinity.buffer.reader.html" class="btn btn-neutral float-right" title="trinity.buffer.reader" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

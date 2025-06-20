@@ -15,8 +15,8 @@ To run the ALFworld and WebShop env, you need to setup the corresponding environ
 - WebShop is a simulated online shopping environment where AI agents learn to shop based on user requirements. The platform allows agents to browse products, compare options, and make purchase decisions, mimicking real-world e-commerce interactions.
 
 You may refer to their original environment to complete the setup.
-- For ALFworld, refer to: https://github.com/alfworld/alfworld
-- For WebShop, refer to: https://github.com/princeton-nlp/WebShop
+- For ALFWorld, refer to the [ALFWorld](https://github.com/alfworld/alfworld) repository.
+- For WebShop, refer to the [WebShop](https://github.com/princeton-nlp/WebShop) repository.
 
 ### Data Preparation
 Our dataset follows the format in Huggingface datasets library, so we should correspondingly convert our env dataset.
@@ -36,7 +36,7 @@ The task is described as an environment instead of a single prompt.
 
 ## Step 2: Config preparation and run the experiment
 
-You can refer to `example_reasoning_basic` to setup the config and others. The default config files are [`alfworld.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_alfworld/alfworld.yaml) and [`webshop.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_webshop/webshop.yaml), respectively.
+You can refer to [Quick Start](./example_reasoning_basic.md) to setup the config and others. The default config files are [`alfworld.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_alfworld/alfworld.yaml) and [`webshop.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_webshop/webshop.yaml), respectively.
 You may revise the configurations properly and run the experiment!
 
 ```bash
@@ -104,7 +104,7 @@ class AlfworldWorkflow(MultiTurnWorkflow):
     ...
 ```
 
-and include them in the init files in `trinity/common/workflows/__init__.py`
+and include it in the init file `trinity/common/workflows/__init__.py`
 
 ```diff
  # -*- coding: utf-8 -*-
@@ -120,7 +120,7 @@ and include them in the init files in `trinity/common/workflows/__init__.py`
  ]
 ```
 
-Then you are all set! It should be pretty simple😄, and both environments converge.
+Then you are all set! It should be pretty simple😄, and the training processes in both environments converge.
 
 ![](../../assets/alfworld_reward_curve.png)
 ![](../../assets/webshop_reward_curve.png)
