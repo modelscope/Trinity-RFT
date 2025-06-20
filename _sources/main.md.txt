@@ -127,7 +127,7 @@ pip install flash-attn -v
 Installation using pip:
 
 ```shell
-pip install trinity-rft==0.1.0
+pip install trinity-rft==0.1.1
 ```
 
 Installation from docker:
