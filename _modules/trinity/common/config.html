@@ -292,7 +292,8 @@
     <span class="n">enable_openai_api</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="c1"># ! DO NOT SET</span>
-    <span class="n">bundle_indices</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span></div>
+    <span class="n">bundle_indices</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">ray_namespace</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span></div>
 
 
 
@@ -495,6 +496,8 @@
     <span class="n">checkpoint_root_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="c1"># ! DO NOT SET, automatically generated as `checkpoint_root_dir/project/name`</span>
     <span class="n">checkpoint_job_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="c1"># ! DO NOT SET, automatically generated as f&quot;{config.project}-{config.name}&quot;</span>
+    <span class="n">ray_namespace</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
     <span class="n">algorithm</span><span class="p">:</span> <span class="n">AlgorithmConfig</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">AlgorithmConfig</span><span class="p">)</span>
     <span class="n">data_processor</span><span class="p">:</span> <span class="n">DataProcessorConfig</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">DataProcessorConfig</span><span class="p">)</span>
@@ -722,6 +725,9 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check and update the config.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_deprecated</span><span class="p">()</span>
 
+        <span class="c1"># set namespace</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ray_namespace</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
+
         <span class="c1"># check algorithm</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_algorithm</span><span class="p">()</span>
 
@@ -752,6 +758,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">rollout_model</span><span class="o">.</span><span class="n">max_prompt_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">max_prompt_tokens</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">rollout_model</span><span class="o">.</span><span class="n">max_response_tokens</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">rollout_model</span><span class="o">.</span><span class="n">max_response_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">max_response_tokens</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">rollout_model</span><span class="o">.</span><span class="n">ray_namespace</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ray_namespace</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">auxiliary_models</span><span class="p">:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">ray_namespace</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ray_namespace</span>
 
         <span class="c1"># check synchronizer</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">explorer_world_size</span> <span class="o">=</span> <span class="p">(</span>
