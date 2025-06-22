@@ -191,7 +191,7 @@ def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
         activate_data_module(
             f"{data_processor_config.data_processor_url}/experience_pipeline", config_path
         )
-    ray_namespace = f"{config.project}-{config.name}"
+    ray_namespace = config.ray_namespace
     if dlc:
         from trinity.utils.dlc_utils import setup_ray_cluster
 

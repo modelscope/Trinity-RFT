@@ -23,6 +23,7 @@ class WorkerExtension:
         timeout: int = 1200,
         update_with_checkpoint: bool = True,
         state_dict_meta: list = None,
+        namespace: str = "",
     ):
         """Init torch process group for model weights update"""
         assert torch.distributed.is_initialized(), "default torch process group must be initialized"
@@ -52,6 +53,7 @@ class WorkerExtension:
             group_name=group_name,
         )
         logger.info("vLLM init_process_group finished.")
+        self.namespace = namespace
         self._explorer_actor = None
 
     def set_state_dict_meta(self, state_dict_meta):
@@ -61,7 +63,7 @@ class WorkerExtension:
         """Broadcast weight to all vllm workers from source rank 0 (actor model)"""
         assert self._state_dict_meta is not None
         if self._explorer_actor is None:
-            self._explorer_actor = ray.get_actor(name=EXPLORER_NAME)
+            self._explorer_actor = ray.get_actor(name=EXPLORER_NAME, namespace=self.namespace)
         for name, dtype_str, shape in self._state_dict_meta:
             if self._weight_update_rank == 0:
                 weight = ray.get(self._explorer_actor.get_weight.remote(name))
