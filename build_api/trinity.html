@@ -337,6 +337,15 @@
 <li class="toctree-l2"><a class="reference internal" href="trinity.buffer.html#module-trinity.buffer.queue">trinity.buffer.queue module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="trinity.buffer.html#trinity.buffer.queue.is_database_url"><code class="docutils literal notranslate"><span class="pre">is_database_url()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.buffer.html#trinity.buffer.queue.is_json_file"><code class="docutils literal notranslate"><span class="pre">is_json_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.buffer.html#trinity.buffer.queue.QueueActor"><code class="docutils literal notranslate"><span class="pre">QueueActor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="trinity.buffer.html#trinity.buffer.queue.QueueActor.FINISH_MESSAGE"><code class="docutils literal notranslate"><span class="pre">QueueActor.FINISH_MESSAGE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.buffer.html#trinity.buffer.queue.QueueActor.__init__"><code class="docutils literal notranslate"><span class="pre">QueueActor.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.buffer.html#trinity.buffer.queue.QueueActor.length"><code class="docutils literal notranslate"><span class="pre">QueueActor.length()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.buffer.html#trinity.buffer.queue.QueueActor.put_batch"><code class="docutils literal notranslate"><span class="pre">QueueActor.put_batch()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.buffer.html#trinity.buffer.queue.QueueActor.finish"><code class="docutils literal notranslate"><span class="pre">QueueActor.finish()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.buffer.html#trinity.buffer.queue.QueueActor.get_batch"><code class="docutils literal notranslate"><span class="pre">QueueActor.get_batch()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="trinity.buffer.html#module-trinity.buffer.ray_wrapper">trinity.buffer.ray_wrapper module</a><ul>
@@ -503,7 +512,6 @@
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.config.InferenceModelConfig.enable_thinking"><code class="docutils literal notranslate"><span class="pre">InferenceModelConfig.enable_thinking</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.config.InferenceModelConfig.enable_openai_api"><code class="docutils literal notranslate"><span class="pre">InferenceModelConfig.enable_openai_api</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.config.InferenceModelConfig.bundle_indices"><code class="docutils literal notranslate"><span class="pre">InferenceModelConfig.bundle_indices</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.config.InferenceModelConfig.ray_namespace"><code class="docutils literal notranslate"><span class="pre">InferenceModelConfig.ray_namespace</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.config.InferenceModelConfig.__init__"><code class="docutils literal notranslate"><span class="pre">InferenceModelConfig.__init__()</span></code></a></li>
 </ul>
 </li>
@@ -1045,6 +1053,12 @@
 <li class="toctree-l4"><a class="reference internal" href="trinity.explorer.html#trinity.explorer.workflow_runner.Status.__init__"><code class="docutils literal notranslate"><span class="pre">Status.__init__()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.explorer.html#trinity.explorer.workflow_runner.WorkflowRunner"><code class="docutils literal notranslate"><span class="pre">WorkflowRunner</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="trinity.explorer.html#trinity.explorer.workflow_runner.WorkflowRunner.__init__"><code class="docutils literal notranslate"><span class="pre">WorkflowRunner.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.explorer.html#trinity.explorer.workflow_runner.WorkflowRunner.is_alive"><code class="docutils literal notranslate"><span class="pre">WorkflowRunner.is_alive()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.explorer.html#trinity.explorer.workflow_runner.WorkflowRunner.run_task"><code class="docutils literal notranslate"><span class="pre">WorkflowRunner.run_task()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="trinity.explorer.html#module-trinity.explorer">Module contents</a><ul>
@@ -1236,6 +1250,12 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="trinity.utils.html#module-trinity.utils.dlc_utils">trinity.utils.dlc_utils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.utils.html#trinity.utils.dlc_utils.ClusterStatus"><code class="docutils literal notranslate"><span class="pre">ClusterStatus</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="trinity.utils.html#trinity.utils.dlc_utils.ClusterStatus.__init__"><code class="docutils literal notranslate"><span class="pre">ClusterStatus.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.utils.html#trinity.utils.dlc_utils.ClusterStatus.finish"><code class="docutils literal notranslate"><span class="pre">ClusterStatus.finish()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.utils.html#trinity.utils.dlc_utils.ClusterStatus.running"><code class="docutils literal notranslate"><span class="pre">ClusterStatus.running()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.utils.html#trinity.utils.dlc_utils.get_dlc_env_vars"><code class="docutils literal notranslate"><span class="pre">get_dlc_env_vars()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.utils.html#trinity.utils.dlc_utils.is_running"><code class="docutils literal notranslate"><span class="pre">is_running()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.utils.html#trinity.utils.dlc_utils.wait_for_ray_setup"><code class="docutils literal notranslate"><span class="pre">wait_for_ray_setup()</span></code></a></li>

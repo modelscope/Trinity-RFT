@@ -101,6 +101,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">aiohttp</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ray</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">vllm</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">vllm.sampling_params</span><span class="w"> </span><span class="kn">import</span> <span class="n">RequestOutputKind</span>
@@ -416,7 +417,7 @@
                 <span class="n">timeout</span><span class="p">,</span>
                 <span class="n">update_with_checkpoint</span><span class="p">,</span>
                 <span class="n">state_dict_meta</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">ray_namespace</span><span class="p">,</span>
+                <span class="n">ray</span><span class="o">.</span><span class="n">get_runtime_context</span><span class="p">()</span><span class="o">.</span><span class="n">namespace</span><span class="p">,</span>
             <span class="p">),</span>
         <span class="p">)</span></div>
 

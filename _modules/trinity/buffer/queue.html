@@ -95,8 +95,6 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">ray</span>
-
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.writer.file_writer</span><span class="w"> </span><span class="kn">import</span> <span class="n">JSONWriter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.writer.sql_writer</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQLWriter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">BufferConfig</span><span class="p">,</span> <span class="n">StorageConfig</span>
@@ -118,12 +116,15 @@
 
 
 
-<span class="nd">@ray</span><span class="o">.</span><span class="n">remote</span>
+<div class="viewcode-block" id="QueueActor">
+<a class="viewcode-back" href="../../../build_api/trinity.buffer.html#trinity.buffer.queue.QueueActor">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">QueueActor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;An asyncio.Queue based queue actor.&quot;&quot;&quot;</span>
 
     <span class="n">FINISH_MESSAGE</span> <span class="o">=</span> <span class="s2">&quot;$FINISH$&quot;</span>
 
+<div class="viewcode-block" id="QueueActor.__init__">
+<a class="viewcode-back" href="../../../build_api/trinity.buffer.html#trinity.buffer.queue.QueueActor.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">storage_config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
@@ -144,22 +145,34 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">st_config</span><span class="o">.</span><span class="n">storage_type</span> <span class="o">=</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">FILE</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">writer</span> <span class="o">=</span> <span class="n">JSONWriter</span><span class="p">(</span><span class="n">st_config</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Save experiences in </span><span class="si">{</span><span class="n">st_config</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Save experiences in </span><span class="si">{</span><span class="n">st_config</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="QueueActor.length">
+<a class="viewcode-back" href="../../../build_api/trinity.buffer.html#trinity.buffer.queue.QueueActor.length">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;The length of the queue.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">qsize</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">qsize</span><span class="p">()</span></div>
 
+
+<div class="viewcode-block" id="QueueActor.put_batch">
+<a class="viewcode-back" href="../../../build_api/trinity.buffer.html#trinity.buffer.queue.QueueActor.put_batch">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">put_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exp_list</span><span class="p">:</span> <span class="n">List</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Put batch of experience.&quot;&quot;&quot;</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">exp_list</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">exp_list</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">exp_list</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="QueueActor.finish">
+<a class="viewcode-back" href="../../../build_api/trinity.buffer.html#trinity.buffer.queue.QueueActor.finish">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">finish</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Stop the queue.&quot;&quot;&quot;</span>
-        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FINISH_MESSAGE</span><span class="p">)</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FINISH_MESSAGE</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="QueueActor.get_batch">
+<a class="viewcode-back" href="../../../build_api/trinity.buffer.html#trinity.buffer.queue.QueueActor.get_batch">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get batch of experience.&quot;&quot;&quot;</span>
         <span class="n">batch</span> <span class="o">=</span> <span class="p">[]</span>
@@ -170,7 +183,9 @@
             <span class="n">batch</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">exp_list</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">batch_size</span><span class="p">:</span>
                 <span class="k">break</span>
-        <span class="k">return</span> <span class="n">batch</span>
+        <span class="k">return</span> <span class="n">batch</span></div>
+</div>
+
 </pre></div>
 
            </div>

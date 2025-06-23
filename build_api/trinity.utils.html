@@ -72,6 +72,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-trinity.utils.dlc_utils">trinity.utils.dlc_utils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.dlc_utils.ClusterStatus"><code class="docutils literal notranslate"><span class="pre">ClusterStatus</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#trinity.utils.dlc_utils.get_dlc_env_vars"><code class="docutils literal notranslate"><span class="pre">get_dlc_env_vars()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#trinity.utils.dlc_utils.is_running"><code class="docutils literal notranslate"><span class="pre">is_running()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#trinity.utils.dlc_utils.wait_for_ray_setup"><code class="docutils literal notranslate"><span class="pre">wait_for_ray_setup()</span></code></a></li>
@@ -172,6 +173,27 @@
 </section>
 <section id="module-trinity.utils.dlc_utils">
 <span id="trinity-utils-dlc-utils-module"></span><h2>trinity.utils.dlc_utils module<a class="headerlink" href="#module-trinity.utils.dlc_utils" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="trinity.utils.dlc_utils.ClusterStatus">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.utils.dlc_utils.</span></span><span class="sig-name descname"><span class="pre">ClusterStatus</span></span><a class="reference internal" href="../_modules/trinity/utils/dlc_utils.html#ClusterStatus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.dlc_utils.ClusterStatus" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.utils.dlc_utils.ClusterStatus.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/utils/dlc_utils.html#ClusterStatus.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.dlc_utils.ClusterStatus.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.utils.dlc_utils.ClusterStatus.finish">
+<span class="sig-name descname"><span class="pre">finish</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/utils/dlc_utils.html#ClusterStatus.finish"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.dlc_utils.ClusterStatus.finish" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.utils.dlc_utils.ClusterStatus.running">
+<span class="sig-name descname"><span class="pre">running</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/utils/dlc_utils.html#ClusterStatus.running"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.dlc_utils.ClusterStatus.running" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="trinity.utils.dlc_utils.get_dlc_env_vars">
 <span class="sig-prename descclassname"><span class="pre">trinity.utils.dlc_utils.</span></span><span class="sig-name descname"><span class="pre">get_dlc_env_vars</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/trinity/utils/dlc_utils.html#get_dlc_env_vars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.dlc_utils.get_dlc_env_vars" title="Link to this definition"></a></dt>
@@ -200,7 +222,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="trinity.utils.dlc_utils.stop_ray_cluster">
-<span class="sig-prename descclassname"><span class="pre">trinity.utils.dlc_utils.</span></span><span class="sig-name descname"><span class="pre">stop_ray_cluster</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/utils/dlc_utils.html#stop_ray_cluster"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.dlc_utils.stop_ray_cluster" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">trinity.utils.dlc_utils.</span></span><span class="sig-name descname"><span class="pre">stop_ray_cluster</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/utils/dlc_utils.html#stop_ray_cluster"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.dlc_utils.stop_ray_cluster" title="Link to this definition"></a></dt>
 <dd><p>Stop the ray cluster by sending a signal to the cluster status actor.</p>
 </dd></dl>
 
