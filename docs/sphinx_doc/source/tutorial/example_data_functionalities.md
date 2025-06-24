@@ -103,8 +103,6 @@ If you are familiar with Data-Juicer, you will realize that Data-Juicer provides
 # This is a Data-Juicer data processing recipe
 project_name: 'gsm-8k-difficulty'
 
-export_path: '/path/to/the/result/processed-dataset.jsonl'
-
 process:
   - llm_difficulty_score_filter:
       api_or_hf_model: "qwen2.5-72b-instruct"  # use "qwen2.5-72b-instruct" to calculate the difficulty scores.
