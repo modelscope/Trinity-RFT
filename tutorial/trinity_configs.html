@@ -213,6 +213,7 @@
 <p>Used to log training metrics during execution.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">monitor</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">monitor_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">wandb</span>
+<span class="w">  </span><span class="nt">enable_ray_timeline</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -222,6 +223,7 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">tensorboard</span></code>: Logs to <a class="reference external" href="https://www.tensorflow.org/tensorboard">TensorBoard</a>. Files are saved under <code class="docutils literal notranslate"><span class="pre">&lt;checkpoint_root_dir&gt;/&lt;project&gt;/&lt;name&gt;/monitor/tensorboard</span></code>.</p></li>
 </ul>
 </li>
+<li><p><code class="docutils literal notranslate"><span class="pre">enable_ray_timeline</span></code>: Whether to export the ray timeline. If set to <code class="docutils literal notranslate"><span class="pre">True</span></code>, a <code class="docutils literal notranslate"><span class="pre">timeline.json</span></code> file will be exported to <code class="docutils literal notranslate"><span class="pre">&lt;checkpoint_root_dir&gt;/&lt;project&gt;/&lt;name&gt;/monitor</span></code>. You can view the timeline file in Chrome at <a class="reference internal" href="#chrome://tracing"><span class="xref myst">chrome://tracing</span></a>.</p></li>
 </ul>
 </section>
 <hr class="docutils" />
