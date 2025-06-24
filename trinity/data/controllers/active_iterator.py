@@ -1,11 +1,14 @@
 import os
 import traceback
 from numbers import Number
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
+from functools import partial
+from data_juicer.utils.constant import Fields
 
 import ray
 
-from trinity.common.config import BufferConfig, DataPipelineConfig
+from trinity.common.config import BufferConfig, DataPipelineConfig, RewardShapingConfig
+from trinity.common.constants import DataProcessorPipelineType, OpType
 from trinity.data.controllers.default_ops import DIMENSION_STATS_KEYS
 from trinity.data.controllers.task_parser import DataTaskParser
 from trinity.data.core.dataset import RftDataset
@@ -23,9 +26,24 @@ class DataActiveIterator:
         self,
         config: DataPipelineConfig,
         buffer_config: BufferConfig,
+        pipeline_type: Optional[DataProcessorPipelineType, str] = DataProcessorPipelineType.TASK,
     ):
+        """
+        The initialization method.
+
+        :param config: the data pipeline config.
+        :param buffer_config: the buffer config.
+        :param pipeline_type: the type of the activated pipeline.
+        """
         self.config = config
         self.buffer_config = buffer_config
+        self.pipeline_type = pipeline_type
+        if self.pipeline_type is None:
+            self.pipeline_type = DataProcessorPipelineType.TASK
+        if isinstance(self.pipeline_type, str):
+            self.pipeline_type = DataProcessorPipelineType(pipeline_type)
+
+        # check if the llm agent is required
         if self.config.agent_model_name is not None and self.config.agent_model_config is not None:
             # get the api key
             api_key = os.environ.get("OPENAI_API_KEY")
@@ -42,6 +60,8 @@ class DataActiveIterator:
             )
         else:
             self.llm_agent = None
+
+        # init task parser
         self.task_parser = DataTaskParser(config, self.llm_agent)
 
         # Priority weights
@@ -153,34 +173,42 @@ class DataActiveIterator:
                 traceback.print_exc()
                 return 6, "Grouping and computing priority score failed."
 
-            # step 7. track lineage if they are changed
+            # step 7. reward shaping. Only available for experience pipeline and the reward shaping config is set
             try:
-                res_dataset = scored_dataset
+                if self.pipeline_type == DataProcessorPipelineType.EXPERIENCE and len(self.config.reward_shaping) > 0:
+                    reshaped_dataset = self._reward_shaping(scored_dataset)
+                else:
+                    reshaped_dataset = scored_dataset
             except Exception:
                 traceback.print_exc()
-                return 7, "Tracking lineage failed."
+                return 7, "Reward shaping failed."
 
-            # step 8
+            # step 8. track lineage if they are changed
+            try:
+                res_dataset = reshaped_dataset
+            except Exception:
+                traceback.print_exc()
+                return 8, "Tracking lineage failed."
+
+            # step 9, sort the dataset by the computed priority
             try:
                 if "priority" in res_dataset.data.features:
                     res_dataset.sort_by("priority", reverse=True)
             except Exception:
                 traceback.print_exc()
-                return 8, "Sorting results by priority failed."
+                return 9, "Sorting results by priority failed."
 
-            # step 9. sort and export the result to the output buffer
+            # step 10. sort and export the result to the output buffer
             try:
                 res_dataset.write_to_buffer()
             except Exception:
                 traceback.print_exc()
-                return 9, "Exporting result to output buffer failed."
+                return 10, "Exporting result to output buffer failed."
 
         return 0, "success"
 
     def _group_scores(self, dataset: RftDataset) -> RftDataset:
         # for perplexity, normalize them with the max value.
-        from data_juicer.utils.constant import Fields
-
         stats_min_max = {}
         for stats in dataset.data.features[Fields.stats]:
             all_stats = [
@@ -267,6 +295,35 @@ class DataActiveIterator:
         """Compute utility scores for all samples in dataset"""
         dataset.data = dataset.data.map(self._compute_combined_score)
         return dataset
+
+    def _reward_shaping_single(self, sample, reward_shaping_config: RewardShapingConfig):
+        tgt_stats = reward_shaping_config.stats_key
+        op_type = reward_shaping_config.op_type
+        # if the target stats does not exist, skip this stats and return the original sample
+        if tgt_stats not in sample[Fields.stats]:
+            return sample
+        if op_type == OpType.ADD:
+            sample[self.config.format.reward_key] += reward_shaping_config.weight * sample[Fields.stats][tgt_stats]
+        elif op_type == OpType.MUL:
+            sample[self.config.format.reward_key] *= reward_shaping_config.weight * sample[Fields.stats][tgt_stats]
+        elif op_type == OpType.SUB:
+            sample[self.config.format.reward_key] -= reward_shaping_config.weight * sample[Fields.stats][tgt_stats]
+        elif op_type == OpType.DIV:
+            sample[self.config.format.reward_key] /= reward_shaping_config.weight * sample[Fields.stats][tgt_stats]
+        return sample
+
+    def _reward_shaping(self, rft_dataset: RftDataset) -> RftDataset:
+        dataset = rft_dataset.data
+        # check if there is a reward column in the dataset. If not, skip!
+        if self.config.format.reward_key not in dataset.features:
+            return rft_dataset
+        # get reward shaping configs
+        reward_shaping_configs = self.config.reward_shaping
+        for reward_shaping_config in reward_shaping_configs:
+            dataset = dataset.map(partial(self._reward_shaping_single, reward_shaping_config=reward_shaping_config))
+
+        rft_dataset.data = dataset
+        return rft_dataset
 
     @ray.method(num_returns=1)
     def select_batch(self, dataset: RftDataset, batch_size: int) -> List[Dict[str, Any]]:

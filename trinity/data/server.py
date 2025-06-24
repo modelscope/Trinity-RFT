@@ -33,7 +33,7 @@ def data_processor(pipeline_type):
             }
         )
 
-    iterator = DataActiveIterator(pipeline_config, config.buffer)
+    iterator = DataActiveIterator(pipeline_config, config.buffer, pipeline_type=pipeline_type)
     ret, msg = iterator.run()
     return jsonify({"return_code": ret, "message": msg})
 

@@ -12,6 +12,7 @@ from trinity.common.constants import (
     StorageType,
     SyncMethod,
     TaskType,
+    OpType
 )
 from trinity.utils.log import get_logger
 
@@ -100,6 +101,13 @@ class StorageConfig:
     # ! DO NOT SET,  automatically set corresponding to train/eval
     task_type: TaskType = TaskType.EXPLORE
 
+@dataclass
+class RewardShapingConfig:
+    """Config for reward shaping."""
+
+    stats_key: str = ""
+    op_type: OpType = OpType.ADD
+    weight: float = 1.0
 
 @dataclass
 class DataPipelineConfig:
@@ -124,6 +132,9 @@ class DataPipelineConfig:
     min_priority_score: Optional[float] = 0.0
     priority_weights: Optional[Dict[str, float]] = None
     data_dist: Optional[str] = "gaussian"  # one of ["gaussian", "uniform"]
+
+    # reward shaping related, only available for experience pipeline
+    reward_shaping: Optional[List[RewardShapingConfig]] = field(default_factory=list)
 
 
 @dataclass

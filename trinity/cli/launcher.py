@@ -9,7 +9,7 @@ from pprint import pprint
 import ray
 
 from trinity.common.config import Config, DataPipelineConfig, load_config
-from trinity.common.constants import EXPLORER_NAME, TRAINER_NAME
+from trinity.common.constants import EXPLORER_NAME, TRAINER_NAME, DataProcessorPipelineType
 from trinity.explorer.explorer import Explorer
 from trinity.trainer.trainer import Trainer
 from trinity.utils.log import get_logger
@@ -126,14 +126,14 @@ def activate_data_module(data_processor_url: str, config_path: str):
         return
 
 
-def validate_data_pipeline(data_pipeline_config: DataPipelineConfig, pipeline_type: str):
+def validate_data_pipeline(data_pipeline_config: DataPipelineConfig, pipeline_type: DataProcessorPipelineType):
     """
     Check if the data pipeline is valid. The config should:
     1. Non-empty input buffer
     2. Different input/output buffers
 
     :param data_pipeline_config: the input data pipeline to be validated.
-    :param pipeline_type: the type of pipeline, should be one of ["task", "experience"]
+    :param pipeline_type: the type of pipeline, should be one of DataProcessorPipelineType
     """
     input_buffers = data_pipeline_config.input_buffers
     output_buffer = data_pipeline_config.output_buffer
@@ -147,7 +147,7 @@ def validate_data_pipeline(data_pipeline_config: DataPipelineConfig, pipeline_ty
     if output_buffer.name in input_buffer_names:
         logger.warning("Output buffer exists in input buffers. Won't activate it.")
         return False
-    if pipeline_type == "task":
+    if pipeline_type == DataProcessorPipelineType.TASK:
         # task pipeline specific
         # "raw" field should be True for task pipeline because the data source must be raw data files
         for buffer in input_buffers:
@@ -156,12 +156,13 @@ def validate_data_pipeline(data_pipeline_config: DataPipelineConfig, pipeline_ty
                     'Input buffers should be raw data files for task pipeline ("raw" field should be True). Won\'t activate it.'
                 )
                 return False
-    elif pipeline_type == "experience":
+    elif pipeline_type == DataProcessorPipelineType.EXPERIENCE:
         # experience pipeline specific
-        raise NotImplementedError("experience_pipeline is not implemented yet.")
+        # No special items need to be checked.
+        pass
     else:
         logger.warning(
-            f'Invalid pipeline type: {pipeline_type}. Should be one of ["task", "experience"].'
+            f'Invalid pipeline type: {pipeline_type}..'
         )
         return False
     return True
@@ -177,19 +178,19 @@ def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
     if (
         data_processor_config.data_processor_url
         and data_processor_config.task_pipeline
-        and validate_data_pipeline(data_processor_config.task_pipeline, "task")
+        and validate_data_pipeline(data_processor_config.task_pipeline, DataProcessorPipelineType.TASK)
     ):
         activate_data_module(
-            f"{data_processor_config.data_processor_url}/task_pipeline", config_path
+            f"{data_processor_config.data_processor_url}/{DataProcessorPipelineType.TASK.value}", config_path
         )
     # try to activate experience pipeline for experiences
     if (
         data_processor_config.data_processor_url
         and data_processor_config.experience_pipeline
-        and validate_data_pipeline(data_processor_config.experience_pipeline, "experience")
+        and validate_data_pipeline(data_processor_config.experience_pipeline, DataProcessorPipelineType.EXPERIENCE)
     ):
         activate_data_module(
-            f"{data_processor_config.data_processor_url}/experience_pipeline", config_path
+            f"{data_processor_config.data_processor_url}/{DataProcessorPipelineType.EXPERIENCE.value}", config_path
         )
     ray_namespace = config.ray_namespace
     if dlc:
