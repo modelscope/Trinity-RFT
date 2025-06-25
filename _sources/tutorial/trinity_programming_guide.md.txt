@@ -2,9 +2,8 @@
 
 This guide introduces how to develop new modules in Trinity-RFT and provides relevant development guidelines.
 
-Trinity-RFT consists of three main modules: **Explorer**, **Trainer** and **Buffer**.
-We decouple the RL pipeline into three modules to make it easier to customize and extend.
-Below is a table summarizing the modules and components that developers with different tragets need to focus on.
+In Trinity-RFT, we decompose the RL pipeline into three main modules (**Explorer**, **Trainer** and **Buffer**) to facilitate customization and extension.
+Below is a table summarizing the modules and components that developers with different targets need to focus on.
 
 | Development Target | Core Module | Key Component |
 |--------------------|-------------|---------------|

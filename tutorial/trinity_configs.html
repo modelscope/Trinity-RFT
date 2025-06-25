@@ -63,6 +63,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#cluster-configuration">Cluster Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#buffer-configuration">Buffer Configuration</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#explorer-input">Explorer Input</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#explorer-output">Explorer Output</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#trainer-input">Trainer Input</a></li>
 </ul>
 </li>
@@ -178,6 +179,7 @@
 </ul>
 </li>
 <li><p><code class="docutils literal notranslate"><span class="pre">checkpoint_root_dir</span></code>: Root directory where all checkpoints and logs will be saved. Checkpoints for this experiment will be stored in <code class="docutils literal notranslate"><span class="pre">&lt;checkpoint_root_dir&gt;/&lt;project&gt;/&lt;name&gt;/</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ray_namespace</span></code>: Namespace for the modules launched in the current experiment. If not specified, it will be set to <code class="docutils literal notranslate"><span class="pre">&lt;project&gt;/&lt;name&gt;</span></code>.</p></li>
 </ul>
 </section>
 <hr class="docutils" />
@@ -272,6 +274,9 @@
 <span class="w">    </span><span class="nt">eval_tasksets</span><span class="p">:</span>
 <span class="w">      </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 
+<span class="w">  </span><span class="nt">explorer_output</span><span class="p">:</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+
 <span class="w">  </span><span class="nt">trainer_input</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">experience_buffer</span><span class="p">:</span>
 <span class="w">      </span><span class="l l-Scalar l-Scalar-Plain">...</span>
@@ -325,7 +330,7 @@
 </ul>
 <p>The configuration for each task dataset is defined as follows:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">name</span></code>: Name of the dataset. Name must be unique.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">name</span></code>: Name of the dataset. This name will be used as the Ray actor’s name, so it must be unique.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">storage_type</span></code>: How the dataset is stored. Options: <code class="docutils literal notranslate"><span class="pre">file</span></code>, <code class="docutils literal notranslate"><span class="pre">queue</span></code>, <code class="docutils literal notranslate"><span class="pre">sql</span></code>.</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">file</span></code>: The dataset is stored in <code class="docutils literal notranslate"><span class="pre">jsonl</span></code>/<code class="docutils literal notranslate"><span class="pre">parquet</span></code> files. The data file organization is required to meet the huggingface standard. <em>We recommand using this storage type for most cases.</em></p></li>
@@ -335,9 +340,9 @@
 </li>
 <li><p><code class="docutils literal notranslate"><span class="pre">path</span></code>: The path to the task dataset.</p>
 <ul>
-<li><p>For <code class="docutils literal notranslate"><span class="pre">file</span></code> storage type, the path is the path to the directory that contains the task dataset files.</p></li>
+<li><p>For <code class="docutils literal notranslate"><span class="pre">file</span></code> storage type, the path points to the directory that contains the task dataset files.</p></li>
 <li><p>For <code class="docutils literal notranslate"><span class="pre">queue</span></code> storage type, the path is optional. You can back up the data in the queue by specifying a sqlite database path here.</p></li>
-<li><p>For <code class="docutils literal notranslate"><span class="pre">sql</span></code> storage type, the path is the path to the sqlite database file.</p></li>
+<li><p>For <code class="docutils literal notranslate"><span class="pre">sql</span></code> storage type, the path points to the sqlite database file.</p></li>
 </ul>
 </li>
 <li><p><code class="docutils literal notranslate"><span class="pre">subset_name</span></code>: The subset name of the task dataset. Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
@@ -356,6 +361,40 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">default_workflow_type</span></code>: Type of workflow logic applied to this dataset. If not specified, the <code class="docutils literal notranslate"><span class="pre">buffer.default_workflow_type</span></code> is used.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">default_reward_fn_type</span></code>: Reward function used during exploration. If not specified, the <code class="docutils literal notranslate"><span class="pre">buffer.default_reward_fn_type</span></code> is used.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">workflow_args</span></code>: A dictionary of arguments used to supplement dataset-level parameters.</p></li>
+</ul>
+</section>
+<section id="explorer-output">
+<h3>Explorer Output<a class="headerlink" href="#explorer-output" title="Link to this heading"></a></h3>
+<p>In <a class="reference internal" href="#global-configuration"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">explore</span></code> mode</span></a>, since there is no trainer, users can configure an experience buffer via <code class="docutils literal notranslate"><span class="pre">buffer.explorer_output</span></code>, rather than using <code class="docutils literal notranslate"><span class="pre">buffer.trainer_input</span></code>, which will be introduced in the next section.</p>
+<blockquote>
+<div><p>For <code class="docutils literal notranslate"><span class="pre">both</span></code> and <code class="docutils literal notranslate"><span class="pre">train</span></code> modes, users should use <code class="docutils literal notranslate"><span class="pre">buffer.trainer_input</span></code> instead of <code class="docutils literal notranslate"><span class="pre">buffer.explorer_output</span></code>.</p>
+</div></blockquote>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">buffer</span><span class="p">:</span>
+<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">explorer_output</span><span class="p p-Indicator">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">countdown_buffer</span>
+<span class="w">    </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">queue</span>
+<span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sqlite:///countdown_buffer.db</span>
+<span class="w">    </span><span class="nt">wrap_in_ray</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">name</span></code>: The name of the experience buffer. This name will be used as the Ray actor’s name, so it must be unique.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">storage_type</span></code>: The storage type for the experience buffer.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">queue</span></code>: Experience data is stored in a queue. This storage type is recommended for most use cases.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sql</span></code>: Experience data is stored in a SQL database. If your database only supports local access (e.g., SQLite), set <code class="docutils literal notranslate"><span class="pre">wrap_in_ray</span></code> to <code class="docutils literal notranslate"><span class="pre">True</span></code> to wrap the database in a Ray actor, enabling remote access from other nodes.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">file</span></code>: Experience data is stored in a JSON file. This storage type should be used only for debugging purposes in <code class="docutils literal notranslate"><span class="pre">explore</span></code> mode.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">path</span></code>: The path to the experience buffer.</p>
+<ul>
+<li><p>For <code class="docutils literal notranslate"><span class="pre">queue</span></code> storage type, this field is optional. You can specify a SQLite database or JSON file path here to back up the queue data.</p></li>
+<li><p>For <code class="docutils literal notranslate"><span class="pre">file</span></code> storage type, the path points to the directory containing the dataset files.</p></li>
+<li><p>For <code class="docutils literal notranslate"><span class="pre">sql</span></code> storage type, the path points to the SQLite database file.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">wrap_in_ray</span></code>: Whether to wrap the experience buffer in a Ray actor. Only take effect when <code class="docutils literal notranslate"><span class="pre">storage_type</span></code> is <code class="docutils literal notranslate"><span class="pre">sql</span></code> or <code class="docutils literal notranslate"><span class="pre">file</span></code>. The <code class="docutils literal notranslate"><span class="pre">queue</span></code> storage always uses a Ray actor.</p></li>
 </ul>
 </section>
 <section id="trainer-input">
@@ -381,7 +420,7 @@
 </pre></div>
 </div>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">experience_buffer</span></code>: Experience replay buffer used by the trainer.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">experience_buffer</span></code>: Experience buffer used by the trainer, which is logically equivalent to <code class="docutils literal notranslate"><span class="pre">buffer.explorer_output</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">sft_warmup_dataset</span></code>: Optional dataset used for pre-training (SFT warmup).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">sft_warmup_steps</span></code>: Number of steps to use SFT warm-up before RL begins.</p></li>
 </ul>
@@ -392,6 +431,7 @@
 <h2>Explorer Configuration<a class="headerlink" href="#explorer-configuration" title="Link to this heading"></a></h2>
 <p>Controls the rollout models and workflow execution.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">explorer</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">explorer</span>
 <span class="w">  </span><span class="nt">runner_num</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32</span>
 <span class="w">  </span><span class="nt">rollout_model</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">engine_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vllm_async</span>
@@ -403,6 +443,7 @@
 </pre></div>
 </div>
 <ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">name</span></code>: Name of the explorer. This name will be used as the Ray actor’s name, so it must be unique.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">runner_num</span></code>: Number of parallel workflow runners.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">rollout_model.engine_type</span></code>: Type of inference engine. Options: <code class="docutils literal notranslate"><span class="pre">vllm_async</span></code> (recommended), <code class="docutils literal notranslate"><span class="pre">vllm</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">rollout_model.engine_num</span></code>: Number of inference engines.</p></li>
@@ -417,6 +458,7 @@
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">synchronizer</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">sync_method</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;nccl&#39;</span>
 <span class="w">  </span><span class="nt">sync_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">  </span><span class="nt">sync_offset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
 <span class="w">  </span><span class="nt">sync_timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1200</span>
 </pre></div>
 </div>
@@ -428,6 +470,7 @@
 </ul>
 </li>
 <li><p><code class="docutils literal notranslate"><span class="pre">sync_interval</span></code>: Interval (in steps) of model weight synchronization between trainer and explorer.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sync_offset</span></code>: Offset (in steps) of model weight synchronization between trainer and explorer. The explorer can run <code class="docutils literal notranslate"><span class="pre">sync_offset</span></code> steps before the trainer starts training.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">sync_timeout</span></code>: Timeout duration for synchronization.</p></li>
 </ul>
 </section>
@@ -436,6 +479,7 @@
 <h2>Trainer Configuration<a class="headerlink" href="#trainer-configuration" title="Link to this heading"></a></h2>
 <p>Specifies the backend and behavior of the trainer.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">trainer</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">trainer</span>
 <span class="w">  </span><span class="nt">trainer_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;verl&#39;</span>
 <span class="w">  </span><span class="nt">save_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
 <span class="w">  </span><span class="nt">trainer_config_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;examples/ppo_countdown/train_countdown.yaml&#39;</span>
@@ -443,6 +487,7 @@
 </pre></div>
 </div>
 <ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">name</span></code>: Name of the trainer. This name will be used as the Ray actor’s name, so it must be unique.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">trainer_type</span></code>: Trainer backend implementation. Currently only supports <code class="docutils literal notranslate"><span class="pre">verl</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">save_interval</span></code>: Frequency (in steps) at which to save model checkpoints.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">trainer_config_path</span></code>: The path to the trainer configuration file.</p></li>

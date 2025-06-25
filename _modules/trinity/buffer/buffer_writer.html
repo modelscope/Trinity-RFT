@@ -107,11 +107,26 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Write to buffer.&quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="BufferWriter.finish">
-<a class="viewcode-back" href="../../../build_api/trinity.buffer.html#trinity.buffer.buffer_writer.BufferWriter.finish">[docs]</a>
+<div class="viewcode-block" id="BufferWriter.acquire">
+<a class="viewcode-back" href="../../../build_api/trinity.buffer.html#trinity.buffer.buffer_writer.BufferWriter.acquire">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">finish</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Finish writing.&quot;&quot;&quot;</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="nf">acquire</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Acquire the buffer writer.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            `int`: The reference count of the buffer after acquiring.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="BufferWriter.release">
+<a class="viewcode-back" href="../../../build_api/trinity.buffer.html#trinity.buffer.buffer_writer.BufferWriter.release">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">release</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Release the buffer writer. After release, the buffer writer can not be used again.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            `int`: The reference count of the buffer after releasing.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
 </div>
 
 </pre></div>

@@ -128,7 +128,6 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.algorithm_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">AlgorithmManager</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">prefix_metrics</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">TRAINER_NAME</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experiences</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.trainer.trainer</span><span class="w"> </span><span class="kn">import</span> <span class="n">TrainEngineWrapper</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.monitor</span><span class="w"> </span><span class="kn">import</span> <span class="n">MONITOR</span>
@@ -246,7 +245,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">MONITOR</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">global_config</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">monitor_type</span><span class="p">)(</span>
             <span class="n">project</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">project_name</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">experiment_name</span><span class="p">,</span>
-            <span class="n">role</span><span class="o">=</span><span class="n">TRAINER_NAME</span><span class="p">,</span>
+            <span class="n">role</span><span class="o">=</span><span class="n">global_config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="n">config</span><span class="o">=</span><span class="n">global_config</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reset_experiences_example_table</span><span class="p">()</span></div>

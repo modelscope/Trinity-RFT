@@ -94,14 +94,14 @@
              
   <section class="tex2jax_ignore mathjax_ignore" id="asynchronous-rft">
 <h1>Asynchronous RFT<a class="headerlink" href="#asynchronous-rft" title="Link to this heading"></a></h1>
-<p>This example shows how to run RFT in a fully asynchronous mode with the GRPO algorithm, Qwen2.5-1.5B-Instruct model and GSM8K dataset.</p>
-<p>Trinity-RFT supports an asynchronous mode by running the trainer and explorer in separate processes.</p>
-<p>For this purpose, we prepare two main config files: <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/blob/main/examples/async_gsm8k/explorer.yaml"><code class="docutils literal notranslate"><span class="pre">explorer.yaml</span></code></a> and <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/blob/main/examples/async_gsm8k/trainer.yaml"><code class="docutils literal notranslate"><span class="pre">trainer.yaml</span></code></a>.
-The main difference between them is that in <code class="docutils literal notranslate"><span class="pre">explorer.yaml</span></code> we set <code class="docutils literal notranslate"><span class="pre">mode</span></code> as <code class="docutils literal notranslate"><span class="pre">explore</span></code>, while in <code class="docutils literal notranslate"><span class="pre">trainer.yaml</span></code> we set <code class="docutils literal notranslate"><span class="pre">mode</span></code> as <code class="docutils literal notranslate"><span class="pre">train</span></code>.
+<p>This example demonstrates how to run RFT in fully asynchronous mode using the GRPO algorithm, Qwen2.5-1.5B-Instruct model, and GSM8K dataset.</p>
+<p>Trinity-RFT supports Asynchronous RFT by running the trainer and explorer in separate processes.</p>
+<p>For this purpose, we provide two main configuration files: <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/blob/main/examples/async_gsm8k/explorer.yaml"><code class="docutils literal notranslate"><span class="pre">explorer.yaml</span></code></a> and <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/blob/main/examples/async_gsm8k/trainer.yaml"><code class="docutils literal notranslate"><span class="pre">trainer.yaml</span></code></a>.
+The primary difference between them is that in <code class="docutils literal notranslate"><span class="pre">explorer.yaml</span></code> we set <code class="docutils literal notranslate"><span class="pre">mode</span></code> as <code class="docutils literal notranslate"><span class="pre">explore</span></code>, while in <code class="docutils literal notranslate"><span class="pre">trainer.yaml</span></code> we set <code class="docutils literal notranslate"><span class="pre">mode</span></code> as <code class="docutils literal notranslate"><span class="pre">train</span></code>.
 The model weights of the explorer and trainer are synchronized once every <code class="docutils literal notranslate"><span class="pre">sync_interval</span> <span class="pre">*</span> <span class="pre">batch_size</span></code> tasks.</p>
-<p>Suppose we have a node of 8 GPUs; we use 4 GPUs for the trainer and 4 GPUs for the explorer.
-Some important setups of <code class="docutils literal notranslate"><span class="pre">explorer.yaml</span></code> are listed in the following:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;project_name&gt;</span>
+<p>Assuming we have a node with 8 GPUs, we allocate 4 GPUs for the trainer and 4 GPUs for the explorer. Key configurations in <code class="docutils literal notranslate"><span class="pre">explorer.yaml</span></code> are as follows:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># explorer.yaml</span>
+<span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;project_name&gt;</span>
 <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;experiment_name&gt;</span>
 <span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">explore</span>
 <span class="nt">checkpoint_root_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/CHECKPOINT/</span>
@@ -115,7 +115,7 @@ Some important setups of <code class="docutils literal notranslate"><span class=
 <span class="w">  </span><span class="nt">gpu_per_node</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
 <span class="nt">buffer</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">total_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">96</span>
+<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">64</span>
 <span class="w">  </span><span class="nt">explorer_input</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">taskset</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gsm8k</span>
@@ -134,7 +134,6 @@ Some important setups of <code class="docutils literal notranslate"><span class=
 <span class="w">      </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">queue</span>
 <span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;sqlite:///gsm8k.db&#39;</span>
 <span class="nt">explorer</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">eval_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
 <span class="w">  </span><span class="nt">runner_num</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32</span>
 <span class="w">  </span><span class="nt">rollout_model</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">engine_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vllm_async</span>
@@ -146,8 +145,9 @@ Some important setups of <code class="docutils literal notranslate"><span class=
 <span class="w">  </span><span class="nt">trainer_config_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">examples/async_gsm8k/verl_config.yaml</span>
 </pre></div>
 </div>
-<p>Some important setups of <code class="docutils literal notranslate"><span class="pre">trainer.yaml</span></code> are listed in the following:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;project_name&gt;</span>
+<p>Key configurations in <code class="docutils literal notranslate"><span class="pre">trainer.yaml</span></code> are as follows:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># trainer.yaml</span>
+<span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;project_name&gt;</span>
 <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;experiment_name&gt;</span>
 <span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">train</span>
 <span class="nt">checkpoint_root_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/CHECKPOINT/</span>
@@ -161,7 +161,7 @@ Some important setups of <code class="docutils literal notranslate"><span class=
 <span class="w">  </span><span class="nt">gpu_per_node</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
 <span class="nt">buffer</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">total_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">96</span>
+<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">64</span>
 <span class="w">  </span><span class="nt">explorer_input</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">taskset</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gsm8k</span>
@@ -185,7 +185,7 @@ Some important setups of <code class="docutils literal notranslate"><span class=
 <span class="w">  </span><span class="nt">trainer_config_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">examples/async_gsm8k/verl_config.yaml</span>
 </pre></div>
 </div>
-<p>You may run this example with the following command:</p>
+<p>You can run this example with the following command:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>bash<span class="w"> </span>examples/async_gsm8k/run.sh
 </pre></div>
 </div>
@@ -195,6 +195,59 @@ Some important setups of <code class="docutils literal notranslate"><span class=
 We are continuously investigating other RL algorithms (e.g., <a class="reference internal" href="example_reasoning_advanced.html"><span class="std std-doc">OPMD</span></a>) in the asynchronous mode.</p>
 </div></blockquote>
 <p><img alt="async" src="../_images/async-curve.png" /></p>
+<p>Trinity-RFT also supports dynamic scaling in asynchronous mode. Continuing with the previous example, if an additional machine with 8 GPUs joins the Ray cluster during training, you can launch a new explorer using the following configuration <code class="docutils literal notranslate"><span class="pre">explorer_new.yaml</span></code>.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># explorer_new.yaml</span>
+<span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;project_name&gt;</span>
+<span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;experiment_name&gt;</span>
+<span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">explore</span>
+<span class="nt">checkpoint_root_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/CHECKPOINT/</span>
+<span class="nt">algorithm</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">algorithm_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">grpo</span>
+<span class="w">  </span><span class="nt">repeat_times</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
+<span class="nt">model</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">model_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/MODEL/</span>
+<span class="nt">cluster</span><span class="p">:</span><span class="w">  </span><span class="c1"># important</span>
+<span class="w">  </span><span class="nt">node_num</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">  </span><span class="nt">gpu_per_node</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
+<span class="nt">explorer</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;explorer_new&#39;</span><span class="w">  </span><span class="c1"># important</span>
+<span class="w">  </span><span class="nt">runner_num</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">64</span>
+<span class="w">  </span><span class="nt">rollout_model</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">engine_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vllm_async</span>
+<span class="w">    </span><span class="nt">engine_num</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
+<span class="nt">buffer</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">total_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">64</span>
+<span class="w">  </span><span class="nt">explorer_input</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">taskset</span><span class="p">:</span><span class="w">  </span><span class="c1"># important</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gsm8k</span>
+<span class="w">      </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">file</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/DATASET/</span>
+<span class="w">      </span><span class="nt">format</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">prompt_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;question&#39;</span>
+<span class="w">        </span><span class="nt">response_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;answer&#39;</span>
+<span class="w">      </span><span class="nt">rollout_args</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">temperature</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">    </span><span class="nt">default_workflow_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;math_workflow&#39;</span>
+<span class="w">  </span><span class="nt">trainer_input</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">experience_buffer</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gsm8k_buffer</span>
+<span class="w">      </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">queue</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;sqlite:///gsm8k.db&#39;</span>
+<span class="nt">synchronizer</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">sync_method</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;checkpoint&#39;</span>
+<span class="w">  </span><span class="nt">sync_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="c1"># other configs are the same as explorer.yaml</span>
+</pre></div>
+</div>
+<p>The differences between <code class="docutils literal notranslate"><span class="pre">explorer_new.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">explorer.yaml</span></code> include:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">cluster.node_num/gpu_per_node</span></code>: Specify the cluster configuration for the newly added explorer.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">explorer.name</span></code>: The later-started explorer requires a different name than “explorer”, which is the default name for the existing explorer.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">explorer.rollout_model.engine_num/tensor_parallel_size</span></code>: Define the engine number and tensor parallel size to optimally utilize GPU resources.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.taskset</span></code>: Provide another task dataset as input for the new explorer.</p></li>
+</ul>
+<p>All other parameters remain the same as in <code class="docutils literal notranslate"><span class="pre">explorer.yaml</span></code>.</p>
 </section>
 
 
