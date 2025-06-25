@@ -20,9 +20,10 @@ FILE_READERS = Registry("file_readers")
 
 
 class _HFBatchReader:
-    def __init__(self, dataset: Dataset, max_epoch: int = 1, offset: int = 0):
+    def __init__(self, dataset: Dataset, name: str, max_epoch: int = 1, offset: int = 0):
         self.dataset = dataset
         self.dataset_size = len(dataset)
+        self.name = name
         self.current_batch_size = None
         self.max_epoch = max_epoch
         if offset >= self.dataset_size:
@@ -41,7 +42,7 @@ class _HFBatchReader:
         self.progress_bar = tqdm(
             total=self.total_steps,
             initial=self.current_epoch * self.dataset_size + self.current_offset,
-            desc="Dataset Progressing",
+            desc=f"Dataset [{self.name}] Progressing",
         )
 
     def read_batch(self, batch_size: int) -> List:
@@ -65,6 +66,15 @@ class _HFBatchReader:
                 self.iter = iter(self.dataset)
         return batch
 
+    def reset(self):
+        self.current_epoch = 0
+        self.current_offset = 0
+        self.progress_bar = tqdm(
+            total=self.total_steps,
+            initial=self.current_epoch * self.dataset_size + self.current_offset,
+            desc=f"Dataset [{self.name}] Progressing",
+        )
+
 
 @FILE_READERS.register_module(SFTAlgorithm.name())
 class SFTDataReader(BufferReader):
@@ -80,6 +90,7 @@ class SFTDataReader(BufferReader):
         self.read_batch_size = config.read_batch_size
         self.dataset = _HFBatchReader(
             load_dataset(meta.path, name=subset_name, split=self.split, trust_remote_code=True),
+            name=meta.name,
             max_epoch=meta.total_epochs,
         )  # TODO: support resume
         self.tokenizer = transformers.AutoTokenizer.from_pretrained(config.tokenizer_path)
@@ -157,6 +168,7 @@ class DPODataReader(BufferReader):
         self.read_batch_size = config.read_batch_size
         self.dataset = _HFBatchReader(
             load_dataset(meta.path, name=subset_name, split=self.split, trust_remote_code=True),
+            name=meta.name,
             max_epoch=meta.total_epochs,
         )  # TODO: support resume
         self.tokenizer = transformers.AutoTokenizer.from_pretrained(config.tokenizer_path)
@@ -229,6 +241,7 @@ class RolloutDataReader(BufferReader):
         datasets.disable_caching()
         self.dataset = _HFBatchReader(
             load_dataset(meta.path, name=subset_name, split=self.split, trust_remote_code=True),
+            name=meta.name,
             max_epoch=self.meta.total_epochs if meta.task_type == TaskType.EXPLORE else 1,
             offset=self.meta.index,
         )
@@ -273,6 +286,9 @@ class RolloutDataReader(BufferReader):
             )
             tasks.append(task)
         return tasks
+
+    def reset(self):
+        self.dataset.reset()
 
 
 @FILE_READERS.register_module("raw")
