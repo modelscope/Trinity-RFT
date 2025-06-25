@@ -42,6 +42,7 @@ class TestSQLBuffer(unittest.TestCase):
             )
             for i in range(1, put_batch_size + 1)
         ]
+        self.assertEqual(sql_writer.acquire(), 1)
         for _ in range(total_num // put_batch_size):
             sql_writer.write(exps)
         for _ in range(total_num // read_batch_size):
@@ -65,3 +66,5 @@ class TestSQLBuffer(unittest.TestCase):
         self.assertEqual(len(exps), put_batch_size * 2)
         db_wrapper = ray.get_actor("sql-test_buffer")
         self.assertIsNotNone(db_wrapper)
+        self.assertEqual(sql_writer.release(), 0)
+        self.assertRaises(StopIteration, sql_reader.read)

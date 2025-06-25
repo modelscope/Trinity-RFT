@@ -23,6 +23,15 @@ class SQLWriter(BufferWriter):
         else:
             self.db_wrapper.write(data)
 
-    def finish(self) -> None:
-        # TODO: implement this
-        pass
+    def acquire(self) -> int:
+        if self.wrap_in_ray:
+            return ray.get(self.db_wrapper.acquire.remote())
+        else:
+            return 0
+
+    def release(self) -> int:
+        if self.wrap_in_ray:
+            return ray.get(self.db_wrapper.release.remote())
+        else:
+            self.db_wrapper.release()
+            return 0

@@ -4,7 +4,6 @@ import ray
 import torch
 import torch.distributed
 
-from trinity.common.constants import EXPLORER_NAME
 from trinity.utils.distributed import init_process_group, is_ipv6_address
 from trinity.utils.log import get_logger
 
@@ -23,6 +22,7 @@ class WorkerExtension:
         timeout: int = 1200,
         update_with_checkpoint: bool = True,
         state_dict_meta: list = None,
+        explorer_name: str = None,
         namespace: str = None,
     ):
         """Init torch process group for model weights update"""
@@ -53,6 +53,7 @@ class WorkerExtension:
             group_name=group_name,
         )
         logger.info("vLLM init_process_group finished.")
+        self._explorer_name = explorer_name
         self._namespace = namespace
         self._explorer_actor = None
 
@@ -63,7 +64,9 @@ class WorkerExtension:
         """Broadcast weight to all vllm workers from source rank 0 (actor model)"""
         assert self._state_dict_meta is not None
         if self._explorer_actor is None:
-            self._explorer_actor = ray.get_actor(name=EXPLORER_NAME, namespace=self._namespace)
+            self._explorer_actor = ray.get_actor(
+                name=self._explorer_name, namespace=self._namespace
+            )
         for name, dtype_str, shape in self._state_dict_meta:
             if self._weight_update_rank == 0:
                 weight = ray.get(self._explorer_actor.get_weight.remote(name))

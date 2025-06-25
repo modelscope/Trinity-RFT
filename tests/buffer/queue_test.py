@@ -30,6 +30,7 @@ class TestQueueBuffer(RayUnittestBase):
         )
         writer = QueueWriter(meta, config)
         reader = QueueReader(meta, config)
+        self.assertEqual(writer.acquire(), 1)
         exps = [
             Experience(
                 tokens=torch.tensor([float(j) for j in range(i + 1)]),
@@ -59,7 +60,7 @@ class TestQueueBuffer(RayUnittestBase):
         )
         exps = reader.read(batch_size=put_batch_size * 2)
         self.assertEqual(len(exps), put_batch_size * 2)
-        writer.finish()
+        self.assertEqual(writer.release(), 0)
         self.assertRaises(StopIteration, reader.read)
         with open(BUFFER_FILE_PATH, "r") as f:
             self.assertEqual(len(f.readlines()), total_num + put_batch_size * 2)

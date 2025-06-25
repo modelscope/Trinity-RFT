@@ -11,5 +11,17 @@ class BufferWriter(ABC):
         """Write to buffer."""
 
     @abstractmethod
-    def finish(self) -> None:
-        """Finish writing."""
+    def acquire(self) -> int:
+        """Acquire the buffer writer.
+
+        Returns:
+            `int`: The reference count of the buffer after acquiring.
+        """
+
+    @abstractmethod
+    def release(self) -> int:
+        """Release the buffer writer. After release, the buffer writer can not be used again.
+
+        Returns:
+            `int`: The reference count of the buffer after releasing.
+        """

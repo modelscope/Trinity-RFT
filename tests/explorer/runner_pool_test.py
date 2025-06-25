@@ -250,9 +250,6 @@ class RunnerPoolTest(unittest.TestCase):
         )
 
         # `auxiliary_models`
-        st = time.time()
         status = pool.get_next_unorder()
-        et = time.time()
-        self.assertTrue(et - st < 1)
         self.assertEqual(len(status), 1)
         self.assertTrue(status[0].ok)

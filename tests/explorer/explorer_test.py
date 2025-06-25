@@ -36,8 +36,12 @@ class BaseExplorerCase(RayUnittestBase):
 class TestExplorerCountdownEval(BaseExplorerCase):
     def test_explorer(self):
         self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("countdown")
-        self.config.buffer.explorer_input.eval_tasksets.append(
-            get_unittest_dataset_config("countdown", "test")
+        self.config.buffer.explorer_input.eval_tasksets.extend(
+            [
+                get_unittest_dataset_config("countdown", "test"),
+                get_unittest_dataset_config("eval_short"),
+                get_unittest_dataset_config("eval_long"),
+            ]
         )
         self.config.name = f"explore-eval-{datetime.now().strftime('%Y%m%d%H%M%S')}"
         self.config.explorer.rollout_model.use_v1 = True
@@ -50,6 +54,8 @@ class TestExplorerCountdownEval(BaseExplorerCase):
         self.assertTrue(len(eval_metrics) > 0)
         self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 8)
         self.assertEqual(parser.metric_max_step(eval_metrics[0]), 8)
+        self.assertTrue("eval/eval_short/accuracy/max" in eval_metrics)
+        self.assertTrue("eval/eval_long/accuracy/max" in eval_metrics)
 
 
 class TestExplorerCountdownNoEval(BaseExplorerCase):

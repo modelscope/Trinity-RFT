@@ -7,6 +7,8 @@ from typing import Any, Dict, List, Optional
 from omegaconf import OmegaConf
 
 from trinity.common.constants import (
+    EXPLORER_NAME,
+    TRAINER_NAME,
     PromptType,
     ReadStrategy,
     StorageType,
@@ -80,7 +82,7 @@ class StorageConfig:
     format: FormatConfig = field(default_factory=FormatConfig)
     index: int = 0
 
-    # used for StorageType.SQL
+    # used for StorageType.SQL/FILE
     wrap_in_ray: bool = True
 
     # used for StorageType.QUEUE
@@ -290,6 +292,7 @@ class BufferConfig:
 class ExplorerConfig:
     """Config for explorer."""
 
+    name: str = EXPLORER_NAME
     # for workflow runner
     # number of workflow runners.
     # For sync engine (vllm), it should be equal to `engine_num`.
@@ -311,6 +314,7 @@ class ExplorerConfig:
 
 @dataclass
 class TrainerConfig:
+    name: str = TRAINER_NAME
     trainer_type: str = "verl"
     save_interval: int = 0
     enable_preview: bool = True  # enable rollout preview in wandb
@@ -593,7 +597,7 @@ class Config:
 
         # set namespace
         if self.ray_namespace is None or len(self.ray_namespace) == 0:
-            self.ray_namespace = f"{self.project}-{self.name}"
+            self.ray_namespace = f"{self.project}/{self.name}"
 
         # check algorithm
         self._check_algorithm()

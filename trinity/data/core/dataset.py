@@ -84,7 +84,7 @@ class RftDataset:
             buffer_config = self.buffer_config
         output_buffer = get_buffer_writer(output_storage_config, buffer_config)
         output_buffer.write(self.data.to_list())
-        output_buffer.finish()
+        output_buffer.release()
         self.data = Dataset.from_list([])
 
     def to_parquet(self, path: str):

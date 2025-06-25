@@ -3,6 +3,8 @@ import asyncio
 from copy import deepcopy
 from typing import List
 
+import ray
+
 from trinity.buffer.writer.file_writer import JSONWriter
 from trinity.buffer.writer.sql_writer import SQLWriter
 from trinity.common.config import BufferConfig, StorageConfig
@@ -44,6 +46,19 @@ class QueueActor:
             st_config.storage_type = StorageType.FILE
             self.writer = JSONWriter(st_config, self.config)
         self.logger.warning(f"Save experiences in {st_config.path}.")
+        self.ref_count = 0
+
+    async def acquire(self) -> int:
+        self.ref_count += 1
+        return self.ref_count
+
+    async def release(self) -> int:
+        """Release the queue."""
+        self.ref_count -= 1
+        if self.ref_count <= 0:
+            await self.queue.put(self.FINISH_MESSAGE)
+            self.writer.release()
+        return self.ref_count
 
     def length(self) -> int:
         """The length of the queue."""
@@ -54,10 +69,6 @@ class QueueActor:
         await self.queue.put(exp_list)
         if self.writer is not None:
             self.writer.write(exp_list)
-
-    async def finish(self) -> None:
-        """Stop the queue."""
-        await self.queue.put(self.FINISH_MESSAGE)
 
     async def get_batch(self, batch_size: int) -> List:
         """Get batch of experience."""
@@ -70,3 +81,16 @@ class QueueActor:
             if len(batch) >= batch_size:
                 break
         return batch
+
+    @classmethod
+    def get_actor(cls, storage_config: StorageConfig, config: BufferConfig):
+        """Get the queue actor."""
+        return (
+            ray.remote(cls)
+            .options(
+                name=f"queue-{storage_config.name}",
+                namespace=ray.get_runtime_context().namespace,
+                get_if_exists=True,
+            )
+            .remote(storage_config, config)
+        )

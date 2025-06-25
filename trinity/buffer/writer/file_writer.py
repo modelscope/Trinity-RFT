@@ -20,8 +20,15 @@ class JSONWriter(BufferWriter):
         else:
             self.writer.write(data)
 
-    def finish(self):
+    def acquire(self) -> int:
         if self.wrap_in_ray:
-            ray.get(self.writer.finish.remote())
+            return ray.get(self.writer.acquire())
         else:
-            self.writer.finish()
+            return 0
+
+    def release(self) -> int:
+        if self.wrap_in_ray:
+            return ray.get(self.writer.release.remote())
+        else:
+            self.writer.release()
+            return 0

@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional
 from omegaconf import OmegaConf
 
 from trinity.common.config import BufferConfig, Config, SynchronizerConfig
+from trinity.common.constants import EXPLORER_NAME
 from trinity.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -119,6 +120,7 @@ class ActorRolloutRef:
     ref: Ref = field(default_factory=Ref)
     rollout: Rollout = field(default_factory=Rollout)
     synchronizer: Optional[SynchronizerConfig] = None
+    explorer_name: str = EXPLORER_NAME
 
 
 @dataclass
@@ -298,6 +300,7 @@ class veRLConfig:
 
         self.synchronizer = config.synchronizer
         self.actor_rollout_ref.synchronizer = config.synchronizer
+        self.actor_rollout_ref.explorer_name = config.explorer.name
 
         # Actor / Critic config
         self.actor_rollout_ref.model.path = config.model.model_path

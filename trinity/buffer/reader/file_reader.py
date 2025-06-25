@@ -5,7 +5,7 @@ from typing import List, Optional
 import datasets
 import transformers
 from datasets import Dataset, load_dataset
-from tqdm import tqdm
+from ray.experimental.tqdm_ray import tqdm
 
 from trinity.algorithm.algorithm import DPOAlgorithm, SFTAlgorithm
 from trinity.buffer.buffer_reader import BufferReader
@@ -20,9 +20,16 @@ FILE_READERS = Registry("file_readers")
 
 
 class _HFBatchReader:
-    def __init__(self, dataset: Dataset, max_epoch: int = 1, offset: int = 0):
+    def __init__(
+        self,
+        dataset: Dataset,
+        name: str,
+        max_epoch: int = 1,
+        offset: int = 0,
+    ):
         self.dataset = dataset
         self.dataset_size = len(dataset)
+        self.name = name
         self.current_batch_size = None
         self.max_epoch = max_epoch
         if offset >= self.dataset_size:
@@ -40,11 +47,15 @@ class _HFBatchReader:
         self.total_steps = self.dataset_size * self.max_epoch
         self.progress_bar = tqdm(
             total=self.total_steps,
-            initial=self.current_epoch * self.dataset_size + self.current_offset,
-            desc="Dataset Progressing",
+            desc=f"Dataset [{self.name}] Progressing",
         )
+        initial = self.current_epoch * self.dataset_size + self.current_offset
+        self.progress_bar.update(initial)
 
     def read_batch(self, batch_size: int) -> List:
+        if self.current_epoch >= self.max_epoch:
+            self.progress_bar.close()
+            raise StopIteration
         batch = []
 
         while len(batch) < batch_size:
@@ -59,8 +70,11 @@ class _HFBatchReader:
                 self.current_offset = 0
 
                 if self.current_epoch >= self.max_epoch:
-                    self.progress_bar.close()
-                    raise StopIteration
+                    if len(batch) > 0:
+                        return batch
+                    else:
+                        self.progress_bar.close()
+                        raise StopIteration
                 # Step to the next epoch
                 self.iter = iter(self.dataset)
         return batch
@@ -80,6 +94,7 @@ class SFTDataReader(BufferReader):
         self.read_batch_size = config.read_batch_size
         self.dataset = _HFBatchReader(
             load_dataset(meta.path, name=subset_name, split=self.split, trust_remote_code=True),
+            name=meta.name,
             max_epoch=meta.total_epochs,
         )  # TODO: support resume
         self.tokenizer = transformers.AutoTokenizer.from_pretrained(config.tokenizer_path)
@@ -157,6 +172,7 @@ class DPODataReader(BufferReader):
         self.read_batch_size = config.read_batch_size
         self.dataset = _HFBatchReader(
             load_dataset(meta.path, name=subset_name, split=self.split, trust_remote_code=True),
+            name=meta.name,
             max_epoch=meta.total_epochs,
         )  # TODO: support resume
         self.tokenizer = transformers.AutoTokenizer.from_pretrained(config.tokenizer_path)
@@ -229,6 +245,7 @@ class RolloutDataReader(BufferReader):
         datasets.disable_caching()
         self.dataset = _HFBatchReader(
             load_dataset(meta.path, name=subset_name, split=self.split, trust_remote_code=True),
+            name=meta.name,
             max_epoch=self.meta.total_epochs if meta.task_type == TaskType.EXPLORE else 1,
             offset=self.meta.index,
         )
@@ -273,6 +290,9 @@ class RolloutDataReader(BufferReader):
             )
             tasks.append(task)
         return tasks
+
+    def reset(self):
+        self.dataset.reset()
 
 
 @FILE_READERS.register_module("raw")

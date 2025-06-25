@@ -10,12 +10,7 @@ from abc import ABC, abstractmethod
 import ray
 
 from trinity.common.config import Config
-from trinity.common.constants import (
-    EXPLORER_NAME,
-    TRAINER_NAME,
-    RunningStatus,
-    SyncMethod,
-)
+from trinity.common.constants import RunningStatus, SyncMethod
 from trinity.utils.log import get_logger
 
 
@@ -45,7 +40,7 @@ class Trainer:
                 self.logger.error(f"Error in Trainer: {e}")
                 break
         self.logger.info("--------------------\n> Trainer finished.\n--------------------")
-        return TRAINER_NAME
+        return self.config.trainer.name
 
     def train_step(self) -> bool:
         """Train one step.
@@ -63,7 +58,7 @@ class Trainer:
         """Sync the model weight."""
         if self.config.synchronizer.sync_method == SyncMethod.NCCL:
             if self.explorer_ref is None:
-                self.explorer_ref = ray.get_actor(EXPLORER_NAME)
+                self.explorer_ref = ray.get_actor(self.config.explorer.name)
             explorer_status = ray.get(self.explorer_ref.running_status.remote())
             if explorer_status == RunningStatus.STOPPED:
                 self.logger.warning("Explorer has already stopped. Skipping sync weight.")

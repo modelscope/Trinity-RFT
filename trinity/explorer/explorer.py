@@ -15,7 +15,6 @@ from trinity.buffer import get_buffer_writer
 from trinity.buffer.buffer import get_buffer_reader
 from trinity.common.config import Config
 from trinity.common.constants import (
-    EXPLORER_NAME,
     ROLLOUT_WEIGHT_SYNC_GROUP_NAME,
     RunningStatus,
     SyncMethod,
@@ -47,6 +46,7 @@ class Explorer:
                 self.config.buffer.explorer_output,  # type: ignore
                 self.config.buffer,
             )
+            self.experience_buffer.acquire()
         self.config.buffer.explorer_input.taskset.index = explorer_meta.get("latest_task_index", 0)
         self.taskset = get_buffer_reader(
             self.config.buffer.explorer_input.taskset, self.config.buffer
@@ -55,7 +55,7 @@ class Explorer:
         self.monitor = MONITOR.get(self.config.monitor.monitor_type)(
             project=self.config.project,
             name=self.config.name,
-            role=EXPLORER_NAME,
+            role=self.config.explorer.name,
             config=config,
         )
         self.batch_size = config.buffer.batch_size
@@ -100,6 +100,7 @@ class Explorer:
                 + base_offset,
                 world_size=world_size,
                 group_name=ROLLOUT_WEIGHT_SYNC_GROUP_NAME,
+                explorer_name=self.config.explorer.name,
                 timeout=self.config.synchronizer.sync_timeout,
                 update_with_checkpoint=self.use_checkpoint_weights_update,
                 state_dict_meta=state_dict_meta,
@@ -184,7 +185,7 @@ class Explorer:
                 self.logger.error(f"Error in Explorer: {e}")
                 break
         self.logger.info("--------------------\n> Explorer finished.\n--------------------")
-        return EXPLORER_NAME
+        return self.config.explorer.name
 
     def explore_step(self) -> bool:
         algo_config = self.algorithm_manager.get_current_algorithm_config(self.explore_step_num + 1)
@@ -202,7 +203,7 @@ class Explorer:
             )
             self.status = RunningStatus.STOPPED
             self.wait_for_workflow_done()
-            self.experience_buffer.finish()
+            self.experience_buffer.release()
             return False
         self.runner_pool.run_tasks(tasks)
         self.explore_step_num += 1
@@ -217,16 +218,15 @@ class Explorer:
 
     def eval(self) -> Tuple[bool, int]:
         """Evaluation on all evaluation data samples."""
-        eval_tasksets = []
-        for eval_taskset_config in self.config.buffer.explorer_input.eval_tasksets:
-            eval_tasksets.append(get_buffer_reader(eval_taskset_config, self.config.buffer))
-        if len(eval_tasksets) == 0:
+        if len(self.config.buffer.explorer_input.eval_tasksets) == 0:
             self.logger.warning("No evaluation data samples. Skip evaluation.")
             return True, self.explore_step_num
         self.logger.info("Evaluation started.")
         all_st = time.time()
         log_metrics = {}
-        for eval_taskset in eval_tasksets:
+        for eval_taskset_config in self.config.buffer.explorer_input.eval_tasksets:
+            self.logger.info(f"Evaluation on {eval_taskset_config.name} started.")
+            eval_taskset = get_buffer_reader(eval_taskset_config, self.config.buffer)
             st = time.time()
             all_metrics = defaultdict(list)
 

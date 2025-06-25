@@ -47,7 +47,7 @@ class TestFileBuffer(unittest.TestCase):
         # test writer
         writer = JSONWriter(meta, None)
         writer.write(data)
-        writer.finish()
+        writer.release()
 
         # test reader
         meta.path = self.temp_output_path

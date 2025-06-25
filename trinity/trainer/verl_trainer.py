@@ -36,7 +36,6 @@ from trinity.algorithm.algorithm import ALGORITHM_TYPE, SFTAlgorithm
 from trinity.algorithm.algorithm_manager import AlgorithmManager
 from trinity.algorithm.utils import prefix_metrics
 from trinity.common.config import Config
-from trinity.common.constants import TRAINER_NAME
 from trinity.common.experience import Experiences
 from trinity.trainer.trainer import TrainEngineWrapper
 from trinity.utils.monitor import MONITOR
@@ -150,7 +149,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         self.logger = MONITOR.get(global_config.monitor.monitor_type)(
             project=config.trainer.project_name,
             name=config.trainer.experiment_name,
-            role=TRAINER_NAME,
+            role=global_config.trainer.name,
             config=global_config,
         )
         self.reset_experiences_example_table()

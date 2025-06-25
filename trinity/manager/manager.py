@@ -14,8 +14,8 @@ class CacheManager:
 
     def __init__(self, config: Config, check_config: bool = False):
         self.cache_dir = config.monitor.cache_dir  # type: ignore
-        self.explorer_meta_path = os.path.join(self.cache_dir, "explorer_meta.json")  # type: ignore
-        self.trainer_meta_path = os.path.join(self.cache_dir, "trainer_meta.json")  # type: ignore
+        self.explorer_meta_path = os.path.join(self.cache_dir, f"{config.explorer.name}_meta.json")  # type: ignore
+        self.trainer_meta_path = os.path.join(self.cache_dir, f"{config.trainer.name}_meta.json")  # type: ignore
         if check_config:
             self._check_config_consistency(config)
 

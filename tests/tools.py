@@ -42,7 +42,7 @@ def get_checkpoint_path() -> str:
 def get_unittest_dataset_config(
     dataset_name: str = "countdown", split: str = "train"
 ) -> StorageConfig:
-    """Countdown sample dataset for 8 steps"""
+    """Countdown dataset with 16 samples."""
     if dataset_name == "countdown" or dataset_name == "copy_countdown":
         return StorageConfig(
             name=dataset_name,
@@ -59,6 +59,23 @@ def get_unittest_dataset_config(
             ),
             default_workflow_type="math_workflow",
             default_reward_fn_type="countdown_reward",
+        )
+    elif dataset_name in {"eval_short", "eval_long"}:
+        return StorageConfig(
+            name=dataset_name,
+            path=os.path.join(os.path.dirname(__file__), "template", "data", dataset_name),
+            split="test",
+            format=FormatConfig(
+                prompt_key="question",
+                response_key="answer",
+            ),
+            rollout_args=GenerationConfig(
+                n=1,
+                temperature=1.0,
+                logprobs=0,
+            ),
+            default_workflow_type="math_workflow",
+            default_reward_fn_type="math_reward",
         )
     elif dataset_name == "gsm8k":
         return StorageConfig(

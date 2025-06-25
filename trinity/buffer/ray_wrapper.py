@@ -47,6 +47,8 @@ class DBWrapper:
         self.batch_size = config.read_batch_size
         self.max_retry_times = config.max_retry_times
         self.max_retry_interval = config.max_retry_interval
+        self.ref_count = 0
+        self.stopped = False
 
     @classmethod
     def get_wrapper(cls, storage_config: StorageConfig, config: BufferConfig):
@@ -71,6 +73,9 @@ class DBWrapper:
     def read(
         self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
     ) -> List:
+        if self.stopped:
+            raise StopIteration()
+
         if strategy is None:
             strategy = ReadStrategy.LFU
 
@@ -114,6 +119,16 @@ class DBWrapper:
         self.logger.info(f"first response_text = {exp_list[0].response_text}")
         return exp_list
 
+    def acquire(self) -> int:
+        self.ref_count += 1
+        return self.ref_count
+
+    def release(self) -> int:
+        self.ref_count -= 1
+        if self.ref_count <= 0:
+            self.stopped = True
+        return self.ref_count
+
 
 class _Encoder(json.JSONEncoder):
     def default(self, o):
@@ -147,6 +162,7 @@ class FileWrapper:
         os.makedirs(path_dir, exist_ok=True)
         self.file = open(storage_config.path, "a", encoding="utf-8")
         self.encoder = _Encoder(ensure_ascii=False)
+        self.ref_count = 0
 
     @classmethod
     def get_wrapper(cls, storage_config: StorageConfig, config: BufferConfig):
@@ -174,5 +190,12 @@ class FileWrapper:
             "read() is not implemented for FileWrapper, please use QUEUE instead"
         )
 
-    def finish(self) -> None:
-        self.file.close()
+    def acquire(self) -> int:
+        self.ref_count += 1
+        return self.ref_count
+
+    def release(self) -> int:
+        self.ref_count -= 1
+        if self.ref_count <= 0:
+            self.file.close()
+        return self.ref_count
