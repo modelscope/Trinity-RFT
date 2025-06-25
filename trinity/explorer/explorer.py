@@ -227,6 +227,8 @@ class Explorer:
         all_st = time.time()
         log_metrics = {}
         for eval_taskset in eval_tasksets:
+            self.logger.info(f"Evaluation on {eval_taskset.name} started.")
+            eval_taskset.reset()
             st = time.time()
             all_metrics = defaultdict(list)
 
@@ -251,7 +253,6 @@ class Explorer:
             while self.runner_pool.has_next():
                 wait()
             metrics = self.monitor.calculate_metrics(all_metrics, prefix=f"eval/{eval_taskset.name}")  # type: ignore
-            eval_taskset.reset()
             log_metrics.update(metrics)
             log_metrics[f"eval/{eval_taskset.name}/time"] = time.time() - st
         log_metrics["eval/total_time"] = time.time() - all_st

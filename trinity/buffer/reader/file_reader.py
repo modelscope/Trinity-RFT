@@ -5,7 +5,7 @@ from typing import List, Optional
 import datasets
 import transformers
 from datasets import Dataset, load_dataset
-from tqdm import tqdm
+from ray.experimental.tqdm_ray import tqdm
 
 from trinity.algorithm.algorithm import DPOAlgorithm, SFTAlgorithm
 from trinity.buffer.buffer_reader import BufferReader
@@ -20,7 +20,14 @@ FILE_READERS = Registry("file_readers")
 
 
 class _HFBatchReader:
-    def __init__(self, dataset: Dataset, name: str, max_epoch: int = 1, offset: int = 0):
+    def __init__(
+        self,
+        dataset: Dataset,
+        name: str,
+        max_epoch: int = 1,
+        offset: int = 0,
+        init_progress_bar: bool = True,
+    ):
         self.dataset = dataset
         self.dataset_size = len(dataset)
         self.name = name
@@ -39,13 +46,21 @@ class _HFBatchReader:
 
         # Initialize tqdm progress bar
         self.total_steps = self.dataset_size * self.max_epoch
+        if init_progress_bar:
+            self.init_progress_bar()
+
+    def init_progress_bar(self):
         self.progress_bar = tqdm(
             total=self.total_steps,
-            initial=self.current_epoch * self.dataset_size + self.current_offset,
             desc=f"Dataset [{self.name}] Progressing",
         )
+        initial = self.current_epoch * self.dataset_size + self.current_offset
+        self.progress_bar.update(initial)
 
     def read_batch(self, batch_size: int) -> List:
+        if self.current_epoch >= self.max_epoch:
+            self.progress_bar.close()
+            raise StopIteration
         batch = []
 
         while len(batch) < batch_size:
@@ -60,8 +75,11 @@ class _HFBatchReader:
                 self.current_offset = 0
 
                 if self.current_epoch >= self.max_epoch:
-                    self.progress_bar.close()
-                    raise StopIteration
+                    if len(batch) > 0:
+                        return batch
+                    else:
+                        self.progress_bar.close()
+                        raise StopIteration
                 # Step to the next epoch
                 self.iter = iter(self.dataset)
         return batch
@@ -69,11 +87,7 @@ class _HFBatchReader:
     def reset(self):
         self.current_epoch = 0
         self.current_offset = 0
-        self.progress_bar = tqdm(
-            total=self.total_steps,
-            initial=self.current_epoch * self.dataset_size + self.current_offset,
-            desc=f"Dataset [{self.name}] Progressing",
-        )
+        self.init_progress_bar()
 
 
 @FILE_READERS.register_module(SFTAlgorithm.name())
@@ -244,6 +258,7 @@ class RolloutDataReader(BufferReader):
             name=meta.name,
             max_epoch=self.meta.total_epochs if meta.task_type == TaskType.EXPLORE else 1,
             offset=self.meta.index,
+            init_progress_bar=meta.task_type == TaskType.EXPLORE,
         )
         self.read_batch_size = config.batch_size
         self.prompt_key = meta.format.prompt_key
