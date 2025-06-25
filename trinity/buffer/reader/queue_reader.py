@@ -19,10 +19,15 @@ class QueueReader(BufferReader):
     def __init__(self, storage_config: StorageConfig, config: BufferConfig):
         assert storage_config.storage_type == StorageType.QUEUE
         self.read_batch_size = config.read_batch_size
-        self.queue = QueueActor.options(
-            name=f"queue-{storage_config.name}",
-            get_if_exists=True,
-        ).remote(storage_config, config)
+        self.queue = (
+            ray.remote(QueueActor)
+            .options(
+                name=f"queue-{storage_config.name}",
+                namespace=ray.get_runtime_context().namespace,
+                get_if_exists=True,
+            )
+            .remote(storage_config, config)
+        )
 
     def read(
         self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None

@@ -27,7 +27,6 @@ class BaseTrainerCase(RayUnittestBase):
         self.config.model.model_path = get_model_path()
         self.config.explorer.rollout_model.engine_type = "vllm_async"
         self.config.algorithm.repeat_times = 3
-        self.config.explorer.rollout_model.use_v1 = False
         self.config.project = "Trainer-unittest"
         self.config.name = f"trainer-{datetime.now().strftime('%Y%m%d%H%M%S')}"
         self.config.monitor.monitor_type = "tensorboard"
@@ -45,6 +44,7 @@ class TestTrainerCountdown(BaseTrainerCase):
     def test_trainer(self):
         """Test the both and bench mode."""
         # test both mode
+        self.config.explorer.rollout_model.use_v1 = False
         self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("countdown")
         self.config.buffer.explorer_input.eval_tasksets.append(
             get_unittest_dataset_config("countdown", "test")
@@ -149,6 +149,7 @@ class TestStepAheadAsyncRL(BaseTrainerCase):
         response_metrics = parser.metric_list("response_length")
         self.assertTrue(len(response_metrics) > 0)
         self.assertEqual(parser.metric_max_step(response_metrics[0]), 4)
+        ray.timeline(filename="timeline.json")
         ray.shutdown(_exiting_interpreter=True)
         # check checkpoint
         from trinity.common.models.utils import get_checkpoint_dir_with_step_num

@@ -60,6 +60,9 @@ def load_from_file(file_path: str):
     if full_module_name in sys.modules:
         raise ImportError(f"Module {module_name} already exists.")
     sys.modules[full_module_name] = module
-    shutil.copy2(file_path, Path(__file__).parent.parent / "plugins")
+    try:
+        shutil.copy2(file_path, Path(__file__).parent.parent / "plugins")
+    except shutil.SameFileError:
+        pass
     logger.info(f"Load {file_path} as {full_module_name}")
     return module

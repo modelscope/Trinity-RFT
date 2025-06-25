@@ -158,7 +158,7 @@ class TensorBoardParser:
 class RayUnittestBase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        ray.init(ignore_reinit_error=True)
+        ray.init(ignore_reinit_error=True, namespace="trinity_unittest")
 
     @classmethod
     def tearDownClass(cls):

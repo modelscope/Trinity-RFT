@@ -8,6 +8,7 @@ import re
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import aiohttp
+import ray
 import torch
 import vllm
 from vllm.sampling_params import RequestOutputKind
@@ -298,7 +299,7 @@ class vLLMAysncRolloutModel(InferenceModel):
                 timeout,
                 update_with_checkpoint,
                 state_dict_meta,
-                self.config.ray_namespace,
+                ray.get_runtime_context().namespace,
             ),
         )
 

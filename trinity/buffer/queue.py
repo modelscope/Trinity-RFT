@@ -3,8 +3,6 @@ import asyncio
 from copy import deepcopy
 from typing import List
 
-import ray
-
 from trinity.buffer.writer.file_writer import JSONWriter
 from trinity.buffer.writer.sql_writer import SQLWriter
 from trinity.common.config import BufferConfig, StorageConfig
@@ -20,7 +18,6 @@ def is_json_file(path: str) -> bool:
     return path.endswith(".json") or path.endswith(".jsonl")
 
 
-@ray.remote
 class QueueActor:
     """An asyncio.Queue based queue actor."""
 

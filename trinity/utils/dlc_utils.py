@@ -12,7 +12,6 @@ logger = get_logger(__name__)
 CLUSTER_ACTOR_NAME = "cluster_status"
 
 
-@ray.remote
 class ClusterStatus:
     def __init__(self):
         self.finished = False
@@ -97,10 +96,15 @@ def setup_ray_cluster(namespace: str):
             wait_for_ray_worker_nodes(env_vars["WORLD_SIZE"])
         else:
             # woker wait on the cluster status actor
-            cluster_status = ClusterStatus.options(
-                name=CLUSTER_ACTOR_NAME,
-                get_if_exists=True,
-            ).remote()
+            cluster_status = (
+                ray.remote(ClusterStatus)
+                .options(
+                    name=CLUSTER_ACTOR_NAME,
+                    namespace=namespace,
+                    get_if_exists=True,
+                )
+                .remote()
+            )
             while True:
                 if ray.get(cluster_status.running.remote()):
                     ret = subprocess.run("ray status", shell=True, capture_output=True)
@@ -112,13 +116,18 @@ def setup_ray_cluster(namespace: str):
             sys.exit(0)
 
 
-def stop_ray_cluster():
+def stop_ray_cluster(namespace: str):
     """
     Stop the ray cluster by sending a signal to the cluster status actor.
     """
-    cluster_status = ClusterStatus.options(
-        name=CLUSTER_ACTOR_NAME,
-        get_if_exists=True,
-    ).remote()
+    cluster_status = (
+        ray.remote(ClusterStatus)
+        .options(
+            name=CLUSTER_ACTOR_NAME,
+            namespace=namespace,
+            get_if_exists=True,
+        )
+        .remote()
+    )
     ray.get(cluster_status.finish.remote())
     logger.info("Stopping ray cluster...")

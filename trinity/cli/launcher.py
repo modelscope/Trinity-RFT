@@ -20,7 +20,14 @@ logger = get_logger(__name__)
 
 def bench(config: Config) -> None:
     """Evaluate model."""
-    explorer = ray.remote(Explorer).options(name=EXPLORER_NAME).remote(config)
+    explorer = (
+        ray.remote(Explorer)
+        .options(
+            name=EXPLORER_NAME,
+            namespace=ray.get_runtime_context().namespace,
+        )
+        .remote(config)
+    )
     try:
         ray.get(explorer.prepare.remote())
         ray.get(explorer.benchmark.remote())
@@ -34,7 +41,14 @@ def bench(config: Config) -> None:
 def explore(config: Config) -> None:
     """Run explorer."""
     try:
-        explorer = ray.remote(Explorer).options(name=EXPLORER_NAME).remote(config)
+        explorer = (
+            ray.remote(Explorer)
+            .options(
+                name=EXPLORER_NAME,
+                namespace=ray.get_runtime_context().namespace,
+            )
+            .remote(config)
+        )
         ray.get(explorer.prepare.remote())
         ray.get(explorer.sync_weight.remote())
         ray.get(explorer.explore.remote())
@@ -47,7 +61,14 @@ def explore(config: Config) -> None:
 def train(config: Config) -> None:
     """Run trainer."""
     try:
-        trainer = ray.remote(Trainer).options(name=TRAINER_NAME).remote(config)
+        trainer = (
+            ray.remote(Trainer)
+            .options(
+                name=TRAINER_NAME,
+                namespace=ray.get_runtime_context().namespace,
+            )
+            .remote(config)
+        )
         ray.get(trainer.prepare.remote())
         ray.get(trainer.sync_weight.remote())
         ray.get(trainer.train.remote())
@@ -67,8 +88,23 @@ def both(config: Config) -> None:
     the latest step. The specific number of experiences may vary for different
     algorithms and tasks.
     """
-    explorer = ray.remote(Explorer).options(name=EXPLORER_NAME).remote(config)
-    trainer = ray.remote(Trainer).options(name=TRAINER_NAME).remote(config)
+    namespace = ray.get_runtime_context().namespace
+    explorer = (
+        ray.remote(Explorer)
+        .options(
+            name=EXPLORER_NAME,
+            namespace=namespace,
+        )
+        .remote(config)
+    )
+    trainer = (
+        ray.remote(Trainer)
+        .options(
+            name=TRAINER_NAME,
+            namespace=namespace,
+        )
+        .remote(config)
+    )
     ray.get([explorer.__ray_ready__.remote(), trainer.__ray_ready__.remote()])
     ray.get(
         [
@@ -192,30 +228,36 @@ def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
         activate_data_module(
             f"{data_processor_config.data_processor_url}/{DataProcessorPipelineType.EXPERIENCE.value}", config_path
         )
-    ray_namespace = config.ray_namespace
     if dlc:
         from trinity.utils.dlc_utils import setup_ray_cluster
 
-        setup_ray_cluster(namespace=ray_namespace)
+        setup_ray_cluster(namespace=config.ray_namespace)
     else:
         from trinity.utils.dlc_utils import is_running
 
         if not is_running:
             raise RuntimeError("Ray is not running, please start it by `ray start --head`.")
-        ray.init(namespace=ray_namespace, ignore_reinit_error=True)
-    if config.mode == "explore":
-        explore(config)
-    elif config.mode == "train":
-        train(config)
-    elif config.mode == "both":
-        both(config)
-    elif config.mode == "bench":
-        bench(config)
+        ray.init(namespace=config.ray_namespace, ignore_reinit_error=True)
+    try:
+        if config.mode == "explore":
+            explore(config)
+        elif config.mode == "train":
+            train(config)
+        elif config.mode == "both":
+            both(config)
+        elif config.mode == "bench":
+            bench(config)
+    finally:
+        if config.monitor.enable_ray_timeline:
+            timeline_file = os.path.join(config.monitor.cache_dir, "timeline.json")
+            logger.info(f"Exporting Ray timeline to {timeline_file}...")
+            ray.timeline(filename=timeline_file)
+            logger.info("Done. You can open the timeline file in `chrome://tracing`")
 
-    if dlc:
-        from trinity.utils.dlc_utils import stop_ray_cluster
+        if dlc:
+            from trinity.utils.dlc_utils import stop_ray_cluster
 
-        stop_ray_cluster()
+            stop_ray_cluster(namespace=config.ray_namespace)
 
 
 def studio(port: int = 8501):

@@ -56,6 +56,7 @@ class RunnerPool:
         ]
         self._idle_actors = list()
         self.actor_to_engine_index = {}
+        self._namespace = ray.get_runtime_context().namespace
         self._create_actors(config.explorer.runner_num)
 
     def _create_actors(self, num: int = 1):
@@ -68,8 +69,17 @@ class RunnerPool:
                     self.auxiliary_models, self.auxiliary_engine_status_list
                 )
             ]
-            new_actor = WorkflowRunner.remote(
-                self.config, self.models[engine_index], selected_auxiliary_models
+            new_actor = (
+                ray.remote(WorkflowRunner)
+                .options(
+                    namespace=self._namespace,
+                    scheduling_strategy="SPREAD",
+                )
+                .remote(
+                    self.config,
+                    self.models[engine_index],
+                    selected_auxiliary_models,
+                )
             )
             new_actors.append(new_actor)
             self.engine_status[engine_index] += 1
@@ -219,7 +229,12 @@ class RunnerPool:
             ray.kill(a)
             # TODO: balance the model
             self._return_actor(
-                WorkflowRunner.remote(
+                ray.remote(WorkflowRunner)
+                .options(
+                    namespace=self._namespace,
+                    scheduling_strategy="SPREAD",
+                )
+                .remote(
                     self.config,
                     self.models[
                         random.randint(0, self.config.explorer.rollout_model.engine_num - 1)

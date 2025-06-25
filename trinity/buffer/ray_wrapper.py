@@ -55,6 +55,7 @@ class DBWrapper:
                 ray.remote(cls)
                 .options(
                     name=f"sql-{storage_config.name}",
+                    namespace=ray.get_runtime_context().namespace,
                     get_if_exists=True,
                 )
                 .remote(storage_config, config)
@@ -154,6 +155,7 @@ class FileWrapper:
                 ray.remote(cls)
                 .options(
                     name=f"json-{storage_config.name}",
+                    namespace=ray.get_runtime_context().namespace,
                     get_if_exists=True,
                 )
                 .remote(storage_config, config)

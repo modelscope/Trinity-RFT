@@ -192,7 +192,6 @@ class InferenceModelConfig:
 
     # ! DO NOT SET
     bundle_indices: str = ""
-    ray_namespace: str = ""
 
 
 @dataclass
@@ -331,6 +330,9 @@ class MonitorConfig:
     monitor_type: str = "tensorboard"
     # the default args for monitor
     monitor_args: Dict = field(default_factory=dict)
+    # whether to enable ray timeline profile
+    # the output file will be saved to `cache_dir/timeline.json`
+    enable_ray_timeline: bool = False
     # ! DO NOT SET, automatically generated as checkpoint_job_dir/monitor
     cache_dir: str = ""
 
@@ -365,7 +367,7 @@ class Config:
     checkpoint_root_dir: str = ""
     # ! DO NOT SET, automatically generated as `checkpoint_root_dir/project/name`
     checkpoint_job_dir: str = ""
-    # ! DO NOT SET, automatically generated as f"{config.project}-{config.name}"
+    # If not set, automatically generated as f"{config.project}-{config.name}"
     ray_namespace: str = ""
 
     algorithm: AlgorithmConfig = field(default_factory=AlgorithmConfig)
@@ -590,7 +592,8 @@ class Config:
         self._check_deprecated()
 
         # set namespace
-        self.ray_namespace = f"{self.project}-{self.name}"
+        if self.ray_namespace is None or len(self.ray_namespace) == 0:
+            self.ray_namespace = f"{self.project}-{self.name}"
 
         # check algorithm
         self._check_algorithm()
@@ -622,9 +625,6 @@ class Config:
             self.explorer.rollout_model.max_prompt_tokens = self.model.max_prompt_tokens
         if self.explorer.rollout_model.max_response_tokens is None:
             self.explorer.rollout_model.max_response_tokens = self.model.max_response_tokens
-        self.explorer.rollout_model.ray_namespace = self.ray_namespace
-        for model in self.explorer.auxiliary_models:
-            model.ray_namespace = self.ray_namespace
 
         # check synchronizer
         self.synchronizer.explorer_world_size = (

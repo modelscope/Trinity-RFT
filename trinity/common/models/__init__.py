@@ -89,7 +89,7 @@ def create_inference_models(
     for bundle_id, node_id in bundle_node_map.items():
         node_bundle_map[node_id].append(bundle_id)
     allocator = _BundleAllocator(node_bundle_map)
-
+    namespace = ray.get_runtime_context().namespace
     # create rollout models
     for _ in range(config.explorer.rollout_model.engine_num):
         bundles_for_engine = allocator.allocate(config.explorer.rollout_model.tensor_parallel_size)
@@ -101,6 +101,7 @@ def create_inference_models(
             .options(
                 num_cpus=0,
                 num_gpus=0 if config.explorer.rollout_model.tensor_parallel_size > 1 else 1,
+                namespace=namespace,
                 scheduling_strategy=PlacementGroupSchedulingStrategy(
                     placement_group=pg,
                     placement_group_capture_child_tasks=True,
@@ -128,6 +129,7 @@ def create_inference_models(
                 .options(
                     num_cpus=0,
                     num_gpus=0 if model_config.tensor_parallel_size > 1 else 1,
+                    namespace=namespace,
                     scheduling_strategy=PlacementGroupSchedulingStrategy(
                         placement_group=pg,
                         placement_group_capture_child_tasks=True,

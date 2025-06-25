@@ -7,8 +7,6 @@ from collections import defaultdict
 from dataclasses import dataclass
 from typing import List, Optional
 
-import ray
-
 from trinity.buffer import get_buffer_writer
 from trinity.common.config import Config
 from trinity.common.experience import Experience
@@ -26,7 +24,6 @@ class Status:
     message: Optional[str] = None
 
 
-@ray.remote(scheduling_strategy="SPREAD")
 class WorkflowRunner:
     """A Ray remote actor to run the workflow and put the returned experiences into the buffer."""
 

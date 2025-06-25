@@ -18,10 +18,15 @@ class QueueWriter(BufferWriter):
     def __init__(self, meta: StorageConfig, config: BufferConfig):
         assert meta.storage_type == StorageType.QUEUE
         self.config = config
-        self.queue = QueueActor.options(
-            name=f"queue-{meta.name}",
-            get_if_exists=True,
-        ).remote(meta, config)
+        self.queue = (
+            ray.remote(QueueActor)
+            .options(
+                name=f"queue-{meta.name}",
+                namespace=ray.get_runtime_context().namespace,
+                get_if_exists=True,
+            )
+            .remote(meta, config)
+        )
 
     def write(self, data: List) -> None:
         ray.get(self.queue.put_batch.remote(data))
