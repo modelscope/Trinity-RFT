@@ -26,7 +26,6 @@ class _HFBatchReader:
         name: str,
         max_epoch: int = 1,
         offset: int = 0,
-        init_progress_bar: bool = True,
     ):
         self.dataset = dataset
         self.dataset_size = len(dataset)
@@ -46,10 +45,6 @@ class _HFBatchReader:
 
         # Initialize tqdm progress bar
         self.total_steps = self.dataset_size * self.max_epoch
-        if init_progress_bar:
-            self.init_progress_bar()
-
-    def init_progress_bar(self):
         self.progress_bar = tqdm(
             total=self.total_steps,
             desc=f"Dataset [{self.name}] Progressing",
@@ -83,11 +78,6 @@ class _HFBatchReader:
                 # Step to the next epoch
                 self.iter = iter(self.dataset)
         return batch
-
-    def reset(self):
-        self.current_epoch = 0
-        self.current_offset = 0
-        self.init_progress_bar()
 
 
 @FILE_READERS.register_module(SFTAlgorithm.name())
@@ -258,7 +248,6 @@ class RolloutDataReader(BufferReader):
             name=meta.name,
             max_epoch=self.meta.total_epochs if meta.task_type == TaskType.EXPLORE else 1,
             offset=self.meta.index,
-            init_progress_bar=meta.task_type == TaskType.EXPLORE,
         )
         self.read_batch_size = config.batch_size
         self.prompt_key = meta.format.prompt_key

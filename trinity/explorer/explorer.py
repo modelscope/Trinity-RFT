@@ -217,18 +217,15 @@ class Explorer:
 
     def eval(self) -> Tuple[bool, int]:
         """Evaluation on all evaluation data samples."""
-        eval_tasksets = []
-        for eval_taskset_config in self.config.buffer.explorer_input.eval_tasksets:
-            eval_tasksets.append(get_buffer_reader(eval_taskset_config, self.config.buffer))
-        if len(eval_tasksets) == 0:
+        if len(self.config.buffer.explorer_input.eval_tasksets) == 0:
             self.logger.warning("No evaluation data samples. Skip evaluation.")
             return True, self.explore_step_num
         self.logger.info("Evaluation started.")
         all_st = time.time()
         log_metrics = {}
-        for eval_taskset in eval_tasksets:
-            self.logger.info(f"Evaluation on {eval_taskset.name} started.")
-            eval_taskset.reset()
+        for eval_taskset_config in self.config.buffer.explorer_input.eval_tasksets:
+            self.logger.info(f"Evaluation on {eval_taskset_config.name} started.")
+            eval_taskset = get_buffer_reader(eval_taskset_config, self.config.buffer)
             st = time.time()
             all_metrics = defaultdict(list)
 
