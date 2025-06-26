@@ -37,13 +37,13 @@ class Experience:
         # explicit type cast
         if not isinstance(self.tokens, Tensor):
             self.tokens = Tensor(self.tokens)
-        if self.logprobs and not isinstance(self.logprobs, Tensor):
+        if self.logprobs is not None and not isinstance(self.logprobs, Tensor):
             self.logprobs = Tensor(self.logprobs)
-        if self.action_mask and not isinstance(self.action_mask, Tensor):
+        if self.action_mask is not None and not isinstance(self.action_mask, Tensor):
             self.action_mask = Tensor(self.action_mask)
-        if self.chosen and not isinstance(self.chosen, Tensor):
+        if self.chosen is not None and not isinstance(self.chosen, Tensor):
             self.chosen = Tensor(self.chosen)
-        if self.rejected and not isinstance(self.rejected, Tensor):
+        if self.rejected is not None and not isinstance(self.rejected, Tensor):
             self.rejected = Tensor(self.rejected)
 
     def serialize(self) -> bytes:
