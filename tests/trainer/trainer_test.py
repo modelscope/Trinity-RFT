@@ -112,10 +112,8 @@ class TestTrainerCountdown(BaseTrainerCase):
         self.assertTrue(len(copy_countdown_metrics) > 0)
         countdown_metric_steps = parser.metric_steps(countdown_metrics[0])
         countdown_copy_metric_steps = parser.metric_steps(copy_countdown_metrics[0])
-        self.assertEqual(2, len(countdown_metric_steps))
-        self.assertEqual(2, len(countdown_copy_metric_steps))
-        self.assertTrue(4 in countdown_metric_steps)
-        self.assertTrue(8 in countdown_metric_steps)
+        self.assertEqual([0, 4, 8], countdown_metric_steps)
+        self.assertEqual([0, 4, 8], countdown_copy_metric_steps)
 
     def tearDown(self):
         # remove dir only when the test passed
