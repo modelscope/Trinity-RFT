@@ -506,6 +506,54 @@ class Config:
         if self.buffer.trainer_input.sft_warmup_dataset is not None:
             self.buffer.trainer_input.sft_warmup_dataset.algorithm_type = "sft"  # TODO
 
+        # check input/output buffers in experience pipelines
+        if self.data_processor.experience_pipeline is not None:
+            # collect existing buffers for trinity
+            input_buffers = {}
+            output_buffers = {}
+            # - taskset
+            if self.buffer.explorer_input.taskset.name:
+                input_buffers[self.buffer.explorer_input.taskset.name] = self.buffer.explorer_input.taskset
+            # - explorer output
+            if self.buffer.explorer_output and self.buffer.explorer_output.name:
+                output_buffers[self.buffer.explorer_output.name] = self.buffer.explorer_output
+            # - trainer input: experience buffer
+            if self.buffer.trainer_input.experience_buffer and self.buffer.trainer_input.experience_buffer.name:
+                input_buffers[self.buffer.trainer_input.experience_buffer.name] = self.buffer.trainer_input.experience_buffer
+            # - trainer input: sft warmup dataset
+            if self.buffer.trainer_input.sft_warmup_dataset and self.buffer.trainer_input.sft_warmup_dataset.name:
+                input_buffers[self.buffer.trainer_input.sft_warmup_dataset.name] = self.buffer.trainer_input.sft_warmup_dataset
+
+            # when experience pipeline is on, the explorer output and the
+            # experience buffer of trainer input should be different
+            if self.buffer.explorer_output == self.buffer.trainer_input.experience_buffer:
+                raise ValueError(
+                    f"The explorer output buffer should be different from the experience buffer of the trainer input "
+                    f"when experience pipeline is provided."
+                )
+
+            # NOTICE: For now, input/output buffers for data processors should come from output/input buffers of trinity
+            # the input buffers in experience pipeline should come from the output buffers of trinity
+            exp_pipeline_input_buffers = self.data_processor.experience_pipeline.input_buffers
+            synced_input_buffers = []
+            for input_buffer in exp_pipeline_input_buffers:
+                if input_buffer.name not in output_buffers:
+                    raise ValueError(
+                        f"The input buffer {input_buffer.name} of experience pipeline is not found in any output "
+                        f"buffers of trinity."
+                    )
+                synced_input_buffers.append(output_buffers[input_buffer.name])
+            self.data_processor.experience_pipeline.input_buffers = synced_input_buffers
+            # the output buffers of trinity should come from the input buffers of trinity
+            exp_pipeline_output_buffers = self.data_processor.experience_pipeline.output_buffer
+            if exp_pipeline_output_buffers.name not in input_buffers:
+                raise ValueError(
+                    f"The output buffer {exp_pipeline_output_buffers.name} of experience pipeline is not found in any "
+                    f"input buffers of trinity."
+                )
+            else:
+                self.data_processor.experience_pipeline.output_buffer = input_buffers[exp_pipeline_output_buffers.name]
+
         # set read_batch_size / pad_token_id / tokenizer_path
         self.buffer.read_batch_size = self.buffer.batch_size * self.algorithm.repeat_times
         if self.buffer.pad_token_id is None:
