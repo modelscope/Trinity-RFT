@@ -206,16 +206,21 @@
     <span class="n">checkpoint_root_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">trainer_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;verl&quot;</span><span class="p">,</span>
     <span class="n">step_num</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the checkpoint directory from a root checkpoint directory.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        checkpoint_root_path (str): The root checkpoint directory.</span>
 <span class="sd">        trainer_type (str): The trainer type. Only support &quot;verl&quot; for now.</span>
-<span class="sd">        step_num (Optional[int], optional): The step number. Defaults to None.</span>
+<span class="sd">        step_num (Optional[int], optional): The step number. If specified,</span>
+<span class="sd">            load the checkpoint with the specified step number. If None,</span>
+<span class="sd">            load the latest checkpoint. Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[str, int]: The checkpoint directory and the step number of the checkpoint.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">trainer_type</span> <span class="o">==</span> <span class="s2">&quot;verl&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">get_verl_checkpoint_dir</span><span class="p">(</span><span class="n">checkpoint_path</span><span class="o">=</span><span class="n">checkpoint_root_path</span><span class="p">,</span> <span class="n">step_num</span><span class="o">=</span><span class="n">step_num</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">get_verl_checkpoint_info</span><span class="p">(</span><span class="n">checkpoint_path</span><span class="o">=</span><span class="n">checkpoint_root_path</span><span class="p">,</span> <span class="n">step_num</span><span class="o">=</span><span class="n">step_num</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported trainer type </span><span class="si">{</span><span class="n">trainer_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
@@ -252,10 +257,22 @@
 
 
 
-<div class="viewcode-block" id="get_verl_checkpoint_dir">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.utils.get_verl_checkpoint_dir">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_verl_checkpoint_dir</span><span class="p">(</span><span class="n">checkpoint_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">step_num</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the checkpoint directory from a Verl root checkpoint directory.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="get_verl_checkpoint_info">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.utils.get_verl_checkpoint_info">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_verl_checkpoint_info</span><span class="p">(</span>
+    <span class="n">checkpoint_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">step_num</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the checkpoint directory from a Verl root checkpoint directory.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        checkpoint_path (str): The root checkpoint directory.</span>
+<span class="sd">        step_num (Optional[int], optional): The step number. If specified,</span>
+<span class="sd">            load the checkpoint with the specified step number. If None,</span>
+<span class="sd">            load the latest checkpoint. Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[str, int]: The checkpoint directory and the step number of the checkpoint.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">step_num</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># load latest checkpoint</span>
         <span class="n">iteration_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">checkpoint_path</span><span class="p">,</span> <span class="s2">&quot;latest_checkpointed_iteration.txt&quot;</span><span class="p">)</span>
@@ -264,12 +281,12 @@
                 <span class="n">iteration_file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span>
             <span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>  <span class="c1"># TODO: this file may be modified simultaneously</span>
                 <span class="n">iteration</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-                <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">checkpoint_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;global_step_</span><span class="si">{</span><span class="n">iteration</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">checkpoint_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;global_step_</span><span class="si">{</span><span class="n">iteration</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">iteration</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No iteration file found in </span><span class="si">{</span><span class="n">checkpoint_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># load specific iteration checkpoint</span>
-        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">checkpoint_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;global_step_</span><span class="si">{</span><span class="n">step_num</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">checkpoint_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;global_step_</span><span class="si">{</span><span class="n">step_num</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span> <span class="n">step_num</span></div>
 
 
 

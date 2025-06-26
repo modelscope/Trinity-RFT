@@ -199,7 +199,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">action_mask_method</span> <span class="o">=</span> <span class="n">tokenize_and_mask_messages_hf</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">state_dict_meta</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ckp_version</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># TODO: resume the value from the checkpoint</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_version</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># TODO: resume the value from the checkpoint</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">api_server_host</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">api_server_port</span> <span class="o">=</span> <span class="kc">None</span></div>
 
@@ -381,13 +381,15 @@
 
 <div class="viewcode-block" id="vLLMAysncRolloutModel.sync_model">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.sync_model">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">sync_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">update_weight_args_list</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">sync_model</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">model_version</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">update_weight_args_list</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sync model weights to vLLM.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">update_weight_args_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collective_rpc</span><span class="p">(</span><span class="s2">&quot;set_state_dict_meta&quot;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">update_weight_args_list</span><span class="p">,))</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collective_rpc</span><span class="p">(</span><span class="s2">&quot;update_weight&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Sync model weights to vLLM successfully.&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ckp_version</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_version</span> <span class="o">=</span> <span class="n">model_version</span>
         <span class="k">return</span> <span class="kc">True</span></div>
 
 
@@ -483,10 +485,10 @@
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="o">.</span><span class="n">reset_prefix_cache</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="vLLMAysncRolloutModel.get_ckp_version">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.get_ckp_version">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_ckp_version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ckp_version</span></div>
+<div class="viewcode-block" id="vLLMAysncRolloutModel.get_model_version">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.get_model_version">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_model_version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_version</span></div>
 
 
 <div class="viewcode-block" id="vLLMAysncRolloutModel.sleep">

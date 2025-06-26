@@ -170,8 +170,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.model.InferenceModel.get_ckp_version">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_ckp_version</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/model.html#InferenceModel.get_ckp_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.model.InferenceModel.get_ckp_version" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="trinity.common.models.model.InferenceModel.get_model_version">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_model_version</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/model.html#InferenceModel.get_model_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.model.InferenceModel.get_model_version" title="Link to this definition"></a></dt>
 <dd><p>Get the checkpoint version.</p>
 </dd></dl>
 
@@ -214,10 +214,11 @@
 <dd><p>Convert a list of messages into an experience.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.model.ModelWrapper.get_ckp_version">
-<span class="sig-name descname"><span class="pre">get_ckp_version</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/model.html#ModelWrapper.get_ckp_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.model.ModelWrapper.get_ckp_version" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="trinity.common.models.model.ModelWrapper.model_version">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">model_version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#trinity.common.models.model.ModelWrapper.model_version" title="Link to this definition"></a></dt>
+<dd><p>Get the version of the model.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.common.models.model.ModelWrapper.get_openai_client">
@@ -317,15 +318,23 @@ Please check the chat template before using this method.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="trinity.common.models.utils.get_checkpoint_dir_with_step_num">
-<span class="sig-prename descclassname"><span class="pre">trinity.common.models.utils.</span></span><span class="sig-name descname"><span class="pre">get_checkpoint_dir_with_step_num</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checkpoint_root_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trainer_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'verl'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_num</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/utils.html#get_checkpoint_dir_with_step_num"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.utils.get_checkpoint_dir_with_step_num" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">trinity.common.models.utils.</span></span><span class="sig-name descname"><span class="pre">get_checkpoint_dir_with_step_num</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checkpoint_root_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trainer_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'verl'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_num</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/models/utils.html#get_checkpoint_dir_with_step_num"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.utils.get_checkpoint_dir_with_step_num" title="Link to this definition"></a></dt>
 <dd><p>Get the checkpoint directory from a root checkpoint directory.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>checkpoint_root_path</strong> (<em>str</em>) – The root checkpoint directory.</p></li>
 <li><p><strong>trainer_type</strong> (<em>str</em>) – The trainer type. Only support “verl” for now.</p></li>
-<li><p><strong>step_num</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – The step number. Defaults to None.</p></li>
+<li><p><strong>step_num</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – The step number. If specified,
+load the checkpoint with the specified step number. If None,
+load the latest checkpoint. Defaults to None.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The checkpoint directory and the step number of the checkpoint.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[str, int]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -350,9 +359,25 @@ Please check the chat template before using this method.</p>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="trinity.common.models.utils.get_verl_checkpoint_dir">
-<span class="sig-prename descclassname"><span class="pre">trinity.common.models.utils.</span></span><span class="sig-name descname"><span class="pre">get_verl_checkpoint_dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checkpoint_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_num</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/utils.html#get_verl_checkpoint_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.utils.get_verl_checkpoint_dir" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="trinity.common.models.utils.get_verl_checkpoint_info">
+<span class="sig-prename descclassname"><span class="pre">trinity.common.models.utils.</span></span><span class="sig-name descname"><span class="pre">get_verl_checkpoint_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checkpoint_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_num</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/models/utils.html#get_verl_checkpoint_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.utils.get_verl_checkpoint_info" title="Link to this definition"></a></dt>
 <dd><p>Get the checkpoint directory from a Verl root checkpoint directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>checkpoint_path</strong> (<em>str</em>) – The root checkpoint directory.</p></li>
+<li><p><strong>step_num</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – The step number. If specified,
+load the checkpoint with the specified step number. If None,
+load the latest checkpoint. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The checkpoint directory and the step number of the checkpoint.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[str, int]</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -441,7 +466,7 @@ and they won’t be able to be tracked by Ray anymore.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.sync_model">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sync_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">update_weight_args_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/vllm_async_model.html#vLLMAysncRolloutModel.sync_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.sync_model" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sync_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_weight_args_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/vllm_async_model.html#vLLMAysncRolloutModel.sync_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.sync_model" title="Link to this definition"></a></dt>
 <dd><p>Sync model weights to vLLM.</p>
 </dd></dl>
 
@@ -487,8 +512,8 @@ model_path (str): The path of the model.</p>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.get_ckp_version">
-<span class="sig-name descname"><span class="pre">get_ckp_version</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/vllm_async_model.html#vLLMAysncRolloutModel.get_ckp_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.get_ckp_version" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.get_model_version">
+<span class="sig-name descname"><span class="pre">get_model_version</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/vllm_async_model.html#vLLMAysncRolloutModel.get_model_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.get_model_version" title="Link to this definition"></a></dt>
 <dd><p>Get the checkpoint version.</p>
 </dd></dl>
 
@@ -626,13 +651,13 @@ You need to apply chat template before calling this method.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.common.models.vllm_model.vLLMRolloutModel.sync_model">
-<span class="sig-name descname"><span class="pre">sync_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">update_weight_args_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/vllm_model.html#vLLMRolloutModel.sync_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.vllm_model.vLLMRolloutModel.sync_model" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">sync_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_weight_args_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/vllm_model.html#vLLMRolloutModel.sync_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.vllm_model.vLLMRolloutModel.sync_model" title="Link to this definition"></a></dt>
 <dd><p>Sync model weights to vLLM.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_model.vLLMRolloutModel.get_ckp_version">
-<span class="sig-name descname"><span class="pre">get_ckp_version</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/vllm_model.html#vLLMRolloutModel.get_ckp_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.vllm_model.vLLMRolloutModel.get_ckp_version" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="trinity.common.models.vllm_model.vLLMRolloutModel.get_model_version">
+<span class="sig-name descname"><span class="pre">get_model_version</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/vllm_model.html#vLLMRolloutModel.get_model_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.vllm_model.vLLMRolloutModel.get_model_version" title="Link to this definition"></a></dt>
 <dd><p>Get the checkpoint version.</p>
 </dd></dl>
 
