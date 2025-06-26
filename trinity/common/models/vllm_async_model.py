@@ -102,7 +102,7 @@ class vLLMAysncRolloutModel(InferenceModel):
         else:
             self.action_mask_method = tokenize_and_mask_messages_hf
         self.state_dict_meta = None
-        self.ckp_version = 0  # TODO: resume the value from the checkpoint
+        self.model_version = 0  # TODO: resume the value from the checkpoint
         self.api_server_host = None
         self.api_server_port = None
 
@@ -266,13 +266,15 @@ class vLLMAysncRolloutModel(InferenceModel):
                 method, timeout, args, kwargs
             )
 
-    async def sync_model(self, update_weight_args_list: Optional[List[Tuple]] = None) -> bool:
+    async def sync_model(
+        self, model_version: int, update_weight_args_list: Optional[List[Tuple]] = None
+    ) -> bool:
         """Sync model weights to vLLM."""
         if update_weight_args_list is not None:
             await self._collective_rpc("set_state_dict_meta", args=(update_weight_args_list,))
         await self._collective_rpc("update_weight")
         self.logger.info("Sync model weights to vLLM successfully.")
-        self.ckp_version += 1
+        self.model_version = model_version
         return True
 
     async def init_process_group(
@@ -352,8 +354,8 @@ class vLLMAysncRolloutModel(InferenceModel):
     async def reset_prefix_cache(self) -> None:
         await self.async_llm.reset_prefix_cache()
 
-    def get_ckp_version(self) -> int:
-        return self.ckp_version
+    def get_model_version(self) -> int:
+        return self.model_version
 
     async def sleep(self, level: int = 1) -> None:
         await self.async_llm.sleep(level=level)

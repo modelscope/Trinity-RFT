@@ -85,7 +85,7 @@ class WorkflowRunner:
 
                 if not hasattr(exp, "info") or exp.info is None:
                     exp.info = {}
-                exp.info["model_version"] = self.model_wrapper.get_ckp_version()
+                exp.info["model_version"] = self.model_wrapper.model_version
 
                 if not hasattr(exp, "metrics") or exp.metrics is None:
                     exp.metrics = {}

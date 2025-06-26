@@ -49,7 +49,7 @@ class InferenceModel(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_ckp_version(self) -> int:
+    def get_model_version(self) -> int:
         """Get the checkpoint version."""
 
     def get_available_address(self) -> Tuple[str, int]:
@@ -99,8 +99,10 @@ class ModelWrapper:
         else:
             return ray.get(self.model.convert_messages_to_experience.remote(messages))
 
-    def get_ckp_version(self) -> int:
-        return ray.get(self.model.get_ckp_version.remote())
+    @property
+    def model_version(self) -> int:
+        """Get the version of the model."""
+        return ray.get(self.model.get_model_version.remote())
 
     def get_openai_client(self) -> openai.OpenAI:
         """Get the openai client.

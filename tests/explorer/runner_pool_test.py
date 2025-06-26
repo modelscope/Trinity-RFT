@@ -43,10 +43,10 @@ class DummyWorkflow(Workflow):
 
 @ray.remote
 class DummyModel(InferenceModel):
-    def sync_model(self, update_weight_args_list):
+    def sync_model(self, model_version, update_weight_args_list):
         return True
 
-    def get_ckp_version(self):
+    def get_model_version(self):
         return 0
 
     def init_process_group(
@@ -65,10 +65,10 @@ class DummyModel(InferenceModel):
 
 @ray.remote
 class DummyAuxiliaryModel(InferenceModel):
-    def sync_model(self, update_weight_args_list):
+    def sync_model(self, model_version, update_weight_args_list):
         return True
 
-    def get_ckp_version(self):
+    def get_model_version(self):
         return 0
 
     def init_process_group(

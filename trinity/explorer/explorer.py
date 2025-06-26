@@ -6,7 +6,7 @@ import asyncio
 import os
 import time
 from collections import defaultdict
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 import torch
 
@@ -65,6 +65,7 @@ class Explorer:
         self.use_checkpoint_weights_update = (
             self.config.synchronizer.sync_method == SyncMethod.CHECKPOINT
         )
+        self.eval_explore_step_num = None
 
         # For checkpoint weights update
         # Use explorer to periodically load the latest model weights and
@@ -124,7 +125,7 @@ class Explorer:
         self.logger.info(f"Setup {self.config.explorer.runner_num} WorkflowRunners")
         return RunnerPool(self.config, self.models, self.auxiliary_models)
 
-    async def _update_model_weight(self, state_dict: dict) -> None:
+    async def _update_model_weight(self, step_num: int, state_dict: dict) -> None:
         # TODO: update model weight
         self.state_dict = state_dict
         if self.state_dict_meta is None:
@@ -135,14 +136,14 @@ class Explorer:
         else:
             update_weight_args_list = None
         await asyncio.gather(
-            *[model.sync_model.remote(update_weight_args_list) for model in self.models]
+            *[model.sync_model.remote(step_num, update_weight_args_list) for model in self.models]
         )
         self.state_dict.clear()
 
     async def _checkpoint_weights_update(self, step_num: Optional[int] = None) -> None:
         # TODO: support more checkpoint types
         try:
-            checkpoint_dir = get_checkpoint_dir_with_step_num(
+            checkpoint_dir, checkpoint_step_num = get_checkpoint_dir_with_step_num(
                 checkpoint_root_path=self.config.checkpoint_job_dir,
                 trainer_type=self.config.trainer.trainer_type,
                 step_num=step_num,
@@ -150,14 +151,16 @@ class Explorer:
             if checkpoint_dir == self.old_checkpoint:
                 return
             model_weights = load_state_dict(os.path.join(checkpoint_dir, "actor"))
-            await self._update_model_weight(model_weights)
+            await self._update_model_weight(checkpoint_step_num, model_weights)
             self.old_checkpoint = checkpoint_dir
         except Exception as e:
             self.logger.warning(f"Fail to load checkpoint: {e}")
 
     async def _nccl_weights_update(self):
         assert self.state_dict_meta is not None
-        await asyncio.gather(*[model.sync_model.remote() for model in self.models])
+        await asyncio.gather(
+            *[model.sync_model.remote(self.explore_step_num) for model in self.models]
+        )
 
     async def prepare(self) -> None:
         """Preparation before running."""
@@ -170,17 +173,26 @@ class Explorer:
         return self.state_dict[name]
 
     async def explore(self) -> str:
+        """
+        The dreamming loop for explorer and trainer.
+                 | <----------------------------------------- one period ----------------------------------------------> |
+        explorer | <-- step_1 --> | <-- step_2 --> | ... | <-- step_n --> | <-- eval --> | <-- [idle] --> | <-- sync --> |
+         trainer | <-- idle --> | <-- step_1 --> | <-- step_2 --> | ... | <-- step_n --> | <-- [idle] --> | <-- sync --> |
+        """
+        self.eval_explore_step_num = None
         while True:
             try:
+                if (
+                    self.eval_explore_step_num is None
+                    and self.explore_step_num % self.config.explorer.eval_interval == 0
+                ):
+                    self.eval_explore_step_num = self.explore_step_num
                 explore_contionue = self.explore_step()
                 if not explore_contionue:
                     break
                 if self.need_sync():
                     self.wait_for_workflow_done()
                     await self.sync_weight()
-                if self.explore_step_num % self.config.explorer.eval_interval == 0:
-                    self.wait_for_workflow_done()
-                    self.eval()
             except Exception as e:
                 self.logger.error(f"Error in Explorer: {e}")
                 break
@@ -216,16 +228,18 @@ class Explorer:
             self.explore_step_num - self.config.synchronizer.sync_offset
         ) % self.config.synchronizer.sync_interval == 0
 
-    def eval(self) -> Tuple[bool, int]:
+    def eval(self, eval_explore_step_num: int):
         """Evaluation on all evaluation data samples."""
         if len(self.config.buffer.explorer_input.eval_tasksets) == 0:
             self.logger.warning("No evaluation data samples. Skip evaluation.")
-            return True, self.explore_step_num
-        self.logger.info("Evaluation started.")
+            return
+        self.logger.info(f"Evaluation at step {eval_explore_step_num} started.")
         all_st = time.time()
         log_metrics = {}
         for eval_taskset_config in self.config.buffer.explorer_input.eval_tasksets:
-            self.logger.info(f"Evaluation on {eval_taskset_config.name} started.")
+            self.logger.info(
+                f"Evaluation on {eval_taskset_config.name} at step {eval_explore_step_num} started."
+            )
             eval_taskset = get_buffer_reader(eval_taskset_config, self.config.buffer)
             st = time.time()
             all_metrics = defaultdict(list)
@@ -254,18 +268,19 @@ class Explorer:
             log_metrics.update(metrics)
             log_metrics[f"eval/{eval_taskset.name}/time"] = time.time() - st
         log_metrics["eval/total_time"] = time.time() - all_st
-        self.monitor.log(log_metrics, step=self.explore_step_num)  # type: ignore
-        self.logger.info("Evaluation finished.")
-        return True, self.explore_step_num
+        self.monitor.log(log_metrics, step=eval_explore_step_num)  # type: ignore
+        self.logger.info(f"Evaluation at step {eval_explore_step_num} finished.")
 
     async def benchmark(self) -> bool:
         """Benchmark the model checkpoints."""
         # benchmark on the latest checkpoint
         if self.config.explorer.eval_on_latest_checkpoint:
             await self._checkpoint_weights_update()
-            self.eval()
+            self.eval(self.explore_step_num)
             return True
 
+        # benchmark on base model
+        self.eval(0)
         # benchmark on all checkoints
         all_ckp_steps = sorted(
             [
@@ -276,9 +291,8 @@ class Explorer:
             ]
         )
         for step_num in all_ckp_steps:
-            self.explore_step_num = step_num
             await self._checkpoint_weights_update(step_num=step_num)
-            self.eval()
+            self.eval(step_num)
         return True
 
     def wait_for_workflow_done(self) -> None:
@@ -302,6 +316,10 @@ class Explorer:
                 else:
                     for metric_name, metric_value in status.metric.items():
                         all_metrics[metric_name].append(metric_value)
+        # eval
+        if self.eval_explore_step_num is not None:
+            self.eval(self.eval_explore_step_num)
+            self.eval_explore_step_num = None
         # calculate metrics
         log_metrics = self.monitor.calculate_metrics(all_metrics, prefix="rollout")  # type: ignore
         self.monitor.log(log_metrics, step=self.explore_step_num)

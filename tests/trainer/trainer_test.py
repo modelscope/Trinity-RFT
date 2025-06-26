@@ -1,4 +1,5 @@
 """Tests for trainer."""
+
 import multiprocessing
 import os
 import shutil
@@ -83,14 +84,12 @@ class TestTrainerCountdown(BaseTrainerCase):
         self.assertEqual(parser.metric_max_step(response_metrics[0]), 8)
         ray.shutdown(_exiting_interpreter=True)
         # check checkpoint
-        from trinity.common.models.utils import get_checkpoint_dir_with_step_num
-
-        checkpoint_step_4 = get_checkpoint_dir_with_step_num(
+        checkpoint_step_4, _ = get_checkpoint_dir_with_step_num(
             checkpoint_root_path=self.config.checkpoint_job_dir,
             trainer_type=self.config.trainer.trainer_type,
             step_num=4,
         )
-        checkpoint_step_8 = get_checkpoint_dir_with_step_num(
+        checkpoint_step_8, _ = get_checkpoint_dir_with_step_num(
             checkpoint_root_path=self.config.checkpoint_job_dir,
             trainer_type=self.config.trainer.trainer_type,
             step_num=8,
@@ -112,10 +111,8 @@ class TestTrainerCountdown(BaseTrainerCase):
         self.assertTrue(len(copy_countdown_metrics) > 0)
         countdown_metric_steps = parser.metric_steps(countdown_metrics[0])
         countdown_copy_metric_steps = parser.metric_steps(copy_countdown_metrics[0])
-        self.assertEqual(2, len(countdown_metric_steps))
-        self.assertEqual(2, len(countdown_copy_metric_steps))
-        self.assertTrue(4 in countdown_metric_steps)
-        self.assertTrue(8 in countdown_metric_steps)
+        self.assertEqual([0, 4, 8], countdown_metric_steps)
+        self.assertEqual([0, 4, 8], countdown_copy_metric_steps)
 
     def tearDown(self):
         # remove dir only when the test passed
@@ -158,13 +155,12 @@ class TestStepAheadAsyncRL(BaseTrainerCase):
         self.assertEqual(parser.metric_max_step(response_metrics[0]), 4)
         ray.shutdown(_exiting_interpreter=True)
         # check checkpoint
-        from trinity.common.models.utils import get_checkpoint_dir_with_step_num
 
-        checkpoint_step_4 = get_checkpoint_dir_with_step_num(
+        checkpoint_step_4, step_num = get_checkpoint_dir_with_step_num(
             checkpoint_root_path=self.config.checkpoint_job_dir,
             trainer_type=self.config.trainer.trainer_type,
-            step_num=4,
         )
+        self.assertEqual(step_num, 4)
         self.assertTrue(os.path.exists(checkpoint_step_4))
 
     def tearDown(self):
@@ -374,19 +370,20 @@ class TestFullyAsyncMode(unittest.TestCase):
         explorer2_cache = CacheManager(explorer2_config)
         cache = explorer2_cache.load_explorer()
         self.assertEqual(cache["latest_iteration"], 4)
-        self.assertIsNotNone(
+        # check the lastest checkpoint
+        self.assertEqual(
             get_checkpoint_dir_with_step_num(
                 checkpoint_root_path=explorer1_config.checkpoint_job_dir,
                 trainer_type="verl",
-                step_num=8,
-            )
+            )[1],
+            8,
         )
-        self.assertIsNotNone(
+        self.assertEqual(
             get_checkpoint_dir_with_step_num(
                 checkpoint_root_path=explorer2_config.checkpoint_job_dir,
                 trainer_type="verl",
-                step_num=8,
-            )
+            )[1],
+            8,
         )
         ray.shutdown()
 
