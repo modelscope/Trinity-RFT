@@ -98,7 +98,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">defaultdict</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
@@ -161,6 +161,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">use_checkpoint_weights_update</span> <span class="o">=</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_method</span> <span class="o">==</span> <span class="n">SyncMethod</span><span class="o">.</span><span class="n">CHECKPOINT</span>
         <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eval_explore_step_num</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="c1"># For checkpoint weights update</span>
         <span class="c1"># Use explorer to periodically load the latest model weights and</span>
@@ -278,17 +279,26 @@
 <div class="viewcode-block" id="Explorer.explore">
 <a class="viewcode-back" href="../../../build_api/trinity.explorer.html#trinity.explorer.explorer.Explorer.explore">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">explore</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The dreamming loop for explorer and trainer.</span>
+<span class="sd">                 | &lt;----------------------------------------- one period ----------------------------------------------&gt; |</span>
+<span class="sd">        explorer | &lt;-- step_1 --&gt; | &lt;-- step_2 --&gt; | ... | &lt;-- step_n --&gt; | &lt;-- eval --&gt; | &lt;-- [idle] --&gt; | &lt;-- sync --&gt; |</span>
+<span class="sd">         trainer | &lt;-- idle --&gt; | &lt;-- step_1 --&gt; | &lt;-- step_2 --&gt; | ... | &lt;-- step_n --&gt; | &lt;-- [idle] --&gt; | &lt;-- sync --&gt; |</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eval_explore_step_num</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">eval_explore_step_num</span> <span class="ow">is</span> <span class="kc">None</span>
+                    <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">explore_step_num</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">eval_interval</span> <span class="o">==</span> <span class="mi">0</span>
+                <span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">eval_explore_step_num</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">explore_step_num</span>
                 <span class="n">explore_contionue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">explore_step</span><span class="p">()</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">explore_contionue</span><span class="p">:</span>
                     <span class="k">break</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">need_sync</span><span class="p">():</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">wait_for_workflow_done</span><span class="p">()</span>
                     <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">sync_weight</span><span class="p">()</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">explore_step_num</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">eval_interval</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">wait_for_workflow_done</span><span class="p">()</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error in Explorer: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="k">break</span>
@@ -333,16 +343,18 @@
 
 <div class="viewcode-block" id="Explorer.eval">
 <a class="viewcode-back" href="../../../build_api/trinity.explorer.html#trinity.explorer.explorer.Explorer.eval">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eval_explore_step_num</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Evaluation on all evaluation data samples.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_input</span><span class="o">.</span><span class="n">eval_tasksets</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No evaluation data samples. Skip evaluation.&quot;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">explore_step_num</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Evaluation started.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Evaluation at step </span><span class="si">{</span><span class="n">eval_explore_step_num</span><span class="si">}</span><span class="s2"> started.&quot;</span><span class="p">)</span>
         <span class="n">all_st</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
         <span class="n">log_metrics</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">eval_taskset_config</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_input</span><span class="o">.</span><span class="n">eval_tasksets</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Evaluation on </span><span class="si">{</span><span class="n">eval_taskset_config</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> started.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Evaluation on </span><span class="si">{</span><span class="n">eval_taskset_config</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> at step </span><span class="si">{</span><span class="n">eval_explore_step_num</span><span class="si">}</span><span class="s2"> started.&quot;</span>
+            <span class="p">)</span>
             <span class="n">eval_taskset</span> <span class="o">=</span> <span class="n">get_buffer_reader</span><span class="p">(</span><span class="n">eval_taskset_config</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">buffer</span><span class="p">)</span>
             <span class="n">st</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
             <span class="n">all_metrics</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
@@ -371,9 +383,8 @@
             <span class="n">log_metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
             <span class="n">log_metrics</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;eval/</span><span class="si">{</span><span class="n">eval_taskset</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">/time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">st</span>
         <span class="n">log_metrics</span><span class="p">[</span><span class="s2">&quot;eval/total_time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">all_st</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">log_metrics</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">explore_step_num</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Evaluation finished.&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">explore_step_num</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">log_metrics</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">eval_explore_step_num</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Evaluation at step </span><span class="si">{</span><span class="n">eval_explore_step_num</span><span class="si">}</span><span class="s2"> finished.&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Explorer.benchmark">
@@ -383,9 +394,11 @@
         <span class="c1"># benchmark on the latest checkpoint</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">eval_on_latest_checkpoint</span><span class="p">:</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkpoint_weights_update</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">explore_step_num</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">True</span>
 
+        <span class="c1"># benchmark on base model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="c1"># benchmark on all checkoints</span>
         <span class="n">all_ckp_steps</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
             <span class="p">[</span>
@@ -396,9 +409,8 @@
             <span class="p">]</span>
         <span class="p">)</span>
         <span class="k">for</span> <span class="n">step_num</span> <span class="ow">in</span> <span class="n">all_ckp_steps</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">explore_step_num</span> <span class="o">=</span> <span class="n">step_num</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkpoint_weights_update</span><span class="p">(</span><span class="n">step_num</span><span class="o">=</span><span class="n">step_num</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">step_num</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">True</span></div>
 
 
@@ -425,6 +437,10 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">for</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_value</span> <span class="ow">in</span> <span class="n">status</span><span class="o">.</span><span class="n">metric</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                         <span class="n">all_metrics</span><span class="p">[</span><span class="n">metric_name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric_value</span><span class="p">)</span>
+        <span class="c1"># eval</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_explore_step_num</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eval_explore_step_num</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eval_explore_step_num</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="c1"># calculate metrics</span>
         <span class="n">log_metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">calculate_metrics</span><span class="p">(</span><span class="n">all_metrics</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;rollout&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">log_metrics</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">explore_step_num</span><span class="p">)</span>

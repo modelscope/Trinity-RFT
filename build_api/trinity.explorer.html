@@ -151,7 +151,15 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.explorer.explorer.Explorer.explore">
 <em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">explore</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/explorer.html#Explorer.explore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.explorer.Explorer.explore" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl>
+<dt>The dreamming loop for explorer and trainer.</dt><dd><div class="line-block">
+<div class="line">&lt;—————————————– one period ———————————————-&gt; |</div>
+</div>
+</dd>
+<dt>explorer | &lt;– step_1 –&gt; | &lt;– step_2 –&gt; | … | &lt;– step_n –&gt; | &lt;– eval –&gt; | &lt;– [idle] –&gt; | &lt;– sync –&gt; |</dt><dd><p>trainer | &lt;– idle –&gt; | &lt;– step_1 –&gt; | &lt;– step_2 –&gt; | … | &lt;– step_n –&gt; | &lt;– [idle] –&gt; | &lt;– sync –&gt; |</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.explorer.explorer.Explorer.explore_step">
@@ -165,7 +173,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.explorer.explorer.Explorer.eval">
-<span class="sig-name descname"><span class="pre">eval</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/explorer/explorer.html#Explorer.eval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.explorer.Explorer.eval" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">eval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eval_explore_step_num</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/explorer.html#Explorer.eval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.explorer.Explorer.eval" title="Link to this definition"></a></dt>
 <dd><p>Evaluation on all evaluation data samples.</p>
 </dd></dl>
 
@@ -381,7 +389,15 @@ None if no actor was free to be removed.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.explorer.Explorer.explore">
 <em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">explore</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/explorer.html#Explorer.explore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.Explorer.explore" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl>
+<dt>The dreamming loop for explorer and trainer.</dt><dd><div class="line-block">
+<div class="line">&lt;—————————————– one period ———————————————-&gt; |</div>
+</div>
+</dd>
+<dt>explorer | &lt;– step_1 –&gt; | &lt;– step_2 –&gt; | … | &lt;– step_n –&gt; | &lt;– eval –&gt; | &lt;– [idle] –&gt; | &lt;– sync –&gt; |</dt><dd><p>trainer | &lt;– idle –&gt; | &lt;– step_1 –&gt; | &lt;– step_2 –&gt; | … | &lt;– step_n –&gt; | &lt;– [idle] –&gt; | &lt;– sync –&gt; |</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.explorer.Explorer.explore_step">
@@ -395,7 +411,7 @@ None if no actor was free to be removed.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.explorer.Explorer.eval">
-<span class="sig-name descname"><span class="pre">eval</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/explorer/explorer.html#Explorer.eval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.Explorer.eval" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">eval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eval_explore_step_num</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/explorer.html#Explorer.eval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.Explorer.eval" title="Link to this definition"></a></dt>
 <dd><p>Evaluation on all evaluation data samples.</p>
 </dd></dl>
 
