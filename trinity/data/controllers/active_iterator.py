@@ -1,7 +1,8 @@
 import os
 import traceback
+import threading
 from numbers import Number
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Union
 from functools import partial
 from data_juicer.utils.constant import Fields
 
@@ -26,7 +27,7 @@ class DataActiveIterator:
         self,
         config: DataPipelineConfig,
         buffer_config: BufferConfig,
-        pipeline_type: Optional[DataProcessorPipelineType, str] = DataProcessorPipelineType.TASK,
+        pipeline_type: Union[DataProcessorPipelineType, str] = DataProcessorPipelineType.TASK,
     ):
         """
         The initialization method.
@@ -38,8 +39,6 @@ class DataActiveIterator:
         self.config = config
         self.buffer_config = buffer_config
         self.pipeline_type = pipeline_type
-        if self.pipeline_type is None:
-            self.pipeline_type = DataProcessorPipelineType.TASK
         if isinstance(self.pipeline_type, str):
             self.pipeline_type = DataProcessorPipelineType(pipeline_type)
 
@@ -97,7 +96,7 @@ class DataActiveIterator:
             self.updated_op_args["field_names"].append(self.config.format.response_key)
 
     # flake8: noqa: C901
-    def run(self):
+    def run(self, thread_event: threading.Event = None):
         """Run the active iterator."""
         # step 1. parse the dj config
         try:
@@ -140,6 +139,10 @@ class DataActiveIterator:
             return 3, "DataCleaner loading failed."
 
         while True:
+            # if a stop event is set, stop!
+            if thread_event and thread_event.is_set():
+                break
+
             # step 4. load data from the input buffers for the next batch
             try:
                 dataset.read_from_buffer()

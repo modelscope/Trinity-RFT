@@ -1,11 +1,14 @@
 import fire
+import threading
 from flask import Flask, jsonify, request
 from markupsafe import escape
+from typing import List
 
 app = Flask(__name__)
 
 APP_NAME = "data_processor"
 
+EVNET_POOL: List[threading.Event] = []
 
 @app.route(f"/{APP_NAME}/<pipeline_type>", methods=["GET"])
 def data_processor(pipeline_type):
@@ -33,9 +36,32 @@ def data_processor(pipeline_type):
             }
         )
 
-    iterator = DataActiveIterator(pipeline_config, config.buffer, pipeline_type=pipeline_type)
-    ret, msg = iterator.run()
-    return jsonify({"return_code": ret, "message": msg})
+    if pipeline_type == "task_pipeline":
+        # must be sync
+        iterator = DataActiveIterator(pipeline_config, config.buffer, pipeline_type=pipeline_type)
+        ret, msg = iterator.run()
+        return jsonify({"return_code": ret, "message": msg})
+    elif pipeline_type == "experience_pipeline":
+        # must be async
+        iterator = DataActiveIterator(pipeline_config, config.buffer, pipeline_type=pipeline_type)
+        # add an event
+        event = threading.Event()
+        thread = threading.Thread(target=iterator.run, args=(event,))
+        thread.start()
+        # add this event to the event pool
+        EVNET_POOL.append(event)
+        return jsonify({"return_code": 0, "message": "Experience pipeline starts successfully."})
+
+@app.route(f"/{APP_NAME}/stop_all", methods=["GET"])
+def stop_all():
+    try:
+        for event in EVNET_POOL:
+            event.set()
+    except:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"return_code": 1, "message": traceback.format_exc()})
+    return jsonify({"return_code": 0, "message": "All data pipelines are stopped."})
 
 
 def main(port=5005):

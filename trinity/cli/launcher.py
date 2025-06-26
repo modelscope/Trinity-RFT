@@ -148,7 +148,7 @@ def both(config: Config) -> None:
     trainer.shutdown.remote()
 
 
-def activate_data_module(data_processor_url: str, config_path: str):
+def activate_data_processor(data_processor_url: str, config_path: str):
     """Check whether to activate data module and preprocess datasets."""
     from trinity.cli.client import request
 
@@ -161,6 +161,14 @@ def activate_data_module(data_processor_url: str, config_path: str):
         logger.error(f"Failed to activate data module: {res['return_msg']}.")
         return
 
+def stop_data_processor(base_data_processor_url: str):
+    """Stop all pipelines in the data processor"""
+    from trinity.cli.client import request
+    logger.info(f"Stopping all pipelines in {base_data_processor_url}...")
+    res = request(url=f'{base_data_processor_url}/stop_all')
+    if res["return_code"] != 0:
+        logger.error(f"Failed to stop all data pipelines: {res['return_msg']}.")
+        return
 
 def validate_data_pipeline(data_pipeline_config: DataPipelineConfig, pipeline_type: DataProcessorPipelineType):
     """
@@ -216,7 +224,7 @@ def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
         and data_processor_config.task_pipeline
         and validate_data_pipeline(data_processor_config.task_pipeline, DataProcessorPipelineType.TASK)
     ):
-        activate_data_module(
+        activate_data_processor(
             f"{data_processor_config.data_processor_url}/{DataProcessorPipelineType.TASK.value}", config_path
         )
     # try to activate experience pipeline for experiences
@@ -225,7 +233,7 @@ def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
         and data_processor_config.experience_pipeline
         and validate_data_pipeline(data_processor_config.experience_pipeline, DataProcessorPipelineType.EXPERIENCE)
     ):
-        activate_data_module(
+        activate_data_processor(
             f"{data_processor_config.data_processor_url}/{DataProcessorPipelineType.EXPERIENCE.value}", config_path
         )
     if dlc:
@@ -258,6 +266,9 @@ def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
             from trinity.utils.dlc_utils import stop_ray_cluster
 
             stop_ray_cluster(namespace=config.ray_namespace)
+
+        # stop all pipelines
+        stop_data_processor(data_processor_config.data_processor_url)
 
 
 def studio(port: int = 8501):
