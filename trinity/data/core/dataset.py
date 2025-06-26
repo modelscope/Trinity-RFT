@@ -1,5 +1,5 @@
 from abc import ABC
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from typing import Any, Dict, List, Optional, Union
 
 import networkx as nx
@@ -75,7 +75,8 @@ class RftDataset:
     def read_from_buffer(self):
         datasets = []
         for buffer in self.buffers:
-            datasets.append(Dataset.from_list(buffer.read()))
+            exp_list = buffer.read()
+            datasets.append(Dataset.from_list([asdict(exp) for exp in exp_list]))
         self.data = concatenate_datasets(datasets)
         logger.info(f"Read {len(self.data)} samples from input buffers")
 
