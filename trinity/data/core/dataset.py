@@ -1,5 +1,5 @@
 from abc import ABC
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, fields, asdict
 from typing import Any, Dict, List, Optional, Union
 
 import networkx as nx
@@ -12,6 +12,10 @@ from trinity.utils.log import get_logger
 
 logger = get_logger(__name__)
 
+def dict_to_dataclass(cls, d):
+    valid_keys = {f.name for f in fields(cls)}
+    filtered = {k: v for k, v in d.items() if k in valid_keys}
+    return cls(**filtered)
 
 @dataclass
 class RewardSchema:
@@ -52,6 +56,7 @@ class RftDataset:
         for input_buffer_config in input_buffer_configs:
             self.buffers.append(get_buffer_reader(input_buffer_config, self.buffer_config))
         self.data = Dataset.from_list([])
+        self.original_dataclass = None
 
         self.reward_schema = self._init_reward_schema(reward_schema)
         self.stats: Dict[str, Any] = {}
@@ -76,6 +81,8 @@ class RftDataset:
         datasets = []
         for buffer in self.buffers:
             exp_list = buffer.read()
+            if self.original_dataclass is None:
+                self.original_dataclass = exp_list[0].__class__
             datasets.append(Dataset.from_list([asdict(exp) for exp in exp_list]))
         self.data = concatenate_datasets(datasets)
         logger.info(f"Read {len(self.data)} samples from input buffers")
@@ -88,7 +95,8 @@ class RftDataset:
         if buffer_config is None:
             buffer_config = self.buffer_config
         output_buffer = get_buffer_writer(output_storage_config, buffer_config)
-        output_buffer.write(self.data.to_list())
+        exp_list = [dict_to_dataclass(self.original_dataclass, d) for d in self.data.to_list()]
+        output_buffer.write(exp_list)
         output_buffer.release()
         logger.info(f"Wrote {len(self.data)} samples to output buffer")
         self.data = Dataset.from_list([])
