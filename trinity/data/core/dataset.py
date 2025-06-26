@@ -8,6 +8,9 @@ from datasets import Dataset, concatenate_datasets
 from trinity.buffer import get_buffer_reader, get_buffer_writer
 from trinity.common.config import BufferConfig, DataPipelineConfig, StorageConfig
 from trinity.data.core.formatter import BaseDataFormatter
+from trinity.utils.log import get_logger
+
+logger = get_logger(__name__)
 
 
 @dataclass
@@ -74,6 +77,7 @@ class RftDataset:
         for buffer in self.buffers:
             datasets.append(Dataset.from_list(buffer.read()))
         self.data = concatenate_datasets(datasets)
+        logger.info(f"Read {len(self.data)} samples from input buffers")
 
     def write_to_buffer(
         self, output_storage_config: StorageConfig = None, buffer_config: BufferConfig = None
@@ -85,6 +89,7 @@ class RftDataset:
         output_buffer = get_buffer_writer(output_storage_config, buffer_config)
         output_buffer.write(self.data.to_list())
         output_buffer.release()
+        logger.info(f"Wrote {len(self.data)} samples to output buffer")
         self.data = Dataset.from_list([])
 
     def to_parquet(self, path: str):

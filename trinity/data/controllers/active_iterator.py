@@ -16,6 +16,9 @@ from trinity.data.core.dataset import RftDataset
 from trinity.data.processors.cleaner import DataCleaner
 from trinity.data.processors.human_annotator import DataHumanAnnotator
 from trinity.data.processors.synthesizer import DataSynthesizer
+from trinity.utils.log import get_logger
+
+logger = get_logger(__name__)
 
 
 class DataActiveIterator:
@@ -99,6 +102,7 @@ class DataActiveIterator:
     def run(self, thread_event: threading.Event = None):
         """Run the active iterator."""
         # step 1. parse the dj config
+        logger.info('Parsing the Data-Juicer config...')
         try:
             (
                 dj_config,
@@ -110,14 +114,16 @@ class DataActiveIterator:
             traceback.print_exc()
             return 1, "config parsing failed."
 
-        # step 2. load data from the input buffers
+        # step 2. prepare rft-dataset from the input buffers
+        logger.info('Preparing Rft-Dataset from input buffers...')
         try:
             dataset = RftDataset(self.config, self.buffer_config)
         except Exception:
             traceback.print_exc()
             return 2, "RftDataset loading failed."
 
-        # step 3. load cleaner
+        # step 3. load processor
+        logger.info('Loading data processors...')
         try:
             if hit_cleaner:
                 cleaner = DataCleaner(
@@ -141,9 +147,11 @@ class DataActiveIterator:
         while True:
             # if a stop event is set, stop!
             if thread_event and thread_event.is_set():
+                logger.info("Stop event is set, stopping the pipeline...")
                 break
 
             # step 4. load data from the input buffers for the next batch
+            logger.info('Loading data from input buffers for the next batch...')
             try:
                 dataset.read_from_buffer()
             except StopIteration:
@@ -153,6 +161,7 @@ class DataActiveIterator:
                 return 4, "RftDataset loading from buffers failed."
 
             # step 5. apply processors to calculate scores of different dimensions
+            logger.info('Applying data processors to calculate stats...')
             try:
                 res_dataset = dataset
                 if hit_cleaner:
@@ -168,6 +177,7 @@ class DataActiveIterator:
             # step 6. calculate the average and final scores, including priority
             try:
                 if hit_cleaner:
+                    logger.info('Calculating the average and final scores...')
                     scored_dataset = self._group_scores(res_dataset)
                     scored_dataset = self._compute_priority_scores(scored_dataset)
                 else:
@@ -179,6 +189,7 @@ class DataActiveIterator:
             # step 7. reward shaping. Only available for experience pipeline and the reward shaping config is set
             try:
                 if self.pipeline_type == DataProcessorPipelineType.EXPERIENCE and len(self.config.reward_shaping) > 0:
+                    logger.info("Rewarding shaping...")
                     reshaped_dataset = self._reward_shaping(scored_dataset)
                 else:
                     reshaped_dataset = scored_dataset
@@ -196,13 +207,15 @@ class DataActiveIterator:
             # step 9, sort the dataset by the computed priority
             try:
                 if "priority" in res_dataset.data.features:
+                    logger.info("Sorting samples by priority...")
                     res_dataset.sort_by("priority", reverse=True)
             except Exception:
                 traceback.print_exc()
                 return 9, "Sorting results by priority failed."
 
-            # step 10. sort and export the result to the output buffer
+            # step 10. export the result to the output buffer
             try:
+                logger.info('Writing processed data to output buffer...')
                 res_dataset.write_to_buffer()
             except Exception:
                 traceback.print_exc()
