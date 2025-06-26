@@ -18,6 +18,7 @@ def data_processor(pipeline_type):
     config_path = request.args.get("configPath")
     pipeline_type = escape(pipeline_type)
     config = load_config(config_path)
+    config.check_and_update()
 
     pipeline_config = getattr(config.data_processor, pipeline_type)
     if pipeline_config is None:

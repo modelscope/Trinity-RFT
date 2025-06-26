@@ -39,10 +39,10 @@ class FormatConfig:
     reward_fn_key: str = ""
     workflow_key: str = ""
     # for math dataset
-    solution_key: str = ""
+    solution_key: str = "solution"
 
     # for reward dataset
-    reward_key: str = ""
+    reward_key: str = "reward"
 
     # for dpo dataset
     chosen_key: str = "chosen"
