@@ -1,6 +1,8 @@
 # This is a Data-Juicer data processing recipe
 project_name: 'gsm-8k-experience-quality'
 
+np: 32
+
 process:
   - llm_quality_score_filter:
       api_or_hf_model: "qwen2.5-32b-instruct"  # use "qwen2.5-32b-instruct" to calculate the quality scores.
