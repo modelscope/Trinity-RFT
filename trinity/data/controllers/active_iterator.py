@@ -221,6 +221,12 @@ class DataActiveIterator:
                 traceback.print_exc()
                 return 10, "Exporting result to output buffer failed."
 
+        try:
+            dataset.release_output_buffer()
+        except Exception:
+            traceback.print_exc()
+            return -1, "Releasing output buffer failed."
+
         return 0, "success"
 
     def _group_scores(self, dataset: RftDataset) -> RftDataset:

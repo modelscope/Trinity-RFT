@@ -49,12 +49,16 @@ class RftDataset:
     ):
         self.config = data_pipeline_config
         self.buffer_config = buffer_config
+        # init input buffers
         input_buffer_configs = self.config.input_buffers
         if len(input_buffer_configs) == 0:
             raise ValueError("input_buffers is empty in data pipeline config")
-        self.buffers = []
+        self.input_buffers = []
         for input_buffer_config in input_buffer_configs:
-            self.buffers.append(get_buffer_reader(input_buffer_config, self.buffer_config))
+            self.input_buffers.append(get_buffer_reader(input_buffer_config, self.buffer_config))
+        # init output buffer
+        self.output_buffer = get_buffer_writer(self.config.output_buffer, self.buffer_config)
+
         self.data = Dataset.from_list([])
         self.original_dataclass = None
 
@@ -79,7 +83,7 @@ class RftDataset:
 
     def read_from_buffer(self):
         datasets = []
-        for buffer in self.buffers:
+        for buffer in self.input_buffers:
             exp_list = buffer.read()
             if self.original_dataclass is None:
                 self.original_dataclass = exp_list[0].__class__
@@ -87,19 +91,14 @@ class RftDataset:
         self.data = concatenate_datasets(datasets)
         logger.info(f"Read {len(self.data)} samples from input buffers")
 
-    def write_to_buffer(
-        self, output_storage_config: StorageConfig = None, buffer_config: BufferConfig = None
-    ):
-        if output_storage_config is None:
-            output_storage_config = self.config.output_buffer
-        if buffer_config is None:
-            buffer_config = self.buffer_config
-        output_buffer = get_buffer_writer(output_storage_config, buffer_config)
+    def write_to_buffer(self):
         exp_list = [dict_to_dataclass(self.original_dataclass, d) for d in self.data.to_list()]
-        output_buffer.write(exp_list)
-        output_buffer.release()
+        self.output_buffer.write(exp_list)
         logger.info(f"Wrote {len(self.data)} samples to output buffer")
         self.data = Dataset.from_list([])
+
+    def release_output_buffer(self):
+        self.output_buffer.release()
 
     def to_parquet(self, path: str):
         self.data.to_parquet(path)

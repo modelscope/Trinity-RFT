@@ -1,5 +1,6 @@
 import fire
 import threading
+import ray
 from flask import Flask, jsonify, request
 from markupsafe import escape
 from typing import List
@@ -19,6 +20,9 @@ def data_processor(pipeline_type):
     pipeline_type = escape(pipeline_type)
     config = load_config(config_path)
     config.check_and_update()
+
+    # init ray
+    ray.init(namespace=config.ray_namespace)
 
     pipeline_config = getattr(config.data_processor, pipeline_type)
     if pipeline_config is None:
