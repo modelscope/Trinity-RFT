@@ -11,15 +11,9 @@ WORKDIR /workspace
 
 RUN apt update && apt install -y \
     build-essential \
-    curl \
-    git \
-    wget \
-    vim \
-    tmux \
-    python3 \
-    python3-pip \
-    python3-dev \
-    python3-packaging \
+    curl git wget vim tmux net-tools \
+    python3 python3-pip python3-dev python3-packaging \
+    libomp-dev infiniband-diags libibverbs-dev librdmacm-dev rdma-core perftest \
     && rm -rf /var/lib/apt/lists/* \
     && ln -sf /usr/bin/python3 /usr/bin/python
 

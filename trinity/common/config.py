@@ -94,6 +94,9 @@ class StorageConfig:
     rollout_args: GenerationConfig = field(default_factory=GenerationConfig)
     workflow_args: dict = field(default_factory=dict)
 
+    # get storage from existing experiment
+    ray_namespace: Optional[str] = None
+
     # ! DO NOT SET, automatically set from algorithm.algorithm_type
     algorithm_type: Optional[str] = None
 

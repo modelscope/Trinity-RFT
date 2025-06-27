@@ -74,7 +74,7 @@ def setup_ray_cluster(namespace: str):
             ray.init(namespace=namespace, ignore_reinit_error=True)
     else:
         if is_master:
-            cmd = f"ray start --head --port={env_vars['MASTER_PORT']}"
+            cmd = f"ray start --head --port={env_vars['MASTER_PORT']} --node-ip-address={env_vars['MASTER_ADDR']}"
         else:
             cmd = f"ray start --address={env_vars['MASTER_ADDR']}:{env_vars['MASTER_PORT']}"
         ret = subprocess.run(cmd, shell=True, capture_output=True)
@@ -86,6 +86,7 @@ def setup_ray_cluster(namespace: str):
             sys.exit(1)
 
         wait_for_ray_setup()
+        time.sleep(5)
         ray.init(
             address=f"{env_vars['MASTER_ADDR']}:{env_vars['MASTER_PORT']}",
             namespace=namespace,
@@ -95,7 +96,7 @@ def setup_ray_cluster(namespace: str):
             # master wait for worker nodes to join
             wait_for_ray_worker_nodes(env_vars["WORLD_SIZE"])
         else:
-            # woker wait on the cluster status actor
+            # worker wait on the cluster status actor
             cluster_status = (
                 ray.remote(ClusterStatus)
                 .options(

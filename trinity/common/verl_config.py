@@ -315,6 +315,7 @@ class veRLConfig:
         self.actor_rollout_ref.rollout.n = config.algorithm.repeat_times
         self.critic.ppo_mini_batch_size = config.buffer.batch_size
         self.critic.rollout_n = self.actor_rollout_ref.rollout.n
+        self.critic.synchronizer = config.synchronizer
 
         if config.trainer.actor_grad_clip is not None:
             self.actor_rollout_ref.actor.grad_clip = config.trainer.actor_grad_clip

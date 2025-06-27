@@ -21,6 +21,7 @@ import logging
 import os
 import warnings
 from dataclasses import asdict
+from datetime import timedelta
 
 import psutil
 import torch
@@ -96,6 +97,7 @@ class ActorRolloutRefWorker(Worker):
                 backend="cpu:gloo,cuda:nccl" if is_cuda_available else "cpu:gloo,npu:hccl",
                 rank=rank,
                 world_size=world_size,
+                timeout=timedelta(seconds=self.config.synchronizer.sync_timeout),
             )
 
         # build device mesh for FSDP
@@ -832,7 +834,10 @@ class CriticWorker(Worker):
         import torch.distributed
 
         if not torch.distributed.is_initialized():
-            torch.distributed.init_process_group(backend="nccl" if is_cuda_available else "hccl")
+            torch.distributed.init_process_group(
+                backend="nccl" if is_cuda_available else "hccl",
+                timeout=timedelta(seconds=self.config.synchronizer.sync_timeout),
+            )
         self.config = config
 
         # build device mesh for Ulysses Sequence Parallel
