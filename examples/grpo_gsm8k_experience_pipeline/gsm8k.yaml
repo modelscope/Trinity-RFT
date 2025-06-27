@@ -11,20 +11,19 @@ data_processor:
     # I/O buffers
     input_buffers:
       - name: gsm8k_exp_output
-        storage_type: queue
-        path: 'sqlite:///gsm8k_exp_output.db'
     output_buffer:
       name: reshaped_gsm8k_exp_input
-      storage_type: queue
-      path: 'sqlite:///reshaped_gsm8k_exp_input.db'
     # format mapping
     format:
-      prompt_key: 'prompt'
-      response_key: 'response'
-      reward_key: 'reward'
+      reward_key: 'reward'  # the key name of the reward in the experience
     # data active iterator related
     dj_config_path: 'examples/grpo_gsm8k_experience_pipeline/dj_scoring_exp.yaml'
     clean_strategy: 'iterative'
+    # reward shaping
+    reward_shaping:
+      - stats_key: 'llm_quality_score'
+        op_type: ADD
+        weight: 1.0
 
 model:
   model_path: /PATH/TO/MODEL/
