@@ -161,16 +161,21 @@ def activate_data_processor(data_processor_url: str, config_path: str):
         logger.error(f"Failed to activate data module: {res['return_msg']}.")
         return
 
+
 def stop_data_processor(base_data_processor_url: str):
     """Stop all pipelines in the data processor"""
     from trinity.cli.client import request
+
     logger.info(f"Stopping all pipelines in {base_data_processor_url}...")
-    res = request(url=f'{base_data_processor_url}/stop_all')
+    res = request(url=f"{base_data_processor_url}/stop_all")
     if res["return_code"] != 0:
         logger.error(f"Failed to stop all data pipelines: {res['return_msg']}.")
         return
 
-def validate_data_pipeline(data_pipeline_config: DataPipelineConfig, pipeline_type: DataProcessorPipelineType):
+
+def validate_data_pipeline(
+    data_pipeline_config: DataPipelineConfig, pipeline_type: DataProcessorPipelineType
+):
     """
     Check if the data pipeline is valid. The config should:
     1. Non-empty input buffer
@@ -205,9 +210,7 @@ def validate_data_pipeline(data_pipeline_config: DataPipelineConfig, pipeline_ty
         # No special items need to be checked.
         pass
     else:
-        logger.warning(
-            f'Invalid pipeline type: {pipeline_type}..'
-        )
+        logger.warning(f"Invalid pipeline type: {pipeline_type}..")
         return False
     return True
 
@@ -220,21 +223,27 @@ def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
     # try to activate task pipeline for raw data
     data_processor_config = config.data_processor
     if (
-        data_processor_config.data_processor_url
-        and data_processor_config.task_pipeline
-        and validate_data_pipeline(data_processor_config.task_pipeline, DataProcessorPipelineType.TASK)
+        data_processor_config.data_processor_url is not None
+        and data_processor_config.task_pipeline is not None
+        and validate_data_pipeline(
+            data_processor_config.task_pipeline, DataProcessorPipelineType.TASK
+        )
     ):
         activate_data_processor(
-            f"{data_processor_config.data_processor_url}/{DataProcessorPipelineType.TASK.value}", config_path
+            f"{data_processor_config.data_processor_url}/{DataProcessorPipelineType.TASK.value}",
+            config_path,
         )
     # try to activate experience pipeline for experiences
     if (
-        data_processor_config.data_processor_url
-        and data_processor_config.experience_pipeline
-        and validate_data_pipeline(data_processor_config.experience_pipeline, DataProcessorPipelineType.EXPERIENCE)
+        data_processor_config.data_processor_url is not None
+        and data_processor_config.experience_pipeline is not None
+        and validate_data_pipeline(
+            data_processor_config.experience_pipeline, DataProcessorPipelineType.EXPERIENCE
+        )
     ):
         activate_data_processor(
-            f"{data_processor_config.data_processor_url}/{DataProcessorPipelineType.EXPERIENCE.value}", config_path
+            f"{data_processor_config.data_processor_url}/{DataProcessorPipelineType.EXPERIENCE.value}",
+            config_path,
         )
     if dlc:
         from trinity.utils.dlc_utils import setup_ray_cluster
@@ -268,7 +277,8 @@ def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
             stop_ray_cluster(namespace=config.ray_namespace)
 
         # stop all pipelines
-        stop_data_processor(data_processor_config.data_processor_url)
+        if data_processor_config.data_processor_url is not None:
+            stop_data_processor(data_processor_config.data_processor_url)
 
 
 def studio(port: int = 8501):

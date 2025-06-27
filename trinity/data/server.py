@@ -1,15 +1,17 @@
-import fire
 import threading
+from typing import List
+
+import fire
 import ray
 from flask import Flask, jsonify, request
 from markupsafe import escape
-from typing import List
 
 app = Flask(__name__)
 
 APP_NAME = "data_processor"
 
 EVNET_POOL: List[threading.Event] = []
+
 
 @app.route(f"/{APP_NAME}/<pipeline_type>", methods=["GET"])
 def data_processor(pipeline_type):
@@ -57,13 +59,15 @@ def data_processor(pipeline_type):
         EVNET_POOL.append(event)
         return jsonify({"return_code": 0, "message": "Experience pipeline starts successfully."})
 
+
 @app.route(f"/{APP_NAME}/stop_all", methods=["GET"])
 def stop_all():
     try:
         for event in EVNET_POOL:
             event.set()
-    except:
+    except Exception:
         import traceback
+
         traceback.print_exc()
         return jsonify({"return_code": 1, "message": traceback.format_exc()})
     return jsonify({"return_code": 0, "message": "All data pipelines are stopped."})

@@ -9,12 +9,12 @@ from omegaconf import OmegaConf
 from trinity.common.constants import (
     EXPLORER_NAME,
     TRAINER_NAME,
+    OpType,
     PromptType,
     ReadStrategy,
     StorageType,
     SyncMethod,
     TaskType,
-    OpType
 )
 from trinity.utils.log import get_logger
 
@@ -103,6 +103,7 @@ class StorageConfig:
     # ! DO NOT SET,  automatically set corresponding to train/eval
     task_type: TaskType = TaskType.EXPLORE
 
+
 @dataclass
 class RewardShapingConfig:
     """Config for reward shaping."""
@@ -110,6 +111,7 @@ class RewardShapingConfig:
     stats_key: str = ""
     op_type: OpType = OpType.ADD
     weight: float = 1.0
+
 
 @dataclass
 class DataPipelineConfig:
@@ -513,23 +515,35 @@ class Config:
             output_buffers = {}
             # - taskset
             if self.buffer.explorer_input.taskset.name:
-                input_buffers[self.buffer.explorer_input.taskset.name] = self.buffer.explorer_input.taskset
+                input_buffers[
+                    self.buffer.explorer_input.taskset.name
+                ] = self.buffer.explorer_input.taskset
             # - explorer output
             if self.buffer.explorer_output and self.buffer.explorer_output.name:
                 output_buffers[self.buffer.explorer_output.name] = self.buffer.explorer_output
             # - trainer input: experience buffer
-            if self.buffer.trainer_input.experience_buffer and self.buffer.trainer_input.experience_buffer.name:
-                input_buffers[self.buffer.trainer_input.experience_buffer.name] = self.buffer.trainer_input.experience_buffer
+            if (
+                self.buffer.trainer_input.experience_buffer
+                and self.buffer.trainer_input.experience_buffer.name
+            ):
+                input_buffers[
+                    self.buffer.trainer_input.experience_buffer.name
+                ] = self.buffer.trainer_input.experience_buffer
             # - trainer input: sft warmup dataset
-            if self.buffer.trainer_input.sft_warmup_dataset and self.buffer.trainer_input.sft_warmup_dataset.name:
-                input_buffers[self.buffer.trainer_input.sft_warmup_dataset.name] = self.buffer.trainer_input.sft_warmup_dataset
+            if (
+                self.buffer.trainer_input.sft_warmup_dataset
+                and self.buffer.trainer_input.sft_warmup_dataset.name
+            ):
+                input_buffers[
+                    self.buffer.trainer_input.sft_warmup_dataset.name
+                ] = self.buffer.trainer_input.sft_warmup_dataset
 
             # when experience pipeline is on, the explorer output and the
             # experience buffer of trainer input should be different
             if self.buffer.explorer_output == self.buffer.trainer_input.experience_buffer:
                 raise ValueError(
-                    f"The explorer output buffer should be different from the experience buffer of the trainer input "
-                    f"when experience pipeline is provided."
+                    "The explorer output buffer should be different from the experience buffer of the trainer input "
+                    "when experience pipeline is provided."
                 )
 
             # NOTICE: For now, input/output buffers for data processors should come from output/input buffers of trinity
@@ -552,7 +566,9 @@ class Config:
                     f"input buffers of trinity."
                 )
             else:
-                self.data_processor.experience_pipeline.output_buffer = input_buffers[exp_pipeline_output_buffers.name]
+                self.data_processor.experience_pipeline.output_buffer = input_buffers[
+                    exp_pipeline_output_buffers.name
+                ]
 
         # set read_batch_size / pad_token_id / tokenizer_path
         self.buffer.read_batch_size = self.buffer.batch_size * self.algorithm.repeat_times

@@ -35,7 +35,7 @@ class DataCleaner(BaseDataProcessor):
         dj_cfg: Optional[Namespace],
         clean_strategy: str = "iterative",
         min_size_ratio: PositiveFloat = None,
-        data_dist: str = "gaussian",
+        data_dist: Optional[str] = "gaussian",
         op_weights: dict = None,
         **kwargs,
     ):

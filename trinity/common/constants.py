@@ -104,11 +104,13 @@ class RunningStatus(Enum):
     WAITING_SYNC = "waiting_sync"
     STOPPED = "stopped"
 
+
 class DataProcessorPipelineType(Enum):
     """Data processor pipeline type."""
 
     EXPERIENCE = "experience_pipeline"
     TASK = "task_pipeline"
+
 
 class OpType(Enum):
     """Operator type for reward shaping."""

@@ -1,21 +1,23 @@
 from abc import ABC
-from dataclasses import dataclass, fields, asdict
+from dataclasses import asdict, dataclass, fields
 from typing import Any, Dict, List, Optional, Union
 
 import networkx as nx
 from datasets import Dataset, concatenate_datasets
 
 from trinity.buffer import get_buffer_reader, get_buffer_writer
-from trinity.common.config import BufferConfig, DataPipelineConfig, StorageConfig
+from trinity.common.config import BufferConfig, DataPipelineConfig
 from trinity.data.core.formatter import BaseDataFormatter
 from trinity.utils.log import get_logger
 
 logger = get_logger(__name__)
 
+
 def dict_to_dataclass(cls, d):
     valid_keys = {f.name for f in fields(cls)}
     filtered = {k: v for k, v in d.items() if k in valid_keys}
     return cls(**filtered)
+
 
 @dataclass
 class RewardSchema:

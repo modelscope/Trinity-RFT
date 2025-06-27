@@ -5,8 +5,8 @@ import unittest
 
 import torch
 
-from trinity.common.experience import Experience, Experiences
 from trinity.buffer.schema.sql_schema import ExperienceModel
+from trinity.common.experience import Experience, Experiences
 
 db_url = os.path.join(os.path.dirname(__file__), "tmp", "test.db")
 dataset_path = os.path.join(os.path.dirname(__file__), "data")
