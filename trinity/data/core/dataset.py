@@ -1,5 +1,5 @@
 from abc import ABC
-from dataclasses import asdict, dataclass, fields
+from dataclasses import asdict, dataclass, fields, is_dataclass
 from typing import Any, Dict, List, Optional, Union
 
 import networkx as nx
@@ -87,14 +87,19 @@ class RftDataset:
         datasets = []
         for buffer in self.input_buffers:
             exp_list = buffer.read()
-            if self.original_dataclass is None:
-                self.original_dataclass = exp_list[0].__class__
-            datasets.append(Dataset.from_list([asdict(exp) for exp in exp_list]))
+            if len(exp_list) > 0 and is_dataclass(exp_list[0]):
+                exp_list = [asdict(exp) for exp in exp_list]
+                if self.original_dataclass is None:
+                    self.original_dataclass = exp_list[0].__class__
+            datasets.append(Dataset.from_list([exp for exp in exp_list]))
         self.data = concatenate_datasets(datasets)
         logger.info(f"Read {len(self.data)} samples from input buffers")
 
     def write_to_buffer(self):
-        exp_list = [dict_to_dataclass(self.original_dataclass, d) for d in self.data.to_list()]
+        if self.original_dataclass is not None:
+            exp_list = [dict_to_dataclass(self.original_dataclass, d) for d in self.data.to_list()]
+        else:
+            exp_list = self.data.to_list()
         self.output_buffer.write(exp_list)
         logger.info(f"Wrote {len(self.data)} samples to output buffer")
         self.data = Dataset.from_list([])

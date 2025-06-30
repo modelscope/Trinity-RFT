@@ -47,7 +47,7 @@ class TestBoxedMathDataset(unittest.TestCase):
         self.assertEqual(formatter.config.solution_key, "solution")
         self.assertEqual(formatter.config.chat_template, "User: {}\nAssistant: ")
         # test for default configs
-        self.assertEqual(formatter.config.reward_key, "")
+        self.assertEqual(formatter.config.reward_key, "reward")
         self.assertEqual(formatter.config.chosen_key, "chosen")
         self.assertEqual(formatter.config.rejected_key, "rejected")
         self.assertEqual(formatter.config.label_key, "")
