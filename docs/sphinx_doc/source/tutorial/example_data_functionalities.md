@@ -8,7 +8,8 @@ In this example, you will learn how to apply the data processor of Trinity-RFT t
 2. how to configure the data processor
 3. what the data processor can do
 
-Before getting started, you need to prepare the main environment of Trinity-RFT according to the [installation section of the README file](../main.md).
+Before getting started, you need to prepare the main environment of Trinity-RFT according to the [installation section of the README file](../main.md),
+and store the base url and api key in the environment variables `OPENAI_BASE_URL` and `OPENAI_API_KEY` for some agentic or API-model usages if necessary. 
 
 ### Data Preparation
 
@@ -218,7 +219,7 @@ Here you can set the input/output buffers for the experience pipeline, and some 
   + `input_buffers`: the input buffers for the experience pipeline. It usually loads from the explorer output buffer, so we need to specify the `explorer_output` in the `buffer` config, and here we only need to specify the name that is aligned with the `explorer_output`. It allows multiple input buffers, but for now, we only need to specify one.
   + `output_buffer`: the output buffer for the experience pipeline. It usually writes results to the input buffer of trainer, so we only need to the specify the buffer name that is aligned with the `trainer_input` in the `buffer` config.
   + `format`: some dataset format config items, which are used to map original data field names to unified ones. Here we only need to specify the field name to store the original reward information.
-  + `reward_shaping`: the method to reshap the reward. Usually we use some stats computed by operators in Data-Juicer as new reward items. It's a list that allows multiple methods to reshape rewards. Each item in the list has the following config items:
+  + `reward_shaping`: the method to reshape the reward. Usually we use some stats computed by operators in Data-Juicer as new reward items. It's a list that allows multiple methods to reshape rewards. Each item in the list has the following config items:
     + `stats_key`: which stats to use as the new reward item.
     + `op_type`: the operator to apply the new reward item to the original reward. For now, ["ADD", "SUB", "MUL", "DIV"] are supported.
     + `weight`: the weight of the new reward item.
