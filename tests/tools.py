@@ -42,7 +42,7 @@ def get_checkpoint_path() -> str:
 def get_unittest_dataset_config(
     dataset_name: str = "countdown", split: str = "train"
 ) -> StorageConfig:
-    """Countdown dataset with 16 samples."""
+    """Countdown dataset with 17 samples."""
     if dataset_name == "countdown" or dataset_name == "copy_countdown":
         return StorageConfig(
             name=dataset_name,

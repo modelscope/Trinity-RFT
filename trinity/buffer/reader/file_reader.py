@@ -26,12 +26,14 @@ class _HFBatchReader:
         name: str,
         max_epoch: int = 1,
         offset: int = 0,
+        drop_last: bool = True,
     ):
         self.dataset = dataset
         self.dataset_size = len(dataset)
         self.name = name
         self.current_batch_size = None
         self.max_epoch = max_epoch
+        self.drop_last = drop_last
         if offset >= self.dataset_size:
             self.current_epoch = offset // self.dataset_size
             self.current_offset = offset % self.dataset_size
@@ -70,7 +72,7 @@ class _HFBatchReader:
                 self.current_offset = 0
 
                 if self.current_epoch >= self.max_epoch:
-                    if len(batch) > 0:
+                    if not self.drop_last and len(batch) > 0:
                         return batch
                     else:
                         self.progress_bar.close()
@@ -96,6 +98,7 @@ class SFTDataReader(BufferReader):
             load_dataset(meta.path, name=subset_name, split=self.split, trust_remote_code=True),
             name=meta.name,
             max_epoch=meta.total_epochs,
+            drop_last=True,
         )  # TODO: support resume
         self.tokenizer = transformers.AutoTokenizer.from_pretrained(config.tokenizer_path)
 
@@ -174,6 +177,7 @@ class DPODataReader(BufferReader):
             load_dataset(meta.path, name=subset_name, split=self.split, trust_remote_code=True),
             name=meta.name,
             max_epoch=meta.total_epochs,
+            drop_last=True,
         )  # TODO: support resume
         self.tokenizer = transformers.AutoTokenizer.from_pretrained(config.tokenizer_path)
 
@@ -248,6 +252,7 @@ class RolloutDataReader(BufferReader):
             name=meta.name,
             max_epoch=self.meta.total_epochs if meta.task_type == TaskType.EXPLORE else 1,
             offset=self.meta.index,
+            drop_last=self.meta.task_type == TaskType.EXPLORE,
         )
         self.read_batch_size = config.batch_size
         self.prompt_key = meta.format.prompt_key
