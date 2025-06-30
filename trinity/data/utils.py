@@ -1,9 +1,9 @@
 from trinity.common.config import DataPipelineConfig
 from trinity.common.constants import DataProcessorPipelineType
-
 from trinity.utils.log import get_logger
 
 logger = get_logger(__name__)
+
 
 def activate_data_processor(data_processor_url: str, config_path: str):
     """Check whether to activate data module and preprocess datasets."""
@@ -18,6 +18,7 @@ def activate_data_processor(data_processor_url: str, config_path: str):
         logger.error(f"Failed to activate data module: {res['return_msg']}.")
         return
 
+
 def stop_data_processor(base_data_processor_url: str):
     """Stop all pipelines in the data processor"""
     from trinity.cli.client import request
@@ -27,6 +28,7 @@ def stop_data_processor(base_data_processor_url: str):
     if res["return_code"] != 0:
         logger.error(f"Failed to stop all data pipelines: {res['return_msg']}.")
         return
+
 
 def validate_data_pipeline(
     data_pipeline_config: DataPipelineConfig, pipeline_type: DataProcessorPipelineType

@@ -10,9 +10,13 @@ import ray
 
 from trinity.common.config import Config, load_config
 from trinity.common.constants import DataProcessorPipelineType
+from trinity.data.utils import (
+    activate_data_processor,
+    stop_data_processor,
+    validate_data_pipeline,
+)
 from trinity.explorer.explorer import Explorer
 from trinity.trainer.trainer import Trainer
-from trinity.data.utils import activate_data_processor, stop_data_processor, validate_data_pipeline
 from trinity.utils.log import get_logger
 from trinity.utils.plugin_loader import load_plugins
 
@@ -147,6 +151,7 @@ def both(config: Config) -> None:
         ray.wait(wait_ref, timeout=config.synchronizer.sync_timeout)
     explorer.shutdown.remote()
     trainer.shutdown.remote()
+
 
 def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
     load_plugins(plugin_dir)
