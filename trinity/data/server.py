@@ -24,7 +24,7 @@ def data_processor(pipeline_type):
     config.check_and_update()
 
     # init ray
-    ray.init(namespace=config.ray_namespace)
+    ray.init(namespace=config.ray_namespace, ignore_reinit_error=True)
 
     pipeline_config = getattr(config.data_processor, pipeline_type)
     if pipeline_config is None:

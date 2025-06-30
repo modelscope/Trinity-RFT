@@ -452,6 +452,8 @@ class Config:
             self.buffer.explorer_input.taskset.format.reply_prefix = (
                 self.buffer.explorer_input.reply_prefix
             )
+        if self.buffer.explorer_input.taskset.ray_namespace is None:
+            self.buffer.explorer_input.taskset.ray_namespace = self.ray_namespace
 
         remained_tasksets = []
         for idx, dataset in enumerate(self.buffer.explorer_input.eval_tasksets):
@@ -469,6 +471,8 @@ class Config:
                 dataset.format.system_prompt = self.buffer.explorer_input.system_prompt
             if dataset.format.reply_prefix is None:
                 dataset.format.reply_prefix = self.buffer.explorer_input.reply_prefix
+            if dataset.ray_namespace is None:
+                dataset.ray_namespace = self.ray_namespace
             remained_tasksets.append(dataset)
         self.buffer.explorer_input.eval_tasksets = remained_tasksets
 
@@ -493,12 +497,16 @@ class Config:
             self.buffer.trainer_input.experience_buffer.algorithm_type = (
                 self.algorithm.algorithm_type
             )
+            if self.buffer.trainer_input.experience_buffer.ray_namespace is None:
+                self.buffer.trainer_input.experience_buffer.ray_namespace = self.ray_namespace
 
         # set buffer.explorer_output
         if self.buffer.explorer_output is None:
             self.buffer.explorer_output = self.buffer.trainer_input.experience_buffer
         else:
             self.buffer.explorer_output.algorithm_type = self.algorithm.algorithm_type
+            if self.buffer.explorer_output.ray_namespace is None:
+                self.buffer.explorer_output.ray_namespace = self.ray_namespace
 
         # check trainer_input.sft_warmup_dataset
         if (
@@ -510,6 +518,8 @@ class Config:
             )
         if self.buffer.trainer_input.sft_warmup_dataset is not None:
             self.buffer.trainer_input.sft_warmup_dataset.algorithm_type = "sft"  # TODO
+            if self.buffer.trainer_input.sft_warmup_dataset.ray_namespace is None:
+                self.buffer.trainer_input.sft_warmup_dataset.ray_namespace = self.ray_namespace
 
         # check input/output buffers in experience pipelines
         if self.data_processor.experience_pipeline is not None:
