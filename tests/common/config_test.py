@@ -41,7 +41,9 @@ class TestConfig(unittest.TestCase):
         for example_name in os.listdir(example_dir):
             for filename in os.listdir(os.path.join(example_dir, example_name)):
                 if filename.endswith(".yaml") and not (
-                    filename.startswith("train_") or filename.startswith("verl_")
+                    filename.startswith("train_")
+                    or filename.startswith("verl_")
+                    or filename.startswith("dj_")
                 ):
                     print(f"Checking config: {filename}")
                     config_path = os.path.join(example_dir, example_name, filename)
