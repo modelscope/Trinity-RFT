@@ -8,7 +8,8 @@ In this example, you will learn how to apply the data processor of Trinity-RFT t
 2. how to configure the data processor
 3. what the data processor can do
 
-Before getting started, you need to prepare the main environment of Trinity-RFT according to the [installation section of the README file](../main.md).
+Before getting started, you need to prepare the main environment of Trinity-RFT according to the [installation section of the README file](../main.md),
+and store the base url and api key in the environment variables `OPENAI_BASE_URL` and `OPENAI_API_KEY` for some agentic or API-model usages if necessary.
 
 ### Data Preparation
 
@@ -103,8 +104,6 @@ If you are familiar with Data-Juicer, you will realize that Data-Juicer provides
 # This is a Data-Juicer data processing recipe
 project_name: 'gsm-8k-difficulty'
 
-export_path: '/path/to/the/result/processed-dataset.jsonl'
-
 process:
   - llm_difficulty_score_filter:
       api_or_hf_model: "qwen2.5-72b-instruct"  # use "qwen2.5-72b-instruct" to calculate the difficulty scores.
@@ -143,7 +142,7 @@ And you can set the `clean_strategy` to 'iterative' to get a better dataset.
 
 
 
-All config items in the `data` section can be found [here](trinity_configs.md). A prepared config file for this example of GSM-8K can be found in [the config file of gsm8k](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k/gsm8k.yaml).
+All config items in the `data` section can be found [here](trinity_configs.md). A prepared config file for this example of GSM-8K can be found in [the config file of gsm8k](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_task_pipeline/gsm8k.yaml).
 
 
 
@@ -166,6 +165,99 @@ trinity run --config <Trinity-RFT_config_path>
 ```
 
 If you follow the steps above, Trinity-RFT will send a request to the data processor server, the data active iterator will be activated, compute difficulty scores for each sample in the raw dataset, and rank the dataset according to difficulty scores. After that, the data processor server stores the result dataset into the output buffer, when exploring begins, it will load the prepared dataset and continue the downstream steps.
+
+## Example: Data Processor for Experience Pipeline
+
+In this example, you will learn how to apply the data processor of Trinity-RFT to reshape rewards of experiences after exploring. This example takes GSM-8K dataset as the example dataset to figure out how to reshape rewards of experiences from the explorer before sent to the trainer from a view of the quality of generated responses.
+
+Before getting started, you need to prepare the main environment of Trinity-RFT and start server for the data processor according to the first subsection in the previous example.
+
+### Configure the Data Processor
+
+In this example, assume that you need to add an extra reward item to the experiences outputted by the explorer, which access the quality scores of the experiences. So you can set the `experience_pipeline` config like the following example:
+
+```yaml
+data_processor:
+  data_processor_url: 'http://127.0.0.1:5005/data_processor'
+  # experience pipeline related
+  experience_pipeline:
+    # I/O buffers
+    input_buffers:
+      - name: gsm8k_exp_output
+    output_buffer:
+      name: reshaped_gsm8k_exp_input
+    # format mapping
+    format:
+      reward_key: 'reward'  # the key name of the reward in the experience
+    # data active iterator related
+    dj_config_path: 'examples/grpo_gsm8k_experience_pipeline/dj_scoring_exp.yaml'
+    clean_strategy: 'iterative'
+    # reward shaping
+    reward_shaping:
+      - stats_key: 'llm_quality_score'
+        op_type: ADD
+        weight: 1.0
+
+# the buffer config
+buffer:
+  ...
+  explorer_output:
+    name: gsm8k_exp_output
+    storage_type: queue
+    path: 'sqlite:///gsm8k_exp_output.db'
+  trainer_input:
+    experience_buffer:
+      name: reshaped_gsm8k_exp_input
+      storage_type: queue
+      path: 'sqlite:///reshaped_gsm8k_exp_input.db'
+```
+
+Here you can set the input/output buffers for the experience pipeline, and some other items about reward shaping:
+
++ `data_processor_url`: the URL of the data processor service, which is started in the previous step.
++ `experience_pipeline`: the configs for the experience pipeline. Experience pipeline is used to process the experiences outputted by the explorer, such as reward shaping, data filtering and augmentation. It consists of several inner configs:
+  + `input_buffers`: the input buffers for the experience pipeline. It usually loads from the explorer output buffer, so we need to specify the `explorer_output` in the `buffer` config, and here we only need to specify the name that is aligned with the `explorer_output`. It allows multiple input buffers, but for now, we only need to specify one.
+  + `output_buffer`: the output buffer for the experience pipeline. It usually writes results to the input buffer of trainer, so we only need to the specify the buffer name that is aligned with the `trainer_input` in the `buffer` config.
+  + `format`: some dataset format config items, which are used to map original data field names to unified ones. Here we only need to specify the field name to store the original reward information.
+  + `reward_shaping`: the method to reshape the reward. Usually we use some stats computed by operators in Data-Juicer as new reward items. It's a list that allows multiple methods to reshape rewards. Each item in the list has the following config items:
+    + `stats_key`: which stats to use as the new reward item.
+    + `op_type`: the operator to apply the new reward item to the original reward. For now, ["ADD", "SUB", "MUL", "DIV"] are supported.
+    + `weight`: the weight of the new reward item.
+
+In addition, there are several config items related to the data active iterator in `experience_pipeline` part, which is used to compute stats used to reshape rewards. This part is similar to the `task_pipeline` part in the previous example. The Data-Juicer config used here is:
+```yaml
+# This is a Data-Juicer data processing recipe
+project_name: 'gsm-8k-experience-quality'
+
+np: 32
+
+process:
+  - llm_quality_score_filter:
+      api_or_hf_model: "qwen2.5-32b-instruct"  # use "qwen2.5-32b-instruct" to calculate the quality scores.
+      min_score: 0.0
+      input_keys: ["prompt_text", "prompt_text"]  # set input_keys and field_names to the existing key names in gsm-8k. Here calculating the difficulty scores according to both questions and answers.
+      field_names: ["prompt", "response"]
+```
+
+All config items in the `data` section can be found [here](trinity_configs.md). A prepared config file for this example of GSM-8K can be found in [the config file of gsm8k](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_experience_pipeline/gsm8k.yaml).
+
+### Exploring & Training
+After preparing the config files of Trinity-RFT, you can start your ray cluster and run the RFT process including the data active iterator part with the following commands:
+
+```shell
+# start the ray cluster
+# on master node
+ray start --head
+# on worker nodes
+ray start --address=<master_address>
+
+# run RFT
+trinity run --config <Trinity-RFT_config_path>
+```
+
+If you follow the steps above, Trinity-RFT will send a request to the data processor server and prepare the experience pipeline.
+It will watch the explorer output buffer. Once there is a new batch of experience, the data processor will compute stats for the experience and reshape the rewards. Then it writes the reshaped experience to the trainer input buffer for training.
+
 
 ## Example: Human in the Loop
 Sometimes, you might need to involve human feedbacks for some raw data. In this example, you will learn how to annotate raw data to get a better dataset before training. This example takes an example Q&A dataset and tries to select the chosen and rejected ones for DPO method.

@@ -37,14 +37,6 @@ trinity.common.experience module
    :undoc-members:
    :show-inheritance:
 
-trinity.common.schema module
-----------------------------
-
-.. automodule:: trinity.common.schema
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 trinity.common.verl\_config module
 ----------------------------------
 

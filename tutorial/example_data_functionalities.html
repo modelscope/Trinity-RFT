@@ -56,9 +56,14 @@
 <li class="toctree-l3"><a class="reference internal" href="#exploring-training">Exploring &amp; Training</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#example-data-processor-for-experience-pipeline">Example: Data Processor for Experience Pipeline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Configure the Data Processor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Exploring &amp; Training</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#example-human-in-the-loop">Example: Human in the Loop</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id1">Data Preparation</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id3">Configure the Data Processor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Data Preparation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">Configure the Data Processor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#start-running">Start Running</a></li>
 </ul>
 </li>
@@ -116,7 +121,8 @@
 <li><p>how to configure the data processor</p></li>
 <li><p>what the data processor can do</p></li>
 </ol>
-<p>Before getting started, you need to prepare the main environment of Trinity-RFT according to the <a class="reference internal" href="../main.html"><span class="std std-doc">installation section of the README file</span></a>.</p>
+<p>Before getting started, you need to prepare the main environment of Trinity-RFT according to the <a class="reference internal" href="../main.html"><span class="std std-doc">installation section of the README file</span></a>,
+and store the base url and api key in the environment variables <code class="docutils literal notranslate"><span class="pre">OPENAI_BASE_URL</span></code> and <code class="docutils literal notranslate"><span class="pre">OPENAI_API_KEY</span></code> for some agentic or API-model usages if necessary.</p>
 <section id="data-preparation">
 <h3>Data Preparation<a class="headerlink" href="#data-preparation" title="Link to this heading"></a></h3>
 <section id="prepare-the-data-processor">
@@ -207,8 +213,6 @@ python<span class="w"> </span>scripts/start_servers.py
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># This is a Data-Juicer data processing recipe</span>
 <span class="nt">project_name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;gsm-8k-difficulty&#39;</span>
 
-<span class="nt">export_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;/path/to/the/result/processed-dataset.jsonl&#39;</span>
-
 <span class="nt">process</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">llm_difficulty_score_filter</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">api_or_hf_model</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;qwen2.5-72b-instruct&quot;</span><span class="w">  </span><span class="c1"># use &quot;qwen2.5-72b-instruct&quot; to calculate the difficulty scores.</span>
@@ -242,7 +246,7 @@ python<span class="w"> </span>scripts/start_servers.py
 </pre></div>
 </div>
 <p>And you can set the <code class="docutils literal notranslate"><span class="pre">clean_strategy</span></code> to ‘iterative’ to get a better dataset.</p>
-<p>All config items in the <code class="docutils literal notranslate"><span class="pre">data</span></code> section can be found <a class="reference internal" href="trinity_configs.html"><span class="std std-doc">here</span></a>. A prepared config file for this example of GSM-8K can be found in <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k/gsm8k.yaml">the config file of gsm8k</a>.</p>
+<p>All config items in the <code class="docutils literal notranslate"><span class="pre">data</span></code> section can be found <a class="reference internal" href="trinity_configs.html"><span class="std std-doc">here</span></a>. A prepared config file for this example of GSM-8K can be found in <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_task_pipeline/gsm8k.yaml">the config file of gsm8k</a>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Only when one of <code class="docutils literal notranslate"><span class="pre">xxx_pipeline</span></code> is provided, and one of <code class="docutils literal notranslate"><span class="pre">dj_process_desc</span></code> and <code class="docutils literal notranslate"><span class="pre">dj_config_path</span></code> in the pipeline config is provided, the data processor and the data active iterator will be activated. Otherwise, this part will be skipped and it will enter into the exploring stage directly.</p>
@@ -265,14 +269,107 @@ trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w
 <p>If you follow the steps above, Trinity-RFT will send a request to the data processor server, the data active iterator will be activated, compute difficulty scores for each sample in the raw dataset, and rank the dataset according to difficulty scores. After that, the data processor server stores the result dataset into the output buffer, when exploring begins, it will load the prepared dataset and continue the downstream steps.</p>
 </section>
 </section>
+<section id="example-data-processor-for-experience-pipeline">
+<h2>Example: Data Processor for Experience Pipeline<a class="headerlink" href="#example-data-processor-for-experience-pipeline" title="Link to this heading"></a></h2>
+<p>In this example, you will learn how to apply the data processor of Trinity-RFT to reshape rewards of experiences after exploring. This example takes GSM-8K dataset as the example dataset to figure out how to reshape rewards of experiences from the explorer before sent to the trainer from a view of the quality of generated responses.</p>
+<p>Before getting started, you need to prepare the main environment of Trinity-RFT and start server for the data processor according to the first subsection in the previous example.</p>
+<section id="id1">
+<h3>Configure the Data Processor<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<p>In this example, assume that you need to add an extra reward item to the experiences outputted by the explorer, which access the quality scores of the experiences. So you can set the <code class="docutils literal notranslate"><span class="pre">experience_pipeline</span></code> config like the following example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">data_processor</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">data_processor_url</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;http://127.0.0.1:5005/data_processor&#39;</span>
+<span class="w">  </span><span class="c1"># experience pipeline related</span>
+<span class="w">  </span><span class="nt">experience_pipeline</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># I/O buffers</span>
+<span class="w">    </span><span class="nt">input_buffers</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gsm8k_exp_output</span>
+<span class="w">    </span><span class="nt">output_buffer</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reshaped_gsm8k_exp_input</span>
+<span class="w">    </span><span class="c1"># format mapping</span>
+<span class="w">    </span><span class="nt">format</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">reward_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;reward&#39;</span><span class="w">  </span><span class="c1"># the key name of the reward in the experience</span>
+<span class="w">    </span><span class="c1"># data active iterator related</span>
+<span class="w">    </span><span class="nt">dj_config_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;examples/grpo_gsm8k_experience_pipeline/dj_scoring_exp.yaml&#39;</span>
+<span class="w">    </span><span class="nt">clean_strategy</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;iterative&#39;</span>
+<span class="w">    </span><span class="c1"># reward shaping</span>
+<span class="w">    </span><span class="nt">reward_shaping</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">stats_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;llm_quality_score&#39;</span>
+<span class="w">        </span><span class="nt">op_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ADD</span>
+<span class="w">        </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+
+<span class="c1"># the buffer config</span>
+<span class="nt">buffer</span><span class="p">:</span>
+<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">explorer_output</span><span class="p p-Indicator">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gsm8k_exp_output</span>
+<span class="w">    </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">queue</span>
+<span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;sqlite:///gsm8k_exp_output.db&#39;</span>
+<span class="w">  </span><span class="nt">trainer_input</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">experience_buffer</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reshaped_gsm8k_exp_input</span>
+<span class="w">      </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">queue</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;sqlite:///reshaped_gsm8k_exp_input.db&#39;</span>
+</pre></div>
+</div>
+<p>Here you can set the input/output buffers for the experience pipeline, and some other items about reward shaping:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">data_processor_url</span></code>: the URL of the data processor service, which is started in the previous step.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">experience_pipeline</span></code>: the configs for the experience pipeline. Experience pipeline is used to process the experiences outputted by the explorer, such as reward shaping, data filtering and augmentation. It consists of several inner configs:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">input_buffers</span></code>: the input buffers for the experience pipeline. It usually loads from the explorer output buffer, so we need to specify the <code class="docutils literal notranslate"><span class="pre">explorer_output</span></code> in the <code class="docutils literal notranslate"><span class="pre">buffer</span></code> config, and here we only need to specify the name that is aligned with the <code class="docutils literal notranslate"><span class="pre">explorer_output</span></code>. It allows multiple input buffers, but for now, we only need to specify one.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">output_buffer</span></code>: the output buffer for the experience pipeline. It usually writes results to the input buffer of trainer, so we only need to the specify the buffer name that is aligned with the <code class="docutils literal notranslate"><span class="pre">trainer_input</span></code> in the <code class="docutils literal notranslate"><span class="pre">buffer</span></code> config.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">format</span></code>: some dataset format config items, which are used to map original data field names to unified ones. Here we only need to specify the field name to store the original reward information.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">reward_shaping</span></code>: the method to reshape the reward. Usually we use some stats computed by operators in Data-Juicer as new reward items. It’s a list that allows multiple methods to reshape rewards. Each item in the list has the following config items:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">stats_key</span></code>: which stats to use as the new reward item.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">op_type</span></code>: the operator to apply the new reward item to the original reward. For now, [“ADD”, “SUB”, “MUL”, “DIV”] are supported.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">weight</span></code>: the weight of the new reward item.</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>In addition, there are several config items related to the data active iterator in <code class="docutils literal notranslate"><span class="pre">experience_pipeline</span></code> part, which is used to compute stats used to reshape rewards. This part is similar to the <code class="docutils literal notranslate"><span class="pre">task_pipeline</span></code> part in the previous example. The Data-Juicer config used here is:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># This is a Data-Juicer data processing recipe</span>
+<span class="nt">project_name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;gsm-8k-experience-quality&#39;</span>
+
+<span class="nt">np</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32</span>
+
+<span class="nt">process</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">llm_quality_score_filter</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">api_or_hf_model</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;qwen2.5-32b-instruct&quot;</span><span class="w">  </span><span class="c1"># use &quot;qwen2.5-32b-instruct&quot; to calculate the quality scores.</span>
+<span class="w">      </span><span class="nt">min_score</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span>
+<span class="w">      </span><span class="nt">input_keys</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;prompt_text&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;prompt_text&quot;</span><span class="p p-Indicator">]</span><span class="w">  </span><span class="c1"># set input_keys and field_names to the existing key names in gsm-8k. Here calculating the difficulty scores according to both questions and answers.</span>
+<span class="w">      </span><span class="nt">field_names</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;prompt&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;response&quot;</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+<p>All config items in the <code class="docutils literal notranslate"><span class="pre">data</span></code> section can be found <a class="reference internal" href="trinity_configs.html"><span class="std std-doc">here</span></a>. A prepared config file for this example of GSM-8K can be found in <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_experience_pipeline/gsm8k.yaml">the config file of gsm8k</a>.</p>
+</section>
+<section id="id2">
+<h3>Exploring &amp; Training<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<p>After preparing the config files of Trinity-RFT, you can start your ray cluster and run the RFT process including the data active iterator part with the following commands:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># start the ray cluster</span>
+<span class="c1"># on master node</span>
+ray<span class="w"> </span>start<span class="w"> </span>--head
+<span class="c1"># on worker nodes</span>
+ray<span class="w"> </span>start<span class="w"> </span>--address<span class="o">=</span>&lt;master_address&gt;
+
+<span class="c1"># run RFT</span>
+trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>&lt;Trinity-RFT_config_path&gt;
+</pre></div>
+</div>
+<p>If you follow the steps above, Trinity-RFT will send a request to the data processor server and prepare the experience pipeline.
+It will watch the explorer output buffer. Once there is a new batch of experience, the data processor will compute stats for the experience and reshape the rewards. Then it writes the reshaped experience to the trainer input buffer for training.</p>
+</section>
+</section>
 <section id="example-human-in-the-loop">
 <h2>Example: Human in the Loop<a class="headerlink" href="#example-human-in-the-loop" title="Link to this heading"></a></h2>
 <p>Sometimes, you might need to involve human feedbacks for some raw data. In this example, you will learn how to annotate raw data to get a better dataset before training. This example takes an example Q&amp;A dataset and tries to select the chosen and rejected ones for DPO method.</p>
 <p>Before getting started, you need to prepare the main environment of Trinity-RFT according to the installation section of the README file, and <a class="reference external" href="https://github.com/modelscope/data-juicer/tree/main/tools/humanops">start a label-studio server</a> from Data-Juicer from source.</p>
-<section id="id1">
-<h3>Data Preparation<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
-<section id="id2">
-<h4>Prepare the Data Processor<a class="headerlink" href="#id2" title="Link to this heading"></a></h4>
+<section id="id3">
+<h3>Data Preparation<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<section id="id4">
+<h4>Prepare the Data Processor<a class="headerlink" href="#id4" title="Link to this heading"></a></h4>
 <p>As the overall framework of Trinity-RFT shows, the data processor is one of the high-level functions. Trinity-RFT encapsulates the data processor as an independent service to avoid dependency conflict issues. Thus you need to prepare a split environment for this module and start the server.</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># prepare split environments, including the one of data processor</span>
 python<span class="w"> </span>scripts/install.py
@@ -283,8 +380,8 @@ python<span class="w"> </span>scripts/start_servers.py
 </div>
 </section>
 </section>
-<section id="id3">
-<h3>Configure the Data Processor<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<section id="id5">
+<h3>Configure the Data Processor<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
 <p>Trinity-RFT uses a unified config file to manage all config items. For the data processor, you need to focus on the <code class="docutils literal notranslate"><span class="pre">data_processor</span></code> section in the config file.</p>
 <p>In this example, assume that you need to select the chosen and rejected responses for DPO method. So you can set these config items like the following example:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">data_processor</span><span class="p">:</span>
