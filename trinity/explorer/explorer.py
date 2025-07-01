@@ -182,6 +182,7 @@ class Explorer:
         self.eval_explore_step_num = None
         while True:
             try:
+                self.logger.info(f"Explore step {self.explore_step_num + 1} started.")
                 if (
                     self.eval_explore_step_num is None
                     and self.explore_step_num % self.config.explorer.eval_interval == 0

@@ -38,6 +38,7 @@ from trinity.algorithm.utils import prefix_metrics
 from trinity.common.config import Config
 from trinity.common.experience import Experiences
 from trinity.trainer.trainer import TrainEngineWrapper
+from trinity.utils.log import get_logger
 from trinity.utils.monitor import MONITOR
 
 
@@ -146,13 +147,14 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             ray_worker_group_cls,
         )
         self.init_workers()
-        self.logger = MONITOR.get(global_config.monitor.monitor_type)(
+        self.monitor = MONITOR.get(global_config.monitor.monitor_type)(
             project=config.trainer.project_name,
             name=config.trainer.experiment_name,
             role=global_config.trainer.name,
             config=global_config,
         )
         self.reset_experiences_example_table()
+        self.logger = get_logger(__name__)
 
     def _validate_config(self):  # TODO
         algorithm = ALGORITHM_TYPE.get(self.algorithm_config.algorithm_type)
@@ -276,7 +278,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         if self.val_reward_fn is not None and self.config.trainer.get("val_before_train", True):
             val_metrics = self._validate()
             pprint(f"Initial validation metrics: {val_metrics}")
-            self.logger.log(data=val_metrics, step=self.global_steps)
+            self.monitor.log(data=val_metrics, step=self.global_steps)
             if self.config.trainer.get("val_only", False):
                 return
 
@@ -286,6 +288,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         self.total_training_steps = self.config.trainer.total_training_steps or sys.maxsize
 
     def train_step(self) -> bool:  # noqa C901
+        self.logger.info(f"Training at step {self.global_steps + 1} started.")
         metrics = {}
         try:
             batch, sample_metrics, exp_samples = self.sample_strategy.sample(self.global_steps + 1)
@@ -294,6 +297,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             print("No more data to train. Stop training.")
             return False
         self.global_steps += 1
+        self.logger.info(f"Sampling at step {self.global_steps} done.")
         timing_raw = {}
         algorithm_config = self.algorithm_manager.get_current_algorithm_config(self.global_steps)
         algorithm = ALGORITHM_TYPE.get(algorithm_config.algorithm_type)
@@ -356,8 +360,10 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                 self.config.trainer.save_freq > 0
                 and self.global_steps % self.config.trainer.save_freq == 0
             ):
+                self.logger.info(f"Saving at step {self.global_steps}.")
                 with _timer("save_checkpoint", timing_raw):
                     self._save_checkpoint()
+                self.logger.info(f"Saved at step {self.global_steps}.")
 
         # collect metrics
         if self.algorithm.use_advantage:  # TODO
@@ -372,7 +378,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             self._log_experiences(exp_samples)
 
         # TODO: make a canonical logger that supports various backend
-        self.logger.log(data=metrics, step=self.global_steps)
+        self.monitor.log(data=metrics, step=self.global_steps)
 
         train_status = self.global_steps < self.total_training_steps
         if not train_status or self.algorithm_manager.need_save(self.global_steps):
@@ -380,8 +386,11 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                 self.config.trainer.save_freq == 0
                 or self.global_steps % self.config.trainer.save_freq != 0
             ):
+                self.logger.info(f"Saving at step {self.global_steps}.")
                 with _timer("save_checkpoint", timing_raw):
                     self._save_checkpoint()
+                self.logger.info(f"Saved at step {self.global_steps}.")
+        self.logger.info(f"Training at step {self.global_steps} finished.")
         return train_status
 
     def _log_single_experience(
@@ -412,7 +421,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
     def _log_experiences(self, samples: List[Dict]) -> None:
         self.sample_exps_to_log.extend(samples)
         if self.global_steps % self.config.trainer.sync_freq == 0:
-            self.logger.log_table(
+            self.monitor.log_table(
                 "rollout_examples", pd.DataFrame(self.sample_exps_to_log), self.global_steps
             )
             self.reset_experiences_example_table()

@@ -265,15 +265,6 @@ def set_actor_lr_warmup_steps_ratio(**kwargs):
     )
 
 
-@CONFIG_GENERATORS.register_config(default_value="low_var_kl")
-def set_actor_kl_loss_type(**kwargs):
-    st.selectbox(
-        "KL Loss Type",
-        ["kl", "abs", "mse", "low_var_kl"],
-        **kwargs,
-    )
-
-
 @CONFIG_GENERATORS.register_config(default_value=["model", "hf_model", "optimizer", "extra"])
 def set_actor_checkpoint(**kwargs):
     st.multiselect(

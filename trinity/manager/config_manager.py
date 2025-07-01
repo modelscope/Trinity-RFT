@@ -64,7 +64,7 @@ class ConfigManager:
 
         def maintain_list_state(prefix, key_list):
             last_idx, del_num = 0, 0
-            for idx in range(st.session_state[f"_{prefix}_num"]):
+            for idx in range(st.session_state[f"_{prefix}s_num"]):
                 if st.session_state.get(f"{prefix}_{idx}_del_flag", False):
                     del_num += 1
                     continue
@@ -73,7 +73,7 @@ class ConfigManager:
                     last_full_key = f"{prefix}_{last_idx}_{key}"
                     st.session_state[last_full_key] = st.session_state[full_key]
                 last_idx += 1
-            st.session_state[f"_{prefix}_num"] -= del_num
+            st.session_state[f"_{prefix}s_num"] -= del_num
 
         self.eval_dataset_keys = [
             "name",
@@ -86,7 +86,7 @@ class ConfigManager:
             "logprobs",
             "n",
         ]
-        maintain_list_state("eval_tasksets", self.eval_dataset_keys)
+        maintain_list_state("eval_taskset", self.eval_dataset_keys)
 
         self.inference_model_keys = [
             "model_path",
@@ -103,7 +103,7 @@ class ConfigManager:
             "enable_thinking",
             "enable_openai_api",
         ]
-        maintain_list_state("auxiliary_models", self.inference_model_keys)
+        maintain_list_state("auxiliary_model", self.inference_model_keys)
 
     def get_configs(self, *config_names: str, columns_spec: List[int] = None):
         CONFIG_GENERATORS.get_configs(*config_names, columns_spec=columns_spec)
@@ -356,7 +356,6 @@ class ConfigManager:
                     ],
                     "use_dynamic_bsz": use_dynamic_bsz,
                     "ppo_max_token_len_per_gpu": ppo_max_token_len_per_gpu,
-                    "kl_loss_type": st.session_state["actor_kl_loss_type"],
                     "ppo_epochs": st.session_state["ppo_epochs"],
                     "shuffle": False,
                     "ulysses_sequence_parallel_size": st.session_state[
