@@ -73,7 +73,7 @@ class Trainer:
 
     def flush_log(self, step: int) -> None:
         """Flush the log of the current step."""
-        self.engine.logger.log({}, step=step, commit=True)
+        self.engine.monitor.log({}, step=step, commit=True)
 
     def shutdown(self) -> None:
         # if checkpoint not saved, save the last checkpoint
@@ -81,7 +81,7 @@ class Trainer:
         path = os.path.join(self.config.checkpoint_job_dir, f"global_step_{step_num}")
         if not os.path.isdir(path) or len(os.listdir(path)) == 0:
             self.engine.save_checkpoint()
-        self.engine.logger.close()
+        self.engine.monitor.close()
 
 
 class TrainEngineWrapper(ABC):

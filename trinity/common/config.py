@@ -305,6 +305,7 @@ class ExplorerConfig:
     runner_num: int = 1
     max_timeout: int = 900  # wait each task for 15 minutes
     max_retry_times: int = 2  # retry each task for 2 times if it fails or timeout
+    env_vars: dict = field(default_factory=dict)
 
     # for inference models
     # for rollout model

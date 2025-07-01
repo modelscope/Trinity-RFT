@@ -74,6 +74,7 @@ class RunnerPool:
                 .options(
                     namespace=self._namespace,
                     scheduling_strategy="SPREAD",
+                    runtime_env={"env_vars": self.config.explorer.env_vars},
                 )
                 .remote(
                     self.config,
