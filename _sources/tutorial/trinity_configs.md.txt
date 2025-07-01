@@ -310,6 +310,9 @@ Controls the rollout models and workflow execution.
 explorer:
   name: explorer
   runner_num: 32
+  max_timeout: 900
+  max_retry_times: 2
+  env_vars: {}
   rollout_model:
     engine_type: vllm_async
     engine_num: 1
@@ -321,6 +324,9 @@ explorer:
 
 - `name`: Name of the explorer. This name will be used as the Ray actor's name, so it must be unique.
 - `runner_num`: Number of parallel workflow runners.
+- `max_timeout`: Maximum time (in seconds) for a workflow to complete.
+- `max_retry_times`: Maximum number of retries for a workflow.
+- `env_vars`: Environment variables to be set for every workflow runners.
 - `rollout_model.engine_type`: Type of inference engine. Options: `vllm_async` (recommended), `vllm`.
 - `rollout_model.engine_num`: Number of inference engines.
 - `rollout_model.tensor_parallel_size`: Degree of tensor parallelism.
