@@ -81,6 +81,7 @@ class TensorboardMonitor(Monitor):
         """Log metrics."""
         for key in data:
             self.logger.add_scalar(key, data[key], step)
+        self.console_logger.info(f"Step {step}: {data}")
 
     def close(self) -> None:
         self.logger.close()
