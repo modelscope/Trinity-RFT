@@ -166,7 +166,7 @@
 
         <span class="k">def</span><span class="w"> </span><span class="nf">maintain_list_state</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">key_list</span><span class="p">):</span>
             <span class="n">last_idx</span><span class="p">,</span> <span class="n">del_num</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
-            <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;_</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_num&quot;</span><span class="p">]):</span>
+            <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;_</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">s_num&quot;</span><span class="p">]):</span>
                 <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">_del_flag&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
                     <span class="n">del_num</span> <span class="o">+=</span> <span class="mi">1</span>
                     <span class="k">continue</span>
@@ -175,7 +175,7 @@
                     <span class="n">last_full_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">last_idx</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span>
                     <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="n">last_full_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="n">full_key</span><span class="p">]</span>
                 <span class="n">last_idx</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;_</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_num&quot;</span><span class="p">]</span> <span class="o">-=</span> <span class="n">del_num</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;_</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">s_num&quot;</span><span class="p">]</span> <span class="o">-=</span> <span class="n">del_num</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">eval_dataset_keys</span> <span class="o">=</span> <span class="p">[</span>
             <span class="s2">&quot;name&quot;</span><span class="p">,</span>
@@ -188,7 +188,7 @@
             <span class="s2">&quot;logprobs&quot;</span><span class="p">,</span>
             <span class="s2">&quot;n&quot;</span><span class="p">,</span>
         <span class="p">]</span>
-        <span class="n">maintain_list_state</span><span class="p">(</span><span class="s2">&quot;eval_tasksets&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_dataset_keys</span><span class="p">)</span>
+        <span class="n">maintain_list_state</span><span class="p">(</span><span class="s2">&quot;eval_taskset&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_dataset_keys</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">inference_model_keys</span> <span class="o">=</span> <span class="p">[</span>
             <span class="s2">&quot;model_path&quot;</span><span class="p">,</span>
@@ -205,7 +205,7 @@
             <span class="s2">&quot;enable_thinking&quot;</span><span class="p">,</span>
             <span class="s2">&quot;enable_openai_api&quot;</span><span class="p">,</span>
         <span class="p">]</span>
-        <span class="n">maintain_list_state</span><span class="p">(</span><span class="s2">&quot;auxiliary_models&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inference_model_keys</span><span class="p">)</span></div>
+        <span class="n">maintain_list_state</span><span class="p">(</span><span class="s2">&quot;auxiliary_model&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inference_model_keys</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ConfigManager.get_configs">
@@ -468,7 +468,6 @@
                     <span class="p">],</span>
                     <span class="s2">&quot;use_dynamic_bsz&quot;</span><span class="p">:</span> <span class="n">use_dynamic_bsz</span><span class="p">,</span>
                     <span class="s2">&quot;ppo_max_token_len_per_gpu&quot;</span><span class="p">:</span> <span class="n">ppo_max_token_len_per_gpu</span><span class="p">,</span>
-                    <span class="s2">&quot;kl_loss_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_kl_loss_type&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;ppo_epochs&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;ppo_epochs&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;shuffle&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
                     <span class="s2">&quot;ulysses_sequence_parallel_size&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span>
