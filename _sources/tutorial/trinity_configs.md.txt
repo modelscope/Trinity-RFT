@@ -248,7 +248,9 @@ The configuration for each task dataset is defined as follows:
 
 In [`explore` mode](#global-configuration), since there is no trainer, users can configure an experience buffer via `buffer.explorer_output`, rather than using `buffer.trainer_input`, which will be introduced in the next section.
 
-> For `both` and `train` modes, users should use `buffer.trainer_input` instead of `buffer.explorer_output`.
+```{note}
+For `both` and `train` modes, users should use `buffer.trainer_input.experience_buffer` instead of `buffer.explorer_output`.
+```
 
 ```yaml
 buffer:
@@ -258,6 +260,7 @@ buffer:
     storage_type: queue
     path: sqlite:///countdown_buffer.db
     wrap_in_ray: True
+    max_read_timeout: 1800
 ```
 
 - `name`: The name of the experience buffer. This name will be used as the Ray actor's name, so it must be unique.
@@ -270,6 +273,7 @@ buffer:
   - For `file` storage type, the path points to the directory containing the dataset files.
   - For `sql` storage type, the path points to the SQLite database file.
 - `wrap_in_ray`: Whether to wrap the experience buffer in a Ray actor. Only take effect when `storage_type` is `sql` or `file`. The `queue` storage always uses a Ray actor.
+- `max_read_timeout`: The maximum waiting time (in seconds) to read new experience data. If exceeded, an incomplete batch will be returned directly. Only take effect when `storage_type` is `queue`. Default is 1800 seconds (30 minutes).
 
 
 ### Trainer Input

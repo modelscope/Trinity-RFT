@@ -366,9 +366,10 @@
 <section id="explorer-output">
 <h3>Explorer Output<a class="headerlink" href="#explorer-output" title="Link to this heading"></a></h3>
 <p>In <a class="reference internal" href="#global-configuration"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">explore</span></code> mode</span></a>, since there is no trainer, users can configure an experience buffer via <code class="docutils literal notranslate"><span class="pre">buffer.explorer_output</span></code>, rather than using <code class="docutils literal notranslate"><span class="pre">buffer.trainer_input</span></code>, which will be introduced in the next section.</p>
-<blockquote>
-<div><p>For <code class="docutils literal notranslate"><span class="pre">both</span></code> and <code class="docutils literal notranslate"><span class="pre">train</span></code> modes, users should use <code class="docutils literal notranslate"><span class="pre">buffer.trainer_input</span></code> instead of <code class="docutils literal notranslate"><span class="pre">buffer.explorer_output</span></code>.</p>
-</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For <code class="docutils literal notranslate"><span class="pre">both</span></code> and <code class="docutils literal notranslate"><span class="pre">train</span></code> modes, users should use <code class="docutils literal notranslate"><span class="pre">buffer.trainer_input.experience_buffer</span></code> instead of <code class="docutils literal notranslate"><span class="pre">buffer.explorer_output</span></code>.</p>
+</div>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">buffer</span><span class="p">:</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">explorer_output</span><span class="p p-Indicator">:</span>
@@ -376,6 +377,7 @@
 <span class="w">    </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">queue</span>
 <span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sqlite:///countdown_buffer.db</span>
 <span class="w">    </span><span class="nt">wrap_in_ray</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">    </span><span class="nt">max_read_timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1800</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -395,6 +397,7 @@
 </ul>
 </li>
 <li><p><code class="docutils literal notranslate"><span class="pre">wrap_in_ray</span></code>: Whether to wrap the experience buffer in a Ray actor. Only take effect when <code class="docutils literal notranslate"><span class="pre">storage_type</span></code> is <code class="docutils literal notranslate"><span class="pre">sql</span></code> or <code class="docutils literal notranslate"><span class="pre">file</span></code>. The <code class="docutils literal notranslate"><span class="pre">queue</span></code> storage always uses a Ray actor.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_read_timeout</span></code>: The maximum waiting time (in seconds) to read new experience data. If exceeded, an incomplete batch will be returned directly. Only take effect when <code class="docutils literal notranslate"><span class="pre">storage_type</span></code> is <code class="docutils literal notranslate"><span class="pre">queue</span></code>. Default is 1800 seconds (30 minutes).</p></li>
 </ul>
 </section>
 <section id="trainer-input">
