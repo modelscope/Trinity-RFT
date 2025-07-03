@@ -283,7 +283,7 @@ For more detailed examples about how to use Trinity-RFT, please refer to the fol
 + [Advanced data processing / human-in-the-loop](./docs/sphinx_doc/source/tutorial/example_data_functionalities.md)
 
 
-
+For some frequently asked questions, check [FAQ](./docs/sphinx_doc/source/tutorial/faq.md) for answers.
 
 
 ## Advanced usage and full configurations
