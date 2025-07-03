@@ -3,13 +3,13 @@
 ## Part 1: Configurations
 **Q:** Why do most examples have two configuration YAML files, e.g., `gsm8k.yaml` and `train_gsm8k.yaml` in the `examples/grpo_gsm8k` directory?
 
-**A:** Trinity-RFT uses [veRL](https://github.com/volcengine/verl) as the training backend, and the auxiliary YAML file starting with `train_` is used for configuring veRL, referred to [veRL documentation](https://github.com/volcengine/verl/blob/v0.4.0/docs/examples/config.rst).
+**A:** Trinity-RFT uses [veRL](https://github.com/volcengine/verl) as the training backend, and the auxiliary YAML file starting with `train_` is used for configuring veRL, referred to [veRL documentation](https://verl.readthedocs.io/en/latest/examples/config.html).
 If you specify the path to `train_gsm8k.yaml` in `trainer.trainer_config_path`, Trinity-RFT will automatically pass the parameters to veRL.
 
 We provide an alternative way to configure the veRL trainer. You may also directly specify the parameters in the `trainer.trainer_config` dictionary. This approach is mutually exclusive with using `trainer.trainer_config_path`.
 
 Note that some parameters are not listed in the auxiliary configuration file (e.g., `train_gsm8k.yaml`), as they will be overridden by the parameters in the trinity configuration file (e.g., `gsm8k.yaml`). Please refer to `./trinity_configs.md` for more details.
-Future versions will gradually reduce parameters in `trainer.trainer_config` and `trainer.trainer_config_path` until it's fully deprecated.
+For users' convenience, future versions will gradually reduce parameters in `trainer.trainer_config` and `trainer.trainer_config_path` until it's fully deprecated.
 
 ---
 
@@ -18,14 +18,14 @@ Future versions will gradually reduce parameters in `trainer.trainer_config` and
 **A:** The following parameters are closely related:
 
 - `buffer.batch_size`: The number of tasks in a batch, effective for both the explorer and the trainer.
-- `actor_rollout_ref.actor.ppo_mini_batch_size`: In the configuration, this value represents the number of tasks in a mini-batch, overridden by `buffer.batch_size`; but in the `update_policy` function, its value becomes the number of experiences in a mini-batch per GPU, i.e., `buffer.batch_size * algorithm.repeat_times / ngpus_trainer`.
+- `actor_rollout_ref.actor.ppo_mini_batch_size`: In the configuration, this value represents the number of tasks in a mini-batch, overridden by `buffer.batch_size`; but in the `update_policy` function, its value becomes the number of experiences in a mini-batch per GPU, i.e., `buffer.batch_size * algorithm.repeat_times (/ ngpus_trainer)`. The expression of dividing `ngpus_trainer` is caused by implict data allocation to GPUs, but this do not affects the result after gradient accumulation.
 - `actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu`: The number of experiences in a micro-batch per GPU.
 
 A minimal example showing their usage is as follows:
 
 ```python
-def update_policy(batch):
-    dataloader = batch.split(ppo_mini_batch_size)
+def update_policy(batch_exps):
+    dataloader = batch_epxs.split(ppo_mini_batch_size) # here `ppo_mini_batch_size` is in terms of experiences
     for _ in range(ppo_epochs):
         for batch_idx, data in enumerate(dataloader):
             # Split data
