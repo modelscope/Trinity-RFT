@@ -15,9 +15,9 @@ $$
 \left[
     \frac{1}{T'_b} \sum_{t=1}^{T'_b}
     \log \pi_\theta(o'_{b,t} \mid q'_b, o'_{b,<t})
-\right]}_{\text{Auxiliary Loss on Expert Data}}.
+\right]}_{\text{Auxiliary objective on expert data}}.
 $$
-The first term corresponds to the standard GRPO objective, which aims to maximize the expected reward. The last term is an auxiliary loss defined on expert data, encouraging the policy to imitate expert behavior. $\mu$ is a weighting factor that controls the relative importance of the two terms.
+The first term corresponds to the standard GRPO objective, which aims to maximize the expected reward. The last term is an auxiliary objective defined on expert data, encouraging the policy to imitate expert behavior. $\mu$ is a weighting factor that controls the relative importance of the two terms.
 
 
 ## Step 0: Prepare the Expert Data

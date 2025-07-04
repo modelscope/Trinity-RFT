@@ -409,7 +409,7 @@ data_processor:
 
 For advanced users working with the `verl` trainer backend. This includes fine-grained settings for actor/critic models, optimizer parameters, and training loops.
 
-> For full parameter meanings, refer to the [veRL documentation](https://github.com/volcengine/verl/blob/v0.3.0.post1/docs/examples/config.rst).
+> For full parameter meanings, refer to the [veRL documentation](https://verl.readthedocs.io/en/latest/examples/config.html).
 
 
 ```yaml
