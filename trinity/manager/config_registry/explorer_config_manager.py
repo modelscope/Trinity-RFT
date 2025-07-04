@@ -9,9 +9,9 @@ def explorer_visible() -> bool:
     return st.session_state["mode"] == "both"
 
 
-@CONFIG_GENERATORS.register_config(default_value=32, visible=explorer_visible)
-def set_runner_num(**kwargs):
-    st.number_input("Runner Num", min_value=1, **kwargs)
+@CONFIG_GENERATORS.register_config(default_value=8, visible=explorer_visible)
+def set_runner_per_model(**kwargs):
+    st.number_input("Runner per Model", min_value=1, **kwargs)
 
 
 @CONFIG_GENERATORS.register_config(default_value=900, visible=explorer_visible)
@@ -30,7 +30,7 @@ def set_eval_interval(**kwargs):
 
 
 @CONFIG_GENERATORS.register_config(default_value=True, visible=explorer_visible)
-def set_eval_on_latest_checkpoint(**kwargs):
+def set_bench_on_latest_checkpoint(**kwargs):
     st.checkbox("Eval on Latest Checkpoint", **kwargs)
 
 

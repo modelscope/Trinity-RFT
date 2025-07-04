@@ -57,7 +57,7 @@ class QueueActor:
         self.ref_count -= 1
         if self.ref_count <= 0:
             await self.queue.put(self.FINISH_MESSAGE)
-            self.writer.release()
+            await self.writer.release()
         return self.ref_count
 
     def length(self) -> int:

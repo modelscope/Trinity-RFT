@@ -199,9 +199,11 @@ class ConfigManager:
     def _expert_explorer_part(self):
         self.get_configs("sync_method", "sync_interval", "sync_timeout")
 
-        self.get_configs("runner_num", "max_timeout", "explorer_max_retry_times", "eval_interval")
+        self.get_configs(
+            "runner_per_model", "max_timeout", "explorer_max_retry_times", "eval_interval"
+        )
 
-        self.get_configs("eval_on_latest_checkpoint")
+        self.get_configs("bench_on_latest_checkpoint")
 
         with st.expander("Rollout Model Config", expanded=True):
             self.get_configs("engine_type", "engine_num", "tensor_parallel_size")
@@ -571,7 +573,7 @@ class ConfigManager:
 
     def _gen_explorer_config(self):
         explorer_config = {
-            "runner_num": st.session_state["runner_num"],
+            "runner_per_model": st.session_state["runner_per_model"],
             "max_timeout": st.session_state["max_timeout"],
             "max_retry_times": st.session_state["explorer_max_retry_times"],
             "rollout_model": {
@@ -584,7 +586,7 @@ class ConfigManager:
             },
             "auxiliary_models": [],
             "eval_interval": st.session_state["eval_interval"],
-            "eval_on_latest_checkpoint": st.session_state["eval_on_latest_checkpoint"],
+            "bench_on_latest_checkpoint": st.session_state["bench_on_latest_checkpoint"],
         }
         for i in range(st.session_state["_auxiliary_models_num"]):
             auxiliary_model_config = {

@@ -89,30 +89,32 @@ class TestTrainerCountdown(BaseTrainerCase):
             trainer_type=self.config.trainer.trainer_type,
             step_num=4,
         )
-        checkpoint_step_8, _ = get_checkpoint_dir_with_step_num(
+        # check save lastest checkpoint
+        checkpoint_step_8, step_num = get_checkpoint_dir_with_step_num(
             checkpoint_root_path=self.config.checkpoint_job_dir,
             trainer_type=self.config.trainer.trainer_type,
-            step_num=8,
         )
-        self.assertTrue(os.path.exists(checkpoint_step_4))
-        self.assertTrue(os.path.exists(checkpoint_step_8))
+        self.assertTrue(len(os.listdir(os.path.join(checkpoint_step_4, "actor"))) > 0)
+        self.assertTrue(len(os.listdir(os.path.join(checkpoint_step_8, "actor"))) > 0)
+        self.assertEqual(step_num, 8)
         # TODO: Reinit will fail when using v1 engine, find a way to fix it
         ray.init(ignore_reinit_error=True)
         # test bench mode
         self.config.mode = "bench"
         self.config.synchronizer.sync_method = SyncMethod.CHECKPOINT
-        self.config.explorer.eval_on_latest_checkpoint = False
+        self.config.explorer.bench_on_latest_checkpoint = False
         self.config.check_and_update()
         bench(self.config)
         parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
-        countdown_metrics = parser.metric_list("eval/countdown")
-        copy_countdown_metrics = parser.metric_list("eval/copy_countdown")
-        self.assertTrue(len(countdown_metrics) > 0)
-        self.assertTrue(len(copy_countdown_metrics) > 0)
-        countdown_metric_steps = parser.metric_steps(countdown_metrics[0])
-        countdown_copy_metric_steps = parser.metric_steps(copy_countdown_metrics[0])
-        self.assertEqual([0, 4, 8], countdown_metric_steps)
-        self.assertEqual([0, 4, 8], countdown_copy_metric_steps)
+        for prefix in ["eval", "bench"]:
+            countdown_metrics = parser.metric_list(f"{prefix}/countdown")
+            copy_countdown_metrics = parser.metric_list(f"{prefix}/copy_countdown")
+            self.assertTrue(len(countdown_metrics) > 0)
+            self.assertTrue(len(copy_countdown_metrics) > 0)
+            countdown_metric_steps = parser.metric_steps(countdown_metrics[0])
+            countdown_copy_metric_steps = parser.metric_steps(copy_countdown_metrics[0])
+            self.assertEqual([0, 4, 8], countdown_metric_steps)
+            self.assertEqual([0, 4, 8], countdown_copy_metric_steps)
 
     def tearDown(self):
         # remove dir only when the test passed
@@ -328,7 +330,6 @@ class TestFullyAsyncMode(unittest.TestCase):
         config.cluster.node_num = 1
         explorer1_config.explorer.rollout_model.engine_num = 1
         explorer1_config.explorer.rollout_model.tensor_parallel_size = 1
-        explorer1_config.explorer.runner_num = 4
         explorer1_config.buffer.explorer_output = StorageConfig(
             name="exp_buffer",
             storage_type=StorageType.QUEUE,
@@ -352,7 +353,7 @@ class TestFullyAsyncMode(unittest.TestCase):
         explorer_process_1 = multiprocessing.Process(target=run_explorer, args=(explorer1_config,))
         explorer_process_1.start()
 
-        time.sleep(20)
+        time.sleep(5)
         explorer2_config.explorer.name = "explorer2"
         explorer2_config.check_and_update()
         explorer_process_2 = multiprocessing.Process(target=run_explorer, args=(explorer2_config,))

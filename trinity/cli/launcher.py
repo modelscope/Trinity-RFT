@@ -25,6 +25,7 @@ logger = get_logger(__name__)
 
 def bench(config: Config) -> None:
     """Evaluate model."""
+    config.explorer.name = "benchmark"
     explorer = (
         ray.remote(Explorer)
         .options(

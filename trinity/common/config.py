@@ -301,12 +301,12 @@ class ExplorerConfig:
     name: str = EXPLORER_NAME
     # for workflow runner
     # number of workflow runners.
-    # For sync engine (vllm), it should be equal to `engine_num`.
-    # For async engine (vllm_async), it can be larger than `engine_num`, e.g. 16 * `engine_num`
-    runner_num: int = 1
+    # For sync engine (vllm), it should be `1`.
+    # For async engine (vllm_async), it could be a large number.
+    runner_per_model: int = 8  # number of runners per each rollout model
     max_timeout: int = 900  # wait each task for 15 minutes
     max_retry_times: int = 2  # retry each task for 2 times if it fails or timeout
-    env_vars: dict = field(default_factory=dict)
+    runner_num: Optional[int] = None  # deprecated
 
     # for inference models
     # for rollout model
@@ -316,7 +316,10 @@ class ExplorerConfig:
 
     # for evaluation
     eval_interval: int = 100
-    eval_on_latest_checkpoint: bool = False
+    eval_on_startup: bool = True  # evalulate at step 0
+
+    # for benchmark
+    bench_on_latest_checkpoint: bool = False  # only benchmark the latest checkpoint
 
 
 @dataclass
