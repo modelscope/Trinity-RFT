@@ -218,10 +218,11 @@ class TestTrainerSFTWarmupGSM8K(BaseTrainerCase):
         self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("gsm8k")
         self.config.synchronizer.sync_interval = 1
         self.config.trainer.save_interval = 8
-        self.config.buffer.trainer_input.sft_warmup_steps = 2
+        # sft data is only enough for 2 steps
         self.config.buffer.trainer_input.sft_warmup_dataset = get_unittest_dataset_config(
             "sft_for_gsm8k"
         )
+        self.config.buffer.trainer_input.sft_warmup_steps = 3
         self.config.check_and_update()
         self.config.trainer.trainer_config.trainer.max_actor_ckpt_to_keep = 2
         self.config.trainer.trainer_config.actor_rollout_ref.actor.optim.lr = 1e-5
@@ -229,16 +230,16 @@ class TestTrainerSFTWarmupGSM8K(BaseTrainerCase):
         parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
         rollout_metrics = parser.metric_list("rollout")
         self.assertTrue(len(rollout_metrics) > 0)
-        self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 6)
+        self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 7)
         actor_metrics = parser.metric_list("actor")
         self.assertTrue(len(actor_metrics) > 0)
         sft_metrics = parser.metric_list("actor/sft")
-        self.assertEqual(parser.metric_max_step(sft_metrics[0]), 2)  # SFT
-        self.assertEqual(parser.metric_max_step(actor_metrics[-1]), 6)  # RFT
+        self.assertEqual(parser.metric_max_step(sft_metrics[0]), 3)  # SFT
+        self.assertEqual(parser.metric_max_step(actor_metrics[-1]), 7)  # RFT
         response_metrics = parser.metric_list("response_length")
         self.assertTrue(len(response_metrics) > 0)
-        self.assertEqual(parser.metric_min_step(response_metrics[0]), 3)
-        self.assertEqual(parser.metric_max_step(response_metrics[0]), 6)
+        self.assertEqual(parser.metric_min_step(response_metrics[0]), 4)
+        self.assertEqual(parser.metric_max_step(response_metrics[0]), 7)
         # test save checkpoint when sft finish
         self.assertEqual(
             get_checkpoint_dir_with_step_num(
@@ -251,7 +252,7 @@ class TestTrainerSFTWarmupGSM8K(BaseTrainerCase):
             checkpoint_root_path=self.config.checkpoint_job_dir,
             trainer_type="verl",
         )
-        self.assertEqual(step_num, 6)
+        self.assertEqual(step_num, 7)
         self.assertTrue(len(os.listdir(os.path.join(checkpoint_dir, "actor"))) > 0)
 
     def tearDown(self):

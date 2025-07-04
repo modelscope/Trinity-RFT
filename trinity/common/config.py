@@ -104,6 +104,9 @@ class StorageConfig:
     # ! DO NOT SET, automatically set from buffer.total_epochs
     total_epochs: int = 1  # automatically set
 
+    # ! DO NOT SET, automatically set from buffer.total_steps
+    total_steps: Optional[int] = None  # automatically set
+
     # ! DO NOT SET,  automatically set corresponding to train/eval
     task_type: TaskType = TaskType.EXPLORE
 
@@ -275,6 +278,7 @@ class BufferConfig:
 
     batch_size: int = 1
     total_epochs: int = 1
+    total_steps: Optional[int] = None
 
     # for explorer
     explorer_input: ExplorerInput = field(default_factory=ExplorerInput)
@@ -438,6 +442,7 @@ class Config:
         )
         self.buffer.explorer_input.taskset.task_type = TaskType.EXPLORE
         self.buffer.explorer_input.taskset.total_epochs = self.buffer.total_epochs
+        self.buffer.explorer_input.taskset.total_steps = self.buffer.total_steps
         if self.buffer.explorer_input.taskset.default_workflow_type is None:
             self.buffer.explorer_input.taskset.default_workflow_type = (
                 self.buffer.explorer_input.default_workflow_type
@@ -520,6 +525,9 @@ class Config:
             )
         if self.buffer.trainer_input.sft_warmup_dataset is not None:
             self.buffer.trainer_input.sft_warmup_dataset.algorithm_type = "sft"  # TODO
+            self.buffer.trainer_input.sft_warmup_dataset.total_steps = (
+                self.buffer.trainer_input.sft_warmup_steps
+            )
             if self.buffer.trainer_input.sft_warmup_dataset.ray_namespace is None:
                 self.buffer.trainer_input.sft_warmup_dataset.ray_namespace = self.ray_namespace
 

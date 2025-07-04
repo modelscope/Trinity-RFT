@@ -57,7 +57,7 @@ class TestFileBuffer(unittest.TestCase):
         self.assertEqual(loaded_data, data)
         self.assertRaises(StopIteration, reader.read)
 
-    def test_file_reader(self):
+    def test_file_reader(self):  # noqa: C901
         """Test file reader."""
         reader = get_buffer_reader(self.config.buffer.explorer_input.taskset, self.config.buffer)
 
@@ -81,7 +81,21 @@ class TestFileBuffer(unittest.TestCase):
                 break
         self.assertEqual(len(tasks), 16 * 2 - 4)
 
-        # test offset > dataset_len
+        # test total steps and offset
+        self.config.buffer.explorer_input.taskset.total_steps = 5
+        self.config.buffer.explorer_input.taskset.index = 8
+        reader = get_buffer_reader(self.config.buffer.explorer_input.taskset, self.config.buffer)
+        tasks = []
+        while True:
+            try:
+                tasks.extend(reader.read())
+                print(f"read from buffer, current len {len(tasks)}.")
+            except StopIteration:
+                break
+        self.assertEqual(len(tasks), 20 - 8)
+
+        # test offset > dataset_len with total_epoch
+        self.config.buffer.explorer_input.taskset.total_steps = None
         self.config.buffer.explorer_input.taskset.total_epochs = 3
         self.config.buffer.explorer_input.taskset.index = 20
         reader = get_buffer_reader(self.config.buffer.explorer_input.taskset, self.config.buffer)
@@ -92,6 +106,18 @@ class TestFileBuffer(unittest.TestCase):
             except StopIteration:
                 break
         self.assertEqual(len(tasks), 16 * 3 - 20)
+
+        # test offset > dataset_len with total_steps
+        self.config.buffer.explorer_input.taskset.total_steps = 10
+        self.config.buffer.explorer_input.taskset.index = 24
+        reader = get_buffer_reader(self.config.buffer.explorer_input.taskset, self.config.buffer)
+        tasks = []
+        while True:
+            try:
+                tasks.extend(reader.read())
+            except StopIteration:
+                break
+        self.assertEqual(len(tasks), 40 - 24)
 
     def test_file_writer(self):
         writer = get_buffer_writer(

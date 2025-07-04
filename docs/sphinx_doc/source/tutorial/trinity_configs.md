@@ -182,6 +182,7 @@ buffer:
 
 - `batch_size`: Number of tasks used per training step. *Please do not multiply this value by the `algorithm.repeat_times` manually*.
 - `total_epochs`: Total number of training epochs.
+- `total_steps`: Optional. The total number of training steps. If specified, `total_epochs` will be ignored.
 
 ### Explorer Input
 
