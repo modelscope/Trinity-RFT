@@ -65,7 +65,7 @@ File ".../flash_attn/flash_attn_interface.py", line 15, in ‹module>
 ImportError: ...
 ```
 
-**A:** The `flash-attn` module is not properly installed. Try to fix it by running `pip install flash-attn`.
+**A:** The `flash-attn` module is not properly installed. Try to fix it by running `pip install flash-attn` or `pip install flash-attn -v --no-build-isolation`.
 
 ---
 
@@ -83,7 +83,7 @@ UsageError: api_key not configured (no-tty). call wandb.login(key=[your_api_key]
 ValueError: Failed to look up actor with name 'explorer' ...
 ```
 
-**A:** Try to restart Ray before running the experiment:
+**A:** Make sure Ray is started before running the experiment. If Ray is already running, you can restart it with the following commands:
 
 ```bash
 ray stop
