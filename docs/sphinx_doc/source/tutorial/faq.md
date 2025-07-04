@@ -154,7 +154,7 @@ import os
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from trinity.common.models.utils import load_state_dict_from_verl_checkpoint
 
-# Assume we need the checkpoint at step 780; 
+# Assume we need the checkpoint at step 780;
 # model_path, checkpoint_root_dir, project, and name are already defined
 model = AutoModelForCausalLM.from_pretrained(model_path)
 ckp_path = os.path.join(checkpoint_root_dir, project, name, "global_step_780", "actor")
