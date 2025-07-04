@@ -65,7 +65,7 @@ File ".../flash_attn/flash_attn_interface.py", line 15, in ‹module>
 ImportError: ...
 ```
 
-**A:** The `flash-attn` module is not properly installed. Try to fix it by running `MAX_JOBS=128 pip install flash-attn`.
+**A:** The `flash-attn` module is not properly installed. Try to fix it by running `pip install flash-attn`.
 
 ---
 
@@ -74,7 +74,7 @@ ImportError: ...
 UsageError: api_key not configured (no-tty). call wandb.login(key=[your_api_key]) ...
 ```
 
-**A:** Try to log in to WandB before running the experiment. One way to do this is run the command `export WANDB_API_KEY=[your_api_key]`.
+**A:** Try to log in to WandB before starting Ray and running the experiment. One way to do this is run the command `export WANDB_API_KEY=[your_api_key]`.
 
 ---
 
@@ -147,14 +147,16 @@ for exp in exp_list:
 
 **Q:** How to load the checkpoints outside of the Trinity-RFT framework?
 
-**A:** You need to specify `model.model_path` and `checkpoint_root_dir`. The following code snippet gives an example with transformers.
+**A:** You need to specify model path and checkpoint path. The following code snippet gives an example with transformers.
 
 ```python
+import os
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from trinity.common.models.utils import load_state_dict_from_verl_checkpoint
 
-model = AutoModelForCausalLM.from_pretrained(model.model_path)
-# Assume we need the checkpoint at step 780
-ckp_path = checkpoint_root_dir + "global_step_780/actor/"
+# Assume we need the checkpoint at step 780; 
+# model_path, checkpoint_root_dir, project, and name are already defined
+model = AutoModelForCausalLM.from_pretrained(model_path)
+ckp_path = os.path.join(checkpoint_root_dir, project, name, "global_step_780", "actor")
 model.load_state_dict(load_state_dict_from_verl_checkpoint(ckp_path))
 ```
