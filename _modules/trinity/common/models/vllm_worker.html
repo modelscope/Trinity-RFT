@@ -101,7 +101,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch.distributed</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.distributed</span><span class="w"> </span><span class="kn">import</span> <span class="n">init_process_group</span><span class="p">,</span> <span class="n">is_ipv6_address</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.distributed</span><span class="w"> </span><span class="kn">import</span> <span class="n">init_process_group</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
@@ -139,20 +139,16 @@
             <span class="sa">f</span><span class="s2">&quot;  &gt; rank_offset=</span><span class="si">{</span><span class="n">rank_offset</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
             <span class="sa">f</span><span class="s2">&quot;  &gt; world_size=</span><span class="si">{</span><span class="n">world_size</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
-        <span class="k">if</span> <span class="n">is_ipv6_address</span><span class="p">(</span><span class="n">master_address</span><span class="p">):</span>
-            <span class="c1"># using tcp://ipv6:port will lead to ValueError</span>
-            <span class="n">init_method</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;tcp://[</span><span class="si">{</span><span class="n">master_address</span><span class="si">}</span><span class="s2">]:</span><span class="si">{</span><span class="n">master_port</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">init_method</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;tcp://</span><span class="si">{</span><span class="n">master_address</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">master_port</span><span class="si">}</span><span class="s2">&quot;</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">_model_update_group</span> <span class="o">=</span> <span class="n">init_process_group</span><span class="p">(</span>
+            <span class="n">host</span><span class="o">=</span><span class="n">master_address</span><span class="p">,</span>
+            <span class="n">port</span><span class="o">=</span><span class="n">master_port</span><span class="p">,</span>
+            <span class="n">group_name</span><span class="o">=</span><span class="n">group_name</span><span class="p">,</span>
             <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">,</span>
-            <span class="n">init_method</span><span class="o">=</span><span class="n">init_method</span><span class="p">,</span>
             <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
             <span class="n">world_size</span><span class="o">=</span><span class="n">world_size</span><span class="p">,</span>
             <span class="n">rank</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_weight_update_rank</span><span class="p">,</span>
-            <span class="n">group_name</span><span class="o">=</span><span class="n">group_name</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">barrier</span><span class="p">(</span><span class="n">group</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_model_update_group</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;vLLM init_process_group finished.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_explorer_name</span> <span class="o">=</span> <span class="n">explorer_name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_namespace</span> <span class="o">=</span> <span class="n">namespace</span>
@@ -185,7 +181,7 @@
             <span class="n">weight</span> <span class="o">=</span> <span class="n">weight</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_config</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">model_runner</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">load_weights</span><span class="p">(</span><span class="n">weights</span><span class="o">=</span><span class="p">[(</span><span class="n">name</span><span class="p">,</span> <span class="n">weight</span><span class="p">)])</span>
             <span class="k">del</span> <span class="n">weight</span>
-        <span class="n">torch</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">barrier</span><span class="p">(</span><span class="n">group</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_model_update_group</span><span class="p">)</span>
         <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
         <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">empty_cache</span><span class="p">()</span></div>
 </div>

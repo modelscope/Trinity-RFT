@@ -104,7 +104,6 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">torch.distributed.distributed_c10d</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">Backend</span><span class="p">,</span>
     <span class="n">PrefixStore</span><span class="p">,</span>
-    <span class="n">Store</span><span class="p">,</span>
     <span class="n">_new_process_group_helper</span><span class="p">,</span>
     <span class="n">_world</span><span class="p">,</span>
     <span class="n">default_pg_timeout</span><span class="p">,</span>
@@ -126,27 +125,26 @@
 <div class="viewcode-block" id="init_process_group">
 <a class="viewcode-back" href="../../../build_api/trinity.utils.html#trinity.utils.distributed.init_process_group">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">init_process_group</span><span class="p">(</span>
-    <span class="n">backend</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Backend</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">init_method</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">host</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">port</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">group_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">backend</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Backend</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;nccl&quot;</span><span class="p">,</span>
     <span class="n">timeout</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">world_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
     <span class="n">rank</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
-    <span class="n">store</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Store</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">group_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">pg_options</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="k">assert</span> <span class="p">(</span><span class="n">store</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">init_method</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">),</span> <span class="s2">&quot;Cannot specify both init_method and store.&quot;</span>
+    <span class="k">assert</span> <span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;nccl&quot;</span><span class="p">,</span> <span class="s2">&quot;Only nccl backend is supported for now.&quot;</span>
 
-    <span class="k">if</span> <span class="n">store</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="n">world_size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;world_size must be positive if using store&quot;</span>
-        <span class="k">assert</span> <span class="n">rank</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;rank must be non-negative if using store&quot;</span>
-    <span class="k">elif</span> <span class="n">init_method</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">init_method</span> <span class="o">=</span> <span class="s2">&quot;env://&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">torch.distributed.distributed_c10d</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_nccl_available</span>
 
-    <span class="k">if</span> <span class="n">backend</span><span class="p">:</span>
-        <span class="n">backend</span> <span class="o">=</span> <span class="n">Backend</span><span class="p">(</span><span class="n">backend</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">backend</span> <span class="o">=</span> <span class="n">Backend</span><span class="p">(</span><span class="s2">&quot;undefined&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">is_nccl_available</span><span class="p">()</span>
+
+    <span class="n">init_method</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;tcp://[</span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s2">]:</span><span class="si">{</span><span class="n">port</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">is_ipv6_address</span><span class="p">(</span><span class="n">ip_str</span><span class="o">=</span><span class="n">host</span><span class="p">)</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;tcp://</span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">port</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">backend</span> <span class="o">=</span> <span class="n">Backend</span><span class="p">(</span><span class="n">backend</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">timeout</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">timeout</span> <span class="o">=</span> <span class="n">default_pg_timeout</span>
@@ -154,32 +152,26 @@
         <span class="n">timeout</span> <span class="o">=</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
 
     <span class="c1"># backward compatible API</span>
-    <span class="k">if</span> <span class="n">store</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">rendezvous_iterator</span> <span class="o">=</span> <span class="n">rendezvous</span><span class="p">(</span><span class="n">init_method</span><span class="p">,</span> <span class="n">rank</span><span class="p">,</span> <span class="n">world_size</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
-        <span class="n">store</span><span class="p">,</span> <span class="n">rank</span><span class="p">,</span> <span class="n">world_size</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">rendezvous_iterator</span><span class="p">)</span>
-        <span class="n">store</span><span class="o">.</span><span class="n">set_timeout</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
+    <span class="n">store</span><span class="p">,</span> <span class="n">rank</span><span class="p">,</span> <span class="n">world_size</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">rendezvous</span><span class="p">(</span><span class="n">init_method</span><span class="p">,</span> <span class="n">rank</span><span class="p">,</span> <span class="n">world_size</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">))</span>
+    <span class="n">store</span><span class="o">.</span><span class="n">set_timeout</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
 
-        <span class="c1"># Use a PrefixStore to avoid accidental overrides of keys used by</span>
-        <span class="c1"># different systems (e.g. RPC) in case the store is multi-tenant.</span>
-        <span class="n">store</span> <span class="o">=</span> <span class="n">PrefixStore</span><span class="p">(</span><span class="n">group_name</span><span class="p">,</span> <span class="n">store</span><span class="p">)</span>
+    <span class="c1"># Use a PrefixStore to avoid accidental overrides of keys used by</span>
+    <span class="c1"># different systems (e.g. RPC) in case the store is multi-tenant.</span>
+    <span class="n">prefix_store</span> <span class="o">=</span> <span class="n">PrefixStore</span><span class="p">(</span><span class="n">group_name</span><span class="p">,</span> <span class="n">store</span><span class="p">)</span>
 
-    <span class="c1"># NOTE: The pg_options parameter was renamed into backend_options in PyTorch 2.6.0</span>
-    <span class="c1"># https://github.com/pytorch/pytorch/commit/a0c7029a75628cd5fa8df83c0de0ea98ee7fd844</span>
-    <span class="c1"># We need to determine the appropriate parameter name based on PyTorch version</span>
     <span class="n">pg_options_param_name</span> <span class="o">=</span> <span class="s2">&quot;backend_options&quot;</span> <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="s2">&quot;2.6&quot;</span> <span class="k">else</span> <span class="s2">&quot;pg_options&quot;</span>
     <span class="n">pg</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_new_process_group_helper</span><span class="p">(</span>
-        <span class="n">world_size</span><span class="p">,</span>
-        <span class="n">rank</span><span class="p">,</span>
-        <span class="p">[],</span>
-        <span class="n">backend</span><span class="p">,</span>
-        <span class="n">store</span><span class="p">,</span>
+        <span class="n">group_size</span><span class="o">=</span><span class="n">world_size</span><span class="p">,</span>
+        <span class="n">group_rank</span><span class="o">=</span><span class="n">rank</span><span class="p">,</span>
+        <span class="n">global_ranks_in_group</span><span class="o">=</span><span class="p">[],</span>
+        <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">,</span>
+        <span class="n">store</span><span class="o">=</span><span class="n">prefix_store</span><span class="p">,</span>
         <span class="n">group_name</span><span class="o">=</span><span class="n">group_name</span><span class="p">,</span>
-        <span class="o">**</span><span class="p">{</span><span class="n">pg_options_param_name</span><span class="p">:</span> <span class="n">pg_options</span><span class="p">},</span>
         <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+        <span class="o">**</span><span class="p">{</span><span class="n">pg_options_param_name</span><span class="p">:</span> <span class="n">pg_options</span><span class="p">},</span>
     <span class="p">)</span>
 
     <span class="n">_world</span><span class="o">.</span><span class="n">pg_group_ranks</span><span class="p">[</span><span class="n">pg</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">world_size</span><span class="p">)}</span>
-
     <span class="k">return</span> <span class="n">pg</span></div>
 
 </pre></div>

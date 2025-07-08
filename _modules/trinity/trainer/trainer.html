@@ -182,10 +182,11 @@
             <span class="k">if</span> <span class="n">explorer_status</span> <span class="o">==</span> <span class="n">RunningStatus</span><span class="o">.</span><span class="n">STOPPED</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Explorer has already stopped. Skipping sync weight.&quot;</span><span class="p">)</span>
                 <span class="k">return</span>
+            <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">explorer_ref</span><span class="o">.</span><span class="n">ready_to_sync</span><span class="o">.</span><span class="n">remote</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">sync_weight</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Trainer synchronizing weights at step </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">train_step_num</span><span class="si">}</span><span class="s2"> end.&quot;</span>
-            <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">sync_weight</span><span class="p">()</span></div>
+            <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Trainer.flush_log">
