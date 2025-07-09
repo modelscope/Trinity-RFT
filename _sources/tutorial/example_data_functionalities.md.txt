@@ -88,14 +88,10 @@ data_processor:
     #### new part about data active iterator
     dj_process_desc: 'Please compute difficulty scores for these math questions.'
     agent_model_name: 'qwen-max'
-    agent_model_config:
-      config_name: 'my-qwen-instruction'
-      model_type: 'dashscope_chat'
-      model_name: 'qwen2.5-72b-instruct'
     clean_strategy: 'iterative'
 ```
 
-You can write your demand description in config item `dj_process_desc`, and set the model name and configs used for the agent in config items `agent_model_name` and `agent_model_config`. Here we use Qwen2.5-72b-Instruct as our recipe managing agent. And you can set the `clean_strategy` to 'iterative' to get a better dataset.
+You can write your demand description in config item `dj_process_desc`, and set the model name used for the agent in config items `agent_model_name`. Here we use Qwen-Max as our recipe managing agent. And you can set the `clean_strategy` to 'iterative' to get a better dataset.
 
 #### Familiar with Data-Juicer
 If you are familiar with Data-Juicer, you will realize that Data-Juicer provides an operator that can calculate difficulty scores using existing LLMs. In this case, you can prepare your own Data-Juicer data processing recipe and equip this operator. For example:

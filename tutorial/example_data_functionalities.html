@@ -202,14 +202,10 @@ python<span class="w"> </span>scripts/start_servers.py
 <span class="w">    </span><span class="c1">#### new part about data active iterator</span>
 <span class="w">    </span><span class="nt">dj_process_desc</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;Please</span><span class="nv"> </span><span class="s">compute</span><span class="nv"> </span><span class="s">difficulty</span><span class="nv"> </span><span class="s">scores</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">these</span><span class="nv"> </span><span class="s">math</span><span class="nv"> </span><span class="s">questions.&#39;</span>
 <span class="w">    </span><span class="nt">agent_model_name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;qwen-max&#39;</span>
-<span class="w">    </span><span class="nt">agent_model_config</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">config_name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;my-qwen-instruction&#39;</span>
-<span class="w">      </span><span class="nt">model_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;dashscope_chat&#39;</span>
-<span class="w">      </span><span class="nt">model_name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;qwen2.5-72b-instruct&#39;</span>
 <span class="w">    </span><span class="nt">clean_strategy</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;iterative&#39;</span>
 </pre></div>
 </div>
-<p>You can write your demand description in config item <code class="docutils literal notranslate"><span class="pre">dj_process_desc</span></code>, and set the model name and configs used for the agent in config items <code class="docutils literal notranslate"><span class="pre">agent_model_name</span></code> and <code class="docutils literal notranslate"><span class="pre">agent_model_config</span></code>. Here we use Qwen2.5-72b-Instruct as our recipe managing agent. And you can set the <code class="docutils literal notranslate"><span class="pre">clean_strategy</span></code> to ‘iterative’ to get a better dataset.</p>
+<p>You can write your demand description in config item <code class="docutils literal notranslate"><span class="pre">dj_process_desc</span></code>, and set the model name used for the agent in config items <code class="docutils literal notranslate"><span class="pre">agent_model_name</span></code>. Here we use Qwen-Max as our recipe managing agent. And you can set the <code class="docutils literal notranslate"><span class="pre">clean_strategy</span></code> to ‘iterative’ to get a better dataset.</p>
 </section>
 <section id="familiar-with-data-juicer">
 <h4>Familiar with Data-Juicer<a class="headerlink" href="#familiar-with-data-juicer" title="Link to this heading"></a></h4>
