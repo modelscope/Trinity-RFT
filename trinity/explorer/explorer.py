@@ -77,6 +77,7 @@ class Explorer:
             self.state_dict_meta = []
         self.status = RunningStatus.RUNNING
         self.logger.info("Finished initializing Explorer.")
+        self._ready_to_sync_condition = asyncio.Condition()
 
     async def setup_weight_sync_group(
         self, master_address: str, master_port: int, state_dict_meta: List = None
@@ -158,9 +159,27 @@ class Explorer:
 
     async def _nccl_weights_update(self):
         assert self.state_dict_meta is not None
+        async with self._ready_to_sync_condition:
+            try:
+                await asyncio.wait_for(
+                    self._ready_to_sync_condition.wait_for(
+                        lambda: self.status == RunningStatus.WAITING_SYNC,
+                    ),
+                    timeout=self.config.synchronizer.sync_timeout,
+                )
+            except asyncio.TimeoutError as e:
+                self.logger.error(
+                    f"Trainer is not ready for model weight sync in {self.config.synchronizer.sync_timeout} seconds."
+                )
+                raise e
         await asyncio.gather(
             *[model.sync_model.remote(self.explore_step_num) for model in self.models]
         )
+
+    async def ready_to_sync(self):
+        async with self._ready_to_sync_condition:
+            self.status = RunningStatus.WAITING_SYNC
+            self._ready_to_sync_condition.notify_all()
 
     async def prepare(self) -> None:
         """Preparation before running."""
@@ -182,6 +201,7 @@ class Explorer:
         self.eval_explore_step_num = None
         while True:
             try:
+                self.logger.info(f"Explore step {self.explore_step_num + 1} started.")
                 if (
                     self.eval_explore_step_num is None
                     and self.explore_step_num % self.config.explorer.eval_interval == 0
@@ -329,7 +349,6 @@ class Explorer:
         """Synchronize model weights."""
         # call this method before training start to load the latest model weights
         self.logger.info(f"Explorer sync weights at step {self.explore_step_num}.")
-        self.status = RunningStatus.WAITING_SYNC
         if self.use_checkpoint_weights_update:
             await self._checkpoint_weights_update()
         else:  # nccl weights update

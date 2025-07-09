@@ -34,6 +34,12 @@ Welcome to Trinity-RFT's documentation!
    tutorial/example_mix_algo.md
 
 .. toctree::
+   :maxdepth: 2
+   :caption: FAQ
+
+   tutorial/faq.md
+
+.. toctree::
    :maxdepth: 1
    :glob:
    :caption: API Reference

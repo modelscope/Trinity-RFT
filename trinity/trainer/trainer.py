@@ -5,6 +5,7 @@ Trainer Class
 from __future__ import annotations
 
 import os
+import traceback
 from abc import ABC, abstractmethod
 
 import ray
@@ -36,8 +37,8 @@ class Trainer:
                     break
                 if self.need_sync():
                     self.sync_weight()
-            except Exception as e:
-                self.logger.error(f"Error in Trainer: {e}")
+            except Exception:
+                self.logger.error(f"Error in Trainer:\n{traceback.format_exc()}")
                 break
         self.logger.info("--------------------\n> Trainer finished.\n--------------------")
         return self.config.trainer.name
@@ -57,18 +58,24 @@ class Trainer:
     def sync_weight(self) -> None:
         """Sync the model weight."""
         if self.config.synchronizer.sync_method == SyncMethod.NCCL:
+            self.logger.info(
+                f"Trainer synchronizing weights at step {self.engine.train_step_num} starting.."
+            )
             if self.explorer_ref is None:
                 self.explorer_ref = ray.get_actor(self.config.explorer.name)
             explorer_status = ray.get(self.explorer_ref.running_status.remote())
             if explorer_status == RunningStatus.STOPPED:
                 self.logger.warning("Explorer has already stopped. Skipping sync weight.")
                 return
-            self.logger.info(f"Trainer synchronizing weights at step {self.engine.train_step_num}.")
+            ray.get(self.explorer_ref.ready_to_sync.remote())
             self.engine.sync_weight()
+            self.logger.info(
+                f"Trainer synchronizing weights at step {self.engine.train_step_num} end."
+            )
 
     def flush_log(self, step: int) -> None:
         """Flush the log of the current step."""
-        self.engine.logger.log({}, step=step, commit=True)
+        self.engine.monitor.log({}, step=step, commit=True)
 
     def shutdown(self) -> None:
         # if checkpoint not saved, save the last checkpoint
@@ -76,7 +83,7 @@ class Trainer:
         path = os.path.join(self.config.checkpoint_job_dir, f"global_step_{step_num}")
         if not os.path.isdir(path) or len(os.listdir(path)) == 0:
             self.engine.save_checkpoint()
-        self.engine.logger.close()
+        self.engine.monitor.close()
 
 
 class TrainEngineWrapper(ABC):

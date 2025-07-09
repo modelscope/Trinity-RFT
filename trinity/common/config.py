@@ -87,6 +87,7 @@ class StorageConfig:
 
     # used for StorageType.QUEUE
     capacity: int = 10000
+    max_read_timeout: float = 1800
 
     # used for rollout tasks
     default_workflow_type: Optional[str] = None
@@ -102,6 +103,9 @@ class StorageConfig:
 
     # ! DO NOT SET, automatically set from buffer.total_epochs
     total_epochs: int = 1  # automatically set
+
+    # ! DO NOT SET, automatically set from buffer.total_steps
+    total_steps: Optional[int] = None  # automatically set
 
     # ! DO NOT SET,  automatically set corresponding to train/eval
     task_type: TaskType = TaskType.EXPLORE
@@ -273,6 +277,7 @@ class BufferConfig:
 
     batch_size: int = 1
     total_epochs: int = 1
+    total_steps: Optional[int] = None
 
     # for explorer
     explorer_input: ExplorerInput = field(default_factory=ExplorerInput)
@@ -304,6 +309,7 @@ class ExplorerConfig:
     runner_num: int = 1
     max_timeout: int = 900  # wait each task for 15 minutes
     max_retry_times: int = 2  # retry each task for 2 times if it fails or timeout
+    env_vars: dict = field(default_factory=dict)
 
     # for inference models
     # for rollout model
@@ -435,6 +441,7 @@ class Config:
         )
         self.buffer.explorer_input.taskset.task_type = TaskType.EXPLORE
         self.buffer.explorer_input.taskset.total_epochs = self.buffer.total_epochs
+        self.buffer.explorer_input.taskset.total_steps = self.buffer.total_steps
         if self.buffer.explorer_input.taskset.default_workflow_type is None:
             self.buffer.explorer_input.taskset.default_workflow_type = (
                 self.buffer.explorer_input.default_workflow_type
@@ -517,6 +524,9 @@ class Config:
             )
         if self.buffer.trainer_input.sft_warmup_dataset is not None:
             self.buffer.trainer_input.sft_warmup_dataset.algorithm_type = "sft"  # TODO
+            self.buffer.trainer_input.sft_warmup_dataset.total_steps = (
+                self.buffer.trainer_input.sft_warmup_steps
+            )
             if self.buffer.trainer_input.sft_warmup_dataset.ray_namespace is None:
                 self.buffer.trainer_input.sft_warmup_dataset.ray_namespace = self.ray_namespace
 

@@ -70,11 +70,19 @@ class QueueActor:
         if self.writer is not None:
             self.writer.write(exp_list)
 
-    async def get_batch(self, batch_size: int) -> List:
+    async def get_batch(self, batch_size: int, timeout: float) -> List:
         """Get batch of experience."""
         batch = []
         while True:
-            exp_list = await self.queue.get()
+            try:
+                exp_list = await asyncio.wait_for(self.queue.get(), timeout=timeout)
+            except asyncio.TimeoutError:
+                self.logger.error(
+                    f"Timeout when waiting for experience, only get {len(batch)} experiences.\n"
+                    "This phenomenon is usually caused by the workflow not returning enough "
+                    "experiences or running timeout. Please check your workflow implementation."
+                )
+                return batch
             if exp_list == self.FINISH_MESSAGE:
                 raise StopAsyncIteration()
             batch.extend(exp_list)

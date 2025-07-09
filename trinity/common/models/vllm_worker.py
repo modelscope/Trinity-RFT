@@ -4,7 +4,7 @@ import ray
 import torch
 import torch.distributed
 
-from trinity.utils.distributed import init_process_group, is_ipv6_address
+from trinity.utils.distributed import init_process_group
 from trinity.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -38,20 +38,16 @@ class WorkerExtension:
             f"  > rank_offset={rank_offset}\n"
             f"  > world_size={world_size}"
         )
-        if is_ipv6_address(master_address):
-            # using tcp://ipv6:port will lead to ValueError
-            init_method = f"tcp://[{master_address}]:{master_port}"
-        else:
-            init_method = f"tcp://{master_address}:{master_port}"
-
         self._model_update_group = init_process_group(
+            host=master_address,
+            port=master_port,
+            group_name=group_name,
             backend=backend,
-            init_method=init_method,
             timeout=timeout,
             world_size=world_size,
             rank=self._weight_update_rank,
-            group_name=group_name,
         )
+        torch.distributed.barrier(group=self._model_update_group)
         logger.info("vLLM init_process_group finished.")
         self._explorer_name = explorer_name
         self._namespace = namespace
@@ -78,6 +74,6 @@ class WorkerExtension:
             weight = weight.type(self.model_config.dtype)
             self.model_runner.model.load_weights(weights=[(name, weight)])
             del weight
-        torch.distributed.barrier()
+        torch.distributed.barrier(group=self._model_update_group)
         torch.cuda.synchronize()
         torch.cuda.empty_cache()

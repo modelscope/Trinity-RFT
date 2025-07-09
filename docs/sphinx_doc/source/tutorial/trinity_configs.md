@@ -182,6 +182,7 @@ buffer:
 
 - `batch_size`: Number of tasks used per training step. *Please do not multiply this value by the `algorithm.repeat_times` manually*.
 - `total_epochs`: Total number of training epochs.
+- `total_steps`: Optional. The total number of training steps. If specified, `total_epochs` will be ignored.
 
 ### Explorer Input
 
@@ -248,7 +249,9 @@ The configuration for each task dataset is defined as follows:
 
 In [`explore` mode](#global-configuration), since there is no trainer, users can configure an experience buffer via `buffer.explorer_output`, rather than using `buffer.trainer_input`, which will be introduced in the next section.
 
-> For `both` and `train` modes, users should use `buffer.trainer_input` instead of `buffer.explorer_output`.
+```{note}
+For `both` and `train` modes, users should use `buffer.trainer_input.experience_buffer` instead of `buffer.explorer_output`.
+```
 
 ```yaml
 buffer:
@@ -258,6 +261,7 @@ buffer:
     storage_type: queue
     path: sqlite:///countdown_buffer.db
     wrap_in_ray: True
+    max_read_timeout: 1800
 ```
 
 - `name`: The name of the experience buffer. This name will be used as the Ray actor's name, so it must be unique.
@@ -270,6 +274,7 @@ buffer:
   - For `file` storage type, the path points to the directory containing the dataset files.
   - For `sql` storage type, the path points to the SQLite database file.
 - `wrap_in_ray`: Whether to wrap the experience buffer in a Ray actor. Only take effect when `storage_type` is `sql` or `file`. The `queue` storage always uses a Ray actor.
+- `max_read_timeout`: The maximum waiting time (in seconds) to read new experience data. If exceeded, an incomplete batch will be returned directly. Only take effect when `storage_type` is `queue`. Default is 1800 seconds (30 minutes).
 
 
 ### Trainer Input
@@ -310,6 +315,9 @@ Controls the rollout models and workflow execution.
 explorer:
   name: explorer
   runner_num: 32
+  max_timeout: 900
+  max_retry_times: 2
+  env_vars: {}
   rollout_model:
     engine_type: vllm_async
     engine_num: 1
@@ -321,6 +329,9 @@ explorer:
 
 - `name`: Name of the explorer. This name will be used as the Ray actor's name, so it must be unique.
 - `runner_num`: Number of parallel workflow runners.
+- `max_timeout`: Maximum time (in seconds) for a workflow to complete.
+- `max_retry_times`: Maximum number of retries for a workflow.
+- `env_vars`: Environment variables to be set for every workflow runners.
 - `rollout_model.engine_type`: Type of inference engine. Options: `vllm_async` (recommended), `vllm`.
 - `rollout_model.engine_num`: Number of inference engines.
 - `rollout_model.tensor_parallel_size`: Degree of tensor parallelism.
@@ -399,7 +410,7 @@ data_processor:
 
 For advanced users working with the `verl` trainer backend. This includes fine-grained settings for actor/critic models, optimizer parameters, and training loops.
 
-> For full parameter meanings, refer to the [veRL documentation](https://github.com/volcengine/verl/blob/v0.3.0.post1/docs/examples/config.rst).
+> For full parameter meanings, refer to the [veRL documentation](https://verl.readthedocs.io/en/latest/examples/config.html).
 
 
 ```yaml

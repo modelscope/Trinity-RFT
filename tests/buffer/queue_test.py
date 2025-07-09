@@ -1,4 +1,5 @@
 import os
+import time
 
 import torch
 
@@ -21,6 +22,7 @@ class TestQueueBuffer(RayUnittestBase):
             name="test_buffer",
             algorithm_type="ppo",
             storage_type=StorageType.QUEUE,
+            max_read_timeout=3,
             path=BUFFER_FILE_PATH,
         )
         config = BufferConfig(
@@ -64,6 +66,10 @@ class TestQueueBuffer(RayUnittestBase):
         self.assertRaises(StopIteration, reader.read)
         with open(BUFFER_FILE_PATH, "r") as f:
             self.assertEqual(len(f.readlines()), total_num + put_batch_size * 2)
+        st = time.time()
+        self.assertRaises(StopIteration, reader.read, batch_size=1)
+        et = time.time()
+        self.assertTrue(et - st > 2)
 
     def setUp(self):
         if os.path.exists(BUFFER_FILE_PATH):

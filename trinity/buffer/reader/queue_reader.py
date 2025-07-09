@@ -18,6 +18,7 @@ class QueueReader(BufferReader):
 
     def __init__(self, storage_config: StorageConfig, config: BufferConfig):
         assert storage_config.storage_type == StorageType.QUEUE
+        self.timeout = storage_config.max_read_timeout
         self.read_batch_size = config.read_batch_size
         self.queue = QueueActor.get_actor(storage_config, config)
 
@@ -28,7 +29,9 @@ class QueueReader(BufferReader):
             raise NotImplementedError(f"Read strategy {strategy} not supported for Queue Reader.")
         try:
             batch_size = batch_size or self.read_batch_size
-            exps = ray.get(self.queue.get_batch.remote(batch_size))
+            exps = ray.get(self.queue.get_batch.remote(batch_size, timeout=self.timeout))
+            if len(exps) != batch_size:
+                raise StopIteration("Read incomplete batch, please check your workflow.")
         except StopAsyncIteration:
             raise StopIteration()
         return exps

@@ -23,6 +23,7 @@ class ActorModel:
     override_config: Dict[str, Any] = field(default_factory=dict)
     enable_gradient_checkpointing: bool = True
     use_remove_padding: bool = False
+    use_fused_kernels: bool = False
 
 
 @dataclass

@@ -7,7 +7,6 @@ actor_rollout_ref:
     use_remove_padding: True  # False
   actor:
     strategy: fsdp  # This is for backward-compatibility
-    ppo_mini_batch_size: 128
     ppo_micro_batch_size_per_gpu: 4
     use_dynamic_bsz: True # False
     ppo_max_token_len_per_gpu: 25600 # n * ${data.max_prompt_length} + ${data.max_response_length}

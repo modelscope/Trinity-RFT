@@ -73,7 +73,7 @@ from verl.workers.sharding_manager.fsdp_ulysses import FSDPUlyssesShardingManage
 
 from trinity.common.config import AlgorithmConfig
 from trinity.common.constants import ROLLOUT_WEIGHT_SYNC_GROUP_NAME, SyncMethod
-from trinity.utils.distributed import init_process_group, is_ipv6_address
+from trinity.utils.distributed import init_process_group
 
 logger = logging.getLogger(__file__)
 logger.setLevel(os.getenv("VERL_LOGGING_LEVEL", "WARN"))
@@ -579,24 +579,19 @@ class ActorRolloutRefWorker(Worker):
                 setup_ref = explorer.setup_weight_sync_group.remote(
                     master_address, master_port, self.state_dict_meta
                 )
-                if is_ipv6_address(master_address):
-                    # using tcp://ipv6:port will lead to ValueError
-                    init_method = f"tcp://[{master_address}]:{master_port}"
-                else:
-                    init_method = f"tcp://{master_address}:{master_port}"
                 timeout = self.config.synchronizer.sync_timeout
 
                 self._model_update_group = init_process_group(
+                    host=master_address,
+                    port=master_port,
+                    group_name=ROLLOUT_WEIGHT_SYNC_GROUP_NAME,
                     backend="nccl",
-                    init_method=init_method,
                     timeout=timeout,
                     world_size=world_size,
                     rank=0,
-                    group_name=ROLLOUT_WEIGHT_SYNC_GROUP_NAME,
                 )
+                torch.distributed.barrier(group=self._model_update_group)
                 ray.get(setup_ref)
-
-            torch.distributed.barrier()
 
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
     def sync_weight(self):
@@ -608,9 +603,11 @@ class ActorRolloutRefWorker(Worker):
                             continue
                         torch.distributed.broadcast(param, 0, group=self._model_update_group)
                 param = None
-            torch.distributed.barrier()
+        if torch.distributed.get_rank() == 0:
+            torch.distributed.barrier(group=self._model_update_group)
             torch.cuda.synchronize()
-            torch.cuda.empty_cache()
+        torch.distributed.barrier()
+        torch.cuda.empty_cache()
 
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
     def set_algorithm(self, algo_config: AlgorithmConfig):

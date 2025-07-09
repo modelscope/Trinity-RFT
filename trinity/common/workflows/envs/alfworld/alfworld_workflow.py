@@ -6,7 +6,7 @@ from trinity.common.models.model import ModelWrapper
 from trinity.common.workflows.workflow import WORKFLOWS, MultiTurnWorkflow, Task
 
 EXAMPLE_PROMPT = """
-Observation：
+Observation:
 -= Welcome to TextWorld, ALFRED! =-
 
 You are in the middle of a room. Looking quickly around you, you see a cabinet 4, a cabinet 3, a cabinet 2, a cabinet 1, a countertop 1, a garbagecan 1, a handtowelholder 2, a handtowelholder 1, a sinkbasin 2, a sinkbasin 1, a toilet 1, a toiletpaperhanger 1, and a towelholder 1.
@@ -88,7 +88,7 @@ def parse_action(response):
         action = response.split("<action>")[1].split("</action>")[0].strip()
         return action
     except Exception as e:
-        print("Error parsing action:", e)
+        print(f"Error parsing action: {e}, response = {response}")
         return ""
 
 

@@ -178,9 +178,9 @@ class TestTrainerGSM8K(BaseTrainerCase):
         self.config.algorithm.advantage_fn = "grpo"
         self.config.algorithm.advantage_fn_args = {}
         # self.config.buffer.batch_size = 96  # TODO: used for real testing
+        self.config.buffer.total_epochs = 1
         self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("gsm8k")
         self.config.check_and_update()
-        self.config.trainer.trainer_config.trainer.total_training_steps = 4
         self.config.trainer.trainer_config.trainer.max_actor_ckpt_to_keep = 2
         self.config.trainer.trainer_config.actor_rollout_ref.actor.optim.lr = 1e-5
         both(self.config)
@@ -214,27 +214,46 @@ class TestTrainerSFTWarmupGSM8K(BaseTrainerCase):
         self.config.algorithm.repeat_times = 4
         self.config.algorithm.advantage_fn = "grpo"
         self.config.algorithm.advantage_fn_args = {}
+        self.config.buffer.total_epochs = 1
         self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("gsm8k")
-        self.config.buffer.trainer_input.sft_warmup_steps = 2
+        self.config.synchronizer.sync_interval = 1
+        self.config.trainer.save_interval = 8
+        # sft data is only enough for 2 steps
         self.config.buffer.trainer_input.sft_warmup_dataset = get_unittest_dataset_config(
             "sft_for_gsm8k"
         )
+        self.config.buffer.trainer_input.sft_warmup_steps = 3
         self.config.check_and_update()
-        self.config.trainer.trainer_config.trainer.total_training_steps = 4
         self.config.trainer.trainer_config.trainer.max_actor_ckpt_to_keep = 2
         self.config.trainer.trainer_config.actor_rollout_ref.actor.optim.lr = 1e-5
         both(self.config)
         parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
         rollout_metrics = parser.metric_list("rollout")
         self.assertTrue(len(rollout_metrics) > 0)
-        self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 4)
+        self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 7)
         actor_metrics = parser.metric_list("actor")
         self.assertTrue(len(actor_metrics) > 0)
-        self.assertEqual(parser.metric_max_step(actor_metrics[0]), 2)  # SFT
-        self.assertEqual(parser.metric_max_step(actor_metrics[-1]), 4)  # RFT
+        sft_metrics = parser.metric_list("actor/sft")
+        self.assertEqual(parser.metric_max_step(sft_metrics[0]), 3)  # SFT
+        self.assertEqual(parser.metric_max_step(actor_metrics[-1]), 7)  # RFT
         response_metrics = parser.metric_list("response_length")
         self.assertTrue(len(response_metrics) > 0)
-        self.assertEqual(parser.metric_max_step(response_metrics[0]), 4)
+        self.assertEqual(parser.metric_min_step(response_metrics[0]), 4)
+        self.assertEqual(parser.metric_max_step(response_metrics[0]), 7)
+        # test save checkpoint when sft finish
+        self.assertEqual(
+            get_checkpoint_dir_with_step_num(
+                checkpoint_root_path=self.config.checkpoint_job_dir, trainer_type="verl", step_num=2
+            )[1],
+            2,
+        )
+        # test save checkpoint at last step
+        checkpoint_dir, step_num = get_checkpoint_dir_with_step_num(
+            checkpoint_root_path=self.config.checkpoint_job_dir,
+            trainer_type="verl",
+        )
+        self.assertEqual(step_num, 7)
+        self.assertTrue(len(os.listdir(os.path.join(checkpoint_dir, "actor"))) > 0)
 
     def tearDown(self):
         # TODO: remove dir only when the test passed
@@ -252,7 +271,6 @@ class TestTrainerDPO(BaseTrainerCase):
         # self.config.buffer.batch_size = 32
         self.config.buffer.trainer_input.experience_buffer = get_unittest_dataset_config("dpo")
         self.config.check_and_update()
-        self.config.trainer.trainer_config.trainer.total_training_steps = 4
         self.config.trainer.trainer_config.trainer.max_actor_ckpt_to_keep = 2
         self.config.trainer.trainer_config.actor_rollout_ref.actor.optim.lr = 5e-7
         train(self.config)

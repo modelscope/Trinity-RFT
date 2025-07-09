@@ -80,9 +80,8 @@ def get_unittest_dataset_config(
     elif dataset_name == "gsm8k":
         return StorageConfig(
             name=dataset_name,
-            path="openai/gsm8k",
-            split=split,
-            subset_name="main",
+            path=os.path.join(os.path.dirname(__file__), "template", "data", "gsm8k"),
+            split="train",
             format=FormatConfig(
                 prompt_key="question",
                 response_key="answer",
@@ -109,7 +108,7 @@ def get_unittest_dataset_config(
     elif dataset_name == "dpo":
         return StorageConfig(
             name=dataset_name,
-            path="HumanLLMs/Human-Like-DPO-Dataset",
+            path=os.path.join(os.path.dirname(__file__), "template", "data", "human_like"),
             split="train",
             format=FormatConfig(
                 prompt_type=PromptType.PLAINTEXT,
@@ -154,6 +153,9 @@ class TensorBoardParser:
 
     def metric_exist(self, metric_name: str) -> bool:
         return metric_name in self._metrics
+
+    def metric_min_step(self, metric_name: str) -> int:
+        return min(self.metric_steps(metric_name))
 
     def metric_max_step(self, metric_name: str) -> int:
         return max(self.metric_steps(metric_name))
