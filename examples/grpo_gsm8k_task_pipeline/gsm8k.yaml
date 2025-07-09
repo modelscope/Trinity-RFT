@@ -25,10 +25,6 @@ data_processor:
     # data active iterator related
     dj_process_desc: 'Please compute difficulty scores for these math questions.'
     agent_model_name: 'qwen-max'
-    agent_model_config:
-      config_name: 'my-qwen-instruction'
-      model_type: 'dashscope_chat'
-      model_name: 'qwen2.5-72b-instruct'
     clean_strategy: 'iterative'
 
 model:

@@ -133,7 +133,6 @@ class DataPipelineConfig:
         str
     ] = None  # Describe the data processing procedure without requiring users to be aware of the specific DJ parameters
     agent_model_name: Optional[str] = None
-    agent_model_config: Optional[Dict[str, Any]] = None
     clean_strategy: str = "iterative"
     min_size_ratio: Optional[float] = None
     min_priority_score: Optional[float] = 0.0

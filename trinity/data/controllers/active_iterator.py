@@ -46,14 +46,12 @@ class DataActiveIterator:
             self.pipeline_type = DataProcessorPipelineType(pipeline_type)
 
         # check if the llm agent is required
-        if self.config.agent_model_name is not None and self.config.agent_model_config is not None:
+        if self.config.agent_model_name is not None:
             # get the api key
             api_key = os.environ.get("OPENAI_API_KEY")
             # initialize the agent
-            import agentscope
             from agentscope.models import DashScopeChatWrapper
 
-            agentscope.init(model_configs=[self.config.agent_model_config])
             self.llm_agent = DashScopeChatWrapper(
                 config_name="_",
                 model_name=self.config.agent_model_name,

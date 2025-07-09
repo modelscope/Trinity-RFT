@@ -3,7 +3,6 @@
 import os
 import unittest
 
-import agentscope
 from agentscope.models import DashScopeChatWrapper
 from loguru import logger
 
@@ -19,15 +18,6 @@ class TestTaskParser(unittest.TestCase):
 
         api_key = os.environ.get("OPENAI_API_KEY", None)
 
-        agentscope.init(
-            model_configs=[
-                {
-                    "config_name": "my-qwen-instruction",
-                    "model_type": "dashscope_chat",
-                    "model_name": "qwen2.5-72b-instruct",
-                },
-            ],
-        )
         self.agent = DashScopeChatWrapper(
             config_name="_",
             model_name="qwen-max",
