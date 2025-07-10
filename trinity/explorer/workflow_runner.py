@@ -86,6 +86,7 @@ class WorkflowRunner:
                 if not hasattr(exp, "info") or exp.info is None:
                     exp.info = {}
                 exp.info["model_version"] = self.model_wrapper.model_version
+                exp.info["use_count"] = 0
 
                 if not hasattr(exp, "metrics") or exp.metrics is None:
                     exp.metrics = {}

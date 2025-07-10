@@ -38,6 +38,10 @@ def get_buffer_reader(storage_config: StorageConfig, buffer_config: BufferConfig
         from trinity.buffer.reader.queue_reader import QueueReader
 
         return QueueReader(storage_config, buffer_config)
+    elif storage_config.storage_type == StorageType.REPLAY_BUFFER:
+        from trinity.buffer.reader.replay_buffer_reader import ReplayBufferReader
+
+        return ReplayBufferReader(storage_config, buffer_config)
     elif storage_config.storage_type == StorageType.FILE:
         from trinity.buffer.reader.file_reader import FILE_READERS
 
@@ -63,6 +67,10 @@ def get_buffer_writer(storage_config: StorageConfig, buffer_config: BufferConfig
         from trinity.buffer.writer.queue_writer import QueueWriter
 
         return QueueWriter(storage_config, buffer_config)
+    elif storage_config.storage_type == StorageType.REPLAY_BUFFER:
+        from trinity.buffer.writer.replay_buffer_writer import ReplayBufferWriter
+
+        return ReplayBufferWriter(storage_config, buffer_config)
     elif storage_config.storage_type == StorageType.FILE:
         from trinity.buffer.writer.file_writer import JSONWriter
 

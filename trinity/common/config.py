@@ -4,6 +4,7 @@ import os
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
+import numpy as np
 from omegaconf import OmegaConf
 
 from trinity.common.constants import (
@@ -88,6 +89,12 @@ class StorageConfig:
     # used for StorageType.QUEUE
     capacity: int = 10000
     max_read_timeout: float = 1800
+
+    # used for StorageType.REPLAY_BUFFER
+    reuse_cold_down_time: float = np.inf
+    replay_buffer_kwargs: dict = field(
+        default_factory=lambda: {"priority_fn": "linear_decay", "decay": 0.1}
+    )
 
     # used for rollout tasks
     default_workflow_type: Optional[str] = None

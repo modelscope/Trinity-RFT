@@ -40,6 +40,7 @@ dependencies = [
     "tensorboard",
     "openai",
     "jsonlines",
+    "sortedcontainers",
 ]
 
 [project.scripts]
