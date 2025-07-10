@@ -31,7 +31,7 @@ from verl.trainer.ppo.ray_trainer import (
 from verl.utils import hf_tokenizer
 from verl.utils.fs import copy_local_path_from_hdfs
 
-from trinity.algorithm import ADVANTAGE_FN, KL_FN, SAMPLE_STRATEGY
+from trinity.algorithm import ADVANTAGE_FN, KL_FN
 from trinity.algorithm.algorithm import ALGORITHM_TYPE, SFTAlgorithm
 from trinity.algorithm.algorithm_manager import AlgorithmManager
 from trinity.algorithm.utils import prefix_metrics
@@ -134,11 +134,11 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             self.kl_fn = KL_FN.get(self.algorithm_config.kl_penalty_fn)(
                 **self.algorithm_config.kl_penalty_fn_args
             )
-        self.sample_strategy = SAMPLE_STRATEGY.get(global_config.algorithm.sample_strategy)(
-            buffer_config=global_config.buffer,
-            trainer_type=global_config.trainer.trainer_type,
-            **global_config.algorithm.sample_strategy_args,
-        )
+        # self.sample_strategy = SAMPLE_STRATEGY.get(global_config.algorithm.sample_strategy)(
+        #     buffer_config=global_config.buffer,
+        #     trainer_type=global_config.trainer.trainer_type,
+        #     **global_config.algorithm.sample_strategy_args,
+        # )
         super().__init__(
             config,
             tokenizer,
@@ -287,22 +287,25 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         # TODO: compute total training steps
         self.total_training_steps = self.config.trainer.total_training_steps or sys.maxsize
 
-    def train_step(self) -> bool:  # noqa C901
+    def train_step(self, batch, sample_metrics, exp_samples) -> bool:  # noqa C901
         self.logger.info(f"Training at step {self.global_steps + 1} started.")
         metrics = {}
-        try:
-            batch, sample_metrics, exp_samples = self.sample_strategy.sample(self.global_steps + 1)
-            prefix_metrics(sample_metrics, "sample", metrics)
-        except StopIteration:
-            print("No more data to train. Stop training.")
-            if (
-                self.config.trainer.save_freq == 0
-                or self.global_steps % self.config.trainer.save_freq != 0
-            ):
-                self.logger.info(f"Saving at step {self.global_steps}.")
-                self._save_checkpoint()
-                self.logger.info(f"Saved at step {self.global_steps}.")
-            return False
+        prefix_metrics(sample_metrics, "sample", metrics)
+
+        # try:
+        # batch, sample_metrics, exp_samples = self.sample_strategy.sample(self.global_steps + 1)
+        # prefix_metrics(sample_metrics, "sample", metrics)
+        # except StopIteration:
+        # print("No more data to train. Stop training.")
+        # if (
+        #     self.config.trainer.save_freq == 0
+        #     or self.global_steps % self.config.trainer.save_freq != 0
+        # ):
+        #     self.logger.info(f"Saving at step {self.global_steps}.")
+        #     self._save_checkpoint()
+        #     self.logger.info(f"Saved at step {self.global_steps}.")
+        # return False
+
         self.global_steps += 1
         self.logger.info(f"Sampling at step {self.global_steps} done.")
         timing_raw = {}
