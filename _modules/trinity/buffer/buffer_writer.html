@@ -111,10 +111,17 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Write to buffer.&quot;&quot;&quot;</span></div>
 
 
+<div class="viewcode-block" id="BufferWriter.write_async">
+<a class="viewcode-back" href="../../../build_api/trinity.buffer.html#trinity.buffer.buffer_writer.BufferWriter.write_async">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">write_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">List</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write to buffer asynchronously.&quot;&quot;&quot;</span></div>
+
+
 <div class="viewcode-block" id="BufferWriter.acquire">
 <a class="viewcode-back" href="../../../build_api/trinity.buffer.html#trinity.buffer.buffer_writer.BufferWriter.acquire">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">acquire</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">acquire</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Acquire the buffer writer.</span>
 
 <span class="sd">        Returns:</span>
@@ -125,7 +132,7 @@
 <div class="viewcode-block" id="BufferWriter.release">
 <a class="viewcode-back" href="../../../build_api/trinity.buffer.html#trinity.buffer.buffer_writer.BufferWriter.release">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">release</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">release</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Release the buffer writer. After release, the buffer writer can not be used again.</span>
 
 <span class="sd">        Returns:</span>

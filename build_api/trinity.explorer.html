@@ -70,8 +70,10 @@
 <li class="toctree-l3"><a class="reference internal" href="#trinity.explorer.explorer.Explorer"><code class="docutils literal notranslate"><span class="pre">Explorer</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#module-trinity.explorer.runner_pool">trinity.explorer.runner_pool module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.explorer.runner_pool.RunnerPool"><code class="docutils literal notranslate"><span class="pre">RunnerPool</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-trinity.explorer.scheduler">trinity.explorer.scheduler module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#trinity.explorer.scheduler.RunnerWrapper"><code class="docutils literal notranslate"><span class="pre">RunnerWrapper</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#trinity.explorer.scheduler.sort_batch_id"><code class="docutils literal notranslate"><span class="pre">sort_batch_id()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#trinity.explorer.scheduler.Scheduler"><code class="docutils literal notranslate"><span class="pre">Scheduler</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-trinity.explorer.workflow_runner">trinity.explorer.workflow_runner module</a><ul>
@@ -81,7 +83,6 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-trinity.explorer">Module contents</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#trinity.explorer.Explorer"><code class="docutils literal notranslate"><span class="pre">Explorer</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.explorer.RunnerPool"><code class="docutils literal notranslate"><span class="pre">RunnerPool</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -161,18 +162,31 @@
 <dt class="sig sig-object py" id="trinity.explorer.explorer.Explorer.explore">
 <em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">explore</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/explorer.html#Explorer.explore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.explorer.Explorer.explore" title="Link to this definition"></a></dt>
 <dd><dl>
-<dt>The dreamming loop for explorer and trainer.</dt><dd><div class="line-block">
-<div class="line">&lt;—————————————– one period ———————————————-&gt; |</div>
+<dt>The timeline of the exploration process:</dt><dd><div class="line-block">
+<div class="line">&lt;——————————— one period ————————————-&gt; |</div>
 </div>
 </dd>
-<dt>explorer | &lt;– step_1 –&gt; | &lt;– step_2 –&gt; | … | &lt;– step_n –&gt; | &lt;– eval –&gt; | &lt;– [idle] –&gt; | &lt;– sync –&gt; |</dt><dd><p>trainer | &lt;– idle –&gt; | &lt;– step_1 –&gt; | &lt;– step_2 –&gt; | … | &lt;– step_n –&gt; | &lt;– [idle] –&gt; | &lt;– sync –&gt; |</p>
+<dt>explorer | &lt;—————- step_1 ————–&gt; |                                           |</dt><dd><div class="line-block">
+<div class="line">| &lt;—————- step_2 ————–&gt; |                                       |</div>
+<div class="line-block">
+<div class="line">…                                                                             |</div>
+<div class="line-block">
+<div class="line">| &lt;—————- step_n —————&gt; |                               |</div>
+<div class="line-block">
+<div class="line">| &lt;———————- eval ——————–&gt; | &lt;– sync –&gt; |</div>
+</div>
+</div>
+</div>
+</div>
+<p><a href="#id1"><span class="problematic" id="id2">|--------------------------------------------------------------------------------------|</span></a></p>
 </dd>
 </dl>
+<p>trainer  | &lt;– idle –&gt; | &lt;– step_1 –&gt; | &lt;– step_2 –&gt; | … | &lt;– step_n –&gt; | &lt;– sync –&gt; |</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.explorer.explorer.Explorer.explore_step">
-<span class="sig-name descname"><span class="pre">explore_step</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/explorer.html#Explorer.explore_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.explorer.Explorer.explore_step" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">explore_step</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/explorer.html#Explorer.explore_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.explorer.Explorer.explore_step" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -181,8 +195,13 @@
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="trinity.explorer.explorer.Explorer.need_eval">
+<span class="sig-name descname"><span class="pre">need_eval</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/explorer.html#Explorer.need_eval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.explorer.Explorer.need_eval" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="trinity.explorer.explorer.Explorer.eval">
-<span class="sig-name descname"><span class="pre">eval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eval_explore_step_num</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/explorer.html#Explorer.eval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.explorer.Explorer.eval" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">eval</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/explorer.html#Explorer.eval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.explorer.Explorer.eval" title="Link to this definition"></a></dt>
 <dd><p>Evaluation on all evaluation data samples.</p>
 </dd></dl>
 
@@ -193,10 +212,9 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.explorer.Explorer.wait_for_workflow_done">
-<span class="sig-name descname"><span class="pre">wait_for_workflow_done</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/explorer.html#Explorer.wait_for_workflow_done"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.explorer.Explorer.wait_for_workflow_done" title="Link to this definition"></a></dt>
-<dd><p>Wait for workflow to finish.</p>
-</dd></dl>
+<dt class="sig sig-object py" id="trinity.explorer.explorer.Explorer.save_checkpoint">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">save_checkpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sync_weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/explorer.html#Explorer.save_checkpoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.explorer.Explorer.save_checkpoint" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.explorer.explorer.Explorer.sync_weight">
@@ -210,101 +228,119 @@
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.explorer.Explorer.flush_log">
-<span class="sig-name descname"><span class="pre">flush_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/explorer.html#Explorer.flush_log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.explorer.Explorer.flush_log" title="Link to this definition"></a></dt>
-<dd><p>Flush the log of the current step.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="trinity.explorer.explorer.Explorer.shutdown">
-<span class="sig-name descname"><span class="pre">shutdown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/explorer.html#Explorer.shutdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.explorer.Explorer.shutdown" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">shutdown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/explorer.html#Explorer.shutdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.explorer.Explorer.shutdown" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 </section>
-<section id="module-trinity.explorer.runner_pool">
-<span id="trinity-explorer-runner-pool-module"></span><h2>trinity.explorer.runner_pool module<a class="headerlink" href="#module-trinity.explorer.runner_pool" title="Link to this heading"></a></h2>
-<p>Runner pool for running tasks in parallel. Modified from ray.util.actor_pool.ActorPool.</p>
+<section id="module-trinity.explorer.scheduler">
+<span id="trinity-explorer-scheduler-module"></span><h2>trinity.explorer.scheduler module<a class="headerlink" href="#module-trinity.explorer.scheduler" title="Link to this heading"></a></h2>
+<p>Scheduler for rollout tasks.</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="trinity.explorer.runner_pool.RunnerPool">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.explorer.runner_pool.</span></span><span class="sig-name descname"><span class="pre">RunnerPool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.models.html#trinity.common.models.model.InferenceModel" title="trinity.common.models.model.InferenceModel"><span class="pre">InferenceModel</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.models.html#trinity.common.models.model.InferenceModel" title="trinity.common.models.model.InferenceModel"><span class="pre">InferenceModel</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/runner_pool.html#RunnerPool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.runner_pool.RunnerPool" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="trinity.explorer.scheduler.RunnerWrapper">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.explorer.scheduler.</span></span><span class="sig-name descname"><span class="pre">RunnerWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">runner_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rollout_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.models.html#trinity.common.models.model.InferenceModel" title="trinity.common.models.model.InferenceModel"><span class="pre">InferenceModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.models.html#trinity.common.models.model.InferenceModel" title="trinity.common.models.model.InferenceModel"><span class="pre">InferenceModel</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/scheduler.html#RunnerWrapper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.scheduler.RunnerWrapper" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>A pool of WorkflowRunner.</p>
-<p>The RunnerPool will automatically handle the exceptions during the workflow
-and retry when the workflow fails or timeout. The number of max retries is
-set in <cite>config.explorer.max_retry_times</cite> and the max timeout is set in
-<cite>config.explorer.max_timeout</cite>.</p>
+<p>A wrapper for a WorkflowRunner</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.runner_pool.RunnerPool.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.models.html#trinity.common.models.model.InferenceModel" title="trinity.common.models.model.InferenceModel"><span class="pre">InferenceModel</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.models.html#trinity.common.models.model.InferenceModel" title="trinity.common.models.model.InferenceModel"><span class="pre">InferenceModel</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/runner_pool.html#RunnerPool.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.runner_pool.RunnerPool.__init__" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="trinity.explorer.scheduler.RunnerWrapper.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">runner_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rollout_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.models.html#trinity.common.models.model.InferenceModel" title="trinity.common.models.model.InferenceModel"><span class="pre">InferenceModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.models.html#trinity.common.models.model.InferenceModel" title="trinity.common.models.model.InferenceModel"><span class="pre">InferenceModel</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/scheduler.html#RunnerWrapper.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.scheduler.RunnerWrapper.__init__" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.runner_pool.RunnerPool.run_tasks">
-<span class="sig-name descname"><span class="pre">run_tasks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tasks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.workflows.html#trinity.common.workflows.workflow.Task" title="trinity.common.workflows.workflow.Task"><span class="pre">Task</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="trinity.common.workflows.html#trinity.common.workflows.workflow.Task" title="trinity.common.workflows.workflow.Task"><span class="pre">Task</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/runner_pool.html#RunnerPool.run_tasks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.runner_pool.RunnerPool.run_tasks" title="Link to this definition"></a></dt>
-<dd><p>Schedule a list of tasks to run in the pool.</p>
+<dt class="sig sig-object py" id="trinity.explorer.scheduler.RunnerWrapper.run_with_retry">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run_with_retry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.workflows.html#trinity.common.workflows.workflow.Task" title="trinity.common.workflows.workflow.Task"><span class="pre">Task</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#trinity.explorer.workflow_runner.Status" title="trinity.explorer.workflow_runner.Status"><span class="pre">Status</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/explorer/scheduler.html#RunnerWrapper.run_with_retry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.scheduler.RunnerWrapper.run_with_retry" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The return status of the task.
+<cite>int</cite>: The runner_id of current runner.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><cite>Status</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.explorer.scheduler.RunnerWrapper.restart_runner">
+<span class="sig-name descname"><span class="pre">restart_runner</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/scheduler.html#RunnerWrapper.restart_runner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.scheduler.RunnerWrapper.restart_runner" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.explorer.scheduler.sort_batch_id">
+<span class="sig-prename descclassname"><span class="pre">trinity.explorer.scheduler.</span></span><span class="sig-name descname"><span class="pre">sort_batch_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/scheduler.html#sort_batch_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.scheduler.sort_batch_id" title="Link to this definition"></a></dt>
+<dd><p>Priority of batch_id</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="trinity.explorer.scheduler.Scheduler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.explorer.scheduler.</span></span><span class="sig-name descname"><span class="pre">Scheduler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">rollout_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.models.html#trinity.common.models.model.InferenceModel" title="trinity.common.models.model.InferenceModel"><span class="pre">InferenceModel</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.models.html#trinity.common.models.model.InferenceModel" title="trinity.common.models.model.InferenceModel"><span class="pre">InferenceModel</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/scheduler.html#Scheduler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.scheduler.Scheduler" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Scheduler for rollout tasks.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.explorer.scheduler.Scheduler.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">rollout_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.models.html#trinity.common.models.model.InferenceModel" title="trinity.common.models.model.InferenceModel"><span class="pre">InferenceModel</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.models.html#trinity.common.models.model.InferenceModel" title="trinity.common.models.model.InferenceModel"><span class="pre">InferenceModel</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/scheduler.html#Scheduler.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.scheduler.Scheduler.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.explorer.scheduler.Scheduler.start">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/scheduler.html#Scheduler.start"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.scheduler.Scheduler.start" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.explorer.scheduler.Scheduler.stop">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/scheduler.html#Scheduler.stop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.scheduler.Scheduler.stop" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.explorer.scheduler.Scheduler.schedule">
+<span class="sig-name descname"><span class="pre">schedule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tasks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.workflows.html#trinity.common.workflows.workflow.Task" title="trinity.common.workflows.workflow.Task"><span class="pre">Task</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/scheduler.html#Scheduler.schedule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.scheduler.Scheduler.schedule" title="Link to this definition"></a></dt>
+<dd><p>Schedule the provided tasks.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>tasks</strong> – A list of tasks.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tasks</strong> (<cite>List[Task]</cite>) – The tasks to schedule.</p></li>
+<li><p><strong>batch_id</strong> (<cite>Union[int, str]</cite>) – The id of provided tasks. It should be an integer or a string
+starting with an integer (e.g., 123, “123/my_task”)</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.runner_pool.RunnerPool.has_next">
-<span class="sig-name descname"><span class="pre">has_next</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/runner_pool.html#RunnerPool.has_next"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.runner_pool.RunnerPool.has_next" title="Link to this definition"></a></dt>
-<dd><p>Returns whether there are any pending results to return.</p>
+<dt class="sig sig-object py" id="trinity.explorer.scheduler.Scheduler.get_results">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_num</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clear_timeout_tasks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#trinity.explorer.workflow_runner.Status" title="trinity.explorer.workflow_runner.Status"><span class="pre">Status</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/explorer/scheduler.html#Scheduler.get_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.scheduler.Scheduler.get_results" title="Link to this definition"></a></dt>
+<dd><p>Get the result of tasks at the specific batch_id.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>True if there are any pending results not yet returned.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>batch_id</strong> (<cite>Union[int, str]</cite>) – Only wait for tasks at this batch.</p></li>
+<li><p><strong>min_num</strong> (<cite>int</cite>) – The minimum number of tasks to wait for. If <cite>None</cite>, wait for all tasks at <cite>batch_id</cite>.</p></li>
+<li><p><strong>timeout</strong> (<cite>float</cite>) – The timeout for waiting for tasks to finish. If <cite>None</cite>, wait for default timeout.</p></li>
+<li><p><strong>clear_timeout_tasks</strong> (<cite>bool</cite>) – Whether to clear timeout tasks.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.runner_pool.RunnerPool.get_next_unorder">
-<span class="sig-name descname"><span class="pre">get_next_unorder</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#trinity.explorer.workflow_runner.Status" title="trinity.explorer.workflow_runner.Status"><span class="pre">Status</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/explorer/runner_pool.html#RunnerPool.get_next_unorder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.runner_pool.RunnerPool.get_next_unorder" title="Link to this definition"></a></dt>
-<dd><p>Returns the next pending result unorder.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The return status of the next task.</p>
-</dd>
-</dl>
-</dd></dl>
+<dt class="sig sig-object py" id="trinity.explorer.scheduler.Scheduler.has_step">
+<span class="sig-name descname"><span class="pre">has_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/scheduler.html#Scheduler.has_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.scheduler.Scheduler.has_step" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.runner_pool.RunnerPool.get_next">
-<span class="sig-name descname"><span class="pre">get_next</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#trinity.explorer.workflow_runner.Status" title="trinity.explorer.workflow_runner.Status"><span class="pre">Status</span></a></span></span><a class="reference internal" href="../_modules/trinity/explorer/runner_pool.html#RunnerPool.get_next"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.runner_pool.RunnerPool.get_next" title="Link to this definition"></a></dt>
-<dd><p>Returns the next pending result in order.</p>
-<p>This returns the next task result, blocking for up to
-the specified timeout until it is available.</p>
+<dt class="sig sig-object py" id="trinity.explorer.scheduler.Scheduler.wait_all">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">wait_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clear_timeout_tasks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/scheduler.html#Scheduler.wait_all"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.scheduler.Scheduler.wait_all" title="Link to this definition"></a></dt>
+<dd><p>Wait for all tasks to complete without poping results. If timeout reached, raise TimeoutError.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The return status of the next task.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.runner_pool.RunnerPool.has_free">
-<span class="sig-name descname"><span class="pre">has_free</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/runner_pool.html#RunnerPool.has_free"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.runner_pool.RunnerPool.has_free" title="Link to this definition"></a></dt>
-<dd><p>Returns whether there are any idle actors available.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>True if there are any idle actors and no pending submits.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.runner_pool.RunnerPool.pop_idle">
-<span class="sig-name descname"><span class="pre">pop_idle</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/runner_pool.html#RunnerPool.pop_idle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.runner_pool.RunnerPool.pop_idle" title="Link to this definition"></a></dt>
-<dd><p>Removes an idle actor from the pool.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>An idle actor if one is available.
-None if no actor was free to be removed.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timeout</strong> (<cite>float</cite>) – timeout in seconds. Raise <cite>TimeoutError</cite> when no new tasks is completed within timeout.</p></li>
+<li><p><strong>clear_timeout_tasks</strong> (<cite>bool</cite>) – Whether to clear timeout tasks.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -404,18 +440,31 @@ None if no actor was free to be removed.</p>
 <dt class="sig sig-object py" id="trinity.explorer.Explorer.explore">
 <em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">explore</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/explorer.html#Explorer.explore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.Explorer.explore" title="Link to this definition"></a></dt>
 <dd><dl>
-<dt>The dreamming loop for explorer and trainer.</dt><dd><div class="line-block">
-<div class="line">&lt;—————————————– one period ———————————————-&gt; |</div>
+<dt>The timeline of the exploration process:</dt><dd><div class="line-block">
+<div class="line">&lt;——————————— one period ————————————-&gt; |</div>
 </div>
 </dd>
-<dt>explorer | &lt;– step_1 –&gt; | &lt;– step_2 –&gt; | … | &lt;– step_n –&gt; | &lt;– eval –&gt; | &lt;– [idle] –&gt; | &lt;– sync –&gt; |</dt><dd><p>trainer | &lt;– idle –&gt; | &lt;– step_1 –&gt; | &lt;– step_2 –&gt; | … | &lt;– step_n –&gt; | &lt;– [idle] –&gt; | &lt;– sync –&gt; |</p>
+<dt>explorer | &lt;—————- step_1 ————–&gt; |                                           |</dt><dd><div class="line-block">
+<div class="line">| &lt;—————- step_2 ————–&gt; |                                       |</div>
+<div class="line-block">
+<div class="line">…                                                                             |</div>
+<div class="line-block">
+<div class="line">| &lt;—————- step_n —————&gt; |                               |</div>
+<div class="line-block">
+<div class="line">| &lt;———————- eval ——————–&gt; | &lt;– sync –&gt; |</div>
+</div>
+</div>
+</div>
+</div>
+<p><a href="#id3"><span class="problematic" id="id4">|--------------------------------------------------------------------------------------|</span></a></p>
 </dd>
 </dl>
+<p>trainer  | &lt;– idle –&gt; | &lt;– step_1 –&gt; | &lt;– step_2 –&gt; | … | &lt;– step_n –&gt; | &lt;– sync –&gt; |</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.explorer.Explorer.explore_step">
-<span class="sig-name descname"><span class="pre">explore_step</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/explorer.html#Explorer.explore_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.Explorer.explore_step" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">explore_step</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/explorer.html#Explorer.explore_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.Explorer.explore_step" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -424,8 +473,13 @@ None if no actor was free to be removed.</p>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="trinity.explorer.Explorer.need_eval">
+<span class="sig-name descname"><span class="pre">need_eval</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/explorer.html#Explorer.need_eval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.Explorer.need_eval" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="trinity.explorer.Explorer.eval">
-<span class="sig-name descname"><span class="pre">eval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eval_explore_step_num</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/explorer.html#Explorer.eval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.Explorer.eval" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">eval</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/explorer.html#Explorer.eval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.Explorer.eval" title="Link to this definition"></a></dt>
 <dd><p>Evaluation on all evaluation data samples.</p>
 </dd></dl>
 
@@ -436,10 +490,9 @@ None if no actor was free to be removed.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.Explorer.wait_for_workflow_done">
-<span class="sig-name descname"><span class="pre">wait_for_workflow_done</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/explorer.html#Explorer.wait_for_workflow_done"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.Explorer.wait_for_workflow_done" title="Link to this definition"></a></dt>
-<dd><p>Wait for workflow to finish.</p>
-</dd></dl>
+<dt class="sig sig-object py" id="trinity.explorer.Explorer.save_checkpoint">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">save_checkpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sync_weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/explorer.html#Explorer.save_checkpoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.Explorer.save_checkpoint" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.explorer.Explorer.sync_weight">
@@ -453,100 +506,9 @@ None if no actor was free to be removed.</p>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.Explorer.flush_log">
-<span class="sig-name descname"><span class="pre">flush_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/explorer.html#Explorer.flush_log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.Explorer.flush_log" title="Link to this definition"></a></dt>
-<dd><p>Flush the log of the current step.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="trinity.explorer.Explorer.shutdown">
-<span class="sig-name descname"><span class="pre">shutdown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/explorer.html#Explorer.shutdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.Explorer.shutdown" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">shutdown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/explorer.html#Explorer.shutdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.Explorer.shutdown" title="Link to this definition"></a></dt>
 <dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="trinity.explorer.RunnerPool">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.explorer.</span></span><span class="sig-name descname"><span class="pre">RunnerPool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.models.html#trinity.common.models.model.InferenceModel" title="trinity.common.models.model.InferenceModel"><span class="pre">InferenceModel</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.models.html#trinity.common.models.model.InferenceModel" title="trinity.common.models.model.InferenceModel"><span class="pre">InferenceModel</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/runner_pool.html#RunnerPool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.RunnerPool" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>A pool of WorkflowRunner.</p>
-<p>The RunnerPool will automatically handle the exceptions during the workflow
-and retry when the workflow fails or timeout. The number of max retries is
-set in <cite>config.explorer.max_retry_times</cite> and the max timeout is set in
-<cite>config.explorer.max_timeout</cite>.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.RunnerPool.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.models.html#trinity.common.models.model.InferenceModel" title="trinity.common.models.model.InferenceModel"><span class="pre">InferenceModel</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.models.html#trinity.common.models.model.InferenceModel" title="trinity.common.models.model.InferenceModel"><span class="pre">InferenceModel</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/runner_pool.html#RunnerPool.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.RunnerPool.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.RunnerPool.run_tasks">
-<span class="sig-name descname"><span class="pre">run_tasks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tasks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.workflows.html#trinity.common.workflows.workflow.Task" title="trinity.common.workflows.workflow.Task"><span class="pre">Task</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="trinity.common.workflows.html#trinity.common.workflows.workflow.Task" title="trinity.common.workflows.workflow.Task"><span class="pre">Task</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/explorer/runner_pool.html#RunnerPool.run_tasks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.RunnerPool.run_tasks" title="Link to this definition"></a></dt>
-<dd><p>Schedule a list of tasks to run in the pool.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>tasks</strong> – A list of tasks.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.RunnerPool.has_next">
-<span class="sig-name descname"><span class="pre">has_next</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/runner_pool.html#RunnerPool.has_next"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.RunnerPool.has_next" title="Link to this definition"></a></dt>
-<dd><p>Returns whether there are any pending results to return.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>True if there are any pending results not yet returned.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.RunnerPool.get_next_unorder">
-<span class="sig-name descname"><span class="pre">get_next_unorder</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#trinity.explorer.workflow_runner.Status" title="trinity.explorer.workflow_runner.Status"><span class="pre">Status</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/explorer/runner_pool.html#RunnerPool.get_next_unorder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.RunnerPool.get_next_unorder" title="Link to this definition"></a></dt>
-<dd><p>Returns the next pending result unorder.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The return status of the next task.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.RunnerPool.get_next">
-<span class="sig-name descname"><span class="pre">get_next</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#trinity.explorer.workflow_runner.Status" title="trinity.explorer.workflow_runner.Status"><span class="pre">Status</span></a></span></span><a class="reference internal" href="../_modules/trinity/explorer/runner_pool.html#RunnerPool.get_next"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.RunnerPool.get_next" title="Link to this definition"></a></dt>
-<dd><p>Returns the next pending result in order.</p>
-<p>This returns the next task result, blocking for up to
-the specified timeout until it is available.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The return status of the next task.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.RunnerPool.has_free">
-<span class="sig-name descname"><span class="pre">has_free</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/runner_pool.html#RunnerPool.has_free"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.RunnerPool.has_free" title="Link to this definition"></a></dt>
-<dd><p>Returns whether there are any idle actors available.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>True if there are any idle actors and no pending submits.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.explorer.RunnerPool.pop_idle">
-<span class="sig-name descname"><span class="pre">pop_idle</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/runner_pool.html#RunnerPool.pop_idle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.explorer.RunnerPool.pop_idle" title="Link to this definition"></a></dt>
-<dd><p>Removes an idle actor from the pool.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>An idle actor if one is available.
-None if no actor was free to be removed.</p>
-</dd>
-</dl>
-</dd></dl>
 
 </dd></dl>
 

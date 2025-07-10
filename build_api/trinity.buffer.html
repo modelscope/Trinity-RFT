@@ -250,6 +250,7 @@
 <li class="toctree-l3"><a class="reference internal" href="trinity.buffer.writer.html#trinity.buffer.writer.file_writer.JSONWriter"><code class="docutils literal notranslate"><span class="pre">JSONWriter</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="trinity.buffer.writer.html#trinity.buffer.writer.file_writer.JSONWriter.__init__"><code class="docutils literal notranslate"><span class="pre">JSONWriter.__init__()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.buffer.writer.html#trinity.buffer.writer.file_writer.JSONWriter.write"><code class="docutils literal notranslate"><span class="pre">JSONWriter.write()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.buffer.writer.html#trinity.buffer.writer.file_writer.JSONWriter.write_async"><code class="docutils literal notranslate"><span class="pre">JSONWriter.write_async()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.buffer.writer.html#trinity.buffer.writer.file_writer.JSONWriter.acquire"><code class="docutils literal notranslate"><span class="pre">JSONWriter.acquire()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.buffer.writer.html#trinity.buffer.writer.file_writer.JSONWriter.release"><code class="docutils literal notranslate"><span class="pre">JSONWriter.release()</span></code></a></li>
 </ul>
@@ -260,6 +261,7 @@
 <li class="toctree-l3"><a class="reference internal" href="trinity.buffer.writer.html#trinity.buffer.writer.queue_writer.QueueWriter"><code class="docutils literal notranslate"><span class="pre">QueueWriter</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="trinity.buffer.writer.html#trinity.buffer.writer.queue_writer.QueueWriter.__init__"><code class="docutils literal notranslate"><span class="pre">QueueWriter.__init__()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.buffer.writer.html#trinity.buffer.writer.queue_writer.QueueWriter.write"><code class="docutils literal notranslate"><span class="pre">QueueWriter.write()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.buffer.writer.html#trinity.buffer.writer.queue_writer.QueueWriter.write_async"><code class="docutils literal notranslate"><span class="pre">QueueWriter.write_async()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.buffer.writer.html#trinity.buffer.writer.queue_writer.QueueWriter.acquire"><code class="docutils literal notranslate"><span class="pre">QueueWriter.acquire()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.buffer.writer.html#trinity.buffer.writer.queue_writer.QueueWriter.release"><code class="docutils literal notranslate"><span class="pre">QueueWriter.release()</span></code></a></li>
 </ul>
@@ -270,6 +272,7 @@
 <li class="toctree-l3"><a class="reference internal" href="trinity.buffer.writer.html#trinity.buffer.writer.sql_writer.SQLWriter"><code class="docutils literal notranslate"><span class="pre">SQLWriter</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="trinity.buffer.writer.html#trinity.buffer.writer.sql_writer.SQLWriter.__init__"><code class="docutils literal notranslate"><span class="pre">SQLWriter.__init__()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.buffer.writer.html#trinity.buffer.writer.sql_writer.SQLWriter.write"><code class="docutils literal notranslate"><span class="pre">SQLWriter.write()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.buffer.writer.html#trinity.buffer.writer.sql_writer.SQLWriter.write_async"><code class="docutils literal notranslate"><span class="pre">SQLWriter.write_async()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.buffer.writer.html#trinity.buffer.writer.sql_writer.SQLWriter.acquire"><code class="docutils literal notranslate"><span class="pre">SQLWriter.acquire()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.buffer.writer.html#trinity.buffer.writer.sql_writer.SQLWriter.release"><code class="docutils literal notranslate"><span class="pre">SQLWriter.release()</span></code></a></li>
 </ul>
@@ -333,8 +336,14 @@
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="trinity.buffer.buffer_writer.BufferWriter.write_async">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">write_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/buffer_writer.html#BufferWriter.write_async"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.buffer_writer.BufferWriter.write_async" title="Link to this definition"></a></dt>
+<dd><p>Write to buffer asynchronously.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="trinity.buffer.buffer_writer.BufferWriter.acquire">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">acquire</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/buffer_writer.html#BufferWriter.acquire"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.buffer_writer.BufferWriter.acquire" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">acquire</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/buffer_writer.html#BufferWriter.acquire"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.buffer_writer.BufferWriter.acquire" title="Link to this definition"></a></dt>
 <dd><p>Acquire the buffer writer.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -348,7 +357,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.buffer.buffer_writer.BufferWriter.release">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">release</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/buffer_writer.html#BufferWriter.release"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.buffer_writer.BufferWriter.release" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">release</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/buffer_writer.html#BufferWriter.release"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.buffer_writer.BufferWriter.release" title="Link to this definition"></a></dt>
 <dd><p>Release the buffer writer. After release, the buffer writer can not be used again.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>

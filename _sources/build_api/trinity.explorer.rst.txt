@@ -11,10 +11,10 @@ trinity.explorer.explorer module
    :undoc-members:
    :show-inheritance:
 
-trinity.explorer.runner\_pool module
-------------------------------------
+trinity.explorer.scheduler module
+---------------------------------
 
-.. automodule:: trinity.explorer.runner_pool
+.. automodule:: trinity.explorer.scheduler
    :members:
    :undoc-members:
    :show-inheritance:

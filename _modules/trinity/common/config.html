@@ -441,12 +441,14 @@
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">EXPLORER_NAME</span>
     <span class="c1"># for workflow runner</span>
     <span class="c1"># number of workflow runners.</span>
-    <span class="c1"># For sync engine (vllm), it should be equal to `engine_num`.</span>
-    <span class="c1"># For async engine (vllm_async), it can be larger than `engine_num`, e.g. 16 * `engine_num`</span>
-    <span class="n">runner_num</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="n">max_timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">900</span>  <span class="c1"># wait each task for 15 minutes</span>
+    <span class="c1"># For sync engine (vllm), it should be `1`.</span>
+    <span class="c1"># For async engine (vllm_async), it could be a large number.</span>
+    <span class="n">runner_per_model</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8</span>  <span class="c1"># number of runners per each rollout model</span>
+    <span class="n">max_timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1800</span>  <span class="c1"># wait each task for 30 minutes</span>
     <span class="n">max_retry_times</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># retry each task for 2 times if it fails or timeout</span>
-    <span class="n">env_vars</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">env_vars</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>  <span class="c1"># environment variables for workflow runner</span>
+
+    <span class="n">runner_num</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># deprecated</span>
 
     <span class="c1"># for inference models</span>
     <span class="c1"># for rollout model</span>
@@ -456,7 +458,10 @@
 
     <span class="c1"># for evaluation</span>
     <span class="n">eval_interval</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span>
-    <span class="n">eval_on_latest_checkpoint</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></div>
+    <span class="n">eval_on_startup</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># evalulate at step 0</span>
+
+    <span class="c1"># for benchmark</span>
+    <span class="n">bench_on_latest_checkpoint</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># only benchmark the latest checkpoint</span></div>
 
 
 
@@ -508,7 +513,7 @@
     <span class="c1"># allow explorer to run `sync_offset` steps before sync</span>
     <span class="n">sync_offset</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="c1"># waiting for `sync_timeout` seconds before timeout in `nccl` method</span>
-    <span class="n">sync_timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1800</span>
+    <span class="n">sync_timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3600</span>
     <span class="c1"># wait for the lastest checkpoint to be ready  # TODO: to be used</span>
     <span class="n">wait_for_checkpoint</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 

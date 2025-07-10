@@ -312,9 +312,11 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_expert_explorer_part</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;sync_method&quot;</span><span class="p">,</span> <span class="s2">&quot;sync_interval&quot;</span><span class="p">,</span> <span class="s2">&quot;sync_timeout&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;runner_num&quot;</span><span class="p">,</span> <span class="s2">&quot;max_timeout&quot;</span><span class="p">,</span> <span class="s2">&quot;explorer_max_retry_times&quot;</span><span class="p">,</span> <span class="s2">&quot;eval_interval&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span>
+            <span class="s2">&quot;runner_per_model&quot;</span><span class="p">,</span> <span class="s2">&quot;max_timeout&quot;</span><span class="p">,</span> <span class="s2">&quot;explorer_max_retry_times&quot;</span><span class="p">,</span> <span class="s2">&quot;eval_interval&quot;</span>
+        <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;eval_on_latest_checkpoint&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;bench_on_latest_checkpoint&quot;</span><span class="p">)</span>
 
         <span class="k">with</span> <span class="n">st</span><span class="o">.</span><span class="n">expander</span><span class="p">(</span><span class="s2">&quot;Rollout Model Config&quot;</span><span class="p">,</span> <span class="n">expanded</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;engine_type&quot;</span><span class="p">,</span> <span class="s2">&quot;engine_num&quot;</span><span class="p">,</span> <span class="s2">&quot;tensor_parallel_size&quot;</span><span class="p">)</span>
@@ -687,7 +689,7 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_gen_explorer_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">explorer_config</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;runner_num&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;runner_num&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;runner_per_model&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;runner_per_model&quot;</span><span class="p">],</span>
             <span class="s2">&quot;max_timeout&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_timeout&quot;</span><span class="p">],</span>
             <span class="s2">&quot;max_retry_times&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;explorer_max_retry_times&quot;</span><span class="p">],</span>
             <span class="s2">&quot;rollout_model&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -700,7 +702,7 @@
             <span class="p">},</span>
             <span class="s2">&quot;auxiliary_models&quot;</span><span class="p">:</span> <span class="p">[],</span>
             <span class="s2">&quot;eval_interval&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;eval_interval&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;eval_on_latest_checkpoint&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;eval_on_latest_checkpoint&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;bench_on_latest_checkpoint&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;bench_on_latest_checkpoint&quot;</span><span class="p">],</span>
         <span class="p">}</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;_auxiliary_models_num&quot;</span><span class="p">]):</span>
             <span class="n">auxiliary_model_config</span> <span class="o">=</span> <span class="p">{</span>
