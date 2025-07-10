@@ -3,7 +3,7 @@ from typing import Optional, Union
 
 import torch
 
-from trinity.common.rewards import REWARD_FUNCTIONS, RewardFn
+from trinity.common.rewards.reward_fn import REWARD_FUNCTIONS, RewardFn
 from trinity.utils.eval_utils import compute_score
 from trinity.utils.log import get_logger
 
