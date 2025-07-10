@@ -10,6 +10,7 @@ from copy import deepcopy
 from datetime import datetime
 
 import ray
+from parameterized import parameterized
 
 from tests.tools import (
     RayUnittestBase,
@@ -301,7 +302,19 @@ class TestFullyAsyncMode(unittest.TestCase):
         if multiprocessing.get_start_method(allow_none=True) != "spawn":
             multiprocessing.set_start_method("spawn", force=True)
 
-    def test_fully_async_mode(self):
+    @parameterized.expand(
+        [
+            (
+                "queue",
+                False,
+            ),
+            (
+                "priority_queue",
+                True,
+            ),
+        ]
+    )
+    def test_fully_async_mode(self, name, use_priority_queue):
         config = get_template_config()
         config.project = "unittest"
         config.name = f"fully_async_{datetime.now().strftime('%Y%m%d%H%M%S')}"
@@ -316,6 +329,7 @@ class TestFullyAsyncMode(unittest.TestCase):
             name="exp_buffer",
             storage_type=StorageType.QUEUE,
             wrap_in_ray=True,
+            use_priority_queue=use_priority_queue,
         )
         config.synchronizer.sync_method = SyncMethod.CHECKPOINT
         config.synchronizer.sync_interval = 8

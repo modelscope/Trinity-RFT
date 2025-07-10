@@ -1,7 +1,7 @@
 """An Async PriorityQueue."""
 import asyncio
 from collections import deque
-from typing import List
+from typing import List, Union
 
 import numpy as np
 from sortedcontainers import SortedDict
@@ -57,7 +57,7 @@ class AsyncPriorityQueue:
         self.reuse_cooldown_time = reuse_cooldown_time
         self._condition = asyncio.Condition()  # For thread-safe operations
 
-    async def put(self, item: List[Experience], delay: float = 0.0) -> None:
+    async def put(self, item: Union[List[Experience], str], delay: float = 0.0) -> None:
         """
         Insert an item into the queue, possibly replacing the lowest-priority item if full.
 
