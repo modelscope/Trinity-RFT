@@ -5,6 +5,7 @@ import re
 import time
 import traceback
 from collections import defaultdict, deque
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple, Union
 
 import ray
@@ -14,6 +15,15 @@ from trinity.common.models import InferenceModel
 from trinity.common.workflows import Task
 from trinity.explorer.workflow_runner import Status, WorkflowRunner
 from trinity.utils.log import get_logger
+
+
+@dataclass
+class TaskWrapper:
+    """A wrapper for a task."""
+
+    task: Task
+    batch_id: Union[int, str]
+    repeat_times: int
 
 
 class RunnerWrapper:
@@ -49,7 +59,7 @@ class RunnerWrapper:
             .remote(self.config, self.rollout_model, self.auxiliary_models)
         )
 
-    async def run_with_retry(self, task: Task) -> Tuple[Status, int]:
+    async def run_with_retry(self, task: TaskWrapper) -> Tuple[Status, int]:
         """
         Returns:
             `Status`: The return status of the task.
@@ -62,15 +72,16 @@ class RunnerWrapper:
         try:
             for attempt in range(self.retry_times + 1):
                 try:
-                    status = await asyncio.wait_for(self.runner.run_task.remote(task), self.timeout)
+                    task.task.rollout_args.n = task.repeat_times
+                    status = await asyncio.wait_for(
+                        self.runner.run_task.remote(task.task), self.timeout
+                    )
                     if status.ok:
                         break
                     else:
                         self.logger.error(status.message)
                 except asyncio.TimeoutError:
-                    last_exception_msg = (
-                        f"Timeout when running task at runner {self.runner_id}: {task}"
-                    )
+                    last_exception_msg = f"Timeout when running task of batch {task.batch_id} at runner {self.runner_id}: {task.task}"
                     self.logger.error(last_exception_msg)
                     status = Status(ok=False, metric=dict(), message=last_exception_msg)
                 except Exception:
@@ -123,18 +134,19 @@ class Scheduler:
         self.namespace = ray.get_runtime_context().namespace
         self.default_timeout = config.explorer.max_timeout * (config.explorer.max_retry_times + 1)
         self.max_retry_times = config.explorer.max_retry_times
+        self.max_repeat_times = config.explorer.max_repeat_times_per_runner
         self.running = False
 
         self.runner_num = len(rollout_model) * config.explorer.runner_per_model
         self.runners: Dict[int, RunnerWrapper] = dict()
         self.idle_runners = set()  # runner_id
-        self.busy_runners = dict()  # runner_id -> (task, batch_id)
+        self.busy_runners = dict()  # runner_id -> task
 
-        self.pending_tasks_heap = []
         self.pending_tasks: Dict[Union[int, str], deque] = defaultdict(deque)  # batch_id -> tasks
         self.running_tasks: Dict[Union[int, str], set[asyncio.Future]] = defaultdict(
             set
         )  # batch_id -> futures
+        self.running_task_map: Dict[asyncio.Future, TaskWrapper] = dict()  # future -> task
         self.completed_tasks: Dict[Union[int, str], deque[Status]] = defaultdict(
             deque
         )  # batch_id -> results
@@ -166,9 +178,9 @@ class Scheduler:
         self.runners[runner_id].restart_runner()
 
         if runner_id in self.busy_runners:
-            task, idx = self.busy_runners.pop(runner_id)
+            task = self.busy_runners.pop(runner_id)
             self.logger.warning(
-                f"Runner {runner_id} failed to run task at batch_id {idx}: {task.raw_task}"
+                f"Runner {runner_id} failed to run task at batch_id {task.batch_id}: {task.task.raw_task}"
             )
 
         self.idle_runners.add(runner_id)
@@ -179,7 +191,6 @@ class Scheduler:
         while self.running:
             try:
                 await self._schedule_pending_tasks()
-                await self._check_completed_tasks()
                 await asyncio.sleep(0.01)
             except Exception:
                 self.logger.error(f"Error in scheduler loop:\n{traceback.format_exc()}")
@@ -197,36 +208,35 @@ class Scheduler:
             while task_queue and self.idle_runners:
                 task = task_queue.pop()
                 runner_id = self.idle_runners.pop()
-                self.busy_runners[runner_id] = (task, batch_id)
-                self.running_tasks[batch_id].add(
-                    asyncio.create_task(self.runners[runner_id].run_with_retry(task))
-                )
+                self.busy_runners[runner_id] = task
+                future = asyncio.create_task(self.runners[runner_id].run_with_retry(task))
+                self.running_task_map[future] = task
+                future.add_done_callback(self.task_done_callback)
+                self.running_tasks[batch_id].add(future)
 
             if not task_queue:
                 del self.pending_tasks[batch_id]
 
-    async def _check_completed_tasks(self) -> None:
-        for batch_id in list(self.running_tasks.keys()):
-            futures = self.running_tasks[batch_id]
+    def task_done_callback(self, async_task: asyncio.Task):
+        task = self.running_task_map.pop(async_task)
+        if async_task.cancelled():
+            return
+        elif async_task.exception():
+            self.logger.error(f"Task {task.task_id} failed: {async_task.exception()}")
+            return
+        else:
+            task_result, runner_id = async_task.result()
+            self.completed_tasks[task.batch_id].appendleft(task_result)
+            self.busy_runners.pop(runner_id)
+            self.idle_runners.add(runner_id)
+            self.logger.debug(
+                f"Task completed (batch_id {task.batch_id}), success: {task_result.ok}"
+            )
 
-            for future in list(futures):
-                if future.done():
-                    futures.remove(future)
-                    try:
-                        task_result, runner_id = await future
-                        self.completed_tasks[batch_id].appendleft(task_result)
-                        self.busy_runners.pop(runner_id)
-                        self.idle_runners.add(runner_id)
-
-                        self.logger.debug(
-                            f"Task completed (batch_id {batch_id}), success: {task_result.ok}"
-                        )
-
-                    except Exception as e:
-                        self.logger.error(f"Error getting task result: {e}")
-
-            if not futures:
-                del self.running_tasks[batch_id]
+        if task.batch_id in self.running_tasks:
+            self.running_tasks[task.batch_id].remove(async_task)
+            if not self.running_tasks[task.batch_id]:
+                del self.running_tasks[task.batch_id]
 
     def _clear_timeout_tasks(self, batch_id: Union[int, str]) -> None:
         if batch_id in self.pending_tasks:
@@ -280,8 +290,30 @@ class Scheduler:
         """
         if not tasks:
             return
-        for task in tasks:
-            self.pending_tasks[batch_id].appendleft(task)
+        self._split_and_submit_tasks(tasks, batch_id=batch_id)
+
+    def _split_and_submit_tasks(self, tasks: List[Task], batch_id: Union[int, str]) -> None:
+        for i, task in enumerate(tasks):
+            group_id = f"{batch_id}/{i}"
+            task.group_id = group_id
+            if self.max_repeat_times is None:
+                self.pending_tasks[batch_id].appendleft(
+                    TaskWrapper(
+                        task=task,
+                        batch_id=batch_id,
+                        repeat_times=task.rollout_args.n,
+                    )
+                )
+                continue
+            rest_repeat_times = task.rollout_args.n
+            while rest_repeat_times > 0:
+                task_wrapper = TaskWrapper(
+                    task=task,
+                    batch_id=batch_id,
+                    repeat_times=min(self.max_repeat_times, rest_repeat_times),
+                )
+                rest_repeat_times -= task_wrapper.repeat_times
+                self.pending_tasks[batch_id].appendleft(task_wrapper)
 
     async def get_results(
         self,
@@ -322,7 +354,7 @@ class Scheduler:
             if clear_timeout_tasks:
                 self._clear_timeout_tasks(batch_id=batch_id)
                 for runner_id in list(self.busy_runners.keys()):
-                    if self.busy_runners[runner_id][1] == batch_id:
+                    if self.busy_runners[runner_id].batch_id == batch_id:
                         self._restart_runner(runner_id)
 
         results = []

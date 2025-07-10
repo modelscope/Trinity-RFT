@@ -316,6 +316,9 @@ class ExplorerConfig:
     max_timeout: int = 1800  # wait each task for 30 minutes
     max_retry_times: int = 2  # retry each task for 2 times if it fails or timeout
     env_vars: dict = field(default_factory=dict)  # environment variables for workflow runner
+    max_repeat_times_per_runner: Optional[
+        int
+    ] = None  # the number of time to repeat each task in a single workflow runner (for GRPO-like algorithms)
 
     runner_num: Optional[int] = None  # deprecated
 
@@ -364,9 +367,8 @@ class MonitorConfig:
 
 @dataclass
 class SynchronizerConfig:
-    """Configs for model weight synchronization"""
+    """Configs for model weight synchronization."""
 
-    # TODO: rename to "checkpoint", "nccl", "ipc"
     sync_method: SyncMethod = SyncMethod.NCCL
     # sync weights every `sync_interval` steps
     sync_interval: int = 1

@@ -68,7 +68,7 @@ class TestQueueBuffer(RayUnittestBaseAysnc):
         with open(BUFFER_FILE_PATH, "r") as f:
             self.assertEqual(len(f.readlines()), total_num + put_batch_size * 2)
         st = time.time()
-        self.assertRaises(StopIteration, reader.read, batch_size=1)
+        self.assertRaises(TimeoutError, reader.read, batch_size=1)
         et = time.time()
         self.assertTrue(et - st > 2)
 

@@ -8,7 +8,7 @@ import torch
 
 from tests.tools import get_template_config
 from trinity.buffer.reader.queue_reader import QueueReader
-from trinity.common.config import StorageConfig
+from trinity.common.config import GenerationConfig, StorageConfig
 from trinity.common.constants import StorageType
 from trinity.common.experience import Experience
 from trinity.common.models.model import InferenceModel
@@ -23,6 +23,7 @@ class DummyWorkflow(Workflow):
         super().__init__(model, task, auxiliary_models)
         self.error_type = task.raw_task.get("error_type", "")
         self.seconds = None
+        self.repeat_times = task.rollout_args.n
         if "timeout" in self.error_type:
             parts = self.error_type.split("_")
             if len(parts) > 1:
@@ -42,8 +43,12 @@ class DummyWorkflow(Workflow):
 
         return [
             Experience(
-                tokens=torch.zeros(5), prompt_length=2, prompt_text=self.error_type or "success"
+                tokens=torch.zeros(5),
+                prompt_length=2,
+                prompt_text=self.error_type or "success",
+                info={"repeat_times": self.repeat_times},
             )
+            for _ in range(self.repeat_times)
         ]
 
 
@@ -98,7 +103,11 @@ class DummyAuxiliaryModel(InferenceModel):
 
 
 def generate_tasks(
-    total_num: int, timeout_num: int = 0, exception_num: int = 0, timeout_seconds: int = 10
+    total_num: int,
+    timeout_num: int = 0,
+    exception_num: int = 0,
+    timeout_seconds: int = 10,
+    repeat_times: int = 1,
 ):
     """Generate some tasks for testing
 
@@ -108,7 +117,10 @@ def generate_tasks(
         exception_num: number of exception tasks
         timeout_seconds: the timeout for timeout tasks
     """
-    tasks = [Task(workflow=DummyWorkflow, raw_task={}) for _ in range(total_num)]
+    tasks = [
+        Task(workflow=DummyWorkflow, raw_task={}, rollout_args=GenerationConfig(n=repeat_times))
+        for _ in range(total_num)
+    ]
 
     tasks.extend(
         [
@@ -150,6 +162,9 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
             algorithm_type="ppo",
             path="",
         )
+        self.config.buffer.trainer_input.experience_buffer.max_read_timeout = 1
+        self.config.algorithm.repeat_times = 1
+        self.config.check_and_update()
         self.queue = QueueReader(
             self.config.buffer.trainer_input.experience_buffer, self.config.buffer
         )
@@ -163,6 +178,9 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
 
         results = await scheduler.get_results(batch_id=0, min_num=8, timeout=20)
         self.assertEqual(len(results), 8)
+        self.assertEqual(len(self.queue.read(batch_size=8)), 8)
+        with self.assertRaises(TimeoutError):
+            self.queue.read(batch_size=1)
 
         for result in results:
             self.assertTrue(result.ok)
@@ -176,6 +194,9 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
             results = await scheduler.get_results(batch_id=batch_id, min_num=4, timeout=10)
             self.assertEqual(len(results), 4)
             self.assertFalse(scheduler.has_step(batch_id))
+            self.assertEqual(len(self.queue.read(batch_size=4)), 4)
+        with self.assertRaises(TimeoutError):
+            self.queue.read(batch_size=1)
 
         tasks = generate_tasks(3)
         scheduler.schedule(tasks, batch_id=4)
@@ -183,6 +204,7 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
         results = await scheduler.get_results(batch_id=4)
         self.assertEqual(len(results), 3)
         self.assertFalse(scheduler.has_step(4))
+        self.assertEqual(len(self.queue.read(batch_size=3)), 3)
 
         # test timeout
         tasks = generate_tasks(2, timeout_num=2, timeout_seconds=10)
@@ -194,6 +216,7 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
 
         self.assertLessEqual(end_time - start_time, 5)
         self.assertEqual(len(results), 2)
+        self.assertEqual(len(self.queue.read(batch_size=2)), 2)
 
         # test run tasks after timeout
         tasks = generate_tasks(4)
@@ -204,8 +227,10 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(results), 4)
 
         success_count = sum(1 for r in results if r.ok)
-
-        self.assertEqual(success_count, sum(1 for r in results if r.ok))
+        self.assertEqual(success_count, 4)
+        self.assertEqual(len(self.queue.read(batch_size=4)), 4)
+        with self.assertRaises(TimeoutError):
+            self.queue.read(batch_size=1)
 
         # test exception tasks
         tasks = generate_tasks(1, exception_num=3)
@@ -215,14 +240,21 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
 
         success_count = sum(1 for r in results if r.ok)
         self.assertEqual(success_count, 1)
+        self.assertEqual(len(self.queue.read(batch_size=1)), 1)
+        with self.assertRaises(TimeoutError):
+            self.queue.read(batch_size=1)
 
         # test clear_timeout_tasks
         tasks = generate_tasks(3, timeout_num=1, timeout_seconds=3)
         scheduler.schedule(tasks, batch_id=2)
         results = await scheduler.get_results(batch_id=2, timeout=2, clear_timeout_tasks=False)
         self.assertEqual(len(results), 3)
+        self.assertEqual(len(self.queue.read(batch_size=3)), 3)
         results = await scheduler.get_results(batch_id=2, timeout=2, clear_timeout_tasks=False)
         self.assertEqual(len(results), 1)
+        self.assertEqual(len(self.queue.read(batch_size=1)), 1)
+        with self.assertRaises(TimeoutError):
+            self.queue.read(batch_size=1)
 
         await scheduler.stop()
 
@@ -364,6 +396,38 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(et - st < 1.0)
         self.assertEqual(len(results), 4)
         self.assertFalse(scheduler.has_step(2))
+        await scheduler.stop()
+
+    async def test_split_tasks(self):
+        self.config.explorer.max_repeat_times_per_runner = 2
+        self.config.check_and_update()
+        scheduler = Scheduler(self.config, [DummyModel.remote(), DummyModel.remote()])
+        await scheduler.start()
+
+        tasks = generate_tasks(4, repeat_times=8)  # ceil(8 / 2) == 4
+        scheduler.schedule(tasks, batch_id=1)
+        results = await scheduler.get_results(batch_id=1)
+        self.assertEqual(len(results), 4 * 4)
+        self.assertEqual(len(self.queue.read(batch_size=4 * 8)), 4 * 8)
+        with self.assertRaises(TimeoutError):
+            self.queue.read(batch_size=1)
+
+        tasks = generate_tasks(4, repeat_times=5)  # ceil(5 / 2) == 3
+        scheduler.schedule(tasks, batch_id=1)
+        results = await scheduler.get_results(batch_id=1)
+        self.assertEqual(len(results), 4 * 3)
+        self.assertEqual(len(self.queue.read(batch_size=4 * 5)), 4 * 5)
+        with self.assertRaises(TimeoutError):
+            self.queue.read(batch_size=1)
+
+        tasks = generate_tasks(3, repeat_times=1)  # ceil(1 / 2) == 1
+        scheduler.schedule(tasks, batch_id=1)
+        results = await scheduler.get_results(batch_id=1)
+        self.assertEqual(len(results), 3 * 1)
+        self.assertEqual(len(self.queue.read(batch_size=3 * 1)), 3 * 1)
+        with self.assertRaises(TimeoutError):
+            self.queue.read(batch_size=1)
+
         await scheduler.stop()
 
     def tearDown(self):
