@@ -133,6 +133,8 @@
     <span class="n">reward_fn</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">RewardFn</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">raw_task</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># The raw data sample</span>
 
+    <span class="n">group_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># for GRPO-like algorithms, automatically assigned</span>
+
 <div class="viewcode-block" id="Task.to_workflow">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.Task.to_workflow">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_workflow</span><span class="p">(</span>
