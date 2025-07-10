@@ -65,7 +65,6 @@ class StorageType(CaseInsensitiveEnum):
 
     SQL = "sql"
     QUEUE = "queue"
-    REPLAY_BUFFER = "replay_buffer"
     FILE = "file"
 
 

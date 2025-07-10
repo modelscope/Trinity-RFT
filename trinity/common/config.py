@@ -89,9 +89,8 @@ class StorageConfig:
     # used for StorageType.QUEUE
     capacity: int = 10000
     max_read_timeout: float = 1800
-
-    # used for StorageType.REPLAY_BUFFER
-    reuse_cold_down_time: float = np.inf
+    use_priority_queue: bool = False
+    reuse_cooldown_time: float = np.inf
     replay_buffer_kwargs: dict = field(
         default_factory=lambda: {"priority_fn": "linear_decay", "decay": 0.1}
     )

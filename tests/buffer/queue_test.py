@@ -100,6 +100,131 @@ class TestQueueBuffer(RayUnittestBaseAysnc):
         thread.join(timeout=1)
         self.assertFalse(thread.is_alive())
 
+    async def test_priority_queue_buffer(self):
+        total_num = 8
+        put_batch_size = 2
+        read_batch_size = 4
+        meta = StorageConfig(
+            name="test_buffer",
+            algorithm_type="ppo",
+            storage_type=StorageType.QUEUE,
+            max_read_timeout=3,
+            path=BUFFER_FILE_PATH,
+            use_priority_queue=True,
+        )
+        config = BufferConfig(
+            max_retry_times=3,
+            max_retry_interval=1,
+            read_batch_size=read_batch_size,
+        )
+        writer = QueueWriter(meta, config)
+        reader = QueueReader(meta, config)
+        self.assertEqual(await writer.acquire(), 1)
+        exps = [
+            Experience(
+                tokens=torch.tensor([float(j) for j in range(i + 1)]),
+                prompt_length=i,
+                reward=float(i),
+                logprobs=torch.tensor([0.1]),
+            )
+            for i in range(1, put_batch_size + 1)
+        ]
+        for exp in exps:
+            exp.info = {"model_version": 0, "use_count": 0}
+        for _ in range(total_num // put_batch_size):
+            await writer.write_async(exps)
+        for _ in range(total_num // read_batch_size):
+            exps = reader.read()
+            self.assertEqual(len(exps), read_batch_size)
+            print(f"finish read {read_batch_size} experience")
+        exps = [
+            Experience(
+                tokens=torch.tensor([float(j) for j in range(i + 1)]),
+                prompt_length=i,
+                reward=float(i),
+                logprobs=torch.tensor([0.1]),
+                action_mask=torch.tensor([j % 2 for j in range(i + 1)]),
+            )
+            for i in range(1, put_batch_size * 2 + 1)
+        ]
+        for exp in exps:
+            exp.info = {"model_version": 1, "use_count": 0}
+        writer.write(exps)
+        exps = reader.read(batch_size=put_batch_size * 2)
+        self.assertEqual(len(exps), put_batch_size * 2)
+        self.assertEqual(await writer.release(), 0)
+        self.assertRaises(StopIteration, reader.read)
+        with open(BUFFER_FILE_PATH, "r") as f:
+            self.assertEqual(len(f.readlines()), total_num + put_batch_size * 2)
+        st = time.time()
+        self.assertRaises(StopIteration, reader.read, batch_size=1)
+        et = time.time()
+        self.assertTrue(et - st > 2)
+
+        # test queue capacity
+        meta = StorageConfig(
+            name="test_buffer_small",
+            algorithm_type="ppo",
+            storage_type=StorageType.QUEUE,
+            max_read_timeout=3,
+            capacity=4,
+            path=BUFFER_FILE_PATH,
+            use_priority_queue=True,
+            reuse_cooldown_time=1,
+            replay_buffer_kwargs={"priority_fn": "linear_decay", "decay": 0.1},
+        )
+        writer = QueueWriter(meta, config)
+        reader = QueueReader(meta, config)
+        for i in range(4):
+            writer.write(
+                [
+                    Experience(
+                        tokens=torch.tensor([1, 2, 3]),
+                        prompt_length=2,
+                        info={"model_version": i, "use_count": 0},
+                    )
+                ]
+            )
+
+        # should not be blocked
+        def replace_call():
+            writer.write(
+                [
+                    Experience(
+                        tokens=torch.tensor([1, 2, 3]),
+                        prompt_length=2,
+                        info={"model_version": 4, "use_count": 0},
+                    )
+                ]
+            )
+
+        thread = threading.Thread(target=replace_call)
+        thread.start()
+        thread.join(timeout=2)
+        self.assertFalse(thread.is_alive())
+
+        exps = reader.read(batch_size=2)
+        self.assertEqual(len(exps), 2)
+        self.assertEqual(exps[0].info["model_version"], 4)
+        self.assertEqual(exps[0].info["use_count"], 1)
+        self.assertEqual(exps[1].info["model_version"], 3)
+        self.assertEqual(exps[1].info["use_count"], 1)
+
+        exps = reader.read(batch_size=2)
+        self.assertEqual(len(exps), 2)
+        self.assertEqual(exps[0].info["model_version"], 2)
+        self.assertEqual(exps[0].info["use_count"], 1)
+        self.assertEqual(exps[1].info["model_version"], 1)
+        self.assertEqual(exps[1].info["use_count"], 1)
+
+        time.sleep(1.5)
+        exps = reader.read(batch_size=2)
+        self.assertEqual(len(exps), 2)
+        self.assertEqual(exps[0].info["model_version"], 4)
+        self.assertEqual(exps[0].info["use_count"], 2)
+        self.assertEqual(exps[1].info["model_version"], 3)
+        self.assertEqual(exps[1].info["use_count"], 2)
+
     def setUp(self):
         if os.path.exists(BUFFER_FILE_PATH):
             os.remove(BUFFER_FILE_PATH)

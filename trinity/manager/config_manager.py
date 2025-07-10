@@ -4,6 +4,7 @@ import subprocess
 import tempfile
 from typing import List
 
+import numpy as np
 import streamlit as st
 import yaml
 
@@ -191,6 +192,8 @@ class ConfigManager:
             with st.expander("Experiences Buffer Configs", expanded=True):
                 self.get_configs("storage_type")
                 self.get_configs("experience_buffer_path")
+                self.get_configs("use_priority_queue")
+                self.get_configs("reuse_cooldown_time", "priority_fn", "priority_decay")
 
         self.buffer_advanced_tab = st.expander("Advanced Config")
         with self.buffer_advanced_tab:
@@ -343,7 +346,6 @@ class ConfigManager:
 
         trainer_config = {
             "actor_rollout_ref": {
-                "hybrid_engine": True,
                 "model": {
                     "external_lib": None,
                     "override_config": {},
@@ -352,7 +354,6 @@ class ConfigManager:
                 },
                 "actor": {
                     "strategy": st.session_state["training_strategy"],
-                    "ppo_mini_batch_size": st.session_state["train_batch_size"],
                     "ppo_micro_batch_size_per_gpu": st.session_state[
                         "actor_ppo_micro_batch_size_per_gpu"
                     ],
@@ -498,6 +499,16 @@ class ConfigManager:
             "max_retry_times": st.session_state["buffer_max_retry_times"],
             "max_retry_interval": st.session_state["max_retry_interval"],
         }
+        if st.session_state["algorithm_type"] != "dpo":
+            experience_buffer = buffer_config["trainer_input"]["experience_buffer"]
+            experience_buffer["use_priority_queue"] = st.session_state["use_priority_queue"]
+            experience_buffer["reuse_cooldown_time"] = (
+                st.session_state["reuse_cooldown_time"] or np.inf
+            )
+            experience_buffer["replay_buffer_kwargs"] = {
+                "priority_fn": st.session_state["priority_fn"],
+                "decay": st.session_state["priority_decay"],
+            }
 
         if st.session_state["mode"] != "train":
             buffer_config["explorer_input"] = {

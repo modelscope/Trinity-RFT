@@ -1,5 +1,6 @@
 import streamlit as st
 
+from trinity.buffer.priority_queue import PRIORITY_FUNC
 from trinity.common.constants import PromptType, StorageType
 from trinity.common.rewards.reward_fn import REWARD_FUNCTIONS
 from trinity.common.workflows.workflow import WORKFLOWS
@@ -269,7 +270,7 @@ def set_storage_type(**kwargs):
         storage_candidates = [StorageType.FILE.value, StorageType.SQL.value]
     else:
         st.session_state[key] = st.session_state["_not_dpo_storage_type"]
-        storage_candidates = [StorageType.QUEUE.value, StorageType.SQL.value]
+        storage_candidates = [StorageType.QUEUE.value]
 
     def on_change():
         if st.session_state["algorithm_type"] == "dpo":
@@ -281,6 +282,47 @@ def set_storage_type(**kwargs):
         "Storage Type",
         storage_candidates,
         on_change=on_change,
+        **kwargs,
+    )
+
+
+@CONFIG_GENERATORS.register_config(default_value=False)
+def set_use_priority_queue(**kwargs):
+    st.checkbox("Use Priority Queue", **kwargs)
+
+
+@CONFIG_GENERATORS.register_config(
+    default_value=None, visible=lambda: st.session_state["use_priority_queue"]
+)
+def set_reuse_cooldown_time(**kwargs):
+    st.number_input(
+        "Reuse Cooldown Time",
+        min_value=0.0,
+        max_value=1e5,
+        help="Leave blank to indicate `np.inf`",
+        placeholder="np.inf",
+        **kwargs,
+    )
+
+
+@CONFIG_GENERATORS.register_config(
+    default_value="linear_decay", visible=lambda: st.session_state["use_priority_queue"]
+)
+def set_priority_fn(**kwargs):
+    candidates = list(PRIORITY_FUNC.modules.keys())
+    st.selectbox(
+        "Priority Function",
+        candidates,
+        **kwargs,
+    )
+
+
+@CONFIG_GENERATORS.register_config(
+    default_value=0.1, visible=lambda: st.session_state["use_priority_queue"]
+)
+def set_priority_decay(**kwargs):
+    st.number_input(
+        "Priority Decay",
         **kwargs,
     )
 
@@ -307,11 +349,7 @@ if `storage_type == StorageType.SQL`, this should be a path to database."""
     else:
         st.session_state[key] = st.session_state["_not_dpo_experience_buffer_path"]
         title = "Experience Buffer Path"
-        help_msg = r"""This path is used for `trainer`,
-
-if `storage_type == StorageType.QUEUE`, default to `None`,
-
-if `storage_type == StorageType.SQL`, default to `sqlite:///{os.path.join(checkpoint_root_dir, '.cache', project_name, experiment_name)}/data.db`."""
+        help_msg = r"""This path is used for experiences persistent storage, default to `None`."""
 
     def on_change():
         if st.session_state["algorithm_type"] == "dpo":

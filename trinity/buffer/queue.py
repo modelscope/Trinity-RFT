@@ -5,6 +5,7 @@ from typing import List
 
 import ray
 
+from trinity.buffer.priority_queue import AsyncPriorityQueue
 from trinity.buffer.writer.file_writer import JSONWriter
 from trinity.buffer.writer.sql_writer import SQLWriter
 from trinity.common.config import BufferConfig, StorageConfig
@@ -29,7 +30,14 @@ class QueueActor:
         self.logger = get_logger(__name__)
         self.config = config
         self.capacity = storage_config.capacity
-        self.queue = asyncio.Queue(self.capacity)
+        if storage_config.use_priority_queue:
+            reuse_cooldown_time = storage_config.reuse_cooldown_time
+            replay_buffer_kwargs = storage_config.replay_buffer_kwargs
+            self.queue = AsyncPriorityQueue(
+                self.capacity, reuse_cooldown_time, **replay_buffer_kwargs
+            )
+        else:
+            self.queue = asyncio.Queue(self.capacity)
         st_config = deepcopy(storage_config)
         st_config.wrap_in_ray = False
         if st_config.path is not None:
