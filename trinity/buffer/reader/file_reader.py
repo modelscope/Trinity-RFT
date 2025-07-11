@@ -294,6 +294,7 @@ class RolloutDataReader(BufferReader):
                 format_args=self.meta.format,
                 rollout_args=self.meta.rollout_args,
                 workflow_args=self.meta.workflow_args,
+                reward_fn_args=self.meta.reward_fn_args,
                 is_eval=self.meta.task_type == TaskType.EVAL,
                 reward_fn=reward_fn,
                 raw_task=sample,

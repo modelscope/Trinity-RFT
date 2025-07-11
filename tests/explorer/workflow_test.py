@@ -2,6 +2,7 @@
 """Test for the workflow module"""
 import unittest
 from dataclasses import dataclass
+from typing import Dict, Optional
 from unittest.mock import MagicMock
 
 from tests.tools import get_unittest_dataset_config
@@ -13,6 +14,7 @@ from trinity.common.workflows.workflow import Task
 class MockResponse:
     response_text: str
     reward: float = 0.0
+    metrics: Optional[Dict[str, float]] = None
 
 
 class DummyWorkflow(Workflow):

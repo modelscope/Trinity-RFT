@@ -1,29 +1,28 @@
+"""Base Reward Function Class."""
+
 import re
-from typing import Any, Dict, List
+from typing import Optional
 
-from .base import RewardShapper
+from trinity.common.rewards.reward_fn import REWARD_FUNCTIONS, RewardFn
+from trinity.utils.log import get_logger
+
+logger = get_logger(__name__)
 
 
-class FormatRewardShapper(RewardShapper):
-    """Shapper for format-based rewards"""
+@REWARD_FUNCTIONS.register_module("format_reward")
+class FormatReward(RewardFn):
+    """A reward function that checks if the reasoning process is enclosed within <think> and </think> tags, while the final answer is enclosed within <answer> and </answer> tags.
+    Ref: https://github.com/huggingface/open-r1/blob/main/src/open_r1/rewards.py
+    """
 
-    def __init__(
-        self, pattern: str, correct_format_reward: float = 1.0, incorrect_format_reward: float = 0.0
-    ):
-        self.pattern = re.compile(pattern, re.DOTALL | re.MULTILINE)
-        self.correct_format_reward = correct_format_reward
-        self.incorrect_format_reward = incorrect_format_reward
+    def __init__(self, pattern: Optional[str] = None):
+        self.pattern = pattern if pattern else r"^<think>\n.*?\n</think>\n<answer>\n.*?\n</answer>$"
 
-    def shape(self, sample: Dict[str, Any]) -> Dict[str, Any]:
-        response = sample["response"]
-        reward = (
-            self.correct_format_reward
-            if self.pattern.match(response)
-            else self.incorrect_format_reward
-        )
-
-        sample["format_reward"] = reward
-        return sample
-
-    def batch_shape(self, samples: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        return [self.shape(sample) for sample in samples]
+    def __call__(  # type: ignore
+        self,
+        response,
+    ) -> dict[str, float]:
+        if re.match(self.pattern, response, re.DOTALL | re.MULTILINE):
+            return {"format_score": 0.1}
+        else:
+            return {"format_score": -0.1}
