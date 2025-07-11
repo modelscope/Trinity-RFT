@@ -84,6 +84,11 @@
 <li class="toctree-l3"><a class="reference internal" href="#trinity.buffer.buffer_writer.BufferWriter"><code class="docutils literal notranslate"><span class="pre">BufferWriter</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#module-trinity.buffer.priority_queue">trinity.buffer.priority_queue module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#trinity.buffer.priority_queue.linear_decay_priority"><code class="docutils literal notranslate"><span class="pre">linear_decay_priority()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#trinity.buffer.priority_queue.AsyncPriorityQueue"><code class="docutils literal notranslate"><span class="pre">AsyncPriorityQueue</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#module-trinity.buffer.queue">trinity.buffer.queue module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#trinity.buffer.queue.is_database_url"><code class="docutils literal notranslate"><span class="pre">is_database_url()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#trinity.buffer.queue.is_json_file"><code class="docutils literal notranslate"><span class="pre">is_json_file()</span></code></a></li>
@@ -365,6 +370,129 @@
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><cite>int</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-trinity.buffer.priority_queue">
+<span id="trinity-buffer-priority-queue-module"></span><h2>trinity.buffer.priority_queue module<a class="headerlink" href="#module-trinity.buffer.priority_queue" title="Link to this heading"></a></h2>
+<p>An Async PriorityQueue.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.buffer.priority_queue.linear_decay_priority">
+<span class="sig-prename descclassname"><span class="pre">trinity.buffer.priority_queue.</span></span><span class="sig-name descname"><span class="pre">linear_decay_priority</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decay</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/priority_queue.html#linear_decay_priority"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.priority_queue.linear_decay_priority" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="trinity.buffer.priority_queue.AsyncPriorityQueue">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.buffer.priority_queue.</span></span><span class="sig-name descname"><span class="pre">AsyncPriorityQueue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">capacity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reuse_cooldown_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority_fn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'linear_decay'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/priority_queue.html#AsyncPriorityQueue"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.priority_queue.AsyncPriorityQueue" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>An asynchronous priority queue that manages a fixed-size buffer of experience items.
+Items are prioritized using a user-defined function and reinserted after a cooldown period.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.buffer.priority_queue.AsyncPriorityQueue.capacity">
+<span class="sig-name descname"><span class="pre">capacity</span></span><a class="headerlink" href="#trinity.buffer.priority_queue.AsyncPriorityQueue.capacity" title="Link to this definition"></a></dt>
+<dd><p>Maximum number of items the queue can hold.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.buffer.priority_queue.AsyncPriorityQueue.priority_groups">
+<span class="sig-name descname"><span class="pre">priority_groups</span></span><a class="headerlink" href="#trinity.buffer.priority_queue.AsyncPriorityQueue.priority_groups" title="Link to this definition"></a></dt>
+<dd><p>Maps priorities to deques of items with the same priority.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>SortedDict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.buffer.priority_queue.AsyncPriorityQueue.priority_fn">
+<span class="sig-name descname"><span class="pre">priority_fn</span></span><a class="headerlink" href="#trinity.buffer.priority_queue.AsyncPriorityQueue.priority_fn" title="Link to this definition"></a></dt>
+<dd><p>Function used to determine the priority of an item.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>callable</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.buffer.priority_queue.AsyncPriorityQueue.reuse_cooldown_time">
+<span class="sig-name descname"><span class="pre">reuse_cooldown_time</span></span><a class="headerlink" href="#trinity.buffer.priority_queue.AsyncPriorityQueue.reuse_cooldown_time" title="Link to this definition"></a></dt>
+<dd><p>Delay before reusing an item (set to infinity to disable).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.buffer.priority_queue.AsyncPriorityQueue.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">capacity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reuse_cooldown_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority_fn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'linear_decay'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/priority_queue.html#AsyncPriorityQueue.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.priority_queue.AsyncPriorityQueue.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize the async priority queue.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>capacity</strong> (<cite>int</cite>) – The maximum number of items the queue can store.</p></li>
+<li><p><strong>reuse_cooldown_time</strong> (<cite>float</cite>) – Time to wait before reusing an item. Set to None to disable reuse.</p></li>
+<li><p><strong>priority_fn</strong> (<cite>str</cite>) – Name of the function to use for determining item priority.</p></li>
+<li><p><strong>kwargs</strong> – Additional keyword arguments for the priority function.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.buffer.priority_queue.AsyncPriorityQueue.put">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">put</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/priority_queue.html#AsyncPriorityQueue.put"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.priority_queue.AsyncPriorityQueue.put" title="Link to this definition"></a></dt>
+<dd><p>Insert an item into the queue, possibly replacing the lowest-priority item if full.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>item</strong> (<cite>List[Experience]</cite>) – A list of experiences to add.</p></li>
+<li><p><strong>delay</strong> (<cite>float</cite>) – Optional delay before insertion (for simulating timing behavior).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.buffer.priority_queue.AsyncPriorityQueue.get">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/buffer/priority_queue.html#AsyncPriorityQueue.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.priority_queue.AsyncPriorityQueue.get" title="Link to this definition"></a></dt>
+<dd><p>Retrieve the highest-priority item from the queue.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The highest-priority item (list of experiences).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>List[<a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience">Experience</a>]</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>After retrieval, the item is optionally reinserted after a cooldown period.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.buffer.priority_queue.AsyncPriorityQueue.size">
+<span class="sig-name descname"><span class="pre">size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/priority_queue.html#AsyncPriorityQueue.size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.priority_queue.AsyncPriorityQueue.size" title="Link to this definition"></a></dt>
+<dd><p>Get the current number of items in the queue.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Number of items currently stored.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
 </dd>
 </dl>
 </dd></dl>

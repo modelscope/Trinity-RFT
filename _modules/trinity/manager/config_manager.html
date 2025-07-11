@@ -304,6 +304,8 @@
             <span class="k">with</span> <span class="n">st</span><span class="o">.</span><span class="n">expander</span><span class="p">(</span><span class="s2">&quot;Experiences Buffer Configs&quot;</span><span class="p">,</span> <span class="n">expanded</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;storage_type&quot;</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;experience_buffer_path&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;use_priority_queue&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;reuse_cooldown_time&quot;</span><span class="p">,</span> <span class="s2">&quot;priority_fn&quot;</span><span class="p">,</span> <span class="s2">&quot;priority_decay&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">buffer_advanced_tab</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">expander</span><span class="p">(</span><span class="s2">&quot;Advanced Config&quot;</span><span class="p">)</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer_advanced_tab</span><span class="p">:</span>
@@ -459,7 +461,6 @@
 
         <span class="n">trainer_config</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;actor_rollout_ref&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;hybrid_engine&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
                 <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="s2">&quot;external_lib&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
                     <span class="s2">&quot;override_config&quot;</span><span class="p">:</span> <span class="p">{},</span>
@@ -468,7 +469,6 @@
                 <span class="p">},</span>
                 <span class="s2">&quot;actor&quot;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="s2">&quot;strategy&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;training_strategy&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;ppo_mini_batch_size&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;train_batch_size&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;ppo_micro_batch_size_per_gpu&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span>
                         <span class="s2">&quot;actor_ppo_micro_batch_size_per_gpu&quot;</span>
                     <span class="p">],</span>
@@ -614,6 +614,14 @@
             <span class="s2">&quot;max_retry_times&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;buffer_max_retry_times&quot;</span><span class="p">],</span>
             <span class="s2">&quot;max_retry_interval&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_retry_interval&quot;</span><span class="p">],</span>
         <span class="p">}</span>
+        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;dpo&quot;</span><span class="p">:</span>
+            <span class="n">experience_buffer</span> <span class="o">=</span> <span class="n">buffer_config</span><span class="p">[</span><span class="s2">&quot;trainer_input&quot;</span><span class="p">][</span><span class="s2">&quot;experience_buffer&quot;</span><span class="p">]</span>
+            <span class="n">experience_buffer</span><span class="p">[</span><span class="s2">&quot;use_priority_queue&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;use_priority_queue&quot;</span><span class="p">]</span>
+            <span class="n">experience_buffer</span><span class="p">[</span><span class="s2">&quot;reuse_cooldown_time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;reuse_cooldown_time&quot;</span><span class="p">]</span>
+            <span class="n">experience_buffer</span><span class="p">[</span><span class="s2">&quot;replay_buffer_kwargs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;priority_fn&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;priority_fn&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;decay&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;priority_decay&quot;</span><span class="p">],</span>
+            <span class="p">}</span>
 
         <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;mode&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;train&quot;</span><span class="p">:</span>
             <span class="n">buffer_config</span><span class="p">[</span><span class="s2">&quot;explorer_input&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
