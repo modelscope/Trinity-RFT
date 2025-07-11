@@ -299,8 +299,8 @@ def set_reuse_cooldown_time(**kwargs):
         "Reuse Cooldown Time",
         min_value=0.0,
         max_value=1e5,
-        help="Leave blank to indicate `np.inf`",
-        placeholder="np.inf",
+        help="Leave blank to indicate no reuse",
+        placeholder=None,
         **kwargs,
     )
 

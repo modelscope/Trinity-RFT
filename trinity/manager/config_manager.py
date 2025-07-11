@@ -4,7 +4,6 @@ import subprocess
 import tempfile
 from typing import List
 
-import numpy as np
 import streamlit as st
 import yaml
 
@@ -502,9 +501,7 @@ class ConfigManager:
         if st.session_state["algorithm_type"] != "dpo":
             experience_buffer = buffer_config["trainer_input"]["experience_buffer"]
             experience_buffer["use_priority_queue"] = st.session_state["use_priority_queue"]
-            experience_buffer["reuse_cooldown_time"] = (
-                st.session_state["reuse_cooldown_time"] or np.inf
-            )
+            experience_buffer["reuse_cooldown_time"] = st.session_state["reuse_cooldown_time"]
             experience_buffer["replay_buffer_kwargs"] = {
                 "priority_fn": st.session_state["priority_fn"],
                 "decay": st.session_state["priority_decay"],
