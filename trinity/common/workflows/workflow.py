@@ -13,7 +13,8 @@ import torch
 from trinity.common.config import FormatConfig, GenerationConfig
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
-from trinity.common.rewards.reward_fn import MathRewardFn, RewardFn
+from trinity.common.rewards.basic_reward import MathRewardFn
+from trinity.common.rewards.reward_fn import RewardFn
 from trinity.utils.log import get_logger
 from trinity.utils.registry import Registry
 
@@ -31,6 +32,7 @@ class Task:
     format_args: FormatConfig = field(default_factory=FormatConfig)
     rollout_args: GenerationConfig = field(default_factory=GenerationConfig)
     workflow_args: dict = field(default_factory=dict)
+    reward_fn_args: dict = field(default_factory=dict)
     is_eval: bool = False
     reward_fn: Optional[Type[RewardFn]] = None
     raw_task: Optional[dict] = None  # The raw data sample
@@ -176,6 +178,7 @@ class SimpleWorkflow(Workflow):
         self.format_args = task.format_args
         self.system_prompt = task.format_args.system_prompt
         self.reply_prefix = task.format_args.reply_prefix
+        self.reward_fn_args = task.reward_fn_args
 
         self.raw_task = task.raw_task
         self.task_desc = task.task_desc
@@ -183,7 +186,7 @@ class SimpleWorkflow(Workflow):
 
         reward_fn = task.reward_fn
         if isinstance(reward_fn, type) and issubclass(reward_fn, RewardFn):
-            self.reward_fn: RewardFn = reward_fn()
+            self.reward_fn: RewardFn = reward_fn(**self.reward_fn_args)
         else:
             raise ValueError("`reward_fn` must be a subclass of `RewardFn`")
         # Rollout args
@@ -207,20 +210,20 @@ class SimpleWorkflow(Workflow):
         logger.debug("start chat")
         responses = self.model.chat(messages, **self.rollout_args)
         for response in responses:
-            reward = self.reward_fn(  # type: ignore [misc]
+            reward_dict = self.reward_fn(  # type: ignore [misc]
                 response=response.response_text,  # type: ignore [arg-type]
                 truth=self.truth,
-                return_dict=self.is_eval,
             )
+
+            if response.metrics is None:
+                response.metrics = {}
+            response.metrics.update(reward_dict)
+            reward = sum(reward_dict.values())
+            response.reward = reward
+
             logger.debug(
                 f"self.task_desc: {self.task_desc}, messages: {messages}, response: {response.response_text}, reward: {reward}"
             )
-            if isinstance(reward, dict):
-                if response.metrics is None:
-                    response.metrics = {}
-                response.metrics.update(reward)
-                reward = sum(reward.values())
-            response.reward = reward
         return responses
 
 

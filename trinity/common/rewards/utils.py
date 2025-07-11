@@ -1,0 +1,24 @@
+from typing import Any, List
+
+from rm_gallery.core.model.message import ChatMessage
+
+def to_rm_gallery_messages(messages: List[str]) -> Any:
+    """
+    Converts string list to structured ChatMessage list for debugging.
+
+    Args:
+        messages: List of alternating user/assistant messages
+        system_message: Initial system message content
+
+    Returns:
+        List of structured ChatMessage objects
+    """
+    from rm_gallery.core.model.message import MessageRole
+
+    role_map = {
+        "system": MessageRole.SYSTEM,
+        "user": MessageRole.USER,
+        "assistant": MessageRole.ASSISTANT,
+    }
+
+    return [ChatMessage(role=role_map[msg["role"]], content=msg["content"]) for msg in messages]

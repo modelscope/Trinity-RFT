@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Reward functions for RFT"""
 
-from .reward_fn import REWARD_FUNCTIONS, AccuracyReward, FormatReward, RewardFn
+from .basic_reward import REWARD_FUNCTIONS, AccuracyReward, FormatReward, RewardFn
 
 __all__ = [
     "RewardFn",
