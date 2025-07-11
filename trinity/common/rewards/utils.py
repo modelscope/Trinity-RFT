@@ -1,7 +1,5 @@
 from typing import Any, Dict, List
 
-from rm_gallery.core.model.message import ChatMessage
-
 
 def to_rm_gallery_messages(messages: List[Dict[str, Any]]) -> Any:
     """
@@ -13,7 +11,7 @@ def to_rm_gallery_messages(messages: List[Dict[str, Any]]) -> Any:
     Returns:
         List of structured ChatMessage objects
     """
-    from rm_gallery.core.model.message import MessageRole
+    from rm_gallery.core.model.message import ChatMessage, MessageRole
 
     role_map = {
         "system": MessageRole.SYSTEM,
