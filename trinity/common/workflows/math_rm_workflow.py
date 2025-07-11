@@ -3,14 +3,11 @@
 
 from typing import List, Optional
 
-from trinity.common.experience import Experience
-from trinity.common.workflows.workflow import WORKFLOWS, SimpleWorkflow, Task
-from trinity.utils.log import get_logger
-
 import openai
 
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
+from trinity.common.workflows.workflow import WORKFLOWS, SimpleWorkflow, Task
 from trinity.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -39,13 +36,12 @@ class MathRMWorkflow(SimpleWorkflow):
         logger.debug("start chat")
         responses = self.model.chat(messages, **self.rollout_args)
         for response in responses:
-            reward_dict = self.reward_fn(  # type: ignore [misc]
+            reward_dict = self.reward_fn(  # type: ignore
                 response,
                 messages,
                 ground_truth=self.truth,
             )
-            print(f"{reward_dict=}") #  TODO: delete
-            
+
             if response.metrics is None:
                 response.metrics = {}
             response.metrics.update(reward_dict)

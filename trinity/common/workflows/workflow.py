@@ -13,7 +13,7 @@ import torch
 from trinity.common.config import FormatConfig, GenerationConfig
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
-from trinity.common.rewards.basic_reward import MathRewardFn
+from trinity.common.rewards.math_reward import MathRewardFn
 from trinity.common.rewards.reward_fn import RewardFn
 from trinity.utils.log import get_logger
 from trinity.utils.registry import Registry

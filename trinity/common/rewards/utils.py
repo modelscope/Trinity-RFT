@@ -1,14 +1,14 @@
-from typing import Any, List
+from typing import Any, Dict, List
 
 from rm_gallery.core.model.message import ChatMessage
 
-def to_rm_gallery_messages(messages: List[str]) -> Any:
+
+def to_rm_gallery_messages(messages: List[Dict[str, Any]]) -> Any:
     """
     Converts string list to structured ChatMessage list for debugging.
 
     Args:
         messages: List of alternating user/assistant messages
-        system_message: Initial system message content
 
     Returns:
         List of structured ChatMessage objects

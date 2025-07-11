@@ -5,7 +5,7 @@ from dataclasses import asdict
 from typing import List
 
 from trinity.common.experience import Experience
-from trinity.common.rewards.basic_reward import MathBoxedRewardFn
+from trinity.common.rewards.math_reward import MathBoxedRewardFn
 from trinity.common.workflows.workflow import WORKFLOWS, SimpleWorkflow, Task
 from trinity.utils.log import get_logger
 

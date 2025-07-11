@@ -1,7 +1,7 @@
 import streamlit as st
 
 from trinity.common.constants import PromptType, StorageType
-from trinity.common.rewards.basic_reward import REWARD_FUNCTIONS
+from trinity.common.rewards.reward_fn import REWARD_FUNCTIONS
 from trinity.common.workflows.workflow import WORKFLOWS
 from trinity.manager.config_registry.config_registry import CONFIG_GENERATORS
 

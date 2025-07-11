@@ -22,7 +22,7 @@ class RewardFn(ABC):
         pass
 
     @abstractmethod
-    def __call__(self, **kwargs) -> Dict[str, float]:  # TODO
+    def __call__(self, **kwargs) -> Dict[str, float]:
         pass
 
 
@@ -41,7 +41,7 @@ class RMGalleryFn(RewardFn):
 
         self.reward_model = RewardRegistry.get(reward_name)(**kwargs)
 
-    def __call__(self, experience: Experience, messages: List[str], **kwargs) -> Dict[str, float]:  # type: ignore
+    def __call__(self, experience: Experience, messages: List[Dict[str, Any]], **kwargs) -> Dict[str, float]:  # type: ignore
         """Call the reward function."""
 
         sample = self._build_sample_from_experience(experience, messages, **kwargs)
@@ -51,7 +51,7 @@ class RMGalleryFn(RewardFn):
         return self._extract_reward(sample_with_reward)
 
     def _build_sample_from_experience(
-        self, experience: Experience, messages: List[str], **kwargs
+        self, experience: Experience, messages: List[Dict[str, Any]], **kwargs
     ) -> Any:
         """Convert experience to sample.
         Ref: https://github.com/modelscope/RM-Gallery/blob/main/rm_gallery/core/data/schema.py
@@ -83,15 +83,10 @@ class RMGalleryFn(RewardFn):
 
         reward_dict = {}
 
-        if (
-            not sample.output
-            or not sample.output[0]
-            or not sample.output[0].answer
-            or not sample.output[0].answer.reward
-        ):
-            return reward_dict
-
-        reward_obj = sample.output[0].answer.reward
+        try:
+            reward_obj = sample.output[0].answer.reward
+        except Exception as e:
+            raise ValueError(f"No reward is found in sample: {e}")
 
         from rm_gallery.core.reward.schema import (
             RewardDimensionWithRank,
