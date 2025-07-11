@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
 """Reward functions for RFT"""
 
+# isort: off
+from .reward_fn import REWARD_FUNCTIONS, RewardFn, RMGalleryFn
+
 from .accuracy_reward import AccuracyReward
 from .countdown_reward import CountDownRewardFn
 from .format_reward import FormatReward
 from .math_reward import MathBoxedRewardFn, MathRewardFn
-from .reward_fn import REWARD_FUNCTIONS, RewardFn, RMGalleryFn
+
+# isort: on
 
 __all__ = [
     "RewardFn",

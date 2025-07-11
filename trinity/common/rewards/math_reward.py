@@ -2,9 +2,9 @@
 """Math Reward Function Class."""
 from typing import Optional
 
-from trinity.common.rewards.reward_fn import REWARD_FUNCTIONS, RewardFn
 from trinity.common.rewards.accuracy_reward import AccuracyReward
 from trinity.common.rewards.format_reward import FormatReward
+from trinity.common.rewards.reward_fn import REWARD_FUNCTIONS, RewardFn
 from trinity.utils.eval_utils import (
     compute_score,
     simple_answer_parser,
@@ -41,7 +41,6 @@ class MathRewardFn(RewardFn):
         format_score = self.format_reward(response)
 
         return accuracy_score | format_score
-
 
 
 @REWARD_FUNCTIONS.register_module("math_boxed_reward")
