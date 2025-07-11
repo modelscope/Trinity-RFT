@@ -20,7 +20,7 @@ RUN apt update && apt install -y \
 
 # For Aliyun users: update pip mirror to aliyun to speed up pip install
 RUN pip config set global.index-url http://mirrors.cloud.aliyuncs.com/pypi/simple/ \
-   && pip config set global.trusted-host mirrors.cloud.aliyuncs.com
+   && pip config set install.trusted-host mirrors.cloud.aliyuncs.com
 
 # copy the Trinity-RFT dir into the workspace
 COPY . .

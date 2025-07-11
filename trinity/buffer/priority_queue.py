@@ -1,7 +1,7 @@
 """An Async PriorityQueue."""
 import asyncio
 from collections import deque
-from typing import List, Union
+from typing import List, Optional, Union
 
 import numpy as np
 from sortedcontainers import SortedDict
@@ -32,7 +32,7 @@ class AsyncPriorityQueue:
     def __init__(
         self,
         capacity: int,
-        reuse_cooldown_time: float = np.inf,
+        reuse_cooldown_time: Optional[float] = None,
         priority_fn: str = "linear_decay",
         **kwargs,
     ):
@@ -40,15 +40,17 @@ class AsyncPriorityQueue:
         Initialize the async priority queue.
 
         Args:
-            capacity (int): The maximum number of items the queue can store.
-            reuse_cooldown_time (float): Time to wait before reusing an item.
+            capacity (`int`): The maximum number of items the queue can store.
+            reuse_cooldown_time (`float`): Time to wait before reusing an item. Set to None to disable reuse.
+            priority_fn (`str`): Name of the function to use for determining item priority.
+            kwargs: Additional keyword arguments for the priority function.
         """
         self.capacity = capacity
-        self._count = 0
         self.priority_groups = SortedDict()  # Maps priority -> deque of items
         priority_fn = PRIORITY_FUNC.get(priority_fn)
         from trinity.buffer.queue import QueueActor
 
+        # TODO: remove FINISHE_MESSAGE and use a more elegant solution
         self.FINISH_MESSAGE = QueueActor.FINISH_MESSAGE
 
         self.priority_fn = (
@@ -57,20 +59,20 @@ class AsyncPriorityQueue:
         self.reuse_cooldown_time = reuse_cooldown_time
         self._condition = asyncio.Condition()  # For thread-safe operations
 
-    async def put(self, item: Union[List[Experience], str], delay: float = 0.0) -> None:
+    async def put(self, item: Union[List[Experience], str], delay: float = 0) -> None:
         """
         Insert an item into the queue, possibly replacing the lowest-priority item if full.
 
         Args:
-            item (List[Experience]): A list of experiences to add.
-            delay (float): Optional delay before insertion (for simulating timing behavior).
+            item (`List[Experience]`): A list of experiences to add.
+            delay (`float`): Optional delay before insertion (for simulating timing behavior).
         """
         if delay > 0:
             await asyncio.sleep(delay)
 
         priority = self.priority_fn(item)
         async with self._condition:
-            if self._count == self.capacity:
+            if len(self.priority_groups) == self.capacity:
                 # If full, only insert if new item has higher or equal priority than the lowest
                 lowest_priority, item_queue = self.priority_groups.peekitem(index=0)
                 if lowest_priority > priority:
@@ -79,14 +81,12 @@ class AsyncPriorityQueue:
                 item_queue.popleft()
                 if not item_queue:
                     self.priority_groups.popitem(index=0)
-                self._count -= 1
 
             # Add the new item
             if priority not in self.priority_groups:
                 self.priority_groups[priority] = deque()
             self.priority_groups[priority].append(item)
-            self._count += 1
-            self._condition.notify_all()
+            self._condition.notify()
 
     async def get(self) -> List[Experience]:
         """
@@ -99,22 +99,19 @@ class AsyncPriorityQueue:
             - After retrieval, the item is optionally reinserted after a cooldown period.
         """
         async with self._condition:
-            while self._count == 0:
-                await self._condition.wait_for(lambda: self._count > 0)
+            while len(self.priority_groups) == 0:
+                await self._condition.wait()
 
             _, item_queue = self.priority_groups.peekitem(index=-1)
             item = item_queue.popleft()
-
             if not item_queue:
                 self.priority_groups.popitem(index=-1)
-
-            self._count -= 1
 
         if item != self.FINISH_MESSAGE:
             for exp in item:
                 exp.info["use_count"] += 1
         # Optionally resubmit the item after a cooldown
-        if not np.isinf(self.reuse_cooldown_time):
+        if self.reuse_cooldown_time is not None:
             asyncio.create_task(self.put(item, self.reuse_cooldown_time))
 
         return item
@@ -126,4 +123,4 @@ class AsyncPriorityQueue:
         Returns:
             int: Number of items currently stored.
         """
-        return self._count
+        return len(self.priority_groups)

@@ -81,6 +81,41 @@ class TestQueueBuffer(RayUnittestBaseAysnc):
         et = time.time()
         self.assertTrue(et - st > 2)
 
+    async def test_priority_queue_capacity(self):
+        # test queue capacity
+        meta = StorageConfig(
+            name="test_buffer_small",
+            algorithm_type="ppo",
+            storage_type=StorageType.QUEUE,
+            max_read_timeout=1,
+            capacity=2,
+            path=BUFFER_FILE_PATH,
+            use_priority_queue=True,
+            replay_buffer_kwargs={"priority_fn": "linear_decay", "decay": 0.6},
+        )
+        writer = QueueWriter(meta, self.config)
+        reader = QueueReader(meta, self.config)
+
+        for i in range(4):
+            writer.write(
+                [
+                    Experience(
+                        tokens=torch.tensor([1, 2, 3]),
+                        prompt_length=2,
+                        info={"model_version": i, "use_count": 0},
+                    ),
+                ]
+            )
+
+        exps = reader.read(batch_size=2)
+        self.assertEqual(exps[0].info["model_version"], 3)
+        self.assertEqual(exps[0].info["use_count"], 1)
+        self.assertEqual(exps[1].info["model_version"], 2)
+        self.assertEqual(exps[1].info["use_count"], 1)
+
+        with self.assertRaises(TimeoutError):
+            reader.read(batch_size=1)
+
     async def test_queue_buffer_capacity(self):
         # test queue capacity
         meta = StorageConfig(
@@ -120,8 +155,8 @@ class TestQueueBuffer(RayUnittestBaseAysnc):
             capacity=4,
             path=BUFFER_FILE_PATH,
             use_priority_queue=True,
-            reuse_cooldown_time=1,
-            replay_buffer_kwargs={"priority_fn": "linear_decay", "decay": 0.1},
+            reuse_cooldown_time=0.5,
+            replay_buffer_kwargs={"priority_fn": "linear_decay", "decay": 0.6},
         )
         writer = QueueWriter(meta, self.config)
         reader = QueueReader(meta, self.config)
@@ -132,7 +167,12 @@ class TestQueueBuffer(RayUnittestBaseAysnc):
                         tokens=torch.tensor([1, 2, 3]),
                         prompt_length=2,
                         info={"model_version": i, "use_count": 0},
-                    )
+                    ),
+                    Experience(
+                        tokens=torch.tensor([1, 2, 3]),
+                        prompt_length=2,
+                        info={"model_version": i, "use_count": 0},
+                    ),
                 ]
             )
 
@@ -144,7 +184,12 @@ class TestQueueBuffer(RayUnittestBaseAysnc):
                         tokens=torch.tensor([1, 2, 3]),
                         prompt_length=2,
                         info={"model_version": 4, "use_count": 0},
-                    )
+                    ),
+                    Experience(
+                        tokens=torch.tensor([1, 2, 3]),
+                        prompt_length=2,
+                        info={"model_version": 4, "use_count": 0},
+                    ),
                 ]
             )
 
@@ -153,27 +198,76 @@ class TestQueueBuffer(RayUnittestBaseAysnc):
         thread.join(timeout=2)
         self.assertFalse(thread.is_alive())
 
-        exps = reader.read(batch_size=2)
-        self.assertEqual(len(exps), 2)
+        exps = reader.read(batch_size=4)
+        self.assertEqual(len(exps), 4)
         self.assertEqual(exps[0].info["model_version"], 4)
         self.assertEqual(exps[0].info["use_count"], 1)
-        self.assertEqual(exps[1].info["model_version"], 3)
-        self.assertEqual(exps[1].info["use_count"], 1)
+        self.assertEqual(exps[2].info["model_version"], 3)
+        self.assertEqual(exps[2].info["use_count"], 1)
 
-        exps = reader.read(batch_size=2)
-        self.assertEqual(len(exps), 2)
-        self.assertEqual(exps[0].info["model_version"], 2)
-        self.assertEqual(exps[0].info["use_count"], 1)
-        self.assertEqual(exps[1].info["model_version"], 1)
-        self.assertEqual(exps[1].info["use_count"], 1)
+        # model_version  4,   3,   2,   1
+        # use_count      1,   1,   0,   0
+        # priority      3.4, 2.4, 2.0, 1.0
 
-        time.sleep(1.5)
-        exps = reader.read(batch_size=2)
-        self.assertEqual(len(exps), 2)
+        time.sleep(1)
+        exps = reader.read(batch_size=4)
+        self.assertEqual(len(exps), 4)
         self.assertEqual(exps[0].info["model_version"], 4)
         self.assertEqual(exps[0].info["use_count"], 2)
-        self.assertEqual(exps[1].info["model_version"], 3)
-        self.assertEqual(exps[1].info["use_count"], 2)
+        self.assertEqual(exps[2].info["model_version"], 3)
+        self.assertEqual(exps[2].info["use_count"], 2)
+
+        # model_version  4,   3,   2,   1
+        # use_count      2,   2,   0,   0
+        # priority      2.8, 1.8, 2.0, 1.0
+
+        time.sleep(1)
+        exps = reader.read(batch_size=4)
+        self.assertEqual(len(exps), 4)
+        self.assertEqual(exps[0].info["model_version"], 4)
+        self.assertEqual(exps[0].info["use_count"], 3)
+        self.assertEqual(exps[2].info["model_version"], 2)
+        self.assertEqual(exps[2].info["use_count"], 1)
+
+        # model_version  4,   3,   2,   1
+        # use_count      3,   2,   1,   0
+        # priority      2.2, 1.8, 1.4, 1.0
+
+        time.sleep(1)
+        exps = reader.read(batch_size=4)
+        self.assertEqual(len(exps), 4)
+        self.assertEqual(exps[0].info["model_version"], 4)
+        self.assertEqual(exps[0].info["use_count"], 4)
+        self.assertEqual(exps[2].info["model_version"], 3)
+        self.assertEqual(exps[2].info["use_count"], 3)
+
+        # model_version  4,   3,   2,   1
+        # use_count      4,   3,   1,   0
+        # priority      1.6, 1.2, 1.4, 1.0
+
+        time.sleep(1)
+        exps = reader.read(batch_size=4)
+        self.assertEqual(len(exps), 4)
+        self.assertEqual(exps[0].info["model_version"], 4)
+        self.assertEqual(exps[0].info["use_count"], 5)
+        self.assertEqual(exps[2].info["model_version"], 2)
+        self.assertEqual(exps[2].info["use_count"], 2)
+
+        # model_version  4,   3,   2,   1
+        # use_count      5,   3,   2,   0
+        # priority      1.0, 1.2, 0.8, 1.0
+
+        time.sleep(1)
+        exps = reader.read(batch_size=4)
+        self.assertEqual(len(exps), 4)
+        self.assertEqual(exps[0].info["model_version"], 3)
+        self.assertEqual(exps[0].info["use_count"], 4)
+        self.assertEqual(exps[2].info["model_version"], 1)
+        self.assertEqual(exps[2].info["use_count"], 1)
+
+        # model_version  4,   3,   2,   1
+        # use_count      5,   4,   2,   1
+        # priority      1.0, 0.6, 0.8, 0.4
 
     def setUp(self):
         self.total_num = 8

@@ -4,7 +4,6 @@ import os
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
-import numpy as np
 from omegaconf import OmegaConf
 
 from trinity.common.constants import (
@@ -90,7 +89,7 @@ class StorageConfig:
     capacity: int = 10000
     max_read_timeout: float = 1800
     use_priority_queue: bool = False
-    reuse_cooldown_time: float = np.inf
+    reuse_cooldown_time: Optional[float] = None
     replay_buffer_kwargs: dict = field(
         default_factory=lambda: {"priority_fn": "linear_decay", "decay": 0.1}
     )
