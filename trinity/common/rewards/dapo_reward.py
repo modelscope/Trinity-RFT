@@ -31,7 +31,6 @@ class MathDAPORewardFn(RewardFn):
         response: str,
         response_token: torch.Tensor,
         truth: Optional[str] = None,
-        return_dict: Optional[bool] = False,
     ) -> Union[float, dict]:
         accuracy_score = compute_score(response, truth)
 
@@ -40,13 +39,10 @@ class MathDAPORewardFn(RewardFn):
         if self.enable_overlong_penalty:
             format_score = self.compute_overlong_penalty(response_token)
 
-        if return_dict:
-            return {
-                "accuracy": accuracy_score,
-                "format_score": format_score,
-            }
-
-        return accuracy_score + format_score
+        return {
+            "accuracy": accuracy_score,
+            "format_score": format_score,
+        }
 
     def compute_overlong_penalty(self, response_token):
         assert (

@@ -18,6 +18,8 @@ class MathDAPOWorkflow(SimpleWorkflow):
 
     def reset(self, task: Task):
         self.format_args = task.format_args
+        self.system_prompt = task.format_args.system_prompt
+        self.reply_prefix = task.format_args.reply_prefix
 
         self.raw_task = task.raw_task
         self.task_desc = task.task_desc
