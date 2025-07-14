@@ -53,7 +53,7 @@ data = [
 agent = [
     "agentscope"
 ]
-rm = [
+rm_gallery = [
     "rm-gallery"
 ]
 dev = [
