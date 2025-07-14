@@ -2,10 +2,17 @@
 """Test for the workflow module"""
 import unittest
 from dataclasses import dataclass
+from typing import Dict, Optional
 from unittest.mock import MagicMock
 
 from tests.tools import get_unittest_dataset_config
-from trinity.common.workflows import MathBoxedWorkflow, MathWorkflow, Workflow
+from trinity.common.rewards import RMGalleryFn
+from trinity.common.workflows import (
+    MathBoxedWorkflow,
+    MathRMWorkflow,
+    MathWorkflow,
+    Workflow,
+)
 from trinity.common.workflows.workflow import Task
 
 
@@ -13,6 +20,8 @@ from trinity.common.workflows.workflow import Task
 class MockResponse:
     response_text: str
     reward: float = 0.0
+    metrics: Optional[Dict[str, float]] = None
+    info: Optional[Dict] = None
 
 
 class DummyWorkflow(Workflow):
@@ -206,7 +215,6 @@ class WorkflowTest(unittest.TestCase):
         )
         workflow = task.to_workflow(model=model)
         experiences = workflow.run()
-        # self.assertEqual(len(experiences), 1)
         self.assertEqual(experiences[0].reward, 1.1)
         self.assertEqual(experiences[1].reward, 0.9)
         self.assertEqual(experiences[2].reward, 0.9)
@@ -228,6 +236,37 @@ class WorkflowTest(unittest.TestCase):
         self.assertEqual(experiences[1].reward, -0.1)
         self.assertEqual(experiences[2].reward, -0.1)
         self.assertEqual(experiences[3].reward, 1.1)
+
+    @unittest.skip("Skip for now, need to fix import issues of RM-Gallery")
+    def test_rm_gallery_workflow(self) -> None:
+        model = MagicMock()
+        model.chat.return_value = [
+            MockResponse("<think> balabalabala 99 </think>\n \\boxed{36}"),
+            MockResponse("answer is \\boxed{36 }"),
+            MockResponse("Kim's total points are 6 + 30 =\\boxed{36}"),
+            MockResponse("<think> balalaba </think> \\boxed{35.00}"),
+        ]
+        taskset_config = get_unittest_dataset_config("countdown")
+        task = Task(
+            workflow=MathRMWorkflow,
+            reward_fn=RMGalleryFn,
+            format_args=taskset_config.format,
+            rollout_args=taskset_config.rollout_args,
+            reward_fn_args={
+                "reward_name": "math_verify_reward",
+            },
+            is_eval=False,
+            raw_task={
+                taskset_config.format.prompt_key: "",
+                taskset_config.format.response_key: r"36",
+            },
+        )
+        workflow = task.to_workflow(model=model)
+        experiences = workflow.run()
+        self.assertEqual(experiences[0].reward, 1.0)
+        self.assertEqual(experiences[1].reward, 1.0)
+        self.assertEqual(experiences[2].reward, 1.0)
+        self.assertEqual(experiences[3].reward, 0.0)
 
     def test_workflow_resettable(self) -> None:
         model = MagicMock()

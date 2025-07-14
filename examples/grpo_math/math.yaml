@@ -23,10 +23,12 @@ buffer:
         prompt_key: 'question'
         response_key: 'gt_answer'
       rollout_args:
-        n: 8
         temperature: 1.0
         logprobs: 0
-    default_workflow_type: 'math_workflow'
+      reward_fn_args:
+        reward_name: math_verify_reward
+    default_workflow_type: 'math_rm_workflow'
+    default_reward_fn_type: 'rm_gallery_reward'
   trainer_input:
     experience_buffer:
       name: math_buffer

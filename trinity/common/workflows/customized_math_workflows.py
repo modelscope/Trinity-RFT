@@ -5,7 +5,7 @@ from dataclasses import asdict
 from typing import List
 
 from trinity.common.experience import Experience
-from trinity.common.rewards.reward_fn import MathBoxedRewardFn
+from trinity.common.rewards.math_reward import MathBoxedRewardFn
 from trinity.common.workflows.workflow import WORKFLOWS, SimpleWorkflow, Task
 from trinity.utils.log import get_logger
 
@@ -73,20 +73,20 @@ class MathBoxedWorkflow(SimpleWorkflow):
             responses = self.model.generate([prompt_text], **self.rollout_args)
 
         for response in responses:
-            reward = MathBoxedRewardFn()(  # type: ignore [misc]
+            reward_dict = MathBoxedRewardFn()(  # type: ignore [misc]
                 response=response.response_text,  # type: ignore [arg-type]
                 truth=self.truth,
-                return_dict=self.is_eval,
                 with_think=self.with_think,
                 format_score_coef=self.format_score_coef,
             )
+
+            if response.metrics is None:
+                response.metrics = {}
+            response.metrics.update(reward_dict)
+            reward = sum(reward_dict.values())
+            response.reward = reward
+
             logger.debug(
                 f"self.task_desc: {self.task_desc}, messages: {messages}, response: {response.response_text}, reward: {reward}"
             )
-            if isinstance(reward, dict):
-                if response.metrics is None:
-                    response.metrics = {}
-                response.metrics.update(reward)
-                reward = sum(reward.values())
-            response.reward = reward
         return responses
