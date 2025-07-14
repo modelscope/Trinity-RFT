@@ -137,7 +137,7 @@ We also need to add an `is_expert_mask` field when transforming to DataProto to 
     cumsum = torch.cumsum(attention_mask, dim=-1)
     position_ids = torch.clip(cumsum - 1, 0, None).long()
     batch_dict = {
-        "uid": np.array(experiences.run_ids),
+        "uid": np.array(experiences.group_ids),
         "position_ids": position_ids,
         "input_ids": experiences.tokens.long(),
         "responses": experiences.tokens[:, experiences.prompt_length :].long(),

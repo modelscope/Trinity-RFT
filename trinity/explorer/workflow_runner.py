@@ -2,7 +2,6 @@
 """The Workflow Runner Moudle."""
 import time
 import traceback
-import uuid
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import List, Optional
@@ -78,14 +77,14 @@ class WorkflowRunner:
             exps = self._run_task(task)
             assert exps is not None and len(exps) > 0, "An empty experience is generated"
             metrics: dict[str, List[float]] = defaultdict(list)
-            # add run_id
-            run_id = str(uuid.uuid4())
+            # set group id
             for exp in exps:
-                setattr(exp, "run_id", run_id)
+                setattr(exp, "group_id", task.group_id)
 
                 if not hasattr(exp, "info") or exp.info is None:
                     exp.info = {}
                 exp.info["model_version"] = self.model_wrapper.model_version
+                exp.info["use_count"] = 0
 
                 if not hasattr(exp, "metrics") or exp.metrics is None:
                     exp.metrics = {}

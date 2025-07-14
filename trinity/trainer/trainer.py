@@ -73,10 +73,6 @@ class Trainer:
                 f"Trainer synchronizing weights at step {self.engine.train_step_num} end."
             )
 
-    def flush_log(self, step: int) -> None:
-        """Flush the log of the current step."""
-        self.engine.monitor.log({}, step=step, commit=True)
-
     def shutdown(self) -> None:
         # if checkpoint not saved, save the last checkpoint
         step_num = self.engine.train_step_num

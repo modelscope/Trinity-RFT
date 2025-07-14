@@ -88,6 +88,11 @@ class StorageConfig:
     # used for StorageType.QUEUE
     capacity: int = 10000
     max_read_timeout: float = 1800
+    use_priority_queue: bool = False
+    reuse_cooldown_time: Optional[float] = None
+    replay_buffer_kwargs: dict = field(
+        default_factory=lambda: {"priority_fn": "linear_decay", "decay": 0.1}
+    )
 
     # used for rollout tasks
     default_workflow_type: Optional[str] = None
@@ -304,12 +309,17 @@ class ExplorerConfig:
     name: str = EXPLORER_NAME
     # for workflow runner
     # number of workflow runners.
-    # For sync engine (vllm), it should be equal to `engine_num`.
-    # For async engine (vllm_async), it can be larger than `engine_num`, e.g. 16 * `engine_num`
-    runner_num: int = 1
-    max_timeout: int = 900  # wait each task for 15 minutes
+    # For sync engine (vllm), it should be `1`.
+    # For async engine (vllm_async), it could be a large number.
+    runner_per_model: int = 8  # number of runners per each rollout model
+    max_timeout: int = 1800  # wait each task for 30 minutes
     max_retry_times: int = 2  # retry each task for 2 times if it fails or timeout
-    env_vars: dict = field(default_factory=dict)
+    env_vars: dict = field(default_factory=dict)  # environment variables for workflow runner
+    max_repeat_times_per_runner: Optional[
+        int
+    ] = None  # the number of time to repeat each task in a single workflow runner (for GRPO-like algorithms)
+
+    runner_num: Optional[int] = None  # deprecated
 
     # for inference models
     # for rollout model
@@ -319,7 +329,10 @@ class ExplorerConfig:
 
     # for evaluation
     eval_interval: int = 100
-    eval_on_latest_checkpoint: bool = False
+    eval_on_startup: bool = True  # evalulate at step 0
+
+    # for benchmark
+    bench_on_latest_checkpoint: bool = False  # only benchmark the latest checkpoint
 
 
 @dataclass
@@ -353,16 +366,15 @@ class MonitorConfig:
 
 @dataclass
 class SynchronizerConfig:
-    """Configs for model weight synchronization"""
+    """Configs for model weight synchronization."""
 
-    # TODO: rename to "checkpoint", "nccl", "ipc"
     sync_method: SyncMethod = SyncMethod.NCCL
     # sync weights every `sync_interval` steps
     sync_interval: int = 1
     # allow explorer to run `sync_offset` steps before sync
     sync_offset: int = 0
     # waiting for `sync_timeout` seconds before timeout in `nccl` method
-    sync_timeout: int = 1800
+    sync_timeout: int = 3600
     # wait for the lastest checkpoint to be ready  # TODO: to be used
     wait_for_checkpoint: bool = False
 

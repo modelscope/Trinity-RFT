@@ -26,7 +26,7 @@ class Experience:
     rejected: Optional[Tensor] = None  # for dpo
     info: Optional[dict] = None
     metrics: Optional[dict[str, float]] = None
-    run_id: str = ""
+    group_id: str = ""  # for grpo
 
     def __post_init__(self):
         if self.action_mask is not None:
@@ -95,7 +95,7 @@ class Experiences:
     action_masks: Optional[Tensor]
     prompt_length: int
     logprobs: Optional[Tensor]
-    run_ids: List[str]
+    group_ids: List[str]
 
     @property
     def batch_size(self) -> int:
@@ -118,11 +118,11 @@ class Experiences:
                 action_masks=torch.empty(0, dtype=torch.bool),
                 logprobs=torch.empty(0, dtype=torch.float32),
                 prompt_length=torch.empty(0, dtype=torch.int32),
-                run_ids=[],
+                group_ids=[],
             )
         max_prompt_length = max([exp.prompt_length for exp in experiences])
         max_response_length = max([len(exp.tokens) - exp.prompt_length for exp in experiences])
-        run_ids = [exp.run_id for exp in experiences]
+        group_ids = [exp.group_id for exp in experiences]
         tokens_dtype = experiences[0].tokens.dtype
         tokens = torch.stack(
             [
@@ -208,7 +208,7 @@ class Experiences:
             logprobs = None
 
         return cls(
-            run_ids=run_ids,
+            group_ids=group_ids,
             tokens=tokens,
             rewards=rewards,
             attention_masks=attention_masks,
@@ -249,7 +249,7 @@ class Experiences:
                 action_masks=torch.empty(0, dtype=torch.bool),
                 logprobs=torch.empty(0, dtype=torch.float32),
                 prompt_length=torch.empty(0, dtype=torch.int32),
-                run_ids=[],
+                group_ids=[],
             )
 
         # TODO: exp.tokens in DPO are prompt tokens
@@ -261,7 +261,7 @@ class Experiences:
         response_tokens = list(chain.from_iterable(zip(chosen_tokens, rejected_tokens)))
         max_response_length = max([len(response) for response in response_tokens])  # type: ignore
 
-        run_ids = list(chain.from_iterable([repeat(exp.run_id, 2) for exp in experiences]))
+        group_ids = list(chain.from_iterable([repeat(exp.group_id, 2) for exp in experiences]))
         tokens_dtype = experiences[0].tokens.dtype
         tokens = torch.stack(
             [
@@ -297,7 +297,7 @@ class Experiences:
         assert len(tokens) == 2 * len(experiences)
 
         return cls(
-            run_ids=run_ids,
+            group_ids=group_ids,
             tokens=tokens,
             attention_masks=attention_masks,
             prompt_length=max_prompt_length,

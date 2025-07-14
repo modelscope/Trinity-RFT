@@ -23,15 +23,21 @@ class SQLWriter(BufferWriter):
         else:
             self.db_wrapper.write(data)
 
-    def acquire(self) -> int:
+    async def write_async(self, data):
         if self.wrap_in_ray:
-            return ray.get(self.db_wrapper.acquire.remote())
+            await self.db_wrapper.write.remote(data)
+        else:
+            self.db_wrapper.write(data)
+
+    async def acquire(self) -> int:
+        if self.wrap_in_ray:
+            return await self.db_wrapper.acquire.remote()
         else:
             return 0
 
-    def release(self) -> int:
+    async def release(self) -> int:
         if self.wrap_in_ray:
-            return ray.get(self.db_wrapper.release.remote())
+            return await self.db_wrapper.release.remote()
         else:
             self.db_wrapper.release()
             return 0
