@@ -22,6 +22,7 @@ class MockResponse:
     reward: float = 0.0
     metrics: Optional[Dict[str, float]] = None
     info: Optional[Dict] = None
+    unique_id: Optional[str] = "0"
 
 
 class DummyWorkflow(Workflow):
