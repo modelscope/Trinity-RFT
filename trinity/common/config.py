@@ -99,6 +99,7 @@ class StorageConfig:
     default_reward_fn_type: Optional[str] = None
     rollout_args: GenerationConfig = field(default_factory=GenerationConfig)
     workflow_args: dict = field(default_factory=dict)
+    reward_fn_args: dict = field(default_factory=dict)
 
     # get storage from existing experiment
     ray_namespace: Optional[str] = None
