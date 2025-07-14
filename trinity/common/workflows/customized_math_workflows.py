@@ -48,19 +48,12 @@ class MathBoxedWorkflow(SimpleWorkflow):
             else:
                 self.system_prompt = default_prompt
 
-        self.reward_fn = MathBoxedRewardFn()
-
-    def format_prompt(self):
-        prompt_text = ""
-        if self.system_prompt:
-            prompt_text += "System:" + self.system_prompt
-            prompt_text += "\nUser:\n" + self.task_desc + "\nAssistant:\n"
+        if task.reward_fn is None:
+            self.reward_fn = MathBoxedRewardFn()
         else:
-            prompt_text += "User:\n" + self.task_desc + "\nAssistant:\n"
-        return prompt_text
+            self.reward_fn = task.reward_fn
 
     def run(self) -> List[Experience]:
-        # TODO: Optimize the generate function
         if not self.use_base:
             messages = self.format_messages()
         else:
@@ -73,7 +66,7 @@ class MathBoxedWorkflow(SimpleWorkflow):
             responses = self.model.generate([prompt_text], **self.rollout_args)
 
         for response in responses:
-            reward = MathBoxedRewardFn()(  # type: ignore [misc]
+            reward = self.reward_fn(  # type: ignore [misc]
                 response=response.response_text,  # type: ignore [arg-type]
                 truth=self.truth,
                 return_dict=self.is_eval,

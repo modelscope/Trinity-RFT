@@ -28,6 +28,7 @@ class MathDAPOWorkflow(SimpleWorkflow):
         self.is_eval = task.is_eval
 
         self.workflow_args = task.workflow_args
+        self.use_base = self.workflow_args.get("use_base", False)
 
         self.reward_fn = MathDAPORewardFn(
             enable_overlong_penalty=self.workflow_args.get("enable_overlong_penalty", None),
@@ -37,29 +38,30 @@ class MathDAPOWorkflow(SimpleWorkflow):
         )
 
     def run(self) -> List[Experience]:
-        messages = self.format_messages()
+        if not self.use_base:
+            messages = self.format_messages()
+        else:
+            prompt_text = self.format_prompt()
 
         logger.debug("start chat")
-        responses = self.model.chat(messages, **self.rollout_args)
+        if not self.use_base:
+            responses = self.model.chat(messages, **self.rollout_args)
+        else:
+            responses = self.model.generate([prompt_text], **self.rollout_args)
 
         for response in responses:
-            reward = self.reward_fn(  # type: ignore # TODO: fix type
+            reward_dict = self.reward_fn(  # type: ignore
                 response=response.response_text,  # type: ignore [arg-type]
                 truth=self.truth,
-                return_dict=self.is_eval,
                 response_token=response.tokens[response.prompt_length :],
             )
+            if response.metrics is None:
+                response.metrics = {}
+            response.metrics.update(reward_dict)
+            reward = sum(reward_dict.values())
+            response.reward = reward
+
             logger.debug(
                 f"self.task_desc: {self.task_desc}, messages: {messages}, response: {response.response_text}, reward: {reward}"
             )
-            if isinstance(reward, dict):
-                if response.metrics is None:
-                    response.metrics = {}
-                response.metrics.update(reward)
-                reward = sum(reward.values())
-            response.reward = reward
         return responses
-
-    def format_messages(self):
-        messages = [{"role": "user", "content": self.task_desc}]
-        return messages
