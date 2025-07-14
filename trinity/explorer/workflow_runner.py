@@ -2,6 +2,7 @@
 """The Workflow Runner Moudle."""
 import time
 import traceback
+import uuid
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import List, Optional
@@ -82,7 +83,9 @@ class WorkflowRunner:
             # set group id
             for idx, exp in enumerate(exps):
                 setattr(exp, "group_id", task.group_id)
-                setattr(exp, "unique_id", f"{task.group_id}/{self.runner_id}/{idx}")
+                setattr(
+                    exp, "unique_id", f"{task.group_id}/{self.runner_id}/{str(uuid.uuid4())[:6]}"
+                )
 
                 if not hasattr(exp, "info") or exp.info is None:
                     exp.info = {}
