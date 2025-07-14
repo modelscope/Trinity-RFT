@@ -191,6 +191,8 @@ class ConfigManager:
             with st.expander("Experiences Buffer Configs", expanded=True):
                 self.get_configs("storage_type")
                 self.get_configs("experience_buffer_path")
+                self.get_configs("use_priority_queue")
+                self.get_configs("reuse_cooldown_time", "priority_fn", "priority_decay")
 
         self.buffer_advanced_tab = st.expander("Advanced Config")
         with self.buffer_advanced_tab:
@@ -199,9 +201,11 @@ class ConfigManager:
     def _expert_explorer_part(self):
         self.get_configs("sync_method", "sync_interval", "sync_timeout")
 
-        self.get_configs("runner_num", "max_timeout", "explorer_max_retry_times", "eval_interval")
+        self.get_configs(
+            "runner_per_model", "max_timeout", "explorer_max_retry_times", "eval_interval"
+        )
 
-        self.get_configs("eval_on_latest_checkpoint")
+        self.get_configs("bench_on_latest_checkpoint")
 
         with st.expander("Rollout Model Config", expanded=True):
             self.get_configs("engine_type", "engine_num", "tensor_parallel_size")
@@ -341,7 +345,6 @@ class ConfigManager:
 
         trainer_config = {
             "actor_rollout_ref": {
-                "hybrid_engine": True,
                 "model": {
                     "external_lib": None,
                     "override_config": {},
@@ -350,7 +353,6 @@ class ConfigManager:
                 },
                 "actor": {
                     "strategy": st.session_state["training_strategy"],
-                    "ppo_mini_batch_size": st.session_state["train_batch_size"],
                     "ppo_micro_batch_size_per_gpu": st.session_state[
                         "actor_ppo_micro_batch_size_per_gpu"
                     ],
@@ -496,6 +498,14 @@ class ConfigManager:
             "max_retry_times": st.session_state["buffer_max_retry_times"],
             "max_retry_interval": st.session_state["max_retry_interval"],
         }
+        if st.session_state["algorithm_type"] != "dpo":
+            experience_buffer = buffer_config["trainer_input"]["experience_buffer"]
+            experience_buffer["use_priority_queue"] = st.session_state["use_priority_queue"]
+            experience_buffer["reuse_cooldown_time"] = st.session_state["reuse_cooldown_time"]
+            experience_buffer["replay_buffer_kwargs"] = {
+                "priority_fn": st.session_state["priority_fn"],
+                "decay": st.session_state["priority_decay"],
+            }
 
         if st.session_state["mode"] != "train":
             buffer_config["explorer_input"] = {
@@ -571,7 +581,7 @@ class ConfigManager:
 
     def _gen_explorer_config(self):
         explorer_config = {
-            "runner_num": st.session_state["runner_num"],
+            "runner_per_model": st.session_state["runner_per_model"],
             "max_timeout": st.session_state["max_timeout"],
             "max_retry_times": st.session_state["explorer_max_retry_times"],
             "rollout_model": {
@@ -584,7 +594,7 @@ class ConfigManager:
             },
             "auxiliary_models": [],
             "eval_interval": st.session_state["eval_interval"],
-            "eval_on_latest_checkpoint": st.session_state["eval_on_latest_checkpoint"],
+            "bench_on_latest_checkpoint": st.session_state["bench_on_latest_checkpoint"],
         }
         for i in range(st.session_state["_auxiliary_models_num"]):
             auxiliary_model_config = {

@@ -275,6 +275,8 @@ buffer:
   - For `sql` storage type, the path points to the SQLite database file.
 - `wrap_in_ray`: Whether to wrap the experience buffer in a Ray actor. Only take effect when `storage_type` is `sql` or `file`. The `queue` storage always uses a Ray actor.
 - `max_read_timeout`: The maximum waiting time (in seconds) to read new experience data. If exceeded, an incomplete batch will be returned directly. Only take effect when `storage_type` is `queue`. Default is 1800 seconds (30 minutes).
+- `use_priority_queue`: Only take effect when `storage_type` is `queue`. If set to `True`, the queue will be a priority queue, which allows for prioritizing certain experiences over others. Default is `False`.
+- `reuse_cooldown_time`: Only take effect when `storage_type` is `queue` and `use_priority_queue` is `True`. If set, it specifies the cooldown time (in seconds) for reusing experiences. If not specified, the default value is `None`, meaning experiences can not be reused.
 
 
 ### Trainer Input
@@ -314,7 +316,7 @@ Controls the rollout models and workflow execution.
 ```yaml
 explorer:
   name: explorer
-  runner_num: 32
+  runner_per_model: 8
   max_timeout: 900
   max_retry_times: 2
   env_vars: {}
@@ -325,10 +327,12 @@ explorer:
   auxiliary_models:
   - model_path: /PATH/TO/MODEL
     tensor_parallel_size: 1
+  eval_interval: 100
+  eval_on_startup: True
 ```
 
 - `name`: Name of the explorer. This name will be used as the Ray actor's name, so it must be unique.
-- `runner_num`: Number of parallel workflow runners.
+- `runner_per_model`: Number of parallel workflow runners per each rollout model.
 - `max_timeout`: Maximum time (in seconds) for a workflow to complete.
 - `max_retry_times`: Maximum number of retries for a workflow.
 - `env_vars`: Environment variables to be set for every workflow runners.
@@ -336,6 +340,9 @@ explorer:
 - `rollout_model.engine_num`: Number of inference engines.
 - `rollout_model.tensor_parallel_size`: Degree of tensor parallelism.
 - `auxiliary_models`: Additional models used for custom workflows.
+- `eval_interval`: Interval (in steps) for evaluating the model.
+- `eval_on_startup`: Whether to evaluate the model on startup. More precisely, at step 0 with the original model, so it will not be triggered when restarting.
+- `runner_num`: (*Deprecated*) Number of parallel workflow runners.
 
 ---
 

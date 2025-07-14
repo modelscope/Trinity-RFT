@@ -37,7 +37,7 @@ buffer:
     default_reward_fn_type: ''
 explorer:
   eval_interval: 100
-  runner_num: 4
+  runner_per_model: 8
   rollout_model:
     engine_type: vllm_async
     engine_num: 2

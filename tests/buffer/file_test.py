@@ -16,7 +16,7 @@ from trinity.common.config import StorageConfig
 from trinity.common.constants import StorageType
 
 
-class TestFileBuffer(unittest.TestCase):
+class TestFileBuffer(unittest.IsolatedAsyncioTestCase):
     temp_output_path = "tmp/test_file_buffer/"
 
     @classmethod
@@ -30,7 +30,7 @@ class TestFileBuffer(unittest.TestCase):
         if os.path.exists(cls.temp_output_path):
             os.system(f"rm -rf {cls.temp_output_path}")
 
-    def test_file_buffer(self):
+    async def test_file_buffer(self):
         meta = StorageConfig(
             name="test_buffer",
             path=os.path.join(self.temp_output_path, "buffer.jsonl"),
@@ -46,8 +46,9 @@ class TestFileBuffer(unittest.TestCase):
 
         # test writer
         writer = JSONWriter(meta, None)
+        await writer.acquire()
         writer.write(data)
-        writer.release()
+        await writer.release()
 
         # test reader
         meta.path = self.temp_output_path
@@ -119,23 +120,31 @@ class TestFileBuffer(unittest.TestCase):
                 break
         self.assertEqual(len(tasks), 40 - 24)
 
-    def test_file_writer(self):
+    async def test_file_writer(self):
         writer = get_buffer_writer(
             self.config.buffer.trainer_input.experience_buffer, self.config.buffer
         )
+        await writer.acquire()
         writer.write(
             [
                 {"prompt": "hello world"},
                 {"prompt": "hi"},
             ]
         )
+        await writer.write_async(
+            [
+                {"prompt": "My name is"},
+                {"prompt": "What is your name?"},
+            ]
+        )
+        await writer.release()
         file_wrapper = ray.get_actor("json-test_buffer")
         self.assertIsNotNone(file_wrapper)
         file_path = default_storage_path(
             self.config.buffer.trainer_input.experience_buffer, self.config.buffer
         )
         with open(file_path, "r") as f:
-            self.assertEqual(len(f.readlines()), 2)
+            self.assertEqual(len(f.readlines()), 4)
 
     def setUp(self):
         self.config = get_template_config()

@@ -31,7 +31,9 @@ class QueueReader(BufferReader):
             batch_size = batch_size or self.read_batch_size
             exps = ray.get(self.queue.get_batch.remote(batch_size, timeout=self.timeout))
             if len(exps) != batch_size:
-                raise StopIteration("Read incomplete batch, please check your workflow.")
+                raise TimeoutError(
+                    f"Read incomplete batch ({len(exps)}/{batch_size}), please check your workflow."
+                )
         except StopAsyncIteration:
             raise StopIteration()
         return exps

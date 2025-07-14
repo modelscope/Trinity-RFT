@@ -34,6 +34,7 @@ buffer:
       path: 'sqlite:///alfworld.db'
 explorer:
   runner_num: 32
+  max_timeout: 3600
   rollout_model:
     engine_type: vllm_async
     engine_num: 2
@@ -44,10 +45,12 @@ explorer:
     seed: 42
     gpu_memory_utilization: 0.7
     enable_chunked_prefill: true
+  env_vars:
+    TMPDIR: /PATH/TO/ALFWORLD_TMP_DIR
 synchronizer:
   sync_method: 'nccl'
-  sync_interval: 8
-  sync_timeout: 1200
+  sync_interval: 5
+  sync_timeout: 3600
 trainer:
   trainer_type: 'verl'
   trainer_config_path: 'examples/grpo_alfworld/train_alfworld.yaml'

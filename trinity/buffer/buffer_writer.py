@@ -11,7 +11,11 @@ class BufferWriter(ABC):
         """Write to buffer."""
 
     @abstractmethod
-    def acquire(self) -> int:
+    async def write_async(self, data: List) -> None:
+        """Write to buffer asynchronously."""
+
+    @abstractmethod
+    async def acquire(self) -> int:
         """Acquire the buffer writer.
 
         Returns:
@@ -19,7 +23,7 @@ class BufferWriter(ABC):
         """
 
     @abstractmethod
-    def release(self) -> int:
+    async def release(self) -> int:
         """Release the buffer writer. After release, the buffer writer can not be used again.
 
         Returns:

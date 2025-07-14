@@ -40,6 +40,7 @@ dependencies = [
     "tensorboard",
     "openai",
     "jsonlines",
+    "sortedcontainers",
 ]
 
 [project.scripts]
@@ -64,6 +65,7 @@ dev = [
     "mypy>=1.7.0",
     "pytest>=8.0.0",
     "pytest-json-ctrf",
+    "parameterized",
 ]
 
 doc = [

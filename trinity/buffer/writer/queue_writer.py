@@ -23,8 +23,11 @@ class QueueWriter(BufferWriter):
     def write(self, data: List) -> None:
         ray.get(self.queue.put_batch.remote(data))
 
-    def acquire(self) -> int:
-        return ray.get(self.queue.acquire.remote())
+    async def write_async(self, data):
+        return await self.queue.put_batch.remote(data)
 
-    def release(self) -> int:
-        return ray.get(self.queue.release.remote())
+    async def acquire(self) -> int:
+        return await self.queue.acquire.remote()
+
+    async def release(self) -> int:
+        return await self.queue.release.remote()

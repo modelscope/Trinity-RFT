@@ -182,3 +182,13 @@ class RayUnittestBase(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         ray.shutdown(_exiting_interpreter=True)
+
+
+class RayUnittestBaseAysnc(unittest.IsolatedAsyncioTestCase):
+    @classmethod
+    def setUpClass(cls):
+        ray.init(ignore_reinit_error=True, namespace="trinity_unittest")
+
+    @classmethod
+    def tearDownClass(cls):
+        ray.shutdown(_exiting_interpreter=True)
