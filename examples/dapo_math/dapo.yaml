@@ -22,7 +22,7 @@ buffer:
       name: dapo-math
       storage_type: file
       path: open-r1/DAPO-Math-17k-Processed
-      subset: all
+      subset_name: all
       format:
         prompt_key: 'prompt'
         response_key: 'solution'
