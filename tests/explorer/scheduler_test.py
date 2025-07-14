@@ -403,30 +403,43 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
         self.config.check_and_update()
         scheduler = Scheduler(self.config, [DummyModel.remote(), DummyModel.remote()])
         await scheduler.start()
+        exp_list = []
 
         tasks = generate_tasks(4, repeat_times=8)  # ceil(8 / 2) == 4
         scheduler.schedule(tasks, batch_id=1)
         results = await scheduler.get_results(batch_id=1)
         self.assertEqual(len(results), 4 * 4)
-        self.assertEqual(len(self.queue.read(batch_size=4 * 8)), 4 * 8)
+        exps = self.queue.read(batch_size=4 * 8)
+        self.assertEqual(len(exps), 4 * 8)
+        exp_list.extend(exps)
         with self.assertRaises(TimeoutError):
             self.queue.read(batch_size=1)
 
         tasks = generate_tasks(4, repeat_times=5)  # ceil(5 / 2) == 3
-        scheduler.schedule(tasks, batch_id=1)
-        results = await scheduler.get_results(batch_id=1)
+        scheduler.schedule(tasks, batch_id=2)
+        results = await scheduler.get_results(batch_id=2)
         self.assertEqual(len(results), 4 * 3)
-        self.assertEqual(len(self.queue.read(batch_size=4 * 5)), 4 * 5)
+        exps = self.queue.read(batch_size=4 * 5)
+        self.assertEqual(len(exps), 4 * 5)
+        exp_list.extend(exps)
         with self.assertRaises(TimeoutError):
             self.queue.read(batch_size=1)
 
         tasks = generate_tasks(3, repeat_times=1)  # ceil(1 / 2) == 1
-        scheduler.schedule(tasks, batch_id=1)
-        results = await scheduler.get_results(batch_id=1)
+        scheduler.schedule(tasks, batch_id=3)
+        results = await scheduler.get_results(batch_id=3)
         self.assertEqual(len(results), 3 * 1)
-        self.assertEqual(len(self.queue.read(batch_size=3 * 1)), 3 * 1)
+        exps = self.queue.read(batch_size=3 * 1)
+        self.assertEqual(len(exps), 3 * 1)
+        exp_list.extend(exps)
         with self.assertRaises(TimeoutError):
             self.queue.read(batch_size=1)
+
+        # test group_id and unique_id
+        group_ids = [exp.group_id for exp in exp_list]
+        self.assertEqual(len(set(group_ids)), 11)  # 4 + 4 + 3
+        unique_ids = [exp.unique_id for exp in exp_list]
+        self.assertEqual(len(unique_ids), len(set(unique_ids)))
 
         await scheduler.stop()
 

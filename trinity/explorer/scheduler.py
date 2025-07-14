@@ -56,7 +56,7 @@ class RunnerWrapper:
                     "env_vars": self.config.explorer.env_vars,
                 },
             )
-            .remote(self.config, self.rollout_model, self.auxiliary_models)
+            .remote(self.config, self.rollout_model, self.auxiliary_models, self.runner_id)
         )
 
     async def run_with_retry(self, task: TaskWrapper) -> Tuple[Status, int]:

@@ -27,6 +27,7 @@ class Experience:
     info: Optional[dict] = None
     metrics: Optional[dict[str, float]] = None
     group_id: str = ""  # for grpo
+    unique_id: str = ""
 
     def __post_init__(self):
         if self.action_mask is not None:
@@ -96,6 +97,7 @@ class Experiences:
     prompt_length: int
     logprobs: Optional[Tensor]
     group_ids: List[str]
+    unique_ids: List[str]
 
     @property
     def batch_size(self) -> int:
@@ -119,10 +121,12 @@ class Experiences:
                 logprobs=torch.empty(0, dtype=torch.float32),
                 prompt_length=torch.empty(0, dtype=torch.int32),
                 group_ids=[],
+                unique_ids=[],
             )
         max_prompt_length = max([exp.prompt_length for exp in experiences])
         max_response_length = max([len(exp.tokens) - exp.prompt_length for exp in experiences])
         group_ids = [exp.group_id for exp in experiences]
+        unique_ids = [exp.unique_id for exp in experiences]
         tokens_dtype = experiences[0].tokens.dtype
         tokens = torch.stack(
             [
@@ -209,6 +213,7 @@ class Experiences:
 
         return cls(
             group_ids=group_ids,
+            unique_ids=unique_ids,
             tokens=tokens,
             rewards=rewards,
             attention_masks=attention_masks,
@@ -250,6 +255,7 @@ class Experiences:
                 logprobs=torch.empty(0, dtype=torch.float32),
                 prompt_length=torch.empty(0, dtype=torch.int32),
                 group_ids=[],
+                unique_ids=[],
             )
 
         # TODO: exp.tokens in DPO are prompt tokens
@@ -262,6 +268,11 @@ class Experiences:
         max_response_length = max([len(response) for response in response_tokens])  # type: ignore
 
         group_ids = list(chain.from_iterable([repeat(exp.group_id, 2) for exp in experiences]))
+        unique_ids = list(
+            chain.from_iterable(
+                [(f"{exp.unique_id}/1", f"{exp.unique_id}/0") for exp in experiences]
+            )
+        )
         tokens_dtype = experiences[0].tokens.dtype
         tokens = torch.stack(
             [
@@ -298,6 +309,7 @@ class Experiences:
 
         return cls(
             group_ids=group_ids,
+            unique_ids=unique_ids,
             tokens=tokens,
             attention_masks=attention_masks,
             prompt_length=max_prompt_length,
