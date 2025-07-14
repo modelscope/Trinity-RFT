@@ -40,7 +40,7 @@ class MathRewardFn(RewardFn):
 
         format_score = self.format_reward(response)
 
-        return accuracy_score | format_score
+        return {**accuracy_score, **format_score}
 
 
 @REWARD_FUNCTIONS.register_module("math_boxed_reward")
