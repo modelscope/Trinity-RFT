@@ -22,6 +22,7 @@ class MockResponse:
     reward: float = 0.0
     metrics: Optional[Dict[str, float]] = None
     info: Optional[Dict] = None
+    unique_id: Optional[str] = "0"
 
 
 class DummyWorkflow(Workflow):
@@ -237,7 +238,6 @@ class WorkflowTest(unittest.TestCase):
         self.assertEqual(experiences[2].reward, -0.1)
         self.assertEqual(experiences[3].reward, 1.1)
 
-    @unittest.skip("Skip for now, need to fix import issues of RM-Gallery")
     def test_rm_gallery_workflow(self) -> None:
         model = MagicMock()
         model.chat.return_value = [
