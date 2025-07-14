@@ -80,7 +80,6 @@ class RMGalleryFn(RewardFn):
         """
         Extract reward from DataSample in rm-gallery
         """
-
         reward_dict = {}
 
         try:
@@ -98,7 +97,7 @@ class RMGalleryFn(RewardFn):
                 if isinstance(detail, RewardDimensionWithScore):
                     reward_dict[detail.name] = detail.score
                 elif isinstance(detail, RewardDimensionWithRank):
-                    # TODO: check
+                    # TODO: support multi-ranked dimension
                     if detail:
                         top_ranked_item = detail[0]
                         reward_dict[top_ranked_item.name] = top_ranked_item.score
