@@ -101,7 +101,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.rewards.reward_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">MathBoxedRewardFn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.rewards.math_reward</span><span class="w"> </span><span class="kn">import</span> <span class="n">MathBoxedRewardFn</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">WORKFLOWS</span><span class="p">,</span> <span class="n">SimpleWorkflow</span><span class="p">,</span> <span class="n">Task</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
@@ -179,22 +179,22 @@
             <span class="n">responses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">generate</span><span class="p">([</span><span class="n">prompt_text</span><span class="p">],</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">rollout_args</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">response</span> <span class="ow">in</span> <span class="n">responses</span><span class="p">:</span>
-            <span class="n">reward</span> <span class="o">=</span> <span class="n">MathBoxedRewardFn</span><span class="p">()(</span>  <span class="c1"># type: ignore [misc]</span>
+            <span class="n">reward_dict</span> <span class="o">=</span> <span class="n">MathBoxedRewardFn</span><span class="p">()(</span>  <span class="c1"># type: ignore [misc]</span>
                 <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">response_text</span><span class="p">,</span>  <span class="c1"># type: ignore [arg-type]</span>
                 <span class="n">truth</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">truth</span><span class="p">,</span>
-                <span class="n">return_dict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">is_eval</span><span class="p">,</span>
                 <span class="n">with_think</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">with_think</span><span class="p">,</span>
                 <span class="n">format_score_coef</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">format_score_coef</span><span class="p">,</span>
             <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">metrics</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">response</span><span class="o">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">response</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">reward_dict</span><span class="p">)</span>
+            <span class="n">reward</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">reward_dict</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="n">response</span><span class="o">.</span><span class="n">reward</span> <span class="o">=</span> <span class="n">reward</span>
+
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;self.task_desc: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">task_desc</span><span class="si">}</span><span class="s2">, messages: </span><span class="si">{</span><span class="n">messages</span><span class="si">}</span><span class="s2">, response: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">response_text</span><span class="si">}</span><span class="s2">, reward: </span><span class="si">{</span><span class="n">reward</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reward</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">metrics</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">response</span><span class="o">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="p">{}</span>
-                <span class="n">response</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">reward</span><span class="p">)</span>
-                <span class="n">reward</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">reward</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-            <span class="n">response</span><span class="o">.</span><span class="n">reward</span> <span class="o">=</span> <span class="n">reward</span>
         <span class="k">return</span> <span class="n">responses</span></div>
 </div>
 

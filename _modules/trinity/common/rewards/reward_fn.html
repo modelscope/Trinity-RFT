@@ -96,22 +96,11 @@
   <h1>Source code for trinity.common.rewards.reward_fn</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;Base Reward Function Class.&quot;&quot;&quot;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">latex2sympy2_extended</span><span class="w"> </span><span class="kn">import</span> <span class="n">NormalizationConfig</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">math_verify</span><span class="w"> </span><span class="kn">import</span> <span class="n">LatexExtractionConfig</span><span class="p">,</span> <span class="n">parse</span><span class="p">,</span> <span class="n">verify</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.eval_utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">compute_score</span><span class="p">,</span>
-    <span class="n">evaluate_equation</span><span class="p">,</span>
-    <span class="n">extract_solution</span><span class="p">,</span>
-    <span class="n">simple_answer_parser</span><span class="p">,</span>
-    <span class="n">validate_equation</span><span class="p">,</span>
-    <span class="n">validate_think_pattern</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.rewards.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">to_rm_gallery_messages</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Registry</span>
 
@@ -126,235 +115,103 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">RewardFn</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base Reward Function Class.&quot;&quot;&quot;</span>
 
-    <span class="c1"># TODO: add a batch version</span>
+<div class="viewcode-block" id="RewardFn.__init__">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.html#trinity.common.rewards.reward_fn.RewardFn.__init__">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">pass</span></div>
+
 
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">response</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">prompt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">truth</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">return_dict</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Call the reward function.&quot;&quot;&quot;</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="k">pass</span></div>
 
 
 
-<div class="viewcode-block" id="AccuracyReward">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.html#trinity.common.rewards.reward_fn.AccuracyReward">[docs]</a>
-<span class="nd">@REWARD_FUNCTIONS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;accuracy_reward&quot;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">AccuracyReward</span><span class="p">(</span><span class="n">RewardFn</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A reward function that rewards correct answers.</span>
-<span class="sd">    Ref: https://github.com/huggingface/open-r1/blob/main/src/open_r1/rewards.py</span>
+<div class="viewcode-block" id="RMGalleryFn">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.html#trinity.common.rewards.reward_fn.RMGalleryFn">[docs]</a>
+<span class="nd">@REWARD_FUNCTIONS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;rm_gallery_reward&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RMGalleryFn</span><span class="p">(</span><span class="n">RewardFn</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reward Function from RMGallery.</span>
+<span class="sd">    https://github.com/modelscope/RM-Gallery</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="AccuracyReward.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.html#trinity.common.rewards.reward_fn.AccuracyReward.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">answer_parser</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">answer_parser</span> <span class="o">=</span> <span class="n">answer_parser</span></div>
-
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
+<div class="viewcode-block" id="RMGalleryFn.__init__">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.html#trinity.common.rewards.reward_fn.RMGalleryFn.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">response</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">prompt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">truth</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">return_dict</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">reward_name</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">answer_parser</span><span class="p">:</span>
-            <span class="n">answer_parsed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">answer_parser</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
-            <span class="n">truth_parsed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">answer_parser</span><span class="p">(</span><span class="n">truth</span><span class="p">)</span>  <span class="c1"># type: ignore [arg-type]</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">rm_gallery.core.reward.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">RewardRegistry</span>
 
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">truth_parsed</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span>
-                <span class="n">truth</span><span class="p">,</span>
-                <span class="n">extraction_mode</span><span class="o">=</span><span class="s2">&quot;first_match&quot;</span><span class="p">,</span>
-                <span class="n">extraction_config</span><span class="o">=</span><span class="p">[</span><span class="n">LatexExtractionConfig</span><span class="p">()],</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reward_model</span> <span class="o">=</span> <span class="n">RewardRegistry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">reward_name</span><span class="p">)(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">experience</span><span class="p">:</span> <span class="n">Experience</span><span class="p">,</span> <span class="n">messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>  <span class="c1"># type: ignore</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Call the reward function.&quot;&quot;&quot;</span>
+
+        <span class="n">sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_sample_from_experience</span><span class="p">(</span><span class="n">experience</span><span class="p">,</span> <span class="n">messages</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="n">sample_with_reward</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reward_model</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_reward</span><span class="p">(</span><span class="n">sample_with_reward</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_build_sample_from_experience</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">experience</span><span class="p">:</span> <span class="n">Experience</span><span class="p">,</span> <span class="n">messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert experience to sample.</span>
+<span class="sd">        Ref: https://github.com/modelscope/RM-Gallery/blob/main/rm_gallery/core/data/schema.py</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">rm_gallery.core.data.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataOutput</span><span class="p">,</span> <span class="n">DataSample</span><span class="p">,</span> <span class="n">Step</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">DataOutput</span><span class="p">(</span>
+                <span class="n">answer</span><span class="o">=</span><span class="n">Step</span><span class="p">(</span>
+                    <span class="n">role</span><span class="o">=</span><span class="s2">&quot;assistant&quot;</span><span class="p">,</span>
+                    <span class="n">content</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">experience</span><span class="o">.</span><span class="n">response_text</span><span class="p">),</span>
+                    <span class="n">label</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;reference&quot;</span><span class="p">:</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ground_truth&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)},</span>
+                <span class="p">),</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">truth_parsed</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">truth_parsed</span> <span class="o">=</span> <span class="n">truth</span>
+        <span class="p">]</span>
 
-            <span class="n">answer_parsed</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span>
-                <span class="n">response</span><span class="p">,</span>
-                <span class="n">extraction_config</span><span class="o">=</span><span class="p">[</span>
-                    <span class="n">LatexExtractionConfig</span><span class="p">(</span>
-                        <span class="n">normalization_config</span><span class="o">=</span><span class="n">NormalizationConfig</span><span class="p">(</span>
-                            <span class="n">nits</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                            <span class="n">malformed_operators</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                            <span class="n">basic_latex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                            <span class="n">equations</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                            <span class="n">boxed</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
-                            <span class="n">units</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                        <span class="p">),</span>
-                        <span class="c1"># Ensures that boxed is tried first</span>
-                        <span class="n">boxed_match_priority</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                        <span class="n">try_extract_without_anchor</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                    <span class="p">)</span>
-                <span class="p">],</span>
-                <span class="n">extraction_mode</span><span class="o">=</span><span class="s2">&quot;first_match&quot;</span><span class="p">,</span>
-            <span class="p">)</span>
+        <span class="n">sample</span> <span class="o">=</span> <span class="n">DataSample</span><span class="p">(</span>
+            <span class="n">unique_id</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">,</span>  <span class="c1"># TODO: Generate unique ID</span>
+            <span class="nb">input</span><span class="o">=</span><span class="n">to_rm_gallery_messages</span><span class="p">(</span><span class="n">messages</span><span class="p">),</span>
+            <span class="n">output</span><span class="o">=</span><span class="n">output</span><span class="p">,</span>
+            <span class="n">metadata</span><span class="o">=</span><span class="n">experience</span><span class="o">.</span><span class="n">info</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">sample</span>
 
-        <span class="c1"># Reward 1 if the content is the same as the ground truth, 0 otherwise</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_extract_reward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extract reward from DataSample in rm-gallery</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">reward_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">reward</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">verify</span><span class="p">(</span><span class="n">answer_parsed</span><span class="p">,</span> <span class="n">truth_parsed</span><span class="p">))</span>
+            <span class="n">reward_obj</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">output</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">answer</span><span class="o">.</span><span class="n">reward</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;verify failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">, answer: </span><span class="si">{</span><span class="n">answer_parsed</span><span class="si">}</span><span class="s2">, gold: </span><span class="si">{</span><span class="n">truth_parsed</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">reward</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="k">return</span> <span class="n">reward</span></div>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No reward is found in sample: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
+        <span class="kn">from</span><span class="w"> </span><span class="nn">rm_gallery.core.reward.schema</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+            <span class="n">RewardDimensionWithRank</span><span class="p">,</span>
+            <span class="n">RewardDimensionWithScore</span><span class="p">,</span>
+        <span class="p">)</span>
 
-
-<div class="viewcode-block" id="FormatReward">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.html#trinity.common.rewards.reward_fn.FormatReward">[docs]</a>
-<span class="nd">@REWARD_FUNCTIONS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;format_reward&quot;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">FormatReward</span><span class="p">(</span><span class="n">RewardFn</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A reward function that checks if the reasoning process is enclosed within &lt;think&gt; and &lt;/think&gt; tags, while the final answer is enclosed within &lt;answer&gt; and &lt;/answer&gt; tags.</span>
-<span class="sd">    Ref: https://github.com/huggingface/open-r1/blob/main/src/open_r1/rewards.py</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-<div class="viewcode-block" id="FormatReward.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.html#trinity.common.rewards.reward_fn.FormatReward.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pattern</span> <span class="o">=</span> <span class="n">pattern</span> <span class="k">if</span> <span class="n">pattern</span> <span class="k">else</span> <span class="sa">r</span><span class="s2">&quot;^&lt;think&gt;\n.*?\n&lt;/think&gt;\n&lt;answer&gt;\n.*?\n&lt;/answer&gt;$&quot;</span></div>
-
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">response</span><span class="p">,</span>
-        <span class="n">prompt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">truth</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">return_dict</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pattern</span><span class="p">,</span> <span class="n">response</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">):</span>
-            <span class="k">return</span> <span class="mf">0.1</span>
+        <span class="k">if</span> <span class="n">reward_obj</span><span class="o">.</span><span class="n">details</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">detail</span> <span class="ow">in</span> <span class="n">reward_obj</span><span class="o">.</span><span class="n">details</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">detail</span><span class="p">,</span> <span class="n">RewardDimensionWithScore</span><span class="p">):</span>
+                    <span class="n">reward_dict</span><span class="p">[</span><span class="n">detail</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">detail</span><span class="o">.</span><span class="n">score</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">detail</span><span class="p">,</span> <span class="n">RewardDimensionWithRank</span><span class="p">):</span>
+                    <span class="c1"># TODO: support multi-ranked dimension</span>
+                    <span class="k">if</span> <span class="n">detail</span><span class="p">:</span>
+                        <span class="n">top_ranked_item</span> <span class="o">=</span> <span class="n">detail</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">reward_dict</span><span class="p">[</span><span class="n">top_ranked_item</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">top_ranked_item</span><span class="o">.</span><span class="n">score</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="o">-</span><span class="mf">0.1</span></div>
+            <span class="n">reward_dict</span><span class="p">[</span><span class="s2">&quot;reward&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">reward_obj</span><span class="o">.</span><span class="n">score</span>
 
-
-
-<div class="viewcode-block" id="MathRewardFn">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.html#trinity.common.rewards.reward_fn.MathRewardFn">[docs]</a>
-<span class="nd">@REWARD_FUNCTIONS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;math_reward&quot;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">MathRewardFn</span><span class="p">(</span><span class="n">RewardFn</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A reward function that rewards for math task.&quot;&quot;&quot;</span>
-
-    <span class="c1"># DEFAULT_FORMAT_PATTERN = r&quot;^&lt;think&gt;\n.*?\n&lt;/think&gt;\n&lt;answer&gt;\n.*?\n&lt;/answer&gt;$&quot;</span>
-    <span class="n">DEFAULT_FORMAT_PATTERN</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;.*?&lt;think&gt;.*?&lt;/think&gt;\s*&lt;answer&gt;.*?&lt;/answer&gt;\s*$&quot;</span>
-    <span class="n">DEFAULT_ANSWER_PARSER</span> <span class="o">=</span> <span class="n">simple_answer_parser</span>
-
-<div class="viewcode-block" id="MathRewardFn.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.html#trinity.common.rewards.reward_fn.MathRewardFn.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">answer_parser</span><span class="o">=</span><span class="n">DEFAULT_ANSWER_PARSER</span><span class="p">,</span>
-        <span class="n">pattern</span><span class="o">=</span><span class="n">DEFAULT_FORMAT_PATTERN</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">accuracy_reward</span> <span class="o">=</span> <span class="n">AccuracyReward</span><span class="p">(</span><span class="n">answer_parser</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">format_reward</span> <span class="o">=</span> <span class="n">FormatReward</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span></div>
-
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">response</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">prompt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">truth</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">return_dict</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
-        <span class="n">accuracy_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">accuracy_reward</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">prompt</span><span class="p">,</span> <span class="n">truth</span><span class="p">)</span>
-
-        <span class="n">format_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_reward</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">prompt</span><span class="p">,</span> <span class="n">truth</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">return_dict</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;accuracy&quot;</span><span class="p">:</span> <span class="n">accuracy_score</span><span class="p">,</span> <span class="s2">&quot;format_score&quot;</span><span class="p">:</span> <span class="n">format_score</span><span class="p">}</span>
-
-        <span class="k">return</span> <span class="n">accuracy_score</span> <span class="o">+</span> <span class="n">format_score</span></div>
-
-
-
-<div class="viewcode-block" id="CountDownRewardFn">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.html#trinity.common.rewards.reward_fn.CountDownRewardFn">[docs]</a>
-<span class="nd">@REWARD_FUNCTIONS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;countdown_reward&quot;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">CountDownRewardFn</span><span class="p">(</span><span class="n">RewardFn</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A reward function that rewards for countdown task.&quot;&quot;&quot;</span>
-
-<div class="viewcode-block" id="CountDownRewardFn.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.html#trinity.common.rewards.reward_fn.CountDownRewardFn.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">pass</span></div>
-
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">response</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">prompt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">truth</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">return_dict</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="c1"># Copy from Jiayi-Pan/TinyZero verl/utils/reward_score/countdown.py</span>
-        <span class="n">truth</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">truth</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-        <span class="n">target</span> <span class="o">=</span> <span class="n">truth</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
-        <span class="n">numbers</span> <span class="o">=</span> <span class="n">truth</span><span class="p">[</span><span class="s2">&quot;numbers&quot;</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
-
-        <span class="n">solution_str</span> <span class="o">=</span> <span class="n">response</span>
-        <span class="n">equation</span> <span class="o">=</span> <span class="n">extract_solution</span><span class="p">(</span><span class="n">solution_str</span><span class="o">=</span><span class="n">solution_str</span><span class="p">)</span>
-        <span class="n">format_score</span> <span class="o">=</span> <span class="mf">0.1</span>
-        <span class="n">score</span> <span class="o">=</span> <span class="mf">1.0</span>
-
-        <span class="k">if</span> <span class="n">equation</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="mi">0</span>
-
-        <span class="c1"># Validate equation uses correct numbers</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">validate_equation</span><span class="p">(</span><span class="n">equation</span><span class="p">,</span> <span class="n">numbers</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">format_score</span>
-
-        <span class="c1"># Evaluate equation</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">result</span> <span class="o">=</span> <span class="n">evaluate_equation</span><span class="p">(</span><span class="n">equation</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">format_score</span>
-
-            <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">result</span> <span class="o">-</span> <span class="n">target</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-5</span><span class="p">:</span>  <span class="c1"># Account for floating point precision</span>
-                <span class="k">return</span> <span class="n">score</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">format_score</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># noqa: F841</span>
-            <span class="k">return</span> <span class="n">format_score</span></div>
-
-
-
-<div class="viewcode-block" id="MathBoxedRewardFn">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.html#trinity.common.rewards.reward_fn.MathBoxedRewardFn">[docs]</a>
-<span class="nd">@REWARD_FUNCTIONS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;math_boxed_reward&quot;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">MathBoxedRewardFn</span><span class="p">(</span><span class="n">RewardFn</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A reward function that rewards for math task.&quot;&quot;&quot;</span>
-
-<div class="viewcode-block" id="MathBoxedRewardFn.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.html#trinity.common.rewards.reward_fn.MathBoxedRewardFn.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">pass</span></div>
-
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">response</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">prompt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">truth</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">return_dict</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">with_think</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">format_score_coef</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
-        <span class="n">accuracy_score</span> <span class="o">=</span> <span class="n">compute_score</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">truth</span><span class="p">)</span>
-
-        <span class="n">format_score</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="k">if</span> <span class="n">with_think</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">validate_think_pattern</span><span class="p">(</span><span class="n">response</span><span class="p">):</span>
-            <span class="n">format_score</span> <span class="o">=</span> <span class="p">(</span><span class="n">format_score_coef</span> <span class="ow">or</span> <span class="mf">0.1</span><span class="p">)</span> <span class="o">*</span> <span class="o">-</span><span class="mf">1.0</span>
-
-        <span class="k">if</span> <span class="n">return_dict</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;accuracy&quot;</span><span class="p">:</span> <span class="n">accuracy_score</span><span class="p">,</span> <span class="s2">&quot;format_score&quot;</span><span class="p">:</span> <span class="n">format_score</span><span class="p">}</span>
-
-        <span class="k">return</span> <span class="n">accuracy_score</span> <span class="o">+</span> <span class="n">format_score</span></div>
+        <span class="k">return</span> <span class="n">reward_dict</span></div>
 
 </pre></div>
 
