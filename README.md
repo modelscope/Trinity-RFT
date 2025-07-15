@@ -1,112 +1,143 @@
 
-
-<!-- ![trinity-rft](./docs/sphinx_doc/assets/trinity-title.png) -->
-
 <div align="center">
   <img src="https://img.alicdn.com/imgextra/i1/O1CN01lvLpfw25Pl4ohGZnU_!!6000000007519-2-tps-1628-490.png" alt="Trinity-RFT" style="height: 120px;">
 </div>
 
-&nbsp;
+
+
+<h2 align="center">Trinity-RFT: A General-Purpose and Unified Framework for Reinforcement Fine-Tuning of Large Language Models</h2>
+
 
 <div align="center">
 
 [![paper](http://img.shields.io/badge/cs.LG-2505.17826-B31B1B?logo=arxiv&logoColor=red)](https://arxiv.org/abs/2505.17826)
 [![doc](https://img.shields.io/badge/Docs-blue?logo=markdown)](https://modelscope.github.io/Trinity-RFT/)
-[![pypi](https://img.shields.io/pypi/v/trinity-rft?logo=pypi&color=026cad)](https://pypi.org/project/trinity-rft/0.1.1/)
+[![pypi](https://img.shields.io/pypi/v/trinity-rft?logo=pypi&color=026cad)](https://pypi.org/project/trinity-rft/)
 ![license](https://img.shields.io/badge/license-Apache--2.0-000000.svg)
 
 </div>
 
 
-**Trinity-RFT is a general-purpose, flexible, scalable and user-friendly framework designed for reinforcement fine-tuning (RFT) of large language models (LLM).**
+
+## 🚀 News
+
+* [2025-07] Trinity-RFT v0.2.0 is released.
+* [2025-07] We update the [technical report](https://arxiv.org/abs/2505.17826) (arXiv v2) with new features, examples, and experiments.
+* [2025-06] Trinity-RFT v0.1.1 is released.
+* [2025-05] We release Trinity-RFT v0.1.0 and a technical report.
+* [2025-04] The initial codebase of Trinity-RFT is open.
 
 
-Built with a decoupled design, seamless integration for agent-environment interaction, and systematic data processing pipelines, Trinity-RFT can be easily adapted for diverse application scenarios, and serve as a unified platform for exploring advanced reinforcement learning (RL) paradigms.
-
-
-
-
-
-## Vision of this project
-
-
-Current RFT approaches, such as RLHF (Reinforcement Learning from Human Feedback) with proxy reward models or training long-CoT reasoning models with rule-based rewards, are limited in their ability to handle dynamic, real-world, and continuous learning.
-
-Trinity-RFT envisions a future where AI agents learn by interacting directly with environments, collecting delayed or complex reward signals, and continuously refining their behavior through RL.
-
-
-For example, imagine an AI scientist that designs an experiment, executes it, waits for feedback (while working on other tasks concurrently), and iteratively updates itself based on true environmental rewards when the experiment is finally finished.
-
-
-Trinity-RFT offers a path into this future by providing various useful features.
+## 💡 What is Trinity-RFT?
 
 
 
-
-
-## Key features
-
-
-
-+ **Unified RFT modes & algorithm support.**
-Trinity-RFT unifies and generalizes existing RFT methodologies into a flexible and configurable framework, supporting synchronous/asynchronous, on-policy/off-policy, and online/offline training, as well as hybrid modes that combine them seamlessly into a single learning process.
-
-
-+ **Agent-environment interaction as a first-class citizen.**
-Trinity-RFT allows delayed rewards in multi-step/time-lagged feedback loops, handles long-tailed latencies and environment/agent failures gracefully, and supports distributed deployment where explorers and trainers can operate across separate devices and scale up independently.
+Trinity-RFT is a general-purpose, flexible and easy-to-use framework for reinforcement fine-tuning (RFT) of large language models (LLM).
+It is designed to support diverse application scenarios and serve as a unified platform for exploring advanced RL paradigms in the [era of experience](https://storage.googleapis.com/deepmind-media/Era-of-Experience%20/The%20Era%20of%20Experience%20Paper.pdf).
 
 
 
-+ **Data processing pipelines optimized for RFT with diverse/messy data.**
-These include converting raw datasets to task sets for RL, cleaning/filtering/prioritizing experiences stored in the replay buffer, synthesizing data for tasks and experiences, offering user interfaces for human in the loop, etc.
+## ✨ Key Features
+
+* **Unified RFT Core:**
+
+  Supports *synchronous/asynchronous*, *on-policy/off-policy*, and *online/offline* training. Rollout and training can run separately and scale independently on different devices.
+
+* **First-Class Agent-Environment Interaction:**
+
+  Handles lagged feedback, long-tailed latencies, and agent/env failures gracefully. Supports multi-turn agent-env interaction.
+
+* **Optimized Data Pipelines:**
+
+  Treats rollout tasks and experiences as dynamic assets, enabling active management (prioritization, cleaning, augmentation) throughout the RFT lifecycle.
+
+* **User-Friendly Design:**
+
+  Modular and decoupled architecture for easy adoption and development, plus rich graphical user interfaces for low-code usage.
+
+
+<p align="center">
+  <img src="https://img.alicdn.com/imgextra/i2/O1CN01H3UbpF1yP7E1OCLbi_!!6000000006570-2-tps-1334-638.png" alt="Trinity-RFT">
+  <em>Figure: The high-level design of Trinity-RFT</em>
+</p>
+
+
+<details>
+<summary>Figure: The architecture of RFT-core</summary>
+
+
+<p align="center">
+  <img src="https://img.alicdn.com/imgextra/i1/O1CN01BFCZRV1zS9T1PoH49_!!6000000006712-2-tps-922-544.png" alt="Trinity-RFT-core-architecture">
+</p>
+
+</details>
+
+
+<details>
+<summary>Figure: Some RFT modes supported by Trinity-RFT</summary>
+
+<p align="center">
+  <img src="https://img.alicdn.com/imgextra/i3/O1CN01E7NskS1FFoTI9jlaQ_!!6000000000458-2-tps-1458-682.png" alt="Trinity-RFT-modes">
+</p>
+
+
+</details>
+
+
+<details>
+<summary>Figure: The architecture of data processors</summary>
+
+<p align="center">
+  <img src="https://img.alicdn.com/imgextra/i3/O1CN01hR1LCh25kpJMKmYR4_!!6000000007565-2-tps-1474-740.png" alt="Trinity-RFT-data-pipeline-buffer">
+</p>
+
+</details>
+
+
+<details>
+<summary>Figure: The high-level design of data pipelines in Trinity-RFT</summary>
+
+<p align="center">
+  <img src="https://img.alicdn.com/imgextra/i4/O1CN01UvyfcZ1WoTv5t3pCp_!!6000000002835-2-tps-1166-274.png" alt="Trinity-RFT-data-pipelines">
+</p>
+
+</details>
 
 
 
-## The design of Trinity-RFT
+## 🛠️ What can I use Trinity-RFT for?
 
 
-<!-- ![design](./docs/sphinx_doc/assets/trinity-design.png) -->
+* **Adaptation to New Scenarios:**
 
-<div align="center">
-  <img src="https://img.alicdn.com/imgextra/i2/O1CN01X5jFm81peNsADtRt2_!!6000000005385-2-tps-3298-1498.png" alt="Trinity-RFT">
-</div>
+  Implement agent-environment interaction logic in a single `Workflow` or `MultiTurnWorkflow` class.  ([Example](./docs/sphinx_doc/source/tutorial/example_multi_turn.md))
 
 
+* **RL Algorithm Development:**
+
+  Develop custom RL algorithms (loss design, sampling, data processing) in compact, plug-and-play classes.  ([Example](./docs/sphinx_doc/source/tutorial/example_mix_algo.md))
 
 
+* **Low-Code Usage:**
 
-The overall design of Trinity-RFT exhibits a trinity:
-+ RFT-core;
-+ agent-environment interaction;
-+ data processing pipelines;
-
-and the design of RFT-core also exhibits a trinity:
-+ explorer;
-+ trainer;
-+ buffer.
+  Use graphical interfaces for easy monitoring and tracking of the learning process.
 
 
+---
 
-The *explorer*, powered by the rollout model, interacts with the environment and generates rollout trajectories to be stored in the experience buffer.
-
-The *trainer*, powered by the policy model, samples batches of experiences from the buffer and updates the policy model via RL algorithms.
-
-These two can be completely decoupled and act asynchronously on separate machines, except that they share the same experience buffer, and their model weights are synchronized once in a while.
-Such a decoupled design is crucial for making the aforementioned features of Trinity-RFT possible.
-
-<!-- e.g., flexible and configurable RFT modes (on-policy/off-policy, synchronous/asynchronous, immediate/lagged rewards),
-fault tolerance for failures of explorer (agent/environment) or trainer,
-high efficiency in the presence of long-tailed rollout latencies,
-data processing pipelines and human in the loop of RFT (e.g., via acting on the experience buffer, which is implemented as a persistent database),
-among others. -->
+## Table of contents
 
 
-
-Meanwhile, Trinity-RFT has done a lot of work to ensure high efficiency and robustness in every component of the framework,
-e.g., utilizing NCCL (when feasible) for model weight synchronization, sequence concatenation with proper masking for multi-turn conversations and ReAct-style workflows, pipeline parallelism for the synchronous RFT mode,
-asynchronous and concurrent LLM inference for rollout,
-fault tolerance for agent/environment failures,
-among many others.
+- [Getting started](#getting-started)
+  - [Step 1: installation](#step-1-installation)
+  - [Step 2: prepare dataset and model](#step-2-prepare-dataset-and-model)
+  - [Step 3: configurations](#step-3-configurations)
+  - [Step 4: run the RFT process](#step-4-run-the-rft-process)
+- [Further tutorials](#further-tutorials)
+- [Upcoming features](#upcoming-features)
+- [Contribution guide](#contribution-guide)
+- [Acknowledgements](#acknowledgements)
+- [Citation](#citation)
 
 
 
@@ -117,14 +148,10 @@ among many others.
 > This project is currently under active development. Comments and suggestions are welcome!
 
 
+### Step 1: installation
 
 
-### Step 1: preparations
-
-
-
-
-Installation from source (recommended):
+Installation from source **(recommended)**:
 
 ```shell
 # Pull the source code from GitHub
@@ -159,7 +186,7 @@ pip install -e .\[flash_attn\]
 Installation using pip:
 
 ```shell
-pip install trinity-rft==0.1.1
+pip install trinity-rft==0.2.0
 ```
 
 Installation from docker:
@@ -179,7 +206,7 @@ docker run -it --gpus all --shm-size="64g" --rm -v $PWD:/workspace -v <root_path
 ```
 
 
-Trinity-RFT requires
+**Requirements:**
 Python version >= 3.10,
 CUDA version >= 12.4,
 and at least 2 GPUs.
@@ -201,7 +228,7 @@ huggingface-cli download {model_name} --local-dir $MODEL_PATH/{model_name}
 modelscope download {model_name} --local_dir $MODEL_PATH/{model_name}
 ```
 
-For more details about model downloading, please refer to [Huggingface](https://huggingface.co/docs/huggingface_hub/main/en/guides/cli) or  [ModelScope](https://modelscope.cn/docs/models/download).
+For more details about model downloading, see [Huggingface](https://huggingface.co/docs/huggingface_hub/main/en/guides/cli) or  [ModelScope](https://modelscope.cn/docs/models/download).
 
 
 
@@ -215,35 +242,49 @@ huggingface-cli download {dataset_name} --repo-type dataset --local-dir $DATASET
 modelscope download --dataset {dataset_name} --local_dir $DATASET_PATH/{dataset_name}
 ```
 
-For more details about dataset downloading, please refer to [Huggingface](https://huggingface.co/docs/huggingface_hub/main/en/guides/cli#download-a-dataset-or-a-space) or [ModelScope](https://modelscope.cn/docs/datasets/download).
+For more details about dataset downloading, see [Huggingface](https://huggingface.co/docs/huggingface_hub/main/en/guides/cli#download-a-dataset-or-a-space) or [ModelScope](https://modelscope.cn/docs/datasets/download).
 
 
 
 ### Step 3: configurations
 
 
-For convenience, Trinity-RFT provides a web interface for configuring your RFT process.
+Trinity-RFT provides a web interface for configuring your RFT process.
 
 > [!NOTE]
 > This is an experimental feature, and we will continue to improve it.
 
 
-To enable *minimal* features (mainly for trainer), you can run
+To enable minimal features (mainly for trainer), you can run
+
 ```bash
 trinity studio --port 8080
 ```
+
 Then you can configure your RFT process in the web page and generate a config file. You can save the config for later use or run it directly as described in the following section.
 
-Advanced users can also configure the RFT process by editing the config file directly.
-We provide a set of example config files in [`examples`](examples/).
+Advanced users can also edit the config file directly.
+We provide example config files in [`examples`](examples/).
 
-To enable *complete* visualization features, please refer to the monorepo for [Trinity-Studio](https://github.com/modelscope/Trinity-Studio).
+For complete GUI features, please refer to the monorepo for [Trinity-Studio](https://github.com/modelscope/Trinity-Studio).
+
+
+<details>
+
+<summary> Example: config manager GUI </summary>
+
+![config-manager](https://img.alicdn.com/imgextra/i1/O1CN01yhYrV01lGKchtywSH_!!6000000004791-2-tps-1480-844.png)
+
+
+</details>
+
+
 
 
 ### Step 4: run the RFT process
 
 
-First, start a ray cluster with the following command:
+Start a ray cluster:
 
 ```shell
 # On master node
@@ -253,57 +294,73 @@ ray start --head
 ray start --address=<master_address>
 ```
 
-Optionally, we can login into [wandb](https://docs.wandb.ai/quickstart/) to better monitor the RFT process:
+(Optional) Log in to [wandb](https://docs.wandb.ai/quickstart/) for better monitoring:
 
 ```shell
 export WANDB_API_KEY=<your_api_key>
 wandb login
 ```
 
-Then, for command-line users, run the RFT process with the following command:
+For command-line users, run the RFT process:
 
 ```shell
 trinity run --config <config_path>
 ```
 
-> For example, below is the command for fine-tuning Qwen2.5-1.5B-Instruct on GSM8k dataset using GRPO algorithm:
-> ```shell
-> trinity run --config examples/grpo_gsm8k/gsm8k.yaml
-> ```
+For example, below is the command for fine-tuning Qwen2.5-1.5B-Instruct on GSM8k with GRPO:
 
-For studio users, just click the "Run" button in the web page.
+```shell
+trinity run --config examples/grpo_gsm8k/gsm8k.yaml
+```
+
+For studio users, click "Run" in the web interface.
 
 
-For more detailed examples about how to use Trinity-RFT, please refer to the following tutorials:
-+ [A quick example with GSM8k](./docs/sphinx_doc/source/tutorial/example_reasoning_basic.md)
-+ [Off-policy mode of RFT](./docs/sphinx_doc/source/tutorial/example_reasoning_advanced.md)
-+ [Asynchronous mode of RFT](./docs/sphinx_doc/source/tutorial/example_async_mode.md)
-+ [Multi-turn tasks](./docs/sphinx_doc/source/tutorial/example_multi_turn.md)
+## Further tutorials
+
+
+Tutorials for running different RFT modes:
+
++ [Quick example: GRPO on GSM8k](./docs/sphinx_doc/source/tutorial/example_reasoning_basic.md)
++ [Off-policy RFT](./docs/sphinx_doc/source/tutorial/example_reasoning_advanced.md)
++ [Fully asynchronous RFT](./docs/sphinx_doc/source/tutorial/example_async_mode.md)
 + [Offline learning by DPO or SFT](./docs/sphinx_doc/source/tutorial/example_dpo.md)
-+ [Advanced data processing / human-in-the-loop](./docs/sphinx_doc/source/tutorial/example_data_functionalities.md)
 
 
-For some frequently asked questions, check [FAQ](./docs/sphinx_doc/source/tutorial/faq.md) for answers.
+Tutorials for adapting Trinity-RFT to a new multi-turn agentic scenario:
+
++ [Multi-turn tasks](./docs/sphinx_doc/source/tutorial/example_multi_turn.md)
 
 
-## Advanced usage and full configurations
+Tutorials for data-related functionalities:
+
++ [Advanced data processing & human-in-the-loop](./docs/sphinx_doc/source/tutorial/example_data_functionalities.md)
 
 
-Please refer to [this document](./docs/sphinx_doc/source/tutorial/trinity_configs.md).
+Tutorials for RL algorithm development/research with Trinity-RFT:
+
++ [RL algorithm development with Trinity-RFT](./docs/sphinx_doc/source/tutorial/example_mix_algo.md)
+
+
+Guidelines for full configurations: see [this document](./docs/sphinx_doc/source/tutorial/trinity_configs.md)
+
+
+Guidelines for developers and researchers:
+
++ [Build new RL scenarios](./docs/sphinx_doc/source/tutorial/trinity_programming_guide.md#workflows-for-rl-environment-developers)
++ [Implement new RL algorithms](./docs/sphinx_doc/source/tutorial/trinity_programming_guide.md#algorithms-for-rl-algorithm-developers)
 
 
 
 
+For some frequently asked questions, see [FAQ](./docs/sphinx_doc/source/tutorial/faq.md).
 
-## Programming guide for developers
 
-
-Please refer to [this document](./docs/sphinx_doc/source/tutorial/trinity_programming_guide.md).
 
 
 ## Upcoming features
 
-A tentative roadmap: https://github.com/modelscope/Trinity-RFT/issues/51
+A tentative roadmap: [#51](https://github.com/modelscope/Trinity-RFT/issues/51)
 
 
 
@@ -342,11 +399,9 @@ This project is built upon many excellent open-source projects, including:
 + we have also drawn inspirations from RL frameworks like [OpenRLHF](https://github.com/OpenRLHF/OpenRLHF), [TRL](https://github.com/huggingface/trl) and [ChatLearn](https://github.com/alibaba/ChatLearn);
 + ......
 
-
-
-
-
 ## Citation
+
+
 ```plain
 @misc{trinity-rft,
       title={Trinity-RFT: A General-Purpose and Unified Framework for Reinforcement Fine-Tuning of Large Language Models},

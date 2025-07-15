@@ -442,7 +442,8 @@ actor_rollout_ref:
     entropy_from_logits_with_chunking: false
     entropy_checkpointing: false
     checkpoint:
-      contents: ['model', 'hf_model', 'optimizer', 'extra']  # with 'hf_model' you can save whole model as hf format, now only use sharded model checkpoint to save space
+      load_contents: ['model', 'optimizer', 'extra']
+      save_contents: ['model', 'optimizer', 'extra']
     optim:
       lr: 1e-6
       lr_warmup_steps_ratio: 0.  # the total steps will be injected during runtime
@@ -529,6 +530,7 @@ trainer:
 - `actor_rollout_ref.actor.ulysses_sequence_parallel_size`: Ulysses sequence parallel size.
 - `actor_rollout_ref.actor.entropy_from_logits_with_chunking`: Calculate entropy with chunking to reduce memory peak.
 - `actor_rollout_ref.actor.entropy_checkpointing`: Recompute entropy.
+- `actor_rollout_ref.actor.checkpoint`: Contents to be loaded and saved. With 'hf_model' you can save whole model as hf format; now only use sharded model checkpoint to save space.
 - `actor_rollout_ref.actor.optim.lr`: Learning rate for actor model.
 - `actor_rollout_ref.actor.optim.lr_warmup_steps_ratio`: Ratio of warmup steps for learning rate.
 - `actor_rollout_ref.actor.optim.warmup_style`: Warmup style for learning rate.

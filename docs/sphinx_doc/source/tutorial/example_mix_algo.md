@@ -20,6 +20,11 @@ $$
 The first term corresponds to the standard GRPO objective, which aims to maximize the expected reward. The last term is an auxiliary objective defined on expert data, encouraging the policy to imitate expert behavior. $\mu$ is a weighting factor that controls the relative importance of the two terms.
 
 
+
+A visualization of this pipeline is as follows:
+
+![](../../assets/trinity-mix.png)
+
 ## Step 0: Prepare the Expert Data
 
 We prompt a powerful LLM to generate responses with the CoT process for some pre-defined questions. The collected dta are viewed as some experiences from an expert. We store them in a `jsonl` file `expert_data.jsonl` with the following format:

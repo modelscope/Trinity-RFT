@@ -55,12 +55,8 @@ class FSDPConfig:
 
 @dataclass
 class Checkpoint:
-    load_contents: List[str] = field(
-        default_factory=lambda: ["model", "hf_model", "optimizer", "extra"]
-    )
-    save_contents: List[str] = field(
-        default_factory=lambda: ["model", "hf_model", "optimizer", "extra"]
-    )
+    load_contents: List[str] = field(default_factory=lambda: ["model", "optimizer", "extra"])
+    save_contents: List[str] = field(default_factory=lambda: ["model", "optimizer", "extra"])
 
 
 @dataclass
