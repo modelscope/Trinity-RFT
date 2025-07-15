@@ -173,6 +173,7 @@ class ModelConfig:
     critic_model_path: str = ""
     max_prompt_tokens: Optional[int] = None
     max_response_tokens: Optional[int] = None
+    custom_chat_template: Optional[str] = None
 
 
 @dataclass

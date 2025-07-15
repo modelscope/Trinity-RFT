@@ -24,6 +24,7 @@ class ActorModel:
     enable_gradient_checkpointing: bool = True
     use_remove_padding: bool = False
     use_fused_kernels: bool = False
+    custom_chat_template: Optional[str] = None
 
 
 @dataclass
@@ -49,11 +50,17 @@ class FSDPConfig:
     param_offload: bool = False
     optimizer_offload: bool = False
     fsdp_size: int = -1
+    forward_prefetch: bool = False
 
 
 @dataclass
 class Checkpoint:
-    contents: List[str] = field(default_factory=lambda: ["model", "hf_model", "optimizer", "extra"])
+    load_contents: List[str] = field(
+        default_factory=lambda: ["model", "hf_model", "optimizer", "extra"]
+    )
+    save_contents: List[str] = field(
+        default_factory=lambda: ["model", "hf_model", "optimizer", "extra"]
+    )
 
 
 @dataclass
@@ -70,6 +77,8 @@ class Actor:
     ppo_epochs: int = 1
     shuffle: bool = False
     ulysses_sequence_parallel_size: int = 1
+    entropy_from_logits_with_chunking: bool = False
+    entropy_checkpointing: bool = False
     checkpoint: Checkpoint = field(default_factory=Checkpoint)
     optim: Optim = field(default_factory=Optim)
     fsdp_config: FSDPConfig = field(default_factory=FSDPConfig)
@@ -90,6 +99,11 @@ class Ref:
     log_prob_use_dynamic_bsz: bool = False
     log_prob_max_token_len_per_gpu: int = 0
     ulysses_sequence_parallel_size: int = 1
+    entropy_from_logits_with_chunking: bool = False
+    entropy_checkpointing: bool = False
+    checkpoint: Checkpoint = field(
+        default_factory=lambda: Checkpoint(load_contents=["model"], save_contents=["model"])
+    )
 
 
 @dataclass
@@ -305,6 +319,7 @@ class veRLConfig:
 
         # Actor / Critic config
         self.actor_rollout_ref.model.path = config.model.model_path
+        self.actor_rollout_ref.model.custom_chat_template = config.model.custom_chat_template
         self.critic.model.path = config.model.critic_model_path
         self.critic.model.tokenizer_path = config.model.critic_model_path
         self.actor_rollout_ref.actor.ppo_mini_batch_size = (

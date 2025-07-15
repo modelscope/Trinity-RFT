@@ -15,10 +15,9 @@
 # limitations under the License.
 """
 Single Process Actor.
-Modified from https://github.com/volcengine/verl/blob/0758489422e8d41a89e6c36d4c477714520f0dcc/verl/workers/actor/dp_actor.py
+Modified from https://github.com/volcengine/verl/blob/v0.4.1/verl/workers/actor/dp_actor.py
 """
 
-import itertools
 import logging
 import os
 
@@ -26,9 +25,9 @@ import torch
 from torch import nn
 from verl import DataProto
 from verl.utils.debug import GPUMemoryLogger
-from verl.utils.device import get_torch_device
+from verl.utils.device import get_device_id
 from verl.utils.py_functional import append_to_dict
-from verl.utils.seqlen_balancing import get_reverse_idx, rearrange_micro_batches
+from verl.utils.seqlen_balancing import rearrange_micro_batches
 from verl.workers.actor.dp_actor import DataParallelPPOActor as DPActor
 
 from trinity.algorithm import ENTROPY_LOSS_FN, KL_FN, POLICY_LOSS_FN
@@ -64,81 +63,7 @@ class DataParallelPPOActor(DPActor):
         )
 
     @GPUMemoryLogger(role="dp actor", logger=logger)
-    def compute_log_prob(self, data: DataProto, calculate_entropy=False) -> torch.Tensor:
-        """Compute the log probability of the responses given input_ids, attention_mask and position_ids
-
-        Args:
-            data (DataProto): a DataProto containing keys
-
-                ``input_ids``: tensor of shape [batch_size, sequence_length]. torch.int64. Note that input_ids is the
-                concatenation of prompt and response. Note that ``sequence_length = prompt_length + response_length``.
-
-                ``attention_mask``: tensor of shape [batch_size, sequence_length]. torch.int64.
-
-                ``position_ids``: tensor of shape [batch_size, sequence_length]. torch.int64.
-
-                ``responses``:  tensor of shape [batch_size, response_length]. torch.int64.
-
-        Returns:
-            torch.Tensor: the log_prob tensor
-        """
-        # set to eval
-        self.actor_module.eval()
-
-        micro_batch_size = data.meta_info["micro_batch_size"]
-        temperature = data.meta_info[
-            "temperature"
-        ]  # temperature must be in the data.meta_info to avoid silent error
-        use_dynamic_bsz = data.meta_info["use_dynamic_bsz"]
-
-        select_keys = ["responses", "input_ids", "attention_mask", "position_ids"]
-        batch = data.select(batch_keys=select_keys).batch
-        has_multi_modal_inputs = "multi_modal_inputs" in data.non_tensor_batch.keys()
-
-        if has_multi_modal_inputs:
-            num_micro_batches = data.batch.batch_size[0] // micro_batch_size
-            non_tensor_select_keys = ["multi_modal_inputs"]
-            micro_batches = data.select(select_keys, non_tensor_select_keys).chunk(
-                num_micro_batches
-            )
-        elif use_dynamic_bsz:
-            # split using dynamic bsz
-            max_token_len = data.meta_info["max_token_len"] * self.ulysses_sequence_parallel_size
-            micro_batches, indices = rearrange_micro_batches(
-                batch=batch, max_token_len=max_token_len
-            )
-        else:
-            micro_batches = batch.split(micro_batch_size)
-
-        log_probs_lst = []
-        entropy_lst = []
-        for micro_batch in micro_batches:
-            if isinstance(micro_batch, DataProto):
-                micro_batch = {**micro_batch.batch, **micro_batch.non_tensor_batch}
-            with torch.no_grad():
-                entropy, log_probs = self._forward_micro_batch(
-                    micro_batch, temperature=temperature, calculate_entropy=calculate_entropy
-                )
-            log_probs_lst.append(log_probs)
-            if calculate_entropy:
-                entropy_lst.append(entropy)
-
-        log_probs = torch.concat(log_probs_lst, dim=0)
-        entropys = None
-        if calculate_entropy:
-            entropys = torch.concat(entropy_lst, dim=0)
-        if use_dynamic_bsz:
-            indices = list(itertools.chain.from_iterable(indices))
-            assert len(indices) == log_probs.size(0), f"{len(indices)} vs. {log_probs.size()}"
-            revert_indices = torch.tensor(get_reverse_idx(indices), dtype=torch.long)
-            log_probs = log_probs[revert_indices]
-            if calculate_entropy:
-                entropys = entropys[revert_indices]  # type: ignore
-
-        return log_probs, entropys
-
-    @GPUMemoryLogger(role="dp actor", logger=logger)
-    def update_policy(self, data: DataProto):
+    def update_policy(self, data: DataProto):  # noqa: C901
         # make sure we are in training mode
         self.actor_module.train()
 
@@ -174,15 +99,43 @@ class DataParallelPPOActor(DPActor):
                 # split batch into micro_batches
                 mini_batch = data
                 if has_multi_modal_inputs:
-                    self.gradient_accumulation = (
-                        self.config.ppo_mini_batch_size // self.config.ppo_micro_batch_size_per_gpu
-                    )
-                    num_micro_batches = (
-                        mini_batch.batch.batch_size[0] // self.config.ppo_micro_batch_size_per_gpu
-                    )
-                    micro_batches = data.select(select_keys, non_tensor_select_keys).chunk(
-                        num_micro_batches
-                    )
+                    micro_batches = []
+                    if self.config.use_dynamic_bsz:
+                        all_multi_modal_inputs_list = data.non_tensor_batch["multi_modal_inputs"]
+                        batch_tensordict_for_rearrange = data.batch
+
+                        max_token_len = (
+                            self.config.ppo_max_token_len_per_gpu
+                            * self.ulysses_sequence_parallel_size
+                        )
+                        (
+                            rearranged_text_micro_batches_tds,
+                            textual_indices,
+                        ) = rearrange_micro_batches(
+                            batch=batch_tensordict_for_rearrange, max_token_len=max_token_len
+                        )
+
+                        for current_original_indices, text_mb_td in zip(
+                            textual_indices, rearranged_text_micro_batches_tds
+                        ):
+                            current_mm_inputs_list = [
+                                all_multi_modal_inputs_list[idx] for idx in current_original_indices
+                            ]
+                            mb_dict = {k: v for k, v in text_mb_td.items()}
+                            mb_dict["multi_modal_inputs"] = current_mm_inputs_list
+                            micro_batches.append(mb_dict)
+                    else:
+                        self.gradient_accumulation = (
+                            self.config.ppo_mini_batch_size
+                            // self.config.ppo_micro_batch_size_per_gpu
+                        )
+                        num_micro_batches = (
+                            mini_batch.batch.batch_size[0]
+                            // self.config.ppo_micro_batch_size_per_gpu
+                        )
+                        micro_batches = data.select(select_keys, non_tensor_select_keys).chunk(
+                            num_micro_batches
+                        )
                 elif self.config.use_dynamic_bsz:
                     max_token_len = (
                         self.config.ppo_max_token_len_per_gpu * self.ulysses_sequence_parallel_size
@@ -204,14 +157,20 @@ class DataParallelPPOActor(DPActor):
 
                     # Support all hardwares
                     if isinstance(data, DataProto):
-                        data = {
-                            **data.batch.to(get_torch_device().current_device()),
-                            **data.non_tensor_batch,
-                        }
+                        data = {**data.batch.to(get_device_id()), **data.non_tensor_batch}
+                    elif isinstance(data, dict):
+                        for k, v in data.items():
+                            if isinstance(v, torch.Tensor):
+                                data[k] = v.to(get_device_id())
+                            elif k == "multi_modal_inputs" and v is not None:
+                                data[k] = [
+                                    {kk: vv.to(get_device_id()) for kk, vv in item_dict.items()}
+                                    for item_dict in v
+                                ]
+                            else:
+                                data[k] = v
                     else:
-                        data = data.to(
-                            get_torch_device().current_device()
-                        )  # actor device is cpu when using offload
+                        data = data.to(get_device_id())  # actor device is cpu when using offload
                     responses = data["responses"]
                     response_length = responses.size(1)
                     attention_mask = data["attention_mask"]

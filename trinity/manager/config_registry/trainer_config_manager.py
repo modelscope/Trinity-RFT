@@ -114,6 +114,11 @@ def set_optimizer_offload(**kwargs):
     st.checkbox("FSDP Optimizer Offload", **kwargs)
 
 
+@CONFIG_GENERATORS.register_config(default_value=False, visible=use_fsdp)
+def set_forward_prefetch(**kwargs):
+    st.checkbox("FSDP Forward Prefetch", **kwargs)
+
+
 @CONFIG_GENERATORS.register_config(default_value="auto")
 def set_resume_mode(**kwargs):
     st.selectbox("Resume Mode", ["disable", "auto", "resume_path"], **kwargs)
@@ -233,6 +238,16 @@ def set_actor_ulysses_sequence_parallel_size(**kwargs):
         max_value=8,
         **kwargs,
     )
+
+
+@CONFIG_GENERATORS.register_config(default_value=False)
+def set_actor_entropy_from_logits_with_chunking(**kwargs):
+    st.checkbox("Entropy from Logits with Chunking", **kwargs)
+
+
+@CONFIG_GENERATORS.register_config(default_value=False)
+def set_actor_entropy_checkpointing(**kwargs):
+    st.checkbox("Entropy Checkpointing", **kwargs)
 
 
 @CONFIG_GENERATORS.register_config(default_value=1e-6)
