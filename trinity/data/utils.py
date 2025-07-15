@@ -1,5 +1,5 @@
 import os
-from trinity.common.config import DataPipelineConfig
+from trinity.common.config import Config, DataPipelineConfig
 from trinity.common.constants import DataProcessorPipelineType
 from trinity.utils.log import get_logger
 
@@ -76,6 +76,7 @@ def validate_data_pipeline(
         return False
     return True
 
+# temp file buffers
 def add_temp_file_buffer(name: str, file_path: str):
     """Add a temp file buffer to the global dict."""
     global TEMP_FILE_BUFFERS
@@ -101,3 +102,17 @@ def safe_str_to_bool(value: str, default: bool = True) -> bool:
         return value.lower() in ("true", "t", "1", "yes", "on")
     except AttributeError:
         return default
+
+def get_explorer_model_service(config: Config):
+    """
+    Check and get the API URL and model path of the explorer model service.
+    """
+    import ray
+
+    explorer = ray.get_actor(config.explorer.name)
+    if explorer is None:
+        return None, None
+    if len(explorer.models) == 0:
+        return None, None
+    explorer_model = explorer.models[0]
+    return ray.get(explorer_model.api_server_ready.remote())
