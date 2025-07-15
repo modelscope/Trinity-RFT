@@ -7,7 +7,7 @@ import os
 import time
 import traceback
 from collections import deque
-from typing import List, Optional
+from typing import List, Optional, Callable
 
 import torch
 
@@ -80,6 +80,10 @@ class Explorer:
         self.status = RunningStatus.RUNNING
         self.logger.info("Finished initializing Explorer.")
         self._ready_to_sync_condition = asyncio.Condition()
+
+        # explorer hooks
+        # post hooks: invoked after an explore step finished along with all eval/sync procedures
+        self.post_hooks: List[Callable] = []
 
     async def setup_weight_sync_group(
         self, master_address: str, master_port: int, state_dict_meta: List = None
@@ -221,6 +225,14 @@ class Explorer:
                     self.eval()
                 if self.need_sync():
                     await self.sync_weight()
+
+                # invoke post hooks
+                post_states = {
+                    "is_eval": self.need_eval(),
+                    "is_sync": self.need_sync(),
+                }
+                for hook_func in self.post_hooks:
+                    hook_func(**post_states)
             except Exception:
                 self.logger.error(f"Error in Explorer: {traceback.format_exc()}")
                 break
@@ -373,3 +385,7 @@ class Explorer:
     async def shutdown(self) -> None:
         self.monitor.close()
         await self.scheduler.stop()
+
+    def add_post_hook(self, hook_func: Callable):
+        if hook_func is not None and callable(hook_func):
+            self.post_hooks.append(hook_func)
