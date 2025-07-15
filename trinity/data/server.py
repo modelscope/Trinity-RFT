@@ -10,8 +10,8 @@ app = Flask(__name__)
 
 APP_NAME = "data_processor"
 
-EVNET_POOL: List[threading.Event] = []
-
+# event pool for stopping all running services
+EVENT_POOL: List[threading.Event] = []
 
 @app.route(f"/{APP_NAME}/<pipeline_type>", methods=["GET"])
 def data_processor(pipeline_type):
@@ -56,15 +56,20 @@ def data_processor(pipeline_type):
         thread = threading.Thread(target=iterator.run, args=(event,))
         thread.start()
         # add this event to the event pool
-        EVNET_POOL.append(event)
+        EVENT_POOL.append(event)
         return jsonify({"return_code": 0, "message": "Experience pipeline starts successfully."})
 
 
 @app.route(f"/{APP_NAME}/stop_all", methods=["GET"])
 def stop_all():
     try:
-        for event in EVNET_POOL:
+        # stop all services
+        for event in EVENT_POOL:
             event.set()
+
+        # clear all temp file buffers
+        from trinity.data.utils import clear_temp_file_buffers
+        clear_temp_file_buffers()
     except Exception:
         import traceback
 

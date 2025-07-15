@@ -1,9 +1,13 @@
+import os
 from trinity.common.config import DataPipelineConfig
 from trinity.common.constants import DataProcessorPipelineType
 from trinity.utils.log import get_logger
 
 logger = get_logger(__name__)
 
+# temp file buffers for dynamic task pipelines to store the left unconsumed data batches
+# it's a dict from name to file path
+TEMP_FILE_BUFFERS: dict[str, str] = {}
 
 def activate_data_processor(data_processor_url: str, config_path: str):
     """Check whether to activate data module and preprocess datasets."""
@@ -70,3 +74,21 @@ def validate_data_pipeline(
         logger.warning(f"Invalid pipeline type: {pipeline_type}..")
         return False
     return True
+
+def add_temp_file_buffer(name: str, file_path: str):
+    """Add a temp file buffer to the global dict."""
+    global TEMP_FILE_BUFFERS
+    if name in TEMP_FILE_BUFFERS:
+        logger.warning(f"Temp file buffer {name} already exists.")
+        return TEMP_FILE_BUFFERS[name]
+    else:
+        TEMP_FILE_BUFFERS[name] = file_path
+        return file_path
+
+def clear_temp_file_buffers():
+    """Clear all temp file buffers."""
+    global TEMP_FILE_BUFFERS
+    for name, file_path in TEMP_FILE_BUFFERS.items():
+        if os.path.exists(file_path):
+            logger.info(f"Removing temp file buffer: {name} -> {file_path}")
+            os.remove(file_path)
