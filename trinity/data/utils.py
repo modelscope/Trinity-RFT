@@ -9,7 +9,7 @@ logger = get_logger(__name__)
 # it's a dict from name to file path
 TEMP_FILE_BUFFERS: dict[str, str] = {}
 
-def activate_data_processor(data_processor_url: str, config_path: str):
+def activate_data_processor(data_processor_url: str, config_path: str, **kwargs):
     """Check whether to activate data module and preprocess datasets."""
     from trinity.cli.client import request
 
@@ -17,6 +17,7 @@ def activate_data_processor(data_processor_url: str, config_path: str):
     res = request(
         url=data_processor_url,
         configPath=config_path,
+        **kwargs,
     )
     if res["return_code"] != 0:
         logger.error(f"Failed to activate data module: {res['return_msg']}.")

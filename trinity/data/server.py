@@ -19,8 +19,11 @@ def data_processor(pipeline_type):
     from trinity.data.controllers.active_iterator import DataActiveIterator
     from trinity.data.utils import safe_str_to_bool
 
+    # the path to the config file
     config_path = request.args.get("configPath")
-    recompute = safe_str_to_bool(request.args.get("recompute"), default=True)
+    # whether the explorer is synced. Only need for dynamic task pipeline.
+    is_sync = safe_str_to_bool(request.args.get("is_sync"), default=True)
+
     pipeline_type = escape(pipeline_type)
     config = load_config(config_path)
     config.check_and_update()
@@ -48,7 +51,9 @@ def data_processor(pipeline_type):
     if pipeline_type == "task_pipeline":
         # must be sync
         iterator = DataActiveIterator(pipeline_config, config.buffer, pipeline_type=pipeline_type)
-        ret, msg = iterator.run(recompute=recompute)
+        # If the explorer is synced, the scorer model is updated, so the priority and the corresponding stats/meta need
+        # to be recomputed.
+        ret, msg = iterator.run(recompute=is_sync)
         return jsonify({"return_code": ret, "message": msg})
     elif pipeline_type == "experience_pipeline":
         # must be async
