@@ -150,6 +150,17 @@ class RftDataset:
         # self._validate_structure(sample)
         return sample
 
+    def remove_columns(self, column_names=None):
+        if column_names is not None:
+            if isinstance(column_names, str):
+                column_names = [column_names]
+            remove_column_names = []
+            for column_name in column_names:
+                if column_name in self.data.features:
+                    remove_column_names.append(column_name)
+            self.data = self.data.remove_columns(remove_column_names)
+        return self
+
     def __len__(self):
         return len(self.data)
 

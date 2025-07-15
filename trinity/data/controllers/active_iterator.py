@@ -97,7 +97,7 @@ class DataActiveIterator:
             self.updated_op_args["field_names"].append(self.config.format.response_key)
 
     # flake8: noqa: C901
-    def run(self, thread_event: threading.Event = None):
+    def run(self, thread_event: threading.Event = None, recompute: bool = True):
         """Run the active iterator."""
         # step 1. parse the dj config
         logger.info("Parsing the Data-Juicer config...")
@@ -152,6 +152,11 @@ class DataActiveIterator:
             logger.info("Loading data from input buffers for the next batch...")
             try:
                 dataset.read_from_buffer()
+                if "priority" not in dataset.data.features:
+                    recompute = True
+                elif recompute:
+                    # remove the "priority" column and computed stats & meta
+                    dataset = dataset.remove_columns(["priority", Fields.stats, Fields.meta])
             except StopIteration:
                 break
             except Exception:
@@ -162,19 +167,20 @@ class DataActiveIterator:
             logger.info("Applying data processors to calculate stats...")
             try:
                 res_dataset = dataset
-                if hit_cleaner:
-                    res_dataset = cleaner.process([res_dataset])
-                if hit_synthesizer:
-                    res_dataset = synthesizer.process([res_dataset])
-                if hit_human_annotator:
-                    res_dataset = human_annotator.process([res_dataset])
+                if recompute:
+                    if hit_cleaner:
+                        res_dataset = cleaner.process([res_dataset])
+                    if hit_synthesizer:
+                        res_dataset = synthesizer.process([res_dataset])
+                    if hit_human_annotator:
+                        res_dataset = human_annotator.process([res_dataset])
             except Exception:
                 traceback.print_exc()
                 return 5, "DataProcessors processing failed."
 
             # step 6. calculate the average and final scores, including priority
             try:
-                if hit_cleaner:
+                if recompute and hit_cleaner:
                     logger.info("Calculating the average and final scores...")
                     scored_dataset = self._group_scores(res_dataset)
                     scored_dataset = self._compute_priority_scores(scored_dataset)

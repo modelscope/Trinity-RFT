@@ -17,8 +17,10 @@ EVENT_POOL: List[threading.Event] = []
 def data_processor(pipeline_type):
     from trinity.common.config import load_config
     from trinity.data.controllers.active_iterator import DataActiveIterator
+    from trinity.data.utils import safe_str_to_bool
 
     config_path = request.args.get("configPath")
+    recompute = safe_str_to_bool(request.args.get("recompute"), default=True)
     pipeline_type = escape(pipeline_type)
     config = load_config(config_path)
     config.check_and_update()
@@ -46,14 +48,14 @@ def data_processor(pipeline_type):
     if pipeline_type == "task_pipeline":
         # must be sync
         iterator = DataActiveIterator(pipeline_config, config.buffer, pipeline_type=pipeline_type)
-        ret, msg = iterator.run()
+        ret, msg = iterator.run(recompute=recompute)
         return jsonify({"return_code": ret, "message": msg})
     elif pipeline_type == "experience_pipeline":
         # must be async
         iterator = DataActiveIterator(pipeline_config, config.buffer, pipeline_type=pipeline_type)
         # add an event
         event = threading.Event()
-        thread = threading.Thread(target=iterator.run, args=(event,))
+        thread = threading.Thread(target=iterator.run, args=(event, False,))
         thread.start()
         # add this event to the event pool
         EVENT_POOL.append(event)

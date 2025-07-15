@@ -92,3 +92,11 @@ def clear_temp_file_buffers():
         if os.path.exists(file_path):
             logger.info(f"Removing temp file buffer: {name} -> {file_path}")
             os.remove(file_path)
+
+def safe_str_to_bool(value: str, default: bool = True) -> bool:
+    if value is None:
+        return default
+    try:
+        return value.lower() in ("true", "t", "1", "yes", "on")
+    except AttributeError:
+        return default
