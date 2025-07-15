@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""Reward Function with Overlong Reward Shaping described in DAPO (https://arxiv.org/pdf/2503.14476)"""
 from typing import Optional, Union
 
 import torch
@@ -60,6 +61,6 @@ class MathDAPORewardFn(RewardFn):
         if response_len < excepted_len:
             return 0.0
         elif response_len > self.max_response_length:
-            return -1
+            return -self.penalty_factor
         else:
             return (excepted_len - response_len) / self.cache_length * self.penalty_factor

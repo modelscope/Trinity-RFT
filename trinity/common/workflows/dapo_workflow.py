@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
-"""We include the DAPO math workflows in this file."""
+"""
+We include the DAPO math workflows in this file.
+This workflow adopts MathDAPORewardFn as the reward function.
+Ref: https://arxiv.org/pdf/2503.14476
+"""
 
 from dataclasses import asdict
 from typing import List

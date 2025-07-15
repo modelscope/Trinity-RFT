@@ -210,7 +210,7 @@ class SimpleWorkflow(Workflow):
         """Format prompt for the base model."""
         prompt_text = ""
         if self.system_prompt:
-            prompt_text += "System:" + self.system_prompt
+            prompt_text += "System:\n" + self.system_prompt
             prompt_text += "\nUser:\n" + self.task_desc + "\nAssistant:\n"
         else:
             prompt_text += "User:\n" + self.task_desc + "\nAssistant:\n"
