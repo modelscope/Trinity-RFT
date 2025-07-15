@@ -1,0 +1,36 @@
+# An example: comparison between training on gsm8k and math
+
+# General configurations for plotting
+plot_configs:
+  title: "Multi-exps Comparison for {scalar_key}"
+  x_label: "Steps"
+  y_label_template: "{scalar_key}"
+  output_path: "scripts/multi_exps_plot/output"
+
+  # A list of all scalar keys to plot
+  scalar_keys:
+    - "eval/gsm8k-eval/accuracy/mean"
+    - "response_length/mean"
+    # - "critic/rewards/mean"
+
+# Configurations for each experiment to be plotted
+exps_configs:
+  # Define each experiments' name
+  gsm8k-train:
+    # 'paths' should point to the root directory of each run
+    paths:
+      - "/PATH/TO/CHECKPOINT/Trinity-RFT-gsm8k/qwen2.5-1.5B-gsm8k-1"
+      - "/PATH/TO/CHECKPOINT/Trinity-RFT-gsm8k/qwen2.5-1.5B-gsm8k-2"
+      - "/PATH/TO/CHECKPOINT/Trinity-RFT-gsm8k/qwen2.5-1.5B-gsm8k-3"
+      # - "/PATH/TO/CHECKPOINT/Trinity-RFT-gsm8k/qwen2.5-1.5B-gsm8k-n"
+
+    # If not provided, a default color will be used
+    color: "blue"
+
+  math-train:
+    paths:
+      - "/PATH/TO/CHECKPOINT/Trinity-RFT-math/qwen2.5-1.5B-math-1"
+      - "/PATH/TO/CHECKPOINT/Trinity-RFT-math/qwen2.5-1.5B-math-2"
+      - "/PATH/TO/CHECKPOINT/Trinity-RFT-math/qwen2.5-1.5B-math-3"
+      # - "/PATH/TO/CHECKPOINT/Trinity-RFT-math/qwen2.5-1.5B-math-n"
+    color: "red"

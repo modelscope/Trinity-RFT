@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name =  "trinity-rft"
-version = "0.2.0.dev0"
+version = "0.2.0"
 authors = [
     {name="Trinity-RFT Team", email="trinity-rft@outlook.com"},
 ]
@@ -66,6 +66,7 @@ dev = [
     "pytest>=8.0.0",
     "pytest-json-ctrf",
     "parameterized",
+    "matplotlib"
 ]
 
 doc = [
