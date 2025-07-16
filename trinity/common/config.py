@@ -14,6 +14,7 @@ from trinity.common.constants import (
     ReadStrategy,
     StorageType,
     SyncMethod,
+    SyncStyle,
     TaskType,
 )
 from trinity.utils.log import get_logger
@@ -370,6 +371,7 @@ class SynchronizerConfig:
     """Configs for model weight synchronization."""
 
     sync_method: SyncMethod = SyncMethod.NCCL
+    sync_style: SyncStyle = SyncStyle.FIXED
     # sync weights every `sync_interval` steps
     sync_interval: int = 1
     # allow explorer to run `sync_offset` steps before sync
