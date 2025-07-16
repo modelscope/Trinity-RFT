@@ -14,8 +14,6 @@ actor_rollout_ref:
     ppo_epochs: 1
     shuffle: False
     ulysses_sequence_parallel_size: 1 # sp size
-    entropy_from_logits_with_chunking: false
-    entropy_checkpointing: false
     optim:
       lr: 1e-5
       lr_warmup_steps_ratio: 0.  # the total steps will be injected during runtime
@@ -29,21 +27,16 @@ actor_rollout_ref:
       param_offload: False
       optimizer_offload: False
       fsdp_size: -1
-      forward_prefetch: False
   ref:
     fsdp_config:
       param_offload: False
       wrap_policy:
         # transformer_layer_cls_to_wrap: None
         min_num_params: 0
-      fsdp_size: -1
-      forward_prefetch: False
     log_prob_micro_batch_size_per_gpu: 16
     log_prob_use_dynamic_bsz: ${actor_rollout_ref.actor.use_dynamic_bsz}
     log_prob_max_token_len_per_gpu: ${actor_rollout_ref.actor.ppo_max_token_len_per_gpu}
     ulysses_sequence_parallel_size: ${actor_rollout_ref.actor.ulysses_sequence_parallel_size} # sp size
-    entropy_from_logits_with_chunking: ${actor_rollout_ref.actor.entropy_from_logits_with_chunking}
-    entropy_checkpointing: ${actor_rollout_ref.actor.entropy_checkpointing}
 
 trainer:
   balance_batch: True
