@@ -131,6 +131,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">is_eval</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">is_eval</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">workflow_args</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">workflow_args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reward_fn_args</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">reward_fn_args</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">use_base</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflow_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;use_base&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">with_think</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflow_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;with_think&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
@@ -148,7 +149,10 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt</span> <span class="o">=</span> <span class="n">default_prompt</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">reward_fn</span> <span class="o">=</span> <span class="n">MathBoxedRewardFn</span><span class="p">()</span></div>
+        <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">reward_fn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reward_fn</span> <span class="o">=</span> <span class="n">MathBoxedRewardFn</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">reward_fn_args</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reward_fn</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">reward_fn</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">reward_fn_args</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="MathBoxedWorkflow.format_prompt">
@@ -166,7 +170,6 @@
 <div class="viewcode-block" id="MathBoxedWorkflow.run">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.customized_math_workflows.MathBoxedWorkflow.run">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
-        <span class="c1"># TODO: Optimize the generate function</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_base</span><span class="p">:</span>
             <span class="n">messages</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_messages</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
@@ -179,11 +182,12 @@
             <span class="n">responses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">generate</span><span class="p">([</span><span class="n">prompt_text</span><span class="p">],</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">rollout_args</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">response</span> <span class="ow">in</span> <span class="n">responses</span><span class="p">:</span>
-            <span class="n">reward_dict</span> <span class="o">=</span> <span class="n">MathBoxedRewardFn</span><span class="p">()(</span>  <span class="c1"># type: ignore [misc]</span>
+            <span class="n">reward_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reward_fn</span><span class="p">(</span>  <span class="c1"># type: ignore [misc]</span>
                 <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">response_text</span><span class="p">,</span>  <span class="c1"># type: ignore [arg-type]</span>
                 <span class="n">truth</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">truth</span><span class="p">,</span>
                 <span class="n">with_think</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">with_think</span><span class="p">,</span>
                 <span class="n">format_score_coef</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">format_score_coef</span><span class="p">,</span>
+                <span class="n">response_token</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">tokens</span><span class="p">[</span><span class="n">response</span><span class="o">.</span><span class="n">prompt_length</span> <span class="p">:],</span>
             <span class="p">)</span>
 
             <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">metrics</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -192,9 +196,14 @@
             <span class="n">reward</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">reward_dict</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
             <span class="n">response</span><span class="o">.</span><span class="n">reward</span> <span class="o">=</span> <span class="n">reward</span>
 
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;self.task_desc: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">task_desc</span><span class="si">}</span><span class="s2">, messages: </span><span class="si">{</span><span class="n">messages</span><span class="si">}</span><span class="s2">, response: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">response_text</span><span class="si">}</span><span class="s2">, reward: </span><span class="si">{</span><span class="n">reward</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_base</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;self.task_desc: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">task_desc</span><span class="si">}</span><span class="s2">, messages: </span><span class="si">{</span><span class="n">messages</span><span class="si">}</span><span class="s2">, response: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">response_text</span><span class="si">}</span><span class="s2">, reward: </span><span class="si">{</span><span class="n">reward</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;self.task_desc: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">task_desc</span><span class="si">}</span><span class="s2">, prompt_text: </span><span class="si">{</span><span class="n">prompt_text</span><span class="si">}</span><span class="s2">, response: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">response_text</span><span class="si">}</span><span class="s2">, reward: </span><span class="si">{</span><span class="n">reward</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
         <span class="k">return</span> <span class="n">responses</span></div>
 </div>
 

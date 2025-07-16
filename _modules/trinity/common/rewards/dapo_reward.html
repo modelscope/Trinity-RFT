@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>trinity.common.rewards.math_reward &mdash; Trinity-RFT 0.2.0 documentation</title>
+  <title>trinity.common.rewards.dapo_reward &mdash; Trinity-RFT 0.2.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
 
@@ -84,7 +84,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
-      <li class="breadcrumb-item active">trinity.common.rewards.math_reward</li>
+      <li class="breadcrumb-item active">trinity.common.rewards.dapo_reward</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -93,88 +93,82 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for trinity.common.rewards.math_reward</h1><div class="highlight"><pre>
+  <h1>Source code for trinity.common.rewards.dapo_reward</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;Math Reward Function Class.&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;Reward Function with Overlong Reward Shaping described in DAPO (https://arxiv.org/pdf/2503.14476)&quot;&quot;&quot;</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.rewards.accuracy_reward</span><span class="w"> </span><span class="kn">import</span> <span class="n">AccuracyReward</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.rewards.format_reward</span><span class="w"> </span><span class="kn">import</span> <span class="n">FormatReward</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.rewards.reward_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">REWARD_FUNCTIONS</span><span class="p">,</span> <span class="n">RewardFn</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.eval_utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">compute_score</span><span class="p">,</span>
-    <span class="n">simple_answer_parser</span><span class="p">,</span>
-    <span class="n">validate_think_pattern</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.eval_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_score</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="MathRewardFn">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.html#trinity.common.rewards.math_reward.MathRewardFn">[docs]</a>
-<span class="nd">@REWARD_FUNCTIONS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;math_reward&quot;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">MathRewardFn</span><span class="p">(</span><span class="n">RewardFn</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A reward function that rewards for math task.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="MathDAPORewardFn">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.html#trinity.common.rewards.dapo_reward.MathDAPORewardFn">[docs]</a>
+<span class="nd">@REWARD_FUNCTIONS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;math_dapo_reward&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MathDAPORewardFn</span><span class="p">(</span><span class="n">RewardFn</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A reward function that follows the definition in DAPO for math task.&quot;&quot;&quot;</span>
 
-    <span class="n">DEFAULT_FORMAT_PATTERN</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;.*?&lt;think&gt;.*?&lt;/think&gt;\s*&lt;answer&gt;.*?&lt;/answer&gt;\s*$&quot;</span>
-    <span class="n">DEFAULT_ANSWER_PARSER</span> <span class="o">=</span> <span class="n">simple_answer_parser</span>
-
-<div class="viewcode-block" id="MathRewardFn.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.html#trinity.common.rewards.math_reward.MathRewardFn.__init__">[docs]</a>
+<div class="viewcode-block" id="MathDAPORewardFn.__init__">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.html#trinity.common.rewards.dapo_reward.MathDAPORewardFn.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">answer_parser</span><span class="o">=</span><span class="n">DEFAULT_ANSWER_PARSER</span><span class="p">,</span>
-        <span class="n">pattern</span><span class="o">=</span><span class="n">DEFAULT_FORMAT_PATTERN</span><span class="p">,</span>
+        <span class="n">enable_overlong_penalty</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">penalty_factor</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_response_length</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">cache_length</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">accuracy_reward</span> <span class="o">=</span> <span class="n">AccuracyReward</span><span class="p">(</span><span class="n">answer_parser</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">format_reward</span> <span class="o">=</span> <span class="n">FormatReward</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enable_overlong_penalty</span> <span class="o">=</span> <span class="n">enable_overlong_penalty</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">penalty_factor</span> <span class="o">=</span> <span class="n">penalty_factor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_response_length</span> <span class="o">=</span> <span class="n">max_response_length</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cache_length</span> <span class="o">=</span> <span class="n">cache_length</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">response</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">prompt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">response_token</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
         <span class="n">truth</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-        <span class="n">accuracy_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">accuracy_reward</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">prompt</span><span class="p">,</span> <span class="n">truth</span><span class="p">)</span>
-
-        <span class="n">format_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_reward</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="p">{</span><span class="o">**</span><span class="n">accuracy_score</span><span class="p">,</span> <span class="o">**</span><span class="n">format_score</span><span class="p">}</span></div>
-
-
-
-<div class="viewcode-block" id="MathBoxedRewardFn">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.html#trinity.common.rewards.math_reward.MathBoxedRewardFn">[docs]</a>
-<span class="nd">@REWARD_FUNCTIONS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;math_boxed_reward&quot;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">MathBoxedRewardFn</span><span class="p">(</span><span class="n">RewardFn</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A reward function that rewards for math task.&quot;&quot;&quot;</span>
-
-<div class="viewcode-block" id="MathBoxedRewardFn.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.html#trinity.common.rewards.math_reward.MathBoxedRewardFn.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">pass</span></div>
-
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">response</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">truth</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">with_think</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">format_score_coef</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
         <span class="n">accuracy_score</span> <span class="o">=</span> <span class="n">compute_score</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">truth</span><span class="p">)</span>
 
         <span class="n">format_score</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="k">if</span> <span class="n">with_think</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">validate_think_pattern</span><span class="p">(</span><span class="n">response</span><span class="p">):</span>
-            <span class="n">format_score</span> <span class="o">=</span> <span class="p">(</span><span class="n">format_score_coef</span> <span class="ow">or</span> <span class="mf">0.1</span><span class="p">)</span> <span class="o">*</span> <span class="o">-</span><span class="mf">1.0</span>
 
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;accuracy&quot;</span><span class="p">:</span> <span class="n">accuracy_score</span><span class="p">,</span> <span class="s2">&quot;format_score&quot;</span><span class="p">:</span> <span class="n">format_score</span><span class="p">}</span></div>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">enable_overlong_penalty</span><span class="p">:</span>
+            <span class="n">format_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_overlong_penalty</span><span class="p">(</span><span class="n">response_token</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;accuracy&quot;</span><span class="p">:</span> <span class="n">accuracy_score</span><span class="p">,</span>
+            <span class="s2">&quot;format_score&quot;</span><span class="p">:</span> <span class="n">format_score</span><span class="p">,</span>
+        <span class="p">}</span>
+
+<div class="viewcode-block" id="MathDAPORewardFn.compute_overlong_penalty">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.rewards.html#trinity.common.rewards.dapo_reward.MathDAPORewardFn.compute_overlong_penalty">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_overlong_penalty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response_token</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max_response_length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">penalty_factor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">),</span> <span class="s2">&quot;When enable_overlong_penalty = true, max_response_length, penalty_factor, cache_length must be set&quot;</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max_response_length</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_length</span>
+        <span class="p">),</span> <span class="s2">&quot;max_response_length must be greater than cache_length&quot;</span>
+
+        <span class="n">response_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">response_token</span><span class="p">)</span>
+        <span class="n">excepted_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_response_length</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_length</span>
+
+        <span class="k">if</span> <span class="n">response_len</span> <span class="o">&lt;</span> <span class="n">excepted_len</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.0</span>
+        <span class="k">elif</span> <span class="n">response_len</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_response_length</span><span class="p">:</span>
+            <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">penalty_factor</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">excepted_len</span> <span class="o">-</span> <span class="n">response_len</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_length</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">penalty_factor</span></div>
+</div>
 
 </pre></div>
 
