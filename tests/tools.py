@@ -48,6 +48,7 @@ def get_unittest_dataset_config(
             name=dataset_name,
             path=os.path.join(os.path.dirname(__file__), "template", "data", "countdown"),
             split=split,
+            enable_progress_bar=False,
             format=FormatConfig(
                 prompt_key="question",
                 response_key="answer",
