@@ -206,16 +206,6 @@ class SimpleWorkflow(Workflow):
             messages.append({"role": "assistant", "content": self.reply_prefix})
         return messages
 
-    def format_prompt(self):
-        """Format prompt for the base model."""
-        prompt_text = ""
-        if self.system_prompt:
-            prompt_text += "System:\n" + self.system_prompt
-            prompt_text += "\nUser:\n" + self.task_desc + "\nAssistant:\n"
-        else:
-            prompt_text += "User:\n" + self.task_desc + "\nAssistant:\n"
-        return prompt_text
-
     def run(self) -> List[Experience]:
         # TODO: Optimize the generate function
         messages = self.format_messages()

@@ -32,6 +32,7 @@ buffer:
         logprobs: 0
       workflow_args:
         use_base: true
+      reward_fn_args:
         enable_overlong_penalty: true
         penalty_factor: 1.0
         max_response_length: 20480
@@ -49,7 +50,8 @@ buffer:
         n: 32
         temperature: 1.0
         top_p: 0.7
-    default_workflow_type: 'math_dapo_workflow'
+    default_workflow_type: 'math_boxed_workflow'
+    default_reward_fn_type: 'math_dapo_reward'
   trainer_input:
     experience_buffer:
       name: math_buffer

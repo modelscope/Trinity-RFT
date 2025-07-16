@@ -49,16 +49,17 @@ class MathBoxedRewardFn(RewardFn):
 
     def __init__(
         self,
+        **kwargs,
     ) -> None:
         pass
 
     def __call__(  # type: ignore
         self,
         response: str,
-        prompt: Optional[str] = None,
         truth: Optional[str] = None,
         with_think: Optional[bool] = False,
         format_score_coef: Optional[float] = 0.1,
+        **kwargs,
     ) -> dict[str, float]:
         accuracy_score = compute_score(response, truth)
 

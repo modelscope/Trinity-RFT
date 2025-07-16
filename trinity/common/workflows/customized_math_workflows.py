@@ -31,6 +31,7 @@ class MathBoxedWorkflow(SimpleWorkflow):
         self.is_eval = task.is_eval
 
         self.workflow_args = task.workflow_args
+        self.reward_fn_args = task.reward_fn_args
 
         self.use_base = self.workflow_args.get("use_base", False)
         self.with_think = self.workflow_args.get("with_think", False)
@@ -49,9 +50,18 @@ class MathBoxedWorkflow(SimpleWorkflow):
                 self.system_prompt = default_prompt
 
         if task.reward_fn is None:
-            self.reward_fn = MathBoxedRewardFn()
+            self.reward_fn = MathBoxedRewardFn(**self.reward_fn_args)
         else:
-            self.reward_fn = task.reward_fn
+            self.reward_fn = task.reward_fn(**self.reward_fn_args)
+
+    def format_prompt(self):
+        prompt_text = ""
+        if self.system_prompt:
+            prompt_text += "System:" + self.system_prompt
+            prompt_text += "\nUser:\n" + self.task_desc + "\nAssistant:\n"
+        else:
+            prompt_text += "User:\n" + self.task_desc + "\nAssistant:\n"
+        return prompt_text
 
     def run(self) -> List[Experience]:
         if not self.use_base:
@@ -71,6 +81,7 @@ class MathBoxedWorkflow(SimpleWorkflow):
                 truth=self.truth,
                 with_think=self.with_think,
                 format_score_coef=self.format_score_coef,
+                response_token=response.tokens[response.prompt_length :],
             )
 
             if response.metrics is None:
@@ -79,7 +90,12 @@ class MathBoxedWorkflow(SimpleWorkflow):
             reward = sum(reward_dict.values())
             response.reward = reward
 
-            logger.debug(
-                f"self.task_desc: {self.task_desc}, messages: {messages}, response: {response.response_text}, reward: {reward}"
-            )
+            if not self.use_base:
+                logger.debug(
+                    f"self.task_desc: {self.task_desc}, messages: {messages}, response: {response.response_text}, reward: {reward}"
+                )
+            else:
+                logger.debug(
+                    f"self.task_desc: {self.task_desc}, prompt_text: {prompt_text}, response: {response.response_text}, reward: {reward}"
+                )
         return responses
