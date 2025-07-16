@@ -5,6 +5,8 @@ from dataclasses import dataclass
 from typing import Dict, Optional
 from unittest.mock import MagicMock
 
+from torch import Tensor
+
 from tests.tools import get_unittest_dataset_config
 from trinity.common.rewards import RMGalleryFn
 from trinity.common.workflows import (
@@ -23,6 +25,8 @@ class MockResponse:
     metrics: Optional[Dict[str, float]] = None
     info: Optional[Dict] = None
     unique_id: Optional[str] = "0"
+    tokens: Optional[Tensor] = Tensor([0, 0])
+    prompt_length: int = 1
 
 
 class DummyWorkflow(Workflow):
