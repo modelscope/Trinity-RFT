@@ -35,9 +35,14 @@ def get_buffer_reader(storage_config: StorageConfig, buffer_config: BufferConfig
 
         return SQLReader(storage_config, buffer_config)
     elif storage_config.storage_type == StorageType.QUEUE:
-        from trinity.buffer.reader.queue_reader import QueueReader
+        from trinity.buffer.reader.queue_reader import RETURN_TYPES
 
-        return QueueReader(storage_config, buffer_config)
+        queue_reader_cls = RETURN_TYPES.get(storage_config.return_type)
+
+        if queue_reader_cls is None:
+            raise ValueError(f"{storage_config.return_type} not supported.")
+
+        return queue_reader_cls(storage_config, buffer_config)
     elif storage_config.storage_type == StorageType.FILE:
         from trinity.buffer.reader.file_reader import FILE_READERS
 

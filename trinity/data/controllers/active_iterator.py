@@ -1,21 +1,24 @@
 import os
 import threading
 import traceback
+from copy import deepcopy
 from functools import partial
 from numbers import Number
 from typing import Any, Dict, List, Union
 
 import ray
 from data_juicer.utils.constant import Fields
+from data_juicer.utils.file_utils import add_suffix_to_filename
 
 from trinity.common.config import BufferConfig, DataPipelineConfig, RewardShapingConfig
-from trinity.common.constants import DataProcessorPipelineType, OpType
+from trinity.common.constants import DataProcessorPipelineType, OpType, StorageType
 from trinity.data.controllers.default_ops import DIMENSION_STATS_KEYS
 from trinity.data.controllers.task_parser import DataTaskParser
-from trinity.data.core.dataset import RftDataset
+from trinity.data.core.dataset import RftDataset, read_from_buffer, write_to_buffer
 from trinity.data.processors.cleaner import DataCleaner
 from trinity.data.processors.human_annotator import DataHumanAnnotator
 from trinity.data.processors.synthesizer import DataSynthesizer
+from trinity.data.utils import add_temp_file_buffer, get_temp_file_buffer_path
 from trinity.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -31,6 +34,7 @@ class DataActiveIterator:
         config: DataPipelineConfig,
         buffer_config: BufferConfig,
         pipeline_type: Union[DataProcessorPipelineType, str] = DataProcessorPipelineType.TASK,
+        updated_api_info: Dict[str, Any] = None,
     ):
         """
         The initialization method.
@@ -38,12 +42,14 @@ class DataActiveIterator:
         :param config: the data pipeline config.
         :param buffer_config: the buffer config.
         :param pipeline_type: the type of the activated pipeline.
+        :param updated_api_info: the updated API info for OPs. Not available for Data-Juicer config agents.
         """
         self.config = config
         self.buffer_config = buffer_config
         self.pipeline_type = pipeline_type
         if isinstance(self.pipeline_type, str):
             self.pipeline_type = DataProcessorPipelineType(pipeline_type)
+        self.updated_api_info = updated_api_info if updated_api_info is not None else {}
 
         # check if the llm agent is required
         if self.config.agent_model_name is not None:
@@ -75,6 +81,10 @@ class DataActiveIterator:
         }
         self.min_priority_score = self.config.min_priority_score
 
+        # sort with only the top_k
+        # keep all data by default
+        self.top_k = -1
+
         # Statistics tracking
         self.state = {"iterations": 0, "samples_selected": 0, "avg_priority_score": 0.0}
 
@@ -95,6 +105,32 @@ class DataActiveIterator:
         if self.config.format.response_key != "":
             self.updated_op_args["input_keys"].append(self.config.format.response_key)
             self.updated_op_args["field_names"].append(self.config.format.response_key)
+
+        # if it's a dynamic task pipeline, update the model_params and model_path as well
+        if self.pipeline_type == DataProcessorPipelineType.TASK and self.config.dynamic:
+            # update the api model path
+            if self.updated_api_info.get("model", None) is not None:
+                self.updated_op_args["api_or_hf_model"] = self.updated_api_info["model"]
+            # update the model_params
+            self.updated_op_args["model_params"] = {
+                "base_url": self.updated_api_info.get("base_url", None),
+                "api_key": self.updated_api_info.get("api_key", None),
+            }
+
+            # besides, try to use a temp buffer to store the left task set with dynamic priorities
+            temp_file_buffer_name = self.config.input_buffers[0].name + "_temp_file_buffer"
+            temp_file_buffer_path = add_suffix_to_filename(self.config.input_buffers[0].path, "_temp_file_buffer") + '.jsonl'
+
+            self.temp_file_buffer_config = deepcopy(self.config.input_buffers[0])
+            self.temp_file_buffer_config.name = temp_file_buffer_name
+            self.temp_file_buffer_config.path = temp_file_buffer_path
+            self.temp_file_buffer_config.storage_type = StorageType.FILE
+            self.temp_file_buffer_config.raw = True
+
+            # update batch size -- top_k
+            self.top_k = self.buffer_config.read_batch_size
+        else:
+            self.temp_file_buffer_config = None
 
     # flake8: noqa: C901
     def run(self, thread_event: threading.Event = None, recompute: bool = True):
@@ -151,7 +187,20 @@ class DataActiveIterator:
             # step 4. load data from the input buffers for the next batch
             logger.info("Loading data from input buffers for the next batch...")
             try:
-                dataset.read_from_buffer()
+                if self.temp_file_buffer_config is not None:
+                    # it's a dynamic task pipeline and the temp_file_buffer already exists,
+                    # read from the temp_file_buffer
+                    temp_file_buffer_path = get_temp_file_buffer_path(self.temp_file_buffer_config.name)
+                    if temp_file_buffer_path is not None:
+                        # the temp_file_buffer already exists, so read from it
+                        self.temp_file_buffer_config.path = temp_file_buffer_path
+                        dataset.data = read_from_buffer(self.temp_file_buffer_config, self.buffer_config)
+                    else:
+                        # add this new temp_file_buffer and load from the original input buffers
+                        add_temp_file_buffer(self.temp_file_buffer_config.name, self.temp_file_buffer_config.path)
+                        dataset.read_from_buffer()
+                else:
+                    dataset.read_from_buffer()
                 if "priority" not in dataset.data.features:
                     recompute = True
                 elif recompute:
@@ -216,7 +265,11 @@ class DataActiveIterator:
             try:
                 if "priority" in res_dataset.data.features:
                     logger.info("Sorting samples by priority...")
-                    res_dataset.sort_by("priority", reverse=True)
+                    res_dataset, left_data = res_dataset.sort_by("priority", reverse=True, top_k=self.top_k)
+                    if self.temp_file_buffer_config is not None and get_temp_file_buffer_path(self.temp_file_buffer_config.name) is not None:
+                        # write left data to the temp buffer
+                        self.temp_file_buffer_config.path = get_temp_file_buffer_path(self.temp_file_buffer_config.name)
+                        write_to_buffer(self.temp_file_buffer_config, self.buffer_config, left_data)
             except Exception:
                 traceback.print_exc()
                 return 9, "Sorting results by priority failed."
@@ -229,8 +282,14 @@ class DataActiveIterator:
                 traceback.print_exc()
                 return 10, "Exporting result to output buffer failed."
 
+            # only one iter for task pipelines
+            if self.pipeline_type == DataProcessorPipelineType.TASK:
+                break
+
         try:
-            dataset.release_output_buffer()
+            if self.pipeline_type != DataProcessorPipelineType.TASK or not self.config.dynamic:
+                # do not release the output buffer if it's a dynamic task pipeline
+                dataset.release_output_buffer()
         except Exception:
             traceback.print_exc()
             return -1, "Releasing output buffer failed."

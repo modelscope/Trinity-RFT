@@ -87,6 +87,10 @@ def add_temp_file_buffer(name: str, file_path: str):
         TEMP_FILE_BUFFERS[name] = file_path
         return file_path
 
+def get_temp_file_buffer_path(name: str):
+    global TEMP_FILE_BUFFERS
+    return TEMP_FILE_BUFFERS.get(name, None)
+
 def clear_temp_file_buffers():
     """Clear all temp file buffers."""
     global TEMP_FILE_BUFFERS

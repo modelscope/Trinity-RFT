@@ -1,4 +1,6 @@
+import os
 from abc import ABC
+from copy import deepcopy
 from dataclasses import asdict, dataclass, fields, is_dataclass
 from typing import Any, Dict, List, Optional, Union
 
@@ -6,7 +8,7 @@ import networkx as nx
 from datasets import Dataset, concatenate_datasets
 
 from trinity.buffer import get_buffer_reader, get_buffer_writer
-from trinity.common.config import BufferConfig, DataPipelineConfig
+from trinity.common.config import BufferConfig, DataPipelineConfig, StorageConfig
 from trinity.data.core.formatter import BaseDataFormatter
 from trinity.utils.log import get_logger
 
@@ -17,6 +19,28 @@ def dict_to_dataclass(cls, d):
     valid_keys = {f.name for f in fields(cls)}
     filtered = {k: v for k, v in d.items() if k in valid_keys}
     return cls(**filtered)
+
+def read_from_buffer(storage_config: StorageConfig, buffer_config: BufferConfig):
+    input_buffer = get_buffer_reader(storage_config, buffer_config)
+    data_list = input_buffer.read()
+    if len(data_list) > 0 and is_dataclass(data_list[0]):
+        data_list = [asdict(exp) for exp in data_list]
+    return Dataset.from_list([sample for sample in data_list])
+
+def write_to_buffer(storage_config: StorageConfig, buffer_config: BufferConfig, data: Dataset, dataclass=None, clear_exists_contents: bool=True):
+    # clear existing contents
+    if clear_exists_contents:
+        file_path = storage_config.path
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+    output_buffer = get_buffer_writer(storage_config, buffer_config)
+    if dataclass is not None:
+        data_list = [dict_to_dataclass(dataclass, d) for d in data.to_list()]
+    else:
+        data_list = data.to_list()
+    output_buffer.write(data_list)
+    logger.info(f"Wrote {len(data)} samples to output buffer [{storage_config.name}]")
 
 
 @dataclass
@@ -79,9 +103,15 @@ class RftDataset:
             self.data = formatter(self.data, num_proc)
 
     def sort_by(self, key: str, reverse: bool = False, top_k: int = -1):
-        if top_k == -1:
+        if top_k == -1 or top_k > len(self.data):
             top_k = len(self.data)
-        self.data = self.data.sort(key, reverse=reverse).take(top_k)
+        self.data = self.data.sort(key, reverse=reverse)
+        top_k_data = self.data.take(top_k)
+        left_data = self.data.skip(top_k)
+        self.data = top_k_data
+        new_rft_dataset = deepcopy(self)
+        new_rft_dataset.data = left_data
+        return self, new_rft_dataset
 
     def read_from_buffer(self):
         datasets = []

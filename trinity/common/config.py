@@ -75,6 +75,8 @@ class StorageConfig:
 
     # only available for StorageType.FILE. When requiring data processing on raw data, set the raw to True.
     raw: bool = False
+    # only available for StorageType.QUEUE. When it's used as the taskset inputs,
+    return_type: str = "experience"
 
     # used for StorageType.FILE
     split: str = "train"
@@ -129,6 +131,9 @@ class RewardShapingConfig:
 @dataclass
 class DataPipelineConfig:
     """Config for data pipeline."""
+
+    # NOTE: ONLY FOR TASK PIPELINE
+    dynamic: bool = False
 
     # I/O buffer
     input_buffers: List[StorageConfig] = field(default_factory=list)

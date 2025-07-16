@@ -17,7 +17,7 @@ EVENT_POOL: List[threading.Event] = []
 def data_processor(pipeline_type):
     from trinity.common.config import load_config
     from trinity.data.controllers.active_iterator import DataActiveIterator
-    from trinity.data.utils import safe_str_to_bool
+    from trinity.data.utils import safe_str_to_bool, get_explorer_model_service
 
     # the path to the config file
     config_path = request.args.get("configPath")
@@ -50,7 +50,14 @@ def data_processor(pipeline_type):
 
     if pipeline_type == "task_pipeline":
         # must be sync
-        iterator = DataActiveIterator(pipeline_config, config.buffer, pipeline_type=pipeline_type)
+        # if it's a dynamic task pipeline, try to get the api url and model path from the explorer
+        api_url, model_path = get_explorer_model_service(config)
+        updated_api_info = {
+            "base_url": api_url,
+            "api_key": "EMPTY",
+            "model": model_path,
+        }
+        iterator = DataActiveIterator(pipeline_config, config.buffer, pipeline_type=pipeline_type, updated_api_info=updated_api_info)
         # If the explorer is synced, the scorer model is updated, so the priority and the corresponding stats/meta need
         # to be recomputed.
         ret, msg = iterator.run(recompute=is_sync)
