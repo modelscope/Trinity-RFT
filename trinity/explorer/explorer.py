@@ -9,6 +9,7 @@ import traceback
 from collections import deque
 from typing import List, Optional
 
+import ray
 import torch
 
 from trinity.algorithm.algorithm_manager import AlgorithmManager
@@ -19,12 +20,14 @@ from trinity.common.constants import (
     ROLLOUT_WEIGHT_SYNC_GROUP_NAME,
     RunningStatus,
     SyncMethod,
+    SyncStyle,
 )
 from trinity.common.models import create_inference_models
 from trinity.common.models.utils import (
     get_checkpoint_dir_with_step_num,
     load_state_dict,
 )
+from trinity.common.synchronizer import Synchronizer
 from trinity.explorer.scheduler import Scheduler
 from trinity.manager.manager import CacheManager
 from trinity.utils.log import get_logger
@@ -80,6 +83,9 @@ class Explorer:
         self.status = RunningStatus.RUNNING
         self.logger.info("Finished initializing Explorer.")
         self._ready_to_sync_condition = asyncio.Condition()
+
+        self.synchronizer = Synchronizer.get_actor(config)
+        self.last_explorer_sync_step = self.explore_step_num
 
     async def setup_weight_sync_group(
         self, master_address: str, master_port: int, state_dict_meta: List = None
@@ -157,19 +163,10 @@ class Explorer:
 
     async def _nccl_weights_update(self):
         assert self.state_dict_meta is not None
-        async with self._ready_to_sync_condition:
-            try:
-                await asyncio.wait_for(
-                    self._ready_to_sync_condition.wait_for(
-                        lambda: self.status == RunningStatus.WAITING_SYNC,
-                    ),
-                    timeout=self.config.synchronizer.sync_timeout,
-                )
-            except asyncio.TimeoutError as e:
-                self.logger.error(
-                    f"Trainer is not ready for model weight sync in {self.config.synchronizer.sync_timeout} seconds."
-                )
-                raise e
+        status = ray.get(self.synchronizer.ready_to_sync.remote("explorer"))
+        if not status:
+            self.logger.info("Trainer is not ready to sync weight. Skipping sync weight.")
+            return
         await asyncio.gather(
             *[model.sync_model.remote(self.explore_step_num) for model in self.models]
         )
@@ -246,11 +243,23 @@ class Explorer:
         return True
 
     def need_sync(self) -> bool:
-        if self.explore_step_num <= self.config.synchronizer.sync_offset:
-            return False
-        return (
-            self.explore_step_num - self.config.synchronizer.sync_offset
-        ) % self.config.synchronizer.sync_interval == 0
+        if self.config.synchronizer.sync_style == SyncStyle.FIXED:
+            if self.explore_step_num <= self.config.synchronizer.sync_offset:
+                return False
+            return (
+                self.explore_step_num - self.config.synchronizer.sync_offset
+            ) % self.config.synchronizer.sync_interval == 0
+        else:
+            need_sync = False
+            if self.config.synchronizer.sync_style == SyncStyle.DYNAMIC_BY_EXPLORER:
+                delta = self.explore_step_num - self.last_explorer_sync_step
+                if delta >= self.config.synchronizer.sync_interval:
+                    need_sync = True
+            else:
+                need_sync = ray.get(self.synchronizer.get_trainer_status == RunningStatus.WANT_SYNC)
+            if need_sync:
+                ray.get(self.synchronizer.set_explorer_status.remote(RunningStatus.WANT_SYNC))
+            return need_sync
 
     def need_eval(self) -> bool:
         return self.explore_step_num % self.config.explorer.eval_interval == 0
@@ -334,6 +343,7 @@ class Explorer:
         """Synchronize model weights."""
         # call this method before training start to load the latest model weights
         await self.save_checkpoint(sync_weight=True)
+        self.last_explorer_sync_step = self.explore_step_num
 
     async def _log_metrics(self, start_step: int, end_step: int) -> None:
         for step in range(start_step, end_step + 1):
