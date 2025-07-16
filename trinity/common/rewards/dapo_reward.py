@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Reward Function with Overlong Reward Shaping described in DAPO (https://arxiv.org/pdf/2503.14476)"""
-from typing import Optional, Union
+from typing import Dict, Optional
 
 import torch
 
@@ -33,7 +33,7 @@ class MathDAPORewardFn(RewardFn):
         response_token: torch.Tensor,
         truth: Optional[str] = None,
         **kwargs,
-    ) -> Union[float, dict]:
+    ) -> Dict[str, float]:
         accuracy_score = compute_score(response, truth)
 
         format_score = 0.0
