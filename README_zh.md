@@ -1,4 +1,4 @@
-[**English Homepage**](https://github.com/modelscope/Trinity-RFT/blob/main/README.md) | [**Tutorial**](https://modelscope.github.io/Trinity-RFT/) | [**FAQ**](./docs/sphinx_doc/source/tutorial/faq.md)
+[**English Homepage**](https://github.com/modelscope/Trinity-RFT/blob/main/README.md) | [**教程**](https://modelscope.github.io/Trinity-RFT/) | [**FAQ**](./docs/sphinx_doc/source/tutorial/faq.md)
 
 <div align="center">
   <img src="https://img.alicdn.com/imgextra/i1/O1CN01lvLpfw25Pl4ohGZnU_!!6000000007519-2-tps-1628-490.png" alt="Trinity-RFT" style="height: 120px;">
@@ -22,11 +22,11 @@
 
 ## 🚀 最新动态
 
-* [2025-07] Trinity-RFT v0.2.0 发布。
-* [2025-07] 我们更新了[技术报告](https://arxiv.org/abs/2505.17826) (arXiv v2)，增加了新功能、示例和实验。
-* [2025-06] Trinity-RFT v0.1.1 发布。
-* [2025-05] 我们发布了 Trinity-RFT v0.1.0 和一份技术报告。
-* [2025-04] Trinity-RFT 的初始代码库正式开源。
+* [2025-07] 发布 Trinity-RFT v0.2.0 版本，新增了多项功能优化。
+* [2025-07] 更新了[技术报告](https://arxiv.org/abs/2505.17826) (arXiv v2)，增加了新功能、示例和实验。
+* [2025-06] 发布 Trinity-RFT v0.1.1 版本，修复了已知问题并提升系统稳定性。
+* [2025-05] 发布 Trinity-RFT v0.1.0 版本及配套技术报告。
+* [2025-04] 开源了 Trinity-RFT 的初始代码库，开启项目共建之旅！
 
 
 ## 💡 Trinity-RFT 是什么？
@@ -40,21 +40,21 @@ Trinity-RFT是一个通用、灵活且易于使用的大语言模型强化微调
 
 ## ✨ 核心特性
 
-* **统一的 RFT 核心：**
+* **统一的 RFT 内核：**
 
-  支持*同步/异步*（synchronous/asynchronous）、*同策略/异策略*（on-policy/off-policy）和*在线/离线*（online/offline）训练，经验数据的产生（rollout）和训练（training）可以分别在不同设备上独立运行和扩展。
+  灵活应对*同步/异步*（synchronous/asynchronous）、*同策略/异策略*（on-policy/off-policy）和*在线/离线*（online/offline）等多样化训练模式，经验数据的产生（rollout）和训练（training）可独立部署在不同设备并实现分布式扩展。
 
 * **一流的智能体-环境交互：**
 
-  优雅地处理滞后反馈、长尾延迟以及智能体/环境故障。支持智能体和环境之间的多轮交互。
+  优雅地处理滞后反馈、长尾延迟以及智能体/环境故障，并且支持智能体和环境之间的多轮交互。
 
 * **优化的数据管道：**
 
-  将 RFT 任务和经验数据视为动态资产，支持在整个 RFT 生命周期中进行主动管理（如优先级排序、清洗、增强）。
+  将 RFT 任务和经验数据视为动态资源，支持在整个 RFT 生命周期中进行主动管理（如对数据进行排序、清洗、增强等）。
 
 * **用户友好的设计：**
 
-  采用了模块化和解耦的架构，便于采纳和二次开发，并提供丰富的图形用户界面以支持低代码使用。
+  采用了模块化和解耦的架构，支持快速集成与功能扩展，并配套可视化操作界面，提供低代码的交互式开发体验。
 
 
 <p align="center">
@@ -109,19 +109,19 @@ Trinity-RFT是一个通用、灵活且易于使用的大语言模型强化微调
 ## 🛠️ 我可以用 Trinity-RFT 做什么？
 
 
-* **适应新场景：**
+* **快速构建新场景：**
 
-  只需在单个 `Workflow` 或 `MultiTurnWorkflow` 类中实现智能体-环境交互逻辑。([示例](./docs/sphinx_doc/source/tutorial/example_multi_turn.md))
-
-
-* **强化学习算法开发：**
-
-  在紧凑、即插即用的类中开发自定义的强化学习算法（包括损失函数设计、采样、数据处理等）。([示例](./docs/sphinx_doc/source/tutorial/example_mix_algo.md))
+  通过编写基础交互逻辑配置即可构建新场景，只需在 `Workflow` 或 `MultiTurnWorkflow` 类中定义智能体与环境的互动规则。([查看示例](./docs/sphinx_doc/source/tutorial/example_multi_turn.md))
 
 
-* **低代码使用：**
+* **灵活开发算法模块：**
 
-  使用图形化界面轻松监控和追踪学习过程。
+  在轻量级算法模块中开发强化学习算法，包括了损失函数设计、数据采样与数据处理等核心环节，模块支持自由组合，便于快速迭代实验。([查看示例](./docs/sphinx_doc/source/tutorial/example_mix_algo.md))
+
+
+* **可视化操作体验：**
+
+  通过图形化界面直观监控训练过程，并且几乎无需编写代码即可完成基础操作。
 
 
 ---
