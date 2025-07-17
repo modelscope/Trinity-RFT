@@ -721,8 +721,8 @@ class Config:
             os.path.exists(self.checkpoint_job_dir) and os.listdir(self.checkpoint_job_dir)
         ):
             ori_name = self.name
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            self.time = f"{ori_name}_{timestamp}"
+            timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+            self.name = f"{ori_name}_{timestamp}"
             self.checkpoint_job_dir = f"{self.checkpoint_job_dir}_{timestamp}"
             logger.warning(f"Experiment [{ori_name}] already exists, renamed as {self.name}.")
         os.makedirs(self.checkpoint_job_dir, exist_ok=True)
