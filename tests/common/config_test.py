@@ -8,6 +8,8 @@ import unittest
 from tests.tools import get_template_config
 from trinity.common.config import InferenceModelConfig, load_config
 
+CHECKPOINT_ROOT_DIR = os.path.join(os.path.dirname(__file__), "temp_checkpoint_dir")
+
 
 class TestConfig(unittest.TestCase):
     def test_load_default_config(self):
@@ -61,9 +63,7 @@ class TestConfig(unittest.TestCase):
         self.config = get_template_config()
         self.config.name = "test"
         self.config.project = "unittest"
-        self.config.checkpoint_root_dir = os.path.join(
-            os.path.dirname(__file__), "temp_checkpoint_dir"
-        )
+        self.config.checkpoint_root_dir = CHECKPOINT_ROOT_DIR
 
         dir_path = os.path.join(
             self.config.checkpoint_root_dir, self.config.project, self.config.name
