@@ -33,7 +33,7 @@
 
 
 
-Trinity-RFT是一个通用、灵活且易于使用的大语言模型强化学习微调（RFT）框架。
+Trinity-RFT是一个通用、灵活且易于使用的大语言模型强化微调（RFT）框架。
 它旨在支持多样化的应用场景，并作为一个用于在[经验时代](https://storage.googleapis.com/deepmind-media/Era-of-Experience%20/The%20Era%20of%20Experience%20Paper.pdf)探索先进的强化学习（RL）范式的平台。
 
 
@@ -42,7 +42,7 @@ Trinity-RFT是一个通用、灵活且易于使用的大语言模型强化学习
 
 * **统一的 RFT 核心：**
 
-  支持*同步/异步*（synchronous/asynchronous）、*在线策略/离线策略*（on-policy/off-policy）和*在线/离线*（online/offline）训练，数据产生（rollout）和训练（training）可以分别在不同设备上独立运行和扩展。
+  支持*同步/异步*（synchronous/asynchronous）、*同策略/异策略*（on-policy/off-policy）和*在线/离线*（online/offline）训练，经验数据的产生（rollout）和训练（training）可以分别在不同设备上独立运行和扩展。
 
 * **一流的智能体-环境交互：**
 
@@ -50,7 +50,7 @@ Trinity-RFT是一个通用、灵活且易于使用的大语言模型强化学习
 
 * **优化的数据管道：**
 
-  将数据收集任务和经验视为动态资产，支持在整个 RFT 生命周期中进行主动管理（如优先级排序、清洗、增强）。
+  将 RFT 任务和经验数据视为动态资产，支持在整个 RFT 生命周期中进行主动管理（如优先级排序、清洗、增强）。
 
 * **用户友好的设计：**
 
@@ -59,7 +59,7 @@ Trinity-RFT是一个通用、灵活且易于使用的大语言模型强化学习
 
 <p align="center">
   <img src="https://img.alicdn.com/imgextra/i2/O1CN01H3UbpF1yP7E1OCLbi_!!6000000006570-2-tps-1334-638.png" alt="Trinity-RFT">
-  <em>图：Trinity-RFT 的设计</em>
+  <em>图：Trinity-RFT 的整体设计</em>
 </p>
 
 
@@ -96,7 +96,7 @@ Trinity-RFT是一个通用、灵活且易于使用的大语言模型强化学习
 
 
 <details>
-<summary>图：Trinity-RFT 中数据处理的设计</summary>
+<summary>图：Trinity-RFT 中数据处理的整体设计</summary>
 
 <p align="center">
   <img src="https://img.alicdn.com/imgextra/i4/O1CN01UvyfcZ1WoTv5t3pCp_!!6000000002835-2-tps-1166-274.png" alt="Trinity-RFT-data-pipelines">
@@ -295,7 +295,7 @@ ray start --head
 ray start --address=<master_address>
 ```
 
-（可选）登录 [wandb](https://docs.wandb.ai/quickstart/) 以便更好地监控：
+（可选）登录 [wandb](https://docs.wandb.ai/quickstart/) 以便更好地监控 RFT 过程：
 
 ```shell
 export WANDB_API_KEY=<your_api_key>
@@ -323,7 +323,7 @@ trinity run --config examples/grpo_gsm8k/gsm8k.yaml
 运行不同 RFT 模式的教程：
 
 + [快速示例：在 GSM8k 上运行 GRPO](./docs/sphinx_doc/source/tutorial/example_reasoning_basic.md)
-+ [离线策略 RFT](./docs/sphinx_doc/source/tutorial/example_reasoning_advanced.md)
++ [异策略 RFT](./docs/sphinx_doc/source/tutorial/example_reasoning_advanced.md)
 + [完全异步 RFT](./docs/sphinx_doc/source/tutorial/example_async_mode.md)
 + [通过 DPO 或 SFT 进行离线学习](./docs/sphinx_doc/source/tutorial/example_dpo.md)
 
@@ -346,7 +346,7 @@ trinity run --config examples/grpo_gsm8k/gsm8k.yaml
 完整配置指南：请参阅[此文档](./docs/sphinx_doc/source/tutorial/trinity_configs.md)
 
 
-给开发者和研究人员的指南：
+面向开发者和研究人员的指南：
 
 + [构建新的 RL 场景](./docs/sphinx_doc/source/tutorial/trinity_programming_guide.md#workflows-for-rl-environment-developers)
 + [实现新的 RL 算法](./docs/sphinx_doc/source/tutorial/trinity_programming_guide.md#algorithms-for-rl-algorithm-developers)
