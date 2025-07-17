@@ -61,7 +61,9 @@ class TestConfig(unittest.TestCase):
         self.config = get_template_config()
         self.config.name = "test"
         self.config.project = "unittest"
-        self.config.checkpoint_root_dir = "./temp_checkpoint_dir"
+        self.config.checkpoint_root_dir = os.path.join(
+            os.path.dirname(__file__), "temp_checkpoint_dir"
+        )
 
         dir_path = os.path.join(
             self.config.checkpoint_root_dir, self.config.project, self.config.name
