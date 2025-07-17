@@ -293,6 +293,10 @@ class veRLConfig:
         self.trainer.experiment_name = config.name
         self.trainer.default_local_dir = config.checkpoint_job_dir
         self.trainer.sft_warmup_steps = config.buffer.trainer_input.sft_warmup_steps
+        if not config.continue_from_checkpoint:
+            self.trainer.resume_mode = "disable"
+        else:
+            self.trainer.resume_mode = "auto"
 
         self.buffer = config.buffer
         # TODO: use dynamic read_batch_size to support multi-round scenarios

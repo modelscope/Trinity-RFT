@@ -2,6 +2,7 @@
 """Configs for RFT."""
 import os
 from dataclasses import dataclass, field
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from omegaconf import OmegaConf
@@ -399,6 +400,8 @@ class Config:
     checkpoint_job_dir: str = ""
     # If not set, automatically generated as f"{config.project}-{config.name}"
     ray_namespace: str = ""
+    # whether to continue training from the last checkpoint in checkpoint_job_dir (if any)
+    continue_from_checkpoint: bool = True
 
     algorithm: AlgorithmConfig = field(default_factory=AlgorithmConfig)
     data_processor: DataProcessorConfig = field(default_factory=DataProcessorConfig)
@@ -696,6 +699,13 @@ class Config:
     def check_and_update(self) -> None:  # noqa: C901
         """Check and update the config."""
         self._check_deprecated()
+
+        # rename the experiment when necessary
+        exp_dir = os.path.join(self.checkpoint_root_dir, self.project, self.name)
+        if not self.continue_from_checkpoint and (os.path.exists(exp_dir) and os.listdir(exp_dir)):
+            ori_name = self.name
+            self.name = self.name + f"_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+            logger.warning(f"Experiment [{ori_name}] already exists, renamed as {self.name}.")
 
         # set namespace
         if self.ray_namespace is None or len(self.ray_namespace) == 0:
