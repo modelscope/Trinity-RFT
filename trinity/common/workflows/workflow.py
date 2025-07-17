@@ -197,6 +197,7 @@ class SimpleWorkflow(Workflow):
         self.is_eval = task.is_eval
 
     def format_messages(self):
+        """Format messages for the instruct model."""
         messages = []
         if self.system_prompt:
             messages.append({"role": "system", "content": self.system_prompt})
