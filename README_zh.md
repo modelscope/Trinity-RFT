@@ -322,9 +322,9 @@ trinity run --config examples/grpo_gsm8k/gsm8k.yaml
 
 运行不同 RFT 模式的教程：
 
-+ [快速示例：在 GSM8k 上运行 GRPO](./docs/sphinx_doc/source/tutorial/example_reasoning_basic.md)
-+ [异策略 RFT](./docs/sphinx_doc/source/tutorial/example_reasoning_advanced.md)
-+ [完全异步 RFT](./docs/sphinx_doc/source/tutorial/example_async_mode.md)
++ [快速开始：在 GSM8k 上运行 GRPO](./docs/sphinx_doc/source/tutorial/example_reasoning_basic.md)
++ [Off-Policy RFT](./docs/sphinx_doc/source/tutorial/example_reasoning_advanced.md)
++ [全异步 RFT](./docs/sphinx_doc/source/tutorial/example_async_mode.md)
 + [通过 DPO 或 SFT 进行离线学习](./docs/sphinx_doc/source/tutorial/example_dpo.md)
 
 
@@ -335,7 +335,7 @@ trinity run --config examples/grpo_gsm8k/gsm8k.yaml
 
 数据相关功能的教程：
 
-+ [高级数据处理与人机协同](./docs/sphinx_doc/source/tutorial/example_data_functionalities.md)
++ [高级数据处理及Human-in-the-loop](./docs/sphinx_doc/source/tutorial/example_data_functionalities.md)
 
 
 使用 Trinity-RFT 进行 RL 算法开发/研究的教程：
