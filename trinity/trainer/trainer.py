@@ -56,13 +56,18 @@ class Trainer:
 
     def need_sync(self) -> bool:
         """Whether to sync the model weight."""
+        if self.config.synchronizer.sync_method == SyncMethod.CHECKPOINT:
+            ray.get()
+            return False
+
+        # SyncMethod.NCCL
         if self.config.synchronizer.sync_style == SyncStyle.FIXED:
             return self.engine.train_step_num % self.config.synchronizer.sync_interval == 0
         else:
             if self.config.synchronizer.sync_style == SyncStyle.DYNAMIC_BY_TRAINER:
                 delta = self.engine.train_step_num - self.last_trainer_sync_step
                 if delta >= self.config.synchronizer.sync_interval:
-                    ray.get(self.synchronizer.set_trainer_status.remote(RunningStatus.WANT_SYNC))
+                    ray.get(self.synchronizer.set_trainer_status.remote(RunningStatus.REQUIRE_SYNC))
             return (
                 ray.get(self.synchronizer.get_explorer_status.remote())
                 == RunningStatus.WAITING_SYNC
@@ -80,7 +85,7 @@ class Trainer:
                 f"Trainer synchronizing weights at step {self.engine.train_step_num} end."
             )
             self.last_trainer_sync_step = self.engine.train_step_num
-            ray.get(self.synchronizer.set_trainer_status.remote(RunningStatus.RUNNING))
+        ray.get(self.synchronizer.set_trainer_status.remote(RunningStatus.RUNNING))
 
     def shutdown(self) -> None:
         # if checkpoint not saved, save the last checkpoint

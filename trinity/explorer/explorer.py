@@ -80,7 +80,6 @@ class Explorer:
             self.state_dict = {}
         else:  # nccl mode
             self.state_dict_meta = []
-        self.status = RunningStatus.RUNNING
         self.logger.info("Finished initializing Explorer.")
         self._ready_to_sync_condition = asyncio.Condition()
 
@@ -170,12 +169,6 @@ class Explorer:
         await asyncio.gather(
             *[model.sync_model.remote(self.explore_step_num) for model in self.models]
         )
-        self.status = RunningStatus.RUNNING
-
-    async def ready_to_sync(self):
-        async with self._ready_to_sync_condition:
-            self.status = RunningStatus.WAITING_SYNC
-            self._ready_to_sync_condition.notify_all()
 
     async def prepare(self) -> None:
         """Preparation before running."""
@@ -235,7 +228,6 @@ class Explorer:
         except StopIteration:
             self.logger.warning("No more tasks to explore. Stop exploring.")
             await self.save_checkpoint(sync_weight=False)
-            self.status = RunningStatus.STOPPED
             await self.experience_buffer.release()
             return False
         self.scheduler.schedule(tasks, batch_id=self.explore_step_num + 1)
@@ -243,6 +235,11 @@ class Explorer:
         return True
 
     def need_sync(self) -> bool:
+        if self.use_checkpoint_weights_update:
+            pass
+            # need return in checkpoint mode
+
+        # SyncMethod.NCCL
         if self.config.synchronizer.sync_style == SyncStyle.FIXED:
             if self.explore_step_num <= self.config.synchronizer.sync_offset:
                 return False
@@ -256,9 +253,11 @@ class Explorer:
                 if delta >= self.config.synchronizer.sync_interval:
                     need_sync = True
             else:
-                need_sync = ray.get(self.synchronizer.get_trainer_status == RunningStatus.WANT_SYNC)
+                need_sync = ray.get(
+                    self.synchronizer.get_trainer_status == RunningStatus.REQUIRE_SYNC
+                )
             if need_sync:
-                ray.get(self.synchronizer.set_explorer_status.remote(RunningStatus.WANT_SYNC))
+                ray.get(self.synchronizer.set_explorer_status.remote(RunningStatus.REQUIRE_SYNC))
             return need_sync
 
     def need_eval(self) -> bool:
@@ -343,6 +342,7 @@ class Explorer:
         """Synchronize model weights."""
         # call this method before training start to load the latest model weights
         await self.save_checkpoint(sync_weight=True)
+        ray.get(self.synchronizer.set_explorer_status.remote(RunningStatus.RUNNING))
         self.last_explorer_sync_step = self.explore_step_num
 
     async def _log_metrics(self, start_step: int, end_step: int) -> None:
@@ -376,9 +376,6 @@ class Explorer:
             )
         metric[f"{prefix}/total_time"] = time.time() - st
         self.monitor.log(metric, step)
-
-    async def running_status(self) -> RunningStatus:
-        return self.status
 
     async def shutdown(self) -> None:
         self.monitor.close()

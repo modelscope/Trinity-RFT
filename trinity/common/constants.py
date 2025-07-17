@@ -101,7 +101,7 @@ class RunningStatus(Enum):
     """Running status of explorer and trainer."""
 
     RUNNING = "running"
-    WANT_SYNC = "want_sync"
+    REQUIRE_SYNC = "require_sync"
     WAITING_SYNC = "waiting_sync"
     STOPPED = "stopped"
 

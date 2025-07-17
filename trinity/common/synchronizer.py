@@ -6,7 +6,7 @@ from typing import List
 import ray
 
 from trinity.common.config import Config
-from trinity.common.constants import RunningStatus, SyncStyle
+from trinity.common.constants import RunningStatus
 
 
 class Synchronizer:
