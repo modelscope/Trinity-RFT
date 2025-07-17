@@ -5,14 +5,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; Trinity-RFT 0.2.0 documentation</title>
+  <title>Index &mdash; Trinity-RFT 0.2.1.dev0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=938c9ccc"></script>
+      <script src="_static/documentation_options.js?v=8c48c73b"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -281,8 +281,6 @@
 </li>
         <li><a href="build_api/trinity.common.models.html#trinity.common.models.model.ModelWrapper.__init__">(trinity.common.models.model.ModelWrapper method)</a>
 </li>
-        <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.__init__">(trinity.common.models.vllm_async_model.vLLMAysncRolloutModel method)</a>
-</li>
         <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.__init__">(trinity.common.models.vllm_model.vLLMRolloutModel method)</a>
 </li>
         <li><a href="build_api/trinity.common.rewards.html#trinity.common.rewards.accuracy_reward.AccuracyReward.__init__">(trinity.common.rewards.accuracy_reward.AccuracyReward method)</a>
@@ -524,7 +522,7 @@
         <li><a href="build_api/trinity.algorithm.html#trinity.algorithm.algorithm.AlgorithmType">(class in trinity.algorithm.algorithm)</a>
 </li>
       </ul></li>
-      <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.api_server_ready">api_server_ready() (trinity.common.models.vllm_async_model.vLLMAysncRolloutModel method)</a>
+      <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.api_server_ready">api_server_ready() (trinity.common.models.vllm_model.vLLMRolloutModel method)</a>
 </li>
       <li><a href="build_api/trinity.algorithm.kl_fn.html#trinity.algorithm.kl_fn.kl_fn.DummyKLFn.apply_kl_penalty_to_reward">apply_kl_penalty_to_reward() (trinity.algorithm.kl_fn.kl_fn.DummyKLFn method)</a>
 
@@ -668,12 +666,8 @@
         <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.chat">(trinity.common.models.vllm_model.vLLMRolloutModel method)</a>
 </li>
       </ul></li>
-      <li><a href="build_api/trinity.common.models.html#trinity.common.models.model.InferenceModel.chat_async">chat_async() (trinity.common.models.model.InferenceModel method)</a>
-
-      <ul>
-        <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.chat_async">(trinity.common.models.vllm_async_model.vLLMAysncRolloutModel method)</a>
+      <li><a href="build_api/trinity.common.models.html#trinity.common.models.model.ModelWrapper.chat_async">chat_async() (trinity.common.models.model.ModelWrapper method)</a>
 </li>
-      </ul></li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.FormatConfig.chat_template">chat_template (trinity.common.config.FormatConfig attribute)</a>
 
       <ul>
@@ -714,14 +708,14 @@
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.constants.SyncMethod.CHECKPOINT">CHECKPOINT (trinity.common.constants.SyncMethod attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Actor.checkpoint">checkpoint (trinity.common.verl_config.Actor attribute)</a>
 
       <ul>
         <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Critic.checkpoint">(trinity.common.verl_config.Critic attribute)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.html#trinity.common.config.Config.checkpoint_job_dir">checkpoint_job_dir (trinity.common.config.Config attribute)</a>
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.Config.checkpoint_root_dir">checkpoint_root_dir (trinity.common.config.Config attribute)</a>
@@ -798,6 +792,8 @@
       </ul></li>
       <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Checkpoint.contents">contents (trinity.common.verl_config.Checkpoint attribute)</a>
 </li>
+      <li><a href="build_api/trinity.common.models.html#trinity.common.models.model.convert_api_output_to_experience">convert_api_output_to_experience() (in module trinity.common.models.model)</a>
+</li>
       <li><a href="build_api/trinity.common.models.html#trinity.common.models.model.InferenceModel.convert_messages_to_experience">convert_messages_to_experience() (trinity.common.models.model.InferenceModel method)</a>
 
       <ul>
@@ -806,12 +802,8 @@
         <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.convert_messages_to_experience">(trinity.common.models.vllm_model.vLLMRolloutModel method)</a>
 </li>
       </ul></li>
-      <li><a href="build_api/trinity.common.models.html#trinity.common.models.model.InferenceModel.convert_messages_to_experience_async">convert_messages_to_experience_async() (trinity.common.models.model.InferenceModel method)</a>
-
-      <ul>
-        <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.convert_messages_to_experience_async">(trinity.common.models.vllm_async_model.vLLMAysncRolloutModel method)</a>
+      <li><a href="build_api/trinity.common.models.html#trinity.common.models.model.ModelWrapper.convert_messages_to_experience_async">convert_messages_to_experience_async() (trinity.common.models.model.ModelWrapper method)</a>
 </li>
-      </ul></li>
       <li><a href="build_api/trinity.common.rewards.html#trinity.common.rewards.CountDownRewardFn">CountDownRewardFn (class in trinity.common.rewards)</a>
 
       <ul>
@@ -1044,8 +1036,6 @@
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.InferenceModelConfig.dtype">dtype (trinity.common.config.InferenceModelConfig attribute)</a>
 </li>
-      <li><a href="build_api/trinity.common.models.html#trinity.common.models.openai_api.dummy_add_signal_handler">dummy_add_signal_handler() (in module trinity.common.models.openai_api)</a>
-</li>
       <li><a href="build_api/trinity.algorithm.entropy_loss_fn.html#trinity.algorithm.entropy_loss_fn.entropy_loss_fn.DummyEntropyLossFn">DummyEntropyLossFn (class in trinity.algorithm.entropy_loss_fn.entropy_loss_fn)</a>
 </li>
       <li><a href="build_api/trinity.algorithm.kl_fn.html#trinity.algorithm.kl_fn.kl_fn.DummyKLFn">DummyKLFn (class in trinity.algorithm.kl_fn.kl_fn)</a>
@@ -1070,6 +1060,8 @@
         <li><a href="build_api/trinity.common.html#trinity.common.verl_config.CriticModel.enable_gradient_checkpointing">(trinity.common.verl_config.CriticModel attribute)</a>
 </li>
       </ul></li>
+      <li><a href="build_api/trinity.common.html#trinity.common.config.InferenceModelConfig.enable_history">enable_history (trinity.common.config.InferenceModelConfig attribute)</a>
+</li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.InferenceModelConfig.enable_openai_api">enable_openai_api (trinity.common.config.InferenceModelConfig attribute)</a>
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.InferenceModelConfig.enable_prefix_caching">enable_prefix_caching (trinity.common.config.InferenceModelConfig attribute)</a>
@@ -1120,10 +1112,10 @@
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.ExplorerConfig.eval_on_startup">eval_on_startup (trinity.common.config.ExplorerConfig attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.html#trinity.common.config.ExplorerInput.eval_tasksets">eval_tasksets (trinity.common.config.ExplorerInput attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.utils.html#trinity.utils.eval_utils.evaluate_equation">evaluate_equation() (in module trinity.utils.eval_utils)</a>
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.experience.Experience">Experience (class in trinity.common.experience)</a>
@@ -1184,6 +1176,10 @@
         <li><a href="build_api/trinity.common.html#trinity.common.verl_config.CriticModel.external_lib">(trinity.common.verl_config.CriticModel attribute)</a>
 </li>
       </ul></li>
+      <li><a href="build_api/trinity.common.models.html#trinity.common.models.model.ModelWrapper.extract_experience_from_history">extract_experience_from_history() (trinity.common.models.model.ModelWrapper method)</a>
+</li>
+      <li><a href="build_api/trinity.common.models.html#trinity.common.models.model.extract_logprobs">extract_logprobs() (in module trinity.common.models.model)</a>
+</li>
       <li><a href="build_api/trinity.utils.html#trinity.utils.eval_utils.extract_solution">extract_solution() (in module trinity.utils.eval_utils)</a>
 </li>
   </ul></td>
@@ -1296,12 +1292,8 @@
         <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.generate">(trinity.common.models.vllm_model.vLLMRolloutModel method)</a>
 </li>
       </ul></li>
-      <li><a href="build_api/trinity.common.models.html#trinity.common.models.model.InferenceModel.generate_async">generate_async() (trinity.common.models.model.InferenceModel method)</a>
-
-      <ul>
-        <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.generate_async">(trinity.common.models.vllm_async_model.vLLMAysncRolloutModel method)</a>
+      <li><a href="build_api/trinity.common.models.html#trinity.common.models.model.ModelWrapper.generate_async">generate_async() (trinity.common.models.model.ModelWrapper method)</a>
 </li>
-      </ul></li>
       <li><a href="build_api/trinity.manager.html#trinity.manager.config_manager.ConfigManager.generate_config">generate_config() (trinity.manager.config_manager.ConfigManager method)</a>
 </li>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.AlfworldWorkflow.generate_env_inference_samples">generate_env_inference_samples() (trinity.common.workflows.AlfworldWorkflow method)</a>
@@ -1377,8 +1369,6 @@
       <li><a href="build_api/trinity.common.models.html#trinity.common.models.model.InferenceModel.get_model_version">get_model_version() (trinity.common.models.model.InferenceModel method)</a>
 
       <ul>
-        <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.get_model_version">(trinity.common.models.vllm_async_model.vLLMAysncRolloutModel method)</a>
-</li>
         <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.get_model_version">(trinity.common.models.vllm_model.vLLMRolloutModel method)</a>
 </li>
       </ul></li>
@@ -1442,16 +1432,12 @@
 <h2 id="H">H</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.has_api_server">has_api_server() (trinity.common.models.vllm_async_model.vLLMAysncRolloutModel method)</a>
-
-      <ul>
-        <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.has_api_server">(trinity.common.models.vllm_model.vLLMRolloutModel method)</a>
+      <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.has_api_server">has_api_server() (trinity.common.models.vllm_model.vLLMRolloutModel method)</a>
 </li>
-      </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.explorer.html#trinity.explorer.scheduler.Scheduler.has_step">has_step() (trinity.explorer.scheduler.Scheduler method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.html#trinity.common.verl_config.KL_Ctrl.horizon">horizon (trinity.common.verl_config.KL_Ctrl attribute)</a>
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.verl_config.ActorRolloutRef.hybrid_engine">hybrid_engine (trinity.common.verl_config.ActorRolloutRef attribute)</a>
@@ -1491,8 +1477,6 @@
       <li><a href="build_api/trinity.utils.html#trinity.utils.distributed.init_process_group">init_process_group() (in module trinity.utils.distributed)</a>
 
       <ul>
-        <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.init_process_group">(trinity.common.models.vllm_async_model.vLLMAysncRolloutModel method)</a>
-</li>
         <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.init_process_group">(trinity.common.models.vllm_model.vLLMRolloutModel method)</a>
 </li>
         <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_worker.WorkerExtension.init_process_group">(trinity.common.models.vllm_worker.WorkerExtension method)</a>
@@ -1628,14 +1612,14 @@
       </ul></li>
       <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Ref.log_prob_max_token_len_per_gpu">log_prob_max_token_len_per_gpu (trinity.common.verl_config.Ref attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Ref.log_prob_micro_batch_size">log_prob_micro_batch_size (trinity.common.verl_config.Ref attribute)</a>
 
       <ul>
         <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Rollout.log_prob_micro_batch_size">(trinity.common.verl_config.Rollout attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Ref.log_prob_micro_batch_size_per_gpu">log_prob_micro_batch_size_per_gpu (trinity.common.verl_config.Ref attribute)</a>
 
       <ul>
@@ -1670,12 +1654,8 @@
         <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.logprobs">(trinity.common.models.vllm_model.vLLMRolloutModel method)</a>
 </li>
       </ul></li>
-      <li><a href="build_api/trinity.common.models.html#trinity.common.models.model.InferenceModel.logprobs_async">logprobs_async() (trinity.common.models.model.InferenceModel method)</a>
-
-      <ul>
-        <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.logprobs_async">(trinity.common.models.vllm_async_model.vLLMAysncRolloutModel method)</a>
+      <li><a href="build_api/trinity.common.models.html#trinity.common.models.model.ModelWrapper.logprobs_async">logprobs_async() (trinity.common.models.model.ModelWrapper method)</a>
 </li>
-      </ul></li>
       <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Actor.loss_agg_mode">loss_agg_mode (trinity.common.verl_config.Actor attribute)</a>
 
       <ul>
@@ -1952,11 +1932,7 @@
 </li>
         <li><a href="build_api/trinity.common.models.html#module-trinity.common.models.model">trinity.common.models.model</a>
 </li>
-        <li><a href="build_api/trinity.common.models.html#module-trinity.common.models.openai_api">trinity.common.models.openai_api</a>
-</li>
         <li><a href="build_api/trinity.common.models.html#module-trinity.common.models.utils">trinity.common.models.utils</a>
-</li>
-        <li><a href="build_api/trinity.common.models.html#module-trinity.common.models.vllm_async_model">trinity.common.models.vllm_async_model</a>
 </li>
         <li><a href="build_api/trinity.common.models.html#module-trinity.common.models.vllm_model">trinity.common.models.vllm_model</a>
 </li>
@@ -2198,8 +2174,6 @@
       <li><a href="build_api/trinity.common.html#trinity.common.config.BufferConfig.pad_token_id">pad_token_id (trinity.common.config.BufferConfig attribute)</a>
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.verl_config.FSDPConfig.param_offload">param_offload (trinity.common.verl_config.FSDPConfig attribute)</a>
-</li>
-      <li><a href="build_api/trinity.common.models.html#trinity.common.models.openai_api.patch_and_serve_http">patch_and_serve_http() (in module trinity.common.models.openai_api)</a>
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.StorageConfig.path">path (trinity.common.config.StorageConfig attribute)</a>
 
@@ -2497,12 +2471,8 @@
       </ul></li>
       <li><a href="build_api/trinity.trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.reset_experiences_example_table">reset_experiences_example_table() (trinity.trainer.verl_trainer.VerlPPOTrainerWrapper method)</a>
 </li>
-      <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.reset_prefix_cache">reset_prefix_cache() (trinity.common.models.vllm_async_model.vLLMAysncRolloutModel method)</a>
-
-      <ul>
-        <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.reset_prefix_cache">(trinity.common.models.vllm_model.vLLMRolloutModel method)</a>
+      <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.reset_prefix_cache">reset_prefix_cache() (trinity.common.models.vllm_model.vLLMRolloutModel method)</a>
 </li>
-      </ul></li>
       <li><a href="build_api/trinity.manager.html#trinity.manager.config_manager.ConfigManager.reset_session_state">reset_session_state() (trinity.manager.config_manager.ConfigManager method)</a>
 </li>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.SimpleWorkflow.resettable">resettable (trinity.common.workflows.SimpleWorkflow property)</a>
@@ -2639,13 +2609,9 @@
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.Workflow.run">(trinity.common.workflows.workflow.Workflow method)</a>
 </li>
       </ul></li>
-      <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.run_api_server">run_api_server() (trinity.common.models.vllm_async_model.vLLMAysncRolloutModel method)</a>
-</li>
-      <li><a href="build_api/trinity.common.models.html#trinity.common.models.openai_api.run_api_server_in_ray_actor">run_api_server_in_ray_actor() (in module trinity.common.models.openai_api)</a>
+      <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.run_api_server">run_api_server() (trinity.common.models.vllm_model.vLLMRolloutModel method)</a>
 </li>
       <li><a href="build_api/trinity.manager.html#trinity.manager.config_manager.ConfigManager.run_config">run_config() (trinity.manager.config_manager.ConfigManager method)</a>
-</li>
-      <li><a href="build_api/trinity.common.models.html#trinity.common.models.openai_api.run_server_in_ray">run_server_in_ray() (in module trinity.common.models.openai_api)</a>
 </li>
       <li><a href="build_api/trinity.explorer.html#trinity.explorer.workflow_runner.WorkflowRunner.run_task">run_task() (trinity.explorer.workflow_runner.WorkflowRunner method)</a>
 </li>
@@ -2943,10 +2909,10 @@
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.set_max_timeout">set_max_timeout() (in module trinity.manager.config_registry.explorer_config_manager)</a>
 </li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.set_model_path">set_model_path() (in module trinity.manager.config_registry.model_config_manager)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.set_model_path">set_model_path() (in module trinity.manager.config_registry.model_config_manager)</a>
+</li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.set_monitor_type">set_monitor_type() (in module trinity.manager.config_registry.model_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_mu_in_policy_loss_fn">set_mu_in_policy_loss_fn() (in module trinity.manager.config_registry.algorithm_config_manager)</a>
@@ -3087,7 +3053,7 @@
         <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Critic.shuffle">(trinity.common.verl_config.Critic attribute)</a>
 </li>
       </ul></li>
-      <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.shutdown">shutdown() (trinity.common.models.vllm_async_model.vLLMAysncRolloutModel method)</a>
+      <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.shutdown">shutdown() (trinity.common.models.vllm_model.vLLMRolloutModel method)</a>
 
       <ul>
         <li><a href="build_api/trinity.explorer.html#trinity.explorer.Explorer.shutdown">(trinity.explorer.Explorer method)</a>
@@ -3119,12 +3085,8 @@
       </ul></li>
       <li><a href="build_api/trinity.buffer.html#trinity.buffer.priority_queue.AsyncPriorityQueue.size">size() (trinity.buffer.priority_queue.AsyncPriorityQueue method)</a>
 </li>
-      <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.sleep">sleep() (trinity.common.models.vllm_async_model.vLLMAysncRolloutModel method)</a>
-
-      <ul>
-        <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.sleep">(trinity.common.models.vllm_model.vLLMRolloutModel method)</a>
+      <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.sleep">sleep() (trinity.common.models.vllm_model.vLLMRolloutModel method)</a>
 </li>
-      </ul></li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.FormatConfig.solution_key">solution_key (trinity.common.config.FormatConfig attribute)</a>
 </li>
       <li><a href="build_api/trinity.explorer.html#trinity.explorer.scheduler.sort_batch_id">sort_batch_id() (in module trinity.explorer.scheduler)</a>
@@ -3175,12 +3137,8 @@
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.SynchronizerConfig.sync_method">sync_method (trinity.common.config.SynchronizerConfig attribute)</a>
 </li>
-      <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.sync_model">sync_model() (trinity.common.models.vllm_async_model.vLLMAysncRolloutModel method)</a>
-
-      <ul>
-        <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.sync_model">(trinity.common.models.vllm_model.vLLMRolloutModel method)</a>
+      <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.sync_model">sync_model() (trinity.common.models.vllm_model.vLLMRolloutModel method)</a>
 </li>
-      </ul></li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.SynchronizerConfig.sync_offset">sync_offset (trinity.common.config.SynchronizerConfig attribute)</a>
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.SynchronizerConfig.sync_timeout">sync_timeout (trinity.common.config.SynchronizerConfig attribute)</a>
@@ -3653,6 +3611,8 @@
         <li><a href="build_api/trinity.buffer.html#module-trinity.buffer.buffer_reader">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     trinity.buffer.buffer_writer
 
@@ -3660,8 +3620,6 @@
         <li><a href="build_api/trinity.buffer.html#module-trinity.buffer.buffer_writer">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     trinity.buffer.priority_queue
 
@@ -3803,24 +3761,10 @@
 </li>
       </ul></li>
       <li>
-    trinity.common.models.openai_api
-
-      <ul>
-        <li><a href="build_api/trinity.common.models.html#module-trinity.common.models.openai_api">module</a>
-</li>
-      </ul></li>
-      <li>
     trinity.common.models.utils
 
       <ul>
         <li><a href="build_api/trinity.common.models.html#module-trinity.common.models.utils">module</a>
-</li>
-      </ul></li>
-      <li>
-    trinity.common.models.vllm_async_model
-
-      <ul>
-        <li><a href="build_api/trinity.common.models.html#module-trinity.common.models.vllm_async_model">module</a>
 </li>
       </ul></li>
       <li>
@@ -4315,8 +4259,6 @@
 </li>
       <li><a href="build_api/trinity.trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper">VerlPPOTrainerWrapper (class in trinity.trainer.verl_trainer)</a>
 </li>
-      <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel">vLLMAysncRolloutModel (class in trinity.common.models.vllm_async_model)</a>
-</li>
       <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel">vLLMRolloutModel (class in trinity.common.models.vllm_model)</a>
 </li>
   </ul></td>
@@ -4335,12 +4277,8 @@
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.constants.RunningStatus.WAITING_SYNC">WAITING_SYNC (trinity.common.constants.RunningStatus attribute)</a>
 </li>
-      <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_async_model.vLLMAysncRolloutModel.wake_up">wake_up() (trinity.common.models.vllm_async_model.vLLMAysncRolloutModel method)</a>
-
-      <ul>
-        <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.wake_up">(trinity.common.models.vllm_model.vLLMRolloutModel method)</a>
+      <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.wake_up">wake_up() (trinity.common.models.vllm_model.vLLMRolloutModel method)</a>
 </li>
-      </ul></li>
       <li><a href="build_api/trinity.common.html#trinity.common.constants.MonitorType.WANDB">WANDB (trinity.common.constants.MonitorType attribute)</a>
 </li>
       <li><a href="build_api/trinity.utils.html#trinity.utils.monitor.WandbMonitor">WandbMonitor (class in trinity.utils.monitor)</a>
@@ -4375,14 +4313,14 @@
 </li>
       <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_worker.WorkerExtension">WorkerExtension (class in trinity.common.models.vllm_worker)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.Workflow">Workflow (class in trinity.common.workflows)</a>
 
       <ul>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.Workflow">(class in trinity.common.workflows.workflow)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.Task.workflow">workflow (trinity.common.workflows.Task attribute)</a>
 
       <ul>

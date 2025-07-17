@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Configuration Guide &mdash; Trinity-RFT 0.2.0 documentation</title>
+  <title>Configuration Guide &mdash; Trinity-RFT 0.2.1.dev0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=938c9ccc"></script>
+      <script src="../_static/documentation_options.js?v=8c48c73b"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -447,9 +447,10 @@
 <span class="w">  </span><span class="nt">max_retry_times</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
 <span class="w">  </span><span class="nt">env_vars</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
 <span class="w">  </span><span class="nt">rollout_model</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">engine_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vllm_async</span>
+<span class="w">    </span><span class="nt">engine_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vllm</span>
 <span class="w">    </span><span class="nt">engine_num</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="w">    </span><span class="nt">tensor_parallel_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">    </span><span class="nt">enable_history</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
 <span class="w">  </span><span class="nt">auxiliary_models</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">model_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/MODEL</span>
 <span class="w">    </span><span class="nt">tensor_parallel_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
@@ -463,9 +464,10 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">max_timeout</span></code>: Maximum time (in seconds) for a workflow to complete.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">max_retry_times</span></code>: Maximum number of retries for a workflow.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">env_vars</span></code>: Environment variables to be set for every workflow runners.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">rollout_model.engine_type</span></code>: Type of inference engine. Options: <code class="docutils literal notranslate"><span class="pre">vllm_async</span></code> (recommended), <code class="docutils literal notranslate"><span class="pre">vllm</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rollout_model.engine_type</span></code>: Type of inference engine. For now, only <code class="docutils literal notranslate"><span class="pre">vllm_async</span></code> and <code class="docutils literal notranslate"><span class="pre">vllm</span></code> is supported, they have the same meaning and both use the asynchronous engine. In subsequent versions, only <code class="docutils literal notranslate"><span class="pre">vllm</span></code> may be retained for simplicity.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">rollout_model.engine_num</span></code>: Number of inference engines.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">rollout_model.tensor_parallel_size</span></code>: Degree of tensor parallelism.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rollout_model.enable_history</span></code>: Whether to enable model call history recording. If set to <code class="docutils literal notranslate"><span class="pre">True</span></code>, the model wrapper automatically records the return experiences of model calls. Please periodically extract the history via <code class="docutils literal notranslate"><span class="pre">extract_experience_from_history</span></code> to avoid out-of-memory issues. Default is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">auxiliary_models</span></code>: Additional models used for custom workflows.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">eval_interval</span></code>: Interval (in steps) for evaluating the model.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">eval_on_startup</span></code>: Whether to evaluate the model on startup. More precisely, at step 0 with the original model, so it will not be triggered when restarting.</p></li>

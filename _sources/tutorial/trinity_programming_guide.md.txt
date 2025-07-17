@@ -122,6 +122,7 @@ During initialization, `Workflow` receives the following parameters:
 
 ```{tip}
 You can switch to using the OpenAI API by setting `explorer.rollout_model.enable_openai_api` to `true` in your config file and calling `model.get_openai_client()` to get an `openai.OpenAI` instance in your workflow.
+And the `model` field when calling openai API can be obtained via `openai_client.models.list().data[0].id`.
 ```
 
 Here's an example of initializing a simple workflow using only `raw_task` and `rollout_args`. In more complex cases, you can use the `format_args` for further customization.

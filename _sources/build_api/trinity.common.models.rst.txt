@@ -11,26 +11,10 @@ trinity.common.models.model module
    :undoc-members:
    :show-inheritance:
 
-trinity.common.models.openai\_api module
-----------------------------------------
-
-.. automodule:: trinity.common.models.openai_api
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 trinity.common.models.utils module
 ----------------------------------
 
 .. automodule:: trinity.common.models.utils
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-trinity.common.models.vllm\_async\_model module
------------------------------------------------
-
-.. automodule:: trinity.common.models.vllm_async_model
    :members:
    :undoc-members:
    :show-inheritance:

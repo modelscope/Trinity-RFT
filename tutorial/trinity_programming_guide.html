@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Developer Guide &mdash; Trinity-RFT 0.2.0 documentation</title>
+  <title>Developer Guide &mdash; Trinity-RFT 0.2.1.dev0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=938c9ccc"></script>
+      <script src="../_static/documentation_options.js?v=8c48c73b"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -252,7 +252,8 @@ To handle differences in <code class="docutils literal notranslate"><span class=
 </ul>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>You can switch to using the OpenAI API by setting <code class="docutils literal notranslate"><span class="pre">explorer.rollout_model.enable_openai_api</span></code> to <code class="docutils literal notranslate"><span class="pre">true</span></code> in your config file and calling <code class="docutils literal notranslate"><span class="pre">model.get_openai_client()</span></code> to get an <code class="docutils literal notranslate"><span class="pre">openai.OpenAI</span></code> instance in your workflow.</p>
+<p>You can switch to using the OpenAI API by setting <code class="docutils literal notranslate"><span class="pre">explorer.rollout_model.enable_openai_api</span></code> to <code class="docutils literal notranslate"><span class="pre">true</span></code> in your config file and calling <code class="docutils literal notranslate"><span class="pre">model.get_openai_client()</span></code> to get an <code class="docutils literal notranslate"><span class="pre">openai.OpenAI</span></code> instance in your workflow.
+And the <code class="docutils literal notranslate"><span class="pre">model</span></code> field when calling openai API can be obtained via <code class="docutils literal notranslate"><span class="pre">openai_client.models.list().data[0].id</span></code>.</p>
 </div>
 <p>Here’s an example of initializing a simple workflow using only <code class="docutils literal notranslate"><span class="pre">raw_task</span></code> and <code class="docutils literal notranslate"><span class="pre">rollout_args</span></code>. In more complex cases, you can use the <code class="docutils literal notranslate"><span class="pre">format_args</span></code> for further customization.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>

@@ -5,14 +5,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>trinity.common.models.vllm_model &mdash; Trinity-RFT 0.2.0 documentation</title>
+  <title>trinity.common.models.vllm_model &mdash; Trinity-RFT 0.2.1.dev0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=938c9ccc"></script>
+      <script src="../../../../_static/documentation_options.js?v=8c48c73b"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -95,23 +95,18 @@
            <div itemprop="articleBody">
              
   <h1>Source code for trinity.common.models.vllm_model</h1><div class="highlight"><pre>
-<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;vLLM related modules.</span>
-
-<span class="sd">Modified from OpenRLHF openrlhf/trainer/ray/vllm_engine.py</span>
+<span></span><span class="sd">&quot;&quot;&quot;A wrapper around the vllm.AsyncEngine to handle async requests.</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">aiohttp</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ray</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">vllm</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">vllm</span><span class="w"> </span><span class="kn">import</span> <span class="n">LLM</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">vllm.sampling_params</span><span class="w"> </span><span class="kn">import</span> <span class="n">SamplingParams</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">vllm.sampling_params</span><span class="w"> </span><span class="kn">import</span> <span class="n">RequestOutputKind</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">InferenceModelConfig</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
@@ -122,17 +117,29 @@
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
+<span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
+
+<span class="c1"># TODO: remove V0 when V1 is stable</span>
 <div class="viewcode-block" id="vLLMRolloutModel">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">vLLMRolloutModel</span><span class="p">(</span><span class="n">InferenceModel</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Actor for vLLM.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Wrapper around the vLLM engine to handle async requests.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        config (Config): The config.</span>
+<span class="sd">        kwargs (dict): The keyword arguments for the engine.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="vLLMRolloutModel.__init__">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">InferenceModelConfig</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">config</span><span class="p">:</span> <span class="n">InferenceModelConfig</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_v1</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">use_v1</span>
         <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">tensor_parallel_size</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;VLLM_WORKER_MULTIPROC_METHOD&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;spawn&quot;</span>
             <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;VLLM_RAY_BUNDLE_INDICES&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">bundle_indices</span>
@@ -143,7 +150,7 @@
             <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;VLLM_RAY_PER_WORKER_GPUS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">use_v1</span><span class="p">))</span>
             <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;VLLM_WORKER_MULTIPROC_METHOD&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;spawn&quot;</span>
             <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;VLLM_ENABLE_V1_MULTIPROCESSING&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;0&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">default_sampling_params</span> <span class="o">=</span> <span class="n">SamplingParams</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_sampling_params</span> <span class="o">=</span> <span class="n">vllm</span><span class="o">.</span><span class="n">SamplingParams</span><span class="p">(</span>
             <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">temperature</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
             <span class="n">max_tokens</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">max_response_tokens</span><span class="p">,</span>
@@ -151,13 +158,15 @@
             <span class="n">truncate_prompt_tokens</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">max_prompt_tokens</span><span class="p">,</span>
             <span class="n">skip_special_tokens</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">include_stop_str_in_output</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">output_kind</span><span class="o">=</span><span class="n">RequestOutputKind</span><span class="o">.</span><span class="n">FINAL_ONLY</span><span class="p">,</span>
             <span class="n">logprobs</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enable_thinking</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">enable_thinking</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">request_id</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">max_model_len</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">max_prompt_tokens</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">config</span><span class="o">.</span><span class="n">max_response_tokens</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">max_model_len</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">max_prompt_tokens</span> <span class="o">+</span> <span class="n">config</span><span class="o">.</span><span class="n">max_response_tokens</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">llm</span> <span class="o">=</span> <span class="n">LLM</span><span class="p">(</span>
-            <span class="c1"># TODO: check checkpoint path</span>
+        <span class="n">engine_args</span> <span class="o">=</span> <span class="n">vllm</span><span class="o">.</span><span class="n">AsyncEngineArgs</span><span class="p">(</span>
             <span class="n">model</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">model_path</span><span class="p">,</span>
             <span class="n">enforce_eager</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">enforce_eager</span><span class="p">,</span>
             <span class="n">worker_extension_cls</span><span class="o">=</span><span class="s2">&quot;trinity.common.models.vllm_worker.WorkerExtension&quot;</span><span class="p">,</span>
@@ -168,16 +177,20 @@
             <span class="n">enable_prefix_caching</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">enable_prefix_caching</span><span class="p">,</span>
             <span class="n">dtype</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
             <span class="n">trust_remote_code</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">task</span><span class="o">=</span><span class="s2">&quot;generate&quot;</span><span class="p">,</span>
+            <span class="n">disable_log_requests</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">gpu_memory_utilization</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">gpu_memory_utilization</span><span class="p">,</span>
             <span class="n">enable_chunked_prefill</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">enable_chunked_prefill</span><span class="p">,</span>
-            <span class="c1"># max_num_batched_tokens=256,</span>
+            <span class="c1"># max_num_batched_tokens=256, # you can further set this parameter to reduce the vllm peak memory usage</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">llm</span><span class="o">.</span><span class="n">get_tokenizer</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">chat_template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">get_chat_template</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">enable_thinking</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">enable_thinking</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span> <span class="o">=</span> <span class="n">vllm</span><span class="o">.</span><span class="n">AsyncLLMEngine</span><span class="o">.</span><span class="n">from_engine_args</span><span class="p">(</span><span class="n">engine_args</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chat_template</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">chat_template</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">chat_template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">chat_template</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\{\%-?\s*generation\s*-?\%\}&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">chat_template</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">chat_template</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span>
+            <span class="sa">r</span><span class="s2">&quot;\{\%-?\s*generation\s*-?\%\}&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">chat_template</span>
+        <span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                 <span class="s2">&quot;The provided chat template does not support `return_assitant_tokens_mask`. &quot;</span>
                 <span class="s2">&quot;The default assistant mask method will be used, which may cause performance &quot;</span>
@@ -186,14 +199,204 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">action_mask_method</span> <span class="o">=</span> <span class="n">tokenize_and_mask_messages_default</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">action_mask_method</span> <span class="o">=</span> <span class="n">tokenize_and_mask_messages_hf</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">state_dict_meta</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model_version</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># TODO: resume the value from the checkpoint</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_version</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># TODO: resume the value from the checkpoint</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api_server_host</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api_server_port</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="vLLMRolloutModel.chat">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.chat">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">chat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Chat with the model with a list of messages in async.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            messages (List[dict]): The input history messages.</span>
+<span class="sd">            kwargs (dict): A dictionary of sampling parameters.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A list of experiences.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="o">.</span><span class="n">get_tokenizer</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">chat_template</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">chat_template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">get_chat_template</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">messages</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;assistant&quot;</span><span class="p">:</span>
+            <span class="n">prompt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">apply_chat_template</span><span class="p">(</span>
+                <span class="n">messages</span><span class="p">,</span>
+                <span class="n">tokenize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">continue_final_message</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">chat_template</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">chat_template</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">prompt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">apply_chat_template</span><span class="p">(</span>
+                <span class="n">messages</span><span class="p">,</span>
+                <span class="n">tokenize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">add_generation_prompt</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">chat_template</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">chat_template</span><span class="p">,</span>
+                <span class="n">enable_thinking</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">enable_thinking</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="vLLMRolloutModel.generate">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.generate">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate a response from the provided prompt in async.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            prompt (str): The input prompt.</span>
+<span class="sd">            kwargs (dict): A dictionary of sampling parameters.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A list of experiences.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_internal</span><span class="p">(</span><span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">experiences</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">Experience</span><span class="p">(</span>
+                <span class="n">tokens</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span>
+                    <span class="p">(</span>
+                        <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">prompt_token_ids</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span>
+                        <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">token_ids</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span>
+                    <span class="p">)</span>
+                <span class="p">),</span>
+                <span class="n">logprobs</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span>
+                    <span class="p">(</span>
+                        <span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">(</span>
+                            <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">prompt_token_ids</span><span class="p">),),</span>
+                            <span class="mf">0.0</span><span class="p">,</span>
+                            <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+                        <span class="p">),</span>
+                        <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+                            <span class="p">[</span>
+                                <span class="nb">list</span><span class="p">(</span><span class="n">logprob_dict</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">logprob</span>
+                                <span class="k">for</span> <span class="n">logprob_dict</span> <span class="ow">in</span> <span class="n">output</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">logprobs</span>
+                            <span class="p">],</span>
+                            <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+                        <span class="p">),</span>
+                    <span class="p">)</span>
+                <span class="p">),</span>
+                <span class="n">prompt_length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">prompt_token_ids</span><span class="p">),</span>
+                <span class="n">prompt_text</span><span class="o">=</span><span class="n">output</span><span class="o">.</span><span class="n">prompt</span><span class="p">,</span>
+                <span class="n">response_text</span><span class="o">=</span><span class="n">output</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">outputs</span><span class="p">))</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="n">experiences</span></div>
+
+
+<div class="viewcode-block" id="vLLMRolloutModel.logprobs">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.logprobs">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">logprobs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token_ids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the logprobs of the given tokens in async.&quot;&quot;&quot;</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_internal</span><span class="p">(</span>
+            <span class="n">prompt</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;prompt_token_ids&quot;</span><span class="p">:</span> <span class="n">token_ids</span><span class="p">},</span>
+            <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">max_tokens</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">prompt_logprobs</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="c1"># vLLM return `prompt_logprobs + 1` logrpobs for each token</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="o">+</span> <span class="p">[</span>
+                <span class="nb">list</span><span class="p">(</span><span class="n">logprob_dict</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">logprob</span>
+                <span class="k">for</span> <span class="n">logprob_dict</span> <span class="ow">in</span> <span class="n">output</span><span class="o">.</span><span class="n">prompt_logprobs</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="p">],</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_generate_internal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prompt</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="c1"># Send the request to the LLM engine.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">request_id</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">stream</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span>
+            <span class="n">request_id</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request_id</span><span class="p">),</span>
+            <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
+            <span class="n">sampling_params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_create_sampling_params</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Consume the stream until the request is finished.</span>
+        <span class="k">async</span> <span class="k">for</span> <span class="n">request_output</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">request_output</span><span class="o">.</span><span class="n">finished</span><span class="p">:</span>
+                <span class="c1"># Bypass the original full prompt.</span>
+                <span class="c1"># request_output.prompt = request.prompt</span>
+                <span class="k">return</span> <span class="n">request_output</span>
+
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;[vLLM] The request is not finished. This should not happen.&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="vLLMRolloutModel.convert_messages_to_experience">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.convert_messages_to_experience">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">convert_messages_to_experience</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Experience</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert a list of messages into an experience.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="o">.</span><span class="n">get_tokenizer</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">chat_template</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">chat_template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">get_chat_template</span><span class="p">()</span>
+        <span class="n">token_ids</span><span class="p">,</span> <span class="n">action_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_mask_method</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">messages</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">chat_template</span>
+        <span class="p">)</span>
+        <span class="n">logprobs</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">logprobs</span><span class="p">(</span><span class="n">token_ids</span><span class="o">=</span><span class="n">token_ids</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">Experience</span><span class="p">(</span>
+            <span class="n">tokens</span><span class="o">=</span><span class="n">token_ids</span><span class="p">,</span>
+            <span class="n">prompt_length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">token_ids</span><span class="p">),</span>
+            <span class="n">logprobs</span><span class="o">=</span><span class="n">logprobs</span><span class="p">,</span>
+            <span class="n">action_mask</span><span class="o">=</span><span class="n">action_mask</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="vLLMRolloutModel.shutdown">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.shutdown">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Shutdown the vLLM v1 engine. This kills child processes forked</span>
+<span class="sd">        by the vLLM engine. If not called, the child processes will be</span>
+<span class="sd">        orphaned and will not be killed when the parent process exits,</span>
+<span class="sd">        and they won&#39;t be able to be tracked by Ray anymore.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="p">,</span> <span class="s2">&quot;shutdown&quot;</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Shutting down vLLM engine&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_sampling_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create sampling params.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_sampling_params</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_sampling_params</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">params</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_collective_rpc</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">method</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">timeout</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">args</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(),</span>
+        <span class="n">kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_v1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="o">.</span><span class="n">collective_rpc</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">model_executor</span><span class="o">.</span><span class="n">collective_rpc</span><span class="p">(</span>
+                <span class="n">method</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span>
+            <span class="p">)</span>
+
+<div class="viewcode-block" id="vLLMRolloutModel.sync_model">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.sync_model">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">sync_model</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">model_version</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">update_weight_args_list</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sync model weights to vLLM.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">update_weight_args_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collective_rpc</span><span class="p">(</span><span class="s2">&quot;set_state_dict_meta&quot;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">update_weight_args_list</span><span class="p">,))</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collective_rpc</span><span class="p">(</span><span class="s2">&quot;update_weight&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Sync model weights to vLLM successfully.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_version</span> <span class="o">=</span> <span class="n">model_version</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
 
 
 <div class="viewcode-block" id="vLLMRolloutModel.init_process_group">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.init_process_group">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">init_process_group</span><span class="p">(</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">init_process_group</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">master_address</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">master_port</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -206,7 +409,7 @@
         <span class="n">update_with_checkpoint</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">state_dict_meta</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">llm</span><span class="o">.</span><span class="n">collective_rpc</span><span class="p">(</span>
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collective_rpc</span><span class="p">(</span>
             <span class="s2">&quot;init_process_group&quot;</span><span class="p">,</span>
             <span class="n">args</span><span class="o">=</span><span class="p">(</span>
                 <span class="n">master_address</span><span class="p">,</span>
@@ -224,207 +427,77 @@
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="vLLMRolloutModel.reset_prefix_cache">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.reset_prefix_cache">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">reset_prefix_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">llm</span><span class="o">.</span><span class="n">llm_engine</span><span class="o">.</span><span class="n">reset_prefix_cache</span><span class="p">()</span></div>
-
-
-<div class="viewcode-block" id="vLLMRolloutModel.sleep">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.sleep">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">sleep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">llm</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="vLLMRolloutModel.wake_up">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.wake_up">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">wake_up</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">llm</span><span class="o">.</span><span class="n">wake_up</span><span class="p">()</span></div>
-
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_create_sampling_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create sampling params.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_sampling_params</span>
-        <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_sampling_params</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
-                <span class="nb">setattr</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">params</span>
-
-<div class="viewcode-block" id="vLLMRolloutModel.generate">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.generate">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prompts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Generate a batch of responses from a batch of prompts.</span>
+<div class="viewcode-block" id="vLLMRolloutModel.run_api_server">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.run_api_server">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_api_server</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run the OpenAI API server in a Ray actor.</span>
 
 <span class="sd">        Note:</span>
-
-<span class="sd">            This method will not apply chat template.</span>
-<span class="sd">            You need to apply chat template before calling this method.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            prompts (List[str]): A list of prompts.</span>
-<span class="sd">            kwargs (dict): A dictionary of sampling parameters.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            List[Experience]: A list of experiences.</span>
-
-<span class="sd">        Example:</span>
-
-<span class="sd">            &gt;&gt;&gt; # config.algorithm.repeat_times == 2 or kwargs[&quot;n&quot;] == 2</span>
-<span class="sd">            &gt;&gt;&gt;</span>
-<span class="sd">            &gt;&gt;&gt; prompts = [</span>
-<span class="sd">            &gt;&gt;&gt;     &quot;Hello, world!&quot;,</span>
-<span class="sd">            &gt;&gt;&gt;     &quot;How are you?&quot;</span>
-<span class="sd">            &gt;&gt;&gt; ]</span>
-<span class="sd">            &gt;&gt;&gt; experiences = model.generate(prompts)</span>
-<span class="sd">            &gt;&gt;&gt; print(experiences)</span>
-<span class="sd">            [</span>
-<span class="sd">                Experience(tokens=tensor()...),  # first sequnece for prompts[0]</span>
-<span class="sd">                Experience(tokens=tensor()...),  # second sequnece for prompts[0]</span>
-<span class="sd">                Experience(tokens=tensor()...),  # first sequence for prompts[1]</span>
-<span class="sd">                Experience(tokens=tensor()...)   # second sequence for prompts[1]</span>
-<span class="sd">            ]</span>
+<span class="sd">            Do not use `ray.get()` on this method.</span>
+<span class="sd">            This method will run forever until the server is shut down.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="p">:</span>
-            <span class="n">sampling_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_sampling_params</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-            <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">llm</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">prompts</span><span class="p">,</span> <span class="n">sampling_params</span><span class="p">,</span> <span class="n">use_tqdm</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="n">experiences</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sampling_params</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
-                <span class="n">experiences</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="n">Experience</span><span class="p">(</span>
-                        <span class="n">tokens</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span>
-                            <span class="p">(</span>
-                                <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">prompt_token_ids</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span>
-                                <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">token_ids</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span>
-                            <span class="p">)</span>
-                        <span class="p">),</span>
-                        <span class="n">logprobs</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span>
-                            <span class="p">(</span>
-                                <span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">(</span>
-                                    <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">prompt_token_ids</span><span class="p">),),</span>
-                                    <span class="mf">0.0</span><span class="p">,</span>
-                                    <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
-                                <span class="p">),</span>
-                                <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
-                                    <span class="p">[</span>
-                                        <span class="nb">list</span><span class="p">(</span><span class="n">logprob_dict</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">logprob</span>
-                                        <span class="k">for</span> <span class="n">logprob_dict</span> <span class="ow">in</span> <span class="n">output</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">logprobs</span>
-                                    <span class="p">],</span>
-                                    <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
-                                <span class="p">),</span>
-                            <span class="p">)</span>
-                        <span class="p">),</span>
-                        <span class="n">prompt_length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">prompt_token_ids</span><span class="p">),</span>
-                        <span class="n">prompt_text</span><span class="o">=</span><span class="n">output</span><span class="o">.</span><span class="n">prompt</span><span class="p">,</span>
-                        <span class="n">response_text</span><span class="o">=</span><span class="n">output</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
-        <span class="k">return</span> <span class="n">experiences</span></div>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api_server_host</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_server_port</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;API server is already running.&quot;</span><span class="p">)</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.api.vllm_patch</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_api_server_in_ray_actor</span>
 
-
-<div class="viewcode-block" id="vLLMRolloutModel.chat">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.chat">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">chat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Chat with the model with a list of messages.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            messages (List[dict]): A list of messages.</span>
-
-<span class="sd">        Example:</span>
-
-<span class="sd">            &gt;&gt;&gt; [</span>
-<span class="sd">            &gt;&gt;&gt;   {&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: &quot;You are a helpful assistant.&quot;},</span>
-<span class="sd">            &gt;&gt;&gt;   {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Hello, world!&quot;},</span>
-<span class="sd">            &gt;&gt;&gt; ]</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            List[Experience]: A list of experiences containing the response text.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># TODO: support tools and other fields</span>
-        <span class="k">if</span> <span class="n">messages</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;assistant&quot;</span><span class="p">:</span>
-            <span class="n">prompt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">apply_chat_template</span><span class="p">(</span>
-                <span class="n">messages</span><span class="p">,</span>
-                <span class="n">tokenize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                <span class="n">continue_final_message</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">chat_template</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">chat_template</span><span class="p">,</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">prompt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">apply_chat_template</span><span class="p">(</span>
-                <span class="n">messages</span><span class="p">,</span>
-                <span class="n">tokenize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                <span class="n">add_generation_prompt</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">chat_template</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">chat_template</span><span class="p">,</span>
-                <span class="n">enable_thinking</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">enable_thinking</span><span class="p">,</span>
-            <span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate</span><span class="p">([</span><span class="n">prompt</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="vLLMRolloutModel.logprobs">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.logprobs">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">logprobs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token_ids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="p">:</span>
-            <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">llm</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span>
-                <span class="n">prompts</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;prompt_token_ids&quot;</span><span class="p">:</span> <span class="n">token_ids</span><span class="p">},</span>
-                <span class="n">sampling_params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_create_sampling_params</span><span class="p">(</span>
-                    <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                    <span class="n">max_tokens</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                    <span class="n">prompt_logprobs</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                <span class="p">),</span>
-                <span class="n">use_tqdm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="p">)</span>
-        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
-            <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="o">+</span> <span class="p">[</span>
-                <span class="nb">list</span><span class="p">(</span><span class="n">logprob_dict</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">logprob</span>
-                <span class="k">for</span> <span class="n">logprob_dict</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">prompt_logprobs</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-            <span class="p">],</span>
-            <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
-        <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="vLLMRolloutModel.convert_messages_to_experience">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.convert_messages_to_experience">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">convert_messages_to_experience</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Experience</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert a list of messages into an experience.&quot;&quot;&quot;</span>
-        <span class="n">token_ids</span><span class="p">,</span> <span class="n">action_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_mask_method</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">messages</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">chat_template</span>
-        <span class="p">)</span>
-        <span class="n">logprobs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">logprobs</span><span class="p">(</span><span class="n">token_ids</span><span class="o">=</span><span class="n">token_ids</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
-        <span class="k">return</span> <span class="n">Experience</span><span class="p">(</span>
-            <span class="n">tokens</span><span class="o">=</span><span class="n">token_ids</span><span class="p">,</span>
-            <span class="n">prompt_length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">token_ids</span><span class="p">),</span>
-            <span class="n">logprobs</span><span class="o">=</span><span class="n">logprobs</span><span class="p">,</span>
-            <span class="n">action_mask</span><span class="o">=</span><span class="n">action_mask</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api_server_host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_server_port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_available_address</span><span class="p">()</span>
+        <span class="k">await</span> <span class="n">run_api_server_in_ray_actor</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_server_host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_server_port</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model_path</span>
         <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="vLLMRolloutModel.has_api_server">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.has_api_server">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">has_api_server</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">False</span></div>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">has_api_server</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">enable_openai_api</span></div>
 
 
-<div class="viewcode-block" id="vLLMRolloutModel.sync_model">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.sync_model">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">sync_model</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">model_version</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">update_weight_args_list</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sync model weights to vLLM.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">update_weight_args_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_collective_rpc</span><span class="p">(</span><span class="s2">&quot;set_state_dict_meta&quot;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">update_weight_args_list</span><span class="p">,))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_collective_rpc</span><span class="p">(</span><span class="s2">&quot;update_weight&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Sync model weights to vLLM successfully.&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model_version</span> <span class="o">=</span> <span class="n">model_version</span>
-        <span class="k">return</span> <span class="kc">True</span></div>
+<div class="viewcode-block" id="vLLMRolloutModel.api_server_ready">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.api_server_ready">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">api_server_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the OpenAI API server is ready.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            api_url (str): The URL of the OpenAI API server.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_api_server</span><span class="p">():</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">async</span> <span class="k">with</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">ClientSession</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+                <span class="k">async</span> <span class="k">with</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;http://</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">api_server_host</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">api_server_port</span><span class="si">}</span><span class="s2">/health&quot;</span>
+                <span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;http://</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">api_server_host</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">api_server_port</span><span class="si">}</span><span class="s2">/v1&quot;</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="vLLMRolloutModel.reset_prefix_cache">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.reset_prefix_cache">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">reset_prefix_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="o">.</span><span class="n">reset_prefix_cache</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="vLLMRolloutModel.get_model_version">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.get_model_version">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_model_version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_version</span></div>
+
+
+<div class="viewcode-block" id="vLLMRolloutModel.sleep">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.sleep">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">sleep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="vLLMRolloutModel.wake_up">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.wake_up">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">wake_up</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="o">.</span><span class="n">wake_up</span><span class="p">()</span></div>
 </div>
 
 </pre></div>

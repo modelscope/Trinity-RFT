@@ -5,14 +5,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>trinity.common.models &mdash; Trinity-RFT 0.2.0 documentation</title>
+  <title>trinity.common.models &mdash; Trinity-RFT 0.2.1.dev0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=938c9ccc"></script>
+      <script src="../../../_static/documentation_options.js?v=8c48c73b"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -141,24 +141,15 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">ray.util.placement_group</span><span class="w"> </span><span class="kn">import</span> <span class="n">placement_group</span><span class="p">,</span> <span class="n">placement_group_table</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ray.util.scheduling_strategies</span><span class="w"> </span><span class="kn">import</span> <span class="n">PlacementGroupSchedulingStrategy</span>
 
-    <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.vllm_async_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">vLLMAysncRolloutModel</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.vllm_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">vLLMRolloutModel</span>
 
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
     <span class="n">engine_num</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">rollout_model</span><span class="o">.</span><span class="n">engine_num</span>
     <span class="n">tensor_parallel_size</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">rollout_model</span><span class="o">.</span><span class="n">tensor_parallel_size</span>
 
-    <span class="k">if</span> <span class="p">(</span>
-        <span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">rollout_model</span><span class="o">.</span><span class="n">enable_openai_api</span>
-        <span class="ow">and</span> <span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">rollout_model</span><span class="o">.</span><span class="n">engine_type</span> <span class="o">!=</span> <span class="s2">&quot;vllm_async&quot;</span>
-    <span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;OpenAI API is only supported for vllm_async engine&quot;</span><span class="p">)</span>
-
     <span class="n">rollout_engines</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">rollout_model</span><span class="o">.</span><span class="n">engine_type</span> <span class="o">==</span> <span class="s2">&quot;vllm&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">rollout_model</span><span class="o">.</span><span class="n">engine_type</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;vllm&quot;</span><span class="p">):</span>
         <span class="n">engine_cls</span> <span class="o">=</span> <span class="n">vLLMRolloutModel</span>
-    <span class="k">elif</span> <span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">rollout_model</span><span class="o">.</span><span class="n">engine_type</span> <span class="o">==</span> <span class="s2">&quot;vllm_async&quot;</span><span class="p">:</span>
-        <span class="n">engine_cls</span> <span class="o">=</span> <span class="n">vLLMAysncRolloutModel</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown engine type: </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">rollout_model</span><span class="o">.</span><span class="n">engine_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
@@ -213,17 +204,21 @@
     <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">rollout_model</span><span class="o">.</span><span class="n">enable_openai_api</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">engine</span> <span class="ow">in</span> <span class="n">rollout_engines</span><span class="p">:</span>
             <span class="n">engine</span><span class="o">.</span><span class="n">run_api_server</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span>
-
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">rollout_model</span><span class="o">.</span><span class="n">enable_history</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Model History recording is enabled. Please periodically extract &quot;</span>
+            <span class="s2">&quot;history via `extract_experience_from_history` to avoid out-of-memory issues.&quot;</span>
+        <span class="p">)</span>
     <span class="c1"># create auxiliary models</span>
     <span class="k">for</span> <span class="n">model_config</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">auxiliary_models</span><span class="p">:</span>
         <span class="n">engines</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">model_config</span><span class="o">.</span><span class="n">engine_num</span><span class="p">):</span>
             <span class="n">bundles_for_engine</span> <span class="o">=</span> <span class="n">allocator</span><span class="o">.</span><span class="n">allocate</span><span class="p">(</span><span class="n">model_config</span><span class="o">.</span><span class="n">tensor_parallel_size</span><span class="p">)</span>
             <span class="n">model_config</span><span class="o">.</span><span class="n">enable_openai_api</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="n">model_config</span><span class="o">.</span><span class="n">engine_type</span> <span class="o">=</span> <span class="s2">&quot;vllm_async&quot;</span>
+            <span class="n">model_config</span><span class="o">.</span><span class="n">engine_type</span> <span class="o">=</span> <span class="s2">&quot;vllm&quot;</span>
             <span class="n">model_config</span><span class="o">.</span><span class="n">bundle_indices</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">bid</span><span class="p">)</span> <span class="k">for</span> <span class="n">bid</span> <span class="ow">in</span> <span class="n">bundles_for_engine</span><span class="p">])</span>
             <span class="n">engines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="n">ray</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">vLLMAysncRolloutModel</span><span class="p">)</span>
+                <span class="n">ray</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">vLLMRolloutModel</span><span class="p">)</span>
                 <span class="o">.</span><span class="n">options</span><span class="p">(</span>
                     <span class="n">num_cpus</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                     <span class="n">num_gpus</span><span class="o">=</span><span class="mi">0</span> <span class="k">if</span> <span class="n">model_config</span><span class="o">.</span><span class="n">tensor_parallel_size</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">1</span><span class="p">,</span>
