@@ -1,4 +1,4 @@
-[**English Homepage**](https://github.com/modelscope/Trinity-RFT/blob/main/README.md) | [**教程**](https://modelscope.github.io/Trinity-RFT/) | [**FAQ**](./docs/sphinx_doc/source/tutorial/faq.md)
+[**English Homepage**](https://github.com/modelscope/Trinity-RFT/blob/main/README.md) | [**教程**](https://modelscope.github.io/Trinity-RFT/) | [**常见问题**](./docs/sphinx_doc/source/tutorial/faq.md)
 
 <div align="center">
   <img src="https://img.alicdn.com/imgextra/i1/O1CN01lvLpfw25Pl4ohGZnU_!!6000000007519-2-tps-1628-490.png" alt="Trinity-RFT" style="height: 120px;">
@@ -256,15 +256,15 @@ Trinity-RFT 提供了一个 Web 界面来配置您的 RFT 流程。
 > 这是一个实验性功能，我们将持续改进。
 
 
-要启用最小功能（主要用于训练器），您可以运行
+要启动 Web 界面进行配置，您可以运行：
 
 ```bash
 trinity studio --port 8080
 ```
 
-然后您可以在网页上配置您的 RFT 流程并生成一个配置文件。您可以保存该配置以备后用，或按照下一节的描述直接运行。
+然后您可以在网页上配置您的 RFT 流程并生成一个配置文件。您可以保存该配置文件以备后用，或按照下一节的描述直接运行。
 
-高级用户也可以直接编辑配置文件。
+高阶用户也可以直接编辑配置文件。
 我们在 [`examples`](examples/) 目录中提供了一些示例配置文件。
 
 若需完整的 GUI 功能，请参考 [Trinity-Studio](https://github.com/modelscope/Trinity-Studio) 仓库。
