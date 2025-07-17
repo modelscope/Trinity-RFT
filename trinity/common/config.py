@@ -700,13 +700,6 @@ class Config:
         """Check and update the config."""
         self._check_deprecated()
 
-        # rename the experiment when necessary
-        exp_dir = os.path.join(self.checkpoint_root_dir, self.project, self.name)
-        if not self.continue_from_checkpoint and (os.path.exists(exp_dir) and os.listdir(exp_dir)):
-            ori_name = self.name
-            self.name = self.name + f"_{datetime.now().strftime('%Y%m%d%H%M%S')}"
-            logger.warning(f"Experiment [{ori_name}] already exists, renamed as {self.name}.")
-
         # set namespace
         if self.ray_namespace is None or len(self.ray_namespace) == 0:
             self.ray_namespace = f"{self.project}/{self.name}"
@@ -723,6 +716,15 @@ class Config:
             self.checkpoint_root_dir = os.path.join(os.getcwd(), self.checkpoint_root_dir)
         # create a job dir at checkpoint_root_dir/project/name
         self.checkpoint_job_dir = os.path.join(self.checkpoint_root_dir, self.project, self.name)
+        # rename the experiment when necessary
+        if not self.continue_from_checkpoint and (
+            os.path.exists(self.checkpoint_job_dir) and os.listdir(self.checkpoint_job_dir)
+        ):
+            ori_name = self.name
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            self.time = f"{ori_name}_{timestamp}"
+            self.checkpoint_job_dir = f"{self.checkpoint_job_dir}_{timestamp}"
+            logger.warning(f"Experiment [{ori_name}] already exists, renamed as {self.name}.")
         os.makedirs(self.checkpoint_job_dir, exist_ok=True)
 
         # check and update model path
