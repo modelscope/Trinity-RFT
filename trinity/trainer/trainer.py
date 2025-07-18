@@ -10,6 +10,7 @@ from abc import ABC, abstractmethod
 
 import ray
 
+from trinity.algorithm import SAMPLE_STRATEGY
 from trinity.common.config import Config
 from trinity.common.constants import RunningStatus, SyncMethod
 from trinity.utils.log import get_logger
@@ -23,6 +24,11 @@ class Trainer:
         self.logger = get_logger(__name__)
         self.engine = get_trainer_wrapper(config)
         self.explorer_ref = None
+        self.sample_strategy = SAMPLE_STRATEGY.get(config.algorithm.sample_strategy)(
+            buffer_config=config.buffer,
+            trainer_type=config.trainer.trainer_type,
+            **config.algorithm.sample_strategy_args,
+        )
 
     def prepare(self) -> None:
         """Prepare the trainer."""
@@ -32,7 +38,30 @@ class Trainer:
         """Train the model."""
         while True:
             try:
-                train_continue = self.train_step()
+                # sample experiences for train step
+                try:
+                    batch, sample_metrics, exp_samples = self.sample_strategy.sample(
+                        self.engine.global_steps + 1,
+                    )
+                    successful_sampling = True
+                except StopIteration:
+                    print("No more data to train. Stop training.")
+                    if (
+                        self.engine.config.trainer.save_freq == 0
+                        or self.engine.global_steps % self.engine.config.trainer.save_freq != 0
+                    ):  # TODO: double-check this if-condition
+                        self.engine.logger.info(f"Saving at step {self.engine.global_steps}.")
+                        self.engine.save_checkpoint()
+                        self.engine.logger.info(f"Saved at step {self.engine.global_steps}.")
+                    successful_sampling = False
+                # TODO: get rid of self.engine.global_steps/config/logger?
+
+                # run train step
+                if successful_sampling:
+                    train_continue = self.engine.train_step(batch, sample_metrics, exp_samples)
+                else:
+                    train_continue = False
+
                 if not train_continue:
                     break
                 if self.need_sync():
@@ -42,14 +71,6 @@ class Trainer:
                 break
         self.logger.info("--------------------\n> Trainer finished.\n--------------------")
         return self.config.trainer.name
-
-    def train_step(self) -> bool:
-        """Train one step.
-
-        Returns:
-            bool: Whether to continue training.
-        """
-        return self.engine.train_step()
 
     def need_sync(self) -> bool:
         """Whether to sync the model weight."""
@@ -95,7 +116,7 @@ class TrainEngineWrapper(ABC):
         """Get the current training step number."""
 
     @abstractmethod
-    def train_step(self) -> bool:
+    def train_step(self, batch, sample_metrics, exp_samples) -> bool:
         """Training."""
 
     @abstractmethod
