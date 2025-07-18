@@ -109,8 +109,7 @@ class DataActiveIterator:
         # if it's a dynamic task pipeline, update the model_params and model_path as well
         if self.pipeline_type == DataProcessorPipelineType.TASK and self.config.dynamic:
             # update the api model path
-            if self.updated_api_info.get("model", None) is not None:
-                self.updated_op_args["api_or_hf_model"] = self.updated_api_info["model"]
+            self.updated_op_args["api_or_hf_model"] = self.updated_api_info.get("model", None)
             # update the model_params
             self.updated_op_args["model_params"] = {
                 "base_url": self.updated_api_info.get("base_url", None),

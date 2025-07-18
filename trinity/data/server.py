@@ -51,11 +51,11 @@ def data_processor(pipeline_type):
     if pipeline_type == "task_pipeline":
         # must be sync
         # if it's a dynamic task pipeline, try to get the api url and model path from the explorer
-        api_url, model_path = get_explorer_model_service(config)
+        api_url = get_explorer_model_service(config)
         updated_api_info = {
             "base_url": api_url,
             "api_key": "EMPTY",
-            "model": model_path,
+            "model": None,  # use the first available model
         }
         iterator = DataActiveIterator(pipeline_config, config.buffer, pipeline_type=pipeline_type, updated_api_info=updated_api_info)
         # If the explorer is synced, the scorer model is updated, so the priority and the corresponding stats/meta need
