@@ -109,7 +109,7 @@
 <span class="c1"># limitations under the License.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">The main entry point to run the PPO algorithm.</span>
-<span class="sd">Modified from https://github.com/volcengine/verl/blob/0758489422e8d41a89e6c36d4c477714520f0dcc/verl/workers/fsdp_workers.py</span>
+<span class="sd">Modified from https://github.com/volcengine/verl/blob/v0.4.1/verl/workers/fsdp_workers.py</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
@@ -123,9 +123,10 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch.distributed</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch.distributed</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dist</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">vllm</span>  <span class="c1"># noqa: F401 ; import vllm to set NCCL_CUMEM_ENABLE automatically.</span>
+
+<span class="c1"># import vllm  # noqa: F401 ; import vllm to set NCCL_CUMEM_ENABLE automatically.</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">codetiming</span><span class="w"> </span><span class="kn">import</span> <span class="n">Timer</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">omegaconf</span><span class="w"> </span><span class="kn">import</span> <span class="n">DictConfig</span><span class="p">,</span> <span class="n">open_dict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">omegaconf</span><span class="w"> </span><span class="kn">import</span> <span class="n">DictConfig</span><span class="p">,</span> <span class="n">OmegaConf</span><span class="p">,</span> <span class="n">open_dict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">peft</span><span class="w"> </span><span class="kn">import</span> <span class="n">LoraConfig</span><span class="p">,</span> <span class="n">TaskType</span><span class="p">,</span> <span class="n">get_peft_model</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">safetensors.torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">save_file</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">torch.distributed.device_mesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">init_device_mesh</span>
@@ -140,7 +141,12 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.activation_offload</span><span class="w"> </span><span class="kn">import</span> <span class="n">enable_activation_offloading</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.checkpoint.fsdp_checkpoint_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">FSDPCheckpointManager</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.debug</span><span class="w"> </span><span class="kn">import</span> <span class="n">log_gpu_memory_usage</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.device</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_torch_device</span><span class="p">,</span> <span class="n">is_cuda_available</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.device</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">get_device_id</span><span class="p">,</span>
+    <span class="n">get_device_name</span><span class="p">,</span>
+    <span class="n">get_nccl_backend</span><span class="p">,</span>
+    <span class="n">get_torch_device</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.flops_counter</span><span class="w"> </span><span class="kn">import</span> <span class="n">FlopsCounter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.fs</span><span class="w"> </span><span class="kn">import</span> <span class="n">copy_to_local</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.fsdp_utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
@@ -194,9 +200,10 @@
             <span class="n">rank</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;RANK&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
             <span class="n">world_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;WORLD_SIZE&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
             <span class="n">torch</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">init_process_group</span><span class="p">(</span>
-                <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;cpu:gloo,cuda:nccl&quot;</span> <span class="k">if</span> <span class="n">is_cuda_available</span> <span class="k">else</span> <span class="s2">&quot;cpu:gloo,npu:hccl&quot;</span><span class="p">,</span>
+                <span class="n">backend</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;cpu:gloo,</span><span class="si">{</span><span class="n">get_device_name</span><span class="p">()</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">get_nccl_backend</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
                 <span class="n">rank</span><span class="o">=</span><span class="n">rank</span><span class="p">,</span>
                 <span class="n">world_size</span><span class="o">=</span><span class="n">world_size</span><span class="p">,</span>
+                <span class="n">init_method</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;DIST_INIT_METHOD&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
                 <span class="n">timeout</span><span class="o">=</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_timeout</span><span class="p">),</span>
             <span class="p">)</span>
 
@@ -319,6 +326,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">hf_tokenizer</span><span class="p">(</span><span class="n">local_path</span><span class="p">,</span> <span class="n">trust_remote_code</span><span class="o">=</span><span class="n">trust_remote_code</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">processor</span> <span class="o">=</span> <span class="n">hf_processor</span><span class="p">(</span><span class="n">local_path</span><span class="p">,</span> <span class="n">trust_remote_code</span><span class="o">=</span><span class="n">trust_remote_code</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;custom_chat_template&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">processor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">processor</span><span class="o">.</span><span class="n">chat_template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">custom_chat_template</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">chat_template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">custom_chat_template</span>
+
         <span class="n">torch_dtype</span> <span class="o">=</span> <span class="n">fsdp_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;model_dtype&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">torch_dtype</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">torch_dtype</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">float32</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_actor</span> <span class="k">else</span> <span class="n">torch</span><span class="o">.</span><span class="n">bfloat16</span>
@@ -375,11 +388,19 @@
 
                 <span class="n">_apply_liger_kernel_to_instance</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">actor_module</span><span class="p">)</span>
 
+            <span class="n">fused_kernel_options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;fused_kernel_options&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">fused_kernels_backend</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">fused_kernel_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;impl_backend&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">fused_kernel_options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="k">else</span> <span class="kc">None</span>
+            <span class="p">)</span>
+
             <span class="n">apply_monkey_patch</span><span class="p">(</span>
                 <span class="n">model</span><span class="o">=</span><span class="n">actor_module</span><span class="p">,</span>
                 <span class="n">use_remove_padding</span><span class="o">=</span><span class="n">use_remove_padding</span><span class="p">,</span>
                 <span class="n">ulysses_sp_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ulysses_sequence_parallel_size</span><span class="p">,</span>
                 <span class="n">use_fused_kernels</span><span class="o">=</span><span class="n">use_fused_kernels</span><span class="p">,</span>
+                <span class="n">fused_kernels_backend</span><span class="o">=</span><span class="n">fused_kernels_backend</span><span class="p">,</span>
             <span class="p">)</span>
 
             <span class="c1"># some parameters may not in torch_dtype. TODO(zhangchi.usc1992) remove this after we switch to fsdp2</span>
@@ -451,12 +472,12 @@
                 <span class="n">param_init_fn</span><span class="o">=</span><span class="n">init_fn</span><span class="p">,</span>
                 <span class="n">use_orig_params</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                 <span class="n">auto_wrap_policy</span><span class="o">=</span><span class="n">auto_wrap_policy</span><span class="p">,</span>
-                <span class="n">device_id</span><span class="o">=</span><span class="n">get_torch_device</span><span class="p">()</span><span class="o">.</span><span class="n">current_device</span><span class="p">(),</span>
+                <span class="n">device_id</span><span class="o">=</span><span class="n">get_device_id</span><span class="p">(),</span>
                 <span class="n">sharding_strategy</span><span class="o">=</span><span class="n">sharding_strategy</span><span class="p">,</span>  <span class="c1"># zero3</span>
                 <span class="n">mixed_precision</span><span class="o">=</span><span class="n">mixed_precision</span><span class="p">,</span>
                 <span class="n">sync_module_states</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="n">device_mesh</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device_mesh</span><span class="p">,</span>
-                <span class="n">forward_prefetch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">forward_prefetch</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">fsdp_config</span><span class="o">.</span><span class="n">forward_prefetch</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="n">fsdp_strategy</span> <span class="o">==</span> <span class="s2">&quot;fsdp2&quot;</span><span class="p">:</span>
             <span class="k">assert</span> <span class="p">(</span>
@@ -549,8 +570,6 @@
         <span class="c1"># This is used to import external_lib into the huggingface systems</span>
         <span class="n">import_external_libs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;external_lib&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
 
-        <span class="kn">from</span><span class="w"> </span><span class="nn">omegaconf</span><span class="w"> </span><span class="kn">import</span> <span class="n">OmegaConf</span>
-
         <span class="n">override_model_config</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">to_container</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;override_config&quot;</span><span class="p">,</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">create</span><span class="p">())</span>
         <span class="p">)</span>
@@ -597,7 +616,7 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_offload_optimizer</span><span class="p">:</span>
                 <span class="n">offload_fsdp_optimizer</span><span class="p">(</span><span class="n">optimizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">actor_optimizer</span><span class="p">)</span>
                 <span class="n">log_gpu_memory_usage</span><span class="p">(</span><span class="s2">&quot;After offload actor optimizer during init&quot;</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
-        <span class="c1"># load from checkpoint</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_actor</span><span class="p">:</span>
             <span class="n">OmegaConf</span><span class="o">.</span><span class="n">set_struct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">actor</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
             <span class="k">with</span> <span class="n">open_dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">actor</span><span class="p">):</span>
@@ -634,6 +653,7 @@
                 <span class="n">optimizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">lr_scheduler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">processing_class</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">processor</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">processor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">,</span>
+                <span class="n">checkpoint_config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">ref</span><span class="o">.</span><span class="n">checkpoint</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_actor</span><span class="p">:</span>
@@ -643,7 +663,7 @@
                 <span class="n">optimizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">actor_optimizer</span><span class="p">,</span>
                 <span class="n">lr_scheduler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">actor_lr_scheduler</span><span class="p">,</span>
                 <span class="n">processing_class</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">processor</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">processor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">,</span>
-                <span class="n">checkpoint_contents</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">checkpoint</span><span class="o">.</span><span class="n">contents</span><span class="p">,</span>
+                <span class="n">checkpoint_config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">checkpoint</span><span class="p">,</span>
             <span class="p">)</span></div>
 
 
@@ -731,15 +751,13 @@
     <span class="nd">@register</span><span class="p">(</span><span class="n">dispatch_mode</span><span class="o">=</span><span class="n">Dispatch</span><span class="o">.</span><span class="n">DP_COMPUTE_PROTO</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">update_actor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">DataProto</span><span class="p">):</span>
         <span class="c1"># Support all hardwares</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">get_torch_device</span><span class="p">()</span><span class="o">.</span><span class="n">current_device</span><span class="p">())</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>  <span class="c1"># data will to device with each micro batch on actor.update_policy</span>
 
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_actor</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_offload_param</span><span class="p">:</span>
             <span class="n">load_fsdp_model_to_gpu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actor_module_fsdp</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_offload_optimizer</span><span class="p">:</span>
-            <span class="n">load_fsdp_optimizer</span><span class="p">(</span>
-                <span class="n">optimizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">actor_optimizer</span><span class="p">,</span> <span class="n">device_id</span><span class="o">=</span><span class="n">get_torch_device</span><span class="p">()</span><span class="o">.</span><span class="n">current_device</span><span class="p">()</span>
-            <span class="p">)</span>
+            <span class="n">load_fsdp_optimizer</span><span class="p">(</span><span class="n">optimizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">actor_optimizer</span><span class="p">,</span> <span class="n">device_id</span><span class="o">=</span><span class="n">get_device_id</span><span class="p">())</span>
 
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">ulysses_sharding_manager</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ulysses_sharding_manager</span><span class="o">.</span><span class="n">preprocess_data</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
@@ -797,7 +815,7 @@
 
         <span class="n">is_lora</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">meta_info</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;is_lora&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
         <span class="n">adapter_ctx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">actor_module</span><span class="o">.</span><span class="n">disable_adapter</span><span class="p">()</span> <span class="k">if</span> <span class="n">is_lora</span> <span class="k">else</span> <span class="n">nullcontext</span><span class="p">()</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">get_torch_device</span><span class="p">()</span><span class="o">.</span><span class="n">current_device</span><span class="p">())</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">get_device_id</span><span class="p">())</span>
         <span class="c1"># we should always recompute old_log_probs when it is HybridEngine</span>
         <span class="n">data</span><span class="o">.</span><span class="n">meta_info</span><span class="p">[</span><span class="s2">&quot;micro_batch_size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">rollout</span><span class="o">.</span><span class="n">log_prob_micro_batch_size_per_gpu</span>
         <span class="n">data</span><span class="o">.</span><span class="n">meta_info</span><span class="p">[</span><span class="s2">&quot;max_token_len&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">rollout</span><span class="o">.</span><span class="n">log_prob_max_token_len_per_gpu</span>
@@ -843,7 +861,7 @@
         <span class="c1"># else:</span>
         <span class="c1"># otherwise, the class have a standalone ref model</span>
         <span class="c1"># Support all hardwares</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">get_torch_device</span><span class="p">()</span><span class="o">.</span><span class="n">current_device</span><span class="p">())</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">get_device_id</span><span class="p">())</span>
 
         <span class="n">micro_batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">ref</span><span class="o">.</span><span class="n">log_prob_micro_batch_size_per_gpu</span>
         <span class="n">data</span><span class="o">.</span><span class="n">meta_info</span><span class="p">[</span><span class="s2">&quot;micro_batch_size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">micro_batch_size</span>
@@ -870,6 +888,8 @@
 <a class="viewcode-back" href="../../../../build_api/trinity.trainer.verl.html#trinity.trainer.verl.fsdp_workers.ActorRolloutRefWorker.save_checkpoint">[docs]</a>
     <span class="nd">@register</span><span class="p">(</span><span class="n">dispatch_mode</span><span class="o">=</span><span class="n">Dispatch</span><span class="o">.</span><span class="n">ONE_TO_ALL</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">save_checkpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">local_path</span><span class="p">,</span> <span class="n">hdfs_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">global_step</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_ckpt_to_keep</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">log_with_rank</span>
+
         <span class="c1"># only support save and load ckpt for actor</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_actor</span>
 
@@ -898,7 +918,7 @@
                 <span class="n">peft_config</span><span class="p">[</span><span class="s2">&quot;target_modules&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">peft_config</span><span class="p">[</span><span class="s2">&quot;target_modules&quot;</span><span class="p">])</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">fsdp_version</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actor_module_fsdp</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">actor_module_fsdp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor_module_fsdp</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">actor_module_fsdp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor_module_fsdp</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">get_device_name</span><span class="p">())</span>
                     <span class="n">lora_params</span> <span class="o">=</span> <span class="n">layered_summon_lora_params</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actor_module_fsdp</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">dist</span><span class="o">.</span><span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="n">save_file</span><span class="p">(</span>
@@ -911,12 +931,20 @@
                         <span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                             <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">peft_config</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">dist</span><span class="o">.</span><span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[rank-</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="si">}</span><span class="s2">]: Save LoRA Adapter Error (</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+                <span class="n">log_with_rank</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Save LoRA Adapter Error (</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
+                    <span class="n">rank</span><span class="o">=</span><span class="n">dist</span><span class="o">.</span><span class="n">get_rank</span><span class="p">(),</span>
+                    <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
+                    <span class="n">log_only_rank_0</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
 
             <span class="n">dist</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">dist</span><span class="o">.</span><span class="n">get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[rank-</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="si">}</span><span class="s2">]: Saved LoRA adapter to: </span><span class="si">{</span><span class="n">lora_save_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">log_with_rank</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;[rank-</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="si">}</span><span class="s2">]: Saved LoRA adapter to: </span><span class="si">{</span><span class="n">lora_save_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">rank</span><span class="o">=</span><span class="n">dist</span><span class="o">.</span><span class="n">get_rank</span><span class="p">(),</span>
+                <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
+                <span class="n">log_only_rank_0</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_offload_param</span><span class="p">:</span>
             <span class="n">offload_fsdp_model_to_cpu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actor_module_fsdp</span><span class="p">)</span></div>
@@ -926,6 +954,8 @@
 <a class="viewcode-back" href="../../../../build_api/trinity.trainer.verl.html#trinity.trainer.verl.fsdp_workers.ActorRolloutRefWorker.load_checkpoint">[docs]</a>
     <span class="nd">@register</span><span class="p">(</span><span class="n">dispatch_mode</span><span class="o">=</span><span class="n">Dispatch</span><span class="o">.</span><span class="n">ONE_TO_ALL</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">load_checkpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">local_path</span><span class="p">,</span> <span class="n">hdfs_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">del_local_after_load</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_is_actor</span><span class="si">=}</span><span class="s2"> and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_is_ref</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_actor</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_offload_param</span><span class="p">:</span>
             <span class="n">load_fsdp_model_to_gpu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actor_module_fsdp</span><span class="p">)</span>
 
@@ -946,9 +976,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">clear_optimizer_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Clear actor optimizer state&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_offload_optimizer</span><span class="p">:</span>
-            <span class="n">load_fsdp_optimizer</span><span class="p">(</span>
-                <span class="n">optimizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">actor_optimizer</span><span class="p">,</span> <span class="n">device_id</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">current_device</span><span class="p">()</span>
-            <span class="p">)</span>
+            <span class="n">load_fsdp_optimizer</span><span class="p">(</span><span class="n">optimizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">actor_optimizer</span><span class="p">,</span> <span class="n">device_id</span><span class="o">=</span><span class="n">get_device_id</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actor_optimizer</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actor_optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_offload_optimizer</span><span class="p">:</span>
@@ -968,7 +996,8 @@
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">torch</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">is_initialized</span><span class="p">():</span>
             <span class="n">torch</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">init_process_group</span><span class="p">(</span>
-                <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;nccl&quot;</span> <span class="k">if</span> <span class="n">is_cuda_available</span> <span class="k">else</span> <span class="s2">&quot;hccl&quot;</span><span class="p">,</span>
+                <span class="n">backend</span><span class="o">=</span><span class="n">get_nccl_backend</span><span class="p">(),</span>
+                <span class="n">init_method</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;DIST_INIT_METHOD&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
                 <span class="n">timeout</span><span class="o">=</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_timeout</span><span class="p">),</span>
             <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
@@ -1021,11 +1050,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_is_lora</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;lora_rank&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_build_critic_model_optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_build_critic_model_optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>  <span class="c1"># noqa: C901</span>
         <span class="c1"># the following line is necessary</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">optim</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">torch.distributed.fsdp</span><span class="w"> </span><span class="kn">import</span> <span class="n">MixedPrecision</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">print_model_size</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_valuehead_model</span><span class="p">,</span> <span class="n">print_model_size</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.torch_dtypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">PrecisionType</span>
 
         <span class="n">use_shm</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;use_shm&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
@@ -1040,6 +1069,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">processor</span> <span class="o">=</span> <span class="n">hf_processor</span><span class="p">(</span>
             <span class="n">tokenizer_path</span><span class="p">,</span> <span class="n">trust_remote_code</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;trust_remote_code&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
         <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;custom_chat_template&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">processor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">processor</span><span class="o">.</span><span class="n">chat_template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">custom_chat_template</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">chat_template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">custom_chat_template</span>
 
         <span class="kn">from</span><span class="w"> </span><span class="nn">omegaconf</span><span class="w"> </span><span class="kn">import</span> <span class="n">OmegaConf</span>
 
@@ -1058,7 +1093,7 @@
         <span class="n">torch_dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">fsdp_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;model_dtype&quot;</span><span class="p">,</span> <span class="s2">&quot;fp32&quot;</span><span class="p">)</span>
         <span class="n">torch_dtype</span> <span class="o">=</span> <span class="n">PrecisionType</span><span class="o">.</span><span class="n">to_dtype</span><span class="p">(</span><span class="n">torch_dtype</span><span class="p">)</span>
 
-        <span class="kn">from</span><span class="w"> </span><span class="nn">transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoConfig</span><span class="p">,</span> <span class="n">AutoModelForTokenClassification</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoConfig</span>
 
         <span class="n">critic_model_config</span> <span class="o">=</span> <span class="n">AutoConfig</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span>
             <span class="n">local_path</span><span class="p">,</span>
@@ -1078,11 +1113,13 @@
             <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
             <span class="n">critic_model_config</span><span class="o">.</span><span class="n">classifier_dropout</span> <span class="o">=</span> <span class="mf">0.0</span>
             <span class="n">critic_model_config</span><span class="o">.</span><span class="n">hidden_dropout</span> <span class="o">=</span> <span class="s2">&quot;0&quot;</span>
-            <span class="n">critic_module</span> <span class="o">=</span> <span class="n">AutoModelForTokenClassification</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span>
-                <span class="n">pretrained_model_name_or_path</span><span class="o">=</span><span class="n">local_path</span><span class="p">,</span>
-                <span class="n">torch_dtype</span><span class="o">=</span><span class="n">torch_dtype</span><span class="p">,</span>
-                <span class="n">config</span><span class="o">=</span><span class="n">critic_model_config</span><span class="p">,</span>
-                <span class="n">trust_remote_code</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;trust_remote_code&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+            <span class="n">critic_model_config</span><span class="o">.</span><span class="n">summary_dropout_prob</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+            <span class="n">critic_module</span> <span class="o">=</span> <span class="n">load_valuehead_model</span><span class="p">(</span>
+                <span class="n">local_path</span><span class="p">,</span>
+                <span class="n">torch_dtype</span><span class="p">,</span>
+                <span class="n">critic_model_config</span><span class="p">,</span>
+                <span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;trust_remote_code&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
             <span class="p">)</span>
 
             <span class="n">use_remove_padding</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;use_remove_padding&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
@@ -1156,11 +1193,11 @@
                 <span class="n">param_init_fn</span><span class="o">=</span><span class="n">init_fn</span><span class="p">,</span>
                 <span class="n">use_orig_params</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                 <span class="n">auto_wrap_policy</span><span class="o">=</span><span class="n">auto_wrap_policy</span><span class="p">,</span>
-                <span class="n">device_id</span><span class="o">=</span><span class="n">get_torch_device</span><span class="p">()</span><span class="o">.</span><span class="n">current_device</span><span class="p">(),</span>
+                <span class="n">device_id</span><span class="o">=</span><span class="n">get_device_id</span><span class="p">(),</span>
                 <span class="n">sharding_strategy</span><span class="o">=</span><span class="n">sharding_strategy</span><span class="p">,</span>
                 <span class="n">mixed_precision</span><span class="o">=</span><span class="n">mixed_precision</span><span class="p">,</span>
                 <span class="n">sync_module_states</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">forward_prefetch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">forward_prefetch</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">fsdp_config</span><span class="o">.</span><span class="n">forward_prefetch</span><span class="p">,</span>
                 <span class="n">device_mesh</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device_mesh</span><span class="p">,</span>
                 <span class="n">cpu_offload</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="p">)</span>
@@ -1268,7 +1305,7 @@
             <span class="n">optimizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">critic_optimizer</span><span class="p">,</span>
             <span class="n">lr_scheduler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">critic_lr_scheduler</span><span class="p">,</span>
             <span class="n">processing_class</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">processor</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">processor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">,</span>
-            <span class="n">checkpoint_contents</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">checkpoint</span><span class="o">.</span><span class="n">contents</span><span class="p">,</span>
+            <span class="n">checkpoint_config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">checkpoint</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
@@ -1277,7 +1314,7 @@
     <span class="nd">@register</span><span class="p">(</span><span class="n">dispatch_mode</span><span class="o">=</span><span class="n">Dispatch</span><span class="o">.</span><span class="n">DP_COMPUTE_PROTO</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">compute_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">DataProto</span><span class="p">):</span>
         <span class="c1"># Support all hardwares</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">get_torch_device</span><span class="p">()</span><span class="o">.</span><span class="n">current_device</span><span class="p">())</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">get_device_id</span><span class="p">())</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_offload_param</span><span class="p">:</span>
             <span class="n">load_fsdp_model_to_gpu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">critic_module</span><span class="p">)</span>
@@ -1303,13 +1340,11 @@
     <span class="nd">@register</span><span class="p">(</span><span class="n">dispatch_mode</span><span class="o">=</span><span class="n">Dispatch</span><span class="o">.</span><span class="n">DP_COMPUTE_PROTO</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">update_critic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">DataProto</span><span class="p">):</span>
         <span class="c1"># Support all hardwares</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">get_torch_device</span><span class="p">()</span><span class="o">.</span><span class="n">current_device</span><span class="p">())</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">get_device_id</span><span class="p">())</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_offload_param</span><span class="p">:</span>
             <span class="n">load_fsdp_model_to_gpu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">critic_module</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_offload_optimizer</span><span class="p">:</span>
-            <span class="n">load_fsdp_optimizer</span><span class="p">(</span>
-                <span class="n">optimizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">critic_optimizer</span><span class="p">,</span> <span class="n">device_id</span><span class="o">=</span><span class="n">get_torch_device</span><span class="p">()</span><span class="o">.</span><span class="n">current_device</span><span class="p">()</span>
-            <span class="p">)</span>
+            <span class="n">load_fsdp_optimizer</span><span class="p">(</span><span class="n">optimizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">critic_optimizer</span><span class="p">,</span> <span class="n">device_id</span><span class="o">=</span><span class="n">get_device_id</span><span class="p">())</span>
 
         <span class="c1"># perform forward computation</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">ulysses_sharding_manager</span><span class="p">:</span>
@@ -1391,9 +1426,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">clear_optimizer_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Clear critic optimizer state&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_offload_optimizer</span><span class="p">:</span>
-            <span class="n">load_fsdp_optimizer</span><span class="p">(</span>
-                <span class="n">optimizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">critic_optimizer</span><span class="p">,</span> <span class="n">device_id</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">current_device</span><span class="p">()</span>
-            <span class="p">)</span>
+            <span class="n">load_fsdp_optimizer</span><span class="p">(</span><span class="n">optimizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">critic_optimizer</span><span class="p">,</span> <span class="n">device_id</span><span class="o">=</span><span class="n">get_device_id</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">critic_optimizer</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">critic_optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_offload_optimizer</span><span class="p">:</span>

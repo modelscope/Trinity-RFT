@@ -111,12 +111,15 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">contextmanager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch.distributed</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dist</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">codetiming</span><span class="w"> </span><span class="kn">import</span> <span class="n">Timer</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.device</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_torch_device</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.logger.aggregate_logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">DecoratorLoggerBase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.device</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_device_id</span><span class="p">,</span> <span class="n">get_torch_device</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">DecoratorLoggerBase</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_get_current_mem_info</span><span class="p">(</span><span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;GB&quot;</span><span class="p">,</span> <span class="n">precision</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
@@ -186,14 +189,93 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">logging_function</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">output</span>
 
+
 <span class="k">def</span><span class="w"> </span><span class="nf">log_print</span><span class="p">(</span><span class="n">ctn</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
-    <span class="n">current_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">)</span>
+    <span class="n">current_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">)</span>
 
     <span class="n">frame</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">currentframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_back</span>
     <span class="n">function_name</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
     <span class="n">line_number</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_lineno</span>
-    <span class="n">file_name</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">line_number</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">function_name</span><span class="si">}</span><span class="s2">]: </span><span class="si">{</span><span class="n">ctn</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">file_name</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">current_time</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">line_number</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">function_name</span><span class="si">}</span><span class="s2">]: </span><span class="si">{</span><span class="n">ctn</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_timer</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">timing_raw</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Inner function that handles the core timing logic.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        name (str): The name/identifier for this timing measurement.</span>
+<span class="sd">        timing_raw (Dict[str, float]): Dictionary to store timing information.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="k">as</span> <span class="n">timer</span><span class="p">:</span>
+        <span class="k">yield</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">timing_raw</span><span class="p">:</span>
+        <span class="n">timing_raw</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">timing_raw</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">+=</span> <span class="n">timer</span><span class="o">.</span><span class="n">last</span>
+
+
+<span class="nd">@contextmanager</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">simple_timer</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">timing_raw</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Context manager for basic timing without NVTX markers.</span>
+
+<span class="sd">    This utility function measures the execution time of code within its context</span>
+<span class="sd">    and accumulates the timing information in the provided dictionary.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        name (str): The name/identifier for this timing measurement.</span>
+<span class="sd">        timing_raw (Dict[str, float]): Dictionary to store timing information.</span>
+
+<span class="sd">    Yields:</span>
+<span class="sd">        None: This is a context manager that yields control back to the code block.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">yield from</span> <span class="n">_timer</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">timing_raw</span><span class="p">)</span>
+
+
+<span class="nd">@contextmanager</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">marked_timer</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">timing_raw</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">domain</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">category</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Context manager for timing with platform markers.</span>
+
+<span class="sd">    This utility function measures the execution time of code within its context,</span>
+<span class="sd">    accumulates the timing information, and adds platform markers for profiling.</span>
+<span class="sd">    This function is a default implementation when hardware profiler is not available.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        name (str): The name/identifier for this timing measurement.</span>
+<span class="sd">        timing_raw (Dict[str, float]): Dictionary to store timing information.</span>
+<span class="sd">        color (Optional[str]): Color for the marker. Defaults to None.</span>
+<span class="sd">        domain (Optional[str]): Domain for the marker. Defaults to None.</span>
+<span class="sd">        category (Optional[str]): Category for the marker. Defaults to None.</span>
+
+<span class="sd">    Yields:</span>
+<span class="sd">        None: This is a context manager that yields control back to the code block.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">yield from</span> <span class="n">_timer</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">timing_raw</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">reduce_timing</span><span class="p">(</span><span class="n">timing_raw</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reduce timing information across all processes.</span>
+
+<span class="sd">    This function uses distributed communication to gather and sum the timing</span>
+<span class="sd">    information from all processes in a distributed environment.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        timing_raw (Dict[str, float]): Dictionary containing timing information.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict[str, float]: Reduced timing information.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">dist</span><span class="o">.</span><span class="n">is_initialized</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">timing_raw</span>
+
+    <span class="n">key_list</span><span class="p">,</span> <span class="n">timing_list</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">timing_raw</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="n">key_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="n">timing_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">timing_raw</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+    <span class="n">timing_list</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">timing_list</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">get_device_id</span><span class="p">())</span>
+    <span class="n">torch</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">all_reduce</span><span class="p">(</span><span class="n">timing_list</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">ReduceOp</span><span class="o">.</span><span class="n">AVG</span><span class="p">)</span>
+    <span class="n">timing_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">tensor</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="k">for</span> <span class="n">tensor</span> <span class="ow">in</span> <span class="n">timing_list</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)]</span>
+    <span class="n">timing_generate</span> <span class="o">=</span> <span class="p">{</span><span class="n">key_list</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> <span class="n">timing_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">key_list</span><span class="p">))}</span>
+    <span class="k">return</span> <span class="n">timing_generate</span>
 </pre></div>
 
            </div>

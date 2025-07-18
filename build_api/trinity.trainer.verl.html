@@ -115,7 +115,7 @@
 <section id="module-trinity.trainer.verl.dp_actor">
 <span id="trinity-trainer-verl-dp-actor-module"></span><h2>trinity.trainer.verl.dp_actor module<a class="headerlink" href="#module-trinity.trainer.verl.dp_actor" title="Link to this heading"></a></h2>
 <p>Single Process Actor.
-Modified from <a class="reference external" href="https://github.com/volcengine/verl/blob/0758489422e8d41a89e6c36d4c477714520f0dcc/verl/workers/actor/dp_actor.py">https://github.com/volcengine/verl/blob/0758489422e8d41a89e6c36d4c477714520f0dcc/verl/workers/actor/dp_actor.py</a></p>
+Modified from <a class="reference external" href="https://github.com/volcengine/verl/blob/v0.4.1/verl/workers/actor/dp_actor.py">https://github.com/volcengine/verl/blob/v0.4.1/verl/workers/actor/dp_actor.py</a></p>
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.trainer.verl.dp_actor.DataParallelPPOActor">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.trainer.verl.dp_actor.</span></span><span class="sig-name descname"><span class="pre">DataParallelPPOActor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">actor_module</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">actor_optimizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optimizer</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/trainer/verl/dp_actor.html#DataParallelPPOActor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.trainer.verl.dp_actor.DataParallelPPOActor" title="Link to this definition"></a></dt>
@@ -130,24 +130,6 @@ Modified from <a class="reference external" href="https://github.com/volcengine/
 <dt class="sig sig-object py" id="trinity.trainer.verl.dp_actor.DataParallelPPOActor.set_algorithm">
 <span class="sig-name descname"><span class="pre">set_algorithm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.config.AlgorithmConfig" title="trinity.common.config.AlgorithmConfig"><span class="pre">AlgorithmConfig</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/trainer/verl/dp_actor.html#DataParallelPPOActor.set_algorithm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.trainer.verl.dp_actor.DataParallelPPOActor.set_algorithm" title="Link to this definition"></a></dt>
 <dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.trainer.verl.dp_actor.DataParallelPPOActor.compute_log_prob">
-<span class="sig-name descname"><span class="pre">compute_log_prob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.trainer.verl.dp_actor.DataParallelPPOActor.compute_log_prob" title="Link to this definition"></a></dt>
-<dd><p>Compute logits given a batch of data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<em>DataProto</em>) – a batch of data represented by DataProto. It must contain key <code class="docutils literal notranslate"><span class="pre">`input_ids`</span></code>,
-<code class="docutils literal notranslate"><span class="pre">`attention_mask`</span></code> and <code class="docutils literal notranslate"><span class="pre">`position_ids`</span></code>.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>a DataProto containing the key <code class="docutils literal notranslate"><span class="pre">`log_probs`</span></code></p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>DataProto</p>
-</dd>
-</dl>
-</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.trainer.verl.dp_actor.DataParallelPPOActor.update_policy">
@@ -174,7 +156,7 @@ such as <code class="docutils literal notranslate"><span class="pre">`loss`</spa
 <section id="module-trinity.trainer.verl.fsdp_workers">
 <span id="trinity-trainer-verl-fsdp-workers-module"></span><h2>trinity.trainer.verl.fsdp_workers module<a class="headerlink" href="#module-trinity.trainer.verl.fsdp_workers" title="Link to this heading"></a></h2>
 <p>The main entry point to run the PPO algorithm.
-Modified from <a class="reference external" href="https://github.com/volcengine/verl/blob/0758489422e8d41a89e6c36d4c477714520f0dcc/verl/workers/fsdp_workers.py">https://github.com/volcengine/verl/blob/0758489422e8d41a89e6c36d4c477714520f0dcc/verl/workers/fsdp_workers.py</a></p>
+Modified from <a class="reference external" href="https://github.com/volcengine/verl/blob/v0.4.1/verl/workers/fsdp_workers.py">https://github.com/volcengine/verl/blob/v0.4.1/verl/workers/fsdp_workers.py</a></p>
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.trainer.verl.fsdp_workers.ActorRolloutRefWorker">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.trainer.verl.fsdp_workers.</span></span><span class="sig-name descname"><span class="pre">ActorRolloutRefWorker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/trainer/verl/fsdp_workers.html#ActorRolloutRefWorker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.trainer.verl.fsdp_workers.ActorRolloutRefWorker" title="Link to this definition"></a></dt>

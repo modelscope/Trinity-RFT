@@ -713,6 +713,8 @@
       <ul>
         <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Critic.checkpoint">(trinity.common.verl_config.Critic attribute)</a>
 </li>
+        <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Ref.checkpoint">(trinity.common.verl_config.Ref attribute)</a>
+</li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -756,12 +758,8 @@
 </li>
       <li><a href="build_api/trinity.utils.html#trinity.utils.dlc_utils.ClusterStatus">ClusterStatus (class in trinity.utils.dlc_utils)</a>
 </li>
-      <li><a href="build_api/trinity.trainer.verl.html#trinity.trainer.verl.dp_actor.DataParallelPPOActor.compute_log_prob">compute_log_prob() (trinity.trainer.verl.dp_actor.DataParallelPPOActor method)</a>
-
-      <ul>
-        <li><a href="build_api/trinity.trainer.verl.html#trinity.trainer.verl.fsdp_workers.ActorRolloutRefWorker.compute_log_prob">(trinity.trainer.verl.fsdp_workers.ActorRolloutRefWorker method)</a>
+      <li><a href="build_api/trinity.trainer.verl.html#trinity.trainer.verl.fsdp_workers.ActorRolloutRefWorker.compute_log_prob">compute_log_prob() (trinity.trainer.verl.fsdp_workers.ActorRolloutRefWorker method)</a>
 </li>
-      </ul></li>
       <li><a href="build_api/trinity.common.rewards.html#trinity.common.rewards.dapo_reward.MathDAPORewardFn.compute_overlong_penalty">compute_overlong_penalty() (trinity.common.rewards.dapo_reward.MathDAPORewardFn method)</a>
 
       <ul>
@@ -790,8 +788,6 @@
         <li><a href="build_api/trinity.buffer.schema.html#trinity.buffer.schema.sql_schema.SFTDataModel.consumed">(trinity.buffer.schema.sql_schema.SFTDataModel attribute)</a>
 </li>
       </ul></li>
-      <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Checkpoint.contents">contents (trinity.common.verl_config.Checkpoint attribute)</a>
-</li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.Config.continue_from_checkpoint">continue_from_checkpoint (trinity.common.config.Config attribute)</a>
 </li>
       <li><a href="build_api/trinity.common.models.html#trinity.common.models.model.convert_api_output_to_experience">convert_api_output_to_experience() (in module trinity.common.models.model)</a>
@@ -832,6 +828,12 @@
 </li>
       <li><a href="build_api/trinity.trainer.verl.html#trinity.trainer.verl.fsdp_workers.CriticWorker">CriticWorker (class in trinity.trainer.verl.fsdp_workers)</a>
 </li>
+      <li><a href="build_api/trinity.common.html#trinity.common.config.ModelConfig.custom_chat_template">custom_chat_template (trinity.common.config.ModelConfig attribute)</a>
+
+      <ul>
+        <li><a href="build_api/trinity.common.html#trinity.common.verl_config.ActorModel.custom_chat_template">(trinity.common.verl_config.ActorModel attribute)</a>
+</li>
+      </ul></li>
       <li><a href="build_api/trinity.common.html#trinity.common.verl_config.veRLConfig.custom_reward_function">custom_reward_function (trinity.common.verl_config.veRLConfig attribute)</a>
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.verl_config.CustomRewardFunction">CustomRewardFunction (class in trinity.common.verl_config)</a>
@@ -1086,8 +1088,20 @@
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.InferenceModelConfig.engine_type">engine_type (trinity.common.config.InferenceModelConfig attribute)</a>
 </li>
+      <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Actor.entropy_checkpointing">entropy_checkpointing (trinity.common.verl_config.Actor attribute)</a>
+
+      <ul>
+        <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Ref.entropy_checkpointing">(trinity.common.verl_config.Ref attribute)</a>
+</li>
+      </ul></li>
       <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Actor.entropy_coeff">entropy_coeff (trinity.common.verl_config.Actor attribute)</a>
 </li>
+      <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Actor.entropy_from_logits_with_chunking">entropy_from_logits_with_chunking (trinity.common.verl_config.Actor attribute)</a>
+
+      <ul>
+        <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Ref.entropy_from_logits_with_chunking">(trinity.common.verl_config.Ref attribute)</a>
+</li>
+      </ul></li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.AlgorithmConfig.entropy_loss_fn">entropy_loss_fn (trinity.common.config.AlgorithmConfig attribute)</a>
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.AlgorithmConfig.entropy_loss_fn_args">entropy_loss_fn_args (trinity.common.config.AlgorithmConfig attribute)</a>
@@ -1112,12 +1126,12 @@
       </ul></li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.ExplorerConfig.eval_interval">eval_interval (trinity.common.config.ExplorerConfig attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.html#trinity.common.config.ExplorerConfig.eval_on_startup">eval_on_startup (trinity.common.config.ExplorerConfig attribute)</a>
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.ExplorerInput.eval_tasksets">eval_tasksets (trinity.common.config.ExplorerInput attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.utils.html#trinity.utils.eval_utils.evaluate_equation">evaluate_equation() (in module trinity.utils.eval_utils)</a>
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.experience.Experience">Experience (class in trinity.common.experience)</a>
@@ -1228,14 +1242,14 @@
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.workflow.SimpleWorkflow.format_messages">(trinity.common.workflows.workflow.SimpleWorkflow method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.customized_math_workflows.MathBoxedWorkflow.format_prompt">format_prompt() (trinity.common.workflows.customized_math_workflows.MathBoxedWorkflow method)</a>
 
       <ul>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.MathBoxedWorkflow.format_prompt">(trinity.common.workflows.MathBoxedWorkflow method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.html#trinity.common.config.FormatConfig">FormatConfig (class in trinity.common.config)</a>
 </li>
       <li><a href="build_api/trinity.common.rewards.html#trinity.common.rewards.FormatReward">FormatReward (class in trinity.common.rewards)</a>
@@ -1253,6 +1267,8 @@
       <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Critic.forward_micro_batch_size">forward_micro_batch_size (trinity.common.verl_config.Critic attribute)</a>
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Critic.forward_micro_batch_size_per_gpu">forward_micro_batch_size_per_gpu (trinity.common.verl_config.Critic attribute)</a>
+</li>
+      <li><a href="build_api/trinity.common.html#trinity.common.verl_config.FSDPConfig.forward_prefetch">forward_prefetch (trinity.common.verl_config.FSDPConfig attribute)</a>
 </li>
       <li><a href="build_api/trinity.buffer.schema.html#trinity.buffer.schema.sql_schema.ExperienceModel.from_experience">from_experience() (trinity.buffer.schema.sql_schema.ExperienceModel class method)</a>
 </li>
@@ -1592,6 +1608,8 @@
         <li><a href="build_api/trinity.common.html#trinity.common.verl_config.load_config">(in module trinity.common.verl_config)</a>
 </li>
       </ul></li>
+      <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Checkpoint.load_contents">load_contents (trinity.common.verl_config.Checkpoint attribute)</a>
+</li>
       <li><a href="build_api/trinity.manager.html#trinity.manager.manager.CacheManager.load_explorer">load_explorer() (trinity.manager.manager.CacheManager method)</a>
 </li>
       <li><a href="build_api/trinity.utils.html#trinity.utils.plugin_loader.load_from_file">load_from_file() (in module trinity.utils.plugin_loader)</a>
@@ -2697,6 +2715,8 @@
         <li><a href="build_api/trinity.trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.save_checkpoint">(trinity.trainer.verl_trainer.VerlPPOTrainerWrapper method)</a>
 </li>
       </ul></li>
+      <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Checkpoint.save_contents">save_contents (trinity.common.verl_config.Checkpoint attribute)</a>
+</li>
       <li><a href="build_api/trinity.manager.html#trinity.manager.manager.CacheManager.save_explorer">save_explorer() (trinity.manager.manager.CacheManager method)</a>
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Trainer.save_freq">save_freq (trinity.common.verl_config.Trainer attribute)</a>
@@ -2770,6 +2790,10 @@
 </li>
       </ul></li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_actor_checkpoint">set_actor_checkpoint() (in module trinity.manager.config_registry.trainer_config_manager)</a>
+</li>
+      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_actor_entropy_checkpointing">set_actor_entropy_checkpointing() (in module trinity.manager.config_registry.trainer_config_manager)</a>
+</li>
+      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_actor_entropy_from_logits_with_chunking">set_actor_entropy_from_logits_with_chunking() (in module trinity.manager.config_registry.trainer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_actor_grad_clip">set_actor_grad_clip() (in module trinity.manager.config_registry.trainer_config_manager)</a>
 </li>
@@ -2873,6 +2897,8 @@
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.set_explorer_max_retry_times">set_explorer_max_retry_times() (in module trinity.manager.config_registry.explorer_config_manager)</a>
 </li>
+      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_forward_prefetch">set_forward_prefetch() (in module trinity.manager.config_registry.trainer_config_manager)</a>
+</li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_gamma_in_advantage_fn">set_gamma_in_advantage_fn() (in module trinity.manager.config_registry.algorithm_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.set_gpu_memory_utilization">set_gpu_memory_utilization() (in module trinity.manager.config_registry.explorer_config_manager)</a>
@@ -2907,12 +2933,12 @@
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.set_max_response_tokens">set_max_response_tokens() (in module trinity.manager.config_registry.model_config_manager)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.set_max_retry_interval">set_max_retry_interval() (in module trinity.manager.config_registry.buffer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.set_max_timeout">set_max_timeout() (in module trinity.manager.config_registry.explorer_config_manager)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.set_model_path">set_model_path() (in module trinity.manager.config_registry.model_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.set_monitor_type">set_monitor_type() (in module trinity.manager.config_registry.model_config_manager)</a>

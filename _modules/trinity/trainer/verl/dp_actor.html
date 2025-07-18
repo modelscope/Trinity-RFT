@@ -111,10 +111,9 @@
 <span class="c1"># limitations under the License.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Single Process Actor.</span>
-<span class="sd">Modified from https://github.com/volcengine/verl/blob/0758489422e8d41a89e6c36d4c477714520f0dcc/verl/workers/actor/dp_actor.py</span>
+<span class="sd">Modified from https://github.com/volcengine/verl/blob/v0.4.1/verl/workers/actor/dp_actor.py</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
@@ -122,9 +121,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">nn</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">verl</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataProto</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.debug</span><span class="w"> </span><span class="kn">import</span> <span class="n">GPUMemoryLogger</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.device</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_torch_device</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.device</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_device_id</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.py_functional</span><span class="w"> </span><span class="kn">import</span> <span class="n">append_to_dict</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.seqlen_balancing</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_reverse_idx</span><span class="p">,</span> <span class="n">rearrange_micro_batches</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.seqlen_balancing</span><span class="w"> </span><span class="kn">import</span> <span class="n">rearrange_micro_batches</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">verl.workers.actor.dp_actor</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataParallelPPOActor</span> <span class="k">as</span> <span class="n">DPActor</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm</span><span class="w"> </span><span class="kn">import</span> <span class="n">ENTROPY_LOSS_FN</span><span class="p">,</span> <span class="n">KL_FN</span><span class="p">,</span> <span class="n">POLICY_LOSS_FN</span>
@@ -168,81 +167,7 @@
 
 
     <span class="nd">@GPUMemoryLogger</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="s2">&quot;dp actor&quot;</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">compute_log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">DataProto</span><span class="p">,</span> <span class="n">calculate_entropy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the log probability of the responses given input_ids, attention_mask and position_ids</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            data (DataProto): a DataProto containing keys</span>
-
-<span class="sd">                ``input_ids``: tensor of shape [batch_size, sequence_length]. torch.int64. Note that input_ids is the</span>
-<span class="sd">                concatenation of prompt and response. Note that ``sequence_length = prompt_length + response_length``.</span>
-
-<span class="sd">                ``attention_mask``: tensor of shape [batch_size, sequence_length]. torch.int64.</span>
-
-<span class="sd">                ``position_ids``: tensor of shape [batch_size, sequence_length]. torch.int64.</span>
-
-<span class="sd">                ``responses``:  tensor of shape [batch_size, response_length]. torch.int64.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            torch.Tensor: the log_prob tensor</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># set to eval</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">actor_module</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
-
-        <span class="n">micro_batch_size</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">meta_info</span><span class="p">[</span><span class="s2">&quot;micro_batch_size&quot;</span><span class="p">]</span>
-        <span class="n">temperature</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">meta_info</span><span class="p">[</span>
-            <span class="s2">&quot;temperature&quot;</span>
-        <span class="p">]</span>  <span class="c1"># temperature must be in the data.meta_info to avoid silent error</span>
-        <span class="n">use_dynamic_bsz</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">meta_info</span><span class="p">[</span><span class="s2">&quot;use_dynamic_bsz&quot;</span><span class="p">]</span>
-
-        <span class="n">select_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;responses&quot;</span><span class="p">,</span> <span class="s2">&quot;input_ids&quot;</span><span class="p">,</span> <span class="s2">&quot;attention_mask&quot;</span><span class="p">,</span> <span class="s2">&quot;position_ids&quot;</span><span class="p">]</span>
-        <span class="n">batch</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">batch_keys</span><span class="o">=</span><span class="n">select_keys</span><span class="p">)</span><span class="o">.</span><span class="n">batch</span>
-        <span class="n">has_multi_modal_inputs</span> <span class="o">=</span> <span class="s2">&quot;multi_modal_inputs&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">non_tensor_batch</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="n">has_multi_modal_inputs</span><span class="p">:</span>
-            <span class="n">num_micro_batches</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="o">.</span><span class="n">batch_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="n">micro_batch_size</span>
-            <span class="n">non_tensor_select_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;multi_modal_inputs&quot;</span><span class="p">]</span>
-            <span class="n">micro_batches</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">select_keys</span><span class="p">,</span> <span class="n">non_tensor_select_keys</span><span class="p">)</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span>
-                <span class="n">num_micro_batches</span>
-            <span class="p">)</span>
-        <span class="k">elif</span> <span class="n">use_dynamic_bsz</span><span class="p">:</span>
-            <span class="c1"># split using dynamic bsz</span>
-            <span class="n">max_token_len</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">meta_info</span><span class="p">[</span><span class="s2">&quot;max_token_len&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ulysses_sequence_parallel_size</span>
-            <span class="n">micro_batches</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="n">rearrange_micro_batches</span><span class="p">(</span>
-                <span class="n">batch</span><span class="o">=</span><span class="n">batch</span><span class="p">,</span> <span class="n">max_token_len</span><span class="o">=</span><span class="n">max_token_len</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">micro_batches</span> <span class="o">=</span> <span class="n">batch</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">micro_batch_size</span><span class="p">)</span>
-
-        <span class="n">log_probs_lst</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">entropy_lst</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">micro_batch</span> <span class="ow">in</span> <span class="n">micro_batches</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">micro_batch</span><span class="p">,</span> <span class="n">DataProto</span><span class="p">):</span>
-                <span class="n">micro_batch</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">micro_batch</span><span class="o">.</span><span class="n">batch</span><span class="p">,</span> <span class="o">**</span><span class="n">micro_batch</span><span class="o">.</span><span class="n">non_tensor_batch</span><span class="p">}</span>
-            <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
-                <span class="n">entropy</span><span class="p">,</span> <span class="n">log_probs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_micro_batch</span><span class="p">(</span>
-                    <span class="n">micro_batch</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span> <span class="n">calculate_entropy</span><span class="o">=</span><span class="n">calculate_entropy</span>
-                <span class="p">)</span>
-            <span class="n">log_probs_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">log_probs</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">calculate_entropy</span><span class="p">:</span>
-                <span class="n">entropy_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entropy</span><span class="p">)</span>
-
-        <span class="n">log_probs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">log_probs_lst</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="n">entropys</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">calculate_entropy</span><span class="p">:</span>
-            <span class="n">entropys</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">entropy_lst</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">use_dynamic_bsz</span><span class="p">:</span>
-            <span class="n">indices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span><span class="n">indices</span><span class="p">))</span>
-            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">==</span> <span class="n">log_probs</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span><span class="si">}</span><span class="s2"> vs. </span><span class="si">{</span><span class="n">log_probs</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="n">revert_indices</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">get_reverse_idx</span><span class="p">(</span><span class="n">indices</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span>
-            <span class="n">log_probs</span> <span class="o">=</span> <span class="n">log_probs</span><span class="p">[</span><span class="n">revert_indices</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">calculate_entropy</span><span class="p">:</span>
-                <span class="n">entropys</span> <span class="o">=</span> <span class="n">entropys</span><span class="p">[</span><span class="n">revert_indices</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
-
-        <span class="k">return</span> <span class="n">log_probs</span><span class="p">,</span> <span class="n">entropys</span>
-
-    <span class="nd">@GPUMemoryLogger</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="s2">&quot;dp actor&quot;</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">update_policy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">DataProto</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_policy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">DataProto</span><span class="p">):</span>  <span class="c1"># noqa: C901</span>
         <span class="c1"># make sure we are in training mode</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actor_module</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
 
@@ -278,15 +203,43 @@
                 <span class="c1"># split batch into micro_batches</span>
                 <span class="n">mini_batch</span> <span class="o">=</span> <span class="n">data</span>
                 <span class="k">if</span> <span class="n">has_multi_modal_inputs</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">gradient_accumulation</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">ppo_mini_batch_size</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">ppo_micro_batch_size_per_gpu</span>
-                    <span class="p">)</span>
-                    <span class="n">num_micro_batches</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="n">mini_batch</span><span class="o">.</span><span class="n">batch</span><span class="o">.</span><span class="n">batch_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">ppo_micro_batch_size_per_gpu</span>
-                    <span class="p">)</span>
-                    <span class="n">micro_batches</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">select_keys</span><span class="p">,</span> <span class="n">non_tensor_select_keys</span><span class="p">)</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span>
-                        <span class="n">num_micro_batches</span>
-                    <span class="p">)</span>
+                    <span class="n">micro_batches</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">use_dynamic_bsz</span><span class="p">:</span>
+                        <span class="n">all_multi_modal_inputs_list</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">non_tensor_batch</span><span class="p">[</span><span class="s2">&quot;multi_modal_inputs&quot;</span><span class="p">]</span>
+                        <span class="n">batch_tensordict_for_rearrange</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">batch</span>
+
+                        <span class="n">max_token_len</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">ppo_max_token_len_per_gpu</span>
+                            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ulysses_sequence_parallel_size</span>
+                        <span class="p">)</span>
+                        <span class="p">(</span>
+                            <span class="n">rearranged_text_micro_batches_tds</span><span class="p">,</span>
+                            <span class="n">textual_indices</span><span class="p">,</span>
+                        <span class="p">)</span> <span class="o">=</span> <span class="n">rearrange_micro_batches</span><span class="p">(</span>
+                            <span class="n">batch</span><span class="o">=</span><span class="n">batch_tensordict_for_rearrange</span><span class="p">,</span> <span class="n">max_token_len</span><span class="o">=</span><span class="n">max_token_len</span>
+                        <span class="p">)</span>
+
+                        <span class="k">for</span> <span class="n">current_original_indices</span><span class="p">,</span> <span class="n">text_mb_td</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                            <span class="n">textual_indices</span><span class="p">,</span> <span class="n">rearranged_text_micro_batches_tds</span>
+                        <span class="p">):</span>
+                            <span class="n">current_mm_inputs_list</span> <span class="o">=</span> <span class="p">[</span>
+                                <span class="n">all_multi_modal_inputs_list</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">current_original_indices</span>
+                            <span class="p">]</span>
+                            <span class="n">mb_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">text_mb_td</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+                            <span class="n">mb_dict</span><span class="p">[</span><span class="s2">&quot;multi_modal_inputs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_mm_inputs_list</span>
+                            <span class="n">micro_batches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mb_dict</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">gradient_accumulation</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">ppo_mini_batch_size</span>
+                            <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">ppo_micro_batch_size_per_gpu</span>
+                        <span class="p">)</span>
+                        <span class="n">num_micro_batches</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="n">mini_batch</span><span class="o">.</span><span class="n">batch</span><span class="o">.</span><span class="n">batch_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                            <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">ppo_micro_batch_size_per_gpu</span>
+                        <span class="p">)</span>
+                        <span class="n">micro_batches</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">select_keys</span><span class="p">,</span> <span class="n">non_tensor_select_keys</span><span class="p">)</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span>
+                            <span class="n">num_micro_batches</span>
+                        <span class="p">)</span>
                 <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">use_dynamic_bsz</span><span class="p">:</span>
                     <span class="n">max_token_len</span> <span class="o">=</span> <span class="p">(</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">ppo_max_token_len_per_gpu</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ulysses_sequence_parallel_size</span>
@@ -308,14 +261,20 @@
 
                     <span class="c1"># Support all hardwares</span>
                     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">DataProto</span><span class="p">):</span>
-                        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
-                            <span class="o">**</span><span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">get_torch_device</span><span class="p">()</span><span class="o">.</span><span class="n">current_device</span><span class="p">()),</span>
-                            <span class="o">**</span><span class="n">data</span><span class="o">.</span><span class="n">non_tensor_batch</span><span class="p">,</span>
-                        <span class="p">}</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">data</span><span class="o">.</span><span class="n">batch</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">get_device_id</span><span class="p">()),</span> <span class="o">**</span><span class="n">data</span><span class="o">.</span><span class="n">non_tensor_batch</span><span class="p">}</span>
+                    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+                                <span class="n">data</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">get_device_id</span><span class="p">())</span>
+                            <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="s2">&quot;multi_modal_inputs&quot;</span> <span class="ow">and</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                                <span class="n">data</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                                    <span class="p">{</span><span class="n">kk</span><span class="p">:</span> <span class="n">vv</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">get_device_id</span><span class="p">())</span> <span class="k">for</span> <span class="n">kk</span><span class="p">,</span> <span class="n">vv</span> <span class="ow">in</span> <span class="n">item_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+                                    <span class="k">for</span> <span class="n">item_dict</span> <span class="ow">in</span> <span class="n">v</span>
+                                <span class="p">]</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">data</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to</span><span class="p">(</span>
-                            <span class="n">get_torch_device</span><span class="p">()</span><span class="o">.</span><span class="n">current_device</span><span class="p">()</span>
-                        <span class="p">)</span>  <span class="c1"># actor device is cpu when using offload</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">get_device_id</span><span class="p">())</span>  <span class="c1"># actor device is cpu when using offload</span>
                     <span class="n">responses</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;responses&quot;</span><span class="p">]</span>
                     <span class="n">response_length</span> <span class="o">=</span> <span class="n">responses</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
                     <span class="n">attention_mask</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;attention_mask&quot;</span><span class="p">]</span>

@@ -131,7 +131,6 @@
 <li class="toctree-l3"><a class="reference internal" href="trinity.trainer.verl.html#trinity.trainer.verl.dp_actor.DataParallelPPOActor"><code class="docutils literal notranslate"><span class="pre">DataParallelPPOActor</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="trinity.trainer.verl.html#trinity.trainer.verl.dp_actor.DataParallelPPOActor.__init__"><code class="docutils literal notranslate"><span class="pre">DataParallelPPOActor.__init__()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.trainer.verl.html#trinity.trainer.verl.dp_actor.DataParallelPPOActor.set_algorithm"><code class="docutils literal notranslate"><span class="pre">DataParallelPPOActor.set_algorithm()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="trinity.trainer.verl.html#trinity.trainer.verl.dp_actor.DataParallelPPOActor.compute_log_prob"><code class="docutils literal notranslate"><span class="pre">DataParallelPPOActor.compute_log_prob()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.trainer.verl.html#trinity.trainer.verl.dp_actor.DataParallelPPOActor.update_policy"><code class="docutils literal notranslate"><span class="pre">DataParallelPPOActor.update_policy()</span></code></a></li>
 </ul>
 </li>
@@ -293,7 +292,27 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">global_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.config.Config" title="trinity.common.config.Config"><span class="pre">Config</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/trainer/verl_trainer.html#VerlPPOTrainerWrapper.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.__init__" title="Link to this definition"></a></dt>
-<dd><p>Initialize distributed PPO trainer with Ray backend.</p>
+<dd><p>Initialize distributed PPO trainer with Ray backend.
+Note that this trainer runs on the driver process on a single CPU/GPU node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> – Configuration object containing training parameters.</p></li>
+<li><p><strong>tokenizer</strong> – Tokenizer used for encoding and decoding text.</p></li>
+<li><p><strong>role_worker_mapping</strong> (<em>dict</em><em>[</em><em>Role</em><em>, </em><em>WorkerType</em><em>]</em>) – Mapping from roles to worker classes.</p></li>
+<li><p><strong>resource_pool_manager</strong> (<em>ResourcePoolManager</em>) – Manager for Ray resource pools.</p></li>
+<li><p><strong>ray_worker_group_cls</strong> (<em>RayWorkerGroup</em><em>, </em><em>optional</em>) – Class for Ray worker groups. Defaults to RayWorkerGroup.</p></li>
+<li><p><strong>processor</strong> – Optional data processor, used for multimodal data</p></li>
+<li><p><strong>reward_fn</strong> – Function for computing rewards during training.</p></li>
+<li><p><strong>val_reward_fn</strong> – Function for computing rewards during validation.</p></li>
+<li><p><strong>train_dataset</strong> (<em>Optional</em><em>[</em><em>Dataset</em><em>]</em><em>, </em><em>optional</em>) – Training dataset. Defaults to None.</p></li>
+<li><p><strong>val_dataset</strong> (<em>Optional</em><em>[</em><em>Dataset</em><em>]</em><em>, </em><em>optional</em>) – Validation dataset. Defaults to None.</p></li>
+<li><p><strong>collate_fn</strong> – Function to collate data samples into batches.</p></li>
+<li><p><strong>train_sampler</strong> (<em>Optional</em><em>[</em><em>Sampler</em><em>]</em><em>, </em><em>optional</em>) – Sampler for the training dataset. Defaults to None.</p></li>
+<li><p><strong>device_name</strong> (<em>str</em><em>, </em><em>optional</em>) – Device name for training (e.g., “cuda”, “cpu”). Defaults to “cuda”.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">

@@ -533,6 +533,7 @@
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.config.ModelConfig.critic_model_path"><code class="docutils literal notranslate"><span class="pre">ModelConfig.critic_model_path</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.config.ModelConfig.max_prompt_tokens"><code class="docutils literal notranslate"><span class="pre">ModelConfig.max_prompt_tokens</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.config.ModelConfig.max_response_tokens"><code class="docutils literal notranslate"><span class="pre">ModelConfig.max_response_tokens</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.config.ModelConfig.custom_chat_template"><code class="docutils literal notranslate"><span class="pre">ModelConfig.custom_chat_template</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.config.ModelConfig.__init__"><code class="docutils literal notranslate"><span class="pre">ModelConfig.__init__()</span></code></a></li>
 </ul>
 </li>
@@ -798,6 +799,7 @@
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.verl_config.ActorModel.enable_gradient_checkpointing"><code class="docutils literal notranslate"><span class="pre">ActorModel.enable_gradient_checkpointing</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.verl_config.ActorModel.use_remove_padding"><code class="docutils literal notranslate"><span class="pre">ActorModel.use_remove_padding</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.verl_config.ActorModel.use_fused_kernels"><code class="docutils literal notranslate"><span class="pre">ActorModel.use_fused_kernels</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.verl_config.ActorModel.custom_chat_template"><code class="docutils literal notranslate"><span class="pre">ActorModel.custom_chat_template</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.verl_config.ActorModel.__init__"><code class="docutils literal notranslate"><span class="pre">ActorModel.__init__()</span></code></a></li>
 </ul>
 </li>
@@ -823,11 +825,13 @@
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.verl_config.FSDPConfig.param_offload"><code class="docutils literal notranslate"><span class="pre">FSDPConfig.param_offload</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.verl_config.FSDPConfig.optimizer_offload"><code class="docutils literal notranslate"><span class="pre">FSDPConfig.optimizer_offload</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.verl_config.FSDPConfig.fsdp_size"><code class="docutils literal notranslate"><span class="pre">FSDPConfig.fsdp_size</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.verl_config.FSDPConfig.forward_prefetch"><code class="docutils literal notranslate"><span class="pre">FSDPConfig.forward_prefetch</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.verl_config.FSDPConfig.__init__"><code class="docutils literal notranslate"><span class="pre">FSDPConfig.__init__()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.html#trinity.common.verl_config.Checkpoint"><code class="docutils literal notranslate"><span class="pre">Checkpoint</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.verl_config.Checkpoint.contents"><code class="docutils literal notranslate"><span class="pre">Checkpoint.contents</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.verl_config.Checkpoint.load_contents"><code class="docutils literal notranslate"><span class="pre">Checkpoint.load_contents</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.verl_config.Checkpoint.save_contents"><code class="docutils literal notranslate"><span class="pre">Checkpoint.save_contents</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.verl_config.Checkpoint.__init__"><code class="docutils literal notranslate"><span class="pre">Checkpoint.__init__()</span></code></a></li>
 </ul>
 </li>
@@ -842,6 +846,8 @@
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.verl_config.Actor.ppo_epochs"><code class="docutils literal notranslate"><span class="pre">Actor.ppo_epochs</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.verl_config.Actor.shuffle"><code class="docutils literal notranslate"><span class="pre">Actor.shuffle</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.verl_config.Actor.ulysses_sequence_parallel_size"><code class="docutils literal notranslate"><span class="pre">Actor.ulysses_sequence_parallel_size</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.verl_config.Actor.entropy_from_logits_with_chunking"><code class="docutils literal notranslate"><span class="pre">Actor.entropy_from_logits_with_chunking</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.verl_config.Actor.entropy_checkpointing"><code class="docutils literal notranslate"><span class="pre">Actor.entropy_checkpointing</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.verl_config.Actor.checkpoint"><code class="docutils literal notranslate"><span class="pre">Actor.checkpoint</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.verl_config.Actor.optim"><code class="docutils literal notranslate"><span class="pre">Actor.optim</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.verl_config.Actor.fsdp_config"><code class="docutils literal notranslate"><span class="pre">Actor.fsdp_config</span></code></a></li>
@@ -861,6 +867,9 @@
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.verl_config.Ref.log_prob_use_dynamic_bsz"><code class="docutils literal notranslate"><span class="pre">Ref.log_prob_use_dynamic_bsz</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.verl_config.Ref.log_prob_max_token_len_per_gpu"><code class="docutils literal notranslate"><span class="pre">Ref.log_prob_max_token_len_per_gpu</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.verl_config.Ref.ulysses_sequence_parallel_size"><code class="docutils literal notranslate"><span class="pre">Ref.ulysses_sequence_parallel_size</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.verl_config.Ref.entropy_from_logits_with_chunking"><code class="docutils literal notranslate"><span class="pre">Ref.entropy_from_logits_with_chunking</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.verl_config.Ref.entropy_checkpointing"><code class="docutils literal notranslate"><span class="pre">Ref.entropy_checkpointing</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.verl_config.Ref.checkpoint"><code class="docutils literal notranslate"><span class="pre">Ref.checkpoint</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.verl_config.Ref.__init__"><code class="docutils literal notranslate"><span class="pre">Ref.__init__()</span></code></a></li>
 </ul>
 </li>

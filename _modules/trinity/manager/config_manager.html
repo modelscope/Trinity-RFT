@@ -370,7 +370,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;ppo_epochs&quot;</span><span class="p">,</span> <span class="s2">&quot;training_strategy&quot;</span><span class="p">,</span> <span class="s2">&quot;resume_mode&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;param_offload&quot;</span><span class="p">,</span> <span class="s2">&quot;optimizer_offload&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;param_offload&quot;</span><span class="p">,</span> <span class="s2">&quot;optimizer_offload&quot;</span><span class="p">,</span> <span class="s2">&quot;forward_prefetch&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;resume_from_path&quot;</span><span class="p">)</span>
 
         <span class="k">with</span> <span class="n">st</span><span class="o">.</span><span class="n">expander</span><span class="p">(</span><span class="s2">&quot;Advanced Config&quot;</span><span class="p">):</span>
@@ -388,6 +388,8 @@
             <span class="s2">&quot;actor_ppo_micro_batch_size_per_gpu&quot;</span><span class="p">,</span>
             <span class="s2">&quot;ref_log_prob_micro_batch_size_per_gpu&quot;</span><span class="p">,</span>
             <span class="s2">&quot;actor_ulysses_sequence_parallel_size&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;actor_entropy_from_logits_with_chunking&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;actor_entropy_checkpointing&quot;</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;actor_lr&quot;</span><span class="p">,</span> <span class="s2">&quot;actor_warmup_style&quot;</span><span class="p">,</span> <span class="s2">&quot;actor_lr_warmup_steps_ratio&quot;</span><span class="p">)</span>
@@ -451,6 +453,7 @@
                 <span class="s2">&quot;param_offload&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;param_offload&quot;</span><span class="p">],</span>
                 <span class="s2">&quot;optimizer_offload&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;optimizer_offload&quot;</span><span class="p">],</span>
                 <span class="s2">&quot;fsdp_size&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+                <span class="s2">&quot;forward_prefetch&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;forward_prefetch&quot;</span><span class="p">],</span>
             <span class="p">}</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">fsdp_config</span> <span class="o">=</span> <span class="p">{}</span>
@@ -479,6 +482,10 @@
                     <span class="s2">&quot;ulysses_sequence_parallel_size&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span>
                         <span class="s2">&quot;actor_ulysses_sequence_parallel_size&quot;</span>
                     <span class="p">],</span>
+                    <span class="s2">&quot;entropy_from_logits_with_chunking&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span>
+                        <span class="s2">&quot;actor_entropy_from_logits_with_chunking&quot;</span>
+                    <span class="p">],</span>
+                    <span class="s2">&quot;entropy_checkpointing&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_entropy_checkpointing&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;checkpoint&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;contents&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_checkpoint&quot;</span><span class="p">]},</span>
                     <span class="s2">&quot;optim&quot;</span><span class="p">:</span> <span class="p">{</span>
                         <span class="s2">&quot;lr&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_lr&quot;</span><span class="p">],</span>
@@ -502,6 +509,10 @@
                     <span class="s2">&quot;ulysses_sequence_parallel_size&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span>
                         <span class="s2">&quot;actor_ulysses_sequence_parallel_size&quot;</span>
                     <span class="p">],</span>
+                    <span class="s2">&quot;entropy_from_logits_with_chunking&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span>
+                        <span class="s2">&quot;actor_entropy_from_logits_with_chunking&quot;</span>
+                    <span class="p">],</span>
+                    <span class="s2">&quot;entropy_checkpointing&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_entropy_checkpointing&quot;</span><span class="p">],</span>
                 <span class="p">},</span>
             <span class="p">},</span>
             <span class="s2">&quot;critic&quot;</span><span class="p">:</span> <span class="p">{},</span>
