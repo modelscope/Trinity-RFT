@@ -43,24 +43,15 @@ def create_inference_models(
     from ray.util.placement_group import placement_group, placement_group_table
     from ray.util.scheduling_strategies import PlacementGroupSchedulingStrategy
 
-    from trinity.common.models.vllm_async_model import vLLMAysncRolloutModel
     from trinity.common.models.vllm_model import vLLMRolloutModel
 
+    logger = get_logger(__name__)
     engine_num = config.explorer.rollout_model.engine_num
     tensor_parallel_size = config.explorer.rollout_model.tensor_parallel_size
 
-    if (
-        config.explorer.rollout_model.enable_openai_api
-        and config.explorer.rollout_model.engine_type != "vllm_async"
-    ):
-        raise ValueError("OpenAI API is only supported for vllm_async engine")
-
     rollout_engines = []
-
-    if config.explorer.rollout_model.engine_type == "vllm":
+    if config.explorer.rollout_model.engine_type.startswith("vllm"):
         engine_cls = vLLMRolloutModel
-    elif config.explorer.rollout_model.engine_type == "vllm_async":
-        engine_cls = vLLMAysncRolloutModel
     else:
         raise ValueError(f"Unknown engine type: {config.explorer.rollout_model.engine_type}")
 
@@ -115,17 +106,21 @@ def create_inference_models(
     if config.explorer.rollout_model.enable_openai_api:
         for engine in rollout_engines:
             engine.run_api_server.remote()
-
+    if config.explorer.rollout_model.enable_history:
+        logger.info(
+            "Model History recording is enabled. Please periodically extract "
+            "history via `extract_experience_from_history` to avoid out-of-memory issues."
+        )
     # create auxiliary models
     for model_config in config.explorer.auxiliary_models:
         engines = []
         for _ in range(model_config.engine_num):
             bundles_for_engine = allocator.allocate(model_config.tensor_parallel_size)
             model_config.enable_openai_api = True
-            model_config.engine_type = "vllm_async"
+            model_config.engine_type = "vllm"
             model_config.bundle_indices = ",".join([str(bid) for bid in bundles_for_engine])
             engines.append(
-                ray.remote(vLLMAysncRolloutModel)
+                ray.remote(vLLMRolloutModel)
                 .options(
                     num_cpus=0,
                     num_gpus=0 if model_config.tensor_parallel_size > 1 else 1,

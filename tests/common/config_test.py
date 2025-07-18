@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 """Test cases for Config modules."""
+import datetime
 import os
+import shutil
 import unittest
 
 from tests.tools import get_template_config
 from trinity.common.config import InferenceModelConfig, load_config
+
+CHECKPOINT_ROOT_DIR = os.path.join(os.path.dirname(__file__), "temp_checkpoint_dir")
 
 
 class TestConfig(unittest.TestCase):
@@ -54,3 +58,26 @@ class TestConfig(unittest.TestCase):
                     except Exception as e:
                         print(f"Error loading config {config_path}: {e}")
                         raise e
+
+    def test_continue_from_checkpoint_is_valid(self):
+        config = get_template_config()
+        config.name = "test"
+        config.project = "unittest"
+        config.checkpoint_root_dir = CHECKPOINT_ROOT_DIR
+
+        dir_path = os.path.join(config.checkpoint_root_dir, config.project, config.name)
+        os.makedirs(os.path.join(dir_path, "global_step_1"))
+
+        config.continue_from_checkpoint = True
+        config.check_and_update()
+        self.assertEqual(config.name, "test")
+
+        config.continue_from_checkpoint = False
+        config.check_and_update()
+        self.assertTrue(config.name.startswith("test_"))
+        timestamp = config.name.split("_")[-1]
+        self.assertTrue(datetime.datetime.strptime(timestamp, "%Y%m%d%H%M%S"))
+
+    def tearDown(self):
+        if os.path.exists(CHECKPOINT_ROOT_DIR):
+            shutil.rmtree(CHECKPOINT_ROOT_DIR)

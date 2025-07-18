@@ -11,6 +11,7 @@ project: Trinity-RFT
 name: example
 mode: both
 checkpoint_root_dir: /PATH/TO/CHECKPOINT
+continue_from_checkpoint: true
 
 algorithm:
   # Algorithm-related parameters
@@ -68,6 +69,7 @@ checkpoint_root_dir: /PATH/TO/CHECKPOINT
   - `explore`: Only launches the explorer.
   - `bench`: Used for benchmarking.
 - `checkpoint_root_dir`: Root directory where all checkpoints and logs will be saved. Checkpoints for this experiment will be stored in `<checkpoint_root_dir>/<project>/<name>/`.
+- `continue_from_checkpoint`: If set to `true`, the experiment will continue from the latest checkpoint in the checkpoint path (if any); otherwise, it will rename the current experiment to `<name>_<timestamp>` and start a new experiment.
 - `ray_namespace`: Namespace for the modules launched in the current experiment. If not specified, it will be set to `<project>/<name>`.
 
 ---
@@ -321,9 +323,10 @@ explorer:
   max_retry_times: 2
   env_vars: {}
   rollout_model:
-    engine_type: vllm_async
+    engine_type: vllm
     engine_num: 1
     tensor_parallel_size: 1
+    enable_history: False
   auxiliary_models:
   - model_path: /PATH/TO/MODEL
     tensor_parallel_size: 1
@@ -336,9 +339,10 @@ explorer:
 - `max_timeout`: Maximum time (in seconds) for a workflow to complete.
 - `max_retry_times`: Maximum number of retries for a workflow.
 - `env_vars`: Environment variables to be set for every workflow runners.
-- `rollout_model.engine_type`: Type of inference engine. Options: `vllm_async` (recommended), `vllm`.
+- `rollout_model.engine_type`: Type of inference engine. For now, only `vllm_async` and `vllm` is supported, they have the same meaning and both use the asynchronous engine. In subsequent versions, only `vllm` may be retained for simplicity.
 - `rollout_model.engine_num`: Number of inference engines.
 - `rollout_model.tensor_parallel_size`: Degree of tensor parallelism.
+- `rollout_model.enable_history`: Whether to enable model call history recording. If set to `True`, the model wrapper automatically records the return experiences of model calls. Please periodically extract the history via `extract_experience_from_history` to avoid out-of-memory issues. Default is `False`.
 - `auxiliary_models`: Additional models used for custom workflows.
 - `eval_interval`: Interval (in steps) for evaluating the model.
 - `eval_on_startup`: Whether to evaluate the model on startup. More precisely, at step 0 with the original model, so it will not be triggered when restarting.
@@ -439,8 +443,11 @@ actor_rollout_ref:
     ppo_epochs: 1
     shuffle: False
     ulysses_sequence_parallel_size: 1 # sp size
+    entropy_from_logits_with_chunking: false
+    entropy_checkpointing: false
     checkpoint:
-      contents: ['model', 'hf_model', 'optimizer', 'extra']  # with 'hf_model' you can save whole model as hf format, now only use sharded model checkpoint to save space
+      load_contents: ['model', 'optimizer', 'extra']
+      save_contents: ['model', 'optimizer', 'extra']
     optim:
       lr: 1e-6
       lr_warmup_steps_ratio: 0.  # the total steps will be injected during runtime
@@ -454,17 +461,22 @@ actor_rollout_ref:
       param_offload: False
       optimizer_offload: False
       fsdp_size: -1
+      forward_prefetch: False
   ref:
     fsdp_config:
       param_offload: False
       wrap_policy:
         # transformer_layer_cls_to_wrap: None
         min_num_params: 0
+      fsdp_size: -1
+      forward_prefetch: False
     # log_prob_micro_batch_size: 4 # will be deprecated, use log_prob_micro_batch_size_per_gpu
     log_prob_micro_batch_size_per_gpu: 8
     log_prob_use_dynamic_bsz: ${actor_rollout_ref.actor.use_dynamic_bsz}
     log_prob_max_token_len_per_gpu: ${actor_rollout_ref.actor.ppo_max_token_len_per_gpu}
     ulysses_sequence_parallel_size: ${actor_rollout_ref.actor.ulysses_sequence_parallel_size} # sp size
+    entropy_from_logits_with_chunking: ${actor_rollout_ref.actor.entropy_from_logits_with_chunking}
+    entropy_checkpointing: ${actor_rollout_ref.actor.entropy_checkpointing}
 
 critic:
   strategy: fsdp
@@ -486,6 +498,7 @@ critic:
         # transformer_layer_cls_to_wrap: None
         min_num_params: 0
       fsdp_size: -1
+      forward_prefetch: False
   ppo_mini_batch_size: ${actor_rollout_ref.actor.ppo_mini_batch_size}
   ppo_micro_batch_size_per_gpu: 8
   forward_micro_batch_size_per_gpu: ${critic.ppo_micro_batch_size_per_gpu}
@@ -519,6 +532,9 @@ trainer:
 - `actor_rollout_ref.actor.use_dynamic_bsz`: Whether to reorganize the batch data, specifically to splice the shorter data to reduce the batch size in the actual training process.
 - `actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu`: Batch size for one GPU in one forward pass.
 - `actor_rollout_ref.actor.ulysses_sequence_parallel_size`: Ulysses sequence parallel size.
+- `actor_rollout_ref.actor.entropy_from_logits_with_chunking`: Calculate entropy with chunking to reduce memory peak.
+- `actor_rollout_ref.actor.entropy_checkpointing`: Recompute entropy.
+- `actor_rollout_ref.actor.checkpoint`: Contents to be loaded and saved. With 'hf_model' you can save whole model as hf format; now only use sharded model checkpoint to save space.
 - `actor_rollout_ref.actor.optim.lr`: Learning rate for actor model.
 - `actor_rollout_ref.actor.optim.lr_warmup_steps_ratio`: Ratio of warmup steps for learning rate.
 - `actor_rollout_ref.actor.optim.warmup_style`: Warmup style for learning rate.

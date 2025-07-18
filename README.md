@@ -1,3 +1,4 @@
+[**中文主页**](https://github.com/modelscope/Trinity-RFT/blob/main/README_zh.md) | [**Tutorial**](https://modelscope.github.io/Trinity-RFT/) | [**FAQ**](./docs/sphinx_doc/source/tutorial/faq.md)
 
 <div align="center">
   <img src="https://img.alicdn.com/imgextra/i1/O1CN01lvLpfw25Pl4ohGZnU_!!6000000007519-2-tps-1628-490.png" alt="Trinity-RFT" style="height: 120px;">
@@ -255,13 +256,13 @@ Trinity-RFT provides a web interface for configuring your RFT process.
 > This is an experimental feature, and we will continue to improve it.
 
 
-To enable minimal features (mainly for trainer), you can run
+To launch the web interface for minimal configurations, you can run
 
 ```bash
 trinity studio --port 8080
 ```
 
-Then you can configure your RFT process in the web page and generate a config file. You can save the config for later use or run it directly as described in the following section.
+Then you can configure your RFT process in the web page and generate a config file. You can save the config file for later use or run it directly as described in the following section.
 
 Advanced users can also edit the config file directly.
 We provide example config files in [`examples`](examples/).
@@ -350,10 +351,6 @@ Guidelines for developers and researchers:
 + [Build new RL scenarios](./docs/sphinx_doc/source/tutorial/trinity_programming_guide.md#workflows-for-rl-environment-developers)
 + [Implement new RL algorithms](./docs/sphinx_doc/source/tutorial/trinity_programming_guide.md#algorithms-for-rl-algorithm-developers)
 
-
-
-
-For some frequently asked questions, see [FAQ](./docs/sphinx_doc/source/tutorial/faq.md).
 
 
 
