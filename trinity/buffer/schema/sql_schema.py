@@ -5,7 +5,7 @@ from typing import Any, Optional, Union
 from sqlalchemy import Column, Float, Integer, LargeBinary, String
 from sqlalchemy.ext.declarative import declarative_base
 
-from trinity.common.experience import Experience
+from trinity.common.experience import Experience, MultiTurnExperience
 
 Base = declarative_base()
 
@@ -90,9 +90,8 @@ class SFTDataModel(Base):  # type: ignore
             messages=messages,
             chat_template=chat_template,
         )
-        exp = Experience(
-            tokens=token_ids,
-            prompt_length=0,
+        exp = MultiTurnExperience(
+            token_ids=token_ids,
             action_mask=action_mask,
             info={"response_num": sum([1 if m["role"] == "assistant" else 0 for m in messages])},
         )

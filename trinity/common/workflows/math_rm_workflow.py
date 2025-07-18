@@ -19,14 +19,15 @@ class MathRMWorkflow(SimpleWorkflow):
 
     def __init__(
         self,
-        model: ModelWrapper,
+        *,
         task: Task,
+        model: ModelWrapper,
         auxiliary_models: Optional[List[openai.OpenAI]] = None,
     ):
         self.reset(task)
         super().__init__(
-            model=model,
             task=task,
+            model=model,
             auxiliary_models=auxiliary_models,
         )
 

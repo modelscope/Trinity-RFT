@@ -10,7 +10,7 @@ from trinity.algorithm.algorithm import DPOAlgorithm, SFTAlgorithm
 from trinity.buffer.buffer_reader import BufferReader
 from trinity.common.config import BufferConfig, StorageConfig
 from trinity.common.constants import PromptType, ReadStrategy, TaskType
-from trinity.common.experience import Experience
+from trinity.common.experience import DPOExperience, SingleTurnExperience
 from trinity.common.rewards import REWARD_FUNCTIONS
 from trinity.common.workflows import WORKFLOWS, Task
 from trinity.utils.registry import Registry
@@ -129,15 +129,15 @@ class SFTDataReader(BufferReader):
         if self.prompt_type == PromptType.MESSAGES:
             for sample in samples:
                 messages = sample[self.messages_key]
-                tokens = self.tokenizer.apply_chat_template(
+                token_ids = self.tokenizer.apply_chat_template(
                     messages, add_generation_prompt=False, return_tensors="pt"
                 )[0]
-                prompt_tokens = self.tokenizer.apply_chat_template(
+                prompt_tokens_ids = self.tokenizer.apply_chat_template(
                     messages[:-1], add_generation_prompt=True, return_tensors="pt"
                 )[0]
-                experience = Experience(
-                    tokens=tokens,
-                    prompt_length=len(prompt_tokens),
+                experience = SingleTurnExperience(
+                    token_ids=token_ids,
+                    prompt_length=len(prompt_tokens_ids),
                 )
                 exp_list.append(experience)
 
@@ -151,17 +151,17 @@ class SFTDataReader(BufferReader):
                     response_messages = [response_messages]
                 full_messages = prompt_messages + response_messages
 
-                tokens = self.tokenizer.apply_chat_template(
+                token_ids = self.tokenizer.apply_chat_template(
                     full_messages, add_generation_prompt=False, return_tensors="pt"
                 )[0]
 
-                prompt_tokens = self.tokenizer.apply_chat_template(
+                prompt_tokens_ids = self.tokenizer.apply_chat_template(
                     prompt_messages, add_generation_prompt=True, return_tensors="pt"
                 )[0]
 
-                experience = Experience(
-                    tokens=tokens,
-                    prompt_length=len(prompt_tokens),
+                experience = SingleTurnExperience(
+                    token_ids=token_ids,
+                    prompt_length=len(prompt_tokens_ids),
                 )
                 exp_list.append(experience)
 
@@ -170,11 +170,11 @@ class SFTDataReader(BufferReader):
             for sample in samples:
                 prompt = sample[self.prompt_key]
                 response = sample[self.response_key]
-                tokens = self.tokenizer(prompt + response, return_tensors="pt")["input_ids"][0]
-                prompt_tokens = self.tokenizer(prompt, return_tensors="pt")["input_ids"][0]
-                experience = Experience(
-                    tokens=tokens,
-                    prompt_length=len(prompt_tokens),
+                token_ids = self.tokenizer(prompt + response, return_tensors="pt")["input_ids"][0]
+                prompt_tokens_ids = self.tokenizer(prompt, return_tensors="pt")["input_ids"][0]
+                experience = SingleTurnExperience(
+                    token_ids=token_ids,
+                    prompt_length=len(prompt_tokens_ids),
                 )
                 exp_list.append(experience)
         else:
@@ -250,9 +250,8 @@ class DPODataReader(BufferReader):
                 add_generation_prompt=False,
                 return_tensors="pt",
             )[0][prompt_length:]
-            experience = Experience(
-                tokens=prompt_tokens,
-                prompt_length=len(prompt_tokens),
+            experience = DPOExperience(
+                token_ids=prompt_tokens,
                 chosen=chosen_tokens,
                 rejected=rejected_tokens,
             )

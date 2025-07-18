@@ -405,10 +405,10 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
     ) -> None:
         reward = experiences.rewards[idx]
         attn_mask = experiences.attention_masks[idx].bool()
-        prompt_token = experiences.tokens[idx][: experiences.prompt_length][
+        prompt_token = experiences.token_ids[idx][: experiences.prompt_length][
             attn_mask[: experiences.prompt_length]
         ]
-        response_token = experiences.tokens[idx][experiences.prompt_length :][
+        response_token = experiences.token_ids[idx][experiences.prompt_length :][
             attn_mask[experiences.prompt_length :]
         ]
         prompt_text = self.tokenizer.decode(prompt_token, skip_special_tokens=skip_special_tokens)

@@ -94,8 +94,8 @@ def to_data_proto_mix(experiences: Experiences, is_expert_mask: torch.tensor):
         "uid": np.array(experiences.group_ids),
         "unique_ids": np.array(experiences.unique_ids),
         "position_ids": position_ids,
-        "input_ids": experiences.tokens.long(),
-        "responses": experiences.tokens[:, experiences.prompt_length :].long(),
+        "input_ids": experiences.token_ids.long(),
+        "responses": experiences.token_ids[:, experiences.prompt_length :].long(),
         "attention_mask": attention_mask.long(),
         "response_mask": (
             experiences.action_masks[:, experiences.prompt_length :].long()

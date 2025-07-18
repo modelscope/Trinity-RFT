@@ -4,25 +4,25 @@ import asyncio
 import socket
 import time
 from abc import ABC, abstractmethod
-from typing import Any, List, Tuple, Union
+from typing import Any, List, Sequence, Tuple, Union
 
 import openai
 import ray
 import torch
 from torch import Tensor
 
-from trinity.common.experience import Experience
+from trinity.common.experience import Experience, SingleTurnExperience
 from trinity.utils.log import get_logger
 
 
 class InferenceModel(ABC):
     """A model for high performance for rollout inference."""
 
-    async def generate(self, prompt: str, **kwargs) -> List[Experience]:
+    async def generate(self, prompt: str, **kwargs) -> Sequence[Experience]:
         """Generate a responses from a prompt in async."""
         raise NotImplementedError
 
-    async def chat(self, messages: List[dict], **kwargs) -> List[Experience]:
+    async def chat(self, messages: List[dict], **kwargs) -> Sequence[Experience]:
         """Generate experiences from a list of history chat messages in async."""
         raise NotImplementedError
 
@@ -189,8 +189,8 @@ def convert_api_output_to_experience(
 ) -> List[Experience]:
     """Convert the API output to a list of experiences."""
     return [
-        Experience(
-            tokens=torch.cat(
+        SingleTurnExperience(
+            token_ids=torch.cat(
                 (
                     torch.tensor(output.prompt_token_ids, dtype=torch.int32),
                     torch.tensor(choice.token_ids, dtype=torch.int32),
@@ -207,7 +207,6 @@ def convert_api_output_to_experience(
                 )
             ),
             prompt_length=len(output.prompt_token_ids),
-            prompt_text=None,
             response_text=choice.message.content,
         )
         for choice in output.choices

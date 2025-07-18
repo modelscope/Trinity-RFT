@@ -153,7 +153,7 @@ class DPOAlgorithm(AlgorithmType):
 
     @classmethod
     def check_config(cls, config: Config) -> None:
-        if config.model == "train":
+        if config.mode == "train":
             if (
                 config.buffer.trainer_input.experience_buffer is None
                 or not config.buffer.trainer_input.experience_buffer.path

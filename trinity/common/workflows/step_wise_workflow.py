@@ -1,0 +1,117 @@
+from abc import abstractmethod
+
+import openai
+
+from trinity.common.experience import Experience
+from trinity.common.models.model import ModelWrapper
+from trinity.common.workflows.workflow import Task, Workflow
+
+
+class StepWiseRewardWorkflow(Workflow):
+    """A workflow that implements step-wise rewards for tasks."""
+
+    def __init__(self, *, task: Task, model: ModelWrapper, auxiliary_models=None):
+        super().__init__(task=task, model=model, auxiliary_models=auxiliary_models)
+        assert model.enable_history, (
+            "Rollout Model must have history enabled for step-wise rewards, please "
+            "set `explorer.rollout_model.enable_history` to `True` in your config."
+        )
+        # use the rollout model's OpenAI client to write your agent application
+        self.client: openai.OpenAI = model.get_openai_client()
+
+    def run(self) -> list[Experience]:
+        """Run the workflow and return a list of experiences with step-wise rewards."""
+        experiences = []
+        for step in self.max_step_num:
+            # Run a single step of the agent application
+            continue_run = self.step(step_num=step)
+            # Collect experiences data of the current step
+            exps = self.model.extract_experience_from_history()
+            # Calculate the reward for the current step
+            exps = self.reward(exps, step_num=step)
+            # Store the step experiences
+            experiences.extend(exps)
+            if not continue_run:
+                break
+
+        return experiences
+
+    @abstractmethod
+    def step(self, step_num: int) -> bool:
+        """Run a single step of your agent application.
+
+        Args:
+            step_num (int): The current step number.
+
+        Returns:
+            bool: Whether to continue running the agent application.
+
+        Tips:
+            You can use the openai client (`self.client`) to migrate your existing
+            applications at low cost.
+        """
+        pass
+
+    @abstractmethod
+    def reward(self, exps: list[Experience], step_num: int) -> float:
+        """Calculate the reward for the given experiences at the specified step."""
+        pass
+
+    @property
+    @abstractmethod
+    def max_step_num(self):
+        """Return the maximum number of steps in the task."""
+
+
+class RewardPropagationWorkflow(Workflow):
+    """A workflow that propagates rewards across multiple turns."""
+
+    def __init__(self, *, task: Task, model: ModelWrapper, auxiliary_models=None):
+        super().__init__(task=task, model=model, auxiliary_models=auxiliary_models)
+        assert model.enable_history, (
+            "Rollout Model must have history enabled for step-wise rewards, please "
+            "set `explorer.rollout_model.enable_history` to `True` in your config."
+        )
+        # use the rollout model's OpenAI client to write your agent application
+        self.client: openai.OpenAI = model.get_openai_client()
+
+    def run(self) -> list[Experience]:
+        """Run the workflow and return a list of experiences with step-wise rewards."""
+        experiences = []
+        for step in self.max_step_num:
+            # Run a single step of the agent application
+            continue_run = self.step(step_num=step)
+            # Collect experiences data of the current step
+            exps = self.model.extract_experience_from_history()
+            # Store the step experiences
+            experiences.extend(exps)
+            if not continue_run:
+                break
+        self.reward(experiences)
+        return experiences
+
+    @abstractmethod
+    def step(self, step_num: int) -> bool:
+        """Run a single step of your agent application.
+
+        Args:
+            step_num (int): The current step number.
+
+        Returns:
+            bool: Whether to continue running the agent application.
+
+        Tips:
+            You can use the openai client (`self.client`) to migrate your existing
+            applications at low cost.
+        """
+        pass
+
+    @abstractmethod
+    def reward(self, exps: list[Experience]) -> float:
+        """Calculate the reward for the given experiences of the entire run."""
+        pass
+
+    @property
+    @abstractmethod
+    def max_step_num(self):
+        """Return the maximum number of steps in the task."""

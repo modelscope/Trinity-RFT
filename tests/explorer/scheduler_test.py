@@ -10,7 +10,7 @@ from tests.tools import get_template_config
 from trinity.buffer.reader.queue_reader import QueueReader
 from trinity.common.config import GenerationConfig, StorageConfig
 from trinity.common.constants import StorageType
-from trinity.common.experience import Experience
+from trinity.common.experience import Experience, SingleTurnExperience
 from trinity.common.models.model import InferenceModel
 from trinity.common.workflows import Task
 from trinity.common.workflows.workflow import WORKFLOWS, Workflow
@@ -42,8 +42,8 @@ class DummyWorkflow(Workflow):
             assert self.auxiliary_models is not None and len(self.auxiliary_models) == 2
 
         return [
-            Experience(
-                tokens=torch.zeros(5),
+            SingleTurnExperience(
+                token_ids=torch.zeros(5),
                 prompt_length=2,
                 prompt_text=self.error_type or "success",
                 info={"repeat_times": self.repeat_times},

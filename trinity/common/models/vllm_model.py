@@ -3,7 +3,7 @@
 
 import os
 import re
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 import aiohttp
 import ray
@@ -12,7 +12,11 @@ import vllm
 from vllm.sampling_params import RequestOutputKind
 
 from trinity.common.config import InferenceModelConfig
-from trinity.common.experience import Experience
+from trinity.common.experience import (
+    Experience,
+    MultiTurnExperience,
+    SingleTurnExperience,
+)
 from trinity.common.models.model import InferenceModel
 from trinity.common.models.utils import (
     tokenize_and_mask_messages_default,
@@ -29,7 +33,6 @@ class vLLMRolloutModel(InferenceModel):
 
     Args:
         config (Config): The config.
-        kwargs (dict): The keyword arguments for the engine.
     """
 
     def __init__(
@@ -103,7 +106,7 @@ class vLLMRolloutModel(InferenceModel):
         self.api_server_host = None
         self.api_server_port = None
 
-    async def chat(self, messages: List[Dict], **kwargs) -> List[Experience]:
+    async def chat(self, messages: List[Dict], **kwargs) -> Sequence[Experience]:
         """Chat with the model with a list of messages in async.
 
         Args:
@@ -134,7 +137,7 @@ class vLLMRolloutModel(InferenceModel):
             )
         return await self.generate(prompt=prompt, **kwargs)
 
-    async def generate(self, prompt: str, **kwargs) -> List[Experience]:
+    async def generate(self, prompt: str, **kwargs) -> Sequence[Experience]:
         """Generate a response from the provided prompt in async.
 
         Args:
@@ -146,8 +149,8 @@ class vLLMRolloutModel(InferenceModel):
         """
         output = await self._generate_internal(prompt=prompt, **kwargs)
         experiences = [
-            Experience(
-                tokens=torch.cat(
+            SingleTurnExperience(
+                token_ids=torch.cat(
                     (
                         torch.tensor(output.prompt_token_ids, dtype=torch.int32),
                         torch.tensor(output.outputs[i].token_ids, dtype=torch.int32),
@@ -222,9 +225,8 @@ class vLLMRolloutModel(InferenceModel):
             self.tokenizer, messages, self.chat_template
         )
         logprobs = await self.logprobs(token_ids=token_ids.tolist())
-        return Experience(
-            tokens=token_ids,
-            prompt_length=len(token_ids),
+        return MultiTurnExperience(
+            token_ids=token_ids,
             logprobs=logprobs,
             action_mask=action_mask,
         )

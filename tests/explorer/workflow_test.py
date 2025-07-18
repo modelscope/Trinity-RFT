@@ -31,7 +31,7 @@ class MockResponse:
 
 class DummyWorkflow(Workflow):
     def __init__(self, model, task: Task, auxiliary_models=None):
-        super().__init__(model, task, auxiliary_models)
+        super().__init__(task=task, model=model, auxiliary_models=auxiliary_models)
         self.obj = task.raw_task
         self.output_format = task.workflow_args["output_format"]
 

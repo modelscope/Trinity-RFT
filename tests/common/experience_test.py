@@ -77,7 +77,7 @@ class TestExperienceConversion(unittest.TestCase):
             self.assertEqual(batch.rewards[i], exps[i].reward)
             self.assertTrue(
                 torch.all(
-                    batch.tokens[i][
+                    batch.token_ids[i][
                         prompt_length
                         - exps[i].prompt_length : prompt_length
                         - exps[i].prompt_length
