@@ -11,6 +11,7 @@ project: Trinity-RFT
 name: example
 mode: both
 checkpoint_root_dir: /PATH/TO/CHECKPOINT
+continue_from_checkpoint: true
 
 algorithm:
   # Algorithm-related parameters
@@ -68,6 +69,7 @@ checkpoint_root_dir: /PATH/TO/CHECKPOINT
   - `explore`: Only launches the explorer.
   - `bench`: Used for benchmarking.
 - `checkpoint_root_dir`: Root directory where all checkpoints and logs will be saved. Checkpoints for this experiment will be stored in `<checkpoint_root_dir>/<project>/<name>/`.
+- `continue_from_checkpoint`: If set to `true`, the experiment will continue from the latest checkpoint in the checkpoint path (if any); otherwise, it will rename the current experiment to `<name>_<timestamp>` and start a new experiment.
 - `ray_namespace`: Namespace for the modules launched in the current experiment. If not specified, it will be set to `<project>/<name>`.
 
 ---

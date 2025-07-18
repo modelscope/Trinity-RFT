@@ -125,6 +125,7 @@
 <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example</span>
 <span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">both</span>
 <span class="nt">checkpoint_root_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/CHECKPOINT</span>
+<span class="nt">continue_from_checkpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 
 <span class="nt">algorithm</span><span class="p">:</span>
 <span class="w">  </span><span class="c1"># Algorithm-related parameters</span>
@@ -183,6 +184,7 @@
 </ul>
 </li>
 <li><p><code class="docutils literal notranslate"><span class="pre">checkpoint_root_dir</span></code>: Root directory where all checkpoints and logs will be saved. Checkpoints for this experiment will be stored in <code class="docutils literal notranslate"><span class="pre">&lt;checkpoint_root_dir&gt;/&lt;project&gt;/&lt;name&gt;/</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">continue_from_checkpoint</span></code>: If set to <code class="docutils literal notranslate"><span class="pre">true</span></code>, the experiment will continue from the latest checkpoint in the checkpoint path (if any); otherwise, it will rename the current experiment to <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;_&lt;timestamp&gt;</span></code> and start a new experiment.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ray_namespace</span></code>: Namespace for the modules launched in the current experiment. If not specified, it will be set to <code class="docutils literal notranslate"><span class="pre">&lt;project&gt;/&lt;name&gt;</span></code>.</p></li>
 </ul>
 </section>
