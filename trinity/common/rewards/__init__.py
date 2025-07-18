@@ -6,6 +6,7 @@ from .reward_fn import REWARD_FUNCTIONS, RewardFn, RMGalleryFn
 
 from .accuracy_reward import AccuracyReward
 from .countdown_reward import CountDownRewardFn
+from .dapo_reward import MathDAPORewardFn
 from .format_reward import FormatReward
 from .math_reward import MathBoxedRewardFn, MathRewardFn
 
@@ -20,4 +21,5 @@ __all__ = [
     "FormatReward",
     "MathRewardFn",
     "MathBoxedRewardFn",
+    "MathDAPORewardFn",
 ]

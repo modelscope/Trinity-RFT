@@ -257,7 +257,7 @@ class ConfigManager:
 
         self.get_configs("ppo_epochs", "training_strategy", "resume_mode")
 
-        self.get_configs("param_offload", "optimizer_offload")
+        self.get_configs("param_offload", "optimizer_offload", "forward_prefetch")
         self.get_configs("resume_from_path")
 
         with st.expander("Advanced Config"):
@@ -275,6 +275,8 @@ class ConfigManager:
             "actor_ppo_micro_batch_size_per_gpu",
             "ref_log_prob_micro_batch_size_per_gpu",
             "actor_ulysses_sequence_parallel_size",
+            "actor_entropy_from_logits_with_chunking",
+            "actor_entropy_checkpointing",
         )
 
         self.get_configs("actor_lr", "actor_warmup_style", "actor_lr_warmup_steps_ratio")
@@ -335,6 +337,7 @@ class ConfigManager:
                 "param_offload": st.session_state["param_offload"],
                 "optimizer_offload": st.session_state["optimizer_offload"],
                 "fsdp_size": -1,
+                "forward_prefetch": st.session_state["forward_prefetch"],
             }
         else:
             fsdp_config = {}
@@ -363,6 +366,10 @@ class ConfigManager:
                     "ulysses_sequence_parallel_size": st.session_state[
                         "actor_ulysses_sequence_parallel_size"
                     ],
+                    "entropy_from_logits_with_chunking": st.session_state[
+                        "actor_entropy_from_logits_with_chunking"
+                    ],
+                    "entropy_checkpointing": st.session_state["actor_entropy_checkpointing"],
                     "checkpoint": {"contents": st.session_state["actor_checkpoint"]},
                     "optim": {
                         "lr": st.session_state["actor_lr"],
@@ -386,6 +393,10 @@ class ConfigManager:
                     "ulysses_sequence_parallel_size": st.session_state[
                         "actor_ulysses_sequence_parallel_size"
                     ],
+                    "entropy_from_logits_with_chunking": st.session_state[
+                        "actor_entropy_from_logits_with_chunking"
+                    ],
+                    "entropy_checkpointing": st.session_state["actor_entropy_checkpointing"],
                 },
             },
             "critic": {},

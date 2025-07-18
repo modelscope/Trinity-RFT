@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name =  "trinity-rft"
-version = "0.2.0.dev0"
+version = "0.2.1.dev0"
 authors = [
     {name="Trinity-RFT Team", email="trinity-rft@outlook.com"},
 ]
@@ -21,7 +21,7 @@ classifiers = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "verl==0.4.0",
+    "verl==0.4.1",
     "ray[default]>=2.45.0",
     "vllm>=0.9.1",
     "tensordict==0.6.2",
@@ -54,7 +54,7 @@ agent = [
     "agentscope"
 ]
 rm_gallery = [
-    "rm-gallery"
+    "rm-gallery>=0.1.1"
 ]
 dev = [
     "pre-commit>=2.17.0",
@@ -66,6 +66,7 @@ dev = [
     "pytest>=8.0.0",
     "pytest-json-ctrf",
     "parameterized",
+    "matplotlib"
 ]
 
 doc = [

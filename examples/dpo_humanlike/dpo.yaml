@@ -23,6 +23,7 @@ buffer:
     experience_buffer:
       name: dpo_buffer
       storage_type: file
+      enable_progress_bar: True
       path: /PATH/TO/DATASET/
       format:
         prompt_type: plaintext # plaintext/messages/chatpair

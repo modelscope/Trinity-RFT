@@ -24,11 +24,11 @@ from verl.trainer.ppo.ray_trainer import (
     RayWorkerGroup,
     ResourcePoolManager,
     Role,
-    _timer,
     create_colocated_worker_cls,
     find_latest_ckpt_path,
 )
 from verl.utils import hf_tokenizer
+from verl.utils.debug import marked_timer
 from verl.utils.fs import copy_local_path_from_hdfs
 
 from trinity.algorithm import ADVANTAGE_FN, KL_FN, SAMPLE_STRATEGY
@@ -317,7 +317,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                 self.sft_to_rft()
             self.algorithm = algorithm
 
-        with _timer("step", timing_raw):
+        with marked_timer("step", timing_raw):
             batch.meta_info["temperature"] = self.config.actor_rollout_ref.rollout.temperature
 
             if self.algorithm.can_balance_batch and self.config.trainer.balance_batch:
@@ -330,17 +330,17 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
 
             if self.algorithm.use_reference:  # ref_logprob may not be used
                 # compute reference log_prob
-                with _timer("ref", timing_raw):
+                with marked_timer("ref", timing_raw):
                     ref_log_prob = self.ref_policy_wg.compute_ref_log_prob(batch)
                     batch = batch.union(ref_log_prob)
 
             if self.algorithm.use_critic:
-                with _timer("values", timing_raw):
+                with marked_timer("values", timing_raw):
                     values = self.critic_wg.compute_values(batch)
                     batch = batch.union(values)
 
             if self.algorithm.use_advantage:
-                with _timer("adv", timing_raw):
+                with marked_timer("adv", timing_raw):
                     # compute kl penalty
                     batch, kl_metrics = self.kl_fn.apply_kl_penalty_to_reward(batch)
                     metrics.update(prefix_metrics(kl_metrics, prefix="critic"))
@@ -349,7 +349,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
 
                 # update critic
             if self.algorithm.use_critic:
-                with _timer("update_critic", timing_raw):
+                with marked_timer("update_critic", timing_raw):
                     critic_output = self.critic_wg.update_critic(batch)
                 critic_output_metrics = reduce_metrics(critic_output.meta_info["metrics"])
                 metrics.update(critic_output_metrics)
@@ -360,7 +360,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                 or self.config.trainer.critic_warmup <= self.global_steps
             ):
                 # update actor
-                with _timer("update_actor", timing_raw):
+                with marked_timer("update_actor", timing_raw):
                     actor_output = self.actor_rollout_wg.update_actor(batch)
                     # TODO add send weight explorer
                 actor_output_metrics = reduce_metrics(actor_output.meta_info["metrics"])
@@ -371,7 +371,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                 and self.global_steps % self.config.trainer.save_freq == 0
             ):
                 self.logger.info(f"Saving at step {self.global_steps}.")
-                with _timer("save_checkpoint", timing_raw):
+                with marked_timer("save_checkpoint", timing_raw):
                     self._save_checkpoint()
                 self.logger.info(f"Saved at step {self.global_steps}.")
 
@@ -397,7 +397,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                 or self.global_steps % self.config.trainer.save_freq != 0
             ):
                 self.logger.info(f"Saving at step {self.global_steps}.")
-                with _timer("save_checkpoint", timing_raw):
+                with marked_timer("save_checkpoint", timing_raw):
                     self._save_checkpoint()
                 self.logger.info(f"Saved at step {self.global_steps}.")
         self.logger.info(f"Training at step {self.global_steps} finished.")

@@ -5,7 +5,6 @@ from typing import List, Optional
 import datasets
 import transformers
 from datasets import Dataset, load_dataset
-from ray.experimental.tqdm_ray import tqdm
 
 from trinity.algorithm.algorithm import DPOAlgorithm, SFTAlgorithm
 from trinity.buffer.buffer_reader import BufferReader
@@ -19,6 +18,17 @@ from trinity.utils.registry import Registry
 FILE_READERS = Registry("file_readers")
 
 
+class DummyProgressBar:
+    def __init__(self):
+        pass
+
+    def update(self, num: int):
+        pass
+
+    def close(self):
+        pass
+
+
 class _HFBatchReader:
     def __init__(
         self,
@@ -29,6 +39,7 @@ class _HFBatchReader:
         offset: int = 0,
         drop_last: bool = True,
         total_steps: Optional[int] = None,
+        enable_progress_bar: Optional[bool] = True,
     ):
         self.dataset = dataset
         self.dataset_size = len(dataset)
@@ -47,10 +58,17 @@ class _HFBatchReader:
             self.total_samples = default_batch_size * total_steps
         else:
             self.total_samples = self.dataset_size * total_epochs
-        self.progress_bar = tqdm(
-            total=self.total_samples,
-            desc=f"Dataset [{self.name}] Progressing",
-        )
+
+        if enable_progress_bar:
+            from ray.experimental.tqdm_ray import tqdm
+
+            self.progress_bar = tqdm(
+                total=self.total_samples,
+                desc=f"Dataset [{self.name}] Progressing",
+            )
+        else:
+            self.progress_bar = DummyProgressBar()
+
         self.progress_bar.update(self.current_offset)
 
     def read_batch(self, batch_size: int) -> List:
@@ -93,12 +111,13 @@ class SFTDataReader(BufferReader):
         self.response_key = meta.format.response_key
         self.read_batch_size = config.batch_size
         self.dataset = _HFBatchReader(
-            load_dataset(meta.path, name=subset_name, split=self.split, trust_remote_code=True),
+            load_dataset(meta.path, name=subset_name, split=self.split),
             name=meta.name,
             default_batch_size=self.read_batch_size,
             total_epochs=meta.total_epochs,
             drop_last=True,
             total_steps=meta.total_steps,
+            enable_progress_bar=meta.enable_progress_bar,
         )
         self.tokenizer = transformers.AutoTokenizer.from_pretrained(config.tokenizer_path)
 
@@ -174,12 +193,13 @@ class DPODataReader(BufferReader):
         self.rejected_key = meta.format.rejected_key
         self.read_batch_size = config.batch_size
         self.dataset = _HFBatchReader(
-            load_dataset(meta.path, name=subset_name, split=self.split, trust_remote_code=True),
+            load_dataset(meta.path, name=subset_name, split=self.split),
             name=meta.name,
             default_batch_size=self.read_batch_size,
             total_epochs=meta.total_epochs,
             drop_last=True,
             total_steps=meta.total_steps,
+            enable_progress_bar=meta.enable_progress_bar,
         )  # TODO: support resume
         self.tokenizer = transformers.AutoTokenizer.from_pretrained(config.tokenizer_path)
 
@@ -252,13 +272,14 @@ class RolloutDataReader(BufferReader):
         datasets.disable_caching()
         self.read_batch_size = config.batch_size
         self.dataset = _HFBatchReader(
-            load_dataset(meta.path, name=subset_name, split=self.split, trust_remote_code=True),
+            load_dataset(meta.path, name=subset_name, split=self.split),
             name=meta.name,
             default_batch_size=self.read_batch_size,
             total_epochs=self.meta.total_epochs if meta.task_type == TaskType.EXPLORE else 1,
             offset=self.meta.index,
             drop_last=self.meta.task_type == TaskType.EXPLORE,
             total_steps=meta.total_steps,
+            enable_progress_bar=meta.enable_progress_bar,
         )
         self.prompt_key = meta.format.prompt_key
         self.response_key = meta.format.response_key
@@ -307,9 +328,7 @@ class RolloutDataReader(BufferReader):
 class RawDataReader(BufferReader):
     def __init__(self, meta: StorageConfig, config: Optional[BufferConfig]):
         self.returned = False
-        self.dataset = load_dataset(
-            meta.path, name=meta.subset_name, split=meta.split, trust_remote_code=True
-        )
+        self.dataset = load_dataset(meta.path, name=meta.subset_name, split=meta.split)
 
     def __len__(self):
         return len(self.dataset)

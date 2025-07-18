@@ -4,7 +4,6 @@ from typing import Any, Dict, List, Tuple
 
 import numpy as np
 import torch
-from verl.trainer.ppo.ray_trainer import DataProto
 
 from trinity.algorithm.sample_strategy.sample_strategy import (
     SAMPLE_STRATEGY,
@@ -85,12 +84,15 @@ class MixSampleStrategy(SampleStrategy):
         }
 
 
-def to_data_proto_mix(experiences: Experiences, is_expert_mask: torch.tensor) -> DataProto:
+def to_data_proto_mix(experiences: Experiences, is_expert_mask: torch.tensor):
+    from verl.trainer.ppo.ray_trainer import DataProto
+
     attention_mask = experiences.attention_masks
     cumsum = torch.cumsum(attention_mask, dim=-1)
     position_ids = torch.clip(cumsum - 1, 0, None).long()
     batch_dict = {
         "uid": np.array(experiences.group_ids),
+        "unique_ids": np.array(experiences.unique_ids),
         "position_ids": position_ids,
         "input_ids": experiences.tokens.long(),
         "responses": experiences.tokens[:, experiences.prompt_length :].long(),

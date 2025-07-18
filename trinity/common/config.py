@@ -2,6 +2,7 @@
 """Configs for RFT."""
 import os
 from dataclasses import dataclass, field
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from omegaconf import OmegaConf
@@ -102,6 +103,9 @@ class StorageConfig:
     workflow_args: dict = field(default_factory=dict)
     reward_fn_args: dict = field(default_factory=dict)
 
+    # enable progress bar (tqdm) for _HFBatchReader
+    enable_progress_bar: Optional[bool] = True
+
     # get storage from existing experiment
     ray_namespace: Optional[str] = None
 
@@ -174,6 +178,7 @@ class ModelConfig:
     critic_model_path: str = ""
     max_prompt_tokens: Optional[int] = None
     max_response_tokens: Optional[int] = None
+    custom_chat_template: Optional[str] = None
 
 
 @dataclass
@@ -203,6 +208,9 @@ class InferenceModelConfig:
 
     # For Qwen3
     enable_thinking: bool = False
+
+    # For history recording
+    enable_history: bool = False
 
     # For OpenAI API
     enable_openai_api: bool = False
@@ -311,8 +319,6 @@ class ExplorerConfig:
     name: str = EXPLORER_NAME
     # for workflow runner
     # number of workflow runners.
-    # For sync engine (vllm), it should be `1`.
-    # For async engine (vllm_async), it could be a large number.
     runner_per_model: int = 8  # number of runners per each rollout model
     max_timeout: int = 1800  # wait each task for 30 minutes
     max_retry_times: int = 2  # retry each task for 2 times if it fails or timeout
@@ -399,6 +405,8 @@ class Config:
     checkpoint_job_dir: str = ""
     # If not set, automatically generated as f"{config.project}-{config.name}"
     ray_namespace: str = ""
+    # whether to continue training from the last checkpoint in checkpoint_job_dir (if any)
+    continue_from_checkpoint: bool = True
 
     algorithm: AlgorithmConfig = field(default_factory=AlgorithmConfig)
     data_processor: DataProcessorConfig = field(default_factory=DataProcessorConfig)
@@ -713,6 +721,15 @@ class Config:
             self.checkpoint_root_dir = os.path.join(os.getcwd(), self.checkpoint_root_dir)
         # create a job dir at checkpoint_root_dir/project/name
         self.checkpoint_job_dir = os.path.join(self.checkpoint_root_dir, self.project, self.name)
+        # rename the experiment when necessary
+        if not self.continue_from_checkpoint and (
+            os.path.exists(self.checkpoint_job_dir) and os.listdir(self.checkpoint_job_dir)
+        ):
+            ori_name = self.name
+            timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+            self.name = f"{ori_name}_{timestamp}"
+            self.checkpoint_job_dir = f"{self.checkpoint_job_dir}_{timestamp}"
+            logger.warning(f"Experiment [{ori_name}] already exists, renamed as {self.name}.")
         os.makedirs(self.checkpoint_job_dir, exist_ok=True)
 
         # check and update model path
@@ -722,11 +739,6 @@ class Config:
             self.model.critic_model_path = self.model.model_path
 
         # check explorer
-        if (
-            self.explorer.rollout_model.engine_type != "vllm_async"
-            and self.explorer.rollout_model.enable_openai_api
-        ):
-            raise ValueError("OpenAI API server only support `vllm_async` engine.")
         if self.explorer.rollout_model.max_prompt_tokens is None:
             self.explorer.rollout_model.max_prompt_tokens = self.model.max_prompt_tokens
         if self.explorer.rollout_model.max_response_tokens is None:

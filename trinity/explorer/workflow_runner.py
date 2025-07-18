@@ -2,6 +2,7 @@
 """The Workflow Runner Moudle."""
 import time
 import traceback
+import uuid
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import List, Optional
@@ -31,6 +32,7 @@ class WorkflowRunner:
         config: Config,
         model: InferenceModel,
         auxiliary_models: Optional[List[InferenceModel]] = None,
+        runner_id: Optional[int] = None,
     ) -> None:
         self.config = config
         self.experience_buffer = get_buffer_writer(
@@ -52,6 +54,7 @@ class WorkflowRunner:
                 self.auxiliary_models.append(api_client)
         self.logger = get_logger(__name__)
         self.workflow_instance = None
+        self.runner_id = runner_id
 
     def is_alive(self):
         return True
@@ -78,8 +81,11 @@ class WorkflowRunner:
             assert exps is not None and len(exps) > 0, "An empty experience is generated"
             metrics: dict[str, List[float]] = defaultdict(list)
             # set group id
-            for exp in exps:
+            for idx, exp in enumerate(exps):
                 setattr(exp, "group_id", task.group_id)
+                setattr(
+                    exp, "unique_id", f"{task.group_id}/{self.runner_id}/{str(uuid.uuid4())[:6]}"
+                )
 
                 if not hasattr(exp, "info") or exp.info is None:
                     exp.info = {}
