@@ -287,6 +287,9 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         # TODO: compute total training steps
         self.total_training_steps = self.config.trainer.total_training_steps or sys.maxsize
 
+    def upload_state_dict(self):
+        self.actor_rollout_wg.upload_state_dict(self.global_steps)
+
     def train_step(self) -> bool:  # noqa C901
         self.logger.info(f"Training at step {self.global_steps + 1} started.")
         metrics = {}

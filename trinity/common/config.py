@@ -383,6 +383,7 @@ class SynchronizerConfig:
 
     # ! DO NOT SET, automatically calculated
     explorer_world_size: Optional[int] = None
+    ray_namespace: str = ""
 
 
 @dataclass
@@ -732,6 +733,7 @@ class Config:
             self.explorer.rollout_model.max_response_tokens = self.model.max_response_tokens
 
         # check synchronizer
+        self.synchronizer.ray_namespace = self.ray_namespace
         self.synchronizer.explorer_world_size = (
             self.explorer.rollout_model.engine_num
             * self.explorer.rollout_model.tensor_parallel_size

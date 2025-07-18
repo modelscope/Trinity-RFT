@@ -22,9 +22,9 @@ class Trainer:
     def __init__(self, config: Config) -> None:
         self.config = config
         self.logger = get_logger(__name__)
+        self.synchronizer = Synchronizer.get_actor(config)
         self.engine = get_trainer_wrapper(config)
         self.last_trainer_sync_step = 0
-        self.synchronizer = Synchronizer.get_actor(config)
 
     def prepare(self) -> None:
         """Prepare the trainer."""
@@ -85,6 +85,10 @@ class Trainer:
                 f"Trainer synchronizing weights at step {self.engine.train_step_num} end."
             )
             self.last_trainer_sync_step = self.engine.train_step_num
+        elif self.config.synchronizer.sync_method == SyncMethod.CHECKPOINT:
+            pass
+        elif self.config.synchronizer.sync_method == SyncMethod.STATE_DICT:
+            self.engine.upload_state_dict()
         ray.get(self.synchronizer.set_trainer_status.remote(RunningStatus.RUNNING))
 
     def shutdown(self) -> None:
@@ -119,6 +123,10 @@ class TrainEngineWrapper(ABC):
     @abstractmethod
     def sync_weight(self) -> None:
         """Sync the model weight."""
+
+    @abstractmethod
+    def upload_state_dict(self) -> None:
+        """Upload the state dict to Synchronizer."""
 
     @abstractmethod
     def shutdown(self) -> None:

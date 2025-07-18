@@ -95,6 +95,7 @@ class SyncMethod(CaseInsensitiveEnum, metaclass=SyncMethodEnumMeta):
 
     NCCL = "nccl"
     CHECKPOINT = "checkpoint"
+    STATE_DICT = "state_dict"
 
 
 class RunningStatus(Enum):

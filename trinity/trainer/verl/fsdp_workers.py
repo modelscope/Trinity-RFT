@@ -42,7 +42,8 @@ from verl.single_controller.base import Worker
 from verl.single_controller.base.decorator import Dispatch, register
 from verl.utils import hf_processor, hf_tokenizer
 from verl.utils.activation_offload import enable_activation_offloading
-from verl.utils.checkpoint.fsdp_checkpoint_manager import FSDPCheckpointManager
+
+# from verl.utils.checkpoint.fsdp_checkpoint_manager import FSDPCheckpointManager
 from verl.utils.debug import log_gpu_memory_usage
 from verl.utils.device import get_torch_device, is_cuda_available
 from verl.utils.flops_counter import FlopsCounter
@@ -73,6 +74,7 @@ from verl.workers.sharding_manager.fsdp_ulysses import FSDPUlyssesShardingManage
 
 from trinity.common.config import AlgorithmConfig
 from trinity.common.constants import ROLLOUT_WEIGHT_SYNC_GROUP_NAME, SyncMethod
+from trinity.trainer.verl.fsdp_checkpoint_manager import FSDPCheckpointManager
 from trinity.utils.distributed import init_process_group
 
 logger = logging.getLogger(__file__)
@@ -541,14 +543,12 @@ class ActorRolloutRefWorker(Worker):
                 lr_scheduler=self.actor_lr_scheduler,
                 processing_class=self.processor if self.processor is not None else self.tokenizer,
                 checkpoint_contents=self.config.actor.checkpoint.contents,
+                config=self.config.synchronizer,
             )
 
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
     def setup_weight_sync_group(self):
-        if (
-            hasattr(self.config, "synchronizer")
-            and getattr(self.config.synchronizer, "sync_method", None) == SyncMethod.NCCL
-        ):
+        if self.config.synchronizer.sync_method == SyncMethod.NCCL:
             model = self.actor_module_fsdp
             self.named_modules = []
             self.state_dict_meta = []
@@ -608,6 +608,10 @@ class ActorRolloutRefWorker(Worker):
             torch.cuda.synchronize()
         torch.distributed.barrier()
         torch.cuda.empty_cache()
+
+    @register(dispatch_mode=Dispatch.ONE_TO_ALL)
+    def upload_state_dict(self, trainer_step: int):
+        self.checkpoint_manager.upload_state_dict(trainer_step)
 
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
     def set_algorithm(self, algo_config: AlgorithmConfig):
