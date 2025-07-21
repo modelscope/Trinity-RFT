@@ -56,11 +56,6 @@ class Trainer:
 
     def need_sync(self) -> bool:
         """Whether to sync the model weight."""
-        if self.config.synchronizer.sync_method == SyncMethod.CHECKPOINT:
-            ray.get()
-            return False
-
-        # SyncMethod.NCCL
         if self.config.synchronizer.sync_style == SyncStyle.FIXED:
             return self.engine.train_step_num % self.config.synchronizer.sync_interval == 0
         else:
@@ -86,7 +81,8 @@ class Trainer:
             )
             self.last_trainer_sync_step = self.engine.train_step_num
         elif self.config.synchronizer.sync_method == SyncMethod.CHECKPOINT:
-            pass
+            self.engine.save_state_dict()
+            # ray.get(self.synchronizer.set_model_state_dict_with_step_num.remote(self.engine.train_step_num))
         elif self.config.synchronizer.sync_method == SyncMethod.STATE_DICT:
             self.engine.upload_state_dict()
         ray.get(self.synchronizer.set_trainer_status.remote(RunningStatus.RUNNING))
@@ -127,6 +123,10 @@ class TrainEngineWrapper(ABC):
     @abstractmethod
     def upload_state_dict(self) -> None:
         """Upload the state dict to Synchronizer."""
+
+    @abstractmethod
+    def save_state_dict(self) -> None:
+        """Only save the model state dict for Synchronizer."""
 
     @abstractmethod
     def shutdown(self) -> None:

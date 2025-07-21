@@ -398,6 +398,7 @@ class Config:
 
     mode: str = "both"  # `explore`, `train`, `both` or `bench`
     project: str = "Trinity-RFT"
+    group: str = ""
     name: str = "rft"
     # the root dir for checkpoints
     checkpoint_root_dir: str = ""
@@ -438,16 +439,6 @@ class Config:
                 logger.warning(
                     f"`eval_interval` is not a multiple of `sync_interval`; adjusted to the nearest integer={self.explorer.eval_interval}."
                 )
-
-            # check save_interval
-            if self.synchronizer.sync_method == SyncMethod.CHECKPOINT:
-                if self.trainer.save_interval != self.synchronizer.sync_interval:
-                    logger.warning(
-                        f"When `algorithm.algorithm_type` != `dpo` and `synchronizer.sync_method` == `checkpoint`, "
-                        f"`trainer.save_interval` will be set to "
-                        f"`synchronizer.sync_interval = {self.synchronizer.sync_interval}`."
-                    )
-                self.trainer.save_interval = self.synchronizer.sync_interval
 
     def _check_buffer(self) -> None:  # noqa: C901
         # TODO: split this function into different buffer read/writer

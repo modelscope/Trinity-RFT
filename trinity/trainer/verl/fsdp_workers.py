@@ -27,8 +27,7 @@ import psutil
 import torch
 import torch.distributed
 import torch.distributed as dist
-
-# import vllm  # noqa: F401 ; import vllm to set NCCL_CUMEM_ENABLE automatically.
+import vllm  # noqa: F401 ; import vllm to set NCCL_CUMEM_ENABLE automatically.
 from codetiming import Timer
 from omegaconf import DictConfig, OmegaConf, open_dict
 from peft import LoraConfig, TaskType, get_peft_model
@@ -767,7 +766,14 @@ class ActorRolloutRefWorker(Worker):
         return output
 
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
-    def save_checkpoint(self, local_path, hdfs_path=None, global_step=0, max_ckpt_to_keep=None):
+    def save_checkpoint(
+        self,
+        local_path,
+        hdfs_path=None,
+        global_step=0,
+        max_ckpt_to_keep=None,
+        model_state_dict_only=False,
+    ):
         from verl.utils.logger import log_with_rank
 
         # only support save and load ckpt for actor
@@ -781,6 +787,7 @@ class ActorRolloutRefWorker(Worker):
             hdfs_path=hdfs_path,
             global_step=global_step,
             max_ckpt_to_keep=max_ckpt_to_keep,
+            model_state_dict_only=model_state_dict_only,
         )
         dist.barrier()
 

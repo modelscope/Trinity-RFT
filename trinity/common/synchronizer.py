@@ -2,29 +2,32 @@
 
 import asyncio
 import os
+from collections import defaultdict
 from typing import List, Optional
 
 import ray
 
 from trinity.common.config import Config
-from trinity.common.constants import RunningStatus, SyncMethod
+from trinity.common.constants import RunningStatus
 from trinity.common.models.utils import (
     get_checkpoint_dir_with_step_num,
     load_state_dict,
 )
+from trinity.utils.log import get_logger
 
 
 class Synchronizer:
     def __init__(self, config: Config):
+        self.logger = get_logger(__name__)
         self.config = config
         self.trainer_status = RunningStatus.RUNNING
         self.last_trainer_sync_step = 0
         self.explorer_status = RunningStatus.RUNNING
         self.last_explorer_sync_step = 0
-        self.ready_count = 0
         self._ready_condition = asyncio.Condition()
         self.model_state_dict = None
         self.state_dict_version = 0
+        self.checkpoint_shard_count_dict = defaultdict(lambda: 0)
 
     def set_trainer_status(self, status: RunningStatus):
         self.trainer_status = status
@@ -38,13 +41,24 @@ class Synchronizer:
     def get_explorer_status(self) -> RunningStatus:
         return self.explorer_status
 
-    async def set_model_state_dict_with_step_num(self, step_num: Optional[int] = None) -> int:
+    async def set_model_state_dict_with_step_num(
+        self, step_num: Optional[int] = None, world_size: Optional[int] = None
+    ) -> int:
+        if world_size is not None:  # Used for trainer to update model
+            assert step_num is not None
+            self.checkpoint_shard_count_dict[step_num] += 1
+            self.logger.info(
+                f"Synchronizer received checkpoint {self.checkpoint_shard_count_dict[step_num]} of {world_size} shards"
+            )
+            if self.checkpoint_shard_count_dict[step_num] < world_size:
+                return step_num
+
         checkpoint_dir, checkpoint_step_num = get_checkpoint_dir_with_step_num(
             checkpoint_root_path=self.config.checkpoint_job_dir,
             trainer_type=self.config.trainer.trainer_type,
             step_num=step_num,
         )
-        model_state_dict = load_state_dict(os.path.join(checkpoint_dir, "actor"))  # TODO: async
+        model_state_dict = load_state_dict(os.path.join(checkpoint_dir, "actor"))  # TODO: to thread
         await self.set_model_state_dict(model_state_dict, checkpoint_step_num)
         return checkpoint_step_num
 
@@ -52,6 +66,7 @@ class Synchronizer:
         self.model_state_dict = model_state_dict
         async with self._ready_condition:
             self.state_dict_version = trainer_step
+            self.logger.info(f"Set model state dict version to {trainer_step}.")
             self._ready_condition.notify_all()
 
     def get_model_state_dict(self):
@@ -73,11 +88,11 @@ class Synchronizer:
 
     async def wait_new_model_state_dict(self, current_version: int) -> int:
         # wait for the new model state dict; return new version
-        # pass
         async with self._ready_condition:
             if self.state_dict_version <= current_version:
-                await self._ready_condition.wait_for(
-                    lambda: self.state_dict_version > current_version
+                await asyncio.wait_for(
+                    self._ready_condition.wait(),
+                    timeout=self.config.synchronizer.sync_timeout,
                 )
             return self.state_dict_version
 

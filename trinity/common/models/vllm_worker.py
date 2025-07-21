@@ -29,7 +29,6 @@ class WorkerExtension:
         """Init torch process group for model weights update"""
         assert torch.distributed.is_initialized(), "default torch process group must be initialized"
         assert group_name != "", "group name must not be empty"
-        # self.set_state_dict_meta(state_dict_meta)
         self._state_dict_meta = state_dict_meta
         self._update_with_checkpoint = update_with_checkpoint
         self._weight_update_rank = torch.distributed.get_rank() + rank_offset
@@ -58,10 +57,6 @@ class WorkerExtension:
     def update_weight(self):
         """Broadcast weight to all vllm workers from source rank 0 (actor model)"""
         if self._state_dict_meta is None:
-            import time
-
-            time.sleep(20)
-            print(f"Waiting for state dict meta............")
             self._state_dict_meta = ray.get(self.synchronizer.get_state_dict_meta.remote())
         if self._weight_update_rank == 0:
             state_dict, _ = ray.get(self.synchronizer.get_model_state_dict.remote())

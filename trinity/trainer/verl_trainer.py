@@ -149,6 +149,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         self.init_workers()
         self.monitor = MONITOR.get(global_config.monitor.monitor_type)(
             project=config.trainer.project_name,
+            group=config.trainer.group_name,
             name=config.trainer.experiment_name,
             role=global_config.trainer.name,
             config=global_config,
@@ -287,7 +288,22 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         # TODO: compute total training steps
         self.total_training_steps = self.config.trainer.total_training_steps or sys.maxsize
 
-    def upload_state_dict(self):
+    def save_state_dict(self):  # checkpoint sync
+        local_global_step_folder = os.path.join(
+            self.config.trainer.default_local_dir, f"global_step_{self.global_steps}"
+        )
+
+        actor_local_path = os.path.join(local_global_step_folder, "actor")
+        if not os.path.exists(actor_local_path):
+            self.actor_rollout_wg.save_checkpoint(
+                actor_local_path,
+                None,
+                self.global_steps,
+                max_ckpt_to_keep=None,
+                model_state_dict_only=True,
+            )
+
+    def upload_state_dict(self):  # state dict sync
         self.actor_rollout_wg.upload_state_dict(self.global_steps)
 
     def train_step(self) -> bool:  # noqa C901
@@ -366,15 +382,6 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                 actor_output_metrics = reduce_metrics(actor_output.meta_info["metrics"])
                 metrics.update(actor_output_metrics)
 
-            if (
-                self.config.trainer.save_freq > 0
-                and self.global_steps % self.config.trainer.save_freq == 0
-            ):
-                self.logger.info(f"Saving at step {self.global_steps}.")
-                with marked_timer("save_checkpoint", timing_raw):
-                    self._save_checkpoint()
-                self.logger.info(f"Saved at step {self.global_steps}.")
-
         # collect metrics
         if self.algorithm.use_advantage:  # TODO
             metrics.update(compute_data_metrics(batch=batch, use_critic=self.use_critic))
@@ -391,15 +398,18 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         self.monitor.log(data=metrics, step=self.global_steps)
 
         train_status = self.global_steps < self.total_training_steps
-        if not train_status or self.algorithm_manager.need_save(self.global_steps):
-            if (
-                self.config.trainer.save_freq == 0
-                or self.global_steps % self.config.trainer.save_freq != 0
-            ):
-                self.logger.info(f"Saving at step {self.global_steps}.")
-                with marked_timer("save_checkpoint", timing_raw):
-                    self._save_checkpoint()
-                self.logger.info(f"Saved at step {self.global_steps}.")
+        if (
+            not train_status
+            or self.algorithm_manager.need_save(self.global_steps)
+            or (
+                self.config.trainer.save_freq > 0
+                and self.global_steps % self.config.trainer.save_freq == 0
+            )
+        ):
+            self.logger.info(f"Saving at step {self.global_steps}.")
+            with marked_timer("save_checkpoint", timing_raw):
+                self._save_checkpoint()
+            self.logger.info(f"Saved at step {self.global_steps}.")
         self.logger.info(f"Training at step {self.global_steps} finished.")
         return train_status
 

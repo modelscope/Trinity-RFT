@@ -3,7 +3,7 @@
 
 import os
 import re
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Union
 
 import aiohttp
 import ray
@@ -263,12 +263,8 @@ class vLLMRolloutModel(InferenceModel):
                 method, timeout, args, kwargs
             )
 
-    async def sync_model(
-        self, model_version: int, update_weight_args_list: Optional[List[Tuple]] = None
-    ) -> bool:
+    async def sync_model(self, model_version: int) -> bool:
         """Sync model weights to vLLM."""
-        if update_weight_args_list is not None:
-            await self._collective_rpc("set_state_dict_meta", args=(update_weight_args_list,))
         await self._collective_rpc("update_weight")
         self.logger.info("Sync model weights to vLLM successfully.")
         self.model_version = model_version

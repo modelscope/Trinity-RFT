@@ -23,10 +23,6 @@ from trinity.common.constants import (
     SyncStyle,
 )
 from trinity.common.models import create_inference_models
-from trinity.common.models.utils import (
-    get_checkpoint_dir_with_step_num,
-    load_state_dict,
-)
 from trinity.common.synchronizer import Synchronizer
 from trinity.explorer.scheduler import Scheduler
 from trinity.manager.manager import CacheManager
@@ -60,6 +56,7 @@ class Explorer:
         self.scheduler = self._init_scheduler()
         self.monitor = MONITOR.get(self.config.monitor.monitor_type)(
             project=self.config.project,
+            group=self.config.group,
             name=self.config.name,
             role=self.config.explorer.name,
             config=config,
@@ -142,15 +139,23 @@ class Explorer:
     async def _checkpoint_weights_update(self, step_num: Optional[int] = None) -> int:
         step_num = ray.get(self.synchronizer.set_model_state_dict_with_step_num.remote(step_num))
         await asyncio.gather(*[model.sync_model.remote(step_num) for model in self.models])
-        return step_num
+        return step_num  # type: ignore
 
     async def _state_dict_update(self):
-        self.state_dict_version = ray.get(
+        self.logger.info("Start to update state dict.")
+        new_version = ray.get(
             self.synchronizer.wait_new_model_state_dict.remote(self.state_dict_version)
         )
-        await asyncio.gather(
-            *[model.sync_model.remote(self.state_dict_version) for model in self.models]
-        )
+        if new_version > self.state_dict_version:
+            self.logger.info(f"New model state dict version: {new_version}")
+            await asyncio.gather(
+                *[model.sync_model.remote(self.state_dict_version) for model in self.models]
+            )
+            self.state_dict_version = new_version
+        else:
+            self.logger.warning(
+                f"No new model state dict found, current version: {self.state_dict_version}"
+            )
 
     async def _nccl_weights_update(self):
         assert self.state_dict_meta is not None
