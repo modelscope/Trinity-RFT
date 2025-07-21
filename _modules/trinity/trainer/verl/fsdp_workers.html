@@ -123,8 +123,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch.distributed</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch.distributed</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dist</span>
-
-<span class="c1"># import vllm  # noqa: F401 ; import vllm to set NCCL_CUMEM_ENABLE automatically.</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">vllm</span>  <span class="c1"># noqa: F401 ; import vllm to set NCCL_CUMEM_ENABLE automatically.</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">codetiming</span><span class="w"> </span><span class="kn">import</span> <span class="n">Timer</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">omegaconf</span><span class="w"> </span><span class="kn">import</span> <span class="n">DictConfig</span><span class="p">,</span> <span class="n">OmegaConf</span><span class="p">,</span> <span class="n">open_dict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">peft</span><span class="w"> </span><span class="kn">import</span> <span class="n">LoraConfig</span><span class="p">,</span> <span class="n">TaskType</span><span class="p">,</span> <span class="n">get_peft_model</span>
