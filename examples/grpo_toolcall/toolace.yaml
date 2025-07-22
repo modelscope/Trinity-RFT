@@ -34,11 +34,6 @@ buffer:
       name: toolace_buffer
       storage_type: queue
       path: 'sqlite:///toolace.db'
-    # sft_warmup_steps: 0
-    # sft_warmup_dataset: # Uncomment these to enable sft warmup
-    #   name: warmup_data
-    #   storage_type: file
-    #   path: '/PATH/TO/WARMUP_DATA/'
 explorer:
   eval_interval: 50
   runner_num: 32

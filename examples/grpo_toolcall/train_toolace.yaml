@@ -42,7 +42,7 @@ trainer:
   balance_batch: True
   # total_training_steps: null
   # auto: find the last ckpt to resume. If can't find, start from scratch
-  resume_mode: auto # or auto or resume_path if
+  resume_mode: auto # or auto or resume_path
   default_hdfs_dir: null
   remove_previous_ckpt_in_save: False
   del_local_ckpt_after_load: False
