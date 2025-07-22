@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-"""The Workflow Runner Moudle."""
+"""The Workflow Runner Module."""
 import time
 import traceback
-import uuid
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from trinity.buffer import get_buffer_writer
 from trinity.common.config import Config
@@ -25,7 +24,7 @@ class Status:
 
 
 class WorkflowRunner:
-    """A Ray remote actor to run the workflow and put the returned experiences into the buffer."""
+    """A Ray remote actor to run the workflow and generate experiences."""
 
     def __init__(
         self,
@@ -55,6 +54,7 @@ class WorkflowRunner:
         self.logger = get_logger(__name__)
         self.workflow_instance = None
         self.runner_id = runner_id
+        self.return_experiences = self.config.explorer.collect_experiences
 
     def is_alive(self):
         return True
@@ -73,20 +73,18 @@ class WorkflowRunner:
             self.workflow_instance.reset(task)
         return self.workflow_instance.run()
 
-    def run_task(self, task: Task) -> Status:
+    def run_task(self, task: Task) -> Tuple[Status, List[Experience]]:
         """Run the task and return the states."""
+        # TODO: avoid sending the experiences back to the scheduler to reduce the communication overhead
         try:
             st = time.time()
             exps = self._run_task(task)
             assert exps is not None and len(exps) > 0, "An empty experience is generated"
             metrics: dict[str, List[float]] = defaultdict(list)
             # set group id
-            for idx, exp in enumerate(exps):
-                setattr(exp, "group_id", task.group_id)
-                setattr(
-                    exp, "unique_id", f"{task.group_id}/{self.runner_id}/{str(uuid.uuid4())[:6]}"
-                )
-
+            for _, exp in enumerate(exps):
+                exp.eid.batch = task.batch_id
+                exp.eid.task = task.task_id
                 if not hasattr(exp, "info") or exp.info is None:
                     exp.info = {}
                 exp.info["model_version"] = self.model_wrapper.model_version
@@ -102,10 +100,17 @@ class WorkflowRunner:
             if metrics:
                 for k, v in metrics.items():
                     metric[k] = sum(v) / len(v)  # type: ignore
-            if not task.is_eval:
+
+            if task.is_eval:
+                # If the task is an evaluation task, we do not record the experiences to the buffer
+                return Status(True, metric=metric), []
+            elif self.return_experiences:
+                return Status(True, metric=metric), exps
+            else:
                 self.experience_buffer.write(exps)
-            return Status(True, metric=metric)
+                return Status(True, metric=metric), []
+
         except Exception as e:
             error_trace_back = traceback.format_exc()
             self.logger.error(f"WorkflowRunner run task error: {e}\nTraceback:\n{error_trace_back}")
-            return Status(False, metric={"time_per_task": time.time() - st}, message=str(e))
+            return Status(False, metric={"time_per_task": time.time() - st}, message=str(e)), []

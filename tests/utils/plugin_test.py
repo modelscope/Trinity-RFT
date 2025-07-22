@@ -11,7 +11,7 @@ from trinity.utils.plugin_loader import load_plugins
 class PluginActor:
     def run(self):
         my_plugin_cls = WORKFLOWS.get("my_workflow")
-        return my_plugin_cls(None, None).run()
+        return my_plugin_cls(task=None, model=None).run()
 
 
 class TestPluginLoader(unittest.TestCase):
@@ -22,7 +22,7 @@ class TestPluginLoader(unittest.TestCase):
         load_plugins(Path(__file__).resolve().parent / "plugins")
         my_plugin_cls = WORKFLOWS.get("my_workflow")
         self.assertIsNotNone(my_plugin_cls)
-        my_plugin = my_plugin_cls(None, None, None)
+        my_plugin = my_plugin_cls(task=None, model=None, auxiliary_models=None)
         self.assertTrue(my_plugin.__module__.startswith("trinity.plugins"))
         res = my_plugin.run()
         self.assertEqual(res[0], "Hello world")

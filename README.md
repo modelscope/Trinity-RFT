@@ -152,6 +152,12 @@ It is designed to support diverse application scenarios and serve as a unified p
 ### Step 1: installation
 
 
+Requirements:
+- Python version >= 3.10, <= 3.12
+- CUDA version >= 12.4, <= 12.8
+- At least 2 GPUs
+
+
 Installation from source **(recommended)**:
 
 ```shell
@@ -181,13 +187,15 @@ pip install -e .[flash_attn]
 # for zsh
 pip install -e .\[flash_attn\]
 # Try the following command if you encounter errors during flash-attn installation
-# pip install flash-attn -v --no-build-isolation
+# pip install flash-attn==2.8.0.post2 -v --no-build-isolation
 ```
 
 Installation using pip:
 
 ```shell
 pip install trinity-rft==0.2.0
+# install flash-attn separately
+pip install flash-attn==2.8.0.post2
 ```
 
 Installation from docker:
@@ -205,13 +213,6 @@ docker build -f scripts/docker/Dockerfile -t trinity-rft:latest .
 # run the docker image
 docker run -it --gpus all --shm-size="64g" --rm -v $PWD:/workspace -v <root_path_of_data_and_checkpoints>:/data trinity-rft:latest
 ```
-
-
-**Requirements:**
-Python version >= 3.10,
-CUDA version >= 12.4,
-and at least 2 GPUs.
-
 
 ### Step 2: prepare dataset and model
 

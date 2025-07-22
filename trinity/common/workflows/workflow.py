@@ -8,7 +8,6 @@ from dataclasses import asdict, dataclass, field
 from typing import Any, List, Optional, Type, Union
 
 import openai
-import torch
 
 from trinity.common.config import FormatConfig, GenerationConfig
 from trinity.common.experience import Experience
@@ -25,7 +24,7 @@ WORKFLOWS = Registry("workflows")
 
 
 @dataclass
-class Task:
+class Task(dict):
     """A Task class that defines a task and its associated reward function / workflow."""
 
     workflow: Type[Workflow]
@@ -37,7 +36,9 @@ class Task:
     reward_fn: Optional[Type[RewardFn]] = None
     raw_task: Optional[dict] = None  # The raw data sample
 
-    group_id: Optional[str] = None  # for GRPO-like algorithms, automatically assigned
+    # automatically assigned ids
+    batch_id: int = 0
+    task_id: int = 0
 
     def to_workflow(
         self, model: Any, auxiliary_models: Optional[List[openai.OpenAI]] = None
@@ -84,10 +85,12 @@ class Workflow(ABC):
 
     def __init__(
         self,
-        model: ModelWrapper,
+        *,
         task: Task,
+        model: ModelWrapper,
         auxiliary_models: Optional[List[openai.OpenAI]] = None,
     ):
+        self.task = task
         self.model = model
         self.auxiliary_models = auxiliary_models
 
@@ -102,6 +105,7 @@ class Workflow(ABC):
     @abstractmethod
     def run(self) -> List[Experience]:
         """Run workflow and return a list of experiences."""
+        raise NotImplementedError
 
 
 class MultiTurnWorkflow(Workflow):
@@ -111,13 +115,14 @@ class MultiTurnWorkflow(Workflow):
 
     def __init__(
         self,
-        model: ModelWrapper,
+        *,
         task: Task,
+        model: ModelWrapper,
         auxiliary_models: Optional[List[openai.OpenAI]] = None,
     ):
         super().__init__(
-            model=model,
             task=task,
+            model=model,
             auxiliary_models=auxiliary_models,
         )
 
@@ -135,8 +140,6 @@ class MultiTurnWorkflow(Workflow):
         log_probs = log_probs * generation_mask
 
         assert tokens.shape == log_probs.shape
-        # set prompt length to the first 1 in the gen_mask
-        prompt_length = torch.where(generation_mask == 1)[0][0].item()
 
         metrics = {}
         for k, v in info.items():
@@ -145,7 +148,6 @@ class MultiTurnWorkflow(Workflow):
 
         experience = Experience(
             tokens=tokens,
-            prompt_length=prompt_length,
             action_mask=generation_mask,
             reward=reward,
             logprobs=log_probs,
@@ -161,14 +163,15 @@ class SimpleWorkflow(Workflow):
 
     def __init__(
         self,
-        model: ModelWrapper,
+        *,
         task: Task,
+        model: ModelWrapper,
         auxiliary_models: Optional[List[openai.OpenAI]] = None,
     ):
         self.reset(task)
         super().__init__(
-            model=model,
             task=task,
+            model=model,
             auxiliary_models=auxiliary_models,
         )
 
@@ -236,14 +239,15 @@ class MathWorkflow(SimpleWorkflow):
 
     def __init__(
         self,
-        model: ModelWrapper,
+        *,
         task: Task,
+        model: ModelWrapper,
         auxiliary_models: Optional[List[openai.OpenAI]] = None,
     ):
         self.reset(task)
         super().__init__(
-            model=model,
             task=task,
+            model=model,
             auxiliary_models=auxiliary_models,
         )
 

@@ -12,6 +12,7 @@ from typing import List, Optional
 import ray
 import torch
 
+from trinity.algorithm import ADD_STRATEGY
 from trinity.algorithm.algorithm_manager import AlgorithmManager
 from trinity.buffer import get_buffer_writer
 from trinity.buffer.buffer import get_buffer_reader
@@ -78,6 +79,15 @@ class Explorer:
         else:  # nccl mode
             self.state_dict_meta = []
         self.logger.info("Finished initializing Explorer.")
+        self.collect_experiences = self.config.explorer.collect_experiences
+        self.generated_experience_cnt = 0
+        if self.collect_experiences:
+            assert (
+                self.experience_buffer is not None
+            ), "Experience buffer is required when collect_experiences is True."
+            self.add_strategy = ADD_STRATEGY.get(self.config.algorithm.add_strategy)(
+                self.experience_buffer, **self.config.algorithm.add_strategy_args
+            )
 
     async def setup_weight_sync_group(
         self, master_address: str, master_port: int, state_dict_meta: List = None
@@ -289,12 +299,12 @@ class Explorer:
         if self.config.explorer.bench_on_latest_checkpoint:
             self.explore_step_num = await self._checkpoint_weights_update()
             self.eval()
-            await self._log_eval_metrics(prefix="bench")
+            await self._finish_eval_step(prefix="bench")
             return True
 
         # benchmark on base model
         if self.config.explorer.eval_on_startup:
-            await self._log_eval_metrics(prefix="bench")
+            await self._finish_eval_step(prefix="bench")
 
         # benchmark on all checkpoints
         all_ckp_steps = sorted(
@@ -308,16 +318,17 @@ class Explorer:
         for step_num in all_ckp_steps:
             self.explore_step_num = await self._checkpoint_weights_update(step_num=step_num)
             self.eval()
-            await self._log_eval_metrics(prefix="bench")
+            await self._finish_eval_step(prefix="bench")
         return True
 
     async def save_checkpoint(self, sync_weight: bool = False) -> None:
-        # wait for all tasks to complete
-        self.logger.info("Waiting for all tasks to complete")
-        await self.scheduler.wait_all()
-        self.logger.info(f"All tasks before step {self.explore_step_num} have completed.")
+        if not self.config.explorer.collect_experiences:
+            # wait for all tasks to complete
+            self.logger.info("Waiting for all tasks to complete")
+            await self.scheduler.wait_all()
+            self.logger.info(f"All tasks before step {self.explore_step_num} have completed.")
         log_task = asyncio.create_task(
-            self._log_metrics(self.last_sync_step + 1, self.explore_step_num, self.model_version)
+            self._finish_steps(self.last_sync_step + 1, self.explore_step_num, self.model_version)
         )
 
         if sync_weight:
@@ -349,20 +360,25 @@ class Explorer:
             )
         )
 
-    async def _log_metrics(self, start_step: int, end_step: int, model_version: int) -> None:
+    async def _finish_steps(self, start_step: int, end_step: int, model_version: int) -> None:
         for step in range(start_step, end_step + 1):
             self.logger.info(f"Log metrics of step {step}")
-            await self._log_explore_metrics(step=step, model_version=model_version)
-            await self._log_eval_metrics(step=step)
+            await self._finish_explore_step(step=step, model_version=model_version)
+            await self._finish_eval_step(step=step)
 
-    async def _log_explore_metrics(self, step: int, model_version: int) -> None:
-        results = await self.scheduler.get_results(batch_id=step)
-        if results:
-            metric = gather_metrics([status.metric for status in results], "rollout")
+    async def _finish_explore_step(self, step: int, model_version: int) -> None:
+        statuses, exps = await self.scheduler.get_results(batch_id=step)
+        metric = {}
+        if self.config.explorer.collect_experiences:
+            exp_cnt = await self.add_strategy.add(exps, step)
+            self.generated_experience_cnt += exp_cnt
+            metric["rollout/experience_count"] = exp_cnt
+        if statuses:
+            metric.update(gather_metrics([status.metric for status in statuses], "rollout"))
             metric["rollout/model_version"] = model_version
             self.monitor.log(metric, step=step)
 
-    async def _log_eval_metrics(self, step: Optional[int] = None, prefix: str = "eval") -> None:
+    async def _finish_eval_step(self, step: Optional[int] = None, prefix: str = "eval") -> None:
         if not self.pending_eval_tasks:
             return
         step = step or self.explore_step_num
@@ -373,7 +389,7 @@ class Explorer:
             if eval_step != step:
                 return
             self.pending_eval_tasks.popleft()
-            eval_results = await self.scheduler.get_results(f"{step}/{eval_task_name}")
+            eval_results, _ = await self.scheduler.get_results(f"{step}/{eval_task_name}")
             metric.update(
                 gather_metrics(
                     [status.metric for status in eval_results], f"{prefix}/{eval_task_name}"

@@ -145,7 +145,7 @@ class DPOAlgorithm(AlgorithmType):
     @classmethod
     def default_config(cls) -> Dict:
         return {
-            "sample_strategy": "dpo",
+            "sample_strategy": "warmup",
             "policy_loss_fn": "dpo",
             "kl_loss_fn": "k2",
             "entropy_loss_fn": "default",
@@ -153,7 +153,7 @@ class DPOAlgorithm(AlgorithmType):
 
     @classmethod
     def check_config(cls, config: Config) -> None:
-        if config.model == "train":
+        if config.mode == "train":
             if (
                 config.buffer.trainer_input.experience_buffer is None
                 or not config.buffer.trainer_input.experience_buffer.path
