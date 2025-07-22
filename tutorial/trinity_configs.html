@@ -203,6 +203,7 @@
 <span class="w">  </span><span class="nt">kl_penalty_fn</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;none&quot;</span>
 <span class="w">  </span><span class="nt">kl_loss_fn</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;k2&quot;</span>
 <span class="w">  </span><span class="nt">entropy_loss_fn</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;default&quot;</span>
+<span class="w">  </span><span class="nt">add_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -213,6 +214,7 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">kl_penalty_fn</span></code>: The KL penalty function used for computing KL penalty applied in reward.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">kl_loss_fn</span></code>: The KL loss function used for computing KL loss.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">entropy_loss_fn</span></code>: The entropy loss function used for computing entropy loss.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">add_strategy</span></code>: Strategy for adding new experiences to the experience buffer. If set, explorer will collect experiences from workflow runners and pre-process them before adding to the buffer.</p></li>
 </ul>
 </section>
 <hr class="docutils" />

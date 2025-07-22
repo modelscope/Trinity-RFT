@@ -247,12 +247,12 @@
                 <span class="n">tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">apply_chat_template</span><span class="p">(</span>
                     <span class="n">messages</span><span class="p">,</span> <span class="n">add_generation_prompt</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s2">&quot;pt&quot;</span>
                 <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="n">prompt_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">apply_chat_template</span><span class="p">(</span>
+                <span class="n">prompt_tokens_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">apply_chat_template</span><span class="p">(</span>
                     <span class="n">messages</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">add_generation_prompt</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s2">&quot;pt&quot;</span>
                 <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="n">experience</span> <span class="o">=</span> <span class="n">Experience</span><span class="p">(</span>
                     <span class="n">tokens</span><span class="o">=</span><span class="n">tokens</span><span class="p">,</span>
-                    <span class="n">prompt_length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">prompt_tokens</span><span class="p">),</span>
+                    <span class="n">prompt_length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">prompt_tokens_ids</span><span class="p">),</span>
                 <span class="p">)</span>
                 <span class="n">exp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">experience</span><span class="p">)</span>
 
@@ -270,13 +270,13 @@
                     <span class="n">full_messages</span><span class="p">,</span> <span class="n">add_generation_prompt</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s2">&quot;pt&quot;</span>
                 <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
-                <span class="n">prompt_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">apply_chat_template</span><span class="p">(</span>
+                <span class="n">prompt_tokens_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">apply_chat_template</span><span class="p">(</span>
                     <span class="n">prompt_messages</span><span class="p">,</span> <span class="n">add_generation_prompt</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s2">&quot;pt&quot;</span>
                 <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
                 <span class="n">experience</span> <span class="o">=</span> <span class="n">Experience</span><span class="p">(</span>
                     <span class="n">tokens</span><span class="o">=</span><span class="n">tokens</span><span class="p">,</span>
-                    <span class="n">prompt_length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">prompt_tokens</span><span class="p">),</span>
+                    <span class="n">prompt_length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">prompt_tokens_ids</span><span class="p">),</span>
                 <span class="p">)</span>
                 <span class="n">exp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">experience</span><span class="p">)</span>
 
@@ -286,10 +286,10 @@
                 <span class="n">prompt</span> <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt_key</span><span class="p">]</span>
                 <span class="n">response</span> <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">response_key</span><span class="p">]</span>
                 <span class="n">tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">(</span><span class="n">prompt</span> <span class="o">+</span> <span class="n">response</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s2">&quot;pt&quot;</span><span class="p">)[</span><span class="s2">&quot;input_ids&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-                <span class="n">prompt_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s2">&quot;pt&quot;</span><span class="p">)[</span><span class="s2">&quot;input_ids&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">prompt_tokens_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s2">&quot;pt&quot;</span><span class="p">)[</span><span class="s2">&quot;input_ids&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
                 <span class="n">experience</span> <span class="o">=</span> <span class="n">Experience</span><span class="p">(</span>
                     <span class="n">tokens</span><span class="o">=</span><span class="n">tokens</span><span class="p">,</span>
-                    <span class="n">prompt_length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">prompt_tokens</span><span class="p">),</span>
+                    <span class="n">prompt_length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">prompt_tokens_ids</span><span class="p">),</span>
                 <span class="p">)</span>
                 <span class="n">exp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">experience</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -376,7 +376,6 @@
             <span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="n">prompt_length</span><span class="p">:]</span>
             <span class="n">experience</span> <span class="o">=</span> <span class="n">Experience</span><span class="p">(</span>
                 <span class="n">tokens</span><span class="o">=</span><span class="n">prompt_tokens</span><span class="p">,</span>
-                <span class="n">prompt_length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">prompt_tokens</span><span class="p">),</span>
                 <span class="n">chosen</span><span class="o">=</span><span class="n">chosen_tokens</span><span class="p">,</span>
                 <span class="n">rejected</span><span class="o">=</span><span class="n">rejected_tokens</span><span class="p">,</span>
             <span class="p">)</span>

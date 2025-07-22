@@ -100,7 +100,7 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">aiohttp</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ray</span>
@@ -128,7 +128,6 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        config (Config): The config.</span>
-<span class="sd">        kwargs (dict): The keyword arguments for the engine.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="vLLMRolloutModel.__init__">
@@ -207,7 +206,7 @@
 
 <div class="viewcode-block" id="vLLMRolloutModel.chat">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.chat">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">chat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">chat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Chat with the model with a list of messages in async.</span>
 
 <span class="sd">        Args:</span>
@@ -241,7 +240,7 @@
 
 <div class="viewcode-block" id="vLLMRolloutModel.generate">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.generate">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate a response from the provided prompt in async.</span>
 
 <span class="sd">        Args:</span>
@@ -337,7 +336,6 @@
         <span class="n">logprobs</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">logprobs</span><span class="p">(</span><span class="n">token_ids</span><span class="o">=</span><span class="n">token_ids</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">Experience</span><span class="p">(</span>
             <span class="n">tokens</span><span class="o">=</span><span class="n">token_ids</span><span class="p">,</span>
-            <span class="n">prompt_length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">token_ids</span><span class="p">),</span>
             <span class="n">logprobs</span><span class="o">=</span><span class="n">logprobs</span><span class="p">,</span>
             <span class="n">action_mask</span><span class="o">=</span><span class="n">action_mask</span><span class="p">,</span>
         <span class="p">)</span></div>

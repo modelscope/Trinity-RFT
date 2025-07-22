@@ -261,32 +261,6 @@
         <span class="k">return</span> <span class="p">{}</span></div>
 </div>
 
-
-
-<div class="viewcode-block" id="DPOSampleStrategy">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.html#trinity.algorithm.DPOSampleStrategy">[docs]</a>
-<span class="nd">@SAMPLE_STRATEGY</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;dpo&quot;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">DPOSampleStrategy</span><span class="p">(</span><span class="n">WarmupSampleStrategy</span><span class="p">):</span>
-<div class="viewcode-block" id="DPOSampleStrategy.sample">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.html#trinity.algorithm.DPOSampleStrategy.sample">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">]:</span>
-        <span class="n">metrics</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="s2">&quot;read_time&quot;</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">step</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sft_warmup_steps</span><span class="p">:</span>
-                <span class="n">exp_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sft_buffer</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">exp_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exp_buffer</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-            <span class="n">repr_samples</span> <span class="o">=</span> <span class="n">representative_sample</span><span class="p">(</span><span class="n">exp_list</span><span class="p">)</span>
-        <span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="s2">&quot;gather_time&quot;</span><span class="p">):</span>
-            <span class="n">exps</span> <span class="o">=</span> <span class="n">Experiences</span><span class="o">.</span><span class="n">gather_dpo_experiences</span><span class="p">(</span><span class="n">exp_list</span><span class="p">,</span> <span class="n">pad_token_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pad_token_id</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer_type</span> <span class="o">==</span> <span class="s2">&quot;verl&quot;</span><span class="p">:</span>
-            <span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="s2">&quot;convert_time&quot;</span><span class="p">):</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="n">to_data_proto</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">repr_samples</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;backend </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer_type</span><span class="si">}</span><span class="s2"> is not supported&quot;</span><span class="p">)</span></div>
-</div>
-
 </pre></div>
 
            </div>

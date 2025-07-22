@@ -106,6 +106,8 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-trinity.buffer">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#trinity.buffer.BufferReader"><code class="docutils literal notranslate"><span class="pre">BufferReader</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#trinity.buffer.BufferWriter"><code class="docutils literal notranslate"><span class="pre">BufferWriter</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#trinity.buffer.get_buffer_reader"><code class="docutils literal notranslate"><span class="pre">get_buffer_reader()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#trinity.buffer.get_buffer_writer"><code class="docutils literal notranslate"><span class="pre">get_buffer_writer()</span></code></a></li>
 </ul>
@@ -673,6 +675,66 @@ StorageType.QUEUE instead.</p>
 </section>
 <section id="module-trinity.buffer">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-trinity.buffer" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="trinity.buffer.BufferReader">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.buffer.</span></span><span class="sig-name descname"><span class="pre">BufferReader</span></span><a class="reference internal" href="../_modules/trinity/buffer/buffer_reader.html#BufferReader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.BufferReader" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Interface of the buffer reader.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.buffer.BufferReader.read">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.constants.ReadStrategy" title="trinity.common.constants.ReadStrategy"><span class="pre">ReadStrategy</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/buffer_reader.html#BufferReader.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.BufferReader.read" title="Link to this definition"></a></dt>
+<dd><p>Read from buffer.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="trinity.buffer.BufferWriter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.buffer.</span></span><span class="sig-name descname"><span class="pre">BufferWriter</span></span><a class="reference internal" href="../_modules/trinity/buffer/buffer_writer.html#BufferWriter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.BufferWriter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Interface of the buffer writer.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.buffer.BufferWriter.write">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/buffer_writer.html#BufferWriter.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.BufferWriter.write" title="Link to this definition"></a></dt>
+<dd><p>Write to buffer.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.buffer.BufferWriter.write_async">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">write_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/buffer_writer.html#BufferWriter.write_async"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.BufferWriter.write_async" title="Link to this definition"></a></dt>
+<dd><p>Write to buffer asynchronously.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.buffer.BufferWriter.acquire">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">acquire</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/buffer_writer.html#BufferWriter.acquire"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.BufferWriter.acquire" title="Link to this definition"></a></dt>
+<dd><p>Acquire the buffer writer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The reference count of the buffer after acquiring.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><cite>int</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.buffer.BufferWriter.release">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">release</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/buffer_writer.html#BufferWriter.release"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.BufferWriter.release" title="Link to this definition"></a></dt>
+<dd><p>Release the buffer writer. After release, the buffer writer can not be used again.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The reference count of the buffer after releasing.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><cite>int</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="trinity.buffer.get_buffer_reader">
 <span class="sig-prename descclassname"><span class="pre">trinity.buffer.</span></span><span class="sig-name descname"><span class="pre">get_buffer_reader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">storage_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.config.StorageConfig" title="trinity.common.config.StorageConfig"><span class="pre">StorageConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.config.BufferConfig" title="trinity.common.config.BufferConfig"><span class="pre">BufferConfig</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#trinity.buffer.buffer_reader.BufferReader" title="trinity.buffer.buffer_reader.BufferReader"><span class="pre">BufferReader</span></a></span></span><a class="reference internal" href="../_modules/trinity/buffer/buffer.html#get_buffer_reader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.get_buffer_reader" title="Link to this definition"></a></dt>

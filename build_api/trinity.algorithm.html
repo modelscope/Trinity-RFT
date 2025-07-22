@@ -19,7 +19,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="trinity.algorithm.advantage_fn" href="trinity.algorithm.advantage_fn.html" />
+    <link rel="next" title="trinity.algorithm.add_strategy" href="trinity.algorithm.add_strategy.html" />
     <link rel="prev" title="trinity.trainer.verl" href="trinity.trainer.verl.html" /> 
 </head>
 
@@ -68,6 +68,7 @@
 <li class="toctree-l1"><a class="reference internal" href="trinity.trainer.html">trinity.trainer</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">trinity.algorithm</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.add_strategy.html">trinity.algorithm.add_strategy</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.html">trinity.algorithm.advantage_fn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.entropy_loss_fn.html">trinity.algorithm.entropy_loss_fn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.kl_fn.html">trinity.algorithm.kl_fn</a></li>
@@ -110,6 +111,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#trinity.algorithm.KLFn"><code class="docutils literal notranslate"><span class="pre">KLFn</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#trinity.algorithm.EntropyLossFn"><code class="docutils literal notranslate"><span class="pre">EntropyLossFn</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#trinity.algorithm.SampleStrategy"><code class="docutils literal notranslate"><span class="pre">SampleStrategy</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#trinity.algorithm.AddStrategy"><code class="docutils literal notranslate"><span class="pre">AddStrategy</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -149,6 +151,41 @@
 <h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="trinity.algorithm.add_strategy.html">trinity.algorithm.add_strategy</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="trinity.algorithm.add_strategy.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.algorithm.add_strategy.html#module-trinity.algorithm.add_strategy.add_strategy">trinity.algorithm.add_strategy.add_strategy module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.add_strategy.html#trinity.algorithm.add_strategy.add_strategy.AddStrategy"><code class="docutils literal notranslate"><span class="pre">AddStrategy</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.add_strategy.html#trinity.algorithm.add_strategy.add_strategy.AddStrategy.__init__"><code class="docutils literal notranslate"><span class="pre">AddStrategy.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.add_strategy.html#trinity.algorithm.add_strategy.add_strategy.AddStrategy.add"><code class="docutils literal notranslate"><span class="pre">AddStrategy.add()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.add_strategy.html#trinity.algorithm.add_strategy.add_strategy.AddStrategy.default_args"><code class="docutils literal notranslate"><span class="pre">AddStrategy.default_args()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.add_strategy.html#trinity.algorithm.add_strategy.add_strategy.RewardVarianceAddStrategy"><code class="docutils literal notranslate"><span class="pre">RewardVarianceAddStrategy</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.add_strategy.html#trinity.algorithm.add_strategy.add_strategy.RewardVarianceAddStrategy.__init__"><code class="docutils literal notranslate"><span class="pre">RewardVarianceAddStrategy.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.add_strategy.html#trinity.algorithm.add_strategy.add_strategy.RewardVarianceAddStrategy.add"><code class="docutils literal notranslate"><span class="pre">RewardVarianceAddStrategy.add()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.add_strategy.html#trinity.algorithm.add_strategy.add_strategy.RewardVarianceAddStrategy.default_args"><code class="docutils literal notranslate"><span class="pre">RewardVarianceAddStrategy.default_args()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.add_strategy.html#trinity.algorithm.add_strategy.add_strategy.group_by"><code class="docutils literal notranslate"><span class="pre">group_by()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.algorithm.add_strategy.html#module-trinity.algorithm.add_strategy">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.add_strategy.html#trinity.algorithm.add_strategy.AddStrategy"><code class="docutils literal notranslate"><span class="pre">AddStrategy</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.add_strategy.html#trinity.algorithm.add_strategy.AddStrategy.__init__"><code class="docutils literal notranslate"><span class="pre">AddStrategy.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.add_strategy.html#trinity.algorithm.add_strategy.AddStrategy.add"><code class="docutils literal notranslate"><span class="pre">AddStrategy.add()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.add_strategy.html#trinity.algorithm.add_strategy.AddStrategy.default_args"><code class="docutils literal notranslate"><span class="pre">AddStrategy.default_args()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.add_strategy.html#trinity.algorithm.add_strategy.RewardVarianceAddStrategy"><code class="docutils literal notranslate"><span class="pre">RewardVarianceAddStrategy</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.add_strategy.html#trinity.algorithm.add_strategy.RewardVarianceAddStrategy.__init__"><code class="docutils literal notranslate"><span class="pre">RewardVarianceAddStrategy.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.add_strategy.html#trinity.algorithm.add_strategy.RewardVarianceAddStrategy.add"><code class="docutils literal notranslate"><span class="pre">RewardVarianceAddStrategy.add()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.add_strategy.html#trinity.algorithm.add_strategy.RewardVarianceAddStrategy.default_args"><code class="docutils literal notranslate"><span class="pre">RewardVarianceAddStrategy.default_args()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="trinity.algorithm.advantage_fn.html">trinity.algorithm.advantage_fn</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#module-trinity.algorithm.advantage_fn.advantage_fn">trinity.algorithm.advantage_fn.advantage_fn module</a><ul>
@@ -454,10 +491,6 @@
 <li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.sample_strategy.html#trinity.algorithm.sample_strategy.sample_strategy.DefaultSampleStrategy.sample"><code class="docutils literal notranslate"><span class="pre">DefaultSampleStrategy.sample()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.sample_strategy.html#trinity.algorithm.sample_strategy.sample_strategy.DefaultSampleStrategy.warmup_state"><code class="docutils literal notranslate"><span class="pre">DefaultSampleStrategy.warmup_state()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.sample_strategy.html#trinity.algorithm.sample_strategy.sample_strategy.DefaultSampleStrategy.default_args"><code class="docutils literal notranslate"><span class="pre">DefaultSampleStrategy.default_args()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.sample_strategy.html#trinity.algorithm.sample_strategy.sample_strategy.DPOSampleStrategy"><code class="docutils literal notranslate"><span class="pre">DPOSampleStrategy</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.sample_strategy.html#trinity.algorithm.sample_strategy.sample_strategy.DPOSampleStrategy.sample"><code class="docutils literal notranslate"><span class="pre">DPOSampleStrategy.sample()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -1122,6 +1155,51 @@ while handling parameter name mapping between different training frameworks.</p>
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="trinity.algorithm.AddStrategy">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.</span></span><span class="sig-name descname"><span class="pre">AddStrategy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">writer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.buffer.html#trinity.buffer.buffer_writer.BufferWriter" title="trinity.buffer.buffer_writer.BufferWriter"><span class="pre">BufferWriter</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/add_strategy/add_strategy.html#AddStrategy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.AddStrategy" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.AddStrategy.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">writer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.buffer.html#trinity.buffer.buffer_writer.BufferWriter" title="trinity.buffer.buffer_writer.BufferWriter"><span class="pre">BufferWriter</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/add_strategy/add_strategy.html#AddStrategy.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.AddStrategy.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.AddStrategy.add">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiences</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/add_strategy/add_strategy.html#AddStrategy.add"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.AddStrategy.add" title="Link to this definition"></a></dt>
+<dd><p>Add experiences to the buffer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>experiences</strong> (<cite>Experience</cite>) – The experiences to be added.</p></li>
+<li><p><strong>step</strong> (<cite>int</cite>) – The current step number.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The number of experiences added to the buffer.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><cite>int</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.AddStrategy.default_args">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/add_strategy/add_strategy.html#AddStrategy.default_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.AddStrategy.default_args" title="Link to this definition"></a></dt>
+<dd><p>Get the default arguments of the add strategy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The default arguments.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><cite>dict</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 </section>
 
@@ -1130,7 +1208,7 @@ while handling parameter name mapping between different training frameworks.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="trinity.trainer.verl.html" class="btn btn-neutral float-left" title="trinity.trainer.verl" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="trinity.algorithm.advantage_fn.html" class="btn btn-neutral float-right" title="trinity.algorithm.advantage_fn" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="trinity.algorithm.add_strategy.html" class="btn btn-neutral float-right" title="trinity.algorithm.add_strategy" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
