@@ -11,6 +11,14 @@ trinity.common.workflows.customized\_math\_workflows module
    :undoc-members:
    :show-inheritance:
 
+trinity.common.workflows.customized\_toolcall\_workflows module
+---------------------------------------------------------------
+
+.. automodule:: trinity.common.workflows.customized_toolcall_workflows
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 trinity.common.workflows.math\_rm\_workflow module
 --------------------------------------------------
 

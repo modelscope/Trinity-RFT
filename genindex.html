@@ -774,10 +774,10 @@
         <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Ref.checkpoint">(trinity.common.verl_config.Ref attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.html#trinity.common.config.Config.checkpoint_job_dir">checkpoint_job_dir (trinity.common.config.Config attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.html#trinity.common.config.Config.checkpoint_root_dir">checkpoint_root_dir (trinity.common.config.Config attribute)</a>
 </li>
       <li><a href="build_api/trinity.buffer.schema.html#trinity.buffer.schema.sql_schema.DPODataModel.chosen">chosen (trinity.buffer.schema.sql_schema.DPODataModel attribute)</a>
@@ -832,6 +832,10 @@
 </li>
       <li><a href="build_api/trinity.utils.html#trinity.utils.eval_utils.compute_score">compute_score() (in module trinity.utils.eval_utils)</a>
 </li>
+      <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.customized_toolcall_workflows.compute_score_v0">compute_score_v0() (in module trinity.common.workflows.customized_toolcall_workflows)</a>
+</li>
+      <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.customized_toolcall_workflows.compute_toolcall_reward">compute_toolcall_reward() (in module trinity.common.workflows.customized_toolcall_workflows)</a>
+</li>
       <li><a href="build_api/trinity.trainer.verl.html#trinity.trainer.verl.fsdp_workers.CriticWorker.compute_values">compute_values() (trinity.trainer.verl.fsdp_workers.CriticWorker method)</a>
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.Config">Config (class in trinity.common.config)</a>
@@ -841,6 +845,8 @@
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.config_registry.ConfigRegistry">ConfigRegistry (class in trinity.manager.config_registry.config_registry)</a>
 </li>
       <li><a href="build_api/trinity.algorithm.html#trinity.algorithm.algorithm.ConstantMeta">ConstantMeta (class in trinity.algorithm.algorithm)</a>
+</li>
+      <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.customized_toolcall_workflows.construct_prompt">construct_prompt() (in module trinity.common.workflows.customized_toolcall_workflows)</a>
 </li>
       <li><a href="build_api/trinity.buffer.schema.html#trinity.buffer.schema.sql_schema.DPODataModel.consumed">consumed (trinity.buffer.schema.sql_schema.DPODataModel attribute)</a>
 
@@ -1282,6 +1288,8 @@
 </li>
       <li><a href="build_api/trinity.utils.html#trinity.utils.eval_utils.extract_solution">extract_solution() (in module trinity.utils.eval_utils)</a>
 </li>
+      <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.customized_toolcall_workflows.extract_solution_v0">extract_solution_v0() (in module trinity.common.workflows.customized_toolcall_workflows)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -1329,7 +1337,11 @@
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.customized_math_workflows.MathBoxedWorkflow.format_prompt">format_prompt() (trinity.common.workflows.customized_math_workflows.MathBoxedWorkflow method)</a>
 
       <ul>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.customized_toolcall_workflows.ToolCallWorkflow.format_prompt">(trinity.common.workflows.customized_toolcall_workflows.ToolCallWorkflow method)</a>
+</li>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.MathBoxedWorkflow.format_prompt">(trinity.common.workflows.MathBoxedWorkflow method)</a>
+</li>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.ToolCallWorkflow.format_prompt">(trinity.common.workflows.ToolCallWorkflow method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -2082,6 +2094,8 @@
 </li>
         <li><a href="build_api/trinity.common.workflows.html#module-trinity.common.workflows.customized_math_workflows">trinity.common.workflows.customized_math_workflows</a>
 </li>
+        <li><a href="build_api/trinity.common.workflows.html#module-trinity.common.workflows.customized_toolcall_workflows">trinity.common.workflows.customized_toolcall_workflows</a>
+</li>
         <li><a href="build_api/trinity.common.workflows.html#module-trinity.common.workflows.math_rm_workflow">trinity.common.workflows.math_rm_workflow</a>
 </li>
         <li><a href="build_api/trinity.common.workflows.html#module-trinity.common.workflows.step_wise_workflow">trinity.common.workflows.step_wise_workflow</a>
@@ -2578,11 +2592,15 @@
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.customized_math_workflows.MathBoxedWorkflow.reset">reset() (trinity.common.workflows.customized_math_workflows.MathBoxedWorkflow method)</a>
 
       <ul>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.customized_toolcall_workflows.ToolCallWorkflow.reset">(trinity.common.workflows.customized_toolcall_workflows.ToolCallWorkflow method)</a>
+</li>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.MathBoxedWorkflow.reset">(trinity.common.workflows.MathBoxedWorkflow method)</a>
 </li>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.MathWorkflow.reset">(trinity.common.workflows.MathWorkflow method)</a>
 </li>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.SimpleWorkflow.reset">(trinity.common.workflows.SimpleWorkflow method)</a>
+</li>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.ToolCallWorkflow.reset">(trinity.common.workflows.ToolCallWorkflow method)</a>
 </li>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.WebShopWorkflow.reset">(trinity.common.workflows.WebShopWorkflow method)</a>
 </li>
@@ -2732,6 +2750,8 @@
       <ul>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.customized_math_workflows.MathBoxedWorkflow.run">(trinity.common.workflows.customized_math_workflows.MathBoxedWorkflow method)</a>
 </li>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.customized_toolcall_workflows.ToolCallWorkflow.run">(trinity.common.workflows.customized_toolcall_workflows.ToolCallWorkflow method)</a>
+</li>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.math_rm_workflow.MathRMWorkflow.run">(trinity.common.workflows.math_rm_workflow.MathRMWorkflow method)</a>
 </li>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.MathBoxedWorkflow.run">(trinity.common.workflows.MathBoxedWorkflow method)</a>
@@ -2745,6 +2765,8 @@
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.step_wise_workflow.RewardPropagationWorkflow.run">(trinity.common.workflows.step_wise_workflow.RewardPropagationWorkflow method)</a>
 </li>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.step_wise_workflow.StepWiseRewardWorkflow.run">(trinity.common.workflows.step_wise_workflow.StepWiseRewardWorkflow method)</a>
+</li>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.ToolCallWorkflow.run">(trinity.common.workflows.ToolCallWorkflow method)</a>
 </li>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.WebShopWorkflow.run">(trinity.common.workflows.WebShopWorkflow method)</a>
 </li>
@@ -3473,6 +3495,12 @@
         <li><a href="build_api/trinity.common.html#trinity.common.experience.Experiences.tokens">(trinity.common.experience.Experiences attribute)</a>
 </li>
       </ul></li>
+      <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.ToolCallWorkflow">ToolCallWorkflow (class in trinity.common.workflows)</a>
+
+      <ul>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.customized_toolcall_workflows.ToolCallWorkflow">(class in trinity.common.workflows.customized_toolcall_workflows)</a>
+</li>
+      </ul></li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.GenerationConfig.top_k">top_k (trinity.common.config.GenerationConfig attribute)</a>
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.GenerationConfig.top_p">top_p (trinity.common.config.GenerationConfig attribute)</a>
@@ -4078,6 +4106,13 @@
 </li>
       </ul></li>
       <li>
+    trinity.common.workflows.customized_toolcall_workflows
+
+      <ul>
+        <li><a href="build_api/trinity.common.workflows.html#module-trinity.common.workflows.customized_toolcall_workflows">module</a>
+</li>
+      </ul></li>
+      <li>
     trinity.common.workflows.math_rm_workflow
 
       <ul>
@@ -4454,8 +4489,12 @@
 </li>
       <li><a href="build_api/trinity.utils.html#trinity.utils.eval_utils.validate_equation">validate_equation() (in module trinity.utils.eval_utils)</a>
 </li>
+      <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.customized_toolcall_workflows.validate_format">validate_format() (in module trinity.common.workflows.customized_toolcall_workflows)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.customized_toolcall_workflows.validate_result">validate_result() (in module trinity.common.workflows.customized_toolcall_workflows)</a>
+</li>
       <li><a href="build_api/trinity.utils.html#trinity.utils.eval_utils.validate_think_pattern">validate_think_pattern() (in module trinity.utils.eval_utils)</a>
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.verl_config.veRLConfig">veRLConfig (class in trinity.common.verl_config)</a>

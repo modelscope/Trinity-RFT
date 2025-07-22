@@ -144,6 +144,68 @@
 </dd></dl>
 
 </section>
+<section id="module-trinity.common.workflows.customized_toolcall_workflows">
+<span id="trinity-common-workflows-customized-toolcall-workflows-module"></span><h2>trinity.common.workflows.customized_toolcall_workflows module<a class="headerlink" href="#module-trinity.common.workflows.customized_toolcall_workflows" title="Link to this heading"></a></h2>
+<p>We include the customized toolcall workflows in this file.
+Code adapted from <a class="reference external" href="https://github.com/NVlabs/Tool-N1">https://github.com/NVlabs/Tool-N1</a>
+Reference Paper <a class="reference external" href="https://arxiv.org/pdf/2505.00024">https://arxiv.org/pdf/2505.00024</a> for further details.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.common.workflows.customized_toolcall_workflows.construct_prompt">
+<span class="sig-prename descclassname"><span class="pre">trinity.common.workflows.customized_toolcall_workflows.</span></span><span class="sig-name descname"><span class="pre">construct_prompt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/customized_toolcall_workflows.html#construct_prompt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.customized_toolcall_workflows.construct_prompt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.common.workflows.customized_toolcall_workflows.validate_result">
+<span class="sig-prename descclassname"><span class="pre">trinity.common.workflows.customized_toolcall_workflows.</span></span><span class="sig-name descname"><span class="pre">validate_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">answer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/customized_toolcall_workflows.html#validate_result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.customized_toolcall_workflows.validate_result" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.common.workflows.customized_toolcall_workflows.validate_format">
+<span class="sig-prename descclassname"><span class="pre">trinity.common.workflows.customized_toolcall_workflows.</span></span><span class="sig-name descname"><span class="pre">validate_format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tool_call_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/customized_toolcall_workflows.html#validate_format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.customized_toolcall_workflows.validate_format" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.common.workflows.customized_toolcall_workflows.extract_solution_v0">
+<span class="sig-prename descclassname"><span class="pre">trinity.common.workflows.customized_toolcall_workflows.</span></span><span class="sig-name descname"><span class="pre">extract_solution_v0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tool_call_str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/customized_toolcall_workflows.html#extract_solution_v0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.customized_toolcall_workflows.extract_solution_v0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.common.workflows.customized_toolcall_workflows.compute_score_v0">
+<span class="sig-prename descclassname"><span class="pre">trinity.common.workflows.customized_toolcall_workflows.</span></span><span class="sig-name descname"><span class="pre">compute_score_v0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">solution_str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ground_truth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_print</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/customized_toolcall_workflows.html#compute_score_v0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.customized_toolcall_workflows.compute_score_v0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.common.workflows.customized_toolcall_workflows.compute_toolcall_reward">
+<span class="sig-prename descclassname"><span class="pre">trinity.common.workflows.customized_toolcall_workflows.</span></span><span class="sig-name descname"><span class="pre">compute_toolcall_reward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">solution_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ground_truth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/trinity/common/workflows/customized_toolcall_workflows.html#compute_toolcall_reward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.customized_toolcall_workflows.compute_toolcall_reward" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="trinity.common.workflows.customized_toolcall_workflows.ToolCallWorkflow">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.common.workflows.customized_toolcall_workflows.</span></span><span class="sig-name descname"><span class="pre">ToolCallWorkflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#trinity.common.workflows.workflow.Task" title="trinity.common.workflows.workflow.Task"><span class="pre">Task</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.models.html#trinity.common.models.model.ModelWrapper" title="trinity.common.models.model.ModelWrapper"><span class="pre">ModelWrapper</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">OpenAI</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/customized_toolcall_workflows.html#ToolCallWorkflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.customized_toolcall_workflows.ToolCallWorkflow" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#trinity.common.workflows.workflow.SimpleWorkflow" title="trinity.common.workflows.workflow.SimpleWorkflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleWorkflow</span></code></a></p>
+<p>A workflow for toolcall tasks.
+Prompt construction and reward function from <a class="reference external" href="https://github.com/NVlabs/Tool-N1">https://github.com/NVlabs/Tool-N1</a></p>
+<p>Only support qwen model for now. You can change the prompt construction and reward calculation by yourself for other models.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.workflows.customized_toolcall_workflows.ToolCallWorkflow.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#trinity.common.workflows.workflow.Task" title="trinity.common.workflows.workflow.Task"><span class="pre">Task</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/customized_toolcall_workflows.html#ToolCallWorkflow.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.customized_toolcall_workflows.ToolCallWorkflow.reset" title="Link to this definition"></a></dt>
+<dd><p>Reset the workflow.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.workflows.customized_toolcall_workflows.ToolCallWorkflow.format_prompt">
+<span class="sig-name descname"><span class="pre">format_prompt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/customized_toolcall_workflows.html#ToolCallWorkflow.format_prompt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.customized_toolcall_workflows.ToolCallWorkflow.format_prompt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.workflows.customized_toolcall_workflows.ToolCallWorkflow.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/workflows/customized_toolcall_workflows.html#ToolCallWorkflow.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.customized_toolcall_workflows.ToolCallWorkflow.run" title="Link to this definition"></a></dt>
+<dd><p>Run workflow and return a list of experiences.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
 <section id="module-trinity.common.workflows.math_rm_workflow">
 <span id="trinity-common-workflows-math-rm-workflow-module"></span><h2>trinity.common.workflows.math_rm_workflow module<a class="headerlink" href="#module-trinity.common.workflows.math_rm_workflow" title="Link to this heading"></a></h2>
 <p>We include the math workflow with rm-gallery reward in this file.</p>
@@ -822,6 +884,32 @@ applications at low cost.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.common.workflows.MathRMWorkflow.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/workflows/math_rm_workflow.html#MathRMWorkflow.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.MathRMWorkflow.run" title="Link to this definition"></a></dt>
+<dd><p>Run workflow and return a list of experiences.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="trinity.common.workflows.ToolCallWorkflow">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.common.workflows.</span></span><span class="sig-name descname"><span class="pre">ToolCallWorkflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#trinity.common.workflows.workflow.Task" title="trinity.common.workflows.workflow.Task"><span class="pre">Task</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.models.html#trinity.common.models.model.ModelWrapper" title="trinity.common.models.model.ModelWrapper"><span class="pre">ModelWrapper</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">OpenAI</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/customized_toolcall_workflows.html#ToolCallWorkflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.ToolCallWorkflow" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#trinity.common.workflows.workflow.SimpleWorkflow" title="trinity.common.workflows.workflow.SimpleWorkflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleWorkflow</span></code></a></p>
+<p>A workflow for toolcall tasks.
+Prompt construction and reward function from <a class="reference external" href="https://github.com/NVlabs/Tool-N1">https://github.com/NVlabs/Tool-N1</a></p>
+<p>Only support qwen model for now. You can change the prompt construction and reward calculation by yourself for other models.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.workflows.ToolCallWorkflow.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#trinity.common.workflows.workflow.Task" title="trinity.common.workflows.workflow.Task"><span class="pre">Task</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/customized_toolcall_workflows.html#ToolCallWorkflow.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.ToolCallWorkflow.reset" title="Link to this definition"></a></dt>
+<dd><p>Reset the workflow.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.workflows.ToolCallWorkflow.format_prompt">
+<span class="sig-name descname"><span class="pre">format_prompt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/customized_toolcall_workflows.html#ToolCallWorkflow.format_prompt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.ToolCallWorkflow.format_prompt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.workflows.ToolCallWorkflow.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/workflows/customized_toolcall_workflows.html#ToolCallWorkflow.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.ToolCallWorkflow.run" title="Link to this definition"></a></dt>
 <dd><p>Run workflow and return a list of experiences.</p>
 </dd></dl>
 
