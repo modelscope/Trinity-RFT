@@ -90,6 +90,7 @@ algorithm:
   kl_penalty_fn: "none"
   kl_loss_fn: "k2"
   entropy_loss_fn: "default"
+  add_strategy: null
 ```
 
 - `algorithm_type`: Type of reinforcement learning algorithm. Supported types: `ppo`, `grpo`, `opmd`, `dpo`, `sft`, `mix`.
@@ -99,7 +100,7 @@ algorithm:
 - `kl_penalty_fn`: The KL penalty function used for computing KL penalty applied in reward.
 - `kl_loss_fn`: The KL loss function used for computing KL loss.
 - `entropy_loss_fn`: The entropy loss function used for computing entropy loss.
-
+- `add_strategy`: Strategy for adding new experiences to the experience buffer. If set, explorer will collect experiences from workflow runners and pre-process them before adding to the buffer.
 
 ---
 

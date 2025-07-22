@@ -30,7 +30,7 @@ class TestQueueBuffer(RayUnittestBaseAysnc):
     )
     async def test_queue_buffer(self, name, use_priority_queue):
         meta = StorageConfig(
-            name="test_buffer",
+            name=name,
             algorithm_type="ppo",
             storage_type=StorageType.QUEUE,
             max_read_timeout=3,
@@ -60,7 +60,6 @@ class TestQueueBuffer(RayUnittestBaseAysnc):
         exps = [
             Experience(
                 tokens=torch.tensor([float(j) for j in range(i + 1)]),
-                prompt_length=i,
                 reward=float(i),
                 logprobs=torch.tensor([0.1]),
                 action_mask=torch.tensor([j % 2 for j in range(i + 1)]),

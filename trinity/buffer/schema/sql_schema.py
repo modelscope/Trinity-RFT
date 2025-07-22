@@ -85,14 +85,13 @@ class SFTDataModel(Base):  # type: ignore
         """Convert a list of messages into a single instance of SFT data."""
         from trinity.common.models.utils import tokenize_and_mask_messages_hf
 
-        token_ids, action_mask = tokenize_and_mask_messages_hf(
+        tokens, action_mask = tokenize_and_mask_messages_hf(
             tokenizer=tokenizer,
             messages=messages,
             chat_template=chat_template,
         )
         exp = Experience(
-            tokens=token_ids,
-            prompt_length=0,
+            tokens=tokens,
             action_mask=action_mask,
             info={"response_num": sum([1 if m["role"] == "assistant" else 0 for m in messages])},
         )

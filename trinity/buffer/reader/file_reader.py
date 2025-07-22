@@ -132,12 +132,12 @@ class SFTDataReader(BufferReader):
                 tokens = self.tokenizer.apply_chat_template(
                     messages, add_generation_prompt=False, return_tensors="pt"
                 )[0]
-                prompt_tokens = self.tokenizer.apply_chat_template(
+                prompt_tokens_ids = self.tokenizer.apply_chat_template(
                     messages[:-1], add_generation_prompt=True, return_tensors="pt"
                 )[0]
                 experience = Experience(
                     tokens=tokens,
-                    prompt_length=len(prompt_tokens),
+                    prompt_length=len(prompt_tokens_ids),
                 )
                 exp_list.append(experience)
 
@@ -155,13 +155,13 @@ class SFTDataReader(BufferReader):
                     full_messages, add_generation_prompt=False, return_tensors="pt"
                 )[0]
 
-                prompt_tokens = self.tokenizer.apply_chat_template(
+                prompt_tokens_ids = self.tokenizer.apply_chat_template(
                     prompt_messages, add_generation_prompt=True, return_tensors="pt"
                 )[0]
 
                 experience = Experience(
                     tokens=tokens,
-                    prompt_length=len(prompt_tokens),
+                    prompt_length=len(prompt_tokens_ids),
                 )
                 exp_list.append(experience)
 
@@ -171,10 +171,10 @@ class SFTDataReader(BufferReader):
                 prompt = sample[self.prompt_key]
                 response = sample[self.response_key]
                 tokens = self.tokenizer(prompt + response, return_tensors="pt")["input_ids"][0]
-                prompt_tokens = self.tokenizer(prompt, return_tensors="pt")["input_ids"][0]
+                prompt_tokens_ids = self.tokenizer(prompt, return_tensors="pt")["input_ids"][0]
                 experience = Experience(
                     tokens=tokens,
-                    prompt_length=len(prompt_tokens),
+                    prompt_length=len(prompt_tokens_ids),
                 )
                 exp_list.append(experience)
         else:
@@ -252,7 +252,6 @@ class DPODataReader(BufferReader):
             )[0][prompt_length:]
             experience = Experience(
                 tokens=prompt_tokens,
-                prompt_length=len(prompt_tokens),
                 chosen=chosen_tokens,
                 rejected=rejected_tokens,
             )

@@ -11,6 +11,7 @@ from tests.tools import (
     get_template_config,
     get_unittest_dataset_config,
 )
+from trinity.buffer import get_buffer_reader
 from trinity.cli.launcher import explore
 
 
@@ -71,3 +72,56 @@ class TestExplorerCountdownNoEval(BaseExplorerCase):
         eval_metrics = parser.metric_list("eval")
         self.assertTrue(len(eval_metrics) == 0)
         self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 8)
+
+
+class TestExplorerWithAddStrategy(BaseExplorerCase):
+    def test_explorer(self):
+        import ray
+
+        from trinity.explorer.explorer import Explorer
+
+        self.config.algorithm.repeat_times = 2
+        self.config.buffer.total_epochs = 1
+        self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("countdown")
+        self.config.buffer.explorer_input.add_strategy = "random"
+        self.config.name = f"explore-add-strategy-{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        # some step may be skipped due to same reward
+        self.config.algorithm.add_strategy = "reward_variance"
+        self.config.check_and_update()
+        explorer = (
+            ray.remote(Explorer)
+            .options(
+                name=self.config.explorer.name,
+                namespace=ray.get_runtime_context().namespace,
+            )
+            .remote(self.config)
+        )
+        ray.get(explorer.prepare.remote())
+        ray.get(explorer.sync_weight.remote())
+        ray.get(explorer.explore.remote())
+        parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
+        rollout_metrics = parser.metric_list("rollout")
+        self.assertTrue(len(rollout_metrics) > 0)
+        eval_metrics = parser.metric_list("eval")
+        self.assertTrue(len(eval_metrics) == 0)
+        self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 4)
+        self.assertTrue(parser.metric_exist("rollout/experience_count"))
+        experience_counts = parser.metric_values("rollout/experience_count")
+        self.assertTrue(len(experience_counts) == 4)
+        for count in experience_counts:
+            self.assertTrue(count >= 0)
+            self.assertTrue(count <= 2 * 4)  # repeat_times * batch_size
+            self.assertTrue(count % 2 == 0)  # should be multiple of repeat_times
+
+        reader = get_buffer_reader(
+            self.config.buffer.trainer_input.experience_buffer, self.config.buffer
+        )
+        exps = []
+        try:
+            batch = reader.read()
+            exps.extend(batch)
+        except StopIteration:
+            pass
+        self.assertTrue(len(exps) <= 4 * 2 * 4)  # step * repeat_times * batch_size
+        self.assertTrue(len(exps) % (2 * 4) == 0)  # should be multiple of repeat_times
+        ray.get(explorer.shutdown.remote())

@@ -151,6 +151,11 @@ Trinity-RFT是一个通用、灵活且易于使用的大语言模型强化微调
 
 ### 第一步：安装
 
+环境要求:
+- Python >= 3.10, <= 3.12
+- CUDA >= 12.4, <= 12.8
+- 至少 2 块 GPU
+
 
 源码安装 **（推荐）**：
 
@@ -181,13 +186,15 @@ pip install -e .[flash_attn]
 # 适用于 zsh
 pip install -e .\[flash_attn\]
 # 如果安装 flash-attn 时遇到错误，可以尝试以下命令
-# pip install flash-attn -v --no-build-isolation
+# pip install flash-attn==2.8.0.post2 -v --no-build-isolation
 ```
 
 使用 pip 安装：
 
 ```shell
 pip install trinity-rft==0.2.0
+# flash-attn 需要单独安装
+pip install flash-attn==2.8.0.post2
 ```
 
 使用 Docker 安装：
@@ -205,12 +212,6 @@ docker build -f scripts/docker/Dockerfile -t trinity-rft:latest .
 # 运行 Docker 镜像
 docker run -it --gpus all --shm-size="64g" --rm -v $PWD:/workspace -v <root_path_of_data_and_checkpoints>:/data trinity-rft:latest
 ```
-
-
-**环境要求：**
-Python 版本 >= 3.10，
-CUDA 版本 >= 12.4，
-以及至少 2 块 GPU。
 
 
 ### 第二步：准备数据集和模型

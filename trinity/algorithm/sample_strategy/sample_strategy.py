@@ -120,23 +120,3 @@ class DefaultSampleStrategy(SampleStrategy):
     @classmethod
     def default_args(cls) -> dict:
         return {}
-
-
-@SAMPLE_STRATEGY.register_module("dpo")
-class DPOSampleStrategy(WarmupSampleStrategy):
-    def sample(self, step: int, **kwargs) -> Tuple[Any, Dict, List]:
-        metrics = {}
-        with Timer(metrics, "read_time"):
-            if step <= self.sft_warmup_steps:
-                exp_list = self.sft_buffer.read()
-            else:
-                exp_list = self.exp_buffer.read()
-            repr_samples = representative_sample(exp_list)
-        with Timer(metrics, "gather_time"):
-            exps = Experiences.gather_dpo_experiences(exp_list, pad_token_id=self.pad_token_id)  # type: ignore
-        if self.trainer_type == "verl":
-            with Timer(metrics, "convert_time"):
-                data = to_data_proto(exps)
-            return data, metrics, repr_samples
-        else:
-            raise NotImplementedError(f"backend {self.trainer_type} is not supported")

@@ -19,8 +19,8 @@ from trinity.explorer.scheduler import Scheduler
 
 @WORKFLOWS.register_module("dummy_workflow")
 class DummyWorkflow(Workflow):
-    def __init__(self, model, task, auxiliary_models):
-        super().__init__(model, task, auxiliary_models)
+    def __init__(self, *, task, model, auxiliary_models):
+        super().__init__(task=task, model=model, auxiliary_models=auxiliary_models)
         self.error_type = task.raw_task.get("error_type", "")
         self.seconds = None
         self.repeat_times = task.rollout_args.n
@@ -176,13 +176,14 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
         tasks = generate_tasks(8)
         scheduler.schedule(tasks, batch_id=0)
 
-        results = await scheduler.get_results(batch_id=0, min_num=8, timeout=20)
-        self.assertEqual(len(results), 8)
+        statuses, exps = await scheduler.get_results(batch_id=0, min_num=8, timeout=20)
+        self.assertEqual(len(statuses), 8)
+        self.assertEqual(len(exps), 0)
         self.assertEqual(len(self.queue.read(batch_size=8)), 8)
         with self.assertRaises(TimeoutError):
             self.queue.read(batch_size=1)
 
-        for result in results:
+        for result in statuses:
             self.assertTrue(result.ok)
 
         for batch_id in range(1, 4):
@@ -191,8 +192,9 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
 
         for batch_id in range(1, 4):
             self.assertTrue(scheduler.has_step(batch_id))
-            results = await scheduler.get_results(batch_id=batch_id, min_num=4, timeout=10)
-            self.assertEqual(len(results), 4)
+            statuses, exps = await scheduler.get_results(batch_id=batch_id, min_num=4, timeout=10)
+            self.assertEqual(len(statuses), 4)
+            self.assertEqual(len(exps), 0)
             self.assertFalse(scheduler.has_step(batch_id))
             self.assertEqual(len(self.queue.read(batch_size=4)), 4)
         with self.assertRaises(TimeoutError):
@@ -201,8 +203,9 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
         tasks = generate_tasks(3)
         scheduler.schedule(tasks, batch_id=4)
         self.assertTrue(scheduler.has_step(4))
-        results = await scheduler.get_results(batch_id=4)
-        self.assertEqual(len(results), 3)
+        statuses, exps = await scheduler.get_results(batch_id=4)
+        self.assertEqual(len(statuses), 3)
+        self.assertEqual(len(exps), 0)
         self.assertFalse(scheduler.has_step(4))
         self.assertEqual(len(self.queue.read(batch_size=3)), 3)
 
@@ -211,11 +214,11 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
         scheduler.schedule(tasks, batch_id=0)
 
         start_time = time.time()
-        results = await scheduler.get_results(batch_id=0, min_num=4, timeout=3)
+        statuses, exps = await scheduler.get_results(batch_id=0, min_num=4, timeout=3)
         end_time = time.time()
 
         self.assertLessEqual(end_time - start_time, 5)
-        self.assertEqual(len(results), 2)
+        self.assertEqual(len(statuses), 2)
         self.assertEqual(len(self.queue.read(batch_size=2)), 2)
 
         # test run tasks after timeout
@@ -223,10 +226,10 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
         scheduler.schedule(tasks, batch_id=0)
 
         # actor restart is slow, set a big timeout
-        results = await scheduler.get_results(batch_id=0, timeout=20)
-        self.assertEqual(len(results), 4)
+        statuses, exps = await scheduler.get_results(batch_id=0, timeout=20)
+        self.assertEqual(len(statuses), 4)
 
-        success_count = sum(1 for r in results if r.ok)
+        success_count = sum(1 for r in statuses if r.ok)
         self.assertEqual(success_count, 4)
         self.assertEqual(len(self.queue.read(batch_size=4)), 4)
         with self.assertRaises(TimeoutError):
@@ -235,10 +238,10 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
         # test exception tasks
         tasks = generate_tasks(1, exception_num=3)
         scheduler.schedule(tasks, batch_id=1)
-        results = await scheduler.get_results(batch_id=1, timeout=5)
-        self.assertEqual(len(results), 4)
+        statuses, exps = await scheduler.get_results(batch_id=1, timeout=5)
+        self.assertEqual(len(statuses), 4)
 
-        success_count = sum(1 for r in results if r.ok)
+        success_count = sum(1 for r in statuses if r.ok)
         self.assertEqual(success_count, 1)
         self.assertEqual(len(self.queue.read(batch_size=1)), 1)
         with self.assertRaises(TimeoutError):
@@ -247,11 +250,16 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
         # test clear_timeout_tasks
         tasks = generate_tasks(3, timeout_num=1, timeout_seconds=3)
         scheduler.schedule(tasks, batch_id=2)
-        results = await scheduler.get_results(batch_id=2, timeout=2, clear_timeout_tasks=False)
-        self.assertEqual(len(results), 3)
+        statuses, exps = await scheduler.get_results(
+            batch_id=2, timeout=2, clear_timeout_tasks=False
+        )
+        self.assertEqual(len(statuses), 3)
         self.assertEqual(len(self.queue.read(batch_size=3)), 3)
-        results = await scheduler.get_results(batch_id=2, timeout=2, clear_timeout_tasks=False)
-        self.assertEqual(len(results), 1)
+        statuses, exps = await scheduler.get_results(
+            batch_id=2, timeout=2, clear_timeout_tasks=False
+        )
+        self.assertEqual(len(statuses), 1)
+        self.assertEqual(len(exps), 0)
         self.assertEqual(len(self.queue.read(batch_size=1)), 1)
         with self.assertRaises(TimeoutError):
             self.queue.read(batch_size=1)
@@ -277,10 +285,10 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(scheduler.pending_tasks), 0)
         self.assertEqual(len(scheduler.running_tasks), 0)
 
-        results0 = await scheduler.get_results(batch_id=0, min_num=4, timeout=1)
-        results1 = await scheduler.get_results(batch_id=1, min_num=3, timeout=1)
-        self.assertEqual(len(results0), 4)
-        self.assertEqual(len(results1), 3)
+        status0, exps0 = await scheduler.get_results(batch_id=0, min_num=4, timeout=1)
+        status1, exps1 = await scheduler.get_results(batch_id=1, min_num=3, timeout=1)
+        self.assertEqual(len(status0), 4)
+        self.assertEqual(len(status1), 3)
 
         # test timeout
         tasks = generate_tasks(2, timeout_num=2, timeout_seconds=10)
@@ -342,9 +350,9 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
             schedule_tasks(2, 2),
         )
 
-        self.assertEqual(len(results[0]), 3)
-        self.assertEqual(len(results[1]), 4)
-        self.assertEqual(len(results[2]), 2)
+        self.assertEqual(len(results[0][0]), 3)
+        self.assertEqual(len(results[1][0]), 4)
+        self.assertEqual(len(results[2][0]), 2)
 
         await scheduler.stop()
 
@@ -354,47 +362,55 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
         await scheduler.start()
         tasks = generate_tasks(2)
         scheduler.schedule(tasks, batch_id=0)
-        results = await scheduler.get_results(batch_id=0, min_num=2, timeout=10)
+        results, exps = await scheduler.get_results(batch_id=0, min_num=2, timeout=10)
         self.assertEqual(len(results), 2)
+        self.assertEqual(len(exps), 0)
         await scheduler.stop()
 
+        self.config.explorer.collect_experiences = True
         await scheduler.start()
-        tasks = generate_tasks(3)
+        tasks = generate_tasks(3, repeat_times=2)
         scheduler.schedule(tasks, batch_id=1)
-        results = await scheduler.get_results(batch_id=1, min_num=3, timeout=10)
+        results, exps = await scheduler.get_results(batch_id=1, min_num=3, timeout=10)
         self.assertEqual(len(results), 3)
+        self.assertEqual(len(exps), 3 * 2)
         await scheduler.stop()
 
     async def test_scheduler_all_methods(self):
+        self.config.explorer.collect_experiences = True
         scheduler = Scheduler(self.config, [DummyModel.remote(), DummyModel.remote()])
         await scheduler.start()
         tasks = generate_tasks(8)
         scheduler.schedule(tasks, batch_id=0)
         self.assertTrue(scheduler.has_step(0))
-        results = await scheduler.get_results(batch_id=0, min_num=8, timeout=20)
-        self.assertEqual(len(results), 8)
+        statuses, exps = await scheduler.get_results(batch_id=0, min_num=8, timeout=20)
+        self.assertEqual(len(statuses), 8)
+        self.assertEqual(len(exps), 8)
         scheduler.schedule(tasks, batch_id=1)
         scheduler.schedule(tasks[:4], batch_id=2)
         self.assertFalse(scheduler.has_step(0))
-        results = await scheduler.get_results(batch_id=0, min_num=8)
+        statuses, exps = await scheduler.get_results(batch_id=0, min_num=8)
         self.assertFalse(scheduler.has_step(0))
-        self.assertEqual(len(results), 0)  # batch_id 0 has no more tasks
+        self.assertEqual(len(statuses), 0)  # batch_id 0 has no more tasks
+        self.assertEqual(len(exps), 0)
         self.assertFalse(scheduler.has_step(0))
         self.assertTrue(scheduler.has_step(1))
         self.assertTrue(scheduler.has_step(2))
         await scheduler.wait_all()
         st = time.time()
-        results = await scheduler.get_results(batch_id=1)
+        statuses, exps = await scheduler.get_results(batch_id=1)
         et = time.time()
         self.assertTrue(et - st < 1.0)
-        self.assertEqual(len(results), 8)
+        self.assertEqual(len(statuses), 8)
+        self.assertEqual(len(exps), 8)
         self.assertFalse(scheduler.has_step(1))
         self.assertTrue(scheduler.has_step(2))
         st = time.time()
-        results = await scheduler.get_results(batch_id=2)
+        statuses, exps = await scheduler.get_results(batch_id=2)
         et = time.time()
         self.assertTrue(et - st < 1.0)
-        self.assertEqual(len(results), 4)
+        self.assertEqual(len(statuses), 4)
+        self.assertEqual(len(exps), 4)
         self.assertFalse(scheduler.has_step(2))
         await scheduler.stop()
 
@@ -407,8 +423,8 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
 
         tasks = generate_tasks(4, repeat_times=8)  # ceil(8 / 2) == 4
         scheduler.schedule(tasks, batch_id=1)
-        results = await scheduler.get_results(batch_id=1)
-        self.assertEqual(len(results), 4 * 4)
+        statuses, exps = await scheduler.get_results(batch_id=1)
+        self.assertEqual(len(statuses), 4 * 4)
         exps = self.queue.read(batch_size=4 * 8)
         self.assertEqual(len(exps), 4 * 8)
         exp_list.extend(exps)
@@ -417,8 +433,8 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
 
         tasks = generate_tasks(4, repeat_times=5)  # ceil(5 / 2) == 3
         scheduler.schedule(tasks, batch_id=2)
-        results = await scheduler.get_results(batch_id=2)
-        self.assertEqual(len(results), 4 * 3)
+        statuses, exps = await scheduler.get_results(batch_id=2)
+        self.assertEqual(len(statuses), 4 * 3)
         exps = self.queue.read(batch_size=4 * 5)
         self.assertEqual(len(exps), 4 * 5)
         exp_list.extend(exps)
@@ -427,18 +443,18 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
 
         tasks = generate_tasks(3, repeat_times=1)  # ceil(1 / 2) == 1
         scheduler.schedule(tasks, batch_id=3)
-        results = await scheduler.get_results(batch_id=3)
-        self.assertEqual(len(results), 3 * 1)
+        statuses, exps = await scheduler.get_results(batch_id=3)
+        self.assertEqual(len(statuses), 3 * 1)
         exps = self.queue.read(batch_size=3 * 1)
         self.assertEqual(len(exps), 3 * 1)
         exp_list.extend(exps)
         with self.assertRaises(TimeoutError):
             self.queue.read(batch_size=1)
 
-        # test group_id and unique_id
-        group_ids = [exp.group_id for exp in exp_list]
+        # test task_id and unique_id
+        group_ids = [exp.eid.tid for exp in exp_list]
         self.assertEqual(len(set(group_ids)), 11)  # 4 + 4 + 3
-        unique_ids = [exp.unique_id for exp in exp_list]
+        unique_ids = [exp.eid.uid for exp in exp_list]
         self.assertEqual(len(unique_ids), len(set(unique_ids)))
 
         await scheduler.stop()

@@ -3,7 +3,7 @@
 
 import os
 import re
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 import aiohttp
 import ray
@@ -29,7 +29,6 @@ class vLLMRolloutModel(InferenceModel):
 
     Args:
         config (Config): The config.
-        kwargs (dict): The keyword arguments for the engine.
     """
 
     def __init__(
@@ -103,7 +102,7 @@ class vLLMRolloutModel(InferenceModel):
         self.api_server_host = None
         self.api_server_port = None
 
-    async def chat(self, messages: List[Dict], **kwargs) -> List[Experience]:
+    async def chat(self, messages: List[Dict], **kwargs) -> Sequence[Experience]:
         """Chat with the model with a list of messages in async.
 
         Args:
@@ -134,7 +133,7 @@ class vLLMRolloutModel(InferenceModel):
             )
         return await self.generate(prompt=prompt, **kwargs)
 
-    async def generate(self, prompt: str, **kwargs) -> List[Experience]:
+    async def generate(self, prompt: str, **kwargs) -> Sequence[Experience]:
         """Generate a response from the provided prompt in async.
 
         Args:
@@ -224,7 +223,6 @@ class vLLMRolloutModel(InferenceModel):
         logprobs = await self.logprobs(token_ids=token_ids.tolist())
         return Experience(
             tokens=token_ids,
-            prompt_length=len(token_ids),
             logprobs=logprobs,
             action_mask=action_mask,
         )
