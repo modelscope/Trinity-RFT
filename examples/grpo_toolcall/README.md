@@ -12,6 +12,6 @@ To preprocess the data into the format required our `toolcall_workflow`, run the
 
 Then fill in the config file `toolace.yaml` and run the following command: `trinity run --config examples/grpo_toolcall/toolace.yaml`.
 
-## Reward Curve Results
+## Reward curve results
 
 ![](../../docs/sphinx_doc/assets/toolace_reward_curve.png)
