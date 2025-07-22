@@ -42,8 +42,6 @@ from verl.single_controller.base import Worker
 from verl.single_controller.base.decorator import Dispatch, register
 from verl.utils import hf_processor, hf_tokenizer
 from verl.utils.activation_offload import enable_activation_offloading
-
-# from verl.utils.checkpoint.fsdp_checkpoint_manager import FSDPCheckpointManager
 from verl.utils.debug import log_gpu_memory_usage
 from verl.utils.device import (
     get_device_id,
@@ -863,6 +861,10 @@ class ActorRolloutRefWorker(Worker):
         if self._is_offload_optimizer:
             offload_fsdp_optimizer(self.actor_optimizer)
 
+    @register(dispatch_mode=Dispatch.ONE_TO_ALL)
+    def wait_for_saving(self) -> None:
+        self.checkpoint_manager.wait_for_saving()
+
 
 class CriticWorker(Worker):
     def __init__(self, config):
@@ -1288,3 +1290,7 @@ class CriticWorker(Worker):
         self.critic_optimizer.zero_grad()
         if self._is_offload_optimizer:
             offload_fsdp_optimizer(self.critic_optimizer)
+
+    @register(dispatch_mode=Dispatch.ONE_TO_ALL)
+    def wait_for_saving(self) -> None:
+        self.checkpoint_manager.wait_for_saving()

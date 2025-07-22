@@ -71,14 +71,13 @@ class Explorer:
         # For checkpoint weights update
         # Use explorer to periodically load the latest model weights and
         # boradcast to all rollout models
-        self.state_dict_version = 0
+        self.model_version = 0
         if self.use_state_dict_weights_update:
             self.old_checkpoint = None
             self.state_dict = {}
         else:  # nccl mode
             self.state_dict_meta = []
         self.logger.info("Finished initializing Explorer.")
-        self._ready_to_sync_condition = asyncio.Condition()
 
     async def setup_weight_sync_group(
         self, master_address: str, master_port: int, state_dict_meta: List = None
@@ -144,25 +143,26 @@ class Explorer:
     async def _state_dict_update(self):
         self.logger.info("Start to update state dict.")
         new_version = ray.get(
-            self.synchronizer.wait_new_model_state_dict.remote(self.state_dict_version)
+            self.synchronizer.wait_new_model_state_dict.remote(self.model_version)
         )
-        if new_version > self.state_dict_version:
+        if new_version > self.model_version:
             self.logger.info(f"New model state dict version: {new_version}")
-            await asyncio.gather(
-                *[model.sync_model.remote(self.state_dict_version) for model in self.models]
-            )
-            self.state_dict_version = new_version
+            await asyncio.gather(*[model.sync_model.remote(new_version) for model in self.models])
+            self.model_version = new_version
         else:
             self.logger.warning(
-                f"No new model state dict found, current version: {self.state_dict_version}"
+                f"No new model state dict found, current version: {self.model_version}"
             )
 
     async def _nccl_weights_update(self):
         assert self.state_dict_meta is not None
-        status = ray.get(self.synchronizer.ready_to_sync.remote("explorer"))
-        if not status:
+        new_version = ray.get(
+            self.synchronizer.ready_to_nccl_sync.remote("explorer", self.model_version)
+        )
+        if new_version is None:
             self.logger.info("Trainer is not ready to sync weight. Skipping sync weight.")
             return
+        self.model_version = new_version
         await asyncio.gather(
             *[model.sync_model.remote(self.explore_step_num) for model in self.models]
         )
@@ -176,6 +176,7 @@ class Explorer:
                 asyncio.create_task(self.setup_weight_sync_group(master_address, master_port))
             )
         asyncio.gather(*futures, return_exceptions=True)
+        await self.synchronizer.set_explorer_status.remote(RunningStatus.REQUIRE_SYNC)
         if self.experience_buffer:
             await self.experience_buffer.acquire()
         if self.config.explorer.eval_on_startup and self.explore_step_num == 0:
@@ -225,6 +226,9 @@ class Explorer:
         except StopIteration:
             self.logger.warning("No more tasks to explore. Stop exploring.")
             await self.save_checkpoint(sync_weight=False)
+            await self.synchronizer.set_explorer_status.remote(
+                RunningStatus.STOPPED, old_status=RunningStatus.RUNNING
+            )
             await self.experience_buffer.release()
             return False
         self.scheduler.schedule(tasks, batch_id=self.explore_step_num + 1)
@@ -245,11 +249,16 @@ class Explorer:
                 if delta >= self.config.synchronizer.sync_interval:
                     require_sync = True
             else:
-                require_sync = ray.get(
-                    self.synchronizer.get_trainer_status == RunningStatus.REQUIRE_SYNC
+                require_sync = (
+                    ray.get(self.synchronizer.get_trainer_status.remote())
+                    == RunningStatus.REQUIRE_SYNC
                 )
             if require_sync:
-                ray.get(self.synchronizer.set_explorer_status.remote(RunningStatus.REQUIRE_SYNC))
+                ray.get(
+                    self.synchronizer.set_explorer_status.remote(
+                        RunningStatus.REQUIRE_SYNC, old_status=RunningStatus.RUNNING
+                    )
+                )
             return require_sync
 
     def need_eval(self) -> bool:
@@ -308,7 +317,7 @@ class Explorer:
         await self.scheduler.wait_all()
         self.logger.info(f"All tasks before step {self.explore_step_num} have completed.")
         log_task = asyncio.create_task(
-            self._log_metrics(self.last_sync_step + 1, self.explore_step_num)
+            self._log_metrics(self.last_sync_step + 1, self.explore_step_num, self.model_version)
         )
 
         if sync_weight:
@@ -334,18 +343,23 @@ class Explorer:
         """Synchronize model weights."""
         # call this method before training start to load the latest model weights
         await self.save_checkpoint(sync_weight=True)
-        ray.get(self.synchronizer.set_explorer_status.remote(RunningStatus.RUNNING))
+        ray.get(
+            self.synchronizer.set_explorer_status.remote(
+                RunningStatus.RUNNING, old_status=RunningStatus.WAITING_SYNC
+            )
+        )
 
-    async def _log_metrics(self, start_step: int, end_step: int) -> None:
+    async def _log_metrics(self, start_step: int, end_step: int, model_version: int) -> None:
         for step in range(start_step, end_step + 1):
             self.logger.info(f"Log metrics of step {step}")
-            await self._log_explore_metrics(step=step)
+            await self._log_explore_metrics(step=step, model_version=model_version)
             await self._log_eval_metrics(step=step)
 
-    async def _log_explore_metrics(self, step: int) -> None:
+    async def _log_explore_metrics(self, step: int, model_version: int) -> None:
         results = await self.scheduler.get_results(batch_id=step)
         if results:
             metric = gather_metrics([status.metric for status in results], "rollout")
+            metric["rollout/model_version"] = model_version
             self.monitor.log(metric, step=step)
 
     async def _log_eval_metrics(self, step: Optional[int] = None, prefix: str = "eval") -> None:

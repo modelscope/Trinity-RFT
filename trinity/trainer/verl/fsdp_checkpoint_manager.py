@@ -28,6 +28,7 @@ from verl.utils.fsdp_utils import (
 )
 from verl.utils.logger import log_with_rank
 
+from trinity.common.constants import SyncMethod
 from trinity.common.synchronizer import Synchronizer
 
 
@@ -35,6 +36,7 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         config = kwargs.pop("config", None)
+        self.synchronizer_config = config
         if config is not None:
             self.synchronizer = Synchronizer.get_actor(namespace=config.ray_namespace)
         else:
@@ -63,6 +65,9 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
         """
         modified from verl.utils.checkpoint.fsdp_checkpoint_manager.py:save_checkpoint
         """
+        if global_step == 0 and model_state_dict_only:
+            ray.get(self.synchronizer.set_model_state_dict.remote(None, global_step))
+            return
         if local_path is None:
             return
 
@@ -114,7 +119,6 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
 
                 if self.should_save_model:
                     model_state_dict = self.model.state_dict()
-                    # torch.save(model_state_dict, model_path)
                     if self._model_state_dict_thread is not None:
                         self._model_state_dict_thread.join()
 
@@ -125,23 +129,23 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
                             rank=self.rank,
                             logger=logger,
                         )
-                        ray.get(
-                            self.synchronizer.set_model_state_dict_with_step_num.remote(
-                                global_step, self.world_size
+                        if (
+                            self.synchronizer_config is not None
+                            and self.synchronizer_config.sync_method == SyncMethod.CHECKPOINT
+                        ):
+                            ray.get(
+                                self.synchronizer.set_model_state_dict_with_step_num.remote(
+                                    global_step, self.world_size
+                                )
                             )
-                        )
 
                     self._model_state_dict_thread = threading.Thread(
                         target=_save_model_state_dict,
-                        # target=torch.save,
-                        # args=(model_state_dict, model_path),
                     )
                     self._model_state_dict_thread.start()
-                    # log_with_rank(f"Saved model to {os.path.abspath(model_path)}", rank=self.rank, logger=logger)
 
                 if self.should_save_optimizer and not model_state_dict_only:
                     optimizer_state_dict = self.optimizer.state_dict()
-                    # torch.save(optimizer_state_dict, optim_path)
                     if self._optimizer_state_dict_thread is not None:
                         self._optimizer_state_dict_thread.join()
 
@@ -155,11 +159,8 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
 
                     self._optimizer_state_dict_thread = threading.Thread(
                         target=_save_optimizer_state_dict,
-                        # target=torch.save,
-                        # args=(optimizer_state_dict, optim_path),
                     )
                     self._optimizer_state_dict_thread.start()
-                    # log_with_rank(f"Saved optim to {os.path.abspath(optim_path)}", rank=self.rank, logger=logger)
 
                 if self.should_save_extra and not model_state_dict_only:
                     lr_scheduler_state_dict = (
@@ -169,7 +170,6 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
                         "lr_scheduler": lr_scheduler_state_dict,
                         "rng": self.get_rng_state(),
                     }
-                    # torch.save(extra_state_dict, extra_path)
                     if self._extra_state_dict_thread is not None:
                         self._extra_state_dict_thread.join()
 
@@ -183,11 +183,8 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
 
                     self._extra_state_dict_thread = threading.Thread(
                         target=_save_extra_state_dict,
-                        # target=torch.save,
-                        # args=(extra_state_dict, extra_path),
                     )
                     self._extra_state_dict_thread.start()
-                    # log_with_rank(f"Saved extra_state to {os.path.abspath(extra_path)}", rank=self.rank, logger=logger)
 
         if self.rank == 0:
             # Save HF tokenizer/processor and model config on rank 0 to huggingface/ directory, no matter whether
@@ -274,7 +271,6 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
                             f"Warning: {self.__class__.__name__}.save_checkpoint: Generation config file not found in, using a generation config created from the model config when saving hf_model."
                         )
 
-                # save_model.save_pretrained(hf_local_path, state_dict=state_dict)
                 if self._save_model_thread is not None:
                     self._save_model_thread.join()
 
@@ -289,17 +285,22 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
 
                 self._save_model_thread = threading.Thread(
                     target=_save_model,
-                    # target=save_model.save_pretrained,
-                    # args=(hf_local_path, state_dict),
                 )
                 self._save_model_thread.start()
                 self.processing_class.save_pretrained(hf_local_path)
-                # log_with_rank(f"Saved hf_model to {os.path.abspath(hf_local_path)}", rank=self.rank, logger=logger, log_only_rank_0=True)
-                # del state_dict
-                # del save_model
 
             # wait for rank0 to dump hf_model to local
             torch.distributed.barrier()
 
         if not model_state_dict_only:
             self.previous_saved_paths.append(local_path)
+
+    def wait_for_saving(self) -> None:
+        if self._model_state_dict_thread is not None:
+            self._model_state_dict_thread.join()
+        if self._optimizer_state_dict_thread is not None:
+            self._optimizer_state_dict_thread.join()
+        if self._extra_state_dict_thread is not None:
+            self._extra_state_dict_thread.join()
+        if self._save_model_thread is not None:
+            self._save_model_thread.join()

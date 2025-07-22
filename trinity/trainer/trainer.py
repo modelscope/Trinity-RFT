@@ -64,8 +64,10 @@ class Trainer:
                 if delta >= self.config.synchronizer.sync_interval:
                     ray.get(self.synchronizer.set_trainer_status.remote(RunningStatus.REQUIRE_SYNC))
             return (
-                ray.get(self.synchronizer.get_explorer_status.remote())
-                == RunningStatus.WAITING_SYNC
+                ray.get(self.synchronizer.get_explorer_status_counter.remote())[
+                    RunningStatus.WAITING_SYNC
+                ]
+                > 0
             )
 
     def sync_weight(self) -> None:
@@ -74,7 +76,12 @@ class Trainer:
             self.logger.info(
                 f"Trainer synchronizing weights at step {self.engine.train_step_num} starting.."
             )
-            assert ray.get(self.synchronizer.ready_to_sync.remote("trainer"))
+            result = ray.get(
+                self.synchronizer.ready_to_nccl_sync.remote("trainer", self.engine.train_step_num)
+            )
+            if result is None:
+                self.logger.error("Trainer synchronizing weights failed.")
+                raise Exception
             self.engine.sync_weight()
             self.logger.info(
                 f"Trainer synchronizing weights at step {self.engine.train_step_num} end."
@@ -83,7 +90,7 @@ class Trainer:
         elif self.config.synchronizer.sync_method == SyncMethod.CHECKPOINT:
             self.engine.save_state_dict()
             # ray.get(self.synchronizer.set_model_state_dict_with_step_num.remote(self.engine.train_step_num))
-        elif self.config.synchronizer.sync_method == SyncMethod.STATE_DICT:
+        elif self.config.synchronizer.sync_method == SyncMethod.MEMORY:
             self.engine.upload_state_dict()
         ray.get(self.synchronizer.set_trainer_status.remote(RunningStatus.RUNNING))
 

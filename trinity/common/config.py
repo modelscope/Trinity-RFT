@@ -711,7 +711,9 @@ class Config:
         if not os.path.isabs(self.checkpoint_root_dir):
             self.checkpoint_root_dir = os.path.join(os.getcwd(), self.checkpoint_root_dir)
         # create a job dir at checkpoint_root_dir/project/name
-        self.checkpoint_job_dir = os.path.join(self.checkpoint_root_dir, self.project, self.name)
+        self.checkpoint_job_dir = os.path.join(
+            self.checkpoint_root_dir, self.project, self.group, self.name
+        )
         # rename the experiment when necessary
         if not self.continue_from_checkpoint and (
             os.path.exists(self.checkpoint_job_dir) and os.listdir(self.checkpoint_job_dir)

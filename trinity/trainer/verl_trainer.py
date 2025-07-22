@@ -496,4 +496,6 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         print("sft to rft finished")
 
     def shutdown(self) -> None:
-        pass
+        self.actor_rollout_wg.wait_for_saving()
+        if self.algorithm.use_critic:
+            self.critic_wg.wait_for_saving()
