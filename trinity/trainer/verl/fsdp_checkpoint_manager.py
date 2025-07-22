@@ -47,6 +47,12 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
         self._save_model_thread = None
 
     def upload_state_dict(self, trainer_step: int):
+        """
+        Uploads the full model state dictionary to the synchronizer actor for remote access.
+
+        Args:
+            trainer_step (int): The current training step number.
+        """
         assert self.synchronizer is not None
         state_dict_config = FullStateDictConfig(offload_to_cpu=True, rank0_only=True)
         with get_fsdp_state_ctx(self.model, StateDictType.FULL_STATE_DICT, state_dict_config, None):
@@ -64,6 +70,8 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
     ):
         """
         modified from verl.utils.checkpoint.fsdp_checkpoint_manager.py:save_checkpoint
+
+        The main improvement is using separate thread to save checkpoint and the implementation of checkpoint sync method.
         """
         if global_step == 0 and model_state_dict_only:
             ray.get(self.synchronizer.set_model_state_dict.remote(None, global_step))
@@ -296,6 +304,9 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
             self.previous_saved_paths.append(local_path)
 
     def wait_for_saving(self) -> None:
+        """
+        Wait for all background saving threads to complete.
+        """
         if self._model_state_dict_thread is not None:
             self._model_state_dict_thread.join()
         if self._optimizer_state_dict_thread is not None:

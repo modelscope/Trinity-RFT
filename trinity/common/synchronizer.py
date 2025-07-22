@@ -17,27 +17,47 @@ from trinity.utils.log import get_logger
 
 
 class Synchronizer:
+    """
+    A central component to manage synchronization of models and states between
+    the trainer and one or more explorers in a distributed training setup.
+
+    Attributes:
+        trainer_status: Current status of the trainer (e.g., running, waiting).
+        explorer_status_counter: Dictionary tracking the number of explorers in each status.
+        _ready_condition: Async condition variable for signaling state changes.
+        model_state_dict: The latest model weights.
+        model_version: Version number of the current model.
+        checkpoint_shard_counter: Tracks how many shards are received from trainer for a specific train step.
+    """
+
     def __init__(self, config: Config):
         self.logger = get_logger(__name__)
         self.config = config
         self.trainer_status = RunningStatus.RUNNING
-        self.last_trainer_sync_step = 0
         self.explorer_status_counter: Dict[RunningStatus, int] = {}
-        self.last_explorer_sync_step = 0
         self._ready_condition = asyncio.Condition()
         self.model_state_dict = None
         self.model_version = 0
         self.checkpoint_shard_counter = defaultdict(lambda: 0)
 
     def set_trainer_status(self, status: RunningStatus):
+        """Update the status of the trainer."""
         self.trainer_status = status
 
     def get_trainer_status(self) -> RunningStatus:
+        """Get the current status of the trainer."""
         return self.trainer_status
 
     def set_explorer_status(
         self, status: RunningStatus, old_status: Optional[RunningStatus] = None
     ):
+        """
+        Update the status count for an explorer.
+
+        Args:
+            status: New status of the explorer.
+            old_status: Previous status if changing from one to another.
+        """
         if old_status is not None:
             assert (
                 old_status in self.explorer_status_counter
@@ -50,12 +70,23 @@ class Synchronizer:
         self.explorer_status_counter[status] += 1
 
     def get_explorer_status_counter(self) -> Dict[RunningStatus, int]:
+        """Return the current status counts for all explorers."""
         return self.explorer_status_counter
 
     async def set_model_state_dict_with_step_num(
         self, step_num: Optional[int] = None, world_size: Optional[int] = None
     ) -> int:
-        if world_size is not None:  # Used for trainer to update model
+        """
+        Load and set the model state dictionary from a checkpoint at a specific step.
+
+        Args:
+            step_num: Training step number corresponding to the checkpoint.
+            world_size: Number of shards expected for this checkpoint.
+
+        Returns:
+            The updated model version (step number).
+        """
+        if world_size is not None:  # Used when trainer updates the model
             assert step_num is not None
             self.checkpoint_shard_counter[step_num] += 1
             self.logger.info(
@@ -74,6 +105,13 @@ class Synchronizer:
         return checkpoint_step_num
 
     async def set_model_state_dict(self, model_state_dict, trainer_step):
+        """
+        Set the new model state and update the version.
+
+        Args:
+            model_state_dict: The PyTorch model state dictionary.
+            trainer_step: Step number associated with this model version.
+        """
         self.model_state_dict = model_state_dict
         async with self._ready_condition:
             self.model_version = trainer_step
@@ -81,9 +119,16 @@ class Synchronizer:
             self._ready_condition.notify_all()
 
     def get_model_state_dict(self):
+        """Return the current model state and its version."""
         return self.model_state_dict, self.model_version
 
     def get_state_dict_meta(self):
+        """
+        Return metadata about the model state (names, data types, shapes).
+
+        Returns:
+            List of tuples: (name, dtype, shape).
+        """
         if self.model_state_dict is None:
             return None
         update_weight_args_list = []
@@ -94,11 +139,29 @@ class Synchronizer:
     async def setup_weight_sync_group(
         self, master_address: str, master_port: int, state_dict_meta: List = None
     ):
+        """
+        Notify the explorer actor to setup weight sync group.
+
+        This is used to initialize NCCL-based synchronization for distributed training.
+
+        Args:
+            master_address: IP address of the master node.
+            master_port: Port used for synchronization.
+            state_dict_meta: Metadata of the model parameters.
+        """
         explorer = ray.get_actor(self.config.explorer_name)
         await explorer.setup_weight_sync_group.remote(master_address, master_port, state_dict_meta)
 
     async def wait_new_model_state_dict(self, current_version: int) -> int:
-        # wait for the new model state dict; return new version
+        """
+        Wait until a new model state is available.
+
+        Args:
+            current_version: Current model version known to one explorer.
+
+        Returns:
+            The new model version after it has been updated.
+        """
         async with self._ready_condition:
             if self.model_version <= current_version:
                 self.set_explorer_status(
@@ -113,6 +176,18 @@ class Synchronizer:
     async def ready_to_nccl_sync(
         self, module: str, trainer_step: Optional[int] = None
     ) -> Union[int, None]:
+        """
+        Prepare for NCCL-based synchronization between modules.
+
+        Only supports one explorer currently.
+
+        Args:
+            module: Either 'trainer' or 'explorer'.
+            trainer_step: Optional step number from the trainer.
+
+        Returns:
+            The model version if both sides are ready; otherwise None.
+        """
         assert (
             sum(self.explorer_status_counter.values()) == 1
         ), "NCCL sync is only supported for one explorer."
@@ -152,6 +227,16 @@ class Synchronizer:
 
     @classmethod
     def get_actor(cls, config: Optional[Config] = None, namespace: Optional[str] = None):
+        """
+        Get or create a remote Ray actor for the Synchronizer.
+
+        Args:
+            config: Optional configuration to use for creating the actor.
+            namespace: Optional Ray namespace for the actor.
+
+        Returns:
+            A reference to the Synchronizer actor.
+        """
         if config is not None:
             return (
                 ray.remote(cls)
