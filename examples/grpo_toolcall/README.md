@@ -8,7 +8,7 @@ The config files are located in [`toolace.yaml`](toolace.yaml) and [`train_toola
 
 
 ## How to run
-To preprocess the data into the format required our `toolcall_workflow`, run the following command: `python scripts/data_prepare/get_toolace_data.py`.
+To preprocess the data into the format required by our `toolcall_workflow`, run the following command: `python scripts/data_prepare/get_toolace_data.py`.
 
 Then fill in the config file `toolace.yaml` and run the following command: `trinity run --config examples/grpo_toolcall/toolace.yaml`.
 

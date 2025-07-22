@@ -121,7 +121,7 @@ def _parse_function_string(function_string):
 
 def _extract_functions_from_system(text):
     pattern = r"Here is a list of functions in JSON format that you can invoke:\n(.*?)\nShould you decide to return the function call\(s\)."
-    match = re.search(pattern, text, re.DOTALL)  # re.DOTALL允许'.'匹配换行符
+    match = re.search(pattern, text, re.DOTALL)  # re.DOTALL allows '.' to match newlines
     if match:
         s = match.group(1).strip()
         s = s[:-2] + "]"
