@@ -31,4 +31,4 @@ synchronizer:
 trainer:
   trainer_type: 'verl'
   trainer_config_path: 'examples/sft_mot/train_sft.yaml'
-  save_interval: 100
+  save_interval: 10
