@@ -95,6 +95,7 @@ jobs:
       with:
         name: pytest-results
         path: trinity-${{ github.run_id }}/report.json
+      continue-on-error: true
 
     - name: Publish Test Report
       if: env.tests_run == 'true'
@@ -106,12 +107,14 @@ jobs:
         issue: ${{ github.event.issue.number }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      continue-on-error: true
 
     - name: Remove docker compose
       working-directory: trinity-${{ github.run_id }}/.github/workflows/docker
       if: always()
       run: |
         docker compose down --remove-orphans
+      continue-on-error: true
 
     - name: Cleanup workspace
       if: always()
