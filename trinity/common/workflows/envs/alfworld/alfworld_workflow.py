@@ -146,7 +146,7 @@ class AlfworldWorkflow(MultiTurnWorkflow):
 
     def run(self) -> List[Experience]:
         # assume the task_description is the game_file_path generated.
-        # see Trinity-RFT/script/data_prepare/get_alfworld_data.py
+        # see Trinity-RFT/examples/grpo_alfworld/get_alfworld_data.py
         game_file_path = self.task_desc
         rollout_n = self.repeat_times
         # TODO: Make parallel envs

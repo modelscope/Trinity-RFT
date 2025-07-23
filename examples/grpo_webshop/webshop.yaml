@@ -20,7 +20,7 @@ buffer:
     taskset:
       name: webshop
       storage_type: file
-      path: 'scripts/data_prepare/webshop_data'
+      path: 'examples/grpo_webshop/webshop_data'
       format:
         prompt_key: 'task_id'
       rollout_args:

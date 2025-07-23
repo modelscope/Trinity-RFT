@@ -21,7 +21,7 @@ buffer:
     taskset:
       name: toolace_data
       storage_type: file
-      path: scripts/data_prepare/toolace_data
+      path: examples/grpo_toolcall/toolace_data
       # format: []
       rollout_args:
         n: 8

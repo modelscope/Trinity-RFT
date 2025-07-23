@@ -20,7 +20,7 @@ buffer:
     taskset:
       name: sciworld
       storage_type: file
-      path: 'scripts/data_prepare/sciworld_data'
+      path: 'examples/grpo_sciworld/sciworld_data'
       format:
         prompt_key: 'task_desc'
       rollout_args:

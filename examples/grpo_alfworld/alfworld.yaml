@@ -20,7 +20,7 @@ buffer:
     taskset:
       name: alfworld
       storage_type: file
-      path: 'scripts/data_prepare/alfworld_data'
+      path: 'examples/grpo_alfworld/alfworld_data'
       format:
         prompt_key: 'game_file'
       rollout_args:

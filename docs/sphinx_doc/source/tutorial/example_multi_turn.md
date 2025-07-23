@@ -24,10 +24,10 @@ Our dataset follows the format in Huggingface datasets library, so we should cor
 Just check the data preparation scripts and run the following command.
 ```bash
 # For ALFworld env
-python scripts/data_prepare/get_alfworld_data.py
+python examples/grpo_alfworld/get_alfworld_data.py
 
 # For WebShop env
-python scripts/data_prepare/get_webshop_data.py
+python examples/grpo_webshop/get_webshop_data.py
 ```
 
 The task is described as an environment instead of a single prompt.
