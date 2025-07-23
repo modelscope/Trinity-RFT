@@ -79,7 +79,7 @@ trainer:
 
 ### Configuration for SFT
 
-We set the `algorithm_type` as `sft` to run SFT process. Then we modify the config file `sft.yaml` with the following changes:
+We set the `algorithm_type` as `sft` to run SFT process. Then we modify the config file [`examples/sft_mot/sft.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/sft_mot/sft.yaml) with the following changes:
 
 ```yaml
 project: <project_name>
@@ -120,5 +120,5 @@ trinity run --config examples/dpo_humanlike/dpo.yaml
 or, for SFT:
 
 ```shell
-trinity run --config /PATH/TO/sft.yaml
+trinity run --config examples/sft_mot/sft.yaml
 ```
