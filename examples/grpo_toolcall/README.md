@@ -13,7 +13,7 @@ To preprocess the data into the format required by our `toolcall_workflow`, run 
 Then fill in the config file `toolace.yaml` and run the following command: `trinity run --config examples/grpo_toolcall/toolace.yaml`.
 
 ## Preventing reward hacking
-In our inital experiments on the 3B model, we found that the reward structure of ToolAce will result in reward hacking, so we add modification on the reward structure of the toolcall workflow. (Our workflow design is flexible, and please feel free to modify it according to your needs.)
+In our initial experiments on the 3B model, we found that the reward structure of ToolAce will result in reward hacking, so we add modification on the reward structure of the toolcall workflow. (Our workflow design is flexible, and please feel free to modify it according to your needs.)
 
 The original reward for format checking is:
 ```python
@@ -28,8 +28,8 @@ def compute_score_v0(solution_str, ground_truth):
 It simply checks whether the output contains `<think>` and `</think>`.
 But it did not check whether there are only one `<think>` and one `</think>` in the output, nor did it check whether the `<think>` and `</think>` are before the `<tool_call>` tags.
 
-This result in reward hacking in 3B model.
-While the reward curve seems to converge, the model will generate endless `<think>` and `</think>` tags, result in overlength outputs.
+This results in reward hacking in 3B model.
+While the reward curve seems to converge, the model will generate endless `<think>` and `</think>` tags, resulting in overlength outputs.
 
 <div style="display: flex; justify-content: space-around; align-items: center;">
   <img src="../../docs/sphinx_doc/assets/toolace_3b_rewards.png" alt="Reward Curve" style="width: 40%;">
@@ -57,7 +57,7 @@ To fix this, we add the following code to the `compute_score_v0` function:
     ...
 ```
 
-With this fix on reward hacking, the training will sucessfully converges. With Qwen2.5-7B-Instruct model, it takes around 3 hours on 8 H20 GPUs to train 9.6k data for one epoch.
+With this fix on reward hacking, the training will successfully converges. With Qwen2.5-7B-Instruct model, it takes around 3 hours on 8 H20 GPUs to train 9.6k data for one epoch.
 
 ## Reward curve results
 
@@ -67,7 +67,7 @@ Below is the reward curve of the trained Qwen2.5-7B-Instruct model.
 The response length is also steady.
 ![](../../docs/sphinx_doc/assets/toolace_length_curve.png)
 
-To view the model output, you can either use the wandb build in table we provided, or directly use the `sqlite3` command to query the replay buffer and see the model response by running the following command:
+To view the model output, you can either use the wandb built-in table we provided, or directly use the `sqlite3` command to query the replay buffer and see the model response by running the following command:
 ```bash
 sqlite3 /PATH/TO/YOUR/BUFFER/toolace.db
 
