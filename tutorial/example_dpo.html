@@ -182,7 +182,7 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>HumanLLMs
 </section>
 <section id="configuration-for-sft">
 <h3>Configuration for SFT<a class="headerlink" href="#configuration-for-sft" title="Link to this heading"></a></h3>
-<p>We set the <code class="docutils literal notranslate"><span class="pre">algorithm_type</span></code> as <code class="docutils literal notranslate"><span class="pre">sft</span></code> to run SFT process. Then we modify the config file <code class="docutils literal notranslate"><span class="pre">sft.yaml</span></code> with the following changes:</p>
+<p>We set the <code class="docutils literal notranslate"><span class="pre">algorithm_type</span></code> as <code class="docutils literal notranslate"><span class="pre">sft</span></code> to run SFT process. Then we modify the config file <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/sft_mot/sft.yaml"><code class="docutils literal notranslate"><span class="pre">examples/sft_mot/sft.yaml</span></code></a> with the following changes:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;project_name&gt;</span>
 <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;experiment_name&gt;</span>
 <span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">train</span>
@@ -220,7 +220,7 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>HumanLLMs
 </pre></div>
 </div>
 <p>or, for SFT:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>/PATH/TO/sft.yaml
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>examples/sft_mot/sft.yaml
 </pre></div>
 </div>
 </section>
