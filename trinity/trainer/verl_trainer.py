@@ -440,10 +440,14 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             )
             self.reset_experiences_example_table()
 
-    def save_checkpoint(self) -> None:
+    def save_checkpoint(self, block_until_saved: bool = False) -> None:
         if self.last_full_save_step != self.global_steps:
             self.last_full_save_step = self.global_steps
             self._save_checkpoint()
+        if block_until_saved:
+            self.actor_rollout_wg.wait_on_save_thread()
+            if self.algorithm.use_critic:
+                self.critic_wg.wait_on_save_thread()
 
     def sync_weight(self) -> None:
         self.actor_rollout_wg.sync_weight()
@@ -460,7 +464,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             global_step_folder = find_latest_ckpt_path(checkpoint_folder)  # None if no latest
 
         # find global_step_folder
-        self.actor_rollout_wg.wait_for_saving()
+        self.actor_rollout_wg.wait_on_save_thread()
         if self.config.trainer.resume_mode == "auto":
             if global_step_folder is None:
                 print("Training from scratch")
@@ -491,8 +495,3 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         if self.use_critic:
             self.critic_wg.clear_optimizer_state()
         print("sft to rft finished")
-
-    def shutdown(self) -> None:
-        self.actor_rollout_wg.wait_for_saving()
-        if self.algorithm.use_critic:
-            self.critic_wg.wait_for_saving()

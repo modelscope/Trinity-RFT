@@ -349,7 +349,7 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
         if not model_state_dict_only:
             self.previous_saved_paths.append(local_path)
 
-    def wait_for_saving(self) -> None:
+    def wait_on_save_thread(self) -> None:
         """
         Wait for all background saving threads to complete.
         """

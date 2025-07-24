@@ -862,8 +862,8 @@ class ActorRolloutRefWorker(Worker):
             offload_fsdp_optimizer(self.actor_optimizer)
 
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
-    def wait_for_saving(self) -> None:
-        self.checkpoint_manager.wait_for_saving()
+    def wait_on_save_thread(self) -> None:
+        self.checkpoint_manager.wait_on_save_thread()
 
 
 class CriticWorker(Worker):
@@ -1292,5 +1292,5 @@ class CriticWorker(Worker):
             offload_fsdp_optimizer(self.critic_optimizer)
 
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
-    def wait_for_saving(self) -> None:
-        self.checkpoint_manager.wait_for_saving()
+    def wait_on_save_thread(self) -> None:
+        self.checkpoint_manager.wait_on_save_thread()

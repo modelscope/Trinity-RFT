@@ -43,6 +43,8 @@ class Trainer:
             except Exception:
                 self.logger.error(f"Error in Trainer:\n{traceback.format_exc()}")
                 break
+        ray.get(self.synchronizer.set_trainer_status.remote(RunningStatus.STOPPED))
+        self.engine.save_checkpoint(block_until_saved=True)
         self.logger.info("--------------------\n> Trainer finished.\n--------------------")
         return self.config.trainer.name
 
@@ -93,10 +95,7 @@ class Trainer:
         ray.get(self.synchronizer.set_trainer_status.remote(RunningStatus.RUNNING))
 
     def shutdown(self) -> None:
-        ray.get(self.synchronizer.set_trainer_status.remote(RunningStatus.STOPPED))
-        self.engine.save_checkpoint()
         self.engine.monitor.close()
-        self.engine.shutdown()
 
 
 class TrainEngineWrapper(ABC):
@@ -116,7 +115,7 @@ class TrainEngineWrapper(ABC):
         """Training."""
 
     @abstractmethod
-    def save_checkpoint(self) -> None:
+    def save_checkpoint(self, block_until_saved: bool = False) -> None:
         """Save the checkpoint."""
 
     @abstractmethod
@@ -130,10 +129,6 @@ class TrainEngineWrapper(ABC):
     @abstractmethod
     def save_state_dict(self) -> None:
         """Only save the model state dict for Synchronizer."""
-
-    @abstractmethod
-    def shutdown(self) -> None:
-        """Shutdown the engine."""
 
 
 def get_trainer_wrapper(config: Config) -> TrainEngineWrapper:
