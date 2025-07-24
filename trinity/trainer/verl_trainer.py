@@ -156,6 +156,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         )
         self.reset_experiences_example_table()
         self.logger = get_logger(__name__)
+        self.last_full_save_step = None
 
     def _validate_config(self):  # TODO
         algorithm = ALGORITHM_TYPE.get(self.algorithm_config.algorithm_type)
@@ -314,13 +315,6 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             prefix_metrics(sample_metrics, "sample", metrics)
         except StopIteration:
             print("No more data to train. Stop training.")
-            if (
-                self.config.trainer.save_freq == 0
-                or self.global_steps % self.config.trainer.save_freq != 0
-            ):
-                self.logger.info(f"Saving at step {self.global_steps}.")
-                self._save_checkpoint()
-                self.logger.info(f"Saved at step {self.global_steps}.")
             return False
         self.global_steps += 1
         self.logger.info(f"Sampling at step {self.global_steps} done.")
@@ -408,7 +402,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         ):
             self.logger.info(f"Saving at step {self.global_steps}.")
             with marked_timer("save_checkpoint", timing_raw):
-                self._save_checkpoint()
+                self.save_checkpoint()
             self.logger.info(f"Saved at step {self.global_steps}.")
         self.logger.info(f"Training at step {self.global_steps} finished.")
         return train_status
@@ -447,7 +441,9 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             self.reset_experiences_example_table()
 
     def save_checkpoint(self) -> None:
-        self._save_checkpoint()
+        if self.last_full_save_step != self.global_steps:
+            self.last_full_save_step = self.global_steps
+            self._save_checkpoint()
 
     def sync_weight(self) -> None:
         self.actor_rollout_wg.sync_weight()
@@ -464,6 +460,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             global_step_folder = find_latest_ckpt_path(checkpoint_folder)  # None if no latest
 
         # find global_step_folder
+        self.actor_rollout_wg.wait_for_saving()
         if self.config.trainer.resume_mode == "auto":
             if global_step_folder is None:
                 print("Training from scratch")

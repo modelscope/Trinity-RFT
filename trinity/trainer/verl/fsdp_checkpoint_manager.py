@@ -3,7 +3,7 @@ import os
 import threading
 import warnings
 from dataclasses import asdict
-from typing import Optional
+from typing import Optional, Union
 
 import ray
 import torch
@@ -46,19 +46,30 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
         self._extra_state_dict_thread = None
         self._save_model_thread = None
 
-    def upload_state_dict(self, trainer_step: int):
+    def _notify_synchronizer_with_step_num(self, global_step):
+        if getattr(self.synchronizer_config, "sync_method", None) == SyncMethod.CHECKPOINT:
+            ray.get(
+                self.synchronizer.set_model_state_dict_with_step_num.remote(
+                    global_step, self.world_size
+                )
+            )
+
+    def _upload_state_dict(self, state_dict: Union[dict, None], global_step: int):
+        if self.rank == 0:
+            ray.get(self.synchronizer.set_model_state_dict.remote(state_dict, global_step))
+
+    def upload_state_dict(self, global_step: int):
         """
         Uploads the full model state dictionary to the synchronizer actor for remote access.
 
         Args:
-            trainer_step (int): The current training step number.
+            global_step (int): The current training step number.
         """
         assert self.synchronizer is not None
         state_dict_config = FullStateDictConfig(offload_to_cpu=True, rank0_only=True)
         with get_fsdp_state_ctx(self.model, StateDictType.FULL_STATE_DICT, state_dict_config, None):
             state_dict = self.model.state_dict()
-        if self.rank == 0:
-            ray.get(self.synchronizer.set_model_state_dict.remote(state_dict, trainer_step))
+        self._upload_state_dict(state_dict, global_step)
 
     def save_checkpoint(  # noqa: C901
         self,
@@ -74,7 +85,7 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
         The main improvement is using separate thread to save checkpoint and the implementation of checkpoint sync method.
         """
         if global_step == 0 and model_state_dict_only:
-            ray.get(self.synchronizer.set_model_state_dict.remote(None, global_step))
+            self._upload_state_dict(None, global_step)
             return
         if local_path is None:
             return
@@ -125,32 +136,29 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
                     local_path, f"extra_state_world_size_{self.world_size}_rank_{self.rank}.pt"
                 )
 
-                if self.should_save_model:
-                    model_state_dict = self.model.state_dict()
-                    if self._model_state_dict_thread is not None:
-                        self._model_state_dict_thread.join()
+                if self.should_save_model or model_state_dict_only:
+                    if os.path.exists(model_path):
+                        if self._model_state_dict_thread is None:
+                            # resume from checkpoint, so we can directly notify synchronizer.
+                            self._notify_synchronizer_with_step_num(global_step)
+                    else:
+                        model_state_dict = self.model.state_dict()
+                        if self._model_state_dict_thread is not None:
+                            self._model_state_dict_thread.join()
 
-                    def _save_model_state_dict():
-                        torch.save(model_state_dict, model_path)
-                        log_with_rank(
-                            f"Saved model to {os.path.abspath(model_path)}",
-                            rank=self.rank,
-                            logger=logger,
-                        )
-                        if (
-                            self.synchronizer_config is not None
-                            and self.synchronizer_config.sync_method == SyncMethod.CHECKPOINT
-                        ):
-                            ray.get(
-                                self.synchronizer.set_model_state_dict_with_step_num.remote(
-                                    global_step, self.world_size
-                                )
+                        def _save_model_state_dict():
+                            torch.save(model_state_dict, model_path)
+                            log_with_rank(
+                                f"Saved model to {os.path.abspath(model_path)}",
+                                rank=self.rank,
+                                logger=logger,
                             )
+                            self._notify_synchronizer_with_step_num(global_step)
 
-                    self._model_state_dict_thread = threading.Thread(
-                        target=_save_model_state_dict,
-                    )
-                    self._model_state_dict_thread.start()
+                        self._model_state_dict_thread = threading.Thread(
+                            target=_save_model_state_dict,
+                        )
+                        self._model_state_dict_thread.start()
 
                 if self.should_save_optimizer and not model_state_dict_only:
                     optimizer_state_dict = self.optimizer.state_dict()

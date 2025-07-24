@@ -110,8 +110,8 @@ class WandbMonitor(Monitor):
             group = name
         self.logger = wandb.init(
             project=project,
-            group=f"{group}_{role}",
-            name=name,
+            group=group,
+            name=f"{name}_{role}",
             tags=[role],
             config=config,
             save_code=False,

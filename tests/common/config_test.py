@@ -35,10 +35,6 @@ class TestConfig(unittest.TestCase):
         )
         self.assertEqual(config.model.model_path, config.model.critic_model_path)
         self.assertEqual(config.model.model_path, config.explorer.rollout_model.model_path)
-        self.assertEqual(
-            config.trainer.trainer_config.trainer.save_freq,
-            config.synchronizer.sync_interval,
-        )
 
     def test_all_examples_are_valid(self):
         example_dir = os.path.join(os.path.dirname(__file__), "..", "..", "examples")

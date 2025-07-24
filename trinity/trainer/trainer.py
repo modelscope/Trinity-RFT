@@ -4,7 +4,6 @@ Trainer Class
 """
 from __future__ import annotations
 
-import os
 import traceback
 from abc import ABC, abstractmethod
 
@@ -30,6 +29,7 @@ class Trainer:
         """Prepare the trainer."""
         self.engine.prepare()
         self.last_trainer_sync_step = self.engine.train_step_num
+        ray.get(self.synchronizer.set_trainer_status.remote(RunningStatus.RUNNING))
 
     def train(self) -> str:
         """Train the model."""
@@ -63,44 +63,40 @@ class Trainer:
                 delta = self.engine.train_step_num - self.last_trainer_sync_step
                 if delta >= self.config.synchronizer.sync_interval:
                     ray.get(self.synchronizer.set_trainer_status.remote(RunningStatus.REQUIRE_SYNC))
-            return (
-                ray.get(self.synchronizer.get_explorer_status_counter.remote())[
-                    RunningStatus.WAITING_SYNC
-                ]
-                > 0
+            explorer_status_counter = ray.get(
+                self.synchronizer.get_explorer_status_counter.remote()
             )
+            if self.config.synchronizer.sync_method == SyncMethod.NCCL:
+                return explorer_status_counter[RunningStatus.WAITING_SYNC] > 0
+            else:  # memory & checkpoint
+                return explorer_status_counter[RunningStatus.REQUIRE_SYNC] > 0
 
     def sync_weight(self) -> None:
         """Sync the model weight."""
+        self.logger.info(
+            f"Trainer synchronizing weights at step {self.engine.train_step_num} starting.."
+        )
         if self.config.synchronizer.sync_method == SyncMethod.NCCL:
-            self.logger.info(
-                f"Trainer synchronizing weights at step {self.engine.train_step_num} starting.."
-            )
             result = ray.get(
                 self.synchronizer.ready_to_nccl_sync.remote("trainer", self.engine.train_step_num)
             )
             if result is None:
                 self.logger.error("Trainer synchronizing weights failed.")
-                raise Exception
-            self.engine.sync_weight()
-            self.logger.info(
-                f"Trainer synchronizing weights at step {self.engine.train_step_num} end."
-            )
-            self.last_trainer_sync_step = self.engine.train_step_num
+            else:
+                self.engine.sync_weight()
+                self.last_trainer_sync_step = self.engine.train_step_num
         elif self.config.synchronizer.sync_method == SyncMethod.CHECKPOINT:
             self.engine.save_state_dict()
-            # ray.get(self.synchronizer.set_model_state_dict_with_step_num.remote(self.engine.train_step_num))
         elif self.config.synchronizer.sync_method == SyncMethod.MEMORY:
             self.engine.upload_state_dict()
+        self.logger.info(f"Trainer synchronizing weights at step {self.engine.train_step_num} end.")
         ray.get(self.synchronizer.set_trainer_status.remote(RunningStatus.RUNNING))
 
     def shutdown(self) -> None:
-        # if checkpoint not saved, save the last checkpoint
-        step_num = self.engine.train_step_num
-        path = os.path.join(self.config.checkpoint_job_dir, f"global_step_{step_num}")
-        if not os.path.isdir(path) or len(os.listdir(path)) == 0:
-            self.engine.save_checkpoint()
+        ray.get(self.synchronizer.set_trainer_status.remote(RunningStatus.STOPPED))
+        self.engine.save_checkpoint()
         self.engine.monitor.close()
+        self.engine.shutdown()
 
 
 class TrainEngineWrapper(ABC):

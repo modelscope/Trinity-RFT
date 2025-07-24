@@ -227,7 +227,7 @@ class Scheduler:
         if async_task.cancelled():
             return
         elif async_task.exception():
-            self.logger.error(f"Task {task.task_id} failed: {async_task.exception()}")
+            self.logger.error(f"Task {task.task.task_id} failed: {async_task.exception()}")
             return
         else:
             status, exps, runner_id = async_task.result()

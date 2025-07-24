@@ -33,8 +33,8 @@ class Synchronizer:
     def __init__(self, config: Config):
         self.logger = get_logger(__name__)
         self.config = config
-        self.trainer_status = RunningStatus.RUNNING
-        self.explorer_status_counter: Dict[RunningStatus, int] = {}
+        self.trainer_status = RunningStatus.STOPPED
+        self.explorer_status_counter: Dict[RunningStatus, int] = defaultdict(lambda: 0)
         self._ready_condition = asyncio.Condition()
         self.model_state_dict = None
         self.model_version = 0
@@ -62,9 +62,11 @@ class Synchronizer:
             assert (
                 old_status in self.explorer_status_counter
             ), f"Invalid explorer status {old_status}"
-            assert old_status != status
+            assert old_status != status, f"Invalid status change from {old_status} to {status}"
             self.explorer_status_counter[old_status] -= 1
-            assert self.explorer_status_counter[old_status] >= 0
+            assert (
+                self.explorer_status_counter[old_status] >= 0
+            ), f"Invalid status count {old_status} (new status {status})"
         if status not in self.explorer_status_counter:
             self.explorer_status_counter[status] = 0
         self.explorer_status_counter[status] += 1
@@ -88,9 +90,10 @@ class Synchronizer:
         """
         if world_size is not None:  # Used when trainer updates the model
             assert step_num is not None
+            assert self.checkpoint_shard_counter[step_num] < world_size, "World size mismatch!"
             self.checkpoint_shard_counter[step_num] += 1
             self.logger.info(
-                f"Synchronizer received checkpoint {self.checkpoint_shard_counter[step_num]} of {world_size} shards"
+                f"Synchronizer has received {self.checkpoint_shard_counter[step_num]} out of {world_size} shards from the checkpoint {step_num}."
             )
             if self.checkpoint_shard_counter[step_num] < world_size:
                 return step_num
@@ -100,11 +103,14 @@ class Synchronizer:
             trainer_type=self.config.trainer.trainer_type,
             step_num=step_num,
         )
-        model_state_dict = load_state_dict(os.path.join(checkpoint_dir, "actor"))  # TODO: to thread
-        await self.set_model_state_dict(model_state_dict, checkpoint_step_num)
+        if checkpoint_step_num != self.model_version:
+            model_state_dict = load_state_dict(
+                os.path.join(checkpoint_dir, "actor")
+            )  # TODO: to thread
+            await self.set_model_state_dict(model_state_dict, checkpoint_step_num)
         return checkpoint_step_num
 
-    async def set_model_state_dict(self, model_state_dict, trainer_step):
+    async def set_model_state_dict(self, model_state_dict: Union[dict, None], trainer_step: int):
         """
         Set the new model state and update the version.
 
@@ -152,7 +158,7 @@ class Synchronizer:
         explorer = ray.get_actor(self.config.explorer_name)
         await explorer.setup_weight_sync_group.remote(master_address, master_port, state_dict_meta)
 
-    async def wait_new_model_state_dict(self, current_version: int) -> int:
+    async def wait_new_model_state_dict(self, current_version: int, no_wait: bool = False) -> int:
         """
         Wait until a new model state is available.
 
@@ -163,13 +169,20 @@ class Synchronizer:
             The new model version after it has been updated.
         """
         async with self._ready_condition:
-            if self.model_version <= current_version:
+            assert (
+                self.model_version >= current_version
+            ), f"The model version in Synchronizer ({self.model_version}) should be greater than that in Explorer ({current_version})!"
+            if self.model_version == current_version:
+                if not no_wait and self.trainer_status != RunningStatus.STOPPED:
+                    # TODO: explorer need support no wait
+                    # TODO: handle timeout
+                    await asyncio.wait_for(
+                        self._ready_condition.wait(),
+                        timeout=self.config.synchronizer.sync_timeout,
+                    )
+            if self.model_version > current_version:
                 self.set_explorer_status(
                     RunningStatus.WAITING_SYNC, old_status=RunningStatus.REQUIRE_SYNC
-                )
-                await asyncio.wait_for(
-                    self._ready_condition.wait(),
-                    timeout=self.config.synchronizer.sync_timeout,
                 )
             return self.model_version
 
@@ -191,6 +204,29 @@ class Synchronizer:
         assert (
             sum(self.explorer_status_counter.values()) == 1
         ), "NCCL sync is only supported for one explorer."
+
+        def sync_failed():
+            if module == "explorer":
+                another_module = "Trainer"
+                self.set_explorer_status(
+                    RunningStatus.REQUIRE_SYNC, old_status=RunningStatus.WAITING_SYNC
+                )
+            else:
+                another_module = "Explorer"
+                self.trainer_status = RunningStatus.REQUIRE_SYNC
+            self.logger.error(
+                f"{another_module} is not ready for model weight sync in {self.config.synchronizer.sync_timeout} seconds."
+            )
+            return None
+
+        non_stop_cnt = sum(
+            value
+            for key, value in self.explorer_status_counter.items()
+            if key != RunningStatus.STOPPED
+        )
+        if non_stop_cnt == 0:
+            return sync_failed()
+        # for status in RunningStatus:
         async with self._ready_condition:
             try:
                 if module == "trainer":
@@ -219,11 +255,7 @@ class Synchronizer:
                         )
                 return self.model_version
             except asyncio.TimeoutError:
-                another_module = "Trainer" if module == "explorer" else "Explorer"
-                self.logger.error(
-                    f"{another_module} is not ready for model weight sync in {self.config.synchronizer.sync_timeout} seconds."
-                )
-                return None
+                return sync_failed()
 
     @classmethod
     def get_actor(cls, config: Optional[Config] = None, namespace: Optional[str] = None):
