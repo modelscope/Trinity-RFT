@@ -25,7 +25,7 @@ class EID(dict):
     batch: int = 0
     # Task number, e.g., the task sequence in the batch, the first task in the batch has task=0
     # Automatically set by the workflow runner
-    task: int = 0  # Task sequence in the batch, e.g., the first task in the batch has task=0
+    task: int = 0
     # Run id, e.g., the first run in the task has run=0
     # User should set this field in custom workflows when creating experiences
     run: int = 0
@@ -202,10 +202,10 @@ class Experience:
             res["response_text"] = self.response_text
         if self.messages is not None:
             res["messages"] = self.messages
-        if self.chosen is not None:
-            res["chosen"] = self.chosen.tolist()
-        if self.rejected is not None:
-            res["rejected"] = self.rejected.tolist()
+        if self.chosen_text is not None:
+            res["chosen_text"] = self.chosen_text
+        if self.rejected_text is not None:
+            res["rejected_text"] = self.rejected_text
         if self.reward is not None:
             res["reward"] = float(self.reward)
         return res

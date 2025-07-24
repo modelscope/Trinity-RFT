@@ -271,11 +271,41 @@ class TestTrainerDPO(BaseTrainerCase):
         self.config.algorithm.algorithm_type = "dpo"
         self.config.algorithm.policy_loss_fn = "dpo"
         self.config.algorithm.policy_loss_fn_args = {}
+        self.config.buffer.total_epochs = 2
+        self.config.buffer.total_steps = 4  # step has higher priority than epoch
+        self.config.synchronizer.sync_interval = 4
         # self.config.buffer.batch_size = 32
         self.config.buffer.trainer_input.experience_buffer = get_unittest_dataset_config("dpo")
         self.config.check_and_update()
         self.config.trainer.trainer_config.trainer.max_actor_ckpt_to_keep = 2
         self.config.trainer.trainer_config.actor_rollout_ref.actor.optim.lr = 5e-7
+        train(self.config)
+        parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
+        actor_metrics = parser.metric_list("actor")
+        self.assertTrue(len(actor_metrics) > 0)
+        self.assertEqual(parser.metric_max_step(actor_metrics[0]), 4)
+
+    def tearDown(self):
+        # remove dir only when the test passed
+        shutil.rmtree(self.config.checkpoint_job_dir)
+
+
+class TestTrainerSFT(BaseTrainerCase):
+    def test_trainer(self):
+        """Test SFT."""
+        # test both mode
+        self.config.mode = "train"
+        self.config.algorithm.algorithm_type = "sft"
+        self.config.algorithm.policy_loss_fn = "sft"
+        self.config.algorithm.policy_loss_fn_args = {}
+        self.config.algorithm.kl_loss_fn = "none"
+        self.config.algorithm.entropy_loss_fn = "none"
+        self.config.synchronizer.sync_interval = 4
+        self.config.buffer.total_epochs = 2
+        self.config.buffer.trainer_input.experience_buffer = get_unittest_dataset_config(
+            "sft_for_gsm8k"
+        )
+        self.config.check_and_update()
         train(self.config)
         parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
         actor_metrics = parser.metric_list("actor")

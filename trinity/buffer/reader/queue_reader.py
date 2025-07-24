@@ -5,7 +5,7 @@ from typing import List, Optional
 import ray
 
 from trinity.buffer.buffer_reader import BufferReader
-from trinity.buffer.queue import QueueActor
+from trinity.buffer.ray_wrapper import QueueWrapper
 from trinity.common.config import BufferConfig, StorageConfig
 from trinity.common.constants import ReadStrategy, StorageType
 from trinity.utils.log import get_logger
@@ -20,7 +20,7 @@ class QueueReader(BufferReader):
         assert storage_config.storage_type == StorageType.QUEUE
         self.timeout = storage_config.max_read_timeout
         self.read_batch_size = config.read_batch_size
-        self.queue = QueueActor.get_actor(storage_config, config)
+        self.queue = QueueWrapper.get_wrapper(storage_config, config)
 
     def read(
         self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None

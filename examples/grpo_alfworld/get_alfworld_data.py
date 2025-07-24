@@ -60,6 +60,6 @@ def create_dataset_files(output_dir, train_size=1024, test_size=100):
 
 
 if __name__ == "__main__":
-    current_file_path = os.path.dirname(os.path.abspath(__file__))
-    output_dir = f"{current_file_path}/alfworld_data"
+    current_file_dir = os.path.dirname(os.path.abspath(__file__))
+    output_dir = f"{current_file_dir}/alfworld_data"
     create_dataset_files(output_dir, train_size=1024, test_size=100)

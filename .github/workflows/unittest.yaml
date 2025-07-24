@@ -69,9 +69,8 @@ jobs:
           docker compose exec trinity-node-1 pytest tests -v -s --ignore=tests/data --ctrf report.json
           echo "tests_run=true" >> $GITHUB_ENV
         elif [ "$TYPE" = "diff" ]; then
-          ROOT_DIR=trinity-${{ github.run_id }}
-          if [ -s "$ROOT_DIR/test_dirs.txt" ]; then
-            TEST_DIRS=$(cat "$ROOT_DIR/test_dirs.txt" | xargs)
+          if [ -s ../../../test_dirs.txt ]; then
+            TEST_DIRS=$(cat ../../../test_dirs.txt | xargs)
             docker compose exec trinity-node-1 pytest $TEST_DIRS -v -s --ignore=tests/data --ctrf report.json
             echo "tests_run=true" >> $GITHUB_ENV
           else
@@ -95,6 +94,7 @@ jobs:
       with:
         name: pytest-results
         path: trinity-${{ github.run_id }}/report.json
+      continue-on-error: true
 
     - name: Publish Test Report
       if: env.tests_run == 'true'
@@ -106,12 +106,14 @@ jobs:
         issue: ${{ github.event.issue.number }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      continue-on-error: true
 
     - name: Remove docker compose
       working-directory: trinity-${{ github.run_id }}/.github/workflows/docker
       if: always()
       run: |
         docker compose down --remove-orphans
+      continue-on-error: true
 
     - name: Cleanup workspace
       if: always()

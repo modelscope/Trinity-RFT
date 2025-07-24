@@ -2,6 +2,7 @@ import os
 import threading
 import time
 
+import ray
 import torch
 from parameterized import parameterized
 
@@ -75,19 +76,17 @@ class TestQueueBuffer(RayUnittestBaseAysnc):
         self.assertRaises(StopIteration, reader.read)
         with open(BUFFER_FILE_PATH, "r") as f:
             self.assertEqual(len(f.readlines()), self.total_num + self.put_batch_size * 2)
-        st = time.time()
-        self.assertRaises(TimeoutError, reader.read, batch_size=1)
-        et = time.time()
-        self.assertTrue(et - st > 2)
+        self.assertRaises(StopIteration, reader.read, batch_size=1)
 
     async def test_priority_queue_capacity(self):
         # test queue capacity
+        self.config.read_batch_size = 4
         meta = StorageConfig(
             name="test_buffer_small",
             algorithm_type="ppo",
             storage_type=StorageType.QUEUE,
             max_read_timeout=1,
-            capacity=2,
+            capacity=100,  # priority will use 2 * read_batch_size as capacity (8)
             path=BUFFER_FILE_PATH,
             use_priority_queue=True,
             replay_buffer_kwargs={"priority_fn": "linear_decay", "decay": 0.6},
@@ -95,7 +94,7 @@ class TestQueueBuffer(RayUnittestBaseAysnc):
         writer = QueueWriter(meta, self.config)
         reader = QueueReader(meta, self.config)
 
-        for i in range(4):
+        for i in range(12):
             writer.write(
                 [
                     Experience(
@@ -106,13 +105,32 @@ class TestQueueBuffer(RayUnittestBaseAysnc):
                 ]
             )
 
-        exps = reader.read(batch_size=2)
-        self.assertEqual(exps[0].info["model_version"], 3)
+        self.assertEqual(ray.get(reader.queue.length.remote()), 8)
+
+        exps = reader.read(batch_size=8)
+        self.assertEqual(exps[0].info["model_version"], 11)
         self.assertEqual(exps[0].info["use_count"], 1)
-        self.assertEqual(exps[1].info["model_version"], 2)
+        self.assertEqual(exps[1].info["model_version"], 10)
         self.assertEqual(exps[1].info["use_count"], 1)
+        self.assertEqual(exps[7].info["model_version"], 4)
 
         with self.assertRaises(TimeoutError):
+            reader.read(batch_size=1)
+
+        for i in range(12):
+            writer.write(
+                [
+                    Experience(
+                        tokens=torch.tensor([1, 2, 3]),
+                        prompt_length=2,
+                        info={"model_version": i, "use_count": 0},
+                    ),
+                ]
+            )
+        await writer.release()
+        exps = reader.read(batch_size=8)
+
+        with self.assertRaises(StopIteration):
             reader.read(batch_size=1)
 
     async def test_queue_buffer_capacity(self):

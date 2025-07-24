@@ -465,9 +465,16 @@ class Config:
             "`buffer.explorer_input.taskset.rollout_args.n` is set to `algorithm.repeat_times`"
             f" (={self.algorithm.repeat_times})."
         )
-        self.buffer.explorer_input.taskset.task_type = TaskType.EXPLORE
-        self.buffer.explorer_input.taskset.total_epochs = self.buffer.total_epochs
-        self.buffer.explorer_input.taskset.total_steps = self.buffer.total_steps
+        if self.mode == "train":
+            assert (
+                self.buffer.trainer_input.experience_buffer is not None
+            ), "`buffer.trainer_input.experience_buffer` is required when `mode` is `train`."
+            self.buffer.trainer_input.experience_buffer.total_epochs = self.buffer.total_epochs
+            self.buffer.trainer_input.experience_buffer.total_steps = self.buffer.total_steps
+        else:
+            self.buffer.explorer_input.taskset.task_type = TaskType.EXPLORE
+            self.buffer.explorer_input.taskset.total_epochs = self.buffer.total_epochs
+            self.buffer.explorer_input.taskset.total_steps = self.buffer.total_steps
         if self.buffer.explorer_input.taskset.default_workflow_type is None:
             self.buffer.explorer_input.taskset.default_workflow_type = (
                 self.buffer.explorer_input.default_workflow_type
