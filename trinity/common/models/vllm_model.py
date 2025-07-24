@@ -278,7 +278,6 @@ class vLLMRolloutModel(InferenceModel):
         explorer_name: str,
         backend: str = "nccl",
         timeout: int = 1200,
-        update_with_checkpoint: bool = True,
         state_dict_meta: dict = None,
     ):
         return await self._collective_rpc(
@@ -291,7 +290,6 @@ class vLLMRolloutModel(InferenceModel):
                 group_name,
                 backend,
                 timeout,
-                update_with_checkpoint,
                 state_dict_meta,
                 explorer_name,
                 ray.get_runtime_context().namespace,

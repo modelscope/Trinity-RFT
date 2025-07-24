@@ -33,20 +33,39 @@ from trinity.common.synchronizer import Synchronizer
 
 
 class FSDPCheckpointManager(OldFSDPCheckpointManager):
+    """
+    An enhanced version of the original FSDP checkpoint manager that:
+
+    1. Uploads model state dicts to a remote Synchronizer actor (either directly or via checkpoints).
+    2. Offloads saving operations (model, optimizer, extra states) into background threads to avoid blocking the training loop.
+
+    This class is useful in distributed training scenarios where synchronization and non-blocking I/O are important.
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         config = kwargs.pop("config", None)
         self.synchronizer_config = config
         if config is not None:
+            # Retrieve the remote Synchronizer actor using the provided namespace
             self.synchronizer = Synchronizer.get_actor(namespace=config.ray_namespace)
         else:
             self.synchronizer = None
+
+        # Threads for asynchronous saving of different components
         self._model_state_dict_thread = None
         self._optimizer_state_dict_thread = None
         self._extra_state_dict_thread = None
         self._save_model_thread = None
 
     def _notify_synchronizer_with_step_num(self, global_step):
+        """
+        Notifies the Synchronizer actor about the current training step number,
+        used when SyncMethod is CHECKPOINT.
+
+        Args:
+            global_step (int): The current global training step.
+        """
         if getattr(self.synchronizer_config, "sync_method", None) == SyncMethod.CHECKPOINT:
             ray.get(
                 self.synchronizer.set_model_state_dict_with_step_num.remote(
@@ -55,6 +74,13 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
             )
 
     def _upload_state_dict(self, state_dict: Union[dict, None], global_step: int):
+        """
+        Internal method to upload a state dict to the Synchronizer actor.
+
+        Args:
+            state_dict (dict or None): The model state dictionary to upload.
+            global_step (int): The current training step number.
+        """
         if self.rank == 0:
             ray.get(self.synchronizer.set_model_state_dict.remote(state_dict, global_step))
 
@@ -80,9 +106,21 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
         model_state_dict_only: bool = False,
     ):
         """
-        modified from verl.utils.checkpoint.fsdp_checkpoint_manager.py:save_checkpoint
+        Modified from verl.utils.checkpoint.fsdp_checkpoint_manager.py:save_checkpoint
 
-        The main improvement is using separate thread to save checkpoint and the implementation of checkpoint sync method.
+        Saves the model checkpoint to disk, optionally uploads it to a remote Synchronizer,
+        and uses background threads to prevent blocking the main training loop.
+
+        Main improvements over the base class:
+        - Uses separate threads for saving model/optimizer/extras.
+        - Implements synchronization with a remote actor.
+
+        Args:
+            local_path (str): Local directory path to save the checkpoint.
+            hdfs_path (str, optional): HDFS path for saving the checkpoint (not implemented here).
+            global_step (int): Current training step.
+            max_ckpt_to_keep (int, optional): Maximum number of checkpoints to keep locally.
+            model_state_dict_only (bool): Whether to only save the model state dict (no optimizer, etc.).
         """
         if global_step == 0 and model_state_dict_only:
             self._upload_state_dict(None, global_step)
@@ -139,7 +177,7 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
                 if self.should_save_model or model_state_dict_only:
                     if os.path.exists(model_path):
                         if self._model_state_dict_thread is None:
-                            # resume from checkpoint, so we can directly notify synchronizer.
+                            # If resuming from a checkpoint, notify synchronizer immediately
                             self._notify_synchronizer_with_step_num(global_step)
                     else:
                         model_state_dict = self.model.state_dict()

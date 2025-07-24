@@ -66,7 +66,7 @@ class Explorer:
         self.update_interval = (
             self.config.synchronizer.sync_interval * self.config.buffer.batch_size
         )
-        self.use_state_dict_weights_update = self.config.synchronizer.sync_method != SyncMethod.NCCL
+        self.use_nccl_sync = self.config.synchronizer.sync_method == SyncMethod.NCCL
         self.pending_eval_tasks = deque()
 
         # For checkpoint weights update
@@ -89,7 +89,7 @@ class Explorer:
         self, master_address: str, master_port: int, state_dict_meta: List = None
     ):
         # In checkpoint mode, we use explorer to store the model weights which has no rank
-        base_offset = 0 if self.use_state_dict_weights_update else 1
+        base_offset = 1 if self.use_nccl_sync else 0
         world_size = (
             len(self.models) * self.config.explorer.rollout_model.tensor_parallel_size + base_offset
         )
@@ -109,7 +109,6 @@ class Explorer:
                 group_name=ROLLOUT_WEIGHT_SYNC_GROUP_NAME,
                 explorer_name=self.config.explorer.name,
                 timeout=self.config.synchronizer.sync_timeout,
-                update_with_checkpoint=self.use_state_dict_weights_update,
                 state_dict_meta=state_dict_meta,
             )
             for i, model in enumerate(self.models)
@@ -130,7 +129,7 @@ class Explorer:
         await asyncio.gather(*[model.sync_model.remote(step_num) for model in self.models])
         return step_num  # type: ignore
 
-    async def _state_dict_update(self):
+    async def _pull_latest_weights(self):
         self.logger.info("Start to update state dict.")
         new_version = ray.get(
             self.synchronizer.wait_new_model_state_dict.remote(self.model_version)
@@ -180,7 +179,7 @@ class Explorer:
         if self.experience_buffer:
             await self.experience_buffer.acquire()
         futures = [asyncio.create_task(self.scheduler.start())]
-        if self.use_state_dict_weights_update:
+        if not self.use_nccl_sync:
             master_address, master_port = await self.models[0].get_available_address.remote()
             futures.append(
                 asyncio.create_task(self.setup_weight_sync_group(master_address, master_port))
@@ -335,10 +334,10 @@ class Explorer:
         if sync_weight:
             # sync weights
             self.logger.info(f"Explorer sync_weights at step {self.explore_step_num} started.")
-            if self.use_state_dict_weights_update:
-                await self._state_dict_update()
-            else:  # nccl weights update
+            if self.use_nccl_sync:
                 await self._nccl_weights_update()
+            else:  # pull weights from Synchronizer
+                await self._pull_latest_weights()
             self.logger.info(
                 f"Explorer sync_weights at step {self.explore_step_num} finished, model version = {self.model_version}."
             )

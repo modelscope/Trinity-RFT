@@ -21,7 +21,6 @@ class WorkerExtension:
         group_name: str,
         backend: str = "nccl",
         timeout: int = 1200,
-        update_with_checkpoint: bool = True,
         state_dict_meta: list = None,
         explorer_name: str = None,
         namespace: str = None,
@@ -30,10 +29,9 @@ class WorkerExtension:
         assert torch.distributed.is_initialized(), "default torch process group must be initialized"
         assert group_name != "", "group name must not be empty"
         self._state_dict_meta = state_dict_meta
-        self._update_with_checkpoint = update_with_checkpoint
         self._weight_update_rank = torch.distributed.get_rank() + rank_offset
         logger.info(
-            f"vLLM starting init_process_group ({'checkpoint' if self._update_with_checkpoint else 'nccl'}):\n"
+            f"vLLM starting init_process_group:\n"
             f"  > address={master_address}:{master_port}\n"
             f"  > rank={torch.distributed.get_rank()}\n"
             f"  > rank_offset={rank_offset}\n"
