@@ -123,7 +123,7 @@
     <span class="n">batch</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="c1"># Task number, e.g., the task sequence in the batch, the first task in the batch has task=0</span>
     <span class="c1"># Automatically set by the workflow runner</span>
-    <span class="n">task</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Task sequence in the batch, e.g., the first task in the batch has task=0</span>
+    <span class="n">task</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="c1"># Run id, e.g., the first run in the task has run=0</span>
     <span class="c1"># User should set this field in custom workflows when creating experiences</span>
     <span class="n">run</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
@@ -317,10 +317,10 @@
             <span class="n">res</span><span class="p">[</span><span class="s2">&quot;response_text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">response_text</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">messages</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">res</span><span class="p">[</span><span class="s2">&quot;messages&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">messages</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">chosen</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">res</span><span class="p">[</span><span class="s2">&quot;chosen&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chosen</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rejected</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">res</span><span class="p">[</span><span class="s2">&quot;rejected&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rejected</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">chosen_text</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">res</span><span class="p">[</span><span class="s2">&quot;chosen_text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chosen_text</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rejected_text</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">res</span><span class="p">[</span><span class="s2">&quot;rejected_text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rejected_text</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reward</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">res</span><span class="p">[</span><span class="s2">&quot;reward&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reward</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">res</span></div>

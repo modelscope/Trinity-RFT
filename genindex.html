@@ -219,13 +219,15 @@
 </li>
         <li><a href="build_api/trinity.algorithm.html#trinity.algorithm.SampleStrategy.__init__">(trinity.algorithm.SampleStrategy method)</a>
 </li>
-        <li><a href="build_api/trinity.buffer.html#trinity.buffer.priority_queue.AsyncPriorityQueue.__init__">(trinity.buffer.priority_queue.AsyncPriorityQueue method)</a>
+        <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.AsyncPriorityQueue.__init__">(trinity.buffer.queue.AsyncPriorityQueue method)</a>
 </li>
-        <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.QueueActor.__init__">(trinity.buffer.queue.QueueActor method)</a>
+        <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.AsyncQueue.__init__">(trinity.buffer.queue.AsyncQueue method)</a>
 </li>
         <li><a href="build_api/trinity.buffer.html#trinity.buffer.ray_wrapper.DBWrapper.__init__">(trinity.buffer.ray_wrapper.DBWrapper method)</a>
 </li>
         <li><a href="build_api/trinity.buffer.html#trinity.buffer.ray_wrapper.FileWrapper.__init__">(trinity.buffer.ray_wrapper.FileWrapper method)</a>
+</li>
+        <li><a href="build_api/trinity.buffer.html#trinity.buffer.ray_wrapper.QueueWrapper.__init__">(trinity.buffer.ray_wrapper.QueueWrapper method)</a>
 </li>
         <li><a href="build_api/trinity.buffer.reader.html#trinity.buffer.reader.file_reader.DPODataReader.__init__">(trinity.buffer.reader.file_reader.DPODataReader method)</a>
 </li>
@@ -463,11 +465,11 @@
       <ul>
         <li><a href="build_api/trinity.buffer.html#trinity.buffer.BufferWriter.acquire">(trinity.buffer.BufferWriter method)</a>
 </li>
-        <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.QueueActor.acquire">(trinity.buffer.queue.QueueActor method)</a>
-</li>
         <li><a href="build_api/trinity.buffer.html#trinity.buffer.ray_wrapper.DBWrapper.acquire">(trinity.buffer.ray_wrapper.DBWrapper method)</a>
 </li>
         <li><a href="build_api/trinity.buffer.html#trinity.buffer.ray_wrapper.FileWrapper.acquire">(trinity.buffer.ray_wrapper.FileWrapper method)</a>
+</li>
+        <li><a href="build_api/trinity.buffer.html#trinity.buffer.ray_wrapper.QueueWrapper.acquire">(trinity.buffer.ray_wrapper.QueueWrapper method)</a>
 </li>
         <li><a href="build_api/trinity.buffer.writer.html#trinity.buffer.writer.file_writer.JSONWriter.acquire">(trinity.buffer.writer.file_writer.JSONWriter method)</a>
 </li>
@@ -576,7 +578,9 @@
         <li><a href="build_api/trinity.algorithm.html#trinity.algorithm.KLFn.apply_kl_penalty_to_reward">(trinity.algorithm.KLFn method)</a>
 </li>
       </ul></li>
-      <li><a href="build_api/trinity.buffer.html#trinity.buffer.priority_queue.AsyncPriorityQueue">AsyncPriorityQueue (class in trinity.buffer.priority_queue)</a>
+      <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.AsyncPriorityQueue">AsyncPriorityQueue (class in trinity.buffer.queue)</a>
+</li>
+      <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.AsyncQueue">AsyncQueue (class in trinity.buffer.queue)</a>
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.experience.Experiences.attention_masks">attention_masks (trinity.common.experience.Experiences attribute)</a>
 </li>
@@ -706,7 +710,7 @@
         <li><a href="build_api/trinity.algorithm.html#trinity.algorithm.AlgorithmType.can_balance_batch">(trinity.algorithm.AlgorithmType attribute)</a>
 </li>
       </ul></li>
-      <li><a href="build_api/trinity.buffer.html#trinity.buffer.priority_queue.AsyncPriorityQueue.capacity">capacity (trinity.buffer.priority_queue.AsyncPriorityQueue attribute)</a>
+      <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.AsyncPriorityQueue.capacity">capacity (trinity.buffer.queue.AsyncPriorityQueue attribute)</a>
 
       <ul>
         <li><a href="build_api/trinity.common.html#trinity.common.config.StorageConfig.capacity">(trinity.common.config.StorageConfig attribute)</a>
@@ -736,8 +740,6 @@
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.Config.check_and_update">check_and_update() (trinity.common.config.Config method)</a>
 </li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.check_auxiliary_models">check_auxiliary_models() (in module trinity.manager.config_registry.explorer_config_manager)</a>
-</li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.check_checkpoint_root_dir">check_checkpoint_root_dir() (in module trinity.manager.config_registry.model_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.algorithm.html#trinity.algorithm.algorithm.AlgorithmType.check_config">check_config() (trinity.algorithm.algorithm.AlgorithmType class method)</a>
@@ -748,19 +750,9 @@
         <li><a href="build_api/trinity.algorithm.html#trinity.algorithm.AlgorithmType.check_config">(trinity.algorithm.AlgorithmType class method)</a>
 </li>
       </ul></li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.check_experience_buffer_path">check_experience_buffer_path() (in module trinity.manager.config_registry.buffer_config_manager)</a>
-</li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.check_model_path">check_model_path() (in module trinity.manager.config_registry.model_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.check_resume_from_path">check_resume_from_path() (in module trinity.manager.config_registry.trainer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.check_sft_warmup_dataset_path">check_sft_warmup_dataset_path() (in module trinity.manager.config_registry.buffer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.check_taskset_path">check_taskset_path() (in module trinity.manager.config_registry.buffer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.check_tensor_parallel_size">check_tensor_parallel_size() (in module trinity.manager.config_registry.explorer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.check_train_batch_size">check_train_batch_size() (in module trinity.manager.config_registry.buffer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Checkpoint">Checkpoint (class in trinity.common.verl_config)</a>
 </li>
@@ -776,8 +768,6 @@
       </ul></li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.Config.checkpoint_job_dir">checkpoint_job_dir (trinity.common.config.Config attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.html#trinity.common.config.Config.checkpoint_root_dir">checkpoint_root_dir (trinity.common.config.Config attribute)</a>
 </li>
       <li><a href="build_api/trinity.buffer.schema.html#trinity.buffer.schema.sql_schema.DPODataModel.chosen">chosen (trinity.buffer.schema.sql_schema.DPODataModel attribute)</a>
@@ -790,6 +780,8 @@
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.experience.Experience.chosen_text">chosen_text (trinity.common.experience.Experience attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.html#trinity.common.config.DataPipelineConfig.clean_strategy">clean_strategy (trinity.common.config.DataPipelineConfig attribute)</a>
 </li>
       <li><a href="build_api/trinity.trainer.verl.html#trinity.trainer.verl.fsdp_workers.ActorRolloutRefWorker.clear_optimizer_state">clear_optimizer_state() (trinity.trainer.verl.fsdp_workers.ActorRolloutRefWorker method)</a>
@@ -802,9 +794,15 @@
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Critic.cliprange_value">cliprange_value (trinity.common.verl_config.Critic attribute)</a>
 </li>
-      <li><a href="build_api/trinity.buffer.reader.html#trinity.buffer.reader.file_reader.DummyProgressBar.close">close() (trinity.buffer.reader.file_reader.DummyProgressBar method)</a>
+      <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.AsyncPriorityQueue.close">close() (trinity.buffer.queue.AsyncPriorityQueue method)</a>
 
       <ul>
+        <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.AsyncQueue.close">(trinity.buffer.queue.AsyncQueue method)</a>
+</li>
+        <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.QueueBuffer.close">(trinity.buffer.queue.QueueBuffer method)</a>
+</li>
+        <li><a href="build_api/trinity.buffer.reader.html#trinity.buffer.reader.file_reader.DummyProgressBar.close">(trinity.buffer.reader.file_reader.DummyProgressBar method)</a>
+</li>
         <li><a href="build_api/trinity.utils.html#trinity.utils.monitor.Monitor.close">(trinity.utils.monitor.Monitor method)</a>
 </li>
         <li><a href="build_api/trinity.utils.html#trinity.utils.monitor.TensorboardMonitor.close">(trinity.utils.monitor.TensorboardMonitor method)</a>
@@ -1268,8 +1266,6 @@
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.BufferConfig.explorer_output">explorer_output (trinity.common.config.BufferConfig attribute)</a>
 </li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.explorer_visible">explorer_visible() (in module trinity.manager.config_registry.explorer_config_manager)</a>
-</li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.SynchronizerConfig.explorer_world_size">explorer_world_size (trinity.common.config.SynchronizerConfig attribute)</a>
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.ExplorerConfig">ExplorerConfig (class in trinity.common.config)</a>
@@ -1305,8 +1301,6 @@
       <li><a href="build_api/trinity.utils.html#trinity.utils.eval_utils.find_boxed_answer">find_boxed_answer() (in module trinity.utils.eval_utils)</a>
 </li>
       <li><a href="build_api/trinity.utils.html#trinity.utils.dlc_utils.ClusterStatus.finish">finish() (trinity.utils.dlc_utils.ClusterStatus method)</a>
-</li>
-      <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.QueueActor.FINISH_MESSAGE">FINISH_MESSAGE (trinity.buffer.queue.QueueActor attribute)</a>
 </li>
       <li><a href="build_api/trinity.utils.html#trinity.utils.eval_utils.fix_a_slash_b">fix_a_slash_b() (in module trinity.utils.eval_utils)</a>
 </li>
@@ -1428,19 +1422,19 @@
       </ul></li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.GenerationConfig">GenerationConfig (class in trinity.common.config)</a>
 </li>
-      <li><a href="build_api/trinity.buffer.html#trinity.buffer.priority_queue.AsyncPriorityQueue.get">get() (trinity.buffer.priority_queue.AsyncPriorityQueue method)</a>
+      <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.AsyncPriorityQueue.get">get() (trinity.buffer.queue.AsyncPriorityQueue method)</a>
 
       <ul>
+        <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.QueueBuffer.get">(trinity.buffer.queue.QueueBuffer method)</a>
+</li>
         <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.config_registry.ConfigRegistry.get">(trinity.manager.config_registry.config_registry.ConfigRegistry method)</a>
 </li>
         <li><a href="build_api/trinity.utils.html#trinity.utils.registry.Registry.get">(trinity.utils.registry.Registry method)</a>
 </li>
       </ul></li>
-      <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.QueueActor.get_actor">get_actor() (trinity.buffer.queue.QueueActor class method)</a>
-</li>
       <li><a href="build_api/trinity.common.models.html#trinity.common.models.model.InferenceModel.get_available_address">get_available_address() (trinity.common.models.model.InferenceModel method)</a>
 </li>
-      <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.QueueActor.get_batch">get_batch() (trinity.buffer.queue.QueueActor method)</a>
+      <li><a href="build_api/trinity.buffer.html#trinity.buffer.ray_wrapper.QueueWrapper.get_batch">get_batch() (trinity.buffer.ray_wrapper.QueueWrapper method)</a>
 </li>
       <li><a href="build_api/trinity.buffer.html#trinity.buffer.get_buffer_reader">get_buffer_reader() (in module trinity.buffer)</a>
 
@@ -1496,6 +1490,8 @@
       </ul></li>
       <li><a href="build_api/trinity.common.models.html#trinity.common.models.model.ModelWrapper.get_openai_client">get_openai_client() (trinity.common.models.model.ModelWrapper method)</a>
 </li>
+      <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.QueueBuffer.get_queue">get_queue() (trinity.buffer.queue.QueueBuffer class method)</a>
+</li>
       <li><a href="build_api/trinity.explorer.html#trinity.explorer.scheduler.Scheduler.get_results">get_results() (trinity.explorer.scheduler.Scheduler method)</a>
 </li>
       <li><a href="build_api/trinity.manager.html#trinity.manager.get_trainer_wrapper">get_trainer_wrapper() (in module trinity.manager)</a>
@@ -1518,6 +1514,8 @@
 
       <ul>
         <li><a href="build_api/trinity.buffer.html#trinity.buffer.ray_wrapper.FileWrapper.get_wrapper">(trinity.buffer.ray_wrapper.FileWrapper class method)</a>
+</li>
+        <li><a href="build_api/trinity.buffer.html#trinity.buffer.ray_wrapper.QueueWrapper.get_wrapper">(trinity.buffer.ray_wrapper.QueueWrapper class method)</a>
 </li>
       </ul></li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.InferenceModelConfig.gpu_memory_utilization">gpu_memory_utilization (trinity.common.config.InferenceModelConfig attribute)</a>
@@ -1604,7 +1602,7 @@
 </li>
       <li><a href="build_api/trinity.explorer.html#trinity.explorer.workflow_runner.WorkflowRunner.is_alive">is_alive() (trinity.explorer.workflow_runner.WorkflowRunner method)</a>
 </li>
-      <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.is_database_url">is_database_url() (in module trinity.buffer.queue)</a>
+      <li><a href="build_api/trinity.buffer.html#trinity.buffer.ray_wrapper.is_database_url">is_database_url() (in module trinity.buffer.ray_wrapper)</a>
 </li>
       <li><a href="build_api/trinity.utils.html#trinity.utils.eval_utils.is_equiv">is_equiv() (in module trinity.utils.eval_utils)</a>
 </li>
@@ -1616,7 +1614,7 @@
       </ul></li>
       <li><a href="build_api/trinity.utils.html#trinity.utils.distributed.is_ipv6_address">is_ipv6_address() (in module trinity.utils.distributed)</a>
 </li>
-      <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.is_json_file">is_json_file() (in module trinity.buffer.queue)</a>
+      <li><a href="build_api/trinity.buffer.html#trinity.buffer.ray_wrapper.is_json_file">is_json_file() (in module trinity.buffer.ray_wrapper)</a>
 </li>
       <li><a href="build_api/trinity.utils.html#trinity.utils.dlc_utils.is_running">is_running() (in module trinity.utils.dlc_utils)</a>
 </li>
@@ -1684,11 +1682,11 @@
 </li>
       <li><a href="build_api/trinity.utils.html#trinity.utils.eval_utils.last_boxed_only_string">last_boxed_only_string() (in module trinity.utils.eval_utils)</a>
 </li>
-      <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.QueueActor.length">length() (trinity.buffer.queue.QueueActor method)</a>
+      <li><a href="build_api/trinity.buffer.html#trinity.buffer.ray_wrapper.QueueWrapper.length">length() (trinity.buffer.ray_wrapper.QueueWrapper method)</a>
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.constants.ReadStrategy.LFU">LFU (trinity.common.constants.ReadStrategy attribute)</a>
 </li>
-      <li><a href="build_api/trinity.buffer.html#trinity.buffer.priority_queue.linear_decay_priority">linear_decay_priority() (in module trinity.buffer.priority_queue)</a>
+      <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.linear_decay_priority">linear_decay_priority() (in module trinity.buffer.queue)</a>
 </li>
       <li><a href="build_api/trinity.utils.html#trinity.utils.registry.Registry.list">list() (trinity.utils.registry.Registry method)</a>
 </li>
@@ -2020,8 +2018,6 @@
 </li>
         <li><a href="build_api/trinity.buffer.html#module-trinity.buffer.buffer_writer">trinity.buffer.buffer_writer</a>
 </li>
-        <li><a href="build_api/trinity.buffer.html#module-trinity.buffer.priority_queue">trinity.buffer.priority_queue</a>
-</li>
         <li><a href="build_api/trinity.buffer.html#module-trinity.buffer.queue">trinity.buffer.queue</a>
 </li>
         <li><a href="build_api/trinity.buffer.html#module-trinity.buffer.ray_wrapper">trinity.buffer.ray_wrapper</a>
@@ -2114,15 +2110,9 @@
 </li>
         <li><a href="build_api/trinity.manager.html#module-trinity.manager.config_manager">trinity.manager.config_manager</a>
 </li>
-        <li><a href="build_api/trinity.manager.config_registry.html#module-trinity.manager.config_registry">trinity.manager.config_registry</a>
-</li>
         <li><a href="build_api/trinity.manager.config_registry.html#module-trinity.manager.config_registry.algorithm_config_manager">trinity.manager.config_registry.algorithm_config_manager</a>
 </li>
-        <li><a href="build_api/trinity.manager.config_registry.html#module-trinity.manager.config_registry.buffer_config_manager">trinity.manager.config_registry.buffer_config_manager</a>
-</li>
         <li><a href="build_api/trinity.manager.config_registry.html#module-trinity.manager.config_registry.config_registry">trinity.manager.config_registry.config_registry</a>
-</li>
-        <li><a href="build_api/trinity.manager.config_registry.html#module-trinity.manager.config_registry.explorer_config_manager">trinity.manager.config_registry.explorer_config_manager</a>
 </li>
         <li><a href="build_api/trinity.manager.config_registry.html#module-trinity.manager.config_registry.model_config_manager">trinity.manager.config_registry.model_config_manager</a>
 </li>
@@ -2407,9 +2397,9 @@
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.constants.ReadStrategy.PRIORITY">PRIORITY (trinity.common.constants.ReadStrategy attribute)</a>
 </li>
-      <li><a href="build_api/trinity.buffer.html#trinity.buffer.priority_queue.AsyncPriorityQueue.priority_fn">priority_fn (trinity.buffer.priority_queue.AsyncPriorityQueue attribute)</a>
+      <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.AsyncPriorityQueue.priority_fn">priority_fn (trinity.buffer.queue.AsyncPriorityQueue attribute)</a>
 </li>
-      <li><a href="build_api/trinity.buffer.html#trinity.buffer.priority_queue.AsyncPriorityQueue.priority_groups">priority_groups (trinity.buffer.priority_queue.AsyncPriorityQueue attribute)</a>
+      <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.AsyncPriorityQueue.priority_groups">priority_groups (trinity.buffer.queue.AsyncPriorityQueue attribute)</a>
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.DataPipelineConfig.priority_weights">priority_weights (trinity.common.config.DataPipelineConfig attribute)</a>
 </li>
@@ -2435,9 +2425,13 @@
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.constants.PromptType">PromptType (class in trinity.common.constants)</a>
 </li>
-      <li><a href="build_api/trinity.buffer.html#trinity.buffer.priority_queue.AsyncPriorityQueue.put">put() (trinity.buffer.priority_queue.AsyncPriorityQueue method)</a>
+      <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.AsyncPriorityQueue.put">put() (trinity.buffer.queue.AsyncPriorityQueue method)</a>
+
+      <ul>
+        <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.QueueBuffer.put">(trinity.buffer.queue.QueueBuffer method)</a>
 </li>
-      <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.QueueActor.put_batch">put_batch() (trinity.buffer.queue.QueueActor method)</a>
+      </ul></li>
+      <li><a href="build_api/trinity.buffer.html#trinity.buffer.ray_wrapper.QueueWrapper.put_batch">put_batch() (trinity.buffer.ray_wrapper.QueueWrapper method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -2445,13 +2439,21 @@
 <h2 id="Q">Q</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="build_api/trinity.common.html#trinity.common.constants.StorageType.QUEUE">QUEUE (trinity.common.constants.StorageType attribute)</a>
+      <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.AsyncPriorityQueue.qsize">qsize() (trinity.buffer.queue.AsyncPriorityQueue method)</a>
+
+      <ul>
+        <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.QueueBuffer.qsize">(trinity.buffer.queue.QueueBuffer method)</a>
 </li>
-      <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.QueueActor">QueueActor (class in trinity.buffer.queue)</a>
+      </ul></li>
+      <li><a href="build_api/trinity.common.html#trinity.common.constants.StorageType.QUEUE">QUEUE (trinity.common.constants.StorageType attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.QueueBuffer">QueueBuffer (class in trinity.buffer.queue)</a>
+</li>
       <li><a href="build_api/trinity.buffer.reader.html#trinity.buffer.reader.queue_reader.QueueReader">QueueReader (class in trinity.buffer.reader.queue_reader)</a>
+</li>
+      <li><a href="build_api/trinity.buffer.html#trinity.buffer.ray_wrapper.QueueWrapper">QueueWrapper (class in trinity.buffer.ray_wrapper)</a>
 </li>
       <li><a href="build_api/trinity.buffer.writer.html#trinity.buffer.writer.queue_writer.QueueWriter">QueueWriter (class in trinity.buffer.writer.queue_writer)</a>
 </li>
@@ -2548,11 +2550,11 @@
       <ul>
         <li><a href="build_api/trinity.buffer.html#trinity.buffer.BufferWriter.release">(trinity.buffer.BufferWriter method)</a>
 </li>
-        <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.QueueActor.release">(trinity.buffer.queue.QueueActor method)</a>
-</li>
         <li><a href="build_api/trinity.buffer.html#trinity.buffer.ray_wrapper.DBWrapper.release">(trinity.buffer.ray_wrapper.DBWrapper method)</a>
 </li>
         <li><a href="build_api/trinity.buffer.html#trinity.buffer.ray_wrapper.FileWrapper.release">(trinity.buffer.ray_wrapper.FileWrapper method)</a>
+</li>
+        <li><a href="build_api/trinity.buffer.html#trinity.buffer.ray_wrapper.QueueWrapper.release">(trinity.buffer.ray_wrapper.QueueWrapper method)</a>
 </li>
         <li><a href="build_api/trinity.buffer.writer.html#trinity.buffer.writer.file_writer.JSONWriter.release">(trinity.buffer.writer.file_writer.JSONWriter method)</a>
 </li>
@@ -2647,7 +2649,7 @@
 </li>
       <li><a href="build_api/trinity.buffer.html#trinity.buffer.utils.retry_session">retry_session() (in module trinity.buffer.utils)</a>
 </li>
-      <li><a href="build_api/trinity.buffer.html#trinity.buffer.priority_queue.AsyncPriorityQueue.reuse_cooldown_time">reuse_cooldown_time (trinity.buffer.priority_queue.AsyncPriorityQueue attribute)</a>
+      <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.AsyncPriorityQueue.reuse_cooldown_time">reuse_cooldown_time (trinity.buffer.queue.AsyncPriorityQueue attribute)</a>
 
       <ul>
         <li><a href="build_api/trinity.common.html#trinity.common.config.StorageConfig.reuse_cooldown_time">(trinity.common.config.StorageConfig attribute)</a>
@@ -2967,13 +2969,7 @@
       </ul></li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_algorithm_type">set_algorithm_type() (in module trinity.manager.config_registry.algorithm_config_manager)</a>
 </li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.set_auxiliary_models">set_auxiliary_models() (in module trinity.manager.config_registry.explorer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.set_bench_on_latest_checkpoint">set_bench_on_latest_checkpoint() (in module trinity.manager.config_registry.explorer_config_manager)</a>
-</li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_beta_in_policy_loss_fn">set_beta_in_policy_loss_fn() (in module trinity.manager.config_registry.algorithm_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.set_buffer_max_retry_times">set_buffer_max_retry_times() (in module trinity.manager.config_registry.buffer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.set_checkpoint_root_dir">set_checkpoint_root_dir() (in module trinity.manager.config_registry.model_config_manager)</a>
 </li>
@@ -3001,31 +2997,9 @@
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_default_hdfs_dir">set_default_hdfs_dir() (in module trinity.manager.config_registry.trainer_config_manager)</a>
 </li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.set_default_reward_fn_type">set_default_reward_fn_type() (in module trinity.manager.config_registry.buffer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.set_default_workflow_type">set_default_workflow_type() (in module trinity.manager.config_registry.buffer_config_manager)</a>
-</li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_del_local_ckpt_after_load">set_del_local_ckpt_after_load() (in module trinity.manager.config_registry.trainer_config_manager)</a>
 </li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.set_dpo_dataset_kwargs">set_dpo_dataset_kwargs() (in module trinity.manager.config_registry.buffer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.set_dtype">set_dtype() (in module trinity.manager.config_registry.explorer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.set_enable_chunked_prefill">set_enable_chunked_prefill() (in module trinity.manager.config_registry.explorer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.set_enable_openai_api">set_enable_openai_api() (in module trinity.manager.config_registry.explorer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.set_enable_prefix_caching">set_enable_prefix_caching() (in module trinity.manager.config_registry.explorer_config_manager)</a>
-</li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_enable_preview">set_enable_preview() (in module trinity.manager.config_registry.trainer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.set_enable_thinking">set_enable_thinking() (in module trinity.manager.config_registry.explorer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.set_enforce_eager">set_enforce_eager() (in module trinity.manager.config_registry.explorer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.set_engine_num">set_engine_num() (in module trinity.manager.config_registry.explorer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.set_engine_type">set_engine_type() (in module trinity.manager.config_registry.explorer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_entropy_coef_in_entropy_loss_fn">set_entropy_coef_in_entropy_loss_fn() (in module trinity.manager.config_registry.algorithm_config_manager)</a>
 </li>
@@ -3033,23 +3007,13 @@
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_epsilon_in_advantage_fn">set_epsilon_in_advantage_fn() (in module trinity.manager.config_registry.algorithm_config_manager)</a>
 </li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.set_eval_interval">set_eval_interval() (in module trinity.manager.config_registry.explorer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.set_eval_tasksets">set_eval_tasksets() (in module trinity.manager.config_registry.buffer_config_manager)</a>
-</li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.set_exp_name">set_exp_name() (in module trinity.manager.config_registry.model_config_manager)</a>
 </li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.set_experience_buffer_path">set_experience_buffer_path() (in module trinity.manager.config_registry.buffer_config_manager)</a>
-</li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_expert_data_ratio_in_sample_strategy">set_expert_data_ratio_in_sample_strategy() (in module trinity.manager.config_registry.algorithm_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.set_explorer_max_retry_times">set_explorer_max_retry_times() (in module trinity.manager.config_registry.explorer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_forward_prefetch">set_forward_prefetch() (in module trinity.manager.config_registry.trainer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_gamma_in_advantage_fn">set_gamma_in_advantage_fn() (in module trinity.manager.config_registry.algorithm_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.set_gpu_memory_utilization">set_gpu_memory_utilization() (in module trinity.manager.config_registry.explorer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.set_gpu_per_node">set_gpu_per_node() (in module trinity.manager.config_registry.model_config_manager)</a>
 </li>
@@ -3081,20 +3045,16 @@
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.set_max_response_tokens">set_max_response_tokens() (in module trinity.manager.config_registry.model_config_manager)</a>
 </li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.set_max_retry_interval">set_max_retry_interval() (in module trinity.manager.config_registry.buffer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.set_max_timeout">set_max_timeout() (in module trinity.manager.config_registry.explorer_config_manager)</a>
-</li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.set_model_path">set_model_path() (in module trinity.manager.config_registry.model_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.set_monitor_type">set_monitor_type() (in module trinity.manager.config_registry.model_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_mu_in_policy_loss_fn">set_mu_in_policy_loss_fn() (in module trinity.manager.config_registry.algorithm_config_manager)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.set_node_num">set_node_num() (in module trinity.manager.config_registry.model_config_manager)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_norm_adv_by_std_in_grpo">set_norm_adv_by_std_in_grpo() (in module trinity.manager.config_registry.trainer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_opmd_baseline_in_advantage_fn">set_opmd_baseline_in_advantage_fn() (in module trinity.manager.config_registry.algorithm_config_manager)</a>
@@ -3107,10 +3067,6 @@
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_ppo_epochs">set_ppo_epochs() (in module trinity.manager.config_registry.trainer_config_manager)</a>
 </li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.set_priority_decay">set_priority_decay() (in module trinity.manager.config_registry.buffer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.set_priority_fn">set_priority_fn() (in module trinity.manager.config_registry.buffer_config_manager)</a>
-</li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.set_project">set_project() (in module trinity.manager.config_registry.model_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_ref_log_prob_micro_batch_size_per_gpu">set_ref_log_prob_micro_batch_size_per_gpu() (in module trinity.manager.config_registry.trainer_config_manager)</a>
@@ -3119,59 +3075,25 @@
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_repeat_times">set_repeat_times() (in module trinity.manager.config_registry.algorithm_config_manager)</a>
 </li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.set_reply_prefix">set_reply_prefix() (in module trinity.manager.config_registry.buffer_config_manager)</a>
-</li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_resume_from_path">set_resume_from_path() (in module trinity.manager.config_registry.trainer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_resume_mode">set_resume_mode() (in module trinity.manager.config_registry.trainer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.set_reuse_cooldown_time">set_reuse_cooldown_time() (in module trinity.manager.config_registry.buffer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.set_runner_per_model">set_runner_per_model() (in module trinity.manager.config_registry.explorer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_sample_strategy">set_sample_strategy() (in module trinity.manager.config_registry.algorithm_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_save_interval">set_save_interval() (in module trinity.manager.config_registry.trainer_config_manager)</a>
 </li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.set_seed">set_seed() (in module trinity.manager.config_registry.explorer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.set_sft_warmup_dataset_args">set_sft_warmup_dataset_args() (in module trinity.manager.config_registry.buffer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.set_sft_warmup_dataset_path">set_sft_warmup_dataset_path() (in module trinity.manager.config_registry.buffer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.set_sft_warmup_steps">set_sft_warmup_steps() (in module trinity.manager.config_registry.buffer_config_manager)</a>
-</li>
       <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_worker.WorkerExtension.set_state_dict_meta">set_state_dict_meta() (trinity.common.models.vllm_worker.WorkerExtension method)</a>
 </li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.set_storage_type">set_storage_type() (in module trinity.manager.config_registry.buffer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.set_sync_interval">set_sync_interval() (in module trinity.manager.config_registry.explorer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.set_sync_method">set_sync_method() (in module trinity.manager.config_registry.explorer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.set_sync_timeout">set_sync_timeout() (in module trinity.manager.config_registry.explorer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.set_system_prompt">set_system_prompt() (in module trinity.manager.config_registry.buffer_config_manager)</a>
-</li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_target_kl">set_target_kl() (in module trinity.manager.config_registry.trainer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.set_taskset_args">set_taskset_args() (in module trinity.manager.config_registry.buffer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.set_taskset_path">set_taskset_path() (in module trinity.manager.config_registry.buffer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_tau_in_advantage_fn">set_tau_in_advantage_fn() (in module trinity.manager.config_registry.algorithm_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_tau_in_policy_loss_fn">set_tau_in_policy_loss_fn() (in module trinity.manager.config_registry.algorithm_config_manager)</a>
 </li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.set_tensor_parallel_size">set_tensor_parallel_size() (in module trinity.manager.config_registry.explorer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.set_total_epochs">set_total_epochs() (in module trinity.manager.config_registry.buffer_config_manager)</a>
-</li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.set_total_gpu_num">set_total_gpu_num() (in module trinity.manager.config_registry.model_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_total_training_steps">set_total_training_steps() (in module trinity.manager.config_registry.trainer_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.set_train_batch_size">set_train_batch_size() (in module trinity.manager.config_registry.buffer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.set_trainer_gpu_num">set_trainer_gpu_num() (in module trinity.manager.config_registry.model_config_manager)</a>
 </li>
@@ -3185,11 +3107,7 @@
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_use_kl_in_reward">set_use_kl_in_reward() (in module trinity.manager.config_registry.trainer_config_manager)</a>
 </li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.set_use_priority_queue">set_use_priority_queue() (in module trinity.manager.config_registry.buffer_config_manager)</a>
-</li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_use_token_level_loss_in_policy_loss_fn">set_use_token_level_loss_in_policy_loss_fn() (in module trinity.manager.config_registry.algorithm_config_manager)</a>
-</li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.set_use_v1">set_use_v1() (in module trinity.manager.config_registry.explorer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.utils.html#trinity.utils.dlc_utils.setup_ray_cluster">setup_ray_cluster() (in module trinity.utils.dlc_utils)</a>
 </li>
@@ -3263,8 +3181,6 @@
       </ul></li>
       <li><a href="build_api/trinity.common.html#trinity.common.experience.ExperienceType.SINGLE_TURN">SINGLE_TURN (trinity.common.experience.ExperienceType attribute)</a>
 </li>
-      <li><a href="build_api/trinity.buffer.html#trinity.buffer.priority_queue.AsyncPriorityQueue.size">size() (trinity.buffer.priority_queue.AsyncPriorityQueue method)</a>
-</li>
       <li><a href="build_api/trinity.common.models.html#trinity.common.models.vllm_model.vLLMRolloutModel.sleep">sleep() (trinity.common.models.vllm_model.vLLMRolloutModel method)</a>
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.FormatConfig.solution_key">solution_key (trinity.common.config.FormatConfig attribute)</a>
@@ -3303,6 +3219,14 @@
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.constants.RunningStatus.STOPPED">STOPPED (trinity.common.constants.RunningStatus attribute)</a>
 </li>
+      <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.AsyncPriorityQueue.stopped">stopped() (trinity.buffer.queue.AsyncPriorityQueue method)</a>
+
+      <ul>
+        <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.AsyncQueue.stopped">(trinity.buffer.queue.AsyncQueue method)</a>
+</li>
+        <li><a href="build_api/trinity.buffer.html#trinity.buffer.queue.QueueBuffer.stopped">(trinity.buffer.queue.QueueBuffer method)</a>
+</li>
+      </ul></li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.StorageConfig.storage_type">storage_type (trinity.common.config.StorageConfig attribute)</a>
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.StorageConfig">StorageConfig (class in trinity.common.config)</a>
@@ -3809,6 +3733,8 @@
         <li><a href="build_api/trinity.algorithm.sample_strategy.html#module-trinity.algorithm.sample_strategy.utils">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     trinity.algorithm.utils
 
@@ -3823,8 +3749,6 @@
         <li><a href="build_api/trinity.buffer.html#module-trinity.buffer">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     trinity.buffer.buffer
 
@@ -3844,13 +3768,6 @@
 
       <ul>
         <li><a href="build_api/trinity.buffer.html#module-trinity.buffer.buffer_writer">module</a>
-</li>
-      </ul></li>
-      <li>
-    trinity.buffer.priority_queue
-
-      <ul>
-        <li><a href="build_api/trinity.buffer.html#module-trinity.buffer.priority_queue">module</a>
 </li>
       </ul></li>
       <li>
@@ -4176,13 +4093,6 @@
 </li>
       </ul></li>
       <li>
-    trinity.manager.config_registry
-
-      <ul>
-        <li><a href="build_api/trinity.manager.config_registry.html#module-trinity.manager.config_registry">module</a>
-</li>
-      </ul></li>
-      <li>
     trinity.manager.config_registry.algorithm_config_manager
 
       <ul>
@@ -4190,24 +4100,10 @@
 </li>
       </ul></li>
       <li>
-    trinity.manager.config_registry.buffer_config_manager
-
-      <ul>
-        <li><a href="build_api/trinity.manager.config_registry.html#module-trinity.manager.config_registry.buffer_config_manager">module</a>
-</li>
-      </ul></li>
-      <li>
     trinity.manager.config_registry.config_registry
 
       <ul>
         <li><a href="build_api/trinity.manager.config_registry.html#module-trinity.manager.config_registry.config_registry">module</a>
-</li>
-      </ul></li>
-      <li>
-    trinity.manager.config_registry.explorer_config_manager
-
-      <ul>
-        <li><a href="build_api/trinity.manager.config_registry.html#module-trinity.manager.config_registry.explorer_config_manager">module</a>
 </li>
       </ul></li>
       <li>
