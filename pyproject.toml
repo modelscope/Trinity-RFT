@@ -66,7 +66,8 @@ dev = [
     "pytest>=8.0.0",
     "pytest-json-ctrf",
     "parameterized",
-    "matplotlib"
+    "matplotlib",
+    "word2number",
 ]
 
 doc = [

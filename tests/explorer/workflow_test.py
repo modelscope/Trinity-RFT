@@ -12,6 +12,7 @@ from trinity.common.experience import EID
 from trinity.common.rewards import RMGalleryFn
 from trinity.common.workflows import (
     MathBoxedWorkflow,
+    MathEvalWorkflow,
     MathRMWorkflow,
     MathWorkflow,
     Workflow,
@@ -273,6 +274,36 @@ class WorkflowTest(unittest.TestCase):
         self.assertEqual(experiences[1].reward, 1.0)
         self.assertEqual(experiences[2].reward, 1.0)
         self.assertEqual(experiences[3].reward, 0.0)
+
+    def test_math_eval_workflow(self) -> None:
+        model = MagicMock()
+        model.chat.return_value = [
+            MockResponse("My step-by-step reasoning leads to the answer \boxed{36}"),
+            MockResponse("Here is the answer of \boxed{36.0}"),
+            MockResponse("I made a mistake, the answer is \boxed{42}"),
+            MockResponse("The answer is 36, but I forgot the box."),
+        ]
+
+        taskset_config = get_unittest_dataset_config("countdown")
+        task = Task(
+            workflow=MathEvalWorkflow,
+            is_eval=True,
+            format_args=taskset_config.format,
+            raw_task={
+                taskset_config.format.prompt_key: "",
+                taskset_config.format.response_key: "36",
+            },
+        )
+
+        workflow = task.to_workflow(model=model)
+        experiences = workflow.run()
+        self.assertEqual(len(experiences), 4)
+        expected_accuracies = [1.0, 1.0, 0.0, 0.0]
+        for i, (exp, expected_acc) in enumerate(zip(experiences, expected_accuracies)):
+            with self.subTest(f"Response {i}"):
+                self.assertEqual(exp.reward, 0.0)
+                assert exp.metrics is not None, f"Metrics for response {i} should not be None"
+                self.assertEqual(exp.metrics["accuracy"], expected_acc)
 
     def test_workflow_resettable(self) -> None:
         model = MagicMock()
