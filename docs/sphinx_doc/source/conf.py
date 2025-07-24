@@ -49,7 +49,7 @@ autodoc_default_options = {
 
 # -- Options for HTML output -------------------------------------------------
 
-html_theme = "sphinx_rtd_theme"
+html_theme = "sphinxawesome_theme"
 
 html_theme_options = {
     "navigation_depth": 3,

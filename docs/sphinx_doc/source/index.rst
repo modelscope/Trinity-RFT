@@ -35,19 +35,14 @@ Welcome to Trinity-RFT's documentation!
 
 .. toctree::
    :maxdepth: 2
+   :hidden:
    :caption: FAQ
 
    tutorial/faq.md
 
 .. toctree::
-   :maxdepth: 1
-   :glob:
+   :maxdepth: 2
+   :hidden:
    :caption: API Reference
 
-   build_api/trinity.buffer
-   build_api/trinity.explorer
-   build_api/trinity.trainer
-   build_api/trinity.algorithm
-   build_api/trinity.manager
-   build_api/trinity.common
-   build_api/trinity.utils
+   api_reference
