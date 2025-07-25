@@ -745,7 +745,7 @@ class Config:
         )
         if (
             self.mode in ["train", "explore", "bench"]
-            and self.synchronizer.sync_method != SyncMethod.CHECKPOINT
+            and self.synchronizer.sync_method == SyncMethod.NCCL
         ):
             self.synchronizer.sync_method = SyncMethod.CHECKPOINT
             logger.warning(

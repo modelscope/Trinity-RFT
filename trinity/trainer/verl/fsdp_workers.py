@@ -77,6 +77,7 @@ from verl.workers.sharding_manager.fsdp_ulysses import FSDPUlyssesShardingManage
 
 from trinity.common.config import AlgorithmConfig
 from trinity.common.constants import ROLLOUT_WEIGHT_SYNC_GROUP_NAME, SyncMethod
+from trinity.common.synchronizer import Synchronizer
 from trinity.trainer.verl.fsdp_checkpoint_manager import FSDPCheckpointManager
 from trinity.utils.distributed import init_process_group
 
@@ -592,8 +593,8 @@ class ActorRolloutRefWorker(Worker):
                 master_address, master_port = self.get_availale_master_addr_port()
                 world_size = self.config.synchronizer.explorer_world_size + 1
                 print(f"Trainer init_process_group {master_address}:{master_port} ({world_size}).")
-                explorer = ray.get_actor(self.config.explorer_name)
-                setup_ref = explorer.setup_weight_sync_group.remote(
+                synchronizer = Synchronizer.get_actor(self.config.synchronizer)
+                setup_ref = synchronizer.setup_weight_sync_group.remote(
                     master_address, master_port, self.state_dict_meta
                 )
                 timeout = self.config.synchronizer.sync_timeout

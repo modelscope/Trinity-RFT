@@ -130,13 +130,13 @@ class Explorer:
         return step_num  # type: ignore
 
     async def _pull_latest_weights(self):
-        self.logger.info("Start to update state dict.")
+        self.logger.info("Start to pull latest model weights.")
         new_version = ray.get(
             self.synchronizer.wait_new_model_state_dict.remote(self.model_version)
         )
         if new_version > self.model_version:
             if self.model_version != -1:
-                self.logger.info(f"New model state dict version: {new_version}")
+                self.logger.info(f"New model weights version: {new_version}")
                 await asyncio.gather(
                     *[model.sync_model.remote(new_version) for model in self.models]
                 )
@@ -150,7 +150,7 @@ class Explorer:
             self.last_sync_successful = True
         else:
             self.logger.warning(
-                f"No new model state dict found, current version: {self.model_version}"
+                f"No new model weights found, current version: {self.model_version}"
             )
             self.last_sync_successful = False
 
@@ -364,15 +364,14 @@ class Explorer:
 
     async def _finish_explore_step(self, step: int, model_version: int) -> None:
         statuses, exps = await self.scheduler.get_results(batch_id=step)
-        metric = {}
+        metric = {"rollout/model_version": model_version}
         if self.config.explorer.collect_experiences:
             exp_cnt = await self.add_strategy.add(exps, step)
             self.generated_experience_cnt += exp_cnt
             metric["rollout/experience_count"] = exp_cnt
         if statuses:
             metric.update(gather_metrics([status.metric for status in statuses], "rollout"))
-            metric["rollout/model_version"] = model_version
-            self.monitor.log(metric, step=step)
+        self.monitor.log(metric, step=step)
 
     async def _finish_eval_step(self, step: Optional[int] = None, prefix: str = "eval") -> None:
         if not self.pending_eval_tasks:

@@ -40,11 +40,14 @@ class Synchronizer:
         self.model_version = 0
         self.checkpoint_shard_counter = defaultdict(lambda: 0)
 
-    def set_trainer_status(self, status: RunningStatus):
+    async def set_trainer_status(self, status: RunningStatus):
         """Update the status of the trainer."""
-        self.trainer_status = status
+        async with self._ready_condition:
+            self.trainer_status = status
+            if status == RunningStatus.STOPPED:
+                self._ready_condition.notify_all()
 
-    def get_trainer_status(self) -> RunningStatus:
+    async def get_trainer_status(self) -> RunningStatus:
         """Get the current status of the trainer."""
         return self.trainer_status
 
@@ -155,7 +158,7 @@ class Synchronizer:
             master_port: Port used for synchronization.
             state_dict_meta: Metadata of the model parameters.
         """
-        explorer = ray.get_actor(self.config.explorer_name)
+        explorer = ray.get_actor(self.config.explorer.name, namespace=self.config.ray_namespace)
         await explorer.setup_weight_sync_group.remote(master_address, master_port, state_dict_meta)
 
     async def wait_new_model_state_dict(self, current_version: int, no_wait: bool = False) -> int:
@@ -214,9 +217,7 @@ class Synchronizer:
             else:
                 another_module = "Explorer"
                 self.trainer_status = RunningStatus.REQUIRE_SYNC
-            self.logger.error(
-                f"{another_module} is not ready for model weight sync in {self.config.synchronizer.sync_timeout} seconds."
-            )
+            self.logger.error(f"{another_module} is not ready for model weight sync.")
             return None
 
         non_stop_cnt = sum(
@@ -249,10 +250,13 @@ class Synchronizer:
                     if self.trainer_status != RunningStatus.WAITING_SYNC:
                         await asyncio.wait_for(
                             self._ready_condition.wait_for(
-                                lambda: self.trainer_status == RunningStatus.WAITING_SYNC,
+                                lambda: self.trainer_status
+                                in {RunningStatus.WAITING_SYNC, RunningStatus.STOPPED},
                             ),
                             timeout=self.config.synchronizer.sync_timeout,
                         )
+                        if self.trainer_status == RunningStatus.STOPPED:
+                            return sync_failed()
                 return self.model_version
             except asyncio.TimeoutError:
                 return sync_failed()
