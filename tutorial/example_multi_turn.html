@@ -72,13 +72,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.buffer.html">trinity.buffer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.explorer.html">trinity.explorer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.trainer.html">trinity.trainer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.algorithm.html">trinity.algorithm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.manager.html">trinity.manager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.common.html">trinity.common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../build_api/trinity.utils.html">trinity.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_reference.html">API Reference</a></li>
 </ul>
 
         </div>
@@ -120,7 +114,29 @@
 <li><p>ALFworld is a text-based interactive environment that simulates household scenarios. Agents need to understand natural language instructions and complete various domestic tasks like finding objects, moving items, and operating devices in a virtual home environment.</p></li>
 <li><p>WebShop is a simulated online shopping environment where AI agents learn to shop based on user requirements. The platform allows agents to browse products, compare options, and make purchase decisions, mimicking real-world e-commerce interactions.</p></li>
 </ul>
-<p>You may refer to their original environment to complete the setup.</p>
+<br>
+<details>
+<summary>Guidelines for preparing ALFWorld environment</summary>
+<ol class="arabic simple">
+<li><p>Pip install: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">alfworld[full]</span></code></p></li>
+<li><p>Export the path: <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">ALFWORLD_DATA=/path/to/alfworld/data</span></code></p></li>
+<li><p>Download the environment: <code class="docutils literal notranslate"><span class="pre">alfworld-download</span></code></p></li>
+</ol>
+<p>Now you can find the environment in <code class="docutils literal notranslate"><span class="pre">$ALFWORLD_DATA</span></code> and continue with the following steps.</p>
+</details>
+<details>
+<summary>Guidelines for preparing WebShop environment</summary>
+<ol class="arabic simple">
+<li><p>Install Python 3.8.13</p></li>
+<li><p>Install Java</p></li>
+<li><p>Download the source code: <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/princeton-nlp/webshop.git</span> <span class="pre">webshop</span></code></p></li>
+<li><p>Create a virtual environment: <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">create</span> <span class="pre">-n</span> <span class="pre">webshop</span> <span class="pre">python=3.8.13</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate</span> <span class="pre">webshop</span></code></p></li>
+<li><p>Install requirements into the <code class="docutils literal notranslate"><span class="pre">webshop</span></code> virtual environment via the <code class="docutils literal notranslate"><span class="pre">setup.sh</span></code> script: <code class="docutils literal notranslate"><span class="pre">./setup.sh</span> <span class="pre">[-d</span> <span class="pre">small|all]</span></code></p></li>
+</ol>
+<p>Now you can continue with the following steps.</p>
+</details>
+<br>
+<p>You may refer to their original environment for more details.</p>
 <ul class="simple">
 <li><p>For ALFWorld, refer to the <a class="reference external" href="https://github.com/alfworld/alfworld">ALFWorld</a> repository.</p></li>
 <li><p>For WebShop, refer to the <a class="reference external" href="https://github.com/princeton-nlp/WebShop">WebShop</a> repository.</p></li>

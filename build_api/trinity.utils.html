@@ -61,76 +61,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/faq.html">FAQ</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="trinity.buffer.html">trinity.buffer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="trinity.explorer.html">trinity.explorer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="trinity.trainer.html">trinity.trainer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="trinity.algorithm.html">trinity.algorithm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="trinity.manager.html">trinity.manager</a></li>
-<li class="toctree-l1"><a class="reference internal" href="trinity.common.html">trinity.common</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">trinity.utils</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-trinity.utils.distributed">trinity.utils.distributed module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.distributed.is_ipv6_address"><code class="docutils literal notranslate"><span class="pre">is_ipv6_address()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.distributed.init_process_group"><code class="docutils literal notranslate"><span class="pre">init_process_group()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#module-trinity.utils.dlc_utils">trinity.utils.dlc_utils module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.dlc_utils.ClusterStatus"><code class="docutils literal notranslate"><span class="pre">ClusterStatus</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.dlc_utils.get_dlc_env_vars"><code class="docutils literal notranslate"><span class="pre">get_dlc_env_vars()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.dlc_utils.is_running"><code class="docutils literal notranslate"><span class="pre">is_running()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.dlc_utils.wait_for_ray_setup"><code class="docutils literal notranslate"><span class="pre">wait_for_ray_setup()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.dlc_utils.wait_for_ray_worker_nodes"><code class="docutils literal notranslate"><span class="pre">wait_for_ray_worker_nodes()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.dlc_utils.setup_ray_cluster"><code class="docutils literal notranslate"><span class="pre">setup_ray_cluster()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.dlc_utils.stop_ray_cluster"><code class="docutils literal notranslate"><span class="pre">stop_ray_cluster()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#module-trinity.utils.eval_utils">trinity.utils.eval_utils module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.eval_utils.simple_answer_parser"><code class="docutils literal notranslate"><span class="pre">simple_answer_parser()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.eval_utils.find_boxed_answer"><code class="docutils literal notranslate"><span class="pre">find_boxed_answer()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.eval_utils.extract_solution"><code class="docutils literal notranslate"><span class="pre">extract_solution()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.eval_utils.validate_equation"><code class="docutils literal notranslate"><span class="pre">validate_equation()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.eval_utils.evaluate_equation"><code class="docutils literal notranslate"><span class="pre">evaluate_equation()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.eval_utils.validate_think_pattern"><code class="docutils literal notranslate"><span class="pre">validate_think_pattern()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.eval_utils.compute_score"><code class="docutils literal notranslate"><span class="pre">compute_score()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.eval_utils.is_equiv"><code class="docutils literal notranslate"><span class="pre">is_equiv()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.eval_utils.remove_boxed"><code class="docutils literal notranslate"><span class="pre">remove_boxed()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.eval_utils.last_boxed_only_string"><code class="docutils literal notranslate"><span class="pre">last_boxed_only_string()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.eval_utils.fix_fracs"><code class="docutils literal notranslate"><span class="pre">fix_fracs()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.eval_utils.fix_a_slash_b"><code class="docutils literal notranslate"><span class="pre">fix_a_slash_b()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.eval_utils.remove_right_units"><code class="docutils literal notranslate"><span class="pre">remove_right_units()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.eval_utils.fix_sqrt"><code class="docutils literal notranslate"><span class="pre">fix_sqrt()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.eval_utils.strip_string"><code class="docutils literal notranslate"><span class="pre">strip_string()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#module-trinity.utils.log">trinity.utils.log module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.log.NewLineFormatter"><code class="docutils literal notranslate"><span class="pre">NewLineFormatter</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.log.get_logger"><code class="docutils literal notranslate"><span class="pre">get_logger()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#module-trinity.utils.monitor">trinity.utils.monitor module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.monitor.gather_metrics"><code class="docutils literal notranslate"><span class="pre">gather_metrics()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.monitor.Monitor"><code class="docutils literal notranslate"><span class="pre">Monitor</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.monitor.TensorboardMonitor"><code class="docutils literal notranslate"><span class="pre">TensorboardMonitor</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.monitor.WandbMonitor"><code class="docutils literal notranslate"><span class="pre">WandbMonitor</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#module-trinity.utils.plugin_loader">trinity.utils.plugin_loader module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.plugin_loader.load_plugins"><code class="docutils literal notranslate"><span class="pre">load_plugins()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.plugin_loader.load_from_file"><code class="docutils literal notranslate"><span class="pre">load_from_file()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#module-trinity.utils.registry">trinity.utils.registry module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.registry.Registry"><code class="docutils literal notranslate"><span class="pre">Registry</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#module-trinity.utils.timer">trinity.utils.timer module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#trinity.utils.timer.Timer"><code class="docutils literal notranslate"><span class="pre">Timer</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#module-trinity.utils">Module contents</a></li>
-</ul>
-</li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api_reference.html">API Reference</a></li>
 </ul>
 
         </div>
@@ -147,6 +79,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api_reference.html">API Reference</a></li>
       <li class="breadcrumb-item active">trinity.utils</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/modelscope/Trinity-RFT/blob/main/docs/sphinx_doc/source/build_api/trinity.utils.rst" class="fa fa-github"> Edit on GitHub</a>

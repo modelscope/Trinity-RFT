@@ -8,7 +8,7 @@ In this example, you will learn how to apply the data processor of Trinity-RFT t
 2. how to configure the data processor
 3. what the data processor can do
 
-Before getting started, you need to prepare the main environment of Trinity-RFT according to the [installation section of the README file](../main.md),
+Before getting started, you need to prepare the main environment of Trinity-RFT according to the [installation section of Quickstart](example_reasoning_basic.md),
 and store the base url and api key in the environment variables `OPENAI_BASE_URL` and `OPENAI_API_KEY` for some agentic or API-model usages if necessary.
 
 ### Data Preparation

@@ -6,7 +6,6 @@
 # Trinity-RFT: A General-Purpose and Unified Framework for Reinforcement Fine-Tuning of Large Language Models
 
 
-
 ## 🚀 News
 
 * [2025-07] Trinity-RFT v0.2.0 is released.
@@ -82,6 +81,7 @@ It is designed to support diverse application scenarios and serve as a unified p
 ![Trinity-RFT-data-pipelines](../assets/trinity-data-pipelines.png)
 
 </details>
+<br>
 
 
 
@@ -90,12 +90,12 @@ It is designed to support diverse application scenarios and serve as a unified p
 
 * **Adaptation to New Scenarios:**
 
-  Implement agent-environment interaction logic in a single `Workflow` or `MultiTurnWorkflow` class.  ([Example](./docs/sphinx_doc/source/tutorial/example_multi_turn.md))
+  Implement agent-environment interaction logic in a single `Workflow` or `MultiTurnWorkflow` class.  ([Example](/tutorial/example_multi_turn.md))
 
 
 * **RL Algorithm Development:**
 
-  Develop custom RL algorithms (loss design, sampling, data processing) in compact, plug-and-play classes.  ([Example](./docs/sphinx_doc/source/tutorial/example_mix_algo.md))
+  Develop custom RL algorithms (loss design, sampling, data processing) in compact, plug-and-play classes.  ([Example](/tutorial/example_mix_algo.md))
 
 
 * **Low-Code Usage:**
@@ -301,39 +301,39 @@ For studio users, click "Run" in the web interface.
 
 Tutorials for running different RFT modes:
 
-+ [Quick example: GRPO on GSM8k](./docs/sphinx_doc/source/tutorial/example_reasoning_basic.md)
-+ [Off-policy RFT](./docs/sphinx_doc/source/tutorial/example_reasoning_advanced.md)
-+ [Fully asynchronous RFT](./docs/sphinx_doc/source/tutorial/example_async_mode.md)
-+ [Offline learning by DPO or SFT](./docs/sphinx_doc/source/tutorial/example_dpo.md)
++ [Quick example: GRPO on GSM8k](/tutorial/example_reasoning_basic.md)
++ [Off-policy RFT](/tutorial/example_reasoning_advanced.md)
++ [Fully asynchronous RFT](/tutorial/example_async_mode.md)
++ [Offline learning by DPO or SFT](/tutorial/example_dpo.md)
 
 
 Tutorials for adapting Trinity-RFT to a new multi-turn agentic scenario:
 
-+ [Multi-turn tasks](./docs/sphinx_doc/source/tutorial/example_multi_turn.md)
++ [Multi-turn tasks](/tutorial/example_multi_turn.md)
 
 
 Tutorials for data-related functionalities:
 
-+ [Advanced data processing & human-in-the-loop](./docs/sphinx_doc/source/tutorial/example_data_functionalities.md)
++ [Advanced data processing & human-in-the-loop](/tutorial/example_data_functionalities.md)
 
 
 Tutorials for RL algorithm development/research with Trinity-RFT:
 
-+ [RL algorithm development with Trinity-RFT](./docs/sphinx_doc/source/tutorial/example_mix_algo.md)
++ [RL algorithm development with Trinity-RFT](/tutorial/example_mix_algo.md)
 
 
-Guidelines for full configurations: see [this document](./docs/sphinx_doc/source/tutorial/trinity_configs.md)
+Guidelines for full configurations: see [this document](/tutorial/trinity_configs.md)
 
 
 Guidelines for developers and researchers:
 
-+ [Build new RL scenarios](./docs/sphinx_doc/source/tutorial/trinity_programming_guide.md#workflows-for-rl-environment-developers)
-+ [Implement new RL algorithms](./docs/sphinx_doc/source/tutorial/trinity_programming_guide.md#algorithms-for-rl-algorithm-developers)
++ [Build new RL scenarios](/tutorial/trinity_programming_guide.md#workflows-for-rl-environment-developers)
++ [Implement new RL algorithms](/tutorial/trinity_programming_guide.md#algorithms-for-rl-algorithm-developers)
 
 
 
 
-For some frequently asked questions, see [FAQ](./docs/sphinx_doc/source/tutorial/faq.md).
+For some frequently asked questions, see [FAQ](/tutorial/faq.md).
 
 
 
