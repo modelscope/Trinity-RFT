@@ -3,57 +3,16 @@
 API Reference
 =============
 
-This page shows the most useful APIs of Trinity-RFT.
+This page shows some useful APIs of Trinity-RFT. Click the API name to see the detailed documentation.
 
-.. contents::
-   :local:
-   :depth: 2
+.. toctree::
+   :maxdepth: 1
+   :glob:
 
-trinity.buffer
---------------
-.. automodule:: trinity.buffer
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-trinity.explorer
-----------------
-.. automodule:: trinity.explorer
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-trinity.trainer
----------------
-.. automodule:: trinity.trainer
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-trinity.algorithm
------------------
-.. automodule:: trinity.algorithm
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-trinity.manager
----------------
-.. automodule:: trinity.manager
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-trinity.common
---------------
-.. automodule:: trinity.common
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-trinity.utils
--------------
-.. automodule:: trinity.utils
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   build_api/trinity.buffer
+   build_api/trinity.explorer
+   build_api/trinity.trainer
+   build_api/trinity.algorithm
+   build_api/trinity.manager
+   build_api/trinity.common
+   build_api/trinity.utils

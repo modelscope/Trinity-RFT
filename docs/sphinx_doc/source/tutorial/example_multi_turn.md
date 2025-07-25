@@ -14,6 +14,7 @@ To run the ALFworld and WebShop env, you need to setup the corresponding environ
 - ALFworld is a text-based interactive environment that simulates household scenarios. Agents need to understand natural language instructions and complete various domestic tasks like finding objects, moving items, and operating devices in a virtual home environment.
 - WebShop is a simulated online shopping environment where AI agents learn to shop based on user requirements. The platform allows agents to browse products, compare options, and make purchase decisions, mimicking real-world e-commerce interactions.
 
+<br>
 <details>
 <summary>Guidelines for preparing ALFWorld environment</summary>
 
@@ -41,7 +42,7 @@ Now you can find the environment in `$ALFWORLD_DATA` and continue with the follo
 
 Now you can continue with the following steps.
 </details>
-
+<br>
 
 You may refer to their original environment for more details.
 - For ALFWorld, refer to the [ALFWorld](https://github.com/alfworld/alfworld) repository.
