@@ -3,6 +3,7 @@
 
 
 
+# Trinity-RFT: A General-Purpose and Unified Framework for Reinforcement Fine-Tuning of Large Language Models
 
 
 ## 🚀 News
@@ -80,6 +81,7 @@ It is designed to support diverse application scenarios and serve as a unified p
 ![Trinity-RFT-data-pipelines](../assets/trinity-data-pipelines.png)
 
 </details>
+<br>
 
 
 
