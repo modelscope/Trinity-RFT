@@ -109,7 +109,7 @@
     <span class="n">tokenizer</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="n">messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span>
     <span class="n">chat_template</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the assistant token mask with `chat_template`.</span>
 
 <span class="sd">    Args:</span>
@@ -118,8 +118,9 @@
 <span class="sd">        messages (List[dict]): Messages with `role` and `content` fields.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Tuple[torch.Tensor, torch.Tensor]: The token_ids (sequence_length)</span>
-<span class="sd">        and assistant_masks (sequence_length).</span>
+<span class="sd">        `torch.Tensor`: The token_ids (sequence_length)</span>
+<span class="sd">        `torch.Tensor`: Assistant_masks (sequence_length).</span>
+<span class="sd">        `int`: Prompt length.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">token_dict</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">apply_chat_template</span><span class="p">(</span>
         <span class="n">messages</span><span class="p">,</span>
@@ -132,7 +133,9 @@
         <span class="n">return_assistant_tokens_mask</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">return_dict</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">token_dict</span><span class="p">[</span><span class="s2">&quot;input_ids&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">token_dict</span><span class="p">[</span><span class="s2">&quot;assistant_masks&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span></div>
+    <span class="c1"># find the first assistant token, the tokens before are prompt tokens</span>
+    <span class="n">prompt_length</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">token_dict</span><span class="p">[</span><span class="s2">&quot;assistant_masks&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">token_dict</span><span class="p">[</span><span class="s2">&quot;input_ids&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">token_dict</span><span class="p">[</span><span class="s2">&quot;assistant_masks&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">prompt_length</span></div>
 
 
 
@@ -142,7 +145,7 @@
     <span class="n">tokenizer</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="n">messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span>
     <span class="n">chat_template</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the assistant token mask.</span>
 
 <span class="sd">    Args:</span>
@@ -151,8 +154,9 @@
 <span class="sd">        messages (List[dict]): Messages with `role` and `content` fields.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Tuple[torch.Tensor, torch.Tensor]: The token_ids (sequence_length)</span>
-<span class="sd">        and assistant_masks (sequence_length).</span>
+<span class="sd">        `torch.Tensor`: The token_ids (sequence_length)</span>
+<span class="sd">        `torch.Tensor`: Assistant_masks (sequence_length).</span>
+<span class="sd">        `int`: Prompt length.</span>
 
 <span class="sd">    Note:</span>
 <span class="sd">        This method is based on the assumption that as the number of chat rounds increases,</span>
@@ -194,7 +198,8 @@
             <span class="p">)</span>
             <span class="n">prompt_response_length</span> <span class="o">=</span> <span class="n">prompt_response_token_ids</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">assistant_token_mask</span><span class="p">[</span><span class="n">prompt_length</span><span class="p">:</span><span class="n">prompt_response_length</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">tokens</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">assistant_token_mask</span><span class="p">)</span></div>
+    <span class="n">prompt_length</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">assistant_token_mask</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">tokens</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">assistant_token_mask</span><span class="p">,</span> <span class="n">prompt_length</span></div>
 
 
 

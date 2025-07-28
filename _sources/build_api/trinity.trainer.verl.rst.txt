@@ -3,6 +3,14 @@ trinity.trainer.verl
 Submodules
 ----------
 
+trinity.trainer.verl.converter module
+-------------------------------------
+
+.. automodule:: trinity.trainer.verl.converter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 trinity.trainer.verl.dp\_actor module
 -------------------------------------
 

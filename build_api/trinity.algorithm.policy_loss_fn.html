@@ -147,7 +147,7 @@
 <dd><p>Bases: <a class="reference internal" href="#trinity.algorithm.policy_loss_fn.policy_loss_fn.PolicyLossFn" title="trinity.algorithm.policy_loss_fn.policy_loss_fn.PolicyLossFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">PolicyLossFn</span></code></a></p>
 <p>Implements a mixed policy loss combining GRPO and SFT losses.</p>
 <p>This loss function applies different loss components to data based on whether
-it comes from an expert or not, as indicated by <cite>is_expert_mask</cite>. It combines:
+it comes from an expert or not, as indicated by <cite>expert_mask</cite>. It combines:
 - GRPO loss (self.grpo_loss_fn) for non-expert data
 - SFT loss (self.sft_loss_fn) for expert data
 - Weighting parameter <cite>mu</cite></p>
@@ -563,7 +563,7 @@ while handling parameter name mapping between different training frameworks.</p>
 <dd><p>Bases: <a class="reference internal" href="#trinity.algorithm.policy_loss_fn.policy_loss_fn.PolicyLossFn" title="trinity.algorithm.policy_loss_fn.policy_loss_fn.PolicyLossFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">PolicyLossFn</span></code></a></p>
 <p>Implements a mixed policy loss combining GRPO and SFT losses.</p>
 <p>This loss function applies different loss components to data based on whether
-it comes from an expert or not, as indicated by <cite>is_expert_mask</cite>. It combines:
+it comes from an expert or not, as indicated by <cite>expert_mask</cite>. It combines:
 - GRPO loss (self.grpo_loss_fn) for non-expert data
 - SFT loss (self.sft_loss_fn) for expert data
 - Weighting parameter <cite>mu</cite></p>

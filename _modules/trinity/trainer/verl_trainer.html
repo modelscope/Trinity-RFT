@@ -95,10 +95,8 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pprint</span><span class="w"> </span><span class="kn">import</span> <span class="n">pprint</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ray</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">omegaconf</span><span class="w"> </span><span class="kn">import</span> <span class="n">OmegaConf</span>
@@ -128,8 +126,8 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experiences</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.trainer.trainer</span><span class="w"> </span><span class="kn">import</span> <span class="n">TrainEngineWrapper</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.trainer.verl.converter</span><span class="w"> </span><span class="kn">import</span> <span class="n">to_data_proto</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.monitor</span><span class="w"> </span><span class="kn">import</span> <span class="n">MONITOR</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">_InternalDataLoader</span><span class="p">:</span>
@@ -241,13 +239,6 @@
             <span class="n">ray_worker_group_cls</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">init_workers</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span> <span class="o">=</span> <span class="n">MONITOR</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">global_config</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">monitor_type</span><span class="p">)(</span>
-            <span class="n">project</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">project_name</span><span class="p">,</span>
-            <span class="n">name</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">experiment_name</span><span class="p">,</span>
-            <span class="n">role</span><span class="o">=</span><span class="n">global_config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-            <span class="n">config</span><span class="o">=</span><span class="n">global_config</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">reset_experiences_example_table</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span></div>
 
 
@@ -374,16 +365,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">=</span> <span class="mi">0</span>
 
         <span class="c1"># load checkpoint before doing anything</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_load_checkpoint</span><span class="p">()</span>
-
-        <span class="c1"># perform validation before training</span>
-        <span class="c1"># currently, we only support validation using the reward_function.</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">val_reward_fn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;val_before_train&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
-            <span class="n">val_metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate</span><span class="p">()</span>
-            <span class="n">pprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Initial validation metrics: </span><span class="si">{</span><span class="n">val_metrics</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">val_metrics</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;val_only&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
-                <span class="k">return</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load_checkpoint</span><span class="p">()</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_create_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_dataset</span><span class="p">,</span> <span class="n">val_dataset</span><span class="p">,</span> <span class="n">collate_fn</span><span class="p">,</span> <span class="n">train_sampler</span><span class="p">):</span>
@@ -393,22 +375,10 @@
 
 <div class="viewcode-block" id="VerlPPOTrainerWrapper.train_step">
 <a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.train_step">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">train_step</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>  <span class="c1"># noqa C901</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">train_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="n">Experiences</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>  <span class="c1"># noqa C901</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Training at step </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2"> started.&quot;</span><span class="p">)</span>
+        <span class="n">batch</span> <span class="o">=</span> <span class="n">to_data_proto</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
         <span class="n">metrics</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">batch</span><span class="p">,</span> <span class="n">sample_metrics</span><span class="p">,</span> <span class="n">exp_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_strategy</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="n">prefix_metrics</span><span class="p">(</span><span class="n">sample_metrics</span><span class="p">,</span> <span class="s2">&quot;sample&quot;</span><span class="p">,</span> <span class="n">metrics</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No more data to train. Stop training.&quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">save_freq</span> <span class="o">==</span> <span class="mi">0</span>
-                <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">save_freq</span> <span class="o">!=</span> <span class="mi">0</span>
-            <span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Saving at step </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_save_checkpoint</span><span class="p">()</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Saved at step </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sampling at step </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="si">}</span><span class="s2"> done.&quot;</span><span class="p">)</span>
         <span class="n">timing_raw</span> <span class="o">=</span> <span class="p">{}</span>
@@ -487,12 +457,6 @@
             <span class="n">compute_throughout_metrics</span><span class="p">(</span><span class="n">batch</span><span class="o">=</span><span class="n">batch</span><span class="p">,</span> <span class="n">timing_raw</span><span class="o">=</span><span class="n">timing_raw</span><span class="p">,</span> <span class="n">n_gpus</span><span class="o">=</span><span class="n">n_gpus</span><span class="p">)</span>
         <span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">use_advantage</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">enable_preview</span><span class="p">:</span>  <span class="c1"># TODO</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_log_experiences</span><span class="p">(</span><span class="n">exp_samples</span><span class="p">)</span>
-
-        <span class="c1"># TODO: make a canonical logger that supports various backend</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">metrics</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="p">)</span>
-
         <span class="n">train_status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_training_steps</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">train_status</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm_manager</span><span class="o">.</span><span class="n">need_save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="p">):</span>
             <span class="k">if</span> <span class="p">(</span>
@@ -504,41 +468,8 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">_save_checkpoint</span><span class="p">()</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Saved at step </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Training at step </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="si">}</span><span class="s2"> finished.&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">train_status</span></div>
+        <span class="k">return</span> <span class="n">train_status</span><span class="p">,</span> <span class="n">metrics</span></div>
 
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_log_single_experience</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">experiences</span><span class="p">:</span> <span class="n">Experiences</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">skip_special_tokens</span><span class="p">:</span> <span class="nb">bool</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">reward</span> <span class="o">=</span> <span class="n">experiences</span><span class="o">.</span><span class="n">rewards</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
-        <span class="n">attn_mask</span> <span class="o">=</span> <span class="n">experiences</span><span class="o">.</span><span class="n">attention_masks</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">bool</span><span class="p">()</span>
-        <span class="n">prompt_token</span> <span class="o">=</span> <span class="n">experiences</span><span class="o">.</span><span class="n">tokens</span><span class="p">[</span><span class="n">idx</span><span class="p">][:</span> <span class="n">experiences</span><span class="o">.</span><span class="n">prompt_length</span><span class="p">][</span>
-            <span class="n">attn_mask</span><span class="p">[:</span> <span class="n">experiences</span><span class="o">.</span><span class="n">prompt_length</span><span class="p">]</span>
-        <span class="p">]</span>
-        <span class="n">response_token</span> <span class="o">=</span> <span class="n">experiences</span><span class="o">.</span><span class="n">tokens</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="n">experiences</span><span class="o">.</span><span class="n">prompt_length</span> <span class="p">:][</span>
-            <span class="n">attn_mask</span><span class="p">[</span><span class="n">experiences</span><span class="o">.</span><span class="n">prompt_length</span> <span class="p">:]</span>
-        <span class="p">]</span>
-        <span class="n">prompt_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">prompt_token</span><span class="p">,</span> <span class="n">skip_special_tokens</span><span class="o">=</span><span class="n">skip_special_tokens</span><span class="p">)</span>
-        <span class="n">response_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span>
-            <span class="n">response_token</span><span class="p">,</span> <span class="n">skip_special_tokens</span><span class="o">=</span><span class="n">skip_special_tokens</span>
-        <span class="p">)</span>
-        <span class="n">new_row</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
-            <span class="p">{</span>
-                <span class="s2">&quot;step&quot;</span><span class="p">:</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="p">],</span>
-                <span class="s2">&quot;reward&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">reward</span><span class="p">],</span>
-                <span class="s2">&quot;prompt&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">prompt_text</span><span class="p">],</span>
-                <span class="s2">&quot;response&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">response_text</span><span class="p">],</span>
-            <span class="p">}</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sample_exps_to_log</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_exps_to_log</span><span class="p">,</span> <span class="n">new_row</span><span class="p">],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_log_experiences</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">samples</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sample_exps_to_log</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">sync_freq</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">log_table</span><span class="p">(</span>
-                <span class="s2">&quot;rollout_examples&quot;</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_exps_to_log</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span>
-            <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">reset_experiences_example_table</span><span class="p">()</span>
 
 <div class="viewcode-block" id="VerlPPOTrainerWrapper.save_checkpoint">
 <a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.save_checkpoint">[docs]</a>

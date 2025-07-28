@@ -283,7 +283,6 @@
 <li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.html#trinity.algorithm.SampleStrategy"><code class="docutils literal notranslate"><span class="pre">SampleStrategy</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.html#trinity.algorithm.SampleStrategy.__init__"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.__init__()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.html#trinity.algorithm.SampleStrategy.sample"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.sample()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.html#trinity.algorithm.SampleStrategy.warmup_state"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.warmup_state()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.html#trinity.algorithm.SampleStrategy.default_args"><code class="docutils literal notranslate"><span class="pre">SampleStrategy.default_args()</span></code></a></li>
 </ul>
 </li>
@@ -803,10 +802,19 @@
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.experience.ExperienceType.DPO"><code class="docutils literal notranslate"><span class="pre">ExperienceType.DPO</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.html#trinity.common.experience.CustomField"><code class="docutils literal notranslate"><span class="pre">CustomField</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.experience.CustomField.source_field"><code class="docutils literal notranslate"><span class="pre">CustomField.source_field</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.experience.CustomField.destination_field"><code class="docutils literal notranslate"><span class="pre">CustomField.destination_field</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.experience.CustomField.data_type"><code class="docutils literal notranslate"><span class="pre">CustomField.data_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.experience.CustomField.__init__"><code class="docutils literal notranslate"><span class="pre">CustomField.__init__()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience"><code class="docutils literal notranslate"><span class="pre">Experience</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience.__init__"><code class="docutils literal notranslate"><span class="pre">Experience.__init__()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience.eid"><code class="docutils literal notranslate"><span class="pre">Experience.eid</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience.reward"><code class="docutils literal notranslate"><span class="pre">Experience.reward</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience.advantages"><code class="docutils literal notranslate"><span class="pre">Experience.advantages</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience.returns"><code class="docutils literal notranslate"><span class="pre">Experience.returns</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience.experience_type"><code class="docutils literal notranslate"><span class="pre">Experience.experience_type</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience.info"><code class="docutils literal notranslate"><span class="pre">Experience.info</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experience.metrics"><code class="docutils literal notranslate"><span class="pre">Experience.metrics</span></code></a></li>
@@ -833,10 +841,13 @@
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experiences.eids"><code class="docutils literal notranslate"><span class="pre">Experiences.eids</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experiences.tokens"><code class="docutils literal notranslate"><span class="pre">Experiences.tokens</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experiences.rewards"><code class="docutils literal notranslate"><span class="pre">Experiences.rewards</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experiences.advantages"><code class="docutils literal notranslate"><span class="pre">Experiences.advantages</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experiences.returns"><code class="docutils literal notranslate"><span class="pre">Experiences.returns</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experiences.attention_masks"><code class="docutils literal notranslate"><span class="pre">Experiences.attention_masks</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experiences.action_masks"><code class="docutils literal notranslate"><span class="pre">Experiences.action_masks</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experiences.prompt_length"><code class="docutils literal notranslate"><span class="pre">Experiences.prompt_length</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experiences.logprobs"><code class="docutils literal notranslate"><span class="pre">Experiences.logprobs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experiences.custom_fields"><code class="docutils literal notranslate"><span class="pre">Experiences.custom_fields</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experiences.batch_size"><code class="docutils literal notranslate"><span class="pre">Experiences.batch_size</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experiences.gather_experiences"><code class="docutils literal notranslate"><span class="pre">Experiences.gather_experiences()</span></code></a></li>
 </ul>
@@ -846,6 +857,8 @@
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.html#trinity.common.experience.gather_action_masks"><code class="docutils literal notranslate"><span class="pre">gather_action_masks()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.html#trinity.common.experience.gather_attention_masks"><code class="docutils literal notranslate"><span class="pre">gather_attention_masks()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.html#trinity.common.experience.gather_logprobs"><code class="docutils literal notranslate"><span class="pre">gather_logprobs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.html#trinity.common.experience.gather_advantages"><code class="docutils literal notranslate"><span class="pre">gather_advantages()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.html#trinity.common.experience.gather_returns"><code class="docutils literal notranslate"><span class="pre">gather_returns()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="trinity.common.html#module-trinity.common.verl_config">trinity.common.verl_config module</a><ul>
@@ -1218,6 +1231,7 @@
 <li class="toctree-l4"><a class="reference internal" href="trinity.manager.html#trinity.manager.Trainer.need_sync"><code class="docutils literal notranslate"><span class="pre">Trainer.need_sync()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.manager.html#trinity.manager.Trainer.sync_weight"><code class="docutils literal notranslate"><span class="pre">Trainer.sync_weight()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.manager.html#trinity.manager.Trainer.shutdown"><code class="docutils literal notranslate"><span class="pre">Trainer.shutdown()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.manager.html#trinity.manager.Trainer.train_step_num"><code class="docutils literal notranslate"><span class="pre">Trainer.train_step_num</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.manager.html#trinity.manager.TrainEngineWrapper"><code class="docutils literal notranslate"><span class="pre">TrainEngineWrapper</span></code></a><ul>
@@ -1242,6 +1256,7 @@
 <li class="toctree-l2"><a class="reference internal" href="trinity.trainer.html#subpackages">Subpackages</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="trinity.trainer.verl.html">trinity.trainer.verl</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="trinity.trainer.verl.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.trainer.verl.html#module-trinity.trainer.verl.converter">trinity.trainer.verl.converter module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.trainer.verl.html#module-trinity.trainer.verl.dp_actor">trinity.trainer.verl.dp_actor module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.trainer.verl.html#module-trinity.trainer.verl.fsdp_workers">trinity.trainer.verl.fsdp_workers module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.trainer.verl.html#module-trinity.trainer.verl">Module contents</a></li>
@@ -1259,6 +1274,7 @@
 <li class="toctree-l4"><a class="reference internal" href="trinity.trainer.html#trinity.trainer.trainer.Trainer.need_sync"><code class="docutils literal notranslate"><span class="pre">Trainer.need_sync()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.trainer.html#trinity.trainer.trainer.Trainer.sync_weight"><code class="docutils literal notranslate"><span class="pre">Trainer.sync_weight()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.trainer.html#trinity.trainer.trainer.Trainer.shutdown"><code class="docutils literal notranslate"><span class="pre">Trainer.shutdown()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.trainer.html#trinity.trainer.trainer.Trainer.train_step_num"><code class="docutils literal notranslate"><span class="pre">Trainer.train_step_num</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.trainer.html#trinity.trainer.trainer.TrainEngineWrapper"><code class="docutils literal notranslate"><span class="pre">TrainEngineWrapper</span></code></a><ul>
@@ -1298,6 +1314,7 @@
 <li class="toctree-l4"><a class="reference internal" href="trinity.trainer.html#trinity.trainer.Trainer.need_sync"><code class="docutils literal notranslate"><span class="pre">Trainer.need_sync()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.trainer.html#trinity.trainer.Trainer.sync_weight"><code class="docutils literal notranslate"><span class="pre">Trainer.sync_weight()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.trainer.html#trinity.trainer.Trainer.shutdown"><code class="docutils literal notranslate"><span class="pre">Trainer.shutdown()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.trainer.html#trinity.trainer.Trainer.train_step_num"><code class="docutils literal notranslate"><span class="pre">Trainer.train_step_num</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.trainer.html#trinity.trainer.TrainEngineWrapper"><code class="docutils literal notranslate"><span class="pre">TrainEngineWrapper</span></code></a><ul>

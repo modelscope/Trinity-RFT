@@ -91,47 +91,7 @@
 <span></span><span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">verl.trainer.ppo.ray_trainer</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataProto</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span><span class="p">,</span> <span class="n">Experiences</span>
-
-
-<div class="viewcode-block" id="to_data_proto">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.html#trinity.algorithm.sample_strategy.utils.to_data_proto">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">to_data_proto</span><span class="p">(</span><span class="n">experiences</span><span class="p">:</span> <span class="n">Experiences</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataProto</span><span class="p">:</span>
-    <span class="n">attention_mask</span> <span class="o">=</span> <span class="n">experiences</span><span class="o">.</span><span class="n">attention_masks</span>
-    <span class="n">cumsum</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">attention_mask</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">position_ids</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">cumsum</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">long</span><span class="p">()</span>
-    <span class="n">batch_dict</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;uid&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">eid</span><span class="o">.</span><span class="n">tid</span> <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">experiences</span><span class="o">.</span><span class="n">eids</span><span class="p">]),</span>
-        <span class="s2">&quot;unique_ids&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">eid</span><span class="o">.</span><span class="n">uid</span> <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">experiences</span><span class="o">.</span><span class="n">eids</span><span class="p">]),</span>
-        <span class="s2">&quot;position_ids&quot;</span><span class="p">:</span> <span class="n">position_ids</span><span class="p">,</span>
-        <span class="s2">&quot;input_ids&quot;</span><span class="p">:</span> <span class="n">experiences</span><span class="o">.</span><span class="n">tokens</span><span class="o">.</span><span class="n">long</span><span class="p">(),</span>
-        <span class="s2">&quot;responses&quot;</span><span class="p">:</span> <span class="n">experiences</span><span class="o">.</span><span class="n">tokens</span><span class="p">[:,</span> <span class="n">experiences</span><span class="o">.</span><span class="n">prompt_length</span> <span class="p">:]</span><span class="o">.</span><span class="n">long</span><span class="p">(),</span>
-        <span class="s2">&quot;attention_mask&quot;</span><span class="p">:</span> <span class="n">attention_mask</span><span class="o">.</span><span class="n">long</span><span class="p">(),</span>
-        <span class="s2">&quot;response_mask&quot;</span><span class="p">:</span> <span class="p">(</span>
-            <span class="n">experiences</span><span class="o">.</span><span class="n">action_masks</span><span class="p">[:,</span> <span class="n">experiences</span><span class="o">.</span><span class="n">prompt_length</span> <span class="p">:]</span><span class="o">.</span><span class="n">long</span><span class="p">()</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">experiences</span><span class="p">,</span> <span class="s2">&quot;action_masks&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">experiences</span><span class="o">.</span><span class="n">action_masks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-            <span class="k">else</span> <span class="n">attention_mask</span><span class="p">[:,</span> <span class="n">experiences</span><span class="o">.</span><span class="n">prompt_length</span> <span class="p">:]</span><span class="o">.</span><span class="n">long</span><span class="p">()</span>
-        <span class="p">),</span>
-    <span class="p">}</span>
-    <span class="k">if</span> <span class="n">experiences</span><span class="o">.</span><span class="n">rewards</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">token_level_rewards</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">attention_mask</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">experiences</span><span class="o">.</span><span class="n">rewards</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
-        <span class="n">eos_mask_idx</span> <span class="o">=</span> <span class="n">cumsum</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">token_level_rewards</span><span class="p">[</span>
-            <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">experiences</span><span class="o">.</span><span class="n">batch_size</span><span class="p">),</span> <span class="n">eos_mask_idx</span>
-        <span class="p">]</span> <span class="o">=</span> <span class="n">experiences</span><span class="o">.</span><span class="n">rewards</span>
-        <span class="n">token_level_rewards</span> <span class="o">=</span> <span class="n">token_level_rewards</span><span class="p">[:,</span> <span class="n">experiences</span><span class="o">.</span><span class="n">prompt_length</span> <span class="p">:]</span>
-        <span class="n">batch_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-            <span class="p">{</span>
-                <span class="s2">&quot;token_level_scores&quot;</span><span class="p">:</span> <span class="n">token_level_rewards</span><span class="p">,</span>
-                <span class="s2">&quot;old_log_probs&quot;</span><span class="p">:</span> <span class="n">experiences</span><span class="o">.</span><span class="n">logprobs</span><span class="p">[:,</span> <span class="n">experiences</span><span class="o">.</span><span class="n">prompt_length</span> <span class="p">:],</span>  <span class="c1"># type: ignore</span>
-            <span class="p">}</span>
-        <span class="p">)</span>
-    <span class="k">return</span> <span class="n">DataProto</span><span class="o">.</span><span class="n">from_single_dict</span><span class="p">(</span><span class="n">batch_dict</span><span class="p">)</span></div>
-
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
 
 
 <div class="viewcode-block" id="representative_sample">

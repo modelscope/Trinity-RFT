@@ -76,8 +76,8 @@ We need to read two kinds of experiences: usual experiences and expert experienc
 class MixSampleStrategy(SampleStrategy):
     """The default sample strategy."""
 
-    def __init__(self, buffer_config: BufferConfig, trainer_type: str, **kwargs):
-        super().__init__(buffer_config, trainer_type)
+    def __init__(self, buffer_config: BufferConfig, **kwargs):
+        super().__init__(buffer_config)
         self.expert_data_ratio = kwargs.get("expert_data_ratio", 0.5)
         tot_batch_size = buffer_config.read_batch_size
         expert_batch_size = ceil(self.expert_data_ratio * tot_batch_size)
@@ -101,7 +101,7 @@ class MixSampleStrategy(SampleStrategy):
             buffer_config.trainer_input.sft_warmup_dataset, expert_buffer_config
         )
 
-    def sample(self, step: int) -> Tuple[Any, Dict, List]:
+    def sample(self, step: int) -> Tuple[Experiences, Dict, List]:
         metrics = {}
         with Timer(metrics, "read_time"):
             usual_exp_list = self.usual_exp_buffer.read()
@@ -113,7 +113,9 @@ class MixSampleStrategy(SampleStrategy):
             expert_exp_list = self.expert_exp_buffer.read()
             for exp in expert_exp_list:
                 exp.reward = 0.0
-                exp.logprobs = torch.zeros_like(exp.tokens, dtype=torch.float32)
+                exp.logprobs = torch.zeros_like(
+                    exp.tokens[exp.prompt_length :], dtype=torch.float32
+                )
                 if exp.info is None:
                     exp.info = {}
                 exp.info["is_expert"] = True
@@ -121,55 +123,22 @@ class MixSampleStrategy(SampleStrategy):
             exp_list = usual_exp_list + expert_exp_list
             repr_samples = representative_sample(exp_list)
 
-        is_expert_mask = torch.tensor([exp.info["is_expert"] for exp in exp_list], dtype=torch.bool)
-
         with Timer(metrics, "gather_time"):
-            exps = Experiences.gather_experiences(exp_list, self.pad_token_id)  # type: ignore
-
-        if self.trainer_type == "verl":
-            with Timer(metrics, "convert_time"):
-                data = to_data_proto_mix(exps, is_expert_mask)
-            return data, metrics, repr_samples
-        else:
-            raise NotImplementedError(f"backend {self.trainer_type} is not supported")
+            exps = Experiences.gather_experiences(
+                experiences=exp_list,
+                pad_token_id=self.pad_token_id,  # type: ignore [arg-type]
+                custom_fields=[
+                    CustomField(
+                        source_field="is_expert",
+                        destination_field="expert_mask",
+                        data_type=torch.bool,
+                    )
+                ],
+            )  # type: ignore
+        return exps, metrics, repr_samples
 ```
 
-We also need to add an `is_expert_mask` field when transforming to DataProto to indicate the data type.
-
-```diff
-+ def to_data_proto_mix(experiences: Experiences, is_expert_mask: torch.tensor) -> DataProto:
-    attention_mask = experiences.attention_masks
-    cumsum = torch.cumsum(attention_mask, dim=-1)
-    position_ids = torch.clip(cumsum - 1, 0, None).long()
-    batch_dict = {
-        "uid": np.array([eid.tid for eid in experiences.eids]),
-        "unique_ids": np.array([eid.uid for eid in experiences.eids]),
-        "position_ids": position_ids,
-        "input_ids": experiences.tokens.long(),
-        "responses": experiences.tokens[:, experiences.prompt_length :].long(),
-        "attention_mask": attention_mask.long(),
-        "response_mask": (
-            experiences.action_masks[:, experiences.prompt_length :].long()
-            if hasattr(experiences, "action_masks") and experiences.action_masks is not None
-            else attention_mask[:, experiences.prompt_length :].long()
-        ),
-+       "is_expert_mask": is_expert_mask,
-    }
-    if experiences.rewards is not None:
-        token_level_rewards = torch.zeros(attention_mask.shape, dtype=experiences.rewards.dtype)
-        eos_mask_idx = cumsum.argmax(dim=-1)
-        token_level_rewards[
-            torch.arange(experiences.batch_size), eos_mask_idx
-        ] = experiences.rewards
-        token_level_rewards = token_level_rewards[:, experiences.prompt_length :]
-        batch_dict.update(
-            {
-                "token_level_scores": token_level_rewards,
-                "old_log_probs": experiences.logprobs[:, experiences.prompt_length :],  # type: ignore
-            }
-        )
-    return DataProto.from_single_dict(batch_dict)
-```
+Here we use the `custom_fields` argument of `Experiences.gather_experiences` to add a new field `expert_mask`, which indicates whether the experience is from an expert or not. This field will be used in the policy loss function to distinguish between usual and expert experiences.
 
 
 ## Step 3: Define the Policy Loss Function
@@ -217,15 +186,15 @@ class MIXPolicyLossFn(PolicyLossFn):
         old_logprob: torch.Tensor,
         action_mask: torch.Tensor,
         advantages: torch.Tensor,
-        is_expert_mask: torch.Tensor,
+        expert_mask: torch.Tensor,
         **kwargs,
     ) -> Tuple[torch.Tensor, Dict]:
         assert (
-            len(is_expert_mask) == logprob.shape[0]
-        ), f"Error: {len(is_expert_mask)=} != {logprob.shape[0]=}"
+            len(expert_mask) == logprob.shape[0]
+        ), f"Error: {len(expert_mask)=} != {logprob.shape[0]=}"
 
-        n_usual_exp = torch.sum(~is_expert_mask).item()
-        n_expert_exp = torch.sum(is_expert_mask).item()
+        n_usual_exp = torch.sum(~expert_mask).item()
+        n_expert_exp = torch.sum(expert_mask).item()
 
         if self.use_dynamic_bsz:
             per_micro_batch_weight_usual = self.experience_per_gpu / (
@@ -240,10 +209,10 @@ class MIXPolicyLossFn(PolicyLossFn):
 
         if n_usual_exp > 0:
             grpo_loss, grpo_metrics = self.grpo_loss_fn(
-                logprob[~is_expert_mask],
-                old_logprob[~is_expert_mask],
-                action_mask[~is_expert_mask],
-                advantages[~is_expert_mask],
+                logprob[~expert_mask],
+                old_logprob[~expert_mask],
+                action_mask[~expert_mask],
+                advantages[~expert_mask],
                 **kwargs,
             )
             grpo_loss = grpo_loss * n_usual_exp * per_micro_batch_weight_usual
@@ -257,8 +226,8 @@ class MIXPolicyLossFn(PolicyLossFn):
         # SFT Loss (expert)
         if n_expert_exp > 0:
             sft_loss, sft_metrics = self.sft_loss_fn(
-                logprob[is_expert_mask],
-                action_mask[is_expert_mask],
+                logprob[expert_mask],
+                action_mask[expert_mask],
             )
             sft_loss = sft_loss * n_expert_exp * per_micro_batch_weight_expert
             sft_metrics = {
