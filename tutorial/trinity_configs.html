@@ -553,6 +553,9 @@
 <span class="w">    </span><span class="nt">override_config</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="w"> </span><span class="p p-Indicator">}</span>
 <span class="w">    </span><span class="nt">enable_gradient_checkpointing</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
 <span class="w">    </span><span class="nt">use_remove_padding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">    </span><span class="nt">use_fused_kernels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">    </span><span class="nt">fused_kernel_options</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">impl_backend</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
 <span class="w">  </span><span class="nt">actor</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fsdp</span><span class="w">  </span><span class="c1"># This is for backward-compatibility</span>
 <span class="w">    </span><span class="nt">ppo_mini_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">128</span>
@@ -650,6 +653,8 @@
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.model.enable_gradient_checkpointing</span></code>: Whether to enable gradient checkpointing, which will reduce GPU memory usage.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.model.use_remove_padding</span></code>: Whether to remove pad tokens, which will reduce training time.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.model.use_fused_kernels</span></code>: Whether to use custom fused kernels (e.g., FlashAttention, fused MLP).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.model.fused_kernel_options.impl_backend</span></code>: Implementation backend for fused kernels. If use_fused_kernels is true, this will be used. Options: “triton” or “torch”.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.use_dynamic_bsz</span></code>: Whether to reorganize the batch data, specifically to splice the shorter data to reduce the batch size in the actual training process.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu</span></code>: Batch size for one GPU in one forward pass.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.ulysses_sequence_parallel_size</span></code>: Ulysses sequence parallel size.</p></li>

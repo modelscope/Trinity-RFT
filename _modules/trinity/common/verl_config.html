@@ -109,6 +109,14 @@
 
 
 
+<div class="viewcode-block" id="FusedKernelOptions">
+<a class="viewcode-back" href="../../../build_api/trinity.common.html#trinity.common.verl_config.FusedKernelOptions">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FusedKernelOptions</span><span class="p">:</span>
+    <span class="n">impl_backend</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+
 <div class="viewcode-block" id="ActorModel">
 <a class="viewcode-back" href="../../../build_api/trinity.common.html#trinity.common.verl_config.ActorModel">[docs]</a>
 <span class="nd">@dataclass</span>
@@ -119,6 +127,7 @@
     <span class="n">enable_gradient_checkpointing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">use_remove_padding</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">use_fused_kernels</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">fused_kernel_options</span><span class="p">:</span> <span class="n">FusedKernelOptions</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">FusedKernelOptions</span><span class="p">)</span>
     <span class="n">custom_chat_template</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 

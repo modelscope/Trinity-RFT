@@ -173,6 +173,7 @@
             <span class="s2">&quot;gradient_checkpointing&quot;</span><span class="p">,</span>
             <span class="s2">&quot;remove_padding&quot;</span><span class="p">,</span>
             <span class="s2">&quot;dynamic_bsz&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;use_fused_kernels&quot;</span><span class="p">,</span>
         <span class="p">],</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span>
@@ -234,6 +235,18 @@
     <span class="p">):</span>
         <span class="n">unfinished_fields</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
         <span class="n">st</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Please input a valid resume path when `resume_mode == resume_path`&quot;</span><span class="p">)</span>
+
+
+<span class="nd">@CONFIG_GENERATORS</span><span class="o">.</span><span class="n">register_config</span><span class="p">(</span>
+    <span class="n">default_value</span><span class="o">=</span><span class="s2">&quot;triton&quot;</span><span class="p">,</span> <span class="n">visible</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="s2">&quot;use_fused_kernels&quot;</span> <span class="ow">in</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;training_args&quot;</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">set_impl_backend</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">st</span><span class="o">.</span><span class="n">selectbox</span><span class="p">(</span>
+        <span class="s2">&quot;Impl Backend&quot;</span><span class="p">,</span>
+        <span class="p">[</span><span class="s2">&quot;torch&quot;</span><span class="p">,</span> <span class="s2">&quot;triton&quot;</span><span class="p">],</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Backend For FusedKernel&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span>
 
 
 <span class="nd">@CONFIG_GENERATORS</span><span class="o">.</span><span class="n">register_config</span><span class="p">(</span><span class="n">default_value</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
