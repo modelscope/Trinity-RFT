@@ -23,7 +23,7 @@ class Synchronizer:
 
     Attributes:
         trainer_status: Current status of the trainer (e.g., running, waiting).
-        explorer_status_counter: Dictionary tracking the number of explorers in each status.
+        explorer_status_counts: Dictionary tracking the number of explorers in each status.
         _ready_condition: Async condition variable for signaling state changes.
         model_state_dict: The latest model weights.
         model_version: Version number of the current model.
@@ -34,7 +34,7 @@ class Synchronizer:
         self.logger = get_logger(__name__)
         self.config = config
         self.trainer_status = RunningStatus.STOPPED
-        self.explorer_status_counter: Dict[RunningStatus, int] = defaultdict(lambda: 0)
+        self.explorer_status_counts: Dict[RunningStatus, int] = defaultdict(lambda: 0)
         self._ready_condition = asyncio.Condition()
         self.model_state_dict = None
         self.model_version = 0
@@ -64,20 +64,20 @@ class Synchronizer:
         """
         if old_status is not None:
             assert (
-                old_status in self.explorer_status_counter
+                old_status in self.explorer_status_counts
             ), f"Invalid explorer status {old_status}"
             assert old_status != status, f"Invalid status change from {old_status} to {status}"
-            self.explorer_status_counter[old_status] -= 1
+            self.explorer_status_counts[old_status] -= 1
             assert (
-                self.explorer_status_counter[old_status] >= 0
+                self.explorer_status_counts[old_status] >= 0
             ), f"Invalid status count {old_status} (new status {status})"
-        if status not in self.explorer_status_counter:
-            self.explorer_status_counter[status] = 0
-        self.explorer_status_counter[status] += 1
+        if status not in self.explorer_status_counts:
+            self.explorer_status_counts[status] = 0
+        self.explorer_status_counts[status] += 1
 
-    def get_explorer_status_counter(self) -> Dict[RunningStatus, int]:
+    def get_explorer_status_counts(self) -> Dict[RunningStatus, int]:
         """Return the current status counts for all explorers."""
-        return self.explorer_status_counter
+        return self.explorer_status_counts
 
     async def set_model_state_dict_with_step_num(
         self, step_num: Optional[int] = None, world_size: Optional[int] = None
@@ -108,9 +108,7 @@ class Synchronizer:
             step_num=step_num,
         )
         if checkpoint_step_num != self.model_version:
-            model_state_dict = load_state_dict(
-                os.path.join(checkpoint_dir, "actor")
-            )  # TODO: to thread
+            model_state_dict = load_state_dict(os.path.join(checkpoint_dir, "actor"))
             await self.set_model_state_dict(model_state_dict, checkpoint_step_num)
         return checkpoint_step_num
 
@@ -206,7 +204,7 @@ class Synchronizer:
             The model version if both sides are ready; otherwise None.
         """
         assert (
-            sum(self.explorer_status_counter.values()) == 1
+            sum(self.explorer_status_counts.values()) == 1
         ), "NCCL sync is only supported for one explorer."
 
         def sync_failed():
@@ -223,7 +221,7 @@ class Synchronizer:
 
         non_stop_cnt = sum(
             value
-            for key, value in self.explorer_status_counter.items()
+            for key, value in self.explorer_status_counts.items()
             if key != RunningStatus.STOPPED
         )
         if non_stop_cnt == 0:
@@ -235,10 +233,10 @@ class Synchronizer:
                     self.model_version = trainer_step
                     self.trainer_status = RunningStatus.WAITING_SYNC
                     self._ready_condition.notify_all()
-                    if self.explorer_status_counter[RunningStatus.WAITING_SYNC] != 1:
+                    if self.explorer_status_counts[RunningStatus.WAITING_SYNC] != 1:
                         await asyncio.wait_for(
                             self._ready_condition.wait_for(
-                                lambda: self.explorer_status_counter[RunningStatus.WAITING_SYNC]
+                                lambda: self.explorer_status_counts[RunningStatus.WAITING_SYNC]
                                 == 1,
                             ),
                             timeout=self.config.synchronizer.sync_timeout,

@@ -113,7 +113,7 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
 
         Main improvements over the base class:
         - Uses separate threads for saving model/optimizer/extras.
-        - Implements synchronization with a remote actor.
+        - Implements synchronization with a remote actor. If the model is not trained (`global_step == 0`) or continues from a breakpoint, `Synchonizer` will be notified and the model will not be saved.
 
         Args:
             local_path (str): Local directory path to save the checkpoint.

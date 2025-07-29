@@ -12,7 +12,7 @@ from datetime import datetime
 from typing import List
 
 import ray
-from parameterized import parameterized
+from parameterized import parameterized_class
 
 from tests.tools import (
     TensorBoardParser,
@@ -91,36 +91,62 @@ def run_both(
     both(config)
 
 
-class TestSynchronizer(unittest.TestCase):
+class BaseTestSynchronizer(unittest.TestCase):
     def setUp(self):
         if multiprocessing.get_start_method(allow_none=True) != "spawn":
             multiprocessing.set_start_method("spawn", force=True)
 
-    @parameterized.expand(
-        [
-            (
-                "checkpoint_fixed",
-                SyncMethod.CHECKPOINT,
-                SyncStyle.FIXED,
-            ),
-            (
-                "checkpoint_dynamic_by_explorer",
-                SyncMethod.CHECKPOINT,
-                SyncStyle.DYNAMIC_BY_EXPLORER,
-            ),
-            (
-                "memory_fixed",
-                SyncMethod.MEMORY,
-                SyncStyle.FIXED,
-            ),
-            (
-                "memory_dynamic_by_explorer",
-                SyncMethod.MEMORY,
-                SyncStyle.DYNAMIC_BY_EXPLORER,
-            ),
-        ]
-    )
-    def test_state_dict_based_sync(self, name, sync_method, sync_style):
+    def tearDown(self):
+        checkpoint_path = get_checkpoint_path()
+        shutil.rmtree(os.path.join(checkpoint_path, "unittest"))
+
+
+@parameterized_class(
+    (
+        "sync_method",
+        "sync_style",
+        "max_steps",
+        "trainer_intervals",
+        "explorer1_intervals",
+        "explorer2_intervals",
+    ),
+    [
+        (
+            SyncMethod.CHECKPOINT,
+            SyncStyle.FIXED,
+            8,
+            [2, 1, 2, 1, 2, 1, 2, 1],
+            [0, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5],
+            [0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+        ),
+        (
+            SyncMethod.CHECKPOINT,
+            SyncStyle.DYNAMIC_BY_EXPLORER,
+            8,
+            [2, 1, 2, 1, 2, 1, 2, 1],
+            [0, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5],
+            [0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+        ),
+        (
+            SyncMethod.MEMORY,
+            SyncStyle.FIXED,
+            8,
+            [2, 1, 2, 1, 2, 1, 2, 1],
+            [0, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5],
+            [0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+        ),
+        (
+            SyncMethod.MEMORY,
+            SyncStyle.DYNAMIC_BY_EXPLORER,
+            8,
+            [2, 1, 2, 1, 2, 1, 2, 1],
+            [0, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5],
+            [0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+        ),
+    ],
+)
+class TestStateDictBasedSynchronizer(BaseTestSynchronizer):
+    def test_synchronizer(self):
         config = get_template_config()
         config.project = "unittest"
         config.name = f"test_synchronizer_{datetime.now().strftime('%Y%m%d%H%M%S')}"
@@ -136,8 +162,8 @@ class TestSynchronizer(unittest.TestCase):
             storage_type=StorageType.QUEUE,
             wrap_in_ray=True,
         )
-        config.synchronizer.sync_method = sync_method
-        config.synchronizer.sync_style = sync_style
+        config.synchronizer.sync_method = self.sync_method
+        config.synchronizer.sync_style = self.sync_style
         config.synchronizer.sync_interval = 2
         config.trainer.save_interval = 100
         config.monitor.monitor_type = "tensorboard"
@@ -163,16 +189,16 @@ class TestSynchronizer(unittest.TestCase):
         explorer2_config.check_and_update()
 
         trainer_process = multiprocessing.Process(
-            target=run_trainer, args=(trainer_config, 8, [2, 1, 2, 1, 2, 1, 2, 1])
+            target=run_trainer, args=(trainer_config, self.max_steps, self.trainer_intervals)
         )
         trainer_process.start()
         explorer_process_1 = multiprocessing.Process(
             target=run_explorer,
-            args=(explorer1_config, 8, [0, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5]),
+            args=(explorer1_config, self.max_steps, self.explorer1_intervals),
         )
         explorer_process_1.start()
         explorer_process_2 = multiprocessing.Process(
-            target=run_explorer, args=(explorer2_config, 8, [0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])
+            target=run_explorer, args=(explorer2_config, self.max_steps, self.explorer2_intervals)
         )
         explorer_process_2.start()
 
@@ -197,7 +223,26 @@ class TestSynchronizer(unittest.TestCase):
         rollout_metrics = parser.metric_list("rollout")
         self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 8)
 
-    def test_nccl_method_fixed_style(self):
+
+@parameterized_class(
+    ("sync_style", "max_steps", "trainer_intervals", "explorer_intervals"),
+    [
+        (
+            SyncStyle.FIXED,
+            8,
+            [2, 1, 2, 1, 2, 1, 2, 1],
+            [0, 2.5, 2.5, 2.5, 2.5, 0],
+        ),
+        (
+            SyncStyle.DYNAMIC_BY_EXPLORER,
+            8,
+            [2, 1, 2, 1, 2, 1, 2, 1],
+            [0, 0.5, 0.5, 0.5, 0.5, 0],
+        ),
+    ],
+)
+class TestNCCLBasedSynchronizer(BaseTestSynchronizer):
+    def test_synchronizer(self):
         config = get_template_config()
         config.project = "unittest"
         config.name = f"test_synchronizer_{datetime.now().strftime('%Y%m%d%H%M%S')}"
@@ -214,7 +259,7 @@ class TestSynchronizer(unittest.TestCase):
             wrap_in_ray=True,
         )
         config.synchronizer.sync_method = SyncMethod.NCCL
-        config.synchronizer.sync_style = SyncStyle.FIXED
+        config.synchronizer.sync_style = self.sync_style
         config.synchronizer.sync_interval = 2
         config.trainer.save_interval = 100
         config.explorer.rollout_model.engine_num = 2
@@ -225,50 +270,8 @@ class TestSynchronizer(unittest.TestCase):
 
         # TODO: test more interval cases
         both_process = multiprocessing.Process(
-            target=run_both, args=(config, 8, [2, 1, 2, 1, 2, 1, 2, 1], [0, 2.5, 2.5, 2.5, 2.5, 0])
-        )
-        both_process.start()
-        both_process.join(timeout=200)
-
-        # check the tensorboard
-        parser = TensorBoardParser(os.path.join(config.monitor.cache_dir, "tensorboard", "trainer"))
-        actor_metrics = parser.metric_list("actor")
-        self.assertEqual(parser.metric_max_step(actor_metrics[0]), 8)
-        parser = TensorBoardParser(
-            os.path.join(config.monitor.cache_dir, "tensorboard", "explorer")
-        )
-        rollout_metrics = parser.metric_list("rollout")
-        self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 8)
-
-    def test_nccl_method_dynamic_by_explorer_style(self):
-        config = get_template_config()
-        config.project = "unittest"
-        config.name = f"test_synchronizer_{datetime.now().strftime('%Y%m%d%H%M%S')}"
-        config.checkpoint_root_dir = get_checkpoint_path()
-        config.buffer.total_epochs = 1
-        config.buffer.batch_size = 4
-        config.cluster.gpu_per_node = 4
-        config.cluster.node_num = 1
-        config.model.model_path = get_model_path()
-        config.buffer.explorer_input.taskset = get_unittest_dataset_config("countdown")
-        config.buffer.trainer_input.experience_buffer = StorageConfig(
-            name="exp_buffer",
-            storage_type=StorageType.QUEUE,
-            wrap_in_ray=True,
-        )
-        config.synchronizer.sync_method = SyncMethod.NCCL
-        config.synchronizer.sync_style = SyncStyle.DYNAMIC_BY_EXPLORER
-        config.synchronizer.sync_interval = 2
-        config.trainer.save_interval = 100
-        config.explorer.rollout_model.engine_num = 2
-        config.explorer.rollout_model.tensor_parallel_size = 1
-        config.monitor.monitor_type = "tensorboard"
-        config.mode = "both"
-        config.check_and_update()
-
-        # TODO: test more interval cases
-        both_process = multiprocessing.Process(
-            target=run_both, args=(config, 8, [2, 1, 2, 1, 2, 1, 2, 1], [0, 0.5, 0.5, 0.5, 0.5, 0])
+            target=run_both,
+            args=(config, self.max_steps, self.trainer_intervals, self.explorer_intervals),
         )
         both_process.start()
         both_process.join(timeout=200)
