@@ -41,6 +41,7 @@ class Explorer:
         self.explore_step_num = explorer_meta.get("latest_iteration", 0)
         self.last_sync_step = self.explore_step_num if self.explore_step_num > 0 else -1
         self.synchronizer = Synchronizer.get_actor(config)
+        ray.get(self.synchronizer.acquire.remote())
         self.config = config
         self.algorithm_manager = AlgorithmManager(config)
         self.models, self.auxiliary_models = create_inference_models(config)
@@ -219,7 +220,9 @@ class Explorer:
             except Exception:
                 self.logger.error(f"Error in Explorer: {traceback.format_exc()}")
                 break
-        self.logger.info("--------------------\n> Explorer finished.\n--------------------")
+        self.logger.info(
+            f"--------------------\n> Explorer ({self.config.explorer.name}) finished.\n--------------------"
+        )
         return self.config.explorer.name
 
     async def explore_step(self) -> bool:
@@ -395,4 +398,7 @@ class Explorer:
 
     async def shutdown(self) -> None:
         self.monitor.close()
+        if ray.get(self.synchronizer.release.remote()) == 0:
+            ray.kill(self.synchronizer)
+            self.logger.info("Synchronizer stopped.")
         await self.scheduler.stop()

@@ -12,6 +12,7 @@ from datetime import datetime
 from typing import List
 
 import ray
+from parameterized import parameterized
 
 from tests.tools import (
     TensorBoardParser,
@@ -39,7 +40,7 @@ def trainer_monkey_patch(config: Config, max_steps: int, intervals: List[int]):
         self.logger.info(f"Training at step {self.engine.global_steps} started.")
         time.sleep(intervals[self.engine.global_steps - 1])
         metrics = {"actor/step": self.engine.global_steps}
-        self.engine.monitor.log(data=metrics, step=self.engine.global_steps)
+        self.monitor.log(data=metrics, step=self.engine.global_steps)
         self.logger.info(f"Training at step {self.engine.global_steps} finished.")
         return self.engine.global_steps < max_steps
 
@@ -48,6 +49,8 @@ def trainer_monkey_patch(config: Config, max_steps: int, intervals: List[int]):
 
 def explorer_monkey_patch(config: Config, max_steps: int, intervals: List[int]):
     async def new_explore_step(self):
+        if self.explore_step_num == max_steps:
+            await self.save_checkpoint(sync_weight=False)
         self.explore_step_num += 1
         return self.explore_step_num <= max_steps
 
@@ -93,7 +96,31 @@ class TestSynchronizer(unittest.TestCase):
         if multiprocessing.get_start_method(allow_none=True) != "spawn":
             multiprocessing.set_start_method("spawn", force=True)
 
-    def test_checkpoint_method_fixed_style(self):
+    @parameterized.expand(
+        [
+            (
+                "checkpoint_fixed",
+                SyncMethod.CHECKPOINT,
+                SyncStyle.FIXED,
+            ),
+            (
+                "checkpoint_dynamic_by_explorer",
+                SyncMethod.CHECKPOINT,
+                SyncStyle.DYNAMIC_BY_EXPLORER,
+            ),
+            (
+                "memory_fixed",
+                SyncMethod.MEMORY,
+                SyncStyle.FIXED,
+            ),
+            (
+                "memory_dynamic_by_explorer",
+                SyncMethod.MEMORY,
+                SyncStyle.DYNAMIC_BY_EXPLORER,
+            ),
+        ]
+    )
+    def test_state_dict_based_sync(self, name, sync_method, sync_style):
         config = get_template_config()
         config.project = "unittest"
         config.name = f"test_synchronizer_{datetime.now().strftime('%Y%m%d%H%M%S')}"
@@ -109,8 +136,8 @@ class TestSynchronizer(unittest.TestCase):
             storage_type=StorageType.QUEUE,
             wrap_in_ray=True,
         )
-        config.synchronizer.sync_method = SyncMethod.CHECKPOINT
-        config.synchronizer.sync_style = SyncStyle.FIXED
+        config.synchronizer.sync_method = sync_method
+        config.synchronizer.sync_style = sync_style
         config.synchronizer.sync_interval = 2
         config.trainer.save_interval = 100
         config.monitor.monitor_type = "tensorboard"
@@ -140,11 +167,12 @@ class TestSynchronizer(unittest.TestCase):
         )
         trainer_process.start()
         explorer_process_1 = multiprocessing.Process(
-            target=run_explorer, args=(explorer1_config, 8, [0, 2.5, 2.5, 2.5, 2.5])
+            target=run_explorer,
+            args=(explorer1_config, 8, [0, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5]),
         )
         explorer_process_1.start()
         explorer_process_2 = multiprocessing.Process(
-            target=run_explorer, args=(explorer2_config, 8, [0, 0.5, 0.5, 0.5, 0.5])
+            target=run_explorer, args=(explorer2_config, 8, [0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])
         )
         explorer_process_2.start()
 
@@ -197,7 +225,7 @@ class TestSynchronizer(unittest.TestCase):
 
         # TODO: test more interval cases
         both_process = multiprocessing.Process(
-            target=run_both, args=(config, 8, [2, 1, 2, 1, 2, 1, 2, 1], [0, 2.5, 2.5, 2.5, 2.5])
+            target=run_both, args=(config, 8, [2, 1, 2, 1, 2, 1, 2, 1], [0, 2.5, 2.5, 2.5, 2.5, 0])
         )
         both_process.start()
         both_process.join(timeout=200)
@@ -240,7 +268,7 @@ class TestSynchronizer(unittest.TestCase):
 
         # TODO: test more interval cases
         both_process = multiprocessing.Process(
-            target=run_both, args=(config, 8, [2, 1, 2, 1, 2, 1, 2, 1], [0, 0.5, 0.5, 0.5, 0.5])
+            target=run_both, args=(config, 8, [2, 1, 2, 1, 2, 1, 2, 1], [0, 0.5, 0.5, 0.5, 0.5, 0])
         )
         both_process.start()
         both_process.join(timeout=200)

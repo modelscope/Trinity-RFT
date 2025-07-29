@@ -39,6 +39,7 @@ class Synchronizer:
         self.model_state_dict = None
         self.model_version = 0
         self.checkpoint_shard_counter = defaultdict(lambda: 0)
+        self.ref_count = 0
 
     async def set_trainer_status(self, status: RunningStatus):
         """Update the status of the trainer."""
@@ -276,7 +277,19 @@ class Synchronizer:
         if config is not None:
             return (
                 ray.remote(cls)
-                .options(name="synchronizer", namespace=config.ray_namespace, get_if_exists=True)
+                .options(
+                    name="synchronizer",
+                    namespace=config.ray_namespace,
+                    get_if_exists=True,
+                    lifetime="detached",
+                )
                 .remote(config)
             )
         return ray.get_actor("synchronizer", namespace=namespace)
+
+    def acquire(self):
+        self.ref_count += 1
+
+    def release(self):
+        self.ref_count -= 1
+        return self.ref_count

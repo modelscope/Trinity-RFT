@@ -28,10 +28,12 @@ class Trainer:
         self.config = config
         self.logger = get_logger(__name__)
         self.synchronizer = Synchronizer.get_actor(config)
+        ray.get(self.synchronizer.acquire.remote())
         self.engine = get_trainer_wrapper(config)
         self.last_trainer_sync_step = 0
         self.monitor = MONITOR.get(config.monitor.monitor_type)(
             project=config.project,
+            group=self.config.group,
             name=config.name,
             role=config.trainer.name,
             config=config,
@@ -139,7 +141,10 @@ class Trainer:
             self._sample_exps_to_log.clear()
 
     def shutdown(self) -> None:
-        self.engine.monitor.close()
+        self.monitor.close()
+        if ray.get(self.synchronizer.release.remote()) == 0:
+            ray.kill(self.synchronizer)
+            self.logger.info("Synchronizer stopped.")
 
     @property
     def train_step_num(self) -> int:
