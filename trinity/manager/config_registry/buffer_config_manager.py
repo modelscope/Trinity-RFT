@@ -1,6 +1,6 @@
 import streamlit as st
 
-from trinity.buffer.priority_queue import PRIORITY_FUNC
+from trinity.buffer.queue import PRIORITY_FUNC
 from trinity.common.constants import PromptType, StorageType
 from trinity.common.rewards.reward_fn import REWARD_FUNCTIONS
 from trinity.common.workflows.workflow import WORKFLOWS

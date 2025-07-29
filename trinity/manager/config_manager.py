@@ -255,7 +255,7 @@ class ConfigManager:
         st.subheader("RL Training Config")
         self.get_configs("training_args")
 
-        self.get_configs("ppo_epochs", "training_strategy", "resume_mode")
+        self.get_configs("ppo_epochs", "training_strategy", "resume_mode", "impl_backend")
 
         self.get_configs("param_offload", "optimizer_offload", "forward_prefetch")
         self.get_configs("resume_from_path")
@@ -330,6 +330,7 @@ class ConfigManager:
         )
         use_remove_padding = "remove_padding" in st.session_state["training_args"]
         use_dynamic_bsz = "dynamic_bsz" in st.session_state["training_args"]
+        use_fused_kernels = "use_fused_kernels" in st.session_state["training_args"]
 
         if st.session_state["training_strategy"] == "fsdp":
             fsdp_config = {
@@ -353,6 +354,7 @@ class ConfigManager:
                     "override_config": {},
                     "enable_gradient_checkpointing": enable_gradient_checkpointing,
                     "use_remove_padding": use_remove_padding,
+                    "use_fused_kernels": use_fused_kernels,
                 },
                 "actor": {
                     "strategy": st.session_state["training_strategy"],
@@ -412,6 +414,11 @@ class ConfigManager:
                 "max_critic_ckpt_to_keep": st.session_state["max_critic_ckpt_to_keep"],
             },
         }
+
+        if use_fused_kernels:
+            trainer_config["actor_rollout_ref"]["model"]["fused_kernel_options"] = {
+                "impl_backend": st.session_state["impl_backend"],
+            }
 
         if use_critic():
             trainer_config["trainer"]["critic_warmup"] = st.session_state["critic_warmup"]
