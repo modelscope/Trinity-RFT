@@ -149,7 +149,6 @@ def set_impl_backend(**kwargs):
         "Impl Backend",
         ["torch", "triton"],
         help="Backend For FusedKernel",
-        placeholder="For FusedKernel",
         **kwargs,
     )
 
