@@ -196,16 +196,7 @@ def convert_api_output_to_experience(
                     torch.tensor(choice.token_ids, dtype=torch.int32),
                 )
             ),
-            logprobs=torch.cat(
-                (
-                    torch.full(
-                        (len(output.prompt_token_ids),),
-                        0.0,
-                        dtype=torch.float32,
-                    ),
-                    extract_logprobs(choice),
-                )
-            ),
+            logprobs=extract_logprobs(choice),
             prompt_length=len(output.prompt_token_ids),
             response_text=choice.message.content,
         )

@@ -26,7 +26,7 @@ class VerlPolicyLossTest(unittest.TestCase):
                 "ref_log_prob": 2 * torch.rand(shape) - 1,
                 "response_mask": torch.rand(shape) > 0.5,
                 "advantages": 2 * torch.rand(shape) - 1,
-                "is_expert_mask": torch.rand(shape[0]) > 0.5,
+                "expert_mask": torch.rand(shape[0]) > 0.5,
             }
         )
 

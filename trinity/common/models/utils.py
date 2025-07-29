@@ -16,7 +16,7 @@ def tokenize_and_mask_messages_hf(
     tokenizer: Any,
     messages: List[dict],
     chat_template: Optional[str] = None,
-) -> Tuple[torch.Tensor, torch.Tensor]:
+) -> Tuple[torch.Tensor, torch.Tensor, int]:
     """Calculate the assistant token mask with `chat_template`.
 
     Args:
@@ -25,8 +25,9 @@ def tokenize_and_mask_messages_hf(
         messages (List[dict]): Messages with `role` and `content` fields.
 
     Returns:
-        Tuple[torch.Tensor, torch.Tensor]: The token_ids (sequence_length)
-        and assistant_masks (sequence_length).
+        `torch.Tensor`: The token_ids (sequence_length)
+        `torch.Tensor`: Assistant_masks (sequence_length).
+        `int`: Prompt length.
     """
     token_dict = tokenizer.apply_chat_template(
         messages,
@@ -39,14 +40,16 @@ def tokenize_and_mask_messages_hf(
         return_assistant_tokens_mask=True,
         return_dict=True,
     )
-    return (token_dict["input_ids"][0], token_dict["assistant_masks"][0])
+    # find the first assistant token, the tokens before are prompt tokens
+    prompt_length = torch.argmax(token_dict["assistant_masks"][0]).item()
+    return token_dict["input_ids"][0], token_dict["assistant_masks"][0], prompt_length
 
 
 def tokenize_and_mask_messages_default(
     tokenizer: Any,
     messages: List[dict],
     chat_template: Optional[str] = None,
-) -> Tuple[torch.Tensor, torch.Tensor]:
+) -> Tuple[torch.Tensor, torch.Tensor, int]:
     """Calculate the assistant token mask.
 
     Args:
@@ -55,8 +58,9 @@ def tokenize_and_mask_messages_default(
         messages (List[dict]): Messages with `role` and `content` fields.
 
     Returns:
-        Tuple[torch.Tensor, torch.Tensor]: The token_ids (sequence_length)
-        and assistant_masks (sequence_length).
+        `torch.Tensor`: The token_ids (sequence_length)
+        `torch.Tensor`: Assistant_masks (sequence_length).
+        `int`: Prompt length.
 
     Note:
         This method is based on the assumption that as the number of chat rounds increases,
@@ -98,7 +102,8 @@ def tokenize_and_mask_messages_default(
             )
             prompt_response_length = prompt_response_token_ids.shape[1]
             assistant_token_mask[prompt_length:prompt_response_length] = 1
-    return (tokens[0], assistant_token_mask)
+    prompt_length = torch.argmax(assistant_token_mask).item()
+    return tokens[0], assistant_token_mask, prompt_length
 
 
 def get_checkpoint_dir_with_step_num(

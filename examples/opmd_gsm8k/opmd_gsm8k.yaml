@@ -6,8 +6,8 @@ algorithm:
   repeat_times: 8
 model:
   model_path: /PATH/TO/MODEL/
-  max_prompt_tokens: 4096
-  max_response_tokens: 16384
+  max_prompt_tokens: 512
+  max_response_tokens: 512
 cluster:
   node_num: 1
   gpu_per_node: 8
@@ -20,7 +20,7 @@ buffer:
     taskset:
       name: gsm8k
       storage_type: file
-      path: '{path to datasets}/gsm8k'
+      path: '{path to datasets}/gsm8k/main' # the path where your jsonl or parquet files are located; use {path to datasets}/gsm8k/socratic for Socratic dataset
       format:
         prompt_key: 'question'
         response_key: 'answer'

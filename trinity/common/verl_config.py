@@ -17,6 +17,11 @@ class Data:
 
 
 @dataclass
+class FusedKernelOptions:
+    impl_backend: Optional[str] = None
+
+
+@dataclass
 class ActorModel:
     path: str = ""
     external_lib: Optional[str] = None
@@ -24,6 +29,7 @@ class ActorModel:
     enable_gradient_checkpointing: bool = True
     use_remove_padding: bool = False
     use_fused_kernels: bool = False
+    fused_kernel_options: FusedKernelOptions = field(default_factory=FusedKernelOptions)
     custom_chat_template: Optional[str] = None
 
 

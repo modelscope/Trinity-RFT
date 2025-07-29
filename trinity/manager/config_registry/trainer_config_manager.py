@@ -80,6 +80,7 @@ def set_training_args(**kwargs):
             "gradient_checkpointing",
             "remove_padding",
             "dynamic_bsz",
+            "use_fused_kernels",
         ],
         **kwargs,
     )
@@ -138,6 +139,18 @@ def check_resume_from_path(unfinished_fields: set, key: str):
     ):
         unfinished_fields.add(key)
         st.warning("Please input a valid resume path when `resume_mode == resume_path`")
+
+
+@CONFIG_GENERATORS.register_config(
+    default_value="triton", visible=lambda: "use_fused_kernels" in st.session_state["training_args"]
+)
+def set_impl_backend(**kwargs):
+    st.selectbox(
+        "Impl Backend",
+        ["torch", "triton"],
+        help="Backend For FusedKernel",
+        **kwargs,
+    )
 
 
 @CONFIG_GENERATORS.register_config(default_value=0)

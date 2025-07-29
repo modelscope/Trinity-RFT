@@ -42,6 +42,7 @@ class WorkflowRunner:
         self.model_wrapper = ModelWrapper(
             model,
             config.explorer.rollout_model.engine_type,
+            enable_history=config.explorer.rollout_model.enable_history,
         )
         self.auxiliary_models = []
         if auxiliary_models is not None:

@@ -14,7 +14,37 @@ To run the ALFworld and WebShop env, you need to setup the corresponding environ
 - ALFworld is a text-based interactive environment that simulates household scenarios. Agents need to understand natural language instructions and complete various domestic tasks like finding objects, moving items, and operating devices in a virtual home environment.
 - WebShop is a simulated online shopping environment where AI agents learn to shop based on user requirements. The platform allows agents to browse products, compare options, and make purchase decisions, mimicking real-world e-commerce interactions.
 
-You may refer to their original environment to complete the setup.
+<br>
+<details>
+<summary>Guidelines for preparing ALFWorld environment</summary>
+
+1. Pip install: `pip install alfworld[full]`
+
+2. Export the path: `export ALFWORLD_DATA=/path/to/alfworld/data`
+
+3. Download the environment: `alfworld-download`
+
+Now you can find the environment in `$ALFWORLD_DATA` and continue with the following steps.
+</details>
+
+<details>
+<summary>Guidelines for preparing WebShop environment</summary>
+
+1. Install Python 3.8.13
+
+2. Install Java
+
+3. Download the source code: `git clone https://github.com/princeton-nlp/webshop.git webshop`
+
+4. Create a virtual environment: `conda create -n webshop python=3.8.13` and `conda activate webshop`
+
+5. Install requirements into the `webshop` virtual environment via the `setup.sh` script: `./setup.sh [-d small|all]`
+
+Now you can continue with the following steps.
+</details>
+<br>
+
+You may refer to their original environment for more details.
 - For ALFWorld, refer to the [ALFWorld](https://github.com/alfworld/alfworld) repository.
 - For WebShop, refer to the [WebShop](https://github.com/princeton-nlp/WebShop) repository.
 

@@ -159,15 +159,12 @@ class ModelWrapperTest(RayUnittestBaseAysnc):
                 self.assertEqual(exp.prompt_length, history_exp.prompt_length)
                 self.assertEqual(exp.logprobs.tolist(), history_exp.logprobs.tolist())
         for result in results:
-            input_logprobs = result.logprobs[: result.prompt_length]
-            output_logprobs = result.logprobs[result.prompt_length :]
-            self.assertTrue(torch.all(input_logprobs == 0))
-            self.assertTrue(torch.any(output_logprobs != 0))
+            self.assertTrue(torch.any(result.logprobs != 0))
         if self.use_async:
             logprobs = await self.model_wrapper.logprobs_async(results[0].tokens.tolist())
         else:
             logprobs = self.model_wrapper.logprobs(results[0].tokens.tolist())
-        self.assertEqual(logprobs.shape[0], results[0].tokens.shape[0])
+        self.assertEqual(logprobs.shape[0], results[0].tokens.shape[0] - 1)
         if self.config.explorer.rollout_model.enable_history:
             history_experiences = self.model_wrapper.extract_experience_from_history()
             self.assertTrue(len(history_experiences) == 0)
@@ -190,7 +187,10 @@ class ModelWrapperTest(RayUnittestBaseAysnc):
             return_assistant_tokens_mask=True,
             return_dict=True,
         )
-        self.assertTrue(torch.equal(result_dict["assistant_masks"][0], exp.action_mask))
+        prompt_length = torch.argmax(result_dict["assistant_masks"][0]).item()
+        self.assertTrue(
+            torch.equal(result_dict["assistant_masks"][0][prompt_length:], exp.action_mask)
+        )
         self.assertTrue(torch.equal(result_dict["input_ids"][0], exp.tokens))
         self.assertRaises(ValueError, self.model_wrapper.get_openai_client)
         if self.config.explorer.rollout_model.enable_history:
@@ -284,12 +284,12 @@ class TestTokenizer(unittest.TestCase):
             },
         ]
         tokenizer = AutoTokenizer.from_pretrained(get_model_path())
-        token_ids, action_mask = tokenize_and_mask_messages_default(
+        token_ids, action_mask, prompt_length = tokenize_and_mask_messages_default(
             tokenizer=tokenizer,
             messages=messages,
             chat_template=CHAT_TEMPLATE,
         )
-        token_ids_hf, action_mask_hf = tokenize_and_mask_messages_hf(
+        token_ids_hf, action_mask_hf, prompt_length_hf = tokenize_and_mask_messages_hf(
             tokenizer=tokenizer,
             messages=messages,
             chat_template=CHAT_TEMPLATE,
@@ -298,3 +298,4 @@ class TestTokenizer(unittest.TestCase):
         self.assertEqual(action_mask.shape, action_mask_hf.shape)
         self.assertTrue(torch.equal(token_ids, token_ids_hf))
         self.assertTrue(torch.equal(action_mask, action_mask_hf))
+        self.assertEqual(prompt_length, prompt_length_hf)

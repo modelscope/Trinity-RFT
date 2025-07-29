@@ -154,11 +154,6 @@ class vLLMRolloutModel(InferenceModel):
                 ),
                 logprobs=torch.cat(
                     (
-                        torch.full(
-                            (len(output.prompt_token_ids),),
-                            0.0,
-                            dtype=torch.float32,
-                        ),
                         torch.tensor(
                             [
                                 list(logprob_dict.values())[0].logprob
@@ -177,7 +172,14 @@ class vLLMRolloutModel(InferenceModel):
         return experiences
 
     async def logprobs(self, token_ids: List[int]) -> torch.Tensor:
-        """Calculate the logprobs of the given tokens in async."""
+        """Calculate the logprobs of the given tokens in async.
+
+        Args:
+            token_ids (List[int]): The input token ids (seq_length).
+
+        Returns:
+            A tensor of logprobs (seq_length - 1).
+        """
         output = await self._generate_internal(
             prompt={"prompt_token_ids": token_ids},
             n=1,
@@ -185,11 +187,7 @@ class vLLMRolloutModel(InferenceModel):
             prompt_logprobs=0,  # vLLM return `prompt_logprobs + 1` logrpobs for each token
         )
         return torch.tensor(
-            [0]
-            + [
-                list(logprob_dict.values())[0].logprob
-                for logprob_dict in output.prompt_logprobs[1:]
-            ],
+            [list(logprob_dict.values())[0].logprob for logprob_dict in output.prompt_logprobs[1:]],
             dtype=torch.float32,
         )
 
@@ -217,14 +215,15 @@ class vLLMRolloutModel(InferenceModel):
             self.tokenizer = await self.async_llm.get_tokenizer()
         if self.chat_template is None:
             self.chat_template = self.tokenizer.get_chat_template()
-        token_ids, action_mask = self.action_mask_method(
+        token_ids, action_mask, prompt_length = self.action_mask_method(
             self.tokenizer, messages, self.chat_template
         )
         logprobs = await self.logprobs(token_ids=token_ids.tolist())
         return Experience(
             tokens=token_ids,
             logprobs=logprobs,
-            action_mask=action_mask,
+            prompt_length=prompt_length,
+            action_mask=action_mask[prompt_length:],  # Exclude the prompt tokens
         )
 
     def shutdown(self):

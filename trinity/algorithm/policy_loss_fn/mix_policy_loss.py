@@ -14,7 +14,7 @@ class MIXPolicyLossFn(PolicyLossFn):
     """Implements a mixed policy loss combining GRPO and SFT losses.
 
     This loss function applies different loss components to data based on whether
-    it comes from an expert or not, as indicated by `is_expert_mask`. It combines:
+    it comes from an expert or not, as indicated by `expert_mask`. It combines:
     - GRPO loss (self.grpo_loss_fn) for non-expert data
     - SFT loss (self.sft_loss_fn) for expert data
     - Weighting parameter `mu`
@@ -62,15 +62,15 @@ class MIXPolicyLossFn(PolicyLossFn):
         old_logprob: torch.Tensor,
         action_mask: torch.Tensor,
         advantages: torch.Tensor,
-        is_expert_mask: torch.Tensor,
+        expert_mask: torch.Tensor,
         **kwargs,
     ) -> Tuple[torch.Tensor, Dict]:
         assert (
-            len(is_expert_mask) == logprob.shape[0]
-        ), f"Error: {len(is_expert_mask)=} != {logprob.shape[0]=}"
+            len(expert_mask) == logprob.shape[0]
+        ), f"Error: {len(expert_mask)=} != {logprob.shape[0]=}"
 
-        n_usual_exp = torch.sum(~is_expert_mask).item()
-        n_expert_exp = torch.sum(is_expert_mask).item()
+        n_usual_exp = torch.sum(~expert_mask).item()
+        n_expert_exp = torch.sum(expert_mask).item()
 
         if self.use_dynamic_bsz:
             per_micro_batch_weight_usual = self.experience_per_gpu / (
@@ -85,10 +85,10 @@ class MIXPolicyLossFn(PolicyLossFn):
 
         if n_usual_exp > 0:
             grpo_loss, grpo_metrics = self.grpo_loss_fn(
-                logprob[~is_expert_mask],
-                old_logprob[~is_expert_mask],
-                action_mask[~is_expert_mask],
-                advantages[~is_expert_mask],
+                logprob[~expert_mask],
+                old_logprob[~expert_mask],
+                action_mask[~expert_mask],
+                advantages[~expert_mask],
                 **kwargs,
             )
             grpo_loss = grpo_loss * n_usual_exp * per_micro_batch_weight_usual
@@ -102,8 +102,8 @@ class MIXPolicyLossFn(PolicyLossFn):
         # SFT Loss (expert)
         if n_expert_exp > 0:
             sft_loss, sft_metrics = self.sft_loss_fn(
-                logprob[is_expert_mask],
-                action_mask[is_expert_mask],
+                logprob[expert_mask],
+                action_mask[expert_mask],
             )
             sft_loss = sft_loss * n_expert_exp * per_micro_batch_weight_expert
             sft_metrics = {

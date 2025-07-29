@@ -43,14 +43,14 @@ class TestEID(unittest.TestCase):
 class TestExperience(unittest.TestCase):
     def test_single_turn_experience(self):
         tokens = torch.tensor([10, 11, 12], dtype=torch.int32)
-        logprobs = torch.tensor([0.1, 0.2, 0.3], dtype=torch.float32)
+        logprobs = torch.tensor([0.2, 0.3], dtype=torch.float32)
         exp = Experience(tokens=tokens, logprobs=logprobs, reward=1.0, prompt_length=1)
         self.assertEqual(exp.experience_type.name, "SINGLE_TURN")
         self.assertTrue(torch.equal(exp.tokens, tokens))
         self.assertTrue(torch.equal(exp.logprobs, logprobs))
         self.assertEqual(exp.reward, 1.0)
         self.assertEqual(exp.prompt_length, 1)
-        self.assertTrue(torch.equal(exp.action_mask, torch.tensor([0, 1, 1], dtype=torch.bool)))
+        self.assertTrue(torch.equal(exp.action_mask, torch.tensor([1, 1], dtype=torch.bool)))
 
     def test_multi_turn_experience(self):
         tokens = torch.tensor([1, 2, 3, 4])
@@ -171,13 +171,17 @@ class TestExperienceConversion(unittest.TestCase):
                 tokens=torch.tensor([1, 2]),
                 prompt_length=1,
                 reward=float(0.1),
-                logprobs=torch.tensor([0, 0.1]),
+                logprobs=torch.tensor([0.1]),
+                advantages=torch.tensor([0.1]),
+                returns=torch.tensor([0.4]),
             ),
             Experience(
                 tokens=torch.tensor([1, 2, 3]),
                 prompt_length=2,
                 reward=float(0.2),
-                logprobs=torch.tensor([0, 0, 0.1]),
+                logprobs=torch.tensor([0.1]),
+                advantages=torch.tensor([0.3]),
+                returns=torch.tensor([0.2]),
             ),
         ]
         batch = Experiences.gather_experiences(exps)
@@ -199,45 +203,53 @@ class TestExperienceConversion(unittest.TestCase):
             )
             self.assertTrue(
                 torch.all(
-                    batch.logprobs[i][
-                        prompt_length
-                        - exps[i].prompt_length : prompt_length
-                        + exps[i].tokens.size(0)
-                        - exps[i].prompt_length
-                    ]
+                    batch.logprobs[i][: exps[i].tokens.size(0) - exps[i].prompt_length]
                     == exps[i].logprobs
                 )
             )
             self.assertTrue(
                 torch.all(
-                    batch.action_masks[i][
-                        prompt_length
-                        - exps[i].prompt_length : prompt_length
-                        - exps[i].prompt_length
-                        + exps[i].action_mask.size(0)
-                    ]
+                    batch.action_masks[i][: exps[i].tokens.size(0) - exps[i].prompt_length]
                     == exps[i].action_mask
+                )
+            )
+            self.assertTrue(
+                torch.all(
+                    batch.advantages[i][: exps[i].tokens.size(0) - exps[i].prompt_length]
+                    == exps[i].advantages
+                )
+            )
+            self.assertTrue(
+                torch.all(
+                    batch.returns[i][: exps[i].tokens.size(0) - exps[i].prompt_length]
+                    == exps[i].returns
                 )
             )
 
     def test_multiturn_experience_batch_converstion(self):
         exps = [
             Experience(
-                tokens=torch.tensor([1, 2, 3, 4]),
+                tokens=torch.tensor([1, 2, 3, 4, 5, 6]),
                 reward=float(0.3),
-                logprobs=torch.tensor([0, 0, 0.1, 0.2]),
-                action_mask=torch.tensor([1, 0, 1, 0]),
+                logprobs=torch.tensor([0, 0.1, 0.2, 0.3]),
+                prompt_length=2,
+                action_mask=torch.tensor([1, 0, 1, 1]),
+                advantages=torch.tensor([0.1, 0, 0.2, 0.3]),
+                returns=torch.tensor([0.5, 0, 0.7, 0.8]),
             ),
             Experience(
                 tokens=torch.tensor([1, 2, 3, 4]),
                 reward=float(0.4),
-                logprobs=torch.tensor([0, 0, 0, 0.1]),
-                action_mask=torch.tensor([1, 0, 0, 1]),
+                logprobs=torch.tensor([0, 0.1]),
+                prompt_length=2,
+                action_mask=torch.tensor([1, 1]),
+                advantages=torch.tensor([0.2, 0.3]),
+                returns=torch.tensor([0.6, 0.9]),
             ),
         ]
         batch = Experiences.gather_experiences(exps)
         self.assertEqual(batch.batch_size, 2)
-        self.assertEqual(batch.prompt_length, 1)
+        self.assertEqual(batch.prompt_length, 2)
         prompt_length = batch.prompt_length
         for i in range(batch.batch_size):
             self.assertEqual(batch.rewards[i], exps[i].reward)
@@ -254,24 +266,26 @@ class TestExperienceConversion(unittest.TestCase):
             )
             self.assertTrue(
                 torch.all(
-                    batch.logprobs[i][
-                        prompt_length
-                        - exps[i].prompt_length : prompt_length
-                        + exps[i].tokens.size(0)
-                        - exps[i].prompt_length
-                    ]
+                    batch.logprobs[i][: exps[i].tokens.size(0) - exps[i].prompt_length]
                     == exps[i].logprobs
                 )
             )
             self.assertTrue(
                 torch.all(
-                    batch.action_masks[i][
-                        prompt_length
-                        - exps[i].prompt_length : prompt_length
-                        - exps[i].prompt_length
-                        + exps[i].action_mask.size(0)
-                    ]
+                    batch.action_masks[i][: exps[i].tokens.size(0) - exps[i].prompt_length]
                     == exps[i].action_mask
+                )
+            )
+            self.assertTrue(
+                torch.all(
+                    batch.advantages[i][: exps[i].tokens.size(0) - exps[i].prompt_length]
+                    == exps[i].advantages
+                )
+            )
+            self.assertTrue(
+                torch.all(
+                    batch.returns[i][: exps[i].tokens.size(0) - exps[i].prompt_length]
+                    == exps[i].returns
                 )
             )
 

@@ -5,10 +5,8 @@ Modified from verl/trainer/ppo/ray_trainer.py
 """
 import os
 import sys
-from pprint import pprint
-from typing import Dict, List
+from typing import Dict, Tuple
 
-import pandas as pd
 import ray
 import torch
 from omegaconf import OmegaConf
@@ -38,8 +36,8 @@ from trinity.algorithm.utils import prefix_metrics
 from trinity.common.config import Config
 from trinity.common.experience import Experiences
 from trinity.trainer.trainer import TrainEngineWrapper
+from trinity.trainer.verl.converter import to_data_proto
 from trinity.utils.log import get_logger
-from trinity.utils.monitor import MONITOR
 
 
 class _InternalDataLoader:
@@ -147,14 +145,6 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             ray_worker_group_cls,
         )
         self.init_workers()
-        self.monitor = MONITOR.get(global_config.monitor.monitor_type)(
-            project=config.trainer.project_name,
-            group=config.trainer.group_name,
-            name=config.trainer.experiment_name,
-            role=global_config.trainer.name,
-            config=global_config,
-        )
-        self.reset_experiences_example_table()
         self.logger = get_logger(__name__)
         self.last_full_save_step = None
 
@@ -257,9 +247,6 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         self.actor_rollout_wg = all_wg["actor"]
         self.actor_rollout_wg.init_model()
 
-    def reset_experiences_example_table(self):
-        self.sample_exps_to_log = []
-
     @property
     def train_step_num(self) -> int:
         return self.global_steps
@@ -274,15 +261,6 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
 
         # load checkpoint before doing anything
         self._load_checkpoint()
-
-        # perform validation before training
-        # currently, we only support validation using the reward_function.
-        if self.val_reward_fn is not None and self.config.trainer.get("val_before_train", True):
-            val_metrics = self._validate()
-            pprint(f"Initial validation metrics: {val_metrics}")
-            self.monitor.log(data=val_metrics, step=self.global_steps)
-            if self.config.trainer.get("val_only", False):
-                return
 
     def _create_dataloader(self, train_dataset, val_dataset, collate_fn, train_sampler):
         self.train_dataloader = _InternalDataLoader(self.config)
@@ -307,15 +285,10 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
     def upload_state_dict(self):  # state dict sync
         self.actor_rollout_wg.upload_state_dict(self.global_steps)
 
-    def train_step(self) -> bool:  # noqa C901
+    def train_step(self, batch: Experiences) -> Tuple[bool, Dict]:  # noqa C901
         self.logger.info(f"Training at step {self.global_steps + 1} started.")
+        batch = to_data_proto(batch)
         metrics = {}
-        try:
-            batch, sample_metrics, exp_samples = self.sample_strategy.sample(self.global_steps + 1)
-            prefix_metrics(sample_metrics, "sample", metrics)
-        except StopIteration:
-            self.logger.info("No more data to train. Stop training.")
-            return False
         self.global_steps += 1
         self.logger.info(f"Sampling at step {self.global_steps} done.")
         timing_raw = {}
@@ -385,12 +358,6 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             compute_throughout_metrics(batch=batch, timing_raw=timing_raw, n_gpus=n_gpus)
         )
 
-        if self.algorithm.use_advantage and self.config.enable_preview:  # TODO
-            self._log_experiences(exp_samples)
-
-        # TODO: make a canonical logger that supports various backend
-        self.monitor.log(data=metrics, step=self.global_steps)
-
         train_status = self.global_steps < self.total_training_steps
         if (
             not train_status
@@ -405,40 +372,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                 self.save_checkpoint()
             self.logger.info(f"Saved at step {self.global_steps}.")
         self.logger.info(f"Training at step {self.global_steps} finished.")
-        return train_status
-
-    def _log_single_experience(
-        self, experiences: Experiences, idx: int, skip_special_tokens: bool
-    ) -> None:
-        reward = experiences.rewards[idx]
-        attn_mask = experiences.attention_masks[idx].bool()
-        prompt_token = experiences.tokens[idx][: experiences.prompt_length][
-            attn_mask[: experiences.prompt_length]
-        ]
-        response_token = experiences.tokens[idx][experiences.prompt_length :][
-            attn_mask[experiences.prompt_length :]
-        ]
-        prompt_text = self.tokenizer.decode(prompt_token, skip_special_tokens=skip_special_tokens)
-        response_text = self.tokenizer.decode(
-            response_token, skip_special_tokens=skip_special_tokens
-        )
-        new_row = pd.DataFrame(
-            {
-                "step": [self.global_steps],
-                "reward": [reward],
-                "prompt": [prompt_text],
-                "response": [response_text],
-            }
-        )
-        self.sample_exps_to_log = pd.concat([self.sample_exps_to_log, new_row], ignore_index=True)
-
-    def _log_experiences(self, samples: List[Dict]) -> None:
-        self.sample_exps_to_log.extend(samples)
-        if self.global_steps % self.config.trainer.sync_freq == 0:
-            self.monitor.log_table(
-                "rollout_examples", pd.DataFrame(self.sample_exps_to_log), self.global_steps
-            )
-            self.reset_experiences_example_table()
+        return train_status, metrics
 
     def save_checkpoint(self, block_until_saved: bool = False) -> None:
         if self.last_full_save_step != self.global_steps:
