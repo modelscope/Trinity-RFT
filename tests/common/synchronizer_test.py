@@ -58,8 +58,13 @@ def explorer_monkey_patch(config: Config, max_steps: int, intervals: List[int]):
 
         return new_save_checkpoint
 
+    async def new_finish_explore_step(self, step: int, model_version: int) -> None:
+        metric = {"rollout/model_version": model_version}
+        self.monitor.log(metric, step=step)
+
     Explorer.explore_step = new_explore_step
     Explorer.save_checkpoint = wrapper(Explorer.save_checkpoint)
+    Explorer._finish_explore_step = new_finish_explore_step
 
 
 def run_trainer(config: Config, max_steps: int, intervals: List[int]) -> None:

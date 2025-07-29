@@ -314,7 +314,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             batch, sample_metrics, exp_samples = self.sample_strategy.sample(self.global_steps + 1)
             prefix_metrics(sample_metrics, "sample", metrics)
         except StopIteration:
-            print("No more data to train. Stop training.")
+            self.logger.info("No more data to train. Stop training.")
             return False
         self.global_steps += 1
         self.logger.info(f"Sampling at step {self.global_steps} done.")
@@ -467,7 +467,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         self.actor_rollout_wg.wait_on_save_thread()
         if self.config.trainer.resume_mode == "auto":
             if global_step_folder is None:
-                print("Training from scratch")
+                self.logger.info("Training from scratch")
                 return
         else:
             if not (self.config.trainer.resume_from_path and global_step_folder is not None):
@@ -481,17 +481,17 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                 if not os.path.isabs(global_step_folder):
                     working_dir = os.getcwd()
                     global_step_folder = os.path.join(working_dir, global_step_folder)
-        print(f"Load from checkpoint folder: {global_step_folder}")
+        self.logger.info(f"Load from checkpoint folder: {global_step_folder}")
         # set global step
         global_steps = int(global_step_folder.split("global_step_")[-1])
         assert self.global_steps == global_steps + 1
 
-        print(f"Resuming from {global_step_folder}")
+        self.logger.info(f"Resuming from {global_step_folder}")
 
         actor_path = os.path.join(global_step_folder, "actor")
-        print(f"Loading actor from {actor_path} to ref_policy_wg")
+        self.logger.info(f"Loading actor from {actor_path} to ref_policy_wg")
         self.ref_policy_wg.load_checkpoint(actor_path, del_local_after_load=False)
         self.actor_rollout_wg.clear_optimizer_state()
         if self.use_critic:
             self.critic_wg.clear_optimizer_state()
-        print("sft to rft finished")
+        self.logger.info("sft to rft finished")

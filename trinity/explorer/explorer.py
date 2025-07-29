@@ -371,7 +371,7 @@ class Explorer:
             metric["rollout/experience_count"] = exp_cnt
         if statuses:
             metric.update(gather_metrics([status.metric for status in statuses], "rollout"))
-        self.monitor.log(metric, step=step)
+            self.monitor.log(metric, step=step)
 
     async def _finish_eval_step(self, step: Optional[int] = None, prefix: str = "eval") -> None:
         if not self.pending_eval_tasks:
