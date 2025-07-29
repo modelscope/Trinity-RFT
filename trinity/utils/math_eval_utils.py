@@ -25,7 +25,7 @@ from sympy.parsing.latex import parse_latex
 from word2number import w2n
 
 
-def verify_math_answer(response_text, ground_truth) -> Tuple[float, Dict[str, Any]]:
+def verify_math_answer(response_text: str, ground_truth: str) -> Tuple[float, Dict[str, Any]]:
     """Strictly compare the equality of response and groundtruth."""
     # Parse the response
     parsed_prediction = extract_answer(response_text)
@@ -234,7 +234,7 @@ unit_texts = [
     "inch",
 ]
 
-unit_texts.extend([t + "s" for t in unit_texts])
+unit_texts.extend([t + "s" for t in unit_texts if not t.endswith("s")])
 
 
 def strip_string(input_str: Optional[str]) -> Optional[str]:
@@ -319,7 +319,7 @@ def fix_fracs(string):
             else:
                 try:
                     assert len(substr) >= 2
-                except Exception:
+                except AssertionError:
                     return string
                 a = substr[0]
                 b = substr[1]

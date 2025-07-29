@@ -71,7 +71,10 @@ class MathEvalWorkflow(Workflow):
         responses: List[Experience] = self.model.chat(messages, **self.eval_gen_args)
 
         for response in responses:
-            accuracy, eval_details = verify_math_answer(
+            if response.response_text is None or self.task.truth is None:
+                continue
+
+            accuracy, _ = verify_math_answer(
                 response_text=response.response_text, ground_truth=self.task.truth
             )
 

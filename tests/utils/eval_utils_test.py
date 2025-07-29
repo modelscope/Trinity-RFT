@@ -37,7 +37,7 @@ class TestMathEvalUtils(unittest.TestCase):
                 self.assertEqual(
                     actual_output,
                     expected_output,
-                    "Failed on input: '{input_str}'\nExpected: '{expected_output}', Got: '{actual_output}'",
+                    f"Failed on input: '{input_str}'\nExpected: '{expected_output}', Got: '{actual_output}'",
                 )
 
     def test_verify_math_answer(self):
