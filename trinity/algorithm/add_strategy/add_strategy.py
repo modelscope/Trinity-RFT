@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Dict, List, Literal
 
+import copy
+import random
 import numpy as np
 
 from trinity.buffer import BufferWriter
@@ -66,8 +68,8 @@ class RewardVarianceAddStrategy(AddStrategy):
 
 @ADD_STRATEGY.register_module("duplicate_informative")
 class DuplicateInformativeAddStrategy(AddStrategy):
-    """An example AddStrategy that only adds experiences with non-zero advantage and repeats them to reach the target size
-    Ref: POLARIS
+    """An AddStrategy that filters experiences based on reward variance and duplicates them to reach the target size.
+    Ref: POLARIS (https://hkunlp.github.io/blog/2025/Polaris)
     """
 
     def __init__(self, writer: BufferWriter, variance_threshold: float = 0.0, **kwargs) -> None:
@@ -94,17 +96,14 @@ class DuplicateInformativeAddStrategy(AddStrategy):
         if not effective_tasks:
             return 0
 
-        import copy
-        import random
-
         task_ids_to_add = effective_tasks.copy()
         task_id_offset = len(grouped_experiences)
         while cnt < cnt_tot:
             if not task_ids_to_add:
                 task_ids_to_add = effective_tasks.copy()
+                random.shuffle(task_ids_to_add)
                 task_id_offset += len(grouped_experiences)
-            task_id = random.choice(task_ids_to_add)
-            task_ids_to_add.remove(task_id)
+            task_id = task_ids_to_add.pop()
 
             copied_exps = copy.deepcopy(grouped_experiences[task_id])
 
