@@ -41,7 +41,6 @@ class Explorer:
         self.explore_step_num = explorer_meta.get("latest_iteration", 0)
         self.last_sync_step = self.explore_step_num if self.explore_step_num > 0 else -1
         self.synchronizer = Synchronizer.get_actor(config)
-        ray.get(self.synchronizer.acquire.remote())
         self.config = config
         self.algorithm_manager = AlgorithmManager(config)
         self.models, self.auxiliary_models = create_inference_models(config)
@@ -126,15 +125,13 @@ class Explorer:
         return Scheduler(self.config, self.models, self.auxiliary_models)
 
     async def _checkpoint_weights_update(self, step_num: Optional[int] = None) -> int:
-        step_num = ray.get(self.synchronizer.set_model_state_dict_with_step_num.remote(step_num))
+        step_num = await self.synchronizer.set_model_state_dict_with_step_num.remote(step_num)
         await asyncio.gather(*[model.sync_model.remote(step_num) for model in self.models])
         return step_num  # type: ignore
 
     async def _pull_latest_weights(self):
         self.logger.info("Start to pull latest model weights.")
-        new_version = ray.get(
-            self.synchronizer.wait_new_model_state_dict.remote(self.model_version)
-        )
+        new_version = await self.synchronizer.wait_new_model_state_dict.remote(self.model_version)
         if new_version > self.model_version:
             if self.model_version != -1:
                 self.logger.info(f"New model weights version: {new_version}")
@@ -143,10 +140,8 @@ class Explorer:
                 )
             self.model_version = new_version
             self.last_sync_step = self.explore_step_num
-            ray.get(
-                self.synchronizer.set_explorer_status.remote(
-                    RunningStatus.RUNNING, old_status=RunningStatus.WAITING_SYNC
-                )
+            await self.synchronizer.set_explorer_status.remote(
+                RunningStatus.RUNNING, old_status=RunningStatus.WAITING_SYNC
             )
             self.last_sync_successful = True
         else:
@@ -156,8 +151,8 @@ class Explorer:
             self.last_sync_successful = False
 
     async def _nccl_weights_update(self):
-        new_version = ray.get(
-            self.synchronizer.ready_to_nccl_sync.remote("explorer", self.model_version)
+        new_version = await self.synchronizer.ready_to_nccl_sync.remote(
+            "explorer", self.model_version
         )
         if new_version is None:
             self.logger.info("Trainer is not ready to sync weight. Skipping sync weight.")
@@ -168,24 +163,25 @@ class Explorer:
             *[model.sync_model.remote(self.model_version) for model in self.models]
         )
         self.last_sync_step = self.explore_step_num
-        ray.get(
-            self.synchronizer.set_explorer_status.remote(
-                RunningStatus.RUNNING, old_status=RunningStatus.WAITING_SYNC
-            )
+        await self.synchronizer.set_explorer_status.remote(
+            RunningStatus.RUNNING, old_status=RunningStatus.WAITING_SYNC
         )
         self.last_sync_successful = True
 
     async def prepare(self) -> None:
         """Preparation before running."""
+        futures = [
+            asyncio.create_task(self.scheduler.start()),
+            self.synchronizer.acquire.remote(),
+        ]
         if self.experience_buffer:
-            await self.experience_buffer.acquire()
-        futures = [asyncio.create_task(self.scheduler.start())]
+            futures.append(asyncio.create_task(self.experience_buffer.acquire()))
         if not self.use_nccl_sync:
             master_address, master_port = await self.models[0].get_available_address.remote()
             futures.append(
                 asyncio.create_task(self.setup_weight_sync_group(master_address, master_port))
             )
-        asyncio.gather(*futures, return_exceptions=True)
+        await asyncio.gather(*futures, return_exceptions=True)
         if self.config.explorer.eval_on_startup and self.explore_step_num == 0:
             self.eval()
         await self.synchronizer.set_explorer_status.remote(RunningStatus.REQUIRE_SYNC)
@@ -215,7 +211,7 @@ class Explorer:
                     break
                 if self.need_eval():
                     self.eval()
-                if self.need_sync():
+                if await self.need_sync():
                     await self.sync_weight()
             except Exception:
                 self.logger.error(f"Error in Explorer: {traceback.format_exc()}")
@@ -248,7 +244,7 @@ class Explorer:
         self.explore_step_num += 1
         return True
 
-    def need_sync(self) -> bool:
+    async def need_sync(self) -> bool:
         if self.config.synchronizer.sync_style == SyncStyle.FIXED:
             if self.explore_step_num <= self.config.synchronizer.sync_offset:
                 return False
@@ -262,15 +258,12 @@ class Explorer:
                 if delta >= self.config.synchronizer.sync_interval:
                     require_sync = True
             else:
-                require_sync = (
-                    ray.get(self.synchronizer.get_trainer_status.remote())
-                    == RunningStatus.REQUIRE_SYNC
+                require_sync = await (
+                    self.synchronizer.get_trainer_status.remote() == RunningStatus.REQUIRE_SYNC
                 )
         if require_sync and self.last_sync_successful:
-            ray.get(
-                self.synchronizer.set_explorer_status.remote(
-                    RunningStatus.REQUIRE_SYNC, old_status=RunningStatus.RUNNING
-                )
+            await self.synchronizer.set_explorer_status.remote(
+                RunningStatus.REQUIRE_SYNC, old_status=RunningStatus.RUNNING
             )
         return require_sync
 
@@ -399,7 +392,7 @@ class Explorer:
 
     async def shutdown(self) -> None:
         self.monitor.close()
-        if ray.get(self.synchronizer.release.remote()) == 0:
+        if await self.synchronizer.release.remote() == 0:
             ray.kill(self.synchronizer)
             self.logger.info("Synchronizer stopped.")
         await self.scheduler.stop()

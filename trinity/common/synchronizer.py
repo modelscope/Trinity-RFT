@@ -48,7 +48,7 @@ class Synchronizer:
             if status == RunningStatus.STOPPED:
                 self._ready_condition.notify_all()
 
-    async def get_trainer_status(self) -> RunningStatus:
+    def get_trainer_status(self) -> RunningStatus:
         """Get the current status of the trainer."""
         return self.trainer_status
 
@@ -173,7 +173,7 @@ class Synchronizer:
         async with self._ready_condition:
             assert (
                 self.model_version >= current_version
-            ), f"The model version in Synchronizer ({self.model_version}) should be greater than that in Explorer ({current_version})!"
+            ), f"The model version in Synchronizer ({self.model_version}) should be no smaller than that in Explorer ({current_version})!"
             if self.model_version == current_version:
                 if not no_wait and self.trainer_status != RunningStatus.STOPPED:
                     # TODO: explorer need support no wait
@@ -226,7 +226,7 @@ class Synchronizer:
         )
         if non_stop_cnt == 0:
             return sync_failed()
-        # for status in RunningStatus:
+
         async with self._ready_condition:
             try:
                 if module == "trainer":
@@ -256,6 +256,7 @@ class Synchronizer:
                         )
                         if self.trainer_status == RunningStatus.STOPPED:
                             return sync_failed()
+                    self.trainer_status = RunningStatus.RUNNING
                 return self.model_version
             except asyncio.TimeoutError:
                 return sync_failed()

@@ -749,7 +749,7 @@ class Config:
         ):
             self.synchronizer.sync_method = SyncMethod.CHECKPOINT
             logger.warning(
-                f"`{self.mode}` mode only supports checkpoint synchronization, set `synchronizer.sync_method` to `checkpoint`."
+                f"`{self.mode}` mode does not support NCCL synchronization, set `synchronizer.sync_method` to `checkpoint`."
             )
 
         self._check_interval()
