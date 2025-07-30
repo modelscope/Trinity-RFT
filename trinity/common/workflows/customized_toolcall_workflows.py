@@ -247,7 +247,7 @@ class ToolCallWorkflow(SimpleWorkflow):
         logger.debug("start chat")
         responses = self.model.chat(messages, **self.rollout_args)
 
-        for i, response in enumerate(responses):
+        for run_id, response in enumerate(responses):
             reward = 0.0
 
             if self.raw_task is not None:
@@ -267,5 +267,5 @@ class ToolCallWorkflow(SimpleWorkflow):
                 f"self.task_desc: {self.task_desc}, messages: {messages}, response: {response.response_text}, reward: {reward}"
             )
             response.reward = reward
-            response.eid.run = i
+            response.eid.run = run_id
         return responses
