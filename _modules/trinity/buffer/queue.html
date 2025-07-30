@@ -191,7 +191,11 @@
 <a class="viewcode-back" href="../../../build_api/trinity.buffer.html#trinity.buffer.queue.AsyncQueue.close">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Close the queue.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span> <span class="o">=</span> <span class="kc">True</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">for</span> <span class="n">getter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getters</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">getter</span><span class="o">.</span><span class="n">done</span><span class="p">():</span>
+                <span class="n">getter</span><span class="o">.</span><span class="n">set_exception</span><span class="p">(</span><span class="ne">StopAsyncIteration</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_getters</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="AsyncQueue.stopped">

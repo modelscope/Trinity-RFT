@@ -210,7 +210,8 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Sync Method.&quot;&quot;&quot;</span>
 
     <span class="n">NCCL</span> <span class="o">=</span> <span class="s2">&quot;nccl&quot;</span>
-    <span class="n">CHECKPOINT</span> <span class="o">=</span> <span class="s2">&quot;checkpoint&quot;</span></div>
+    <span class="n">CHECKPOINT</span> <span class="o">=</span> <span class="s2">&quot;checkpoint&quot;</span>
+    <span class="n">MEMORY</span> <span class="o">=</span> <span class="s2">&quot;memory&quot;</span></div>
 
 
 
@@ -220,6 +221,7 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Running status of explorer and trainer.&quot;&quot;&quot;</span>
 
     <span class="n">RUNNING</span> <span class="o">=</span> <span class="s2">&quot;running&quot;</span>
+    <span class="n">REQUIRE_SYNC</span> <span class="o">=</span> <span class="s2">&quot;require_sync&quot;</span>
     <span class="n">WAITING_SYNC</span> <span class="o">=</span> <span class="s2">&quot;waiting_sync&quot;</span>
     <span class="n">STOPPED</span> <span class="o">=</span> <span class="s2">&quot;stopped&quot;</span></div>
 
@@ -244,6 +246,15 @@
     <span class="n">SUB</span> <span class="o">=</span> <span class="s2">&quot;sub&quot;</span>
     <span class="n">MUL</span> <span class="o">=</span> <span class="s2">&quot;mul&quot;</span>
     <span class="n">DIV</span> <span class="o">=</span> <span class="s2">&quot;div&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="SyncStyle">
+<a class="viewcode-back" href="../../../build_api/trinity.common.html#trinity.common.config.SyncStyle">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SyncStyle</span><span class="p">(</span><span class="n">CaseInsensitiveEnum</span><span class="p">):</span>
+    <span class="n">FIXED</span> <span class="o">=</span> <span class="s2">&quot;fixed&quot;</span>
+    <span class="n">DYNAMIC_BY_TRAINER</span> <span class="o">=</span> <span class="s2">&quot;dynamic_by_trainer&quot;</span>
+    <span class="n">DYNAMIC_BY_EXPLORER</span> <span class="o">=</span> <span class="s2">&quot;dynamic_by_explorer&quot;</span></div>
 
 </pre></div>
 
