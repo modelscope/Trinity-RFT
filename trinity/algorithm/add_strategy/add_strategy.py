@@ -1,9 +1,9 @@
 import asyncio
+import copy
+import random
 from abc import ABC, abstractmethod
 from typing import Dict, List, Literal, Tuple
 
-import copy
-import random
 import numpy as np
 import torch
 
@@ -221,25 +221,27 @@ class DuplicateInformativeAddStrategy(AddStrategy):
         super().__init__(writer)
         self.variance_threshold = variance_threshold
 
-    async def add(self, experiences: List[Experience], step: int) -> int:
+    async def add(self, experiences: List[Experience], step: int) -> Tuple[int, Dict]:
         cnt = 0
+        metrics = {}
         cnt_tot = len(experiences)
         effective_tasks, effective_experiences = [], []
-        grouped_experiences = group_by(experiences, id_type="task")
-        for task_id, group_exps in grouped_experiences.items():
-            if len(group_exps) < 2:
-                continue
-            # check if the rewards are the same
-            rewards = [exp.reward for exp in group_exps]
-            variance = np.var(rewards)
-            if variance <= self.variance_threshold:
-                continue
-            cnt += len(group_exps)
-            effective_tasks.append(task_id)
-            effective_experiences.extend(group_exps)
+        with Timer(metrics, "add_strategy_time"):
+            grouped_experiences = group_by(experiences, id_type="task")
+            for task_id, group_exps in grouped_experiences.items():
+                if len(group_exps) < 2:
+                    continue
+                # check if the rewards are the same
+                rewards = [exp.reward for exp in group_exps]
+                variance = np.var(rewards)
+                if variance <= self.variance_threshold:
+                    continue
+                cnt += len(group_exps)
+                effective_tasks.append(task_id)
+                effective_experiences.extend(group_exps)
 
-        if not effective_tasks:
-            return 0
+            if not effective_tasks:
+                return 0, metrics
 
         task_ids_to_add = effective_tasks.copy()
         task_id_offset = len(grouped_experiences)
@@ -259,7 +261,7 @@ class DuplicateInformativeAddStrategy(AddStrategy):
             effective_experiences.extend(copied_exps)
 
         await self.writer.write_async(effective_experiences)
-        return cnt
+        return cnt, metrics
 
     @classmethod
     def default_args(cls) -> dict:

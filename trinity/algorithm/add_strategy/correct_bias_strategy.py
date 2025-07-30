@@ -3,10 +3,8 @@
 from typing import Dict, List, Tuple
 
 import torch
-import numpy as np
 
-from trinity.algorithm.add_strategy import ADD_STRATEGY, GRPOAddStrategy
-from trinity.algorithm.utils import masked_mean
+from trinity.algorithm.add_strategy.add_strategy import ADD_STRATEGY, GRPOAddStrategy
 from trinity.buffer import BufferWriter
 from trinity.common.experience import Experience
 
@@ -15,10 +13,12 @@ from trinity.common.experience import Experience
 class CorrectBiasAddStrategy(GRPOAddStrategy):
     """An example AddStrategy with advantages that corrects for rank bias"""
 
-    def __init__(self, writer: BufferWriter, epsilon: float = 1e-6, rank_penalty: float = 0.25, **kwargs) -> None:
-        super().__init__(writer)
-        self.epsilon = epsilon
+    def __init__(
+        self, writer: BufferWriter, epsilon: float = 1e-6, rank_penalty: float = 0.25, **kwargs
+    ) -> None:
+        super().__init__(writer, epsilon, **kwargs)
         self.rank_penalty = rank_penalty
+
     def calculate_group_advantage(
         self, group_id: str, exps: List[Experience]
     ) -> Tuple[List[Experience], Dict]:
@@ -31,15 +31,17 @@ class CorrectBiasAddStrategy(GRPOAddStrategy):
                 corrected_rewards = rewards.clone()
 
                 # correct bias
-                old_log_probs = torch.tensor([torch.mean(exp.logprobs, axis=-1) for exp in exps]) 
+                old_log_probs = torch.tensor([torch.mean(exp.logprobs, axis=-1) for exp in exps])
                 group_ranks = torch.argsort(torch.argsort(old_log_probs))
                 corrected_rewards = corrected_rewards * (1 - group_ranks * self.rank_penalty)
 
                 group_reward_mean = torch.mean(corrected_rewards)
                 group_reward_std = torch.std(corrected_rewards)
-                
+
             for i, exp in enumerate(exps):
-                score = (corrected_rewards[i] - group_reward_mean) / (group_reward_std + self.epsilon)
+                score = (corrected_rewards[i] - group_reward_mean) / (
+                    group_reward_std + self.epsilon
+                )
                 exp.advantages = score * exp.action_mask
                 exp.returns = exp.advantages.clone()
 
@@ -52,5 +54,4 @@ class CorrectBiasAddStrategy(GRPOAddStrategy):
 
     @classmethod
     def default_args(cls) -> dict:
-        return {"epsilon": 1e-6,
-                "rank_penalty": 0.25}
+        return {"epsilon": 1e-6, "rank_penalty": 0.25}
