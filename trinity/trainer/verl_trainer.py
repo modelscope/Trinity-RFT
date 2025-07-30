@@ -11,7 +11,6 @@ import ray
 import torch
 from omegaconf import OmegaConf
 from verl.trainer.ppo.metric_utils import (
-    compute_data_metrics,
     compute_throughout_metrics,
     compute_timing_metrics,
     reduce_metrics,
@@ -36,7 +35,7 @@ from trinity.algorithm.utils import prefix_metrics
 from trinity.common.config import Config
 from trinity.common.experience import Experiences
 from trinity.trainer.trainer import TrainEngineWrapper
-from trinity.trainer.verl.converter import to_data_proto
+from trinity.trainer.verl.utils import compute_data_metrics, to_data_proto
 from trinity.utils.log import get_logger
 
 
@@ -125,7 +124,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
 
         # specify advantage function for various rft algorithms
         algorithm = ALGORITHM_TYPE.get(self.algorithm_config.algorithm_type)
-        if algorithm.use_advantage:
+        if algorithm.compute_advantage_in_trainer:
             self.advantage_fn = ADVANTAGE_FN.get(self.algorithm_config.advantage_fn)(
                 **self.algorithm_config.advantage_fn_args
             )
@@ -306,7 +305,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                     values = self.critic_wg.compute_values(batch)
                     batch = batch.union(values)
 
-            if self.algorithm.use_advantage:
+            if self.algorithm.compute_advantage_in_trainer:
                 with marked_timer("adv", timing_raw):
                     # compute kl penalty
                     batch, kl_metrics = self.kl_fn.apply_kl_penalty_to_reward(batch)
@@ -343,8 +342,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                 self.logger.info(f"Saved at step {self.global_steps}.")
 
         # collect metrics
-        if self.algorithm.use_advantage:  # TODO
-            metrics.update(compute_data_metrics(batch=batch, use_critic=self.use_critic))
+        metrics.update(compute_data_metrics(batch=batch, use_critic=self.use_critic))
         metrics.update(compute_timing_metrics(batch=batch, timing_raw=timing_raw))
         n_gpus = self.resource_pool_manager.get_n_gpus()
         metrics.update(

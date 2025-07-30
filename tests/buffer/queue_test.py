@@ -1,4 +1,5 @@
 import os
+import queue
 import threading
 import time
 
@@ -72,8 +73,21 @@ class TestQueueBuffer(RayUnittestBaseAysnc):
         writer.write(exps)
         exps = reader.read(batch_size=self.put_batch_size * 2)
         self.assertEqual(len(exps), self.put_batch_size * 2)
+
+        def thread_read(reader, result_queue):
+            try:
+                batch = reader.read()
+                result_queue.put(batch)
+            except StopIteration as e:
+                result_queue.put(e)
+
+        result_queue = queue.Queue()
+        t = threading.Thread(target=thread_read, args=(reader, result_queue))
+        t.start()
+        time.sleep(2)  # make sure the thread is waiting for data
         self.assertEqual(await writer.release(), 0)
-        self.assertRaises(StopIteration, reader.read)
+        t.join(timeout=1)
+        self.assertIsInstance(result_queue.get(), StopIteration)
         with open(BUFFER_FILE_PATH, "r") as f:
             self.assertEqual(len(f.readlines()), self.total_num + self.put_batch_size * 2)
         self.assertRaises(StopIteration, reader.read, batch_size=1)

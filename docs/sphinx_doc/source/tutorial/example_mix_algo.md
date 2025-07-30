@@ -52,7 +52,7 @@ class MIXAlgorithm(AlgorithmType):
 
     use_critic: bool = False
     use_reference: bool = True
-    use_advantage: bool = True
+    compute_advantage_in_trainer: bool = False
     can_balance_batch: bool = True
     schema: type = ExperienceModel
 
@@ -60,6 +60,7 @@ class MIXAlgorithm(AlgorithmType):
     def default_config(cls) -> Dict:
         return {
             "repeat_times": 8,
+            "add_strategy": "grpo",
             "policy_loss_fn": "mix",
             "advantage_fn": "grpo",
             "sample_strategy": "mix",

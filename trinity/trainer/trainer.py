@@ -122,7 +122,6 @@ class Trainer:
         path = os.path.join(self.config.checkpoint_job_dir, f"global_step_{self.train_step_num}")
         if not os.path.isdir(path) or len(os.listdir(path)) == 0:
             self.engine.save_checkpoint()
-        self.engine.monitor.close()
 
     @property
     def train_step_num(self) -> int:

@@ -143,11 +143,12 @@ def both(config: Config) -> None:
         ray.wait(wait_ref, timeout=5)
     elif ready == config.explorer.name:
         logger.info(
-            "============================================================\n"
+            "===============================================================\n"
             "> Launcher detected that the `Explorer` process has finished.\n"
+            "> `Trainer` process may need to save the model checkpoint.\n"
             f"> Waiting {config.synchronizer.sync_timeout} s for the trainer process...\n"
-            "> You can force stop the Trainer process by pressing Ctrl+C.\n"
-            "============================================================"
+            "> You can force stop the `Trainer` process by pressing Ctrl+C.\n"
+            "==============================================================="
         )
         ray.wait(wait_ref, timeout=config.synchronizer.sync_timeout)
     explorer.shutdown.remote()

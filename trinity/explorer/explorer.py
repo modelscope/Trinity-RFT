@@ -356,8 +356,9 @@ class Explorer:
         statuses, exps = await self.scheduler.get_results(batch_id=step)
         metric = {}
         if self.config.explorer.collect_experiences:
-            exp_cnt = await self.add_strategy.add(exps, step)
+            exp_cnt, add_strategy_metric = await self.add_strategy.add(exps, step)
             self.generated_experience_cnt += exp_cnt
+            metric.update(add_strategy_metric)
             metric["rollout/experience_count"] = exp_cnt
         if statuses:
             metric.update(gather_metrics([status.metric for status in statuses], "rollout"))
