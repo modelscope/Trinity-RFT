@@ -272,22 +272,24 @@ class QueueWrapper:
 
     async def get_batch(self, batch_size: int, timeout: float) -> List:
         """Get batch of experience."""
+        start_time = time.time()
         while len(self.exp_pool) < batch_size:
             if self.queue.stopped():
                 # If the queue is stopped, ignore the rest of the experiences in the pool
                 raise StopAsyncIteration("Queue is closed and no more items to get.")
             try:
-                exp_list = await asyncio.wait_for(self.queue.get(), timeout=timeout)
+                exp_list = await asyncio.wait_for(self.queue.get(), timeout=1.0)
+                self.exp_pool.extend(exp_list)
             except asyncio.TimeoutError:
-                self.logger.error(
-                    f"Timeout when waiting for experience, only get {len(self.exp_pool)} experiences.\n"
-                    "This phenomenon is usually caused by the workflow not returning enough "
-                    "experiences or running timeout. Please check your workflow implementation."
-                )
-                batch = list(self.exp_pool)
-                self.exp_pool.clear()
-                return batch
-            self.exp_pool.extend(exp_list)
+                if time.time() - start_time > timeout:
+                    self.logger.error(
+                        f"Timeout when waiting for experience, only get {len(self.exp_pool)} experiences.\n"
+                        "This phenomenon is usually caused by the workflow not returning enough "
+                        "experiences or running timeout. Please check your workflow implementation."
+                    )
+                    batch = list(self.exp_pool)
+                    self.exp_pool.clear()
+                    return batch
         return [self.exp_pool.popleft() for _ in range(batch_size)]
 
     @classmethod

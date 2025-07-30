@@ -25,7 +25,7 @@ class ConstantMeta(ABCMeta):
 class AlgorithmType(ABC, metaclass=ConstantMeta):
     use_critic: bool
     use_reference: bool
-    use_advantage: bool
+    compute_advantage_in_trainer: bool
     can_balance_batch: bool
     schema: type
 
@@ -49,7 +49,7 @@ class SFTAlgorithm(AlgorithmType):
 
     use_critic: bool = False
     use_reference: bool = False
-    use_advantage: bool = False
+    compute_advantage_in_trainer: bool = False
     can_balance_batch: bool = True
     schema: type = SFTDataModel
 
@@ -69,7 +69,7 @@ class PPOAlgorithm(AlgorithmType):
 
     use_critic: bool = True
     use_reference: bool = True
-    use_advantage: bool = True
+    compute_advantage_in_trainer: bool = True
     can_balance_batch: bool = True
     schema: type = ExperienceModel
 
@@ -92,7 +92,7 @@ class GRPOAlgorithm(AlgorithmType):
 
     use_critic: bool = False
     use_reference: bool = True
-    use_advantage: bool = True
+    compute_advantage_in_trainer: bool = False
     can_balance_batch: bool = True
     schema: type = ExperienceModel
 
@@ -100,9 +100,9 @@ class GRPOAlgorithm(AlgorithmType):
     def default_config(cls) -> Dict:
         return {
             "repeat_times": 2,
+            "add_strategy": "grpo",
             "sample_strategy": "warmup",
             "policy_loss_fn": "ppo",
-            "advantage_fn": "grpo",
             "kl_penalty_fn": "none",
             "kl_loss_fn": "k2",
             "entropy_loss_fn": "default",
@@ -115,7 +115,7 @@ class OPMDAlgorithm(AlgorithmType):
 
     use_critic: bool = False
     use_reference: bool = True
-    use_advantage: bool = True
+    compute_advantage_in_trainer: bool = False
     can_balance_batch: bool = True
     schema: type = ExperienceModel
 
@@ -123,9 +123,9 @@ class OPMDAlgorithm(AlgorithmType):
     def default_config(cls) -> Dict:
         return {
             "repeat_times": 2,
+            "add_strategy": "opmd",
             "sample_strategy": "warmup",
             "policy_loss_fn": "opmd",
-            "advantage_fn": "opmd",
             "kl_penalty_fn": "none",
             "kl_loss_fn": "k2",
             "entropy_loss_fn": "default",
@@ -138,7 +138,7 @@ class DPOAlgorithm(AlgorithmType):
 
     use_critic: bool = False
     use_reference: bool = True
-    use_advantage: bool = False
+    compute_advantage_in_trainer: bool = False
     can_balance_batch: bool = False
     schema: type = DPODataModel
 
@@ -182,7 +182,7 @@ class MIXAlgorithm(AlgorithmType):
 
     use_critic: bool = False
     use_reference: bool = True
-    use_advantage: bool = True
+    compute_advantage_in_trainer: bool = False
     use_rollout: bool = True
     can_balance_batch: bool = True
     schema: type = ExperienceModel
@@ -191,6 +191,7 @@ class MIXAlgorithm(AlgorithmType):
     def default_config(cls) -> Dict:
         return {
             "repeat_times": 8,
+            "add_strategy": "grpo",
             "policy_loss_fn": "mix",
             "advantage_fn": "grpo",
             "sample_strategy": "mix",

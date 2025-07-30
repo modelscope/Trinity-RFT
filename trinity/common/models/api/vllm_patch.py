@@ -10,6 +10,7 @@ import time
 from typing import Optional, Union
 
 import vllm
+from packaging.version import InvalidVersion
 from packaging.version import parse as parse_version
 from pydantic import Field, TypeAdapter
 from vllm.entrypoints.launcher import serve_http
@@ -252,8 +253,8 @@ async def chat_completion_full_generator(  # noqa C901
         )
 
     request_metadata.final_usage_info = usage
-
-    vllm_version = parse_version(vllm.__version__)
+    if not hasattr(self, "_vllm_version"):
+        self._vllm_version = get_vllm_version()
     response_args = {
         "id": request_id,
         "created": created_time,
@@ -263,7 +264,7 @@ async def chat_completion_full_generator(  # noqa C901
         "prompt_logprobs": clamp_prompt_logprobs(final_res.prompt_logprobs),
         "prompt_token_ids": final_res.prompt_token_ids,
     }
-    if vllm_version >= parse_version("0.9.0"):
+    if self._vllm_version >= parse_version("0.9.0"):
         response_args["kv_transfer_params"] = final_res.kv_transfer_params
 
     return PatchedChatCompletionResponse(**response_args)
@@ -326,8 +327,18 @@ async def patch_and_serve_http(app, sock, args):
         sock.close()
 
 
+def get_vllm_version():
+    try:
+        vllm_version = parse_version(vllm.__version__)
+    except InvalidVersion:
+        # for self-compiled vllm,
+        # we cannot parse the version, trait it as the lowest version we support
+        vllm_version = parse_version("0.8.5")
+    return vllm_version
+
+
 async def run_api_server_in_ray_actor(async_llm, host: str, port: int, model_path: str):
-    vllm_version = parse_version(vllm.__version__)
+    vllm_version = get_vllm_version()
     if vllm_version < parse_version("0.8.5") or vllm_version >= parse_version("0.10.0"):
         raise ValueError(
             f"Unsupported vllm version: {vllm.__version__}. "

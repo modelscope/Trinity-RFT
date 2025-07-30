@@ -177,9 +177,8 @@ class TestTrainerGSM8K(BaseTrainerCase):
         # test both mode
         self.config.algorithm.algorithm_type = "grpo"
         self.config.algorithm.repeat_times = 4
+        self.config.algorithm.add_strategy = "grpo"
         # self.config.algorithm.repeat_times = 8  # TODO: used for real testing
-        self.config.algorithm.advantage_fn = "grpo"
-        self.config.algorithm.advantage_fn_args = {}
         # self.config.buffer.batch_size = 96  # TODO: used for real testing
         self.config.buffer.total_epochs = 1
         self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("gsm8k")
@@ -227,6 +226,7 @@ class TestTrainerSFTWarmupGSM8K(BaseTrainerCase):
         )
         self.config.buffer.trainer_input.sft_warmup_steps = 3
         self.config.check_and_update()
+        self.config.buffer.trainer_input.experience_buffer.max_read_timeout = 20
         self.config.trainer.trainer_config.trainer.max_actor_ckpt_to_keep = 2
         self.config.trainer.trainer_config.actor_rollout_ref.actor.optim.lr = 1e-5
         both(self.config)
@@ -241,7 +241,7 @@ class TestTrainerSFTWarmupGSM8K(BaseTrainerCase):
         self.assertEqual(parser.metric_max_step(actor_metrics[-1]), 7)  # RFT
         response_metrics = parser.metric_list("response_length")
         self.assertTrue(len(response_metrics) > 0)
-        self.assertEqual(parser.metric_min_step(response_metrics[0]), 4)
+        self.assertEqual(parser.metric_min_step(response_metrics[0]), 1)
         self.assertEqual(parser.metric_max_step(response_metrics[0]), 7)
         # test save checkpoint when sft finish
         self.assertEqual(
