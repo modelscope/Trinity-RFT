@@ -69,7 +69,7 @@ class RMGalleryFn(RewardFn):
         ]
 
         sample = DataSample(
-            unique_id=experience.unique_id,
+            unique_id=experience.eid.uid,
             input=to_rm_gallery_messages(messages),
             output=output,
             metadata=experience.info,
