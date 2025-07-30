@@ -103,9 +103,7 @@ class Trainer:
                 delta = self.engine.train_step_num - self.last_trainer_sync_step
                 if delta >= self.config.synchronizer.sync_interval:
                     ray.get(self.synchronizer.set_trainer_status.remote(RunningStatus.REQUIRE_SYNC))
-            explorer_status_counts = ray.get(
-                self.synchronizer.get_explorer_status_counts.remote()
-            )
+            explorer_status_counts = ray.get(self.synchronizer.get_explorer_status_counts.remote())
             if self.config.synchronizer.sync_method == SyncMethod.NCCL:
                 return explorer_status_counts[RunningStatus.WAITING_SYNC] > 0
             else:  # memory & checkpoint

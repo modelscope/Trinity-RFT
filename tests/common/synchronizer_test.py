@@ -74,12 +74,14 @@ def run_trainer(config: Config, max_steps: int, intervals: List[int]) -> None:
     ray.init(ignore_reinit_error=True, namespace=config.ray_namespace)
     trainer_monkey_patch(config, max_steps, intervals)
     train(config)
+    ray.shutdown(_exiting_interpreter=True)
 
 
 def run_explorer(config: Config, max_steps: int, intervals: List[int]) -> None:
     ray.init(ignore_reinit_error=True, namespace=config.ray_namespace)
     explorer_monkey_patch(config, max_steps, intervals)
     explore(config)
+    ray.shutdown(_exiting_interpreter=True)
 
 
 def run_both(
@@ -89,6 +91,7 @@ def run_both(
     trainer_monkey_patch(config, max_steps, trainer_intervals)
     explorer_monkey_patch(config, max_steps, explorer_intervals)
     both(config)
+    ray.shutdown(_exiting_interpreter=True)
 
 
 class BaseTestSynchronizer(unittest.TestCase):
@@ -117,7 +120,7 @@ class BaseTestSynchronizer(unittest.TestCase):
             8,
             [2, 1, 2, 1, 2, 1, 2, 1],
             [0, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5],
-            [0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+            [0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
         ),
         (
             SyncMethod.CHECKPOINT,
@@ -125,7 +128,7 @@ class BaseTestSynchronizer(unittest.TestCase):
             8,
             [2, 1, 2, 1, 2, 1, 2, 1],
             [0, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5],
-            [0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+            [0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
         ),
         (
             SyncMethod.MEMORY,
@@ -133,7 +136,7 @@ class BaseTestSynchronizer(unittest.TestCase):
             8,
             [2, 1, 2, 1, 2, 1, 2, 1],
             [0, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5],
-            [0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+            [0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
         ),
         (
             SyncMethod.MEMORY,
@@ -141,7 +144,7 @@ class BaseTestSynchronizer(unittest.TestCase):
             8,
             [2, 1, 2, 1, 2, 1, 2, 1],
             [0, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5],
-            [0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+            [0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
         ),
     ],
 )
@@ -174,8 +177,6 @@ class TestStateDictBasedSynchronizer(BaseTestSynchronizer):
         explorer1_config = deepcopy(config)
         explorer1_config.mode = "explore"
         explorer1_config.explorer.name = "explorer1"
-        config.cluster.gpu_per_node = 1
-        config.cluster.node_num = 1
         explorer1_config.explorer.rollout_model.engine_num = 1
         explorer1_config.explorer.rollout_model.tensor_parallel_size = 1
         explorer1_config.buffer.explorer_output = StorageConfig(
@@ -192,6 +193,14 @@ class TestStateDictBasedSynchronizer(BaseTestSynchronizer):
             target=run_trainer, args=(trainer_config, self.max_steps, self.trainer_intervals)
         )
         trainer_process.start()
+        ray.init(ignore_reinit_error=True)
+        while True:
+            try:
+                ray.get_actor("queue-exp_buffer", namespace=trainer_config.ray_namespace)
+                break
+            except ValueError:
+                print("waiting for trainer to start.")
+                time.sleep(5)
         explorer_process_1 = multiprocessing.Process(
             target=run_explorer,
             args=(explorer1_config, self.max_steps, self.explorer1_intervals),
@@ -249,8 +258,6 @@ class TestNCCLBasedSynchronizer(BaseTestSynchronizer):
         config.checkpoint_root_dir = get_checkpoint_path()
         config.buffer.total_epochs = 1
         config.buffer.batch_size = 4
-        config.cluster.gpu_per_node = 4
-        config.cluster.node_num = 1
         config.model.model_path = get_model_path()
         config.buffer.explorer_input.taskset = get_unittest_dataset_config("countdown")
         config.buffer.trainer_input.experience_buffer = StorageConfig(
@@ -262,8 +269,6 @@ class TestNCCLBasedSynchronizer(BaseTestSynchronizer):
         config.synchronizer.sync_style = self.sync_style
         config.synchronizer.sync_interval = 2
         config.trainer.save_interval = 100
-        config.explorer.rollout_model.engine_num = 2
-        config.explorer.rollout_model.tensor_parallel_size = 1
         config.monitor.monitor_type = "tensorboard"
         config.mode = "both"
         config.check_and_update()
