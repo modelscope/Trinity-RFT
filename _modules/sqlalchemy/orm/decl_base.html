@@ -193,6 +193,7 @@
 
 <span class="k">class</span><span class="w"> </span><span class="nc">_DeclMappedClassProtocol</span><span class="p">(</span><span class="n">MappedClassProtocol</span><span class="p">[</span><span class="n">_O</span><span class="p">],</span> <span class="n">Protocol</span><span class="p">):</span>
     <span class="s2">&quot;Internal more detailed version of ``MappedClassProtocol``.&quot;</span>
+
     <span class="n">metadata</span><span class="p">:</span> <span class="n">MetaData</span>
     <span class="n">__tablename__</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">__mapper_args__</span><span class="p">:</span> <span class="n">_MapperKwArgs</span>
@@ -1313,9 +1314,9 @@
             <span class="n">restored</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">dataclass_callable</span><span class="p">(</span>
+            <span class="n">dataclass_callable</span><span class="p">(</span>  <span class="c1"># type: ignore[call-overload]</span>
                 <span class="n">klass</span><span class="p">,</span>
-                <span class="o">**</span><span class="p">{</span>
+                <span class="o">**</span><span class="p">{</span>  <span class="c1"># type: ignore[call-overload,unused-ignore]</span>
                     <span class="n">k</span><span class="p">:</span> <span class="n">v</span>
                     <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">dataclass_setup_arguments</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
                     <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_NoArg</span><span class="o">.</span><span class="n">NO_ARG</span> <span class="ow">and</span> <span class="n">k</span> <span class="o">!=</span> <span class="s2">&quot;dataclass_callable&quot;</span>
@@ -1689,9 +1690,15 @@
                                 <span class="s2">&quot;default_factory&quot;</span><span class="p">,</span>
                                 <span class="s2">&quot;repr&quot;</span><span class="p">,</span>
                                 <span class="s2">&quot;default&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;dataclass_metadata&quot;</span><span class="p">,</span>
                             <span class="p">]</span>
                         <span class="k">else</span><span class="p">:</span>
-                            <span class="n">argnames</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;init&quot;</span><span class="p">,</span> <span class="s2">&quot;default_factory&quot;</span><span class="p">,</span> <span class="s2">&quot;repr&quot;</span><span class="p">]</span>
+                            <span class="n">argnames</span> <span class="o">=</span> <span class="p">[</span>
+                                <span class="s2">&quot;init&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;default_factory&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;repr&quot;</span><span class="p">,</span>
+                                <span class="s2">&quot;dataclass_metadata&quot;</span><span class="p">,</span>
+                            <span class="p">]</span>
 
                         <span class="n">args</span> <span class="o">=</span> <span class="p">{</span>
                             <span class="n">a</span>
@@ -2106,8 +2113,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_early_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mapper_kw</span><span class="p">:</span> <span class="n">_MapperKwArgs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">pass</span>
 
-    <span class="c1"># mypy disallows plain property override of variable</span>
-    <span class="nd">@property</span>  <span class="c1"># type: ignore</span>
+    <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">cls</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cls</span><span class="p">()</span>  <span class="c1"># type: ignore</span>
 
