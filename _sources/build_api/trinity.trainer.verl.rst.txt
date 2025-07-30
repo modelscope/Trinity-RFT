@@ -3,14 +3,6 @@ trinity.trainer.verl
 Submodules
 ----------
 
-trinity.trainer.verl.converter module
--------------------------------------
-
-.. automodule:: trinity.trainer.verl.converter
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 trinity.trainer.verl.dp\_actor module
 -------------------------------------
 
@@ -23,6 +15,14 @@ trinity.trainer.verl.fsdp\_workers module
 -----------------------------------------
 
 .. automodule:: trinity.trainer.verl.fsdp_workers
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+trinity.trainer.verl.utils module
+---------------------------------
+
+.. automodule:: trinity.trainer.verl.utils
    :members:
    :undoc-members:
    :show-inheritance:

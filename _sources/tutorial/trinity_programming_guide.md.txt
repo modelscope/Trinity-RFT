@@ -17,6 +17,7 @@ Trinity-RFT is still under development, and the following interfaces may change.
 
 ---
 
+(Workflows)=
 ## Workflows (For RL Environment Developers)
 
 In Trinity-RFT, workflows are the core components that define the interaction between Agents and Environments.
@@ -327,8 +328,9 @@ Trinity-RFT provides a standardized process for implementing new algorithms.
 In Trinity-RFT, the algorithm module is primarily responsible for extracting experience data from the Replay Buffer during the RL process and calculating the loss to update models based on this data.
 To avoid implementing a new Trainer class each time a new algorithm is added, we have decomposed the representative PPO algorithm process into multiple sub-modules to adapt to various algorithms.
 
+- **Add Strategy** ({class}`trinity.algorithm.AddStrategy`): Responsible for adding rollout experience data to the Replay Buffer. You can do some filtering or grouping of experience data before adding it to the buffer. For example, calculate the GRPO advantage in this module and filter out groups with the same reward.
 - **Sample Strategy** ({class}`trinity.algorithm.SampleStrategy`): Responsible for sampling experience data from the buffer module. By customizing this module, you can implement functionalities like filtering experience data or mixed sampling from multiple data sources.
-- **Advantage Fn**({class}`trinity.algorithm.AdvantageFn`): Responsible for calculating the Advantage and Returns of experience data.
+- **Advantage Fn**({class}`trinity.algorithm.AdvantageFn`): Responsible for calculating the Advantage and Returns of experience data. Note that you might not be able to get a whole group of experiences in this module (depending on how experiences are written to and sampled from the buffer). Thus, if you need group based Advantage calculation, it is highly recommended that you implement it in the `AddStrategy` module instead. Only per-sample advantage calculation is recommended in this module, e.g., PPO.
 - **Policy Loss Fn**({class}`trinity.algorithm.PolicyLossFn`): Responsible for calculating the core training loss of the policy network.
 - **KL Fn**({class}`trinity.algorithm.KLFn`): Responsible for calculating KL Divergence, which is generally used in two places in existing RL algorithms: Reward Penalty and Actor Loss.
 - **Entropy Loss Fn**({class}`trinity.algorithm.EntropyLossFn`): Responsible for calculating the entropy loss of the policy network.
@@ -342,13 +344,88 @@ We provide several implementations of above modules in `trinity/algorithm`.
 
 Trinity-RFT allows developers to customize all the above modules. Developers only need to implement specific modules according to the requirements of their new algorithm. This section will provide a simple introduction using the {ref}`OPMD <OPMD>` algorithm as an example.
 
-The main difference between OPMD and PPO algorithms lies in the calculation of Advantage and Policy Loss. Therefore, only new Advantage Fn and Policy Loss Fn modules need to be implemented.
+The main difference between OPMD and PPO algorithms lies in the calculation of Advantage and Policy Loss.
+OPMD relies on a group-based advantage calculation and does not use the Critic model.
+To implement OPMD, developers need to implement advantage calculation in `AddStrategy` (or `AdvantageFn`) and policy loss calculation in `PolicyLossFn`.
 
 ---
 
-#### Step 1.1: Implement `AdvantageFn`
+#### Step 1.1: Implement `AddStrategy`
 
-Developers need to implement the {class}`trinity.algorithm.AdvantageFn` interface, which mainly includes two methods:
+The {class}`trinity.algorithm.AddStrategy` interface includes two methods:
+
+- `add`: This method is called to add experience data to the buffer. It receives a list of experiences and returns the number of experiences added to the buffer.
+- `default_args`: This method returns the default initialization parameters in dictionary form, which will be used by default when users don't specify initialization parameters in the configuration file.
+
+For convenience, Trinity-RFT provides an abstract class {class}`trinity.algorithm.GroupAdvantageStrategy` that implements the `add` method for group-based advantage calculation, you can focus on how to group the experiences and calculate advantages on grouped experiences with the following two methods:
+
+- `group_experiences`: This method groups a experiences generated in a step into multiple sub-groups.
+
+- `calculate_group_advantage`: This method calculates the advantage for each group of experiences.
+
+Here's an implementation example for the OPMD algorithm's Add Strategy:
+
+```python
+from trinity.algorithm.add_strategy import ADD_STRATEGY, GroupAdvantageStrategy
+
+@ADD_STRATEGY.register_module("opmd")
+class OPMDAddStrategy(GroupAdvantageStrategy):
+    """An example AddStrategy that calculates OPMD advantages."""
+
+    def __init__(
+        self, writer: BufferWriter, opmd_baseline: str = "mean", tau: float = 1.0, **kwargs
+    ) -> None:
+        super().__init__(writer)
+        assert opmd_baseline in [
+            "mean",
+            "logavgexp",
+        ], f"opmd_baseline must be 'mean' or 'logavgexp', got {opmd_baseline}"
+        self.opmd_baseline = opmd_baseline
+        self.tau = tau
+
+    def group_experiences(self, exps):
+        return group_by(exps, id_type="task")
+
+    def calculate_group_advantage(
+        self, group_id: str, exps: List[Experience]
+    ) -> Tuple[List[Experience], Dict]:
+        with torch.no_grad():
+            if len(exps) == 1:
+                group_baseline = torch.tensor(0.0)
+            else:
+                group_rewards = torch.tensor([exp.reward for exp in exps])
+                if self.opmd_baseline == "mean":
+                    group_baseline = torch.mean(group_rewards)
+                else:
+                    group_baseline = self.tau * (
+                        torch.logsumexp(group_rewards / self.tau, dim=-1)
+                        - torch.log(torch.tensor(len(exps)))
+                    )
+            for exp in exps:
+                score = exp.reward - group_baseline
+                exp.advantages = score * exp.action_mask
+                exp.returns = exp.advantages.clone()
+            metrics = {
+                "group_baseline": group_baseline,
+            }
+        return exps, metrics
+
+    @classmethod
+    def default_args(cls) -> dict:
+        return {"opmd_baseline": "mean", "tau": 1.0}
+```
+
+After implementation, you need to register this module through {class}`trinity.algorithm.ADD_STRATEGY`. Once registered, the module can be configured in the configuration file using the registered name.
+
+
+#### Step 1.2: Implement `AdvantageFn`
+
+```{note}
+This step can be skipped if you have implemented `AddStrategy` as shown above.
+The `AdvantageFn` is mainly used for per-sample advantage calculation, and not recommended for group-based advantage calculation.
+```
+
+The {class}`trinity.algorithm.AdvantageFn` interface, which mainly includes two methods:
 
 - `__call__`: Calculates advantages and returns based on input experience data, records observable metrics during the calculation process, and returns the experience data containing advantages and returns as well as a metrics dictionary. The input experience data format is [verl](https://github.com/volcengine/verl)'s `DataProto`.
 - `default_args`: Returns default initialization parameters in dictionary form, which will be used by default when users don't specify initialization parameters in the configuration file.
@@ -395,7 +472,7 @@ class OPMDAdvantageFn(AdvantageFn):
         }
 ```
 
-#### Step 1.2: Implement `PolicyLossFn`
+#### Step 1.3: Implement `PolicyLossFn`
 
 Developers need to implement the {class}`trinity.algorithm.PolicyLossFn` interface, which is similar to `AdvantageFn` and includes two methods:
 
@@ -442,7 +519,7 @@ The `AlgorithmType` class includes the following attributes and methods:
 
 - `use_critic`: Whether to use the Critic model
 - `use_reference`: Whether to use the Reference model
-- `use_advantage`: Whether to calculate Advantage; if False, the `AdvantageFn` call will be skipped
+- `compute_advantage_in_trainer`: Whether to calculate Advantages in Trainer; if False, the `AdvantageFn` call in trainer will be skipped
 - `can_balance_batch`: Whether the algorithm allows automatic balancing when splitting a batch into microbatches (which permute the order of samples)
 - `schema`: The format of experience data corresponding to the algorithm
 - `default_config`: Gets the default configuration of the algorithm, which will override attributes with the same name in `ALGORITHM_TYPE`
@@ -460,7 +537,7 @@ class OPMDAlgorithm(AlgorithmType):
 
     use_critic: bool = False
     use_reference: bool = True
-    use_advantage: bool = True
+    compute_advantage_in_trainer: bool = False
     can_balance_batch: bool = True
     schema: type = ExperienceModel
 
@@ -468,6 +545,7 @@ class OPMDAlgorithm(AlgorithmType):
     def default_config(cls) -> Dict:
         return {
             "repeat_times": 2,
+            "add_strategy": "opmd",
             "sample_strategy": "warmup",
             "policy_loss_fn": "opmd",
             "advantage_fn": "opmd",
@@ -499,7 +577,7 @@ If you need to modify certain parameters, you can simply add the corresponding p
 algorithm:
   algorithm_type: "opmd"
   repeat_times: 8
-  advantage_fn_args:
+  add_strategy_args:
     opmd_baseline: "logavgexp"
     tau: 0.99
   policy_loss_fn_args:

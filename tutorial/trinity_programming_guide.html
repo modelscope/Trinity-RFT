@@ -146,7 +146,7 @@ Below is a table summarizing the modules and components that developers with dif
 </div>
 <hr class="docutils" />
 <section id="workflows-for-rl-environment-developers">
-<h2>Workflows (For RL Environment Developers)<a class="headerlink" href="#workflows-for-rl-environment-developers" title="Link to this heading"></a></h2>
+<span id="workflows"></span><h2>Workflows (For RL Environment Developers)<a class="headerlink" href="#workflows-for-rl-environment-developers" title="Link to this heading"></a></h2>
 <p>In Trinity-RFT, workflows are the core components that define the interaction between Agents and Environments.
 A qualified workflow needs to use the trained model to complete the specified task and obtain feedback information (reward) from the environment. Below are the steps to create a new workflow:</p>
 <hr class="docutils" />
@@ -438,8 +438,9 @@ In this case, you can implement the <code class="docutils literal notranslate"><
 <p>In Trinity-RFT, the algorithm module is primarily responsible for extracting experience data from the Replay Buffer during the RL process and calculating the loss to update models based on this data.
 To avoid implementing a new Trainer class each time a new algorithm is added, we have decomposed the representative PPO algorithm process into multiple sub-modules to adapt to various algorithms.</p>
 <ul class="simple">
+<li><p><strong>Add Strategy</strong> (<a class="reference internal" href="../build_api/trinity.algorithm.html#trinity.algorithm.AddStrategy" title="trinity.algorithm.AddStrategy"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.AddStrategy</span></code></a>): Responsible for adding rollout experience data to the Replay Buffer. You can do some filtering or grouping of experience data before adding it to the buffer. For example, calculate the GRPO advantage in this module and filter out groups with the same reward.</p></li>
 <li><p><strong>Sample Strategy</strong> (<a class="reference internal" href="../build_api/trinity.algorithm.html#trinity.algorithm.SampleStrategy" title="trinity.algorithm.SampleStrategy"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.SampleStrategy</span></code></a>): Responsible for sampling experience data from the buffer module. By customizing this module, you can implement functionalities like filtering experience data or mixed sampling from multiple data sources.</p></li>
-<li><p><strong>Advantage Fn</strong>(<a class="reference internal" href="../build_api/trinity.algorithm.html#trinity.algorithm.AdvantageFn" title="trinity.algorithm.AdvantageFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.AdvantageFn</span></code></a>): Responsible for calculating the Advantage and Returns of experience data.</p></li>
+<li><p><strong>Advantage Fn</strong>(<a class="reference internal" href="../build_api/trinity.algorithm.html#trinity.algorithm.AdvantageFn" title="trinity.algorithm.AdvantageFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.AdvantageFn</span></code></a>): Responsible for calculating the Advantage and Returns of experience data. Note that you might not be able to get a whole group of experiences in this module (depending on how experiences are written to and sampled from the buffer). Thus, if you need group based Advantage calculation, it is highly recommended that you implement it in the <code class="docutils literal notranslate"><span class="pre">AddStrategy</span></code> module instead. Only per-sample advantage calculation is recommended in this module, e.g., PPO.</p></li>
 <li><p><strong>Policy Loss Fn</strong>(<a class="reference internal" href="../build_api/trinity.algorithm.html#trinity.algorithm.PolicyLossFn" title="trinity.algorithm.PolicyLossFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.PolicyLossFn</span></code></a>): Responsible for calculating the core training loss of the policy network.</p></li>
 <li><p><strong>KL Fn</strong>(<a class="reference internal" href="../build_api/trinity.algorithm.html#trinity.algorithm.KLFn" title="trinity.algorithm.KLFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.KLFn</span></code></a>): Responsible for calculating KL Divergence, which is generally used in two places in existing RL algorithms: Reward Penalty and Actor Loss.</p></li>
 <li><p><strong>Entropy Loss Fn</strong>(<a class="reference internal" href="../build_api/trinity.algorithm.html#trinity.algorithm.EntropyLossFn" title="trinity.algorithm.EntropyLossFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.EntropyLossFn</span></code></a>): Responsible for calculating the entropy loss of the policy network.</p></li>
@@ -450,11 +451,82 @@ To avoid implementing a new Trainer class each time a new algorithm is added, we
 <section id="step-1-implement-algorithm-components">
 <h3>Step 1: Implement Algorithm Components<a class="headerlink" href="#step-1-implement-algorithm-components" title="Link to this heading"></a></h3>
 <p>Trinity-RFT allows developers to customize all the above modules. Developers only need to implement specific modules according to the requirements of their new algorithm. This section will provide a simple introduction using the <a class="reference internal" href="example_reasoning_advanced.html#opmd"><span class="std std-ref">OPMD</span></a> algorithm as an example.</p>
-<p>The main difference between OPMD and PPO algorithms lies in the calculation of Advantage and Policy Loss. Therefore, only new Advantage Fn and Policy Loss Fn modules need to be implemented.</p>
+<p>The main difference between OPMD and PPO algorithms lies in the calculation of Advantage and Policy Loss.
+OPMD relies on a group-based advantage calculation and does not use the Critic model.
+To implement OPMD, developers need to implement advantage calculation in <code class="docutils literal notranslate"><span class="pre">AddStrategy</span></code> (or <code class="docutils literal notranslate"><span class="pre">AdvantageFn</span></code>) and policy loss calculation in <code class="docutils literal notranslate"><span class="pre">PolicyLossFn</span></code>.</p>
 <hr class="docutils" />
-<section id="step-1-1-implement-advantagefn">
-<h4>Step 1.1: Implement <code class="docutils literal notranslate"><span class="pre">AdvantageFn</span></code><a class="headerlink" href="#step-1-1-implement-advantagefn" title="Link to this heading"></a></h4>
-<p>Developers need to implement the <a class="reference internal" href="../build_api/trinity.algorithm.html#trinity.algorithm.AdvantageFn" title="trinity.algorithm.AdvantageFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.AdvantageFn</span></code></a> interface, which mainly includes two methods:</p>
+<section id="step-1-1-implement-addstrategy">
+<h4>Step 1.1: Implement <code class="docutils literal notranslate"><span class="pre">AddStrategy</span></code><a class="headerlink" href="#step-1-1-implement-addstrategy" title="Link to this heading"></a></h4>
+<p>The <a class="reference internal" href="../build_api/trinity.algorithm.html#trinity.algorithm.AddStrategy" title="trinity.algorithm.AddStrategy"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.AddStrategy</span></code></a> interface includes two methods:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">add</span></code>: This method is called to add experience data to the buffer. It receives a list of experiences and returns the number of experiences added to the buffer.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">default_args</span></code>: This method returns the default initialization parameters in dictionary form, which will be used by default when users don’t specify initialization parameters in the configuration file.</p></li>
+</ul>
+<p>For convenience, Trinity-RFT provides an abstract class <code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.GroupAdvantageStrategy</span></code> that implements the <code class="docutils literal notranslate"><span class="pre">add</span></code> method for group-based advantage calculation, you can focus on how to group the experiences and calculate advantages on grouped experiences with the following two methods:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">group_experiences</span></code>: This method groups a experiences generated in a step into multiple sub-groups.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">calculate_group_advantage</span></code>: This method calculates the advantage for each group of experiences.</p></li>
+</ul>
+<p>Here’s an implementation example for the OPMD algorithm’s Add Strategy:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.add_strategy</span><span class="w"> </span><span class="kn">import</span> <span class="n">ADD_STRATEGY</span><span class="p">,</span> <span class="n">GroupAdvantageStrategy</span>
+
+<span class="nd">@ADD_STRATEGY</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;opmd&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OPMDAddStrategy</span><span class="p">(</span><span class="n">GroupAdvantageStrategy</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;An example AddStrategy that calculates OPMD advantages.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">writer</span><span class="p">:</span> <span class="n">BufferWriter</span><span class="p">,</span> <span class="n">opmd_baseline</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="n">tau</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">writer</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">opmd_baseline</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="s2">&quot;mean&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;logavgexp&quot;</span><span class="p">,</span>
+        <span class="p">],</span> <span class="sa">f</span><span class="s2">&quot;opmd_baseline must be &#39;mean&#39; or &#39;logavgexp&#39;, got </span><span class="si">{</span><span class="n">opmd_baseline</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opmd_baseline</span> <span class="o">=</span> <span class="n">opmd_baseline</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tau</span> <span class="o">=</span> <span class="n">tau</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">group_experiences</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exps</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">group_by</span><span class="p">(</span><span class="n">exps</span><span class="p">,</span> <span class="n">id_type</span><span class="o">=</span><span class="s2">&quot;task&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_group_advantage</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">group_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">exps</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">],</span> <span class="n">Dict</span><span class="p">]:</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">group_baseline</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">group_rewards</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="n">exp</span><span class="o">.</span><span class="n">reward</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">exps</span><span class="p">])</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">opmd_baseline</span> <span class="o">==</span> <span class="s2">&quot;mean&quot;</span><span class="p">:</span>
+                    <span class="n">group_baseline</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">group_rewards</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">group_baseline</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span> <span class="o">*</span> <span class="p">(</span>
+                        <span class="n">torch</span><span class="o">.</span><span class="n">logsumexp</span><span class="p">(</span><span class="n">group_rewards</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="o">-</span> <span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">exps</span><span class="p">)))</span>
+                    <span class="p">)</span>
+            <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">exps</span><span class="p">:</span>
+                <span class="n">score</span> <span class="o">=</span> <span class="n">exp</span><span class="o">.</span><span class="n">reward</span> <span class="o">-</span> <span class="n">group_baseline</span>
+                <span class="n">exp</span><span class="o">.</span><span class="n">advantages</span> <span class="o">=</span> <span class="n">score</span> <span class="o">*</span> <span class="n">exp</span><span class="o">.</span><span class="n">action_mask</span>
+                <span class="n">exp</span><span class="o">.</span><span class="n">returns</span> <span class="o">=</span> <span class="n">exp</span><span class="o">.</span><span class="n">advantages</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+            <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;group_baseline&quot;</span><span class="p">:</span> <span class="n">group_baseline</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="k">return</span> <span class="n">exps</span><span class="p">,</span> <span class="n">metrics</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">default_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;opmd_baseline&quot;</span><span class="p">:</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;tau&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>After implementation, you need to register this module through <code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.ADD_STRATEGY</span></code>. Once registered, the module can be configured in the configuration file using the registered name.</p>
+</section>
+<section id="step-1-2-implement-advantagefn">
+<h4>Step 1.2: Implement <code class="docutils literal notranslate"><span class="pre">AdvantageFn</span></code><a class="headerlink" href="#step-1-2-implement-advantagefn" title="Link to this heading"></a></h4>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This step can be skipped if you have implemented <code class="docutils literal notranslate"><span class="pre">AddStrategy</span></code> as shown above.
+The <code class="docutils literal notranslate"><span class="pre">AdvantageFn</span></code> is mainly used for per-sample advantage calculation, and not recommended for group-based advantage calculation.</p>
+</div>
+<p>The <a class="reference internal" href="../build_api/trinity.algorithm.html#trinity.algorithm.AdvantageFn" title="trinity.algorithm.AdvantageFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.AdvantageFn</span></code></a> interface, which mainly includes two methods:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">__call__</span></code>: Calculates advantages and returns based on input experience data, records observable metrics during the calculation process, and returns the experience data containing advantages and returns as well as a metrics dictionary. The input experience data format is <a class="reference external" href="https://github.com/volcengine/verl">verl</a>’s <code class="docutils literal notranslate"><span class="pre">DataProto</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">default_args</span></code>: Returns default initialization parameters in dictionary form, which will be used by default when users don’t specify initialization parameters in the configuration file.</p></li>
@@ -499,8 +571,8 @@ To avoid implementing a new Trainer class each time a new algorithm is added, we
 </pre></div>
 </div>
 </section>
-<section id="step-1-2-implement-policylossfn">
-<h4>Step 1.2: Implement <code class="docutils literal notranslate"><span class="pre">PolicyLossFn</span></code><a class="headerlink" href="#step-1-2-implement-policylossfn" title="Link to this heading"></a></h4>
+<section id="step-1-3-implement-policylossfn">
+<h4>Step 1.3: Implement <code class="docutils literal notranslate"><span class="pre">PolicyLossFn</span></code><a class="headerlink" href="#step-1-3-implement-policylossfn" title="Link to this heading"></a></h4>
 <p>Developers need to implement the <a class="reference internal" href="../build_api/trinity.algorithm.html#trinity.algorithm.PolicyLossFn" title="trinity.algorithm.PolicyLossFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.PolicyLossFn</span></code></a> interface, which is similar to <code class="docutils literal notranslate"><span class="pre">AdvantageFn</span></code> and includes two methods:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">__call__</span></code>: Calculates the loss based on input parameters. Unlike <code class="docutils literal notranslate"><span class="pre">AdvantageFn</span></code>, the input parameters here are all <code class="docutils literal notranslate"><span class="pre">torch.Tensor</span></code>. This interface automatically scans the parameter list of the <code class="docutils literal notranslate"><span class="pre">__call__</span></code> method and converts it to the corresponding fields in the experience data. Therefore, please write all tensor names needed for loss calculation directly in the parameter list, rather than selecting parameters from <code class="docutils literal notranslate"><span class="pre">kwargs</span></code>.</p></li>
@@ -541,7 +613,7 @@ To avoid implementing a new Trainer class each time a new algorithm is added, we
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">use_critic</span></code>: Whether to use the Critic model</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">use_reference</span></code>: Whether to use the Reference model</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">use_advantage</span></code>: Whether to calculate Advantage; if False, the <code class="docutils literal notranslate"><span class="pre">AdvantageFn</span></code> call will be skipped</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">compute_advantage_in_trainer</span></code>: Whether to calculate Advantages in Trainer; if False, the <code class="docutils literal notranslate"><span class="pre">AdvantageFn</span></code> call in trainer will be skipped</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">can_balance_batch</span></code>: Whether the algorithm allows automatic balancing when splitting a batch into microbatches (which permute the order of samples)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">schema</span></code>: The format of experience data corresponding to the algorithm</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">default_config</span></code>: Gets the default configuration of the algorithm, which will override attributes with the same name in <code class="docutils literal notranslate"><span class="pre">ALGORITHM_TYPE</span></code></p></li>
@@ -556,7 +628,7 @@ The dictionary returned by the <code class="docutils literal notranslate"><span 
 
     <span class="n">use_critic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">use_reference</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">use_advantage</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">compute_advantage_in_trainer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">can_balance_batch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">schema</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">ExperienceModel</span>
 
@@ -564,6 +636,7 @@ The dictionary returned by the <code class="docutils literal notranslate"><span 
     <span class="k">def</span><span class="w"> </span><span class="nf">default_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s2">&quot;repeat_times&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="s2">&quot;add_strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;opmd&quot;</span><span class="p">,</span>
             <span class="s2">&quot;sample_strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;warmup&quot;</span><span class="p">,</span>
             <span class="s2">&quot;policy_loss_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;opmd&quot;</span><span class="p">,</span>
             <span class="s2">&quot;advantage_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;opmd&quot;</span><span class="p">,</span>
@@ -590,7 +663,7 @@ The dictionary returned by the <code class="docutils literal notranslate"><span 
 <span class="nt">algorithm</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">algorithm_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;opmd&quot;</span>
 <span class="w">  </span><span class="nt">repeat_times</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
-<span class="w">  </span><span class="nt">advantage_fn_args</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">add_strategy_args</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">opmd_baseline</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;logavgexp&quot;</span>
 <span class="w">    </span><span class="nt">tau</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.99</span>
 <span class="w">  </span><span class="nt">policy_loss_fn_args</span><span class="p">:</span>

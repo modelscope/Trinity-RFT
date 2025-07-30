@@ -327,10 +327,8 @@ Guidelines for full configurations: see [this document](/tutorial/trinity_config
 
 Guidelines for developers and researchers:
 
-+ [Build new RL scenarios](/tutorial/trinity_programming_guide.md#workflows-for-rl-environment-developers)
-+ [Implement new RL algorithms](/tutorial/trinity_programming_guide.md#algorithms-for-rl-algorithm-developers)
-
-
++ {ref}`Build new RL scenarios <Workflows>`
++ {ref}`Implement new RL algorithms <Algorithms>`
 
 
 For some frequently asked questions, see [FAQ](/tutorial/faq.md).
@@ -382,7 +380,7 @@ This project is built upon many excellent open-source projects, including:
 ## Citation
 
 
-```plain
+```
 @misc{trinity-rft,
       title={Trinity-RFT: A General-Purpose and Unified Framework for Reinforcement Fine-Tuning of Large Language Models},
       author={Xuchen Pan and Yanxi Chen and Yushuo Chen and Yuchang Sun and Daoyuan Chen and Wenhao Zhang and Yuexiang Xie and Yilun Huang and Yilei Zhang and Dawei Gao and Yaliang Li and Bolin Ding and Jingren Zhou},

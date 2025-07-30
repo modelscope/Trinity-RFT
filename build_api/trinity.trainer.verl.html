@@ -97,15 +97,6 @@
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 </section>
-<section id="module-trinity.trainer.verl.converter">
-<span id="trinity-trainer-verl-converter-module"></span><h2>trinity.trainer.verl.converter module<a class="headerlink" href="#module-trinity.trainer.verl.converter" title="Link to this heading"></a></h2>
-<p>Convert Experiences to verl.DataProto.</p>
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.trainer.verl.converter.to_data_proto">
-<span class="sig-prename descclassname"><span class="pre">trinity.trainer.verl.converter.</span></span><span class="sig-name descname"><span class="pre">to_data_proto</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiences</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experiences" title="trinity.common.experience.Experiences"><span class="pre">Experiences</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataProto</span></span></span><a class="reference internal" href="../_modules/trinity/trainer/verl/converter.html#to_data_proto"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.trainer.verl.converter.to_data_proto" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</section>
 <section id="module-trinity.trainer.verl.dp_actor">
 <span id="trinity-trainer-verl-dp-actor-module"></span><h2>trinity.trainer.verl.dp_actor module<a class="headerlink" href="#module-trinity.trainer.verl.dp_actor" title="Link to this heading"></a></h2>
 <p>Single Process Actor.
@@ -265,6 +256,50 @@ or a hybrid engine based on the config.rollout</p>
 <span class="sig-name descname"><span class="pre">clear_optimizer_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/trainer/verl/fsdp_workers.html#CriticWorker.clear_optimizer_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.trainer.verl.fsdp_workers.CriticWorker.clear_optimizer_state" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+</dd></dl>
+
+</section>
+<section id="module-trinity.trainer.verl.utils">
+<span id="trinity-trainer-verl-utils-module"></span><h2>trinity.trainer.verl.utils module<a class="headerlink" href="#module-trinity.trainer.verl.utils" title="Link to this heading"></a></h2>
+<p>Utils for ccompatibility issues with verl.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.trainer.verl.utils.to_data_proto">
+<span class="sig-prename descclassname"><span class="pre">trinity.trainer.verl.utils.</span></span><span class="sig-name descname"><span class="pre">to_data_proto</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiences</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.html#trinity.common.experience.Experiences" title="trinity.common.experience.Experiences"><span class="pre">Experiences</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataProto</span></span></span><a class="reference internal" href="../_modules/trinity/trainer/verl/utils.html#to_data_proto"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.trainer.verl.utils.to_data_proto" title="Link to this definition"></a></dt>
+<dd><p>Convert Experiences to verl DataProto.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.trainer.verl.utils.compute_data_metrics">
+<span class="sig-prename descclassname"><span class="pre">trinity.trainer.verl.utils.</span></span><span class="sig-name descname"><span class="pre">compute_data_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataProto</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_critic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/trinity/trainer/verl/utils.html#compute_data_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.trainer.verl.utils.compute_data_metrics" title="Link to this definition"></a></dt>
+<dd><p>Computes various metrics from a batch of data for PPO training.
+Modified from verl.trainer.ppo.metric_utils.compute_data_metrics</p>
+<p>This function calculates metrics related to scores, rewards, advantages, returns, values,
+and sequence lengths from a batch of data. It provides statistical information (mean, max, min)
+for each metric category.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>batch</strong> – A DataProto object containing batch data with token-level scores, rewards, advantages, etc.</p></li>
+<li><p><strong>use_critic</strong> – Whether to include critic-specific metrics. Defaults to True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>critic/score/mean, max, min: Statistics about sequence scores</p></li>
+<li><p>critic/rewards/mean, max, min: Statistics about sequence rewards</p></li>
+<li><p>critic/advantages/mean, max, min: Statistics about advantages</p></li>
+<li><p>critic/returns/mean, max, min: Statistics about returns</p></li>
+<li><p>critic/values/mean, max, min: Statistics about critic values (if use_critic=True)</p></li>
+<li><p>critic/vf_explained_var: Explained variance of the value function (if use_critic=True)</p></li>
+<li><p>response_length/mean, max, min, clip_ratio: Statistics about response lengths</p></li>
+<li><p>prompt_length/mean, max, min, clip_ratio: Statistics about prompt lengths</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A dictionary of metrics including</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
