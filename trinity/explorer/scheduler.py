@@ -5,7 +5,7 @@ import re
 import time
 import traceback
 from collections import defaultdict, deque
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Dict, List, Optional, Tuple, Union
 
 import ray
@@ -24,7 +24,6 @@ class TaskWrapper:
 
     task: Task
     batch_id: Union[int, str]
-    repeat_times: int
 
 
 class RunnerWrapper:
@@ -75,7 +74,6 @@ class RunnerWrapper:
         try:
             for attempt in range(self.retry_times + 1):
                 try:
-                    task.task.rollout_args.n = task.repeat_times
                     status, exps = await asyncio.wait_for(
                         self.runner.run_task.remote(task.task), self.timeout
                     )
@@ -297,25 +295,27 @@ class Scheduler:
 
     def _split_and_submit_tasks(self, tasks: List[Task], batch_id: Union[int, str]) -> None:
         for i, task in enumerate(tasks):
-            task.batch_id = batch_id
-            task.task_id = i
             if self.max_repeat_times is None:
                 self.pending_tasks[batch_id].appendleft(
                     TaskWrapper(
-                        task=task,
+                        task=replace(task, batch_id=batch_id, task_id=i),
                         batch_id=batch_id,
-                        repeat_times=task.rollout_args.n,
                     )
                 )
                 continue
             rest_repeat_times = task.rollout_args.n
             while rest_repeat_times > 0:
+                repeat_times = min(self.max_repeat_times, rest_repeat_times)
                 task_wrapper = TaskWrapper(
-                    task=task,
+                    task=replace(
+                        task,
+                        batch_id=batch_id,
+                        task_id=i,
+                        rollout_args=replace(task.rollout_args, n=repeat_times),
+                    ),
                     batch_id=batch_id,
-                    repeat_times=min(self.max_repeat_times, rest_repeat_times),
                 )
-                rest_repeat_times -= task_wrapper.repeat_times
+                rest_repeat_times -= repeat_times
                 self.pending_tasks[batch_id].appendleft(task_wrapper)
 
     async def get_results(

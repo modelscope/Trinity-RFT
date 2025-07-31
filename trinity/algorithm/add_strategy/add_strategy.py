@@ -110,7 +110,7 @@ class GRPOAddStrategy(GroupAdvantageStrategy):
                 group_reward_mean = torch.tensor(0.0)
                 group_reward_std = torch.tensor(1.0)
             else:
-                rewards = torch.tensor([exp.reward for exp in exps])
+                rewards = torch.tensor([exp.reward for exp in exps], dtype=torch.float32)
                 group_reward_mean = torch.mean(rewards)
                 group_reward_std = torch.std(rewards)
             for exp in exps:
@@ -155,7 +155,7 @@ class OPMDAddStrategy(GroupAdvantageStrategy):
             if len(exps) == 1:
                 group_baseline = torch.tensor(0.0)
             else:
-                group_rewards = torch.tensor([exp.reward for exp in exps])
+                group_rewards = torch.tensor([exp.reward for exp in exps], dtype=torch.float32)
                 if self.opmd_baseline == "mean":
                     group_baseline = torch.mean(group_rewards)
                 else:
