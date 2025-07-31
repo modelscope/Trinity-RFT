@@ -105,7 +105,7 @@
 <div class="viewcode-block" id="EID">
 <a class="viewcode-back" href="../../../build_api/trinity.common.html#trinity.common.experience.EID">[docs]</a>
 <span class="nd">@dataclass</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">EID</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">EID</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Experience ID class to uniquely identify an experience.</span>
 
 <span class="sd">    To enable the full functionality of the experience grouping, user should manually set the `run` and `step` fields in custom workflows.</span>
@@ -161,7 +161,20 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">uid</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;EID(batch=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">batch</span><span class="si">}</span><span class="s2">, task=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="si">}</span><span class="s2">, run=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="si">}</span><span class="s2">, step=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="si">}</span><span class="s2">, uuid=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">suffix</span><span class="si">}</span><span class="s2">)&quot;</span></div>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;EID(batch=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">batch</span><span class="si">}</span><span class="s2">, task=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="si">}</span><span class="s2">, run=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="si">}</span><span class="s2">, step=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="si">}</span><span class="s2">, uuid=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">suffix</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+<div class="viewcode-block" id="EID.to_dict">
+<a class="viewcode-back" href="../../../build_api/trinity.common.html#trinity.common.experience.EID.to_dict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert the EID to a dictionary.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;batch&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch</span><span class="p">,</span>
+            <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="p">,</span>
+            <span class="s2">&quot;run&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">,</span>
+            <span class="s2">&quot;step&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">,</span>
+            <span class="s2">&quot;suffix&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">suffix</span><span class="p">,</span>
+        <span class="p">}</span></div>
+</div>
 
 
 
