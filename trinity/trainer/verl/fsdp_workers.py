@@ -42,7 +42,6 @@ from verl.single_controller.base import Worker
 from verl.single_controller.base.decorator import Dispatch, register
 from verl.utils import hf_processor, hf_tokenizer
 from verl.utils.activation_offload import enable_activation_offloading
-from verl.utils.checkpoint.fsdp_checkpoint_manager import FSDPCheckpointManager
 from verl.utils.debug import log_gpu_memory_usage
 from verl.utils.device import (
     get_device_id,
@@ -78,6 +77,8 @@ from verl.workers.sharding_manager.fsdp_ulysses import FSDPUlyssesShardingManage
 
 from trinity.common.config import AlgorithmConfig
 from trinity.common.constants import ROLLOUT_WEIGHT_SYNC_GROUP_NAME, SyncMethod
+from trinity.common.synchronizer import Synchronizer
+from trinity.trainer.verl.fsdp_checkpoint_manager import FSDPCheckpointManager
 from trinity.utils.distributed import init_process_group
 
 logger = logging.getLogger(__file__)
@@ -560,14 +561,12 @@ class ActorRolloutRefWorker(Worker):
                 lr_scheduler=self.actor_lr_scheduler,
                 processing_class=self.processor if self.processor is not None else self.tokenizer,
                 checkpoint_config=self.config.actor.checkpoint,
+                config=self.config.synchronizer,
             )
 
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
     def setup_weight_sync_group(self):
-        if (
-            hasattr(self.config, "synchronizer")
-            and getattr(self.config.synchronizer, "sync_method", None) == SyncMethod.NCCL
-        ):
+        if self.config.synchronizer.sync_method == SyncMethod.NCCL:
             model = self.actor_module_fsdp
             self.named_modules = []
             self.state_dict_meta = []
@@ -594,8 +593,8 @@ class ActorRolloutRefWorker(Worker):
                 master_address, master_port = self.get_availale_master_addr_port()
                 world_size = self.config.synchronizer.explorer_world_size + 1
                 print(f"Trainer init_process_group {master_address}:{master_port} ({world_size}).")
-                explorer = ray.get_actor(self.config.explorer_name)
-                setup_ref = explorer.setup_weight_sync_group.remote(
+                synchronizer = Synchronizer.get_actor(self.config.synchronizer)
+                setup_ref = synchronizer.setup_weight_sync_group.remote(
                     master_address, master_port, self.state_dict_meta
                 )
                 timeout = self.config.synchronizer.sync_timeout
@@ -627,6 +626,10 @@ class ActorRolloutRefWorker(Worker):
             torch.cuda.synchronize()
         torch.distributed.barrier()
         torch.cuda.empty_cache()
+
+    @register(dispatch_mode=Dispatch.ONE_TO_ALL)
+    def upload_state_dict(self, trainer_step: int):
+        self.checkpoint_manager.upload_state_dict(trainer_step)
 
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
     def set_algorithm(self, algo_config: AlgorithmConfig):
@@ -762,7 +765,14 @@ class ActorRolloutRefWorker(Worker):
         return output
 
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
-    def save_checkpoint(self, local_path, hdfs_path=None, global_step=0, max_ckpt_to_keep=None):
+    def save_checkpoint(
+        self,
+        local_path,
+        hdfs_path=None,
+        global_step=0,
+        max_ckpt_to_keep=None,
+        model_state_dict_only=False,
+    ):
         from verl.utils.logger import log_with_rank
 
         # only support save and load ckpt for actor
@@ -776,6 +786,7 @@ class ActorRolloutRefWorker(Worker):
             hdfs_path=hdfs_path,
             global_step=global_step,
             max_ckpt_to_keep=max_ckpt_to_keep,
+            model_state_dict_only=model_state_dict_only,
         )
         dist.barrier()
 
@@ -850,6 +861,10 @@ class ActorRolloutRefWorker(Worker):
         self.actor_optimizer.zero_grad()
         if self._is_offload_optimizer:
             offload_fsdp_optimizer(self.actor_optimizer)
+
+    @register(dispatch_mode=Dispatch.ONE_TO_ALL)
+    def wait_on_save_thread(self) -> None:
+        self.checkpoint_manager.wait_on_save_thread()
 
 
 class CriticWorker(Worker):
@@ -1276,3 +1291,7 @@ class CriticWorker(Worker):
         self.critic_optimizer.zero_grad()
         if self._is_offload_optimizer:
             offload_fsdp_optimizer(self.critic_optimizer)
+
+    @register(dispatch_mode=Dispatch.ONE_TO_ALL)
+    def wait_on_save_thread(self) -> None:
+        self.checkpoint_manager.wait_on_save_thread()

@@ -69,7 +69,6 @@ class DummyModel(InferenceModel):
         group_name: str,
         backend: str = "nccl",
         timeout: int = 1200,
-        update_with_checkpoint: bool = True,
     ) -> None:
         pass
 
@@ -91,7 +90,6 @@ class DummyAuxiliaryModel(InferenceModel):
         group_name: str,
         backend: str = "nccl",
         timeout: int = 1200,
-        update_with_checkpoint: bool = True,
     ) -> None:
         pass
 

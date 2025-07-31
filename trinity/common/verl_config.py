@@ -230,6 +230,7 @@ class Trainer:
     total_epochs: int = 30
     total_training_steps: Optional[int] = None
     project_name: str = ""
+    group_name: str = ""
     experiment_name: str = ""
     logger: List[str] = field(default_factory=list)
     val_generations_to_log_to_wandb: int = 0
@@ -306,6 +307,7 @@ class veRLConfig:
         self.trainer.sync_freq = config.synchronizer.sync_interval
         self.trainer.save_freq = config.trainer.save_interval
         self.trainer.project_name = config.project
+        self.trainer.group_name = config.group
         self.trainer.experiment_name = config.name
         self.trainer.default_local_dir = config.checkpoint_job_dir
         self.trainer.sft_warmup_steps = config.buffer.trainer_input.sft_warmup_steps

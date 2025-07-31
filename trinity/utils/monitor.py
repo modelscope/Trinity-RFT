@@ -80,7 +80,9 @@ class Monitor(ABC):
 
 @MONITOR.register_module("tensorboard")
 class TensorboardMonitor(Monitor):
-    def __init__(self, project: str, name: str, role: str, config: Config = None) -> None:
+    def __init__(
+        self, project: str, group: str, name: str, role: str, config: Config = None
+    ) -> None:
         self.tensorboard_dir = os.path.join(config.monitor.cache_dir, "tensorboard", role)
         os.makedirs(self.tensorboard_dir, exist_ok=True)
         self.logger = SummaryWriter(self.tensorboard_dir)
@@ -101,10 +103,14 @@ class TensorboardMonitor(Monitor):
 
 @MONITOR.register_module("wandb")
 class WandbMonitor(Monitor):
-    def __init__(self, project: str, name: str, role: str, config: Config = None) -> None:
+    def __init__(
+        self, project: str, group: str, name: str, role: str, config: Config = None
+    ) -> None:
+        if not group:
+            group = name
         self.logger = wandb.init(
             project=project,
-            group=name,
+            group=group,
             name=f"{name}_{role}",
             tags=[role],
             config=config,

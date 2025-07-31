@@ -22,7 +22,7 @@ from tests.tools import (
 )
 from trinity.cli.launcher import bench, both, explore, train
 from trinity.common.config import Config, StorageConfig
-from trinity.common.constants import StorageType, SyncMethod
+from trinity.common.constants import StorageType, SyncMethod, SyncStyle
 from trinity.common.models.utils import get_checkpoint_dir_with_step_num
 from trinity.manager.manager import CacheManager
 
@@ -99,7 +99,7 @@ class TestTrainerCountdown(BaseTrainerCase):
         self.assertTrue(len(os.listdir(os.path.join(checkpoint_step_8, "actor"))) > 0)
         self.assertEqual(step_num, 8)
         # TODO: Reinit will fail when using v1 engine, find a way to fix it
-        ray.init(ignore_reinit_error=True)
+        ray.init(ignore_reinit_error=True, namespace=self.config.ray_namespace)
         # test bench mode
         self.config.mode = "bench"
         self.config.synchronizer.sync_method = SyncMethod.CHECKPOINT
@@ -362,6 +362,7 @@ class TestFullyAsyncMode(unittest.TestCase):
             use_priority_queue=use_priority_queue,
         )
         config.synchronizer.sync_method = SyncMethod.CHECKPOINT
+        config.synchronizer.sync_style = SyncStyle.DYNAMIC_BY_EXPLORER
         config.synchronizer.sync_interval = 8
         config.monitor.monitor_type = "tensorboard"
         trainer_config = deepcopy(config)

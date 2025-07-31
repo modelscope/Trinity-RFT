@@ -71,6 +71,10 @@ class AsyncQueue(asyncio.Queue, QueueBuffer):
     async def close(self) -> None:
         """Close the queue."""
         self._closed = True
+        for getter in self._getters:
+            if not getter.done():
+                getter.set_exception(StopAsyncIteration())
+        self._getters.clear()
 
     def stopped(self) -> bool:
         """Check if there is no more data to read."""
