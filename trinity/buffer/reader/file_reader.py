@@ -1,5 +1,6 @@
 """Filed based buffer reader."""
 
+import copy
 from typing import List, Optional
 
 import datasets
@@ -311,10 +312,10 @@ class RolloutDataReader(BufferReader):
             ), "`default_workflow_type` or `workflow_key` is required"
             task = Task(
                 workflow=workflow_class,
-                format_args=self.meta.format,
-                rollout_args=self.meta.rollout_args,
-                workflow_args=self.meta.workflow_args,
-                reward_fn_args=self.meta.reward_fn_args,
+                format_args=copy.deepcopy(self.meta.format),
+                rollout_args=copy.deepcopy(self.meta.rollout_args),
+                workflow_args=copy.deepcopy(self.meta.workflow_args),
+                reward_fn_args=copy.deepcopy(self.meta.reward_fn_args),
                 is_eval=self.meta.task_type == TaskType.EVAL,
                 reward_fn=reward_fn,
                 raw_task=sample,
