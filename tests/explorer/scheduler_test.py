@@ -466,7 +466,6 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
 
         n_steps = 3
         for i in range(1, n_steps + 1):
-            print(f"step {i}")
             scheduler.schedule(tasks, batch_id=i)
             statuses, exps = await scheduler.get_results(batch_id=i)
             self.assertEqual(len(statuses), 2 * 4)

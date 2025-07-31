@@ -65,7 +65,7 @@ class OPMDAdvantageFn(AdvantageFn):
                             torch.tensor(id2score[idx], dtype=torch.float32)
                         )
                     elif opmd_baseline == "logavgexp":
-                        rewards_tensor = torch.tensor(id2score[idx])
+                        rewards_tensor = torch.tensor(id2score[idx], dtype=torch.float32)
                         # here we use the fact that logavgexp(x) = logsumexp(x) - log(len(x))
                         id2baseline[idx] = tau * (
                             torch.logsumexp(rewards_tensor / tau, dim=-1)
