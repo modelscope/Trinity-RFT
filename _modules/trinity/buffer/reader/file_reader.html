@@ -90,6 +90,7 @@
   <h1>Source code for trinity.buffer.reader.file_reader</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Filed based buffer reader.&quot;&quot;&quot;</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">datasets</span>
@@ -438,10 +439,10 @@
             <span class="p">),</span> <span class="s2">&quot;`default_workflow_type` or `workflow_key` is required&quot;</span>
             <span class="n">task</span> <span class="o">=</span> <span class="n">Task</span><span class="p">(</span>
                 <span class="n">workflow</span><span class="o">=</span><span class="n">workflow_class</span><span class="p">,</span>
-                <span class="n">format_args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">format</span><span class="p">,</span>
-                <span class="n">rollout_args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">rollout_args</span><span class="p">,</span>
-                <span class="n">workflow_args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">workflow_args</span><span class="p">,</span>
-                <span class="n">reward_fn_args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">reward_fn_args</span><span class="p">,</span>
+                <span class="n">format_args</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">format</span><span class="p">),</span>
+                <span class="n">rollout_args</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">rollout_args</span><span class="p">),</span>
+                <span class="n">workflow_args</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">workflow_args</span><span class="p">),</span>
+                <span class="n">reward_fn_args</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">reward_fn_args</span><span class="p">),</span>
                 <span class="n">is_eval</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">task_type</span> <span class="o">==</span> <span class="n">TaskType</span><span class="o">.</span><span class="n">EVAL</span><span class="p">,</span>
                 <span class="n">reward_fn</span><span class="o">=</span><span class="n">reward_fn</span><span class="p">,</span>
                 <span class="n">raw_task</span><span class="o">=</span><span class="n">sample</span><span class="p">,</span>
