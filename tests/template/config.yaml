@@ -34,6 +34,7 @@ buffer:
       path: 'placeholder'
       split: 'train'
     default_workflow_type: ''
+    default_eval_workflow_type: ''
     default_reward_fn_type: ''
 explorer:
   eval_interval: 100

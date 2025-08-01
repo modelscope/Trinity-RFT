@@ -11,6 +11,7 @@ buffer:
       storage_type: file
       path: ''
     default_workflow_type: ''
+    default_eval_workflow_type: ''
     default_reward_fn_type: ''
 explorer:
   runner_num: 8

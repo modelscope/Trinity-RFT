@@ -41,6 +41,7 @@ dependencies = [
     "openai",
     "jsonlines",
     "sortedcontainers",
+    "word2number",
 ]
 
 [project.scripts]
@@ -66,7 +67,7 @@ dev = [
     "pytest>=8.0.0",
     "pytest-json-ctrf",
     "parameterized",
-    "matplotlib"
+    "matplotlib",
 ]
 
 doc = [

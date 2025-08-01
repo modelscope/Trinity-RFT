@@ -98,6 +98,7 @@ class StorageConfig:
 
     # used for rollout tasks
     default_workflow_type: Optional[str] = None
+    default_eval_workflow_type: Optional[str] = None
     default_reward_fn_type: Optional[str] = None
     rollout_args: GenerationConfig = field(default_factory=GenerationConfig)
     workflow_args: dict = field(default_factory=dict)
@@ -276,6 +277,7 @@ class ExplorerInput:
     eval_tasksets: List[StorageConfig] = field(default_factory=list)
     # The following args provide default values for the corresponding args in `taskset` and `eval_tasksets`
     default_workflow_type: Optional[str] = None
+    default_eval_workflow_type: Optional[str] = None
     default_reward_fn_type: Optional[str] = None
     system_prompt: Optional[str] = None
     reply_prefix: Optional[str] = None
@@ -479,6 +481,10 @@ class Config:
             self.buffer.explorer_input.taskset.default_workflow_type = (
                 self.buffer.explorer_input.default_workflow_type
             )
+        if self.buffer.explorer_input.taskset.default_eval_workflow_type is None:
+            self.buffer.explorer_input.taskset.default_eval_workflow_type = (
+                self.buffer.explorer_input.default_eval_workflow_type
+            )
         if self.buffer.explorer_input.taskset.default_reward_fn_type is None:
             self.buffer.explorer_input.taskset.default_reward_fn_type = (
                 self.buffer.explorer_input.default_reward_fn_type
@@ -504,6 +510,10 @@ class Config:
                 dataset.name = f"eval_taskset_{idx}"
             if dataset.default_workflow_type is None:
                 dataset.default_workflow_type = self.buffer.explorer_input.default_workflow_type
+            if dataset.default_eval_workflow_type is None:
+                dataset.default_eval_workflow_type = (
+                    self.buffer.explorer_input.default_eval_workflow_type
+                )
             if dataset.default_reward_fn_type is None:
                 dataset.default_reward_fn_type = self.buffer.explorer_input.default_reward_fn_type
             if dataset.format.system_prompt is None:

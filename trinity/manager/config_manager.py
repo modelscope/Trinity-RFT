@@ -142,7 +142,9 @@ class ConfigManager:
         if st.session_state["sft_warmup_steps"] > 0:
             self.get_configs("sft_warmup_dataset_args")
 
-        self.get_configs("default_workflow_type", "default_reward_fn_type")
+        self.get_configs(
+            "default_workflow_type", "default_eval_workflow_type", "default_reward_fn_type"
+        )
 
         self.get_configs(
             "actor_ppo_micro_batch_size_per_gpu",
@@ -166,7 +168,9 @@ class ConfigManager:
     def _expert_buffer_part(self):
         self.get_configs("total_epochs", "train_batch_size")
 
-        self.get_configs("default_workflow_type", "default_reward_fn_type")
+        self.get_configs(
+            "default_workflow_type", "default_eval_workflow_type", "default_reward_fn_type"
+        )
         self.get_configs("system_prompt")
         self.get_configs("reply_prefix")
 
@@ -544,6 +548,7 @@ class ConfigManager:
                 },
                 "eval_tasksets": [],
                 "default_workflow_type": st.session_state["default_workflow_type"],
+                "default_eval_workflow_type": st.session_state["default_eval_workflow_type"],
                 "default_reward_fn_type": st.session_state["default_reward_fn_type"],
                 "system_prompt": st.session_state["system_prompt"],
                 "reply_prefix": st.session_state["reply_prefix"],

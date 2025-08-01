@@ -276,6 +276,12 @@ class Explorer:
             self.logger.warning("No evaluation data samples. Skip evaluation.")
             return
         self.logger.info(f"Evaluation at step {self.explore_step_num} started.")
+
+        if self.config.buffer.explorer_input.default_eval_workflow_type:
+            self.logger.info(
+                f"Use '{self.config.buffer.explorer_input.default_eval_workflow_type}' for evaluation."
+            )
+
         for eval_taskset_config in self.config.buffer.explorer_input.eval_tasksets:
             self.logger.info(
                 f"Evaluation on {eval_taskset_config.name} at step {self.explore_step_num} started."
