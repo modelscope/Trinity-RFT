@@ -277,9 +277,9 @@ class Explorer:
             return
         self.logger.info(f"Evaluation at step {self.explore_step_num} started.")
 
-        if self.config.buffer.explorer_input.default_eval_type:
+        if self.config.buffer.explorer_input.default_eval_workflow_type:
             self.logger.info(
-                f"Use the evaluation: '{self.config.buffer.explorer_input.default_eval_type}'."
+                f"Use '{self.config.buffer.explorer_input.default_eval_workflow_type}' for evaluation."
             )
 
         for eval_taskset_config in self.config.buffer.explorer_input.eval_tasksets:

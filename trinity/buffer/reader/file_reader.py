@@ -289,8 +289,8 @@ class RolloutDataReader(BufferReader):
         self.task_type = meta.task_type
         self.default_workflow_cls = WORKFLOWS.get(meta.default_workflow_type)  # type: ignore
         self.default_eval_workflow_cls = None
-        if getattr(meta, "default_eval_type", None):
-            self.default_eval_workflow_cls = WORKFLOWS.get(meta.default_eval_type)
+        if getattr(meta, "default_eval_workflow_type", None):
+            self.default_eval_workflow_cls = WORKFLOWS.get(meta.default_eval_workflow_type)
         self.default_reward_fn_cls = REWARD_FUNCTIONS.get(meta.default_reward_fn_type)  # type: ignore
 
     def read(
