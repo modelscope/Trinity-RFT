@@ -22,25 +22,23 @@ class CorrectBiasAddStrategy(GRPOAddStrategy):
         self, group_id: str, exps: List[Experience]
     ) -> Tuple[List[Experience], Dict]:
         with torch.no_grad():
+            rewards = torch.tensor([exp.reward for exp in exps], dtype=torch.float32)
+
             if len(exps) == 1:
                 group_reward_mean = torch.tensor(0.0)
                 group_reward_std = torch.tensor(1.0)
             else:
-                rewards = torch.tensor([exp.reward for exp in exps])
-                corrected_rewards = rewards.clone()
-
                 # correct bias
                 old_log_probs = torch.tensor([torch.mean(exp.logprobs, axis=-1) for exp in exps])
                 group_ranks = torch.argsort(torch.argsort(old_log_probs))
-                corrected_rewards = corrected_rewards * (1 - group_ranks * self.rank_penalty)
+                group_ranks = group_ranks / len(group_ranks)
+                rewards = rewards * (1 - group_ranks * self.rank_penalty)
 
-                group_reward_mean = torch.mean(corrected_rewards)
-                group_reward_std = torch.std(corrected_rewards)
+                group_reward_mean = torch.mean(rewards)
+                group_reward_std = torch.std(rewards)
 
             for i, exp in enumerate(exps):
-                score = (corrected_rewards[i] - group_reward_mean) / (
-                    group_reward_std + self.epsilon
-                )
+                score = (rewards[i] - group_reward_mean) / (group_reward_std + self.epsilon)
                 exp.advantages = score * exp.action_mask
                 exp.returns = exp.advantages.clone()
 
