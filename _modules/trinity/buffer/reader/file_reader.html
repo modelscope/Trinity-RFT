@@ -412,6 +412,9 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">task_type</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">task_type</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">default_workflow_cls</span> <span class="o">=</span> <span class="n">WORKFLOWS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">default_workflow_type</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_eval_workflow_cls</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="s2">&quot;default_eval_workflow_type&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">default_eval_workflow_cls</span> <span class="o">=</span> <span class="n">WORKFLOWS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">default_eval_workflow_type</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">default_reward_fn_cls</span> <span class="o">=</span> <span class="n">REWARD_FUNCTIONS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">default_reward_fn_type</span><span class="p">)</span>  <span class="c1"># type: ignore</span></div>
 
 
@@ -424,11 +427,14 @@
         <span class="n">tasks</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">read_batch</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">samples</span><span class="p">:</span>
-            <span class="n">workflow_class</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">WORKFLOWS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">workflow_key</span><span class="p">])</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflow_key</span> <span class="ow">in</span> <span class="n">sample</span>
-                <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_workflow_cls</span>
-            <span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task_type</span> <span class="o">==</span> <span class="n">TaskType</span><span class="o">.</span><span class="n">EVAL</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_eval_workflow_cls</span><span class="p">:</span>
+                <span class="n">workflow_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_eval_workflow_cls</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">workflow_class</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">WORKFLOWS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">workflow_key</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflow_key</span> <span class="ow">in</span> <span class="n">sample</span>
+                    <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_workflow_cls</span>
+                <span class="p">)</span>
             <span class="n">reward_fn</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">REWARD_FUNCTIONS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">reward_fn_key</span><span class="p">])</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reward_fn_key</span> <span class="ow">in</span> <span class="n">sample</span>

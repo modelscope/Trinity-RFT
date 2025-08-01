@@ -237,28 +237,8 @@
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="trinity.utils.eval_utils.fix_fracs">
-<span class="sig-prename descclassname"><span class="pre">trinity.utils.eval_utils.</span></span><span class="sig-name descname"><span class="pre">fix_fracs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/utils/eval_utils.html#fix_fracs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.eval_utils.fix_fracs" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.utils.eval_utils.fix_a_slash_b">
-<span class="sig-prename descclassname"><span class="pre">trinity.utils.eval_utils.</span></span><span class="sig-name descname"><span class="pre">fix_a_slash_b</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/utils/eval_utils.html#fix_a_slash_b"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.eval_utils.fix_a_slash_b" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="trinity.utils.eval_utils.remove_right_units">
 <span class="sig-prename descclassname"><span class="pre">trinity.utils.eval_utils.</span></span><span class="sig-name descname"><span class="pre">remove_right_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/utils/eval_utils.html#remove_right_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.eval_utils.remove_right_units" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.utils.eval_utils.fix_sqrt">
-<span class="sig-prename descclassname"><span class="pre">trinity.utils.eval_utils.</span></span><span class="sig-name descname"><span class="pre">fix_sqrt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/utils/eval_utils.html#fix_sqrt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.eval_utils.fix_sqrt" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.utils.eval_utils.strip_string">
-<span class="sig-prename descclassname"><span class="pre">trinity.utils.eval_utils.</span></span><span class="sig-name descname"><span class="pre">strip_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/utils/eval_utils.html#strip_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.eval_utils.strip_string" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>
@@ -320,6 +300,78 @@ it is formatted using formatException() and appended to the message.</p>
 <dd class="field-odd"><p>logging.Logger</p>
 </dd>
 </dl>
+</dd></dl>
+
+</section>
+<section id="module-trinity.utils.math_eval_utils">
+<span id="trinity-utils-math-eval-utils-module"></span><h2>trinity.utils.math_eval_utils module<a class="headerlink" href="#module-trinity.utils.math_eval_utils" title="Link to this heading"></a></h2>
+<p>Utility functions for strictly parsing and evaluating mathematical answers.</p>
+<p>This module is a modified and simplified version of the official evaluation code
+for Qwen2.5-Math, designed for easier standalone use.</p>
+<p>Original source: <a class="reference external" href="https://github.com/QwenLM/Qwen2.5-Math">https://github.com/QwenLM/Qwen2.5-Math</a></p>
+<p>Key modifications include:
+1.  Retained only the core parsing logic for the common <cite>qwen_boxed</cite> prompt format.
+2.  Consolidated essential parsing and evaluation functions from multiple files</p>
+<blockquote>
+<div><p>into this single module.</p>
+</div></blockquote>
+<ol class="arabic simple" start="3">
+<li><p>Simplified benchmark handling and conditional logic for broader applicability.</p></li>
+<li><p>Simplified or removed calls to external tools like TIR.</p></li>
+</ol>
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.utils.math_eval_utils.verify_math_answer">
+<span class="sig-prename descclassname"><span class="pre">trinity.utils.math_eval_utils.</span></span><span class="sig-name descname"><span class="pre">verify_math_answer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response_text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ground_truth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/utils/math_eval_utils.html#verify_math_answer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.math_eval_utils.verify_math_answer" title="Link to this definition"></a></dt>
+<dd><p>Strictly compare the equality of response and groundtruth.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.utils.math_eval_utils.extract_answer">
+<span class="sig-prename descclassname"><span class="pre">trinity.utils.math_eval_utils.</span></span><span class="sig-name descname"><span class="pre">extract_answer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response_text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/utils/math_eval_utils.html#extract_answer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.math_eval_utils.extract_answer" title="Link to this definition"></a></dt>
+<dd><p>Extract the equation from the string.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.utils.math_eval_utils.strip_string">
+<span class="sig-prename descclassname"><span class="pre">trinity.utils.math_eval_utils.</span></span><span class="sig-name descname"><span class="pre">strip_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/utils/math_eval_utils.html#strip_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.math_eval_utils.strip_string" title="Link to this definition"></a></dt>
+<dd><p>Clean and normalize math answer strings.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.utils.math_eval_utils.fix_fracs">
+<span class="sig-prename descclassname"><span class="pre">trinity.utils.math_eval_utils.</span></span><span class="sig-name descname"><span class="pre">fix_fracs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/utils/math_eval_utils.html#fix_fracs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.math_eval_utils.fix_fracs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.utils.math_eval_utils.fix_a_slash_b">
+<span class="sig-prename descclassname"><span class="pre">trinity.utils.math_eval_utils.</span></span><span class="sig-name descname"><span class="pre">fix_a_slash_b</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/utils/math_eval_utils.html#fix_a_slash_b"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.math_eval_utils.fix_a_slash_b" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.utils.math_eval_utils.fix_sqrt">
+<span class="sig-prename descclassname"><span class="pre">trinity.utils.math_eval_utils.</span></span><span class="sig-name descname"><span class="pre">fix_sqrt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/utils/math_eval_utils.html#fix_sqrt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.math_eval_utils.fix_sqrt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.utils.math_eval_utils.convert_word_number">
+<span class="sig-prename descclassname"><span class="pre">trinity.utils.math_eval_utils.</span></span><span class="sig-name descname"><span class="pre">convert_word_number</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/trinity/utils/math_eval_utils.html#convert_word_number"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.math_eval_utils.convert_word_number" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.utils.math_eval_utils.math_equal">
+<span class="sig-prename descclassname"><span class="pre">trinity.utils.math_eval_utils.</span></span><span class="sig-name descname"><span class="pre">math_equal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/utils/math_eval_utils.html#math_equal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.math_eval_utils.math_equal" title="Link to this definition"></a></dt>
+<dd><p>Checks the mathematical equality of two strings by trying different methods.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.utils.math_eval_utils.numeric_equal">
+<span class="sig-prename descclassname"><span class="pre">trinity.utils.math_eval_utils.</span></span><span class="sig-name descname"><span class="pre">numeric_equal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/utils/math_eval_utils.html#numeric_equal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.math_eval_utils.numeric_equal" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.utils.math_eval_utils.symbolic_equal">
+<span class="sig-prename descclassname"><span class="pre">trinity.utils.math_eval_utils.</span></span><span class="sig-name descname"><span class="pre">symbolic_equal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/utils/math_eval_utils.html#symbolic_equal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.utils.math_eval_utils.symbolic_equal" title="Link to this definition"></a></dt>
+<dd><p>Compares two strings for symbolic equivalence using sympy.</p>
 </dd></dl>
 
 </section>

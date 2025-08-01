@@ -248,7 +248,9 @@
         <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_steps&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;sft_warmup_dataset_args&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;default_workflow_type&quot;</span><span class="p">,</span> <span class="s2">&quot;default_reward_fn_type&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span>
+            <span class="s2">&quot;default_workflow_type&quot;</span><span class="p">,</span> <span class="s2">&quot;default_eval_workflow_type&quot;</span><span class="p">,</span> <span class="s2">&quot;default_reward_fn_type&quot;</span>
+        <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span>
             <span class="s2">&quot;actor_ppo_micro_batch_size_per_gpu&quot;</span><span class="p">,</span>
@@ -273,7 +275,9 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_expert_buffer_part</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;total_epochs&quot;</span><span class="p">,</span> <span class="s2">&quot;train_batch_size&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;default_workflow_type&quot;</span><span class="p">,</span> <span class="s2">&quot;default_reward_fn_type&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span>
+            <span class="s2">&quot;default_workflow_type&quot;</span><span class="p">,</span> <span class="s2">&quot;default_eval_workflow_type&quot;</span><span class="p">,</span> <span class="s2">&quot;default_reward_fn_type&quot;</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;system_prompt&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;reply_prefix&quot;</span><span class="p">)</span>
 
@@ -654,6 +658,7 @@
                 <span class="p">},</span>
                 <span class="s2">&quot;eval_tasksets&quot;</span><span class="p">:</span> <span class="p">[],</span>
                 <span class="s2">&quot;default_workflow_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;default_workflow_type&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;default_eval_workflow_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;default_eval_workflow_type&quot;</span><span class="p">],</span>
                 <span class="s2">&quot;default_reward_fn_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;default_reward_fn_type&quot;</span><span class="p">],</span>
                 <span class="s2">&quot;system_prompt&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;system_prompt&quot;</span><span class="p">],</span>
                 <span class="s2">&quot;reply_prefix&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;reply_prefix&quot;</span><span class="p">],</span>

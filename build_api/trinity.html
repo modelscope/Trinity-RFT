@@ -464,6 +464,7 @@
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.workflows.html#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.workflows.html#module-trinity.common.workflows.customized_math_workflows">trinity.common.workflows.customized_math_workflows module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.workflows.html#module-trinity.common.workflows.customized_toolcall_workflows">trinity.common.workflows.customized_toolcall_workflows module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.workflows.html#module-trinity.common.workflows.eval_workflow">trinity.common.workflows.eval_workflow module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.workflows.html#module-trinity.common.workflows.math_rm_workflow">trinity.common.workflows.math_rm_workflow module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.workflows.html#module-trinity.common.workflows.step_wise_workflow">trinity.common.workflows.step_wise_workflow module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.workflows.html#module-trinity.common.workflows.workflow">trinity.common.workflows.workflow module</a></li>
@@ -517,6 +518,7 @@
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.config.StorageConfig.reuse_cooldown_time"><code class="docutils literal notranslate"><span class="pre">StorageConfig.reuse_cooldown_time</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.config.StorageConfig.replay_buffer_kwargs"><code class="docutils literal notranslate"><span class="pre">StorageConfig.replay_buffer_kwargs</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.config.StorageConfig.default_workflow_type"><code class="docutils literal notranslate"><span class="pre">StorageConfig.default_workflow_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.config.StorageConfig.default_eval_workflow_type"><code class="docutils literal notranslate"><span class="pre">StorageConfig.default_eval_workflow_type</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.config.StorageConfig.default_reward_fn_type"><code class="docutils literal notranslate"><span class="pre">StorageConfig.default_reward_fn_type</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.config.StorageConfig.rollout_args"><code class="docutils literal notranslate"><span class="pre">StorageConfig.rollout_args</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.config.StorageConfig.workflow_args"><code class="docutils literal notranslate"><span class="pre">StorageConfig.workflow_args</span></code></a></li>
@@ -622,6 +624,7 @@
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.config.ExplorerInput.taskset"><code class="docutils literal notranslate"><span class="pre">ExplorerInput.taskset</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.config.ExplorerInput.eval_tasksets"><code class="docutils literal notranslate"><span class="pre">ExplorerInput.eval_tasksets</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.config.ExplorerInput.default_workflow_type"><code class="docutils literal notranslate"><span class="pre">ExplorerInput.default_workflow_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.config.ExplorerInput.default_eval_workflow_type"><code class="docutils literal notranslate"><span class="pre">ExplorerInput.default_eval_workflow_type</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.config.ExplorerInput.default_reward_fn_type"><code class="docutils literal notranslate"><span class="pre">ExplorerInput.default_reward_fn_type</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.config.ExplorerInput.system_prompt"><code class="docutils literal notranslate"><span class="pre">ExplorerInput.system_prompt</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.html#trinity.common.config.ExplorerInput.reply_prefix"><code class="docutils literal notranslate"><span class="pre">ExplorerInput.reply_prefix</span></code></a></li>
@@ -1410,11 +1413,7 @@
 <li class="toctree-l3"><a class="reference internal" href="trinity.utils.html#trinity.utils.eval_utils.is_equiv"><code class="docutils literal notranslate"><span class="pre">is_equiv()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.utils.html#trinity.utils.eval_utils.remove_boxed"><code class="docutils literal notranslate"><span class="pre">remove_boxed()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.utils.html#trinity.utils.eval_utils.last_boxed_only_string"><code class="docutils literal notranslate"><span class="pre">last_boxed_only_string()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.utils.html#trinity.utils.eval_utils.fix_fracs"><code class="docutils literal notranslate"><span class="pre">fix_fracs()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.utils.html#trinity.utils.eval_utils.fix_a_slash_b"><code class="docutils literal notranslate"><span class="pre">fix_a_slash_b()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.utils.html#trinity.utils.eval_utils.remove_right_units"><code class="docutils literal notranslate"><span class="pre">remove_right_units()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.utils.html#trinity.utils.eval_utils.fix_sqrt"><code class="docutils literal notranslate"><span class="pre">fix_sqrt()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.utils.html#trinity.utils.eval_utils.strip_string"><code class="docutils literal notranslate"><span class="pre">strip_string()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="trinity.utils.html#module-trinity.utils.log">trinity.utils.log module</a><ul>
@@ -1424,6 +1423,19 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.utils.html#trinity.utils.log.get_logger"><code class="docutils literal notranslate"><span class="pre">get_logger()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.utils.html#module-trinity.utils.math_eval_utils">trinity.utils.math_eval_utils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.utils.html#trinity.utils.math_eval_utils.verify_math_answer"><code class="docutils literal notranslate"><span class="pre">verify_math_answer()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.utils.html#trinity.utils.math_eval_utils.extract_answer"><code class="docutils literal notranslate"><span class="pre">extract_answer()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.utils.html#trinity.utils.math_eval_utils.strip_string"><code class="docutils literal notranslate"><span class="pre">strip_string()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.utils.html#trinity.utils.math_eval_utils.fix_fracs"><code class="docutils literal notranslate"><span class="pre">fix_fracs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.utils.html#trinity.utils.math_eval_utils.fix_a_slash_b"><code class="docutils literal notranslate"><span class="pre">fix_a_slash_b()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.utils.html#trinity.utils.math_eval_utils.fix_sqrt"><code class="docutils literal notranslate"><span class="pre">fix_sqrt()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.utils.html#trinity.utils.math_eval_utils.convert_word_number"><code class="docutils literal notranslate"><span class="pre">convert_word_number()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.utils.html#trinity.utils.math_eval_utils.math_equal"><code class="docutils literal notranslate"><span class="pre">math_equal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.utils.html#trinity.utils.math_eval_utils.numeric_equal"><code class="docutils literal notranslate"><span class="pre">numeric_equal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.utils.html#trinity.utils.math_eval_utils.symbolic_equal"><code class="docutils literal notranslate"><span class="pre">symbolic_equal()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="trinity.utils.html#module-trinity.utils.monitor">trinity.utils.monitor module</a><ul>

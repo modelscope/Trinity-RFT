@@ -91,6 +91,8 @@
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">regex</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">re</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.math_eval_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">strip_string</span>
+
 <span class="n">ANS_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;#### (\-?[0-9\.\,]+)&quot;</span><span class="p">)</span>
 <span class="n">INVALID_ANS</span> <span class="o">=</span> <span class="s2">&quot;[invalid]&quot;</span>
 
@@ -298,61 +300,6 @@
 
 
 <span class="c1"># Adapted from https://github.com/EleutherAI/lm-evaluation-harness/blob/main/lm_eval/tasks/hendrycks_math/utils.py</span>
-<div class="viewcode-block" id="fix_fracs">
-<a class="viewcode-back" href="../../../build_api/trinity.utils.html#trinity.utils.eval_utils.fix_fracs">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">fix_fracs</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
-    <span class="n">substrs</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">frac&quot;</span><span class="p">)</span>
-    <span class="n">new_str</span> <span class="o">=</span> <span class="n">substrs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">substrs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">substrs</span> <span class="o">=</span> <span class="n">substrs</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-        <span class="k">for</span> <span class="n">substr</span> <span class="ow">in</span> <span class="n">substrs</span><span class="p">:</span>
-            <span class="n">new_str</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">frac&quot;</span>
-            <span class="k">if</span> <span class="n">substr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;{&quot;</span><span class="p">:</span>
-                <span class="n">new_str</span> <span class="o">+=</span> <span class="n">substr</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">substr</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span>
-                <span class="k">except</span><span class="p">:</span>  <span class="c1"># noqa: E722</span>
-                    <span class="k">return</span> <span class="n">string</span>
-                <span class="n">a</span> <span class="o">=</span> <span class="n">substr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="n">b</span> <span class="o">=</span> <span class="n">substr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">b</span> <span class="o">!=</span> <span class="s2">&quot;{&quot;</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">substr</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
-                        <span class="n">post_substr</span> <span class="o">=</span> <span class="n">substr</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
-                        <span class="n">new_str</span> <span class="o">+=</span> <span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="n">a</span> <span class="o">+</span> <span class="s2">&quot;}{&quot;</span> <span class="o">+</span> <span class="n">b</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span> <span class="o">+</span> <span class="n">post_substr</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">new_str</span> <span class="o">+=</span> <span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="n">a</span> <span class="o">+</span> <span class="s2">&quot;}{&quot;</span> <span class="o">+</span> <span class="n">b</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">substr</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
-                        <span class="n">post_substr</span> <span class="o">=</span> <span class="n">substr</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
-                        <span class="n">new_str</span> <span class="o">+=</span> <span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="n">a</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span> <span class="o">+</span> <span class="n">b</span> <span class="o">+</span> <span class="n">post_substr</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">new_str</span> <span class="o">+=</span> <span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="n">a</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span> <span class="o">+</span> <span class="n">b</span>
-    <span class="n">string</span> <span class="o">=</span> <span class="n">new_str</span>
-    <span class="k">return</span> <span class="n">string</span></div>
-
-
-
-<span class="c1"># Adapted from https://github.com/EleutherAI/lm-evaluation-harness/blob/main/lm_eval/tasks/hendrycks_math/utils.py</span>
-<div class="viewcode-block" id="fix_a_slash_b">
-<a class="viewcode-back" href="../../../build_api/trinity.utils.html#trinity.utils.eval_utils.fix_a_slash_b">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">fix_a_slash_b</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">string</span>
-    <span class="n">a</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">b</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">a</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
-        <span class="n">b</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
-        <span class="k">assert</span> <span class="n">string</span> <span class="o">==</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
-        <span class="n">new_string</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">frac{&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;}{&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span>
-        <span class="k">return</span> <span class="n">new_string</span>
-    <span class="k">except</span><span class="p">:</span>  <span class="c1"># noqa: E722</span>
-        <span class="k">return</span> <span class="n">string</span></div>
-
-
-
-<span class="c1"># Adapted from https://github.com/EleutherAI/lm-evaluation-harness/blob/main/lm_eval/tasks/hendrycks_math/utils.py</span>
 <div class="viewcode-block" id="remove_right_units">
 <a class="viewcode-back" href="../../../build_api/trinity.utils.html#trinity.utils.eval_utils.remove_right_units">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">remove_right_units</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
@@ -363,93 +310,6 @@
         <span class="k">return</span> <span class="n">splits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">string</span></div>
-
-
-
-<span class="c1"># Adapted from https://github.com/EleutherAI/lm-evaluation-harness/blob/main/lm_eval/tasks/hendrycks_math/utils.py</span>
-<div class="viewcode-block" id="fix_sqrt">
-<a class="viewcode-back" href="../../../build_api/trinity.utils.html#trinity.utils.eval_utils.fix_sqrt">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">fix_sqrt</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
-    <span class="k">if</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">sqrt&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">string</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">string</span>
-    <span class="n">splits</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">sqrt&quot;</span><span class="p">)</span>
-    <span class="n">new_string</span> <span class="o">=</span> <span class="n">splits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">for</span> <span class="n">split</span> <span class="ow">in</span> <span class="n">splits</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
-        <span class="k">if</span> <span class="n">split</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;{&quot;</span><span class="p">:</span>
-            <span class="n">a</span> <span class="o">=</span> <span class="n">split</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">new_substr</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">sqrt{&quot;</span> <span class="o">+</span> <span class="n">a</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span> <span class="o">+</span> <span class="n">split</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">new_substr</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">sqrt&quot;</span> <span class="o">+</span> <span class="n">split</span>
-        <span class="n">new_string</span> <span class="o">+=</span> <span class="n">new_substr</span>
-    <span class="k">return</span> <span class="n">new_string</span></div>
-
-
-
-<span class="c1"># Adapted from https://github.com/EleutherAI/lm-evaluation-harness/blob/main/lm_eval/tasks/hendrycks_math/utils.py</span>
-<div class="viewcode-block" id="strip_string">
-<a class="viewcode-back" href="../../../build_api/trinity.utils.html#trinity.utils.eval_utils.strip_string">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">strip_string</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
-    <span class="c1"># linebreaks</span>
-    <span class="n">string</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-
-    <span class="c1"># remove inverse spaces</span>
-    <span class="n">string</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">!&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-
-    <span class="c1"># replace \\ with \</span>
-    <span class="n">string</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\\\\</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">)</span>
-
-    <span class="c1"># replace tfrac and dfrac with frac</span>
-    <span class="n">string</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;tfrac&quot;</span><span class="p">,</span> <span class="s2">&quot;frac&quot;</span><span class="p">)</span>
-    <span class="n">string</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;dfrac&quot;</span><span class="p">,</span> <span class="s2">&quot;frac&quot;</span><span class="p">)</span>
-
-    <span class="c1"># remove \left and \right</span>
-    <span class="n">string</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">left&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-    <span class="n">string</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">right&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-
-    <span class="c1"># Remove circ (degrees)</span>
-    <span class="n">string</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;^{</span><span class="se">\\</span><span class="s2">circ}&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-    <span class="n">string</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;^</span><span class="se">\\</span><span class="s2">circ&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-
-    <span class="c1"># remove dollar signs</span>
-    <span class="n">string</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">$&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-
-    <span class="c1"># remove units (on the right)</span>
-    <span class="n">string</span> <span class="o">=</span> <span class="n">remove_right_units</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
-
-    <span class="c1"># remove percentage</span>
-    <span class="n">string</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">%&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-    <span class="n">string</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;\%&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>  <span class="c1"># noqa: W605</span>
-
-    <span class="c1"># &quot; 0.&quot; equivalent to &quot; .&quot; and &quot;{0.&quot; equivalent to &quot;{.&quot; Alternatively, add &quot;0&quot; if &quot;.&quot; is the start of the string</span>
-    <span class="n">string</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; .&quot;</span><span class="p">,</span> <span class="s2">&quot; 0.&quot;</span><span class="p">)</span>
-    <span class="n">string</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;{.&quot;</span><span class="p">,</span> <span class="s2">&quot;{0.&quot;</span><span class="p">)</span>
-    <span class="c1"># if empty, return empty string</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">string</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">string</span>
-    <span class="k">if</span> <span class="n">string</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.&quot;</span><span class="p">:</span>
-        <span class="n">string</span> <span class="o">=</span> <span class="s2">&quot;0&quot;</span> <span class="o">+</span> <span class="n">string</span>
-
-    <span class="c1"># to consider: get rid of e.g. &quot;k = &quot; or &quot;q = &quot; at beginning</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">))</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="n">string</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-
-    <span class="c1"># fix sqrt3 --&gt; sqrt{3}</span>
-    <span class="n">string</span> <span class="o">=</span> <span class="n">fix_sqrt</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
-
-    <span class="c1"># remove spaces</span>
-    <span class="n">string</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-
-    <span class="c1"># \frac1b or \frac12 --&gt; \frac{1}{b} and \frac{1}{2}, etc. Even works with \frac1{72} (but not \frac{72}1). Also does a/b --&gt; \\frac{a}{b}</span>
-    <span class="n">string</span> <span class="o">=</span> <span class="n">fix_fracs</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
-
-    <span class="c1"># manually change 0.5 --&gt; \frac{1}{2}</span>
-    <span class="k">if</span> <span class="n">string</span> <span class="o">==</span> <span class="s2">&quot;0.5&quot;</span><span class="p">:</span>
-        <span class="n">string</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\\</span><span class="s2">frac</span><span class="si">{1}{2}</span><span class="s2">&quot;</span>
-
-    <span class="c1"># NOTE: X/Y changed to \frac{X}{Y} in dataset, but in simple cases fix in case the model output is X/Y</span>
-    <span class="n">string</span> <span class="o">=</span> <span class="n">fix_a_slash_b</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">string</span></div>
 
 </pre></div>
 
