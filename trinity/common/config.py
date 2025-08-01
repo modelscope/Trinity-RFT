@@ -15,6 +15,7 @@ from trinity.common.constants import (
     ReadStrategy,
     StorageType,
     SyncMethod,
+    SyncStyle,
     TaskType,
 )
 from trinity.utils.log import get_logger
@@ -387,6 +388,7 @@ class SynchronizerConfig:
     """Configs for model weight synchronization."""
 
     sync_method: SyncMethod = SyncMethod.NCCL
+    sync_style: SyncStyle = SyncStyle.FIXED
     # sync weights every `sync_interval` steps
     sync_interval: int = 1
     # allow explorer to run `sync_offset` steps before sync
@@ -398,6 +400,7 @@ class SynchronizerConfig:
 
     # ! DO NOT SET, automatically calculated
     explorer_world_size: Optional[int] = None
+    ray_namespace: str = ""
 
 
 @dataclass
@@ -406,6 +409,7 @@ class Config:
 
     mode: str = "both"  # `explore`, `train`, `both` or `bench`
     project: str = "Trinity-RFT"
+    group: str = ""
     name: str = "rft"
     # the root dir for checkpoints
     checkpoint_root_dir: str = ""
@@ -446,16 +450,6 @@ class Config:
                 logger.warning(
                     f"`eval_interval` is not a multiple of `sync_interval`; adjusted to the nearest integer={self.explorer.eval_interval}."
                 )
-
-            # check save_interval
-            if self.synchronizer.sync_method == SyncMethod.CHECKPOINT:
-                if self.trainer.save_interval != self.synchronizer.sync_interval:
-                    logger.warning(
-                        f"When `algorithm.algorithm_type` != `dpo` and `synchronizer.sync_method` == `checkpoint`, "
-                        f"`trainer.save_interval` will be set to "
-                        f"`synchronizer.sync_interval = {self.synchronizer.sync_interval}`."
-                    )
-                self.trainer.save_interval = self.synchronizer.sync_interval
 
     def _check_buffer(self) -> None:  # noqa: C901
         # TODO: split this function into different buffer read/writer
@@ -717,7 +711,9 @@ class Config:
         if not os.path.isabs(self.checkpoint_root_dir):
             self.checkpoint_root_dir = os.path.join(os.getcwd(), self.checkpoint_root_dir)
         # create a job dir at checkpoint_root_dir/project/name
-        self.checkpoint_job_dir = os.path.join(self.checkpoint_root_dir, self.project, self.name)
+        self.checkpoint_job_dir = os.path.join(
+            self.checkpoint_root_dir, self.project, self.group, self.name
+        )
         # rename the experiment when necessary
         if not self.continue_from_checkpoint and (
             os.path.exists(self.checkpoint_job_dir) and os.listdir(self.checkpoint_job_dir)
@@ -742,17 +738,18 @@ class Config:
             self.explorer.rollout_model.max_response_tokens = self.model.max_response_tokens
 
         # check synchronizer
+        self.synchronizer.ray_namespace = self.ray_namespace
         self.synchronizer.explorer_world_size = (
             self.explorer.rollout_model.engine_num
             * self.explorer.rollout_model.tensor_parallel_size
         )
         if (
             self.mode in ["train", "explore", "bench"]
-            and self.synchronizer.sync_method != SyncMethod.CHECKPOINT
+            and self.synchronizer.sync_method == SyncMethod.NCCL
         ):
             self.synchronizer.sync_method = SyncMethod.CHECKPOINT
             logger.warning(
-                f"`{self.mode}` mode only supports checkpoint synchronization, set `synchronizer.sync_method` to `checkpoint`."
+                f"`{self.mode}` mode does not support NCCL synchronization, set `synchronizer.sync_method` to `checkpoint`."
             )
 
         self._check_interval()

@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 """Test for the workflow module"""
 import unittest
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, Optional
 from unittest.mock import MagicMock
 
 from torch import Tensor
 
 from tests.tools import get_unittest_dataset_config
+from trinity.common.experience import EID
 from trinity.common.rewards import RMGalleryFn
 from trinity.common.workflows import (
     MathBoxedWorkflow,
@@ -27,6 +28,7 @@ class MockResponse:
     unique_id: Optional[str] = "0"
     tokens: Optional[Tensor] = Tensor([0, 0])
     prompt_length: int = 1
+    eid: EID = field(default_factory=EID)
 
 
 class DummyWorkflow(Workflow):

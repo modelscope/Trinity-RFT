@@ -37,8 +37,8 @@ class Task(dict):
     raw_task: Optional[dict] = None  # The raw data sample
 
     # automatically assigned ids
-    batch_id: int = 0
-    task_id: int = 0
+    batch_id: Union[int, str] = 0
+    task_id: Union[int, str] = 0
 
     def to_workflow(
         self, model: Any, auxiliary_models: Optional[List[openai.OpenAI]] = None
@@ -215,7 +215,7 @@ class SimpleWorkflow(Workflow):
 
         logger.debug("start chat")
         responses = self.model.chat(messages, **self.rollout_args)
-        for response in responses:
+        for run_id, response in enumerate(responses):
             reward_dict = self.reward_fn(  # type: ignore [misc]
                 response=response.response_text,  # type: ignore [arg-type]
                 truth=self.truth,
@@ -226,6 +226,7 @@ class SimpleWorkflow(Workflow):
             response.metrics.update(reward_dict)
             reward = sum(reward_dict.values())
             response.reward = reward
+            response.eid.run = run_id
 
             logger.debug(
                 f"self.task_desc: {self.task_desc}, messages: {messages}, response: {response.response_text}, reward: {reward}"

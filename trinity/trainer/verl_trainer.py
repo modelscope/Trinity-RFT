@@ -145,6 +145,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         )
         self.init_workers()
         self.logger = get_logger(__name__)
+        self.last_full_save_step = None
 
     def _validate_config(self):  # TODO
         algorithm = ALGORITHM_TYPE.get(self.algorithm_config.algorithm_type)
@@ -245,9 +246,6 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         self.actor_rollout_wg = all_wg["actor"]
         self.actor_rollout_wg.init_model()
 
-    def reset_experiences_example_table(self):
-        self.sample_exps_to_log = []
-
     @property
     def train_step_num(self) -> int:
         return self.global_steps
@@ -267,6 +265,24 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         self.train_dataloader = _InternalDataLoader(self.config)
         # TODO: compute total training steps
         self.total_training_steps = self.config.trainer.total_training_steps or sys.maxsize
+
+    def save_state_dict(self):  # checkpoint sync
+        local_global_step_folder = os.path.join(
+            self.config.trainer.default_local_dir, f"global_step_{self.global_steps}"
+        )
+
+        actor_local_path = os.path.join(local_global_step_folder, "actor")
+        if not os.path.exists(actor_local_path):
+            self.actor_rollout_wg.save_checkpoint(
+                actor_local_path,
+                None,
+                self.global_steps,
+                max_ckpt_to_keep=None,
+                model_state_dict_only=True,
+            )
+
+    def upload_state_dict(self):  # state dict sync
+        self.actor_rollout_wg.upload_state_dict(self.global_steps)
 
     def train_step(self, batch: Experiences) -> Tuple[bool, Dict]:  # noqa C901
         self.logger.info(f"Training at step {self.global_steps + 1} started.")
@@ -332,15 +348,6 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                 actor_output_metrics = reduce_metrics(actor_output.meta_info["metrics"])
                 metrics.update(actor_output_metrics)
 
-            if (
-                self.config.trainer.save_freq > 0
-                and self.global_steps % self.config.trainer.save_freq == 0
-            ):
-                self.logger.info(f"Saving at step {self.global_steps}.")
-                with marked_timer("save_checkpoint", timing_raw):
-                    self._save_checkpoint()
-                self.logger.info(f"Saved at step {self.global_steps}.")
-
         # collect metrics
         metrics.update(compute_data_metrics(batch=batch, use_critic=self.use_critic))
         metrics.update(compute_timing_metrics(batch=batch, timing_raw=timing_raw))
@@ -350,20 +357,29 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         )
 
         train_status = self.global_steps < self.total_training_steps
-        if not train_status or self.algorithm_manager.need_save(self.global_steps):
-            if (
-                self.config.trainer.save_freq == 0
-                or self.global_steps % self.config.trainer.save_freq != 0
-            ):
-                self.logger.info(f"Saving at step {self.global_steps}.")
-                with marked_timer("save_checkpoint", timing_raw):
-                    self._save_checkpoint()
-                self.logger.info(f"Saved at step {self.global_steps}.")
+        if (
+            not train_status
+            or self.algorithm_manager.need_save(self.global_steps)
+            or (
+                self.config.trainer.save_freq > 0
+                and self.global_steps % self.config.trainer.save_freq == 0
+            )
+        ):
+            self.logger.info(f"Saving at step {self.global_steps}.")
+            with marked_timer("save_checkpoint", timing_raw):
+                self.save_checkpoint()
+            self.logger.info(f"Saved at step {self.global_steps}.")
         self.logger.info(f"Training at step {self.global_steps} finished.")
         return train_status, metrics
 
-    def save_checkpoint(self) -> None:
-        self._save_checkpoint()
+    def save_checkpoint(self, block_until_saved: bool = False) -> None:
+        if self.last_full_save_step != self.global_steps:
+            self.last_full_save_step = self.global_steps
+            self._save_checkpoint()
+        if block_until_saved:
+            self.actor_rollout_wg.wait_on_save_thread()
+            if self.algorithm.use_critic:
+                self.critic_wg.wait_on_save_thread()
 
     def sync_weight(self) -> None:
         self.actor_rollout_wg.sync_weight()
@@ -380,9 +396,10 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             global_step_folder = find_latest_ckpt_path(checkpoint_folder)  # None if no latest
 
         # find global_step_folder
+        self.actor_rollout_wg.wait_on_save_thread()
         if self.config.trainer.resume_mode == "auto":
             if global_step_folder is None:
-                print("Training from scratch")
+                self.logger.info("Training from scratch")
                 return
         else:
             if not (self.config.trainer.resume_from_path and global_step_folder is not None):
@@ -396,20 +413,17 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                 if not os.path.isabs(global_step_folder):
                     working_dir = os.getcwd()
                     global_step_folder = os.path.join(working_dir, global_step_folder)
-        print(f"Load from checkpoint folder: {global_step_folder}")
+        self.logger.info(f"Load from checkpoint folder: {global_step_folder}")
         # set global step
         global_steps = int(global_step_folder.split("global_step_")[-1])
         assert self.global_steps == global_steps + 1
 
-        print(f"Resuming from {global_step_folder}")
+        self.logger.info(f"Resuming from {global_step_folder}")
 
         actor_path = os.path.join(global_step_folder, "actor")
-        print(f"Loading actor from {actor_path} to ref_policy_wg")
+        self.logger.info(f"Loading actor from {actor_path} to ref_policy_wg")
         self.ref_policy_wg.load_checkpoint(actor_path, del_local_after_load=False)
         self.actor_rollout_wg.clear_optimizer_state()
         if self.use_critic:
             self.critic_wg.clear_optimizer_state()
-        print("sft to rft finished")
-
-    def shutdown(self) -> None:
-        pass
+        self.logger.info("sft to rft finished")

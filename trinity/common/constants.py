@@ -95,12 +95,14 @@ class SyncMethod(CaseInsensitiveEnum, metaclass=SyncMethodEnumMeta):
 
     NCCL = "nccl"
     CHECKPOINT = "checkpoint"
+    MEMORY = "memory"
 
 
 class RunningStatus(Enum):
     """Running status of explorer and trainer."""
 
     RUNNING = "running"
+    REQUIRE_SYNC = "require_sync"
     WAITING_SYNC = "waiting_sync"
     STOPPED = "stopped"
 
@@ -119,3 +121,9 @@ class OpType(Enum):
     SUB = "sub"
     MUL = "mul"
     DIV = "div"
+
+
+class SyncStyle(CaseInsensitiveEnum):
+    FIXED = "fixed"
+    DYNAMIC_BY_TRAINER = "dynamic_by_trainer"
+    DYNAMIC_BY_EXPLORER = "dynamic_by_explorer"

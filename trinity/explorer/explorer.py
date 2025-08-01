@@ -9,6 +9,7 @@ import traceback
 from collections import deque
 from typing import List, Optional
 
+import ray
 import torch
 
 from trinity.algorithm import ADD_STRATEGY
@@ -20,12 +21,10 @@ from trinity.common.constants import (
     ROLLOUT_WEIGHT_SYNC_GROUP_NAME,
     RunningStatus,
     SyncMethod,
+    SyncStyle,
 )
 from trinity.common.models import create_inference_models
-from trinity.common.models.utils import (
-    get_checkpoint_dir_with_step_num,
-    load_state_dict,
-)
+from trinity.common.synchronizer import Synchronizer
 from trinity.explorer.scheduler import Scheduler
 from trinity.manager.manager import CacheManager
 from trinity.utils.log import get_logger
@@ -41,6 +40,7 @@ class Explorer:
         explorer_meta = self.cache.load_explorer()
         self.explore_step_num = explorer_meta.get("latest_iteration", 0)
         self.last_sync_step = self.explore_step_num if self.explore_step_num > 0 else -1
+        self.synchronizer = Synchronizer.get_actor(config)
         self.config = config
         self.algorithm_manager = AlgorithmManager(config)
         self.models, self.auxiliary_models = create_inference_models(config)
@@ -57,6 +57,7 @@ class Explorer:
         self.scheduler = self._init_scheduler()
         self.monitor = MONITOR.get(self.config.monitor.monitor_type)(
             project=self.config.project,
+            group=self.config.group,
             name=self.config.name,
             role=self.config.explorer.name,
             config=config,
@@ -65,22 +66,15 @@ class Explorer:
         self.update_interval = (
             self.config.synchronizer.sync_interval * self.config.buffer.batch_size
         )
-        self.use_checkpoint_weights_update = (
-            self.config.synchronizer.sync_method == SyncMethod.CHECKPOINT
-        )
+        self.use_nccl_sync = self.config.synchronizer.sync_method == SyncMethod.NCCL
         self.pending_eval_tasks = deque()
 
         # For checkpoint weights update
         # Use explorer to periodically load the latest model weights and
         # boradcast to all rollout models
-        if self.use_checkpoint_weights_update:
-            self.old_checkpoint = None
-            self.state_dict = {}
-        else:  # nccl mode
-            self.state_dict_meta = []
-        self.status = RunningStatus.RUNNING
+        self.model_version = -1
+        self.last_sync_successful = True
         self.logger.info("Finished initializing Explorer.")
-        self._ready_to_sync_condition = asyncio.Condition()
         self.collect_experiences = self.config.explorer.collect_experiences
         self.generated_experience_cnt = 0
         if self.collect_experiences:
@@ -95,7 +89,7 @@ class Explorer:
         self, master_address: str, master_port: int, state_dict_meta: List = None
     ):
         # In checkpoint mode, we use explorer to store the model weights which has no rank
-        base_offset = 0 if self.use_checkpoint_weights_update else 1
+        base_offset = 1 if self.use_nccl_sync else 0
         world_size = (
             len(self.models) * self.config.explorer.rollout_model.tensor_parallel_size + base_offset
         )
@@ -104,7 +98,6 @@ class Explorer:
             f"master_address={master_address}, master_port={master_port}, "
             f"world_size={world_size}, rank_offset={base_offset}"
         )
-        self.state_dict_meta = state_dict_meta
         # TODO: save state_dict in models
         refs = [
             model.init_process_group.remote(
@@ -116,7 +109,6 @@ class Explorer:
                 group_name=ROLLOUT_WEIGHT_SYNC_GROUP_NAME,
                 explorer_name=self.config.explorer.name,
                 timeout=self.config.synchronizer.sync_timeout,
-                update_with_checkpoint=self.use_checkpoint_weights_update,
                 state_dict_meta=state_dict_meta,
             )
             for i, model in enumerate(self.models)
@@ -132,77 +124,67 @@ class Explorer:
             )
         return Scheduler(self.config, self.models, self.auxiliary_models)
 
-    async def _update_model_weight(self, step_num: int, state_dict: dict) -> None:
-        # TODO: update model weight
-        self.state_dict = state_dict
-        if self.state_dict_meta is None:
-            update_weight_args_list = []
-            for name, param in state_dict.items():
-                update_weight_args_list.append((name, str(param.dtype), tuple(param.shape)))
-            self.state_dict_meta = update_weight_args_list
-        else:
-            update_weight_args_list = None
-        await asyncio.gather(
-            *[model.sync_model.remote(step_num, update_weight_args_list) for model in self.models]
-        )
-        self.state_dict.clear()
-
     async def _checkpoint_weights_update(self, step_num: Optional[int] = None) -> int:
-        # TODO: support more checkpoint types
-        try:
-            checkpoint_dir, checkpoint_step_num = get_checkpoint_dir_with_step_num(
-                checkpoint_root_path=self.config.checkpoint_job_dir,
-                trainer_type=self.config.trainer.trainer_type,
-                step_num=step_num,
+        step_num = await self.synchronizer.set_model_state_dict_with_step_num.remote(step_num)
+        await asyncio.gather(*[model.sync_model.remote(step_num) for model in self.models])
+        return step_num  # type: ignore
+
+    async def _pull_latest_weights(self):
+        self.logger.info("Start to pull latest model weights.")
+        new_version = await self.synchronizer.wait_new_model_state_dict.remote(self.model_version)
+        if new_version > self.model_version:
+            if self.model_version != -1:
+                self.logger.info(f"New model weights version: {new_version}")
+                await asyncio.gather(
+                    *[model.sync_model.remote(new_version) for model in self.models]
+                )
+            self.model_version = new_version
+            self.last_sync_step = self.explore_step_num
+            await self.synchronizer.set_explorer_status.remote(
+                RunningStatus.RUNNING, old_status=RunningStatus.WAITING_SYNC
             )
-            if checkpoint_dir == self.old_checkpoint:
-                return checkpoint_step_num
-            model_weights = load_state_dict(os.path.join(checkpoint_dir, "actor"))
-            await self._update_model_weight(checkpoint_step_num, model_weights)
-            self.old_checkpoint = checkpoint_dir
-            return checkpoint_step_num
-        except Exception as e:
-            self.logger.warning(f"Fail to load checkpoint: {e}")
-            return 0
+            self.last_sync_successful = True
+        else:
+            self.logger.warning(
+                f"No new model weights found, current version: {self.model_version}"
+            )
+            self.last_sync_successful = False
 
     async def _nccl_weights_update(self):
-        assert self.state_dict_meta is not None
-        async with self._ready_to_sync_condition:
-            try:
-                await asyncio.wait_for(
-                    self._ready_to_sync_condition.wait_for(
-                        lambda: self.status == RunningStatus.WAITING_SYNC,
-                    ),
-                    timeout=self.config.synchronizer.sync_timeout,
-                )
-            except asyncio.TimeoutError as e:
-                self.logger.error(
-                    f"Trainer is not ready for model weight sync in {self.config.synchronizer.sync_timeout} seconds."
-                )
-                raise e
-        await asyncio.gather(
-            *[model.sync_model.remote(self.explore_step_num) for model in self.models]
+        new_version = await self.synchronizer.ready_to_nccl_sync.remote(
+            "explorer", self.model_version
         )
-        self.status = RunningStatus.RUNNING
-
-    async def ready_to_sync(self):
-        async with self._ready_to_sync_condition:
-            self.status = RunningStatus.WAITING_SYNC
-            self._ready_to_sync_condition.notify_all()
+        if new_version is None:
+            self.logger.info("Trainer is not ready to sync weight. Skipping sync weight.")
+            self.last_sync_successful = False
+            return
+        self.model_version = new_version
+        await asyncio.gather(
+            *[model.sync_model.remote(self.model_version) for model in self.models]
+        )
+        self.last_sync_step = self.explore_step_num
+        await self.synchronizer.set_explorer_status.remote(
+            RunningStatus.RUNNING, old_status=RunningStatus.WAITING_SYNC
+        )
+        self.last_sync_successful = True
 
     async def prepare(self) -> None:
         """Preparation before running."""
-        futures = [asyncio.create_task(self.scheduler.start())]
-        if self.use_checkpoint_weights_update:
+        futures = [
+            asyncio.create_task(self.scheduler.start()),
+            self.synchronizer.acquire.remote(),
+        ]
+        if self.experience_buffer:
+            futures.append(asyncio.create_task(self.experience_buffer.acquire()))
+        if not self.use_nccl_sync:
             master_address, master_port = await self.models[0].get_available_address.remote()
             futures.append(
                 asyncio.create_task(self.setup_weight_sync_group(master_address, master_port))
             )
-        asyncio.gather(*futures, return_exceptions=True)
-        if self.experience_buffer:
-            await self.experience_buffer.acquire()
+        await asyncio.gather(*futures, return_exceptions=True)
         if self.config.explorer.eval_on_startup and self.explore_step_num == 0:
             self.eval()
+        await self.synchronizer.set_explorer_status.remote(RunningStatus.REQUIRE_SYNC)
 
     async def get_weight(self, name: str) -> torch.Tensor:
         """Get the weight of the loaded model (For checkpoint weights update)."""
@@ -229,12 +211,14 @@ class Explorer:
                     break
                 if self.need_eval():
                     self.eval()
-                if self.need_sync():
+                if await self.need_sync():
                     await self.sync_weight()
             except Exception:
                 self.logger.error(f"Error in Explorer: {traceback.format_exc()}")
                 break
-        self.logger.info("--------------------\n> Explorer finished.\n--------------------")
+        self.logger.info(
+            f"--------------------\n> Explorer ({self.config.explorer.name}) finished.\n--------------------"
+        )
         return self.config.explorer.name
 
     async def explore_step(self) -> bool:
@@ -248,19 +232,40 @@ class Explorer:
         except StopIteration:
             self.logger.warning("No more tasks to explore. Stop exploring.")
             await self.save_checkpoint(sync_weight=False)
-            self.status = RunningStatus.STOPPED
+            await self.synchronizer.set_explorer_status.remote(
+                RunningStatus.STOPPED,
+                old_status=RunningStatus.RUNNING
+                if self.last_sync_successful
+                else RunningStatus.REQUIRE_SYNC,
+            )
             await self.experience_buffer.release()
             return False
         self.scheduler.schedule(tasks, batch_id=self.explore_step_num + 1)
         self.explore_step_num += 1
         return True
 
-    def need_sync(self) -> bool:
-        if self.explore_step_num <= self.config.synchronizer.sync_offset:
-            return False
-        return (
-            self.explore_step_num - self.config.synchronizer.sync_offset
-        ) % self.config.synchronizer.sync_interval == 0
+    async def need_sync(self) -> bool:
+        if self.config.synchronizer.sync_style == SyncStyle.FIXED:
+            if self.explore_step_num <= self.config.synchronizer.sync_offset:
+                return False
+            require_sync = (
+                self.explore_step_num - self.config.synchronizer.sync_offset
+            ) % self.config.synchronizer.sync_interval == 0
+        else:
+            require_sync = False
+            if self.config.synchronizer.sync_style == SyncStyle.DYNAMIC_BY_EXPLORER:
+                delta = self.explore_step_num - self.last_sync_step
+                if delta >= self.config.synchronizer.sync_interval:
+                    require_sync = True
+            else:
+                require_sync = await (
+                    self.synchronizer.get_trainer_status.remote() == RunningStatus.REQUIRE_SYNC
+                )
+        if require_sync and self.last_sync_successful:
+            await self.synchronizer.set_explorer_status.remote(
+                RunningStatus.REQUIRE_SYNC, old_status=RunningStatus.RUNNING
+            )
+        return require_sync
 
     def need_eval(self) -> bool:
         return self.explore_step_num % self.config.explorer.eval_interval == 0
@@ -319,18 +324,19 @@ class Explorer:
             await self.scheduler.wait_all()
             self.logger.info(f"All tasks before step {self.explore_step_num} have completed.")
         log_task = asyncio.create_task(
-            self._finish_steps(self.last_sync_step + 1, self.explore_step_num)
+            self._finish_steps(self.last_sync_step + 1, self.explore_step_num, self.model_version)
         )
 
         if sync_weight:
             # sync weights
             self.logger.info(f"Explorer sync_weights at step {self.explore_step_num} started.")
-            if self.use_checkpoint_weights_update:
-                await self._checkpoint_weights_update()
-            else:  # nccl weights update
+            if self.use_nccl_sync:
                 await self._nccl_weights_update()
-            self.last_sync_step = self.explore_step_num
-            self.logger.info(f"Explorer sync_weights at step {self.explore_step_num} finished")
+            else:  # pull weights from Synchronizer
+                await self._pull_latest_weights()
+            self.logger.info(
+                f"Explorer sync_weights at step {self.explore_step_num} finished, model version = {self.model_version}."
+            )
 
         # overlay log and weight sync
         await log_task
@@ -346,15 +352,15 @@ class Explorer:
         # call this method before training start to load the latest model weights
         await self.save_checkpoint(sync_weight=True)
 
-    async def _finish_steps(self, start_step: int, end_step: int) -> None:
+    async def _finish_steps(self, start_step: int, end_step: int, model_version: int) -> None:
         for step in range(start_step, end_step + 1):
             self.logger.info(f"Log metrics of step {step}")
-            await self._finish_explore_step(step=step)
+            await self._finish_explore_step(step=step, model_version=model_version)
             await self._finish_eval_step(step=step)
 
-    async def _finish_explore_step(self, step: int) -> None:
+    async def _finish_explore_step(self, step: int, model_version: int) -> None:
         statuses, exps = await self.scheduler.get_results(batch_id=step)
-        metric = {}
+        metric = {"rollout/model_version": model_version}
         if self.config.explorer.collect_experiences:
             exp_cnt, add_strategy_metric = await self.add_strategy.add(exps, step)
             self.generated_experience_cnt += exp_cnt
@@ -384,9 +390,9 @@ class Explorer:
         metric[f"{prefix}/total_time"] = time.time() - st
         self.monitor.log(metric, step)
 
-    async def running_status(self) -> RunningStatus:
-        return self.status
-
     async def shutdown(self) -> None:
         self.monitor.close()
+        if await self.synchronizer.release.remote() == 0:
+            ray.kill(self.synchronizer)
+            self.logger.info("Synchronizer stopped.")
         await self.scheduler.stop()

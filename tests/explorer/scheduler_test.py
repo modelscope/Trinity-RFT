@@ -69,7 +69,6 @@ class DummyModel(InferenceModel):
         group_name: str,
         backend: str = "nccl",
         timeout: int = 1200,
-        update_with_checkpoint: bool = True,
     ) -> None:
         pass
 
@@ -91,7 +90,6 @@ class DummyAuxiliaryModel(InferenceModel):
         group_name: str,
         backend: str = "nccl",
         timeout: int = 1200,
-        update_with_checkpoint: bool = True,
     ) -> None:
         pass
 
@@ -456,6 +454,23 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(set(group_ids)), 11)  # 4 + 4 + 3
         unique_ids = [exp.eid.uid for exp in exp_list]
         self.assertEqual(len(unique_ids), len(set(unique_ids)))
+
+        await scheduler.stop()
+
+    async def test_multi_step_execution(self):
+        self.config.explorer.max_repeat_times_per_runner = 1
+        self.config.check_and_update()
+        scheduler = Scheduler(self.config, [DummyModel.remote(), DummyModel.remote()])
+        await scheduler.start()
+        tasks = generate_tasks(2, repeat_times=4)
+
+        n_steps = 3
+        for i in range(1, n_steps + 1):
+            scheduler.schedule(tasks, batch_id=i)
+            statuses, exps = await scheduler.get_results(batch_id=i)
+            self.assertEqual(len(statuses), 2 * 4)
+            exps = self.queue.read(batch_size=2 * 4)
+            self.assertEqual(len(exps), 2 * 4)
 
         await scheduler.stop()
 

@@ -151,8 +151,11 @@ def both(config: Config) -> None:
             "==============================================================="
         )
         ray.wait(wait_ref, timeout=config.synchronizer.sync_timeout)
-    explorer.shutdown.remote()
-    trainer.shutdown.remote()
+    ray.wait(
+        [explorer.shutdown.remote(), trainer.shutdown.remote()],
+        timeout=config.synchronizer.sync_timeout,
+        num_returns=2,
+    )
 
 
 def run(config_path: str, dlc: bool = False, plugin_dir: str = None):

@@ -18,7 +18,7 @@ from trinity.buffer.schema import Base, create_dynamic_table
 from trinity.buffer.utils import default_storage_path, retry_session
 from trinity.common.config import BufferConfig, StorageConfig
 from trinity.common.constants import ReadStrategy, StorageType
-from trinity.common.experience import Experience
+from trinity.common.experience import EID, Experience
 from trinity.common.workflows import Task
 from trinity.utils.log import get_logger
 
@@ -140,6 +140,8 @@ class _Encoder(json.JSONEncoder):
         if isinstance(o, Experience):
             return o.to_dict()
         if isinstance(o, Task):
+            return o.to_dict()
+        if isinstance(o, EID):
             return o.to_dict()
         return super().default(o)
 

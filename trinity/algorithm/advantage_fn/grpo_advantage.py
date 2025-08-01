@@ -59,8 +59,8 @@ class GRPOAdvantageFn(AdvantageFn):
                     id2mean[idx] = torch.tensor(0.0)
                     id2std[idx] = torch.tensor(1.0)
                 elif len(id2score[idx]) > 1:
-                    id2mean[idx] = torch.mean(torch.tensor(id2score[idx]))
-                    id2std[idx] = torch.std(torch.tensor([id2score[idx]]))
+                    id2mean[idx] = torch.mean(torch.tensor(id2score[idx], dtype=torch.float32))
+                    id2std[idx] = torch.std(torch.tensor(id2score[idx], dtype=torch.float32))
                 else:
                     raise ValueError(f"no score in prompt index: {idx}")
             for i in range(bsz):

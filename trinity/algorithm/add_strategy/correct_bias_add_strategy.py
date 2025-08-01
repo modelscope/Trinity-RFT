@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-"""An Addstrategy with GroupAdvantage that corrects for rank bias (https://arxiv.org/pdf/2506.02355)"""
 from typing import Dict, List, Tuple
 
 import torch
@@ -11,7 +10,7 @@ from trinity.common.experience import Experience
 
 @ADD_STRATEGY.register_module("correct_bias")
 class CorrectBiasAddStrategy(GRPOAddStrategy):
-    """An example AddStrategy with advantages that corrects for rank bias"""
+    """An Addstrategy with GroupAdvantage that corrects for rank bias (https://arxiv.org/pdf/2506.02355)"""
 
     def __init__(
         self, writer: BufferWriter, epsilon: float = 1e-6, rank_penalty: float = 0.25, **kwargs

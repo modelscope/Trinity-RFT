@@ -13,7 +13,7 @@ from torch import Tensor
 
 
 @dataclass
-class EID(dict):
+class EID:
     """Experience ID class to uniquely identify an experience.
 
     To enable the full functionality of the experience grouping, user should manually set the `run` and `step` fields in custom workflows.
@@ -70,6 +70,16 @@ class EID(dict):
 
     def __repr__(self):
         return f"EID(batch={self.batch}, task={self.task}, run={self.run}, step={self.step}, uuid={self.suffix})"
+
+    def to_dict(self) -> dict:
+        """Convert the EID to a dictionary."""
+        return {
+            "batch": self.batch,
+            "task": self.task,
+            "run": self.run,
+            "step": self.step,
+            "suffix": self.suffix,
+        }
 
 
 class ExperienceType(Enum):

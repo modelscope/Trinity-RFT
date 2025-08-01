@@ -66,13 +66,13 @@ jobs:
       run: |
         TYPE="${{ steps.test_type.outputs.type }}"
         if [ "$TYPE" = "all" ]; then
-          docker compose exec trinity-node-1 pytest tests -v -s --ignore=tests/data --ctrf report.json
           echo "tests_run=true" >> $GITHUB_ENV
+          docker compose exec trinity-node-1 pytest tests -v -s --ignore=tests/data --ctrf report.json
         elif [ "$TYPE" = "diff" ]; then
           if [ -s ../../../test_dirs.txt ]; then
+            echo "tests_run=true" >> $GITHUB_ENV
             TEST_DIRS=$(cat ../../../test_dirs.txt | xargs)
             docker compose exec trinity-node-1 pytest $TEST_DIRS -v -s --ignore=tests/data --ctrf report.json
-            echo "tests_run=true" >> $GITHUB_ENV
           else
             echo "No changed modules detected, skipping tests."
             echo "tests_run=false" >> $GITHUB_ENV
@@ -80,8 +80,8 @@ jobs:
         elif [ "$TYPE" = "module" ]; then
           MODULE="${{ steps.test_type.outputs.module }}"
           if [ -n "$MODULE" ]; then
-            docker compose exec trinity-node-1 pytest tests/$MODULE -v -s --ignore=tests/data --ctrf report.json
             echo "tests_run=true" >> $GITHUB_ENV
+            docker compose exec trinity-node-1 pytest tests/$MODULE -v -s --ignore=tests/data --ctrf report.json
           else
             echo "No module specified, skipping tests."
             echo "tests_run=false" >> $GITHUB_ENV
