@@ -98,9 +98,17 @@ class Workflow(ABC):
     def resettable(self):
         return False
 
+    @property
+    def repeatable(self):
+        return True
+
     def reset(self, task: Task):
         """Reset the workflow."""
         raise NotImplementedError
+
+    def set_repeat_times(self, n: int):
+        """The workflow will be repeated `n` times."""
+        self.task.rollout_args.n = n
 
     @abstractmethod
     def run(self) -> List[Experience]:
