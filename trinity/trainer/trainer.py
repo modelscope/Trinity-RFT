@@ -47,7 +47,7 @@ class Trainer:
     def prepare(self) -> None:
         """Prepare the trainer."""
         self.engine.prepare()
-        self.last_trainer_sync_step = self.engine.train_step_num
+        self.last_trainer_sync_step = self.train_step_num
         ray.get(self.synchronizer.set_trainer_status.remote(RunningStatus.RUNNING))
 
     def train(self) -> str:
@@ -73,6 +73,7 @@ class Trainer:
         Returns:
             bool: Whether to continue training.
         """
+        self.logger.info(f"Training at step {self.train_step_num + 1} started.")
         try:
             batch, sample_metrics, repr_samples = self.sample_strategy.sample(
                 self.train_step_num + 1
@@ -87,7 +88,9 @@ class Trainer:
                 self.engine.save_checkpoint()
                 self.logger.info(f"Saved at step {self.train_step_num}.")
             return False
+        self.logger.info(f"Sampling at step {self.train_step_num + 1} done.")
         continue_run, metrics = self.engine.train_step(batch)
+        self.logger.info(f"Training at step {self.train_step_num} finished.")
         prefix_metrics(sample_metrics, "sample", metrics)
         self.monitor.log(data=metrics, step=self.train_step_num)
         if self.config.trainer.enable_preview:
@@ -97,10 +100,10 @@ class Trainer:
     def need_sync(self) -> bool:
         """Whether to sync the model weight."""
         if self.config.synchronizer.sync_style == SyncStyle.FIXED:
-            return self.engine.train_step_num % self.config.synchronizer.sync_interval == 0
+            return self.train_step_num % self.config.synchronizer.sync_interval == 0
         else:
             if self.config.synchronizer.sync_style == SyncStyle.DYNAMIC_BY_TRAINER:
-                delta = self.engine.train_step_num - self.last_trainer_sync_step
+                delta = self.train_step_num - self.last_trainer_sync_step
                 if delta >= self.config.synchronizer.sync_interval:
                     ray.get(self.synchronizer.set_trainer_status.remote(RunningStatus.REQUIRE_SYNC))
             explorer_status_counts = ray.get(self.synchronizer.get_explorer_status_counts.remote())
@@ -111,23 +114,21 @@ class Trainer:
 
     def sync_weight(self) -> None:
         """Sync the model weight."""
-        self.logger.info(
-            f"Trainer synchronizing weights at step {self.engine.train_step_num} starting.."
-        )
+        self.logger.info(f"Trainer synchronizing weights at step {self.train_step_num} starting..")
         if self.config.synchronizer.sync_method == SyncMethod.NCCL:
             result = ray.get(
-                self.synchronizer.ready_to_nccl_sync.remote("trainer", self.engine.train_step_num)
+                self.synchronizer.ready_to_nccl_sync.remote("trainer", self.train_step_num)
             )
             if result is None:
                 self.logger.error("Trainer synchronizing weights failed.")
             else:
                 self.engine.sync_weight()
-                self.last_trainer_sync_step = self.engine.train_step_num
+                self.last_trainer_sync_step = self.train_step_num
         elif self.config.synchronizer.sync_method == SyncMethod.CHECKPOINT:
             self.engine.save_state_dict()
         elif self.config.synchronizer.sync_method == SyncMethod.MEMORY:
             self.engine.upload_state_dict()
-        self.logger.info(f"Trainer synchronizing weights at step {self.engine.train_step_num} end.")
+        self.logger.info(f"Trainer synchronizing weights at step {self.train_step_num} end.")
         ray.get(self.synchronizer.set_trainer_status.remote(RunningStatus.RUNNING))
 
     def _log_experiences(self, samples: List[Dict]) -> None:

@@ -274,13 +274,19 @@ class Synchronizer:
             A reference to the Synchronizer actor.
         """
         if config is not None:
+            if config.mode == "explore" or (
+                config.mode == "train" and config.algorithm.algorithm_type not in {"dpo", "sft"}
+            ):
+                lifetime = "detached"
+            else:
+                lifetime = None
             return (
                 ray.remote(cls)
                 .options(
                     name="synchronizer",
                     namespace=config.ray_namespace,
                     get_if_exists=True,
-                    lifetime="detached",
+                    lifetime=lifetime,
                 )
                 .remote(config)
             )
