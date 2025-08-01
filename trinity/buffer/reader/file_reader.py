@@ -122,7 +122,7 @@ class SFTDataReader(BufferReader):
         )
         self.tokenizer = transformers.AutoTokenizer.from_pretrained(config.tokenizer_path)
 
-    def read(
+    async def read(
         self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
     ) -> List:
         samples = self.dataset.read_batch(batch_size or self.read_batch_size)
@@ -212,7 +212,7 @@ class DPODataReader(BufferReader):
         else:
             return item
 
-    def read(
+    async def read(
         self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
     ) -> List:
         batch_data = self.dataset.read_batch(batch_size or self.read_batch_size)
@@ -290,7 +290,7 @@ class RolloutDataReader(BufferReader):
         self.default_workflow_cls = WORKFLOWS.get(meta.default_workflow_type)  # type: ignore
         self.default_reward_fn_cls = REWARD_FUNCTIONS.get(meta.default_reward_fn_type)  # type: ignore
 
-    def read(
+    async def read(
         self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
     ) -> List:
         batch_size = batch_size or self.read_batch_size
@@ -333,7 +333,7 @@ class RawDataReader(BufferReader):
     def __len__(self):
         return len(self.dataset)
 
-    def read(
+    async def read(
         self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
     ) -> List:
         if self.returned:

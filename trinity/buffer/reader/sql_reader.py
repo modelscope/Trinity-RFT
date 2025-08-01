@@ -2,8 +2,6 @@
 
 from typing import List, Optional
 
-import ray
-
 from trinity.buffer.buffer_reader import BufferReader
 from trinity.buffer.ray_wrapper import DBWrapper
 from trinity.common.config import BufferConfig, StorageConfig
@@ -18,10 +16,10 @@ class SQLReader(BufferReader):
         self.wrap_in_ray = meta.wrap_in_ray
         self.db_wrapper = DBWrapper.get_wrapper(meta, config)
 
-    def read(
+    async def read(
         self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
     ) -> List:
         if self.wrap_in_ray:
-            return ray.get(self.db_wrapper.read.remote(batch_size, strategy))
+            return await self.db_wrapper.read.remote(batch_size, strategy)
         else:
             return self.db_wrapper.read(batch_size, strategy)

@@ -228,7 +228,7 @@ class Explorer:
             self.explore_step_num += 1
             return True
         try:
-            tasks = self.taskset.read()
+            tasks = await self.taskset.read()
         except StopIteration:
             self.logger.warning("No more tasks to explore. Stop exploring.")
             await self.save_checkpoint(sync_weight=False)
@@ -285,7 +285,8 @@ class Explorer:
             self.pending_eval_tasks.append((self.explore_step_num, eval_taskset.name))
             while True:
                 try:
-                    self.scheduler.schedule(eval_taskset.read(), batch_id=eval_batch_id)
+                    data = asyncio.run(eval_taskset.read())
+                    self.scheduler.schedule(data, batch_id=eval_batch_id)
                 except StopIteration:
                     break
 
