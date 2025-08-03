@@ -138,6 +138,48 @@
 </dd></dl>
 
 </section>
+<section id="module-trinity.algorithm.policy_loss_fn.gspo_policy_loss">
+<span id="trinity-algorithm-policy-loss-fn-gspo-policy-loss-module"></span><h2>trinity.algorithm.policy_loss_fn.gspo_policy_loss module<a class="headerlink" href="#module-trinity.algorithm.policy_loss_fn.gspo_policy_loss" title="Link to this heading"></a></h2>
+<p>GSPO-token policy loss function.</p>
+<p>Implemented from <a class="reference external" href="https://arxiv.org/pdf/2507.18071">https://arxiv.org/pdf/2507.18071</a></p>
+<dl class="py class">
+<dt class="sig sig-object py" id="trinity.algorithm.policy_loss_fn.gspo_policy_loss.GSPOLossFn">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.policy_loss_fn.gspo_policy_loss.</span></span><span class="sig-name descname"><span class="pre">GSPOLossFn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'verl'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_range_low</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_range_high</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/policy_loss_fn/gspo_policy_loss.html#GSPOLossFn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.policy_loss_fn.gspo_policy_loss.GSPOLossFn" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#trinity.algorithm.policy_loss_fn.policy_loss_fn.PolicyLossFn" title="trinity.algorithm.policy_loss_fn.policy_loss_fn.PolicyLossFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">PolicyLossFn</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.policy_loss_fn.gspo_policy_loss.GSPOLossFn.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'verl'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_range_low</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_range_high</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/policy_loss_fn/gspo_policy_loss.html#GSPOLossFn.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.policy_loss_fn.gspo_policy_loss.GSPOLossFn.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize the policy loss function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>backend</strong> – The training framework/backend to use (e.g., “verl”)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.policy_loss_fn.gspo_policy_loss.GSPOLossFn.default_args">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/policy_loss_fn/gspo_policy_loss.html#GSPOLossFn.default_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.policy_loss_fn.gspo_policy_loss.GSPOLossFn.default_args" title="Link to this definition"></a></dt>
+<dd><p>Get default initialization arguments for this loss function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The default init arguments for the policy loss function.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><cite>Dict</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="trinity.algorithm.policy_loss_fn.gspo_policy_loss.GSPOLossFn.select_keys">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">select_keys</span></span><a class="headerlink" href="#trinity.algorithm.policy_loss_fn.gspo_policy_loss.GSPOLossFn.select_keys" title="Link to this definition"></a></dt>
+<dd><p>Returns parameter keys mapped to the specific training framework’s naming convention.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
 <section id="module-trinity.algorithm.policy_loss_fn.mix_policy_loss">
 <span id="trinity-algorithm-policy-loss-fn-mix-policy-loss-module"></span><h2>trinity.algorithm.policy_loss_fn.mix_policy_loss module<a class="headerlink" href="#module-trinity.algorithm.policy_loss_fn.mix_policy_loss" title="Link to this heading"></a></h2>
 <p>Mix policy loss function.</p>
@@ -598,6 +640,43 @@ to ensure consistent weighting across different batches of the same type experie
 <dl class="py property">
 <dt class="sig sig-object py" id="trinity.algorithm.policy_loss_fn.MIXPolicyLossFn.select_keys">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">select_keys</span></span><a class="headerlink" href="#trinity.algorithm.policy_loss_fn.MIXPolicyLossFn.select_keys" title="Link to this definition"></a></dt>
+<dd><p>Returns parameter keys mapped to the specific training framework’s naming convention.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="trinity.algorithm.policy_loss_fn.GSPOLossFn">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.policy_loss_fn.</span></span><span class="sig-name descname"><span class="pre">GSPOLossFn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'verl'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_range_low</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_range_high</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/policy_loss_fn/gspo_policy_loss.html#GSPOLossFn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.policy_loss_fn.GSPOLossFn" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#trinity.algorithm.policy_loss_fn.policy_loss_fn.PolicyLossFn" title="trinity.algorithm.policy_loss_fn.policy_loss_fn.PolicyLossFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">PolicyLossFn</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.policy_loss_fn.GSPOLossFn.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'verl'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_range_low</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_range_high</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/policy_loss_fn/gspo_policy_loss.html#GSPOLossFn.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.policy_loss_fn.GSPOLossFn.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize the policy loss function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>backend</strong> – The training framework/backend to use (e.g., “verl”)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.policy_loss_fn.GSPOLossFn.default_args">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/policy_loss_fn/gspo_policy_loss.html#GSPOLossFn.default_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.policy_loss_fn.GSPOLossFn.default_args" title="Link to this definition"></a></dt>
+<dd><p>Get default initialization arguments for this loss function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The default init arguments for the policy loss function.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><cite>Dict</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="trinity.algorithm.policy_loss_fn.GSPOLossFn.select_keys">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">select_keys</span></span><a class="headerlink" href="#trinity.algorithm.policy_loss_fn.GSPOLossFn.select_keys" title="Link to this definition"></a></dt>
 <dd><p>Returns parameter keys mapped to the specific training framework’s naming convention.</p>
 </dd></dl>
 
