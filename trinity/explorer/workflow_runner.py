@@ -72,11 +72,21 @@ class WorkflowRunner:
             self.workflow_instance = task.to_workflow(self.model_wrapper, self.auxiliary_models)
         else:
             self.workflow_instance.reset(task)
-        self.workflow_instance.set_repeat_times(repeat_times, run_id_base)
-        return self.workflow_instance.run()
+        if self.workflow_instance.repeatable:
+            self.workflow_instance.set_repeat_times(repeat_times, run_id_base)
+            exps = self.workflow_instance.run()
+        else:
+            exps = []
+            for i in range(repeat_times):
+                self.workflow_instance.set_repeat_times(1, run_id_base + i)
+                exps.extend(self.workflow_instance.run())
+        return exps
 
     def run_task(
-        self, task: Task, run_id_base: int = 0, repeat_times: int = 1
+        self,
+        task: Task,
+        repeat_times: int = 1,
+        run_id_base: int = 0,
     ) -> Tuple[Status, List[Experience]]:
         """Run the task and return the states."""
         # TODO: avoid sending the experiences back to the scheduler to reduce the communication overhead

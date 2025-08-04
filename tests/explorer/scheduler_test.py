@@ -19,7 +19,6 @@ from trinity.explorer.scheduler import Scheduler
 
 @WORKFLOWS.register_module("dummy_workflow")
 class DummyWorkflow(Workflow):
-
     def __init__(self, *, task, model, auxiliary_models):
         super().__init__(task=task, model=model, auxiliary_models=auxiliary_models)
         self.error_type = task.raw_task.get("error_type", "")
@@ -32,9 +31,9 @@ class DummyWorkflow(Workflow):
             else:
                 self.seconds = 10
 
-    # @property
-    # def repeatable(self):
-    #     return False
+    @property
+    def repeatable(self):
+        return True
 
     def run(self) -> List[Experience]:
         if "timeout" in self.error_type:
@@ -46,7 +45,7 @@ class DummyWorkflow(Workflow):
         elif self.error_type == "auxiliary_models":
             assert self.auxiliary_models is not None and len(self.auxiliary_models) == 2
 
-        return [
+        exp_list = [
             Experience(
                 tokens=torch.zeros(5),
                 prompt_length=2,
@@ -54,6 +53,28 @@ class DummyWorkflow(Workflow):
                 info={"repeat_times": self.repeat_times},
             )
             for _ in range(self.repeat_times)
+        ]
+        for i, exp in enumerate(exp_list):
+            exp.eid.run = i + self.run_id_base
+        return exp_list
+
+
+@WORKFLOWS.register_module("dummy_nonrepeat_workflow")
+class DummyNonRepeatWorkflow(Workflow):
+    def __init__(self, *, task, model, auxiliary_models):
+        super().__init__(task=task, model=model, auxiliary_models=auxiliary_models)
+
+    @property
+    def repeatable(self):
+        return False
+
+    def run(self) -> List[Experience]:
+        return [
+            Experience(
+                tokens=torch.zeros(5),
+                prompt_length=2,
+                prompt_text="success",
+            )
         ]
 
 
@@ -458,7 +479,6 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
         group_ids = [exp.eid.tid for exp in exp_list]
         self.assertEqual(len(set(group_ids)), 11)  # 4 + 4 + 3
         run_ids = [exp.eid.rid for exp in exp_list]
-        print(f"{run_ids=}")
         self.assertEqual(len(run_ids), len(set(run_ids)))
         unique_ids = [exp.eid.uid for exp in exp_list]
         self.assertEqual(len(unique_ids), len(set(unique_ids)))
@@ -481,6 +501,33 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(len(exps), 2 * 4)
 
         await scheduler.stop()
+
+    async def test_non_repeatable_workflow(self):
+        self.config.explorer.max_repeat_times_per_runner = 2
+        self.config.check_and_update()
+        scheduler = Scheduler(self.config, [DummyModel.remote(), DummyModel.remote()])
+        await scheduler.start()
+        tasks = generate_tasks(5, repeat_times=4)
+        for task in tasks:
+            task.workflow = DummyNonRepeatWorkflow
+
+        n_steps = 2
+        exp_list = []
+        for i in range(1, n_steps + 1):
+            scheduler.schedule(tasks, batch_id=i)
+            statuses, _ = await scheduler.get_results(batch_id=i)
+            self.assertEqual(len(statuses), 10)  # 5 * 4 / 2
+            exps = self.queue.read(batch_size=5 * 4)
+            self.assertEqual(len(exps), 5 * 4)
+            exp_list.extend(exps)
+
+        # test task_id, run_id and unique_id
+        group_ids = [exp.eid.tid for exp in exp_list]
+        self.assertEqual(len(set(group_ids)), 10)  # 2 * 5
+        run_ids = [exp.eid.rid for exp in exp_list]
+        self.assertEqual(len(set(run_ids)), 40)  # 2 * 5 * 4
+        unique_ids = [exp.eid.uid for exp in exp_list]
+        self.assertEqual(len(unique_ids), len(set(unique_ids)))
 
     def tearDown(self):
         try:

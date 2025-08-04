@@ -93,6 +93,7 @@ class Workflow(ABC):
         self.task = task
         self.model = model
         self.auxiliary_models = auxiliary_models
+        self.run_id_base = 0
 
     @property
     def resettable(self):
@@ -106,9 +107,12 @@ class Workflow(ABC):
         """Reset the workflow."""
         raise NotImplementedError
 
-    def set_repeat_times(self, repeat_times: int, run_id_base: int):
-        """The workflow will be repeated `n` times."""
-        pass
+    def set_repeat_times(self, repeat_times, run_id_base):
+        if self.repeatable:
+            self.task.rollout_args.n = repeat_times
+            self.run_id_base = run_id_base
+        else:
+            self.run_id_base = run_id_base
 
     @abstractmethod
     def run(self) -> List[Experience]:
@@ -206,13 +210,6 @@ class SimpleWorkflow(Workflow):
         rollout_args = asdict(task.rollout_args)
         self.rollout_args = rollout_args
         self.is_eval = task.is_eval
-
-    def set_repeat_times(self, repeat_times, run_id_base):
-        if self.repeatable:
-            self.task.rollout_args.n = repeat_times
-            self.run_id_base = run_id_base
-        else:
-            assert repeat_times == 1, "The workflow itself is not repeatable, `n` must be 1."
 
     def format_messages(self):
         """Format messages for the instruct model."""

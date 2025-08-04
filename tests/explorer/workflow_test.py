@@ -55,11 +55,11 @@ class DummyWorkflow(Workflow):
         if self.output_format == "json":
             import json
 
-            return [json.dumps(self.obj)] * self.task.rollout_args.get("n", 1)
+            return [json.dumps(self.obj)] * self.task.rollout_args.n
         elif self.output_format == "yaml":
             import yaml
 
-            return [yaml.safe_dump(self.obj)] * self.task.rollout_args.get("n", 1)
+            return [yaml.safe_dump(self.obj)] * self.task.rollout_args.n
         else:
             raise ValueError("Invalid output format")
 
@@ -336,6 +336,6 @@ class WorkflowTest(unittest.TestCase):
         workflow = task.to_workflow(model)
         answer = workflow.run()
         self.assertEqual(len(answer), 3)
-        workflow.set_repeat_times(2)
+        workflow.set_repeat_times(2, run_id_base=0)
         answer = workflow.run()
         self.assertEqual(len(answer), 2)

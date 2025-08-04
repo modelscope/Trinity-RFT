@@ -61,8 +61,6 @@ class GenerationConfig:
     top_k: int = -1
     logprobs: int = 0  # vLLM return `logprobs + 1` elements
     # repeat each task for `n` times (for GPRO-like algorithms)
-    # this field will be automatically set to `algorithm.repeat_times` in
-    # `buffer.explorer_input.taskset.rollout_args`
     # ! DO NOT SET in `buffer.explorer_input.taskset.rollout_args`
     n: int = 1
 
@@ -462,11 +460,6 @@ class Config:
             )
         if not self.buffer.explorer_input.taskset.name:
             self.buffer.explorer_input.taskset.name = "taskset"
-        self.buffer.explorer_input.taskset.rollout_args.n = self.algorithm.repeat_times
-        logger.info(
-            "`buffer.explorer_input.taskset.rollout_args.n` is set to `algorithm.repeat_times`"
-            f" (={self.algorithm.repeat_times})."
-        )
         if self.mode == "train":
             assert (
                 self.buffer.trainer_input.experience_buffer is not None
