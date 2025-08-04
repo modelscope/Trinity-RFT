@@ -60,8 +60,7 @@ class WorkflowRunner:
     def is_alive(self):
         return True
 
-    def _run_task(self, task: Task, repeat_times: int, run_id_base: int) -> List[Experience]:
-        """Init workflow from the task and run it."""
+    def _create_workflow_instance(self, task: Task) -> None:
         if task.workflow is None:
             raise ValueError("Workflow is not set in the task.")
         if (
@@ -72,6 +71,10 @@ class WorkflowRunner:
             self.workflow_instance = task.to_workflow(self.model_wrapper, self.auxiliary_models)
         else:
             self.workflow_instance.reset(task)
+
+    def _run_task(self, task: Task, repeat_times: int, run_id_base: int) -> List[Experience]:
+        """Init workflow from the task and run it."""
+        self._create_workflow_instance(task)
         if self.workflow_instance.repeatable:
             self.workflow_instance.set_repeat_times(repeat_times, run_id_base)
             exps = self.workflow_instance.run()
@@ -80,6 +83,8 @@ class WorkflowRunner:
             for i in range(repeat_times):
                 self.workflow_instance.set_repeat_times(1, run_id_base + i)
                 exps.extend(self.workflow_instance.run())
+                if i < repeat_times - 1:
+                    self._create_workflow_instance(task)
         return exps
 
     def run_task(
@@ -95,7 +100,7 @@ class WorkflowRunner:
             exps = self._run_task(task, repeat_times, run_id_base)
             assert exps is not None and len(exps) > 0, "An empty experience is generated"
             metrics: dict[str, List[float]] = defaultdict(list)
-            # set group id
+            # set eid for each experience
             for i, exp in enumerate(exps):
                 exp.eid.batch = task.batch_id
                 exp.eid.task = task.task_id

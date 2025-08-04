@@ -61,10 +61,19 @@ class DummyWorkflow(Workflow):
 class DummyNonRepeatWorkflow(Workflow):
     def __init__(self, *, task, model, auxiliary_models):
         super().__init__(task=task, model=model, auxiliary_models=auxiliary_models)
+        self.reset_flag = False
+
+    @property
+    def resettable(self):
+        return True
 
     @property
     def repeatable(self):
         return False
+
+    def reset(self, task: Task):
+        self.task = task
+        self.reset_flag = True
 
     def run(self) -> List[Experience]:
         return [
@@ -72,6 +81,7 @@ class DummyNonRepeatWorkflow(Workflow):
                 tokens=torch.zeros(5),
                 prompt_length=2,
                 prompt_text="success",
+                info={"reset_flag": self.reset_flag},
             )
         ]
 
@@ -505,7 +515,8 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
         self.config.check_and_update()
         scheduler = Scheduler(self.config, [DummyModel.remote(), DummyModel.remote()])
         await scheduler.start()
-        tasks = generate_tasks(5, repeat_times=4)
+        task_num, repeat_times = 5, 4
+        tasks = generate_tasks(task_num, repeat_times=repeat_times)
         for task in tasks:
             task.workflow = DummyNonRepeatWorkflow
 
@@ -514,18 +525,26 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
         for i in range(1, n_steps + 1):
             scheduler.schedule(tasks, batch_id=i)
             statuses, _ = await scheduler.get_results(batch_id=i)
-            self.assertEqual(len(statuses), 10)  # 5 * 4 / 2
-            exps = self.queue.read(batch_size=5 * 4)
-            self.assertEqual(len(exps), 5 * 4)
+            self.assertEqual(len(statuses), task_num * repeat_times / 2)
+            exps = self.queue.read(batch_size=task_num * repeat_times)
+            self.assertEqual(len(exps), task_num * repeat_times)
             exp_list.extend(exps)
 
         # test task_id, run_id and unique_id
         group_ids = [exp.eid.tid for exp in exp_list]
-        self.assertEqual(len(set(group_ids)), 10)  # 2 * 5
+        self.assertEqual(len(set(group_ids)), n_steps * task_num)
         run_ids = [exp.eid.rid for exp in exp_list]
-        self.assertEqual(len(set(run_ids)), 40)  # 2 * 5 * 4
+        self.assertEqual(len(set(run_ids)), n_steps * task_num * repeat_times)
         unique_ids = [exp.eid.uid for exp in exp_list]
         self.assertEqual(len(unique_ids), len(set(unique_ids)))
+
+        # test reset used properly
+        runner_num = (
+            self.config.explorer.runner_per_model * self.config.explorer.max_repeat_times_per_runner
+        )
+        self.assertEqual(
+            sum([exp.info["reset_flag"] for exp in exp_list]), len(exp_list) - runner_num
+        )
 
     def tearDown(self):
         try:
