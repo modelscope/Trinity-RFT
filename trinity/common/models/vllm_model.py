@@ -314,6 +314,7 @@ class vLLMRolloutModel(InferenceModel):
             self.config.model_path,
             self.config.enable_auto_tool_choice,
             self.config.tool_call_parser,
+            self.config.reasoning_parser,
         )
 
     async def has_api_server(self) -> bool:

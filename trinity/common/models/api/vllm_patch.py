@@ -344,6 +344,7 @@ async def run_api_server_in_ray_actor(
     model_path: str,
     enable_auto_tool_choice: bool = False,
     tool_call_parser: Optional[str] = None,
+    reasoning_parser: Optional[str] = None,
 ):
     vllm_version = get_vllm_version()
     if vllm_version < parse_version("0.8.5") or vllm_version >= parse_version("0.10.0"):
@@ -366,6 +367,8 @@ async def run_api_server_in_ray_actor(
         cli_args.append("--enable-auto-tool-choice")
     if tool_call_parser:
         cli_args.extend(["--tool-call-parser", tool_call_parser])
+    if reasoning_parser:
+        cli_args.extend(["--reasoning-parser", reasoning_parser])
     args = parser.parse_args(cli_args)
     print(args)
     await run_server_in_ray(args, async_llm)

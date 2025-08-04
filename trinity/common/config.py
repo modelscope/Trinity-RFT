@@ -221,6 +221,8 @@ class InferenceModelConfig:
 
     tool_call_parser: Optional[str] = None
 
+    reasoning_parser: Optional[str] = None
+
     # ! DO NOT SET
     bundle_indices: str = ""
 

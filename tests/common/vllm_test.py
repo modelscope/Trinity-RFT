@@ -217,9 +217,6 @@ class TestAPIServer(RayUnittestBase):
         self.config.explorer.rollout_model.use_v1 = True
         self.config.explorer.rollout_model.chat_template = CHAT_TEMPLATE
         self.config.explorer.rollout_model.enable_openai_api = True
-        # added for toolcalls
-        self.config.explorer.rollout_model.enable_auto_tool_choice = True
-        self.config.explorer.rollout_model.tool_call_parser = "hermes"
 
         self.config.check_and_update()
         self.engines, self.auxiliary_engines = create_inference_models(self.config)
@@ -313,6 +310,13 @@ class TestTokenizer(unittest.TestCase):
         self.assertEqual(prompt_length, prompt_length_hf)
 
 
+@parameterized_class(
+    ("enable_thinking", "reasoning_parser"),
+    [
+        (True, "deepseek_r1"),
+        (False, None),
+    ],
+)
 class TestAPIServerToolCall(RayUnittestBase):
     def setUp(self):
         self.config = get_template_config()
@@ -327,6 +331,8 @@ class TestAPIServerToolCall(RayUnittestBase):
         # added for toolcalls
         self.config.explorer.rollout_model.enable_auto_tool_choice = True
         self.config.explorer.rollout_model.tool_call_parser = "hermes"
+        self.config.explorer.rollout_model.enable_thinking = self.enable_thinking
+        self.config.explorer.rollout_model.reasoning_parser = self.reasoning_parser
 
         self.config.check_and_update()
         self.engines, self.auxiliary_engines = create_inference_models(self.config)
@@ -389,6 +395,12 @@ class TestAPIServerToolCall(RayUnittestBase):
             messages=messages,
             tools=tools,
             tool_choice="auto",
+            extra_body={
+                "repetition_penalty": 1.05,
+                "chat_template_kwargs": {
+                    "enable_thinking": self.enable_thinking
+                },  # default to True
+            },
         )
         print_debug(f"[{time.time() - start_time:.2f}s] First API call completed.")
 
@@ -398,7 +410,8 @@ class TestAPIServerToolCall(RayUnittestBase):
         choice = response.choices[0]
         print_debug(f"    > Finish Reason: {choice.finish_reason}")
         self.assertEqual(choice.finish_reason, "tool_calls")
-        self.assertIsNone(choice.message.content)
+        if self.enable_thinking:
+            self.assertIsNotNone(choice.message.reasoning_content)
         self.assertIsNotNone(choice.message.tool_calls)
         self.assertEqual(len(choice.message.tool_calls), 1)
 
@@ -500,6 +513,12 @@ class TestAPIServerToolCall(RayUnittestBase):
             model=model_id,
             messages=messages,
             tools=tools,
+            extra_body={
+                "repetition_penalty": 1.05,
+                "chat_template_kwargs": {
+                    "enable_thinking": self.enable_thinking
+                },  # default to True
+            },
         )
         print_debug(f"[{time.time() - start_time:.2f}s] Second API call completed.")
 

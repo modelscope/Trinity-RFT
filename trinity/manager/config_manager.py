@@ -104,6 +104,7 @@ class ConfigManager:
             "enable_openai_api",
             "enable_auto_tool_choice",
             "tool_call_parser",
+            "reasoning_parser",
         ]
         maintain_list_state("auxiliary_model", self.inference_model_keys)
 
@@ -223,7 +224,7 @@ class ConfigManager:
             )
 
             self.get_configs("enable_thinking", "enable_openai_api", "enable_auto_tool_choice")
-            self.get_configs("tool_call_parser")
+            self.get_configs("tool_call_parser", "reasoning_parser")
 
         with st.expander("Auxiliary Models", expanded=True):
             self.get_configs("auxiliary_models")

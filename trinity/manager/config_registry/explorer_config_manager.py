@@ -151,7 +151,16 @@ def set_enable_auto_tool_choice(**kwargs):
 def set_tool_call_parser(**kwargs):
     st.text_input(
         "Tool Call Parser",
-        help="The tool call parser to use (e.g., 'hermes'). Leave empty if not needed.",
+        help="The OpenAI API tool call parser to use (e.g., 'hermes'). Leave empty if not needed.",
+        **kwargs,
+    )
+
+
+@CONFIG_GENERATORS.register_config(default_value=None, visible=explorer_visible)
+def set_reasoning_parser(**kwargs):
+    st.text_input(
+        "Reasoning Parser",
+        help="The OpenAI API reasoning parser to use (e.g., 'deepseek_r1'). Leave empty if not needed.",
         **kwargs,
     )
 
