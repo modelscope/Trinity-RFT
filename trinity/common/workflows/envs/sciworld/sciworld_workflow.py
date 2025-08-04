@@ -73,6 +73,10 @@ class SciWorldWorkflow(MultiTurnWorkflow):
         self.repeat_times = task.rollout_args.n
         self.max_env_steps = 30  # should be less than 100
 
+    def set_repeat_times(self, repeat_times, run_id_base):
+        super().set_repeat_times(repeat_times, run_id_base)
+        self.repeat_times = repeat_times
+
     def get_model_response(self, messages):
         responses = self.model.chat(messages, n=1)
         return responses

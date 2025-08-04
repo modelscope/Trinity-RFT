@@ -38,6 +38,7 @@ class DummyWorkflow(Workflow):
         super().__init__(task=task, model=model, auxiliary_models=auxiliary_models)
         self.obj = task.raw_task
         self.output_format = task.workflow_args["output_format"]
+        self.repeat_times = task.rollout_args.n
 
     @property
     def resettable(self):
@@ -50,6 +51,10 @@ class DummyWorkflow(Workflow):
     def reset(self, task: Task):
         self.obj = task.raw_task
         self.output_format = task.workflow_args["output_format"]
+
+    def set_repeat_times(self, repeat_times, run_id_base):
+        super().set_repeat_times(repeat_times, run_id_base)
+        self.repeat_times = repeat_times
 
     def run(self):
         if self.output_format == "json":
@@ -337,5 +342,6 @@ class WorkflowTest(unittest.TestCase):
         answer = workflow.run()
         self.assertEqual(len(answer), 3)
         workflow.set_repeat_times(2, run_id_base=0)
+        self.assertEqual(workflow.repeat_times, 2)
         answer = workflow.run()
         self.assertEqual(len(answer), 2)
