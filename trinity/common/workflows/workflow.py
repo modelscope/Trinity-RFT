@@ -93,6 +93,7 @@ class Workflow(ABC):
         self.task = task
         self.model = model
         self.auxiliary_models = auxiliary_models
+        # self.set_repeat_times(self.task.rollout_args.n) # TODO
 
     @property
     def resettable(self):
@@ -108,7 +109,10 @@ class Workflow(ABC):
 
     def set_repeat_times(self, n: int):
         """The workflow will be repeated `n` times."""
-        self.task.rollout_args.n = n
+        if self.repeatable:
+            self.task.rollout_args.n = n
+        else:
+            assert n == 1, "The workflow itself is not repeatable, `n` must be 1."
 
     @abstractmethod
     def run(self) -> List[Experience]:

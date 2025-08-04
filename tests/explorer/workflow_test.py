@@ -42,19 +42,29 @@ class DummyWorkflow(Workflow):
     def resettable(self):
         return True
 
+    @property
+    def repeatable(self):
+        return True
+
     def reset(self, task: Task):
         self.obj = task.raw_task
         self.output_format = task.workflow_args["output_format"]
+
+    def set_repeat_times(self, n: int):
+        if self.repeatable:
+            self.task.rollout_args["n"] = n
+        else:
+            assert n == 1, "The workflow itself is not repeatable, `n` must be 1."
 
     def run(self):
         if self.output_format == "json":
             import json
 
-            return [json.dumps(self.obj)]
+            return [json.dumps(self.obj)] * self.task.rollout_args.get("n", 1)
         elif self.output_format == "yaml":
             import yaml
 
-            return [yaml.safe_dump(self.obj)]
+            return [yaml.safe_dump(self.obj)] * self.task.rollout_args.get("n", 1)
         else:
             raise ValueError("Invalid output format")
 
@@ -319,3 +329,18 @@ class WorkflowTest(unittest.TestCase):
         workflow.reset(yaml_task)
         answer = workflow.run()
         self.assertEqual(answer[0], "a: 1\n")
+
+    def test_workflow_repeatable(self) -> None:
+        model = MagicMock()
+        task = Task(
+            workflow=DummyWorkflow,
+            raw_task={"a": 1},
+            workflow_args={"output_format": "json"},
+            rollout_args={"n": 3},
+        )
+        workflow = task.to_workflow(model)
+        answer = workflow.run()
+        self.assertEqual(len(answer), 3)
+        workflow.set_repeat_times(2)
+        answer = workflow.run()
+        self.assertEqual(len(answer), 2)

@@ -74,7 +74,7 @@ class WorkflowRunner:
             self.workflow_instance.reset(task)
         return self.workflow_instance.run()
 
-    def run_task(self, task: Task) -> Tuple[Status, List[Experience]]:
+    def run_task(self, task: Task, base_run_id: int = 0) -> Tuple[Status, List[Experience]]:
         """Run the task and return the states."""
         # TODO: avoid sending the experiences back to the scheduler to reduce the communication overhead
         try:
@@ -83,9 +83,14 @@ class WorkflowRunner:
             assert exps is not None and len(exps) > 0, "An empty experience is generated"
             metrics: dict[str, List[float]] = defaultdict(list)
             # set group id
-            for _, exp in enumerate(exps):
+            for i, exp in enumerate(exps):
                 exp.eid.batch = task.batch_id
                 exp.eid.task = task.task_id
+                exp.eid.run = base_run_id + i
+                self.logger.info(f"base_run_id={base_run_id}")  # debug
+                self.logger.info(
+                    f"Experience {i} (batch/task/run/step/suffix) = {exp.eid}"
+                )  # debug
                 if not hasattr(exp, "info") or exp.info is None:
                     exp.info = {}
                 exp.info["model_version"] = self.model_wrapper.model_version

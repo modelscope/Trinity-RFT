@@ -48,6 +48,10 @@ class MathEvalWorkflow(Workflow):
     @property
     def resettable(self):
         return False
+    
+    @property
+    def repeatable(self):
+        return False
 
     def format_messages(self):
         """Format message for the evaluation of qwen_boxed type."""

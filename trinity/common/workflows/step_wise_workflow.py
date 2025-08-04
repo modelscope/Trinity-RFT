@@ -66,6 +66,10 @@ class StepWiseRewardWorkflow(Workflow):
     def max_step_num(self):
         """Return the maximum number of steps in the task."""
 
+    @property
+    def repeatable(self):
+        return False
+
 
 class RewardPropagationWorkflow(Workflow):
     """A workflow that propagates rewards across multiple turns."""
@@ -124,3 +128,7 @@ class RewardPropagationWorkflow(Workflow):
     @abstractmethod
     def max_step_num(self):
         """Return the maximum number of steps in the task."""
+
+    @property
+    def repeatable(self):
+        return False
