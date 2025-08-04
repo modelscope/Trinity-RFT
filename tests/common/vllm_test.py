@@ -209,6 +209,10 @@ class TestAPIServer(RayUnittestBase):
         self.config.explorer.rollout_model.use_v1 = True
         self.config.explorer.rollout_model.chat_template = CHAT_TEMPLATE
         self.config.explorer.rollout_model.enable_openai_api = True
+        # added for toolcalls
+        self.config.explorer.rollout_model.enable_auto_tool_choice = True
+        self.config.explorer.rollout_model.tool_call_parser = "hermes"
+
         self.config.check_and_update()
         self.engines, self.auxiliary_engines = create_inference_models(self.config)
         self.model_wrapper = ModelWrapper(
@@ -266,6 +270,109 @@ class TestAPIServer(RayUnittestBase):
         with self.assertRaises(ValueError):
             self.model_wrapper_no_history.extract_experience_from_history()
         self.assertEqual(len(self.model_wrapper_no_history.history), 0)
+
+    def test_api_tool_calls(self):
+        """Tests the full conversation flow of a tool call via the OpenAI API."""
+        import json
+
+        openai_client = self.model_wrapper.get_openai_client()
+        model_id = openai_client.models.list().data[0].id
+
+        # 1. Define tools that the model can use
+        tools = [
+            {
+                "type": "function",
+                "function": {
+                    "name": "get_current_weather",
+                    "description": "Get the current weather in a given location",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "location": {
+                                "type": "string",
+                                "description": "The city and state, e.g. San Francisco, CA",
+                            },
+                            "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]},
+                        },
+                        "required": ["location"],
+                    },
+                },
+            }
+        ]
+        messages = [{"role": "user", "content": "What's the weather like in Boston?"}]
+
+        # 2. First API call: Model should decide to use the tool
+        response = openai_client.chat.completions.create(
+            model=model_id,
+            messages=messages,
+            tools=tools,
+            tool_choice="auto",
+        )
+
+        # 3. Assert that the model responded with a tool call
+        self.assertEqual(len(response.choices), 1)
+        choice = response.choices[0]
+        self.assertEqual(choice.finish_reason, "tool_calls")
+        self.assertIsNone(choice.message.content)
+        self.assertIsNotNone(choice.message.tool_calls)
+        self.assertEqual(len(choice.message.tool_calls), 1)
+
+        tool_call = choice.message.tool_calls[0]
+        self.assertEqual(tool_call.type, "function")
+        self.assertEqual(tool_call.function.name, "get_current_weather")
+        # Check that the model correctly extracted the argument
+        self.assertIn("Boston", tool_call.function.arguments)
+
+        # 4. Check if the interaction was recorded as an experience
+        exps = self.model_wrapper.extract_experience_from_history()
+        self.assertEqual(len(exps), 1)
+        # The response text in the experience should contain the tool call info
+
+        # note that the response text is none here.
+        # We might need to use the toolcall field in `convert_api_output_to_experience` function
+        # self.assertIn("get_current_weather", exps[0].response_text)
+
+        self.assertEqual(
+            len(self.model_wrapper.extract_experience_from_history()), 0
+        )  # Verify cleared
+
+        # 5. Second API call: Simulate tool execution and send the result back
+        messages.append(response.choices[0].message)  # Add assistant's tool call message
+
+        # Mock the result of our tool
+        tool_response_content = json.dumps(
+            {"location": "Boston", "temperature": "72", "unit": "fahrenheit"}
+        )
+
+        messages.append(
+            {
+                "role": "tool",
+                "tool_call_id": tool_call.id,
+                "content": tool_response_content,
+            }
+        )
+
+        second_response = openai_client.chat.completions.create(
+            model=model_id,
+            messages=messages,
+            tools=tools,
+        )
+
+        # 6. Assert the final response is a natural language summary
+        self.assertEqual(len(second_response.choices), 1)
+        final_choice = second_response.choices[0]
+        self.assertEqual(final_choice.finish_reason, "stop")
+        # should be an empty list here
+        self.assertEqual(final_choice.message.tool_calls, [])
+        self.assertIsNotNone(final_choice.message.content)
+        # Check if the model used the information from the tool response
+        self.assertIn("72", final_choice.message.content)
+        self.assertIn("Boston", final_choice.message.content)
+
+        # 7. Check history for the final interaction
+        final_exps = self.model_wrapper.extract_experience_from_history()
+        self.assertEqual(len(final_exps), 1)
+        self.assertEqual(final_exps[0].response_text, final_choice.message.content)
 
 
 class TestTokenizer(unittest.TestCase):

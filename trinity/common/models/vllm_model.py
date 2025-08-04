@@ -79,7 +79,7 @@ class vLLMRolloutModel(InferenceModel):
             disable_log_requests=True,
             gpu_memory_utilization=config.gpu_memory_utilization,
             enable_chunked_prefill=config.enable_chunked_prefill,
-            # max_num_batched_tokens=256, # you can further set this parameter to reduce the vllm peak memory usage
+            # max_num_batched_tokens=256, # you can further set this parameter to reduce the vllm peak memory usage'
         )
         self.async_llm = vllm.AsyncLLMEngine.from_engine_args(engine_args)
         self.tokenizer = None
@@ -308,7 +308,12 @@ class vLLMRolloutModel(InferenceModel):
 
         self.api_server_host, self.api_server_port = self.get_available_address()
         await run_api_server_in_ray_actor(
-            self.async_llm, self.api_server_host, self.api_server_port, self.config.model_path
+            self.async_llm,
+            self.api_server_host,
+            self.api_server_port,
+            self.config.model_path,
+            self.config.enable_auto_tool_choice,
+            self.config.tool_call_parser,
         )
 
     async def has_api_server(self) -> bool:

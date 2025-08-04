@@ -216,6 +216,11 @@ class InferenceModelConfig:
     # For OpenAI API
     enable_openai_api: bool = False
 
+    # For tool calls in OpenAI API
+    enable_auto_tool_choice: bool = False
+
+    tool_call_parser: Optional[str] = None
+
     # ! DO NOT SET
     bundle_indices: str = ""
 
