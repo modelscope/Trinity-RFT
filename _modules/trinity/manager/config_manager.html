@@ -202,6 +202,9 @@
             <span class="s2">&quot;seed&quot;</span><span class="p">,</span>
             <span class="s2">&quot;enable_thinking&quot;</span><span class="p">,</span>
             <span class="s2">&quot;enable_openai_api&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;enable_auto_tool_choice&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;tool_call_parser&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;reasoning_parser&quot;</span><span class="p">,</span>
         <span class="p">]</span>
         <span class="n">maintain_list_state</span><span class="p">(</span><span class="s2">&quot;auxiliary_model&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inference_model_keys</span><span class="p">)</span></div>
 
@@ -327,7 +330,8 @@
                 <span class="s2">&quot;use_v1&quot;</span><span class="p">,</span> <span class="s2">&quot;enforce_eager&quot;</span><span class="p">,</span> <span class="s2">&quot;enable_prefix_caching&quot;</span><span class="p">,</span> <span class="s2">&quot;enable_chunked_prefill&quot;</span>
             <span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;enable_thinking&quot;</span><span class="p">,</span> <span class="s2">&quot;enable_openai_api&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;enable_thinking&quot;</span><span class="p">,</span> <span class="s2">&quot;enable_openai_api&quot;</span><span class="p">,</span> <span class="s2">&quot;enable_auto_tool_choice&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;tool_call_parser&quot;</span><span class="p">,</span> <span class="s2">&quot;reasoning_parser&quot;</span><span class="p">)</span>
 
         <span class="k">with</span> <span class="n">st</span><span class="o">.</span><span class="n">expander</span><span class="p">(</span><span class="s2">&quot;Auxiliary Models&quot;</span><span class="p">,</span> <span class="n">expanded</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;auxiliary_models&quot;</span><span class="p">)</span>

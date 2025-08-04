@@ -427,7 +427,13 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">api_server_host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_server_port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_available_address</span><span class="p">()</span>
         <span class="k">await</span> <span class="n">run_api_server_in_ray_actor</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_server_host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_server_port</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model_path</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api_server_host</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api_server_port</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model_path</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">enable_auto_tool_choice</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">tool_call_parser</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">reasoning_parser</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 

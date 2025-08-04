@@ -1306,6 +1306,8 @@
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.verl_config.RewardModel.enable">enable (trinity.common.verl_config.RewardModel attribute)</a>
 </li>
+      <li><a href="build_api/trinity.common.html#trinity.common.config.InferenceModelConfig.enable_auto_tool_choice">enable_auto_tool_choice (trinity.common.config.InferenceModelConfig attribute)</a>
+</li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.InferenceModelConfig.enable_chunked_prefill">enable_chunked_prefill (trinity.common.config.InferenceModelConfig attribute)</a>
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Trainer.enable_exp_buffer">enable_exp_buffer (trinity.common.verl_config.Trainer attribute)</a>
@@ -2793,6 +2795,8 @@
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.synchronizer.Synchronizer.ready_to_nccl_sync">ready_to_nccl_sync() (trinity.common.synchronizer.Synchronizer method)</a>
 </li>
+      <li><a href="build_api/trinity.common.html#trinity.common.config.InferenceModelConfig.reasoning_parser">reasoning_parser (trinity.common.config.InferenceModelConfig attribute)</a>
+</li>
       <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Ref">Ref (class in trinity.common.verl_config)</a>
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.verl_config.ActorRolloutRef.ref">ref (trinity.common.verl_config.ActorRolloutRef attribute)</a>
@@ -3313,6 +3317,8 @@
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.set_dtype">set_dtype() (in module trinity.manager.config_registry.explorer_config_manager)</a>
 </li>
+      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.set_enable_auto_tool_choice">set_enable_auto_tool_choice() (in module trinity.manager.config_registry.explorer_config_manager)</a>
+</li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.set_enable_chunked_prefill">set_enable_chunked_prefill() (in module trinity.manager.config_registry.explorer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.set_enable_openai_api">set_enable_openai_api() (in module trinity.manager.config_registry.explorer_config_manager)</a>
@@ -3395,10 +3401,10 @@
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.synchronizer.Synchronizer.set_model_state_dict">set_model_state_dict() (trinity.common.synchronizer.Synchronizer method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.html#trinity.common.synchronizer.Synchronizer.set_model_state_dict_with_step_num">set_model_state_dict_with_step_num() (trinity.common.synchronizer.Synchronizer method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.set_monitor_type">set_monitor_type() (in module trinity.manager.config_registry.model_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_mu_in_policy_loss_fn">set_mu_in_policy_loss_fn() (in module trinity.manager.config_registry.algorithm_config_manager)</a>
@@ -3422,6 +3428,8 @@
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.set_priority_fn">set_priority_fn() (in module trinity.manager.config_registry.buffer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.set_project">set_project() (in module trinity.manager.config_registry.model_config_manager)</a>
+</li>
+      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.set_reasoning_parser">set_reasoning_parser() (in module trinity.manager.config_registry.explorer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_ref_log_prob_micro_batch_size_per_gpu">set_ref_log_prob_micro_batch_size_per_gpu() (in module trinity.manager.config_registry.trainer_config_manager)</a>
 </li>
@@ -3472,6 +3480,8 @@
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_tau_in_policy_loss_fn">set_tau_in_policy_loss_fn() (in module trinity.manager.config_registry.algorithm_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.set_tensor_parallel_size">set_tensor_parallel_size() (in module trinity.manager.config_registry.explorer_config_manager)</a>
+</li>
+      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.set_tool_call_parser">set_tool_call_parser() (in module trinity.manager.config_registry.explorer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.set_total_epochs">set_total_epochs() (in module trinity.manager.config_registry.buffer_config_manager)</a>
 </li>
@@ -3821,6 +3831,8 @@
         <li><a href="build_api/trinity.common.html#trinity.common.experience.Experiences.tokens">(trinity.common.experience.Experiences attribute)</a>
 </li>
       </ul></li>
+      <li><a href="build_api/trinity.common.html#trinity.common.config.InferenceModelConfig.tool_call_parser">tool_call_parser (trinity.common.config.InferenceModelConfig attribute)</a>
+</li>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.ToolCallWorkflow">ToolCallWorkflow (class in trinity.common.workflows)</a>
 
       <ul>
