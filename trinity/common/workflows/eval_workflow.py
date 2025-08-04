@@ -48,7 +48,7 @@ class MathEvalWorkflow(Workflow):
     @property
     def resettable(self):
         return False
-    
+
     @property
     def repeatable(self):
         return False

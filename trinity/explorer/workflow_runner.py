@@ -60,7 +60,7 @@ class WorkflowRunner:
     def is_alive(self):
         return True
 
-    def _run_task(self, task: Task) -> List[Experience]:
+    def _run_task(self, task: Task, repeat_times: int, run_id_base: int) -> List[Experience]:
         """Init workflow from the task and run it."""
         if task.workflow is None:
             raise ValueError("Workflow is not set in the task.")
@@ -72,25 +72,25 @@ class WorkflowRunner:
             self.workflow_instance = task.to_workflow(self.model_wrapper, self.auxiliary_models)
         else:
             self.workflow_instance.reset(task)
+        self.workflow_instance.set_repeat_times(repeat_times, run_id_base)
         return self.workflow_instance.run()
 
-    def run_task(self, task: Task, base_run_id: int = 0) -> Tuple[Status, List[Experience]]:
+    def run_task(
+        self, task: Task, run_id_base: int = 0, repeat_times: int = 1
+    ) -> Tuple[Status, List[Experience]]:
         """Run the task and return the states."""
         # TODO: avoid sending the experiences back to the scheduler to reduce the communication overhead
         try:
             st = time.time()
-            exps = self._run_task(task)
+            exps = self._run_task(task, repeat_times, run_id_base)
             assert exps is not None and len(exps) > 0, "An empty experience is generated"
             metrics: dict[str, List[float]] = defaultdict(list)
             # set group id
             for i, exp in enumerate(exps):
                 exp.eid.batch = task.batch_id
                 exp.eid.task = task.task_id
-                exp.eid.run = base_run_id + i
-                self.logger.info(f"base_run_id={base_run_id}")  # debug
-                self.logger.info(
-                    f"Experience {i} (batch/task/run/step/suffix) = {exp.eid}"
-                )  # debug
+                if not self.workflow_instance.repeatable:
+                    exp.eid.run = run_id_base + i
                 if not hasattr(exp, "info") or exp.info is None:
                     exp.info = {}
                 exp.info["model_version"] = self.model_wrapper.model_version

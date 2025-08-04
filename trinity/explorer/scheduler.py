@@ -24,7 +24,8 @@ class TaskWrapper:
 
     task: Task
     batch_id: Union[int, str]
-    base_run_id: int = 0
+    run_id_base: int = 0
+    repeat_times: int = 1
 
 
 class RunnerWrapper:
@@ -76,7 +77,8 @@ class RunnerWrapper:
             for attempt in range(self.retry_times + 1):
                 try:
                     status, exps = await asyncio.wait_for(
-                        self.runner.run_task.remote(task.task, task.base_run_id), self.timeout
+                        self.runner.run_task.remote(task.task, task.run_id_base, task.repeat_times),
+                        self.timeout,
                     )
                     if status.ok:
                         break
@@ -301,12 +303,13 @@ class Scheduler:
                     TaskWrapper(
                         task=replace(task, batch_id=batch_id, task_id=i),
                         batch_id=batch_id,
-                        base_run_id=0,
+                        run_id_base=0,
+                        repeat_times=task.rollout_args.n,
                     )
                 )
                 continue
             rest_repeat_times = task.rollout_args.n
-            base_run_id = 0
+            run_id_base = 0
             while rest_repeat_times > 0:
                 repeat_times = min(self.max_repeat_times, rest_repeat_times)
                 task_wrapper = TaskWrapper(
@@ -314,12 +317,15 @@ class Scheduler:
                         task,
                         batch_id=batch_id,
                         task_id=i,
-                        rollout_args=replace(task.rollout_args, n=repeat_times),
+                        rollout_args=replace(
+                            task.rollout_args, n=repeat_times
+                        ),  # deprecated: use TaskWrapper.repeat_times
                     ),
                     batch_id=batch_id,
-                    base_run_id=base_run_id,
+                    run_id_base=run_id_base,
+                    repeat_times=repeat_times,
                 )
-                base_run_id += repeat_times
+                run_id_base += repeat_times
                 rest_repeat_times -= repeat_times
                 self.pending_tasks[batch_id].appendleft(task_wrapper)
 

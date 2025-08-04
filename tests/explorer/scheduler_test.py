@@ -20,10 +20,8 @@ from trinity.explorer.scheduler import Scheduler
 @WORKFLOWS.register_module("dummy_workflow")
 class DummyWorkflow(Workflow):
 
-    def __init__(self, *, task, model, repeat_times, auxiliary_models):
-        super().__init__(
-            task=task, model=model, repeat_times=repeat_times, auxiliary_models=auxiliary_models
-        )
+    def __init__(self, *, task, model, auxiliary_models):
+        super().__init__(task=task, model=model, auxiliary_models=auxiliary_models)
         self.error_type = task.raw_task.get("error_type", "")
         self.seconds = None
         self.repeat_times = task.rollout_args.n
@@ -33,6 +31,10 @@ class DummyWorkflow(Workflow):
                 self.seconds = int(parts[-1])
             else:
                 self.seconds = 10
+
+    # @property
+    # def repeatable(self):
+    #     return False
 
     def run(self) -> List[Experience]:
         if "timeout" in self.error_type:
@@ -456,6 +458,7 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
         group_ids = [exp.eid.tid for exp in exp_list]
         self.assertEqual(len(set(group_ids)), 11)  # 4 + 4 + 3
         run_ids = [exp.eid.rid for exp in exp_list]
+        print(f"{run_ids=}")
         self.assertEqual(len(run_ids), len(set(run_ids)))
         unique_ids = [exp.eid.uid for exp in exp_list]
         self.assertEqual(len(unique_ids), len(set(unique_ids)))

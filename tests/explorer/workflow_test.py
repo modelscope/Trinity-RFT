@@ -8,6 +8,7 @@ from unittest.mock import MagicMock
 from torch import Tensor
 
 from tests.tools import get_unittest_dataset_config
+from trinity.common.config import GenerationConfig
 from trinity.common.experience import EID
 from trinity.common.rewards import RMGalleryFn
 from trinity.common.workflows import (
@@ -49,12 +50,6 @@ class DummyWorkflow(Workflow):
     def reset(self, task: Task):
         self.obj = task.raw_task
         self.output_format = task.workflow_args["output_format"]
-
-    def set_repeat_times(self, n: int):
-        if self.repeatable:
-            self.task.rollout_args["n"] = n
-        else:
-            assert n == 1, "The workflow itself is not repeatable, `n` must be 1."
 
     def run(self):
         if self.output_format == "json":
@@ -336,7 +331,7 @@ class WorkflowTest(unittest.TestCase):
             workflow=DummyWorkflow,
             raw_task={"a": 1},
             workflow_args={"output_format": "json"},
-            rollout_args={"n": 3},
+            rollout_args=GenerationConfig(n=3),
         )
         workflow = task.to_workflow(model)
         answer = workflow.run()

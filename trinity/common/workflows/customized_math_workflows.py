@@ -75,7 +75,7 @@ class MathBoxedWorkflow(SimpleWorkflow):
         else:
             responses = self.model.generate([prompt_text], **self.rollout_args)
 
-        for run_id, response in enumerate(responses):
+        for i, response in enumerate(responses):
             reward_dict = self.reward_fn(  # type: ignore [misc]
                 response=response.response_text,  # type: ignore [arg-type]
                 truth=self.truth,
@@ -89,7 +89,7 @@ class MathBoxedWorkflow(SimpleWorkflow):
             response.metrics.update(reward_dict)
             reward = sum(reward_dict.values())
             response.reward = reward
-            response.eid.run = run_id
+            response.eid.run = i + self.run_id_base
 
             if not self.use_base:
                 logger.debug(

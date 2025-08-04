@@ -93,7 +93,6 @@ class Workflow(ABC):
         self.task = task
         self.model = model
         self.auxiliary_models = auxiliary_models
-        # self.set_repeat_times(self.task.rollout_args.n) # TODO
 
     @property
     def resettable(self):
@@ -107,12 +106,9 @@ class Workflow(ABC):
         """Reset the workflow."""
         raise NotImplementedError
 
-    def set_repeat_times(self, n: int):
+    def set_repeat_times(self, repeat_times: int, run_id_base: int):
         """The workflow will be repeated `n` times."""
-        if self.repeatable:
-            self.task.rollout_args.n = n
-        else:
-            assert n == 1, "The workflow itself is not repeatable, `n` must be 1."
+        pass
 
     @abstractmethod
     def run(self) -> List[Experience]:
@@ -211,6 +207,13 @@ class SimpleWorkflow(Workflow):
         self.rollout_args = rollout_args
         self.is_eval = task.is_eval
 
+    def set_repeat_times(self, repeat_times, run_id_base):
+        if self.repeatable:
+            self.task.rollout_args.n = repeat_times
+            self.run_id_base = run_id_base
+        else:
+            assert repeat_times == 1, "The workflow itself is not repeatable, `n` must be 1."
+
     def format_messages(self):
         """Format messages for the instruct model."""
         messages = []
@@ -227,7 +230,7 @@ class SimpleWorkflow(Workflow):
 
         logger.debug("start chat")
         responses = self.model.chat(messages, **self.rollout_args)
-        for run_id, response in enumerate(responses):
+        for i, response in enumerate(responses):
             reward_dict = self.reward_fn(  # type: ignore [misc]
                 response=response.response_text,  # type: ignore [arg-type]
                 truth=self.truth,
@@ -238,7 +241,7 @@ class SimpleWorkflow(Workflow):
             response.metrics.update(reward_dict)
             reward = sum(reward_dict.values())
             response.reward = reward
-            response.eid.run = run_id
+            response.eid.run = i + self.run_id_base
 
             logger.debug(
                 f"self.task_desc: {self.task_desc}, messages: {messages}, response: {response.response_text}, reward: {reward}"
