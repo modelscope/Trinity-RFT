@@ -148,8 +148,9 @@ def set_enable_auto_tool_choice(**kwargs):
 
 
 @CONFIG_GENERATORS.register_config(default_value=False, visible=explorer_visible)
+@CONFIG_GENERATORS.register_config(default_value=None, visible=explorer_visible)
 def set_tool_call_parser(**kwargs):
-    st.checkbox("Vllm ToolCall Parser Format for Model", **kwargs)
+    st.text_input("Tool Call Parser", help="The tool call parser to use (e.g., 'hermes'). Leave empty if not needed.", **kwargs)
 
 
 def _set_auxiliary_model_idx(idx):
