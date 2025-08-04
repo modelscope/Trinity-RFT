@@ -79,7 +79,7 @@ class vLLMRolloutModel(InferenceModel):
             disable_log_requests=True,
             gpu_memory_utilization=config.gpu_memory_utilization,
             enable_chunked_prefill=config.enable_chunked_prefill,
-            # max_num_batched_tokens=256, # you can further set this parameter to reduce the vllm peak memory usage'
+            # max_num_batched_tokens=256, # you can further set this parameter to reduce the vllm peak memory usage
         )
         self.async_llm = vllm.AsyncLLMEngine.from_engine_args(engine_args)
         self.tokenizer = None
