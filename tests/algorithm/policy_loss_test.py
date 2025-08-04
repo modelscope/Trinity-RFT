@@ -43,6 +43,22 @@ class VerlPolicyLossTest(unittest.TestCase):
         self.assertTrue(torch.allclose(torch.tensor(metrics["ppo_kl"]), ppo_kl))
         self.assertTrue(torch.allclose(torch.tensor(metrics["pg_loss"]), ppo_loss))
 
+    def test_gspo_policy_loss(self):
+        policy_loss_fn_cls = POLICY_LOSS_FN.get("gspo")
+        policy_loss_fn_args = policy_loss_fn_cls.default_args()
+        policy_loss_fn = policy_loss_fn_cls(**policy_loss_fn_args)
+        loss, metrics = policy_loss_fn(log_prob=self.logprob, **self.input_data.batch)
+        gspo_loss_expected = torch.tensor(0.27235108613967896)
+        pg_clipfrac_expected = torch.tensor(0.375)
+        ppo_kl_seq_expected = torch.tensor(-0.21027061343193054)
+        ppo_kl_expected = torch.tensor(-0.21663446724414825)
+        print(f"{loss.item()=}, {metrics=}")
+        self.assertTrue(torch.allclose(loss, gspo_loss_expected))
+        self.assertTrue(torch.allclose(torch.tensor(metrics["pg_clipfrac"]), pg_clipfrac_expected))
+        self.assertTrue(torch.allclose(torch.tensor(metrics["ppo_kl_seq"]), ppo_kl_seq_expected))
+        self.assertTrue(torch.allclose(torch.tensor(metrics["ppo_kl"]), ppo_kl_expected))
+        self.assertTrue(torch.allclose(torch.tensor(metrics["pg_loss"]), gspo_loss_expected))
+
     def test_sft_policy_loss(self):
         policy_loss_fn_cls = POLICY_LOSS_FN.get("sft")
         policy_loss_fn_args = policy_loss_fn_cls.default_args()
