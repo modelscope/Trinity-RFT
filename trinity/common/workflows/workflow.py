@@ -108,11 +108,11 @@ class Workflow(ABC):
         raise NotImplementedError
 
     def set_repeat_times(self, repeat_times, run_id_base):
+        self.run_id_base = run_id_base
         if self.repeatable:
             self.task.rollout_args.n = repeat_times
-            self.run_id_base = run_id_base
         else:
-            self.run_id_base = run_id_base
+            pass
 
     @abstractmethod
     def run(self) -> List[Experience]:
