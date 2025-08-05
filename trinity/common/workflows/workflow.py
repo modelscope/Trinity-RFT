@@ -102,6 +102,7 @@ class Workflow(ABC):
 
     @property
     def repeatable(self):
+        """A workflow is repeatable if it can be run multiple times within the run() method."""
         return True
 
     @property
