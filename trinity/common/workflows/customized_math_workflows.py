@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """We include the customized math workflows in this file."""
 
-from dataclasses import asdict
 from typing import List
 
 from trinity.common.experience import Experience
@@ -24,11 +23,6 @@ class MathBoxedWorkflow(SimpleWorkflow):
         self.raw_task = task.raw_task
         self.task_desc = task.task_desc
         self.truth = task.truth
-
-        # Rollout args
-        rollout_args = asdict(task.rollout_args)
-        self.rollout_args = rollout_args
-        self.is_eval = task.is_eval
 
         self.workflow_args = task.workflow_args
         self.reward_fn_args = task.reward_fn_args

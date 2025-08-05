@@ -8,7 +8,6 @@ from unittest.mock import MagicMock
 from torch import Tensor
 
 from tests.tools import get_unittest_dataset_config
-from trinity.common.config import GenerationConfig
 from trinity.common.experience import EID
 from trinity.common.rewards import RMGalleryFn
 from trinity.common.workflows import (
@@ -86,6 +85,7 @@ class WorkflowTest(unittest.TestCase):
         taskset_config = get_unittest_dataset_config("countdown")
         task = Task(
             workflow=MathWorkflow,
+            repeat_times=taskset_config.repeat_times,
             format_args=taskset_config.format,
             rollout_args=taskset_config.rollout_args,
             is_eval=False,
@@ -120,6 +120,7 @@ class WorkflowTest(unittest.TestCase):
         taskset_config = get_unittest_dataset_config("countdown")
         task = Task(
             workflow=MathWorkflow,
+            repeat_times=taskset_config.repeat_times,
             format_args=taskset_config.format,
             rollout_args=taskset_config.rollout_args,
             is_eval=False,
@@ -148,6 +149,7 @@ class WorkflowTest(unittest.TestCase):
         taskset_config = get_unittest_dataset_config("countdown")
         task = Task(
             workflow=MathWorkflow,
+            repeat_times=taskset_config.repeat_times,
             format_args=taskset_config.format,
             rollout_args=taskset_config.rollout_args,
             is_eval=False,
@@ -172,6 +174,7 @@ class WorkflowTest(unittest.TestCase):
         taskset_config = get_unittest_dataset_config("countdown")
         task = Task(
             workflow=MathBoxedWorkflow,
+            repeat_times=taskset_config.repeat_times,
             format_args=taskset_config.format,
             rollout_args=taskset_config.rollout_args,
             workflow_args={
@@ -192,6 +195,7 @@ class WorkflowTest(unittest.TestCase):
         self.assertEqual(experiences[3].reward, 0.0)
         task_new = Task(
             workflow=MathBoxedWorkflow,
+            repeat_times=taskset_config.repeat_times,
             format_args=taskset_config.format,
             rollout_args=taskset_config.rollout_args,
             workflow_args={
@@ -223,6 +227,7 @@ class WorkflowTest(unittest.TestCase):
         taskset_config = get_unittest_dataset_config("countdown")
         task = Task(
             workflow=MathWorkflow,
+            repeat_times=taskset_config.repeat_times,
             format_args=taskset_config.format,
             rollout_args=taskset_config.rollout_args,
             is_eval=False,
@@ -239,6 +244,7 @@ class WorkflowTest(unittest.TestCase):
         self.assertEqual(experiences[3].reward, 0.1)
         task_new = Task(
             workflow=MathWorkflow,
+            repeat_times=taskset_config.repeat_times,
             format_args=taskset_config.format,
             rollout_args=taskset_config.rollout_args,
             is_eval=False,
@@ -267,6 +273,7 @@ class WorkflowTest(unittest.TestCase):
         task = Task(
             workflow=MathRMWorkflow,
             reward_fn=RMGalleryFn,
+            repeat_times=taskset_config.repeat_times,
             format_args=taskset_config.format,
             rollout_args=taskset_config.rollout_args,
             reward_fn_args={
@@ -297,6 +304,7 @@ class WorkflowTest(unittest.TestCase):
         taskset_config = get_unittest_dataset_config("countdown")
         task = Task(
             workflow=MathEvalWorkflow,
+            repeat_times=taskset_config.repeat_times,
             is_eval=True,
             format_args=taskset_config.format,
             raw_task={
@@ -318,10 +326,16 @@ class WorkflowTest(unittest.TestCase):
     def test_workflow_resettable(self) -> None:
         model = MagicMock()
         json_task = Task(
-            workflow=DummyWorkflow, raw_task={"a": 1}, workflow_args={"output_format": "json"}
+            workflow=DummyWorkflow,
+            repeat_times=1,
+            raw_task={"a": 1},
+            workflow_args={"output_format": "json"},
         )
         yaml_task = Task(
-            workflow=DummyWorkflow, raw_task={"a": 1}, workflow_args={"output_format": "yaml"}
+            workflow=DummyWorkflow,
+            repeat_times=1,
+            raw_task={"a": 1},
+            workflow_args={"output_format": "yaml"},
         )
         workflow = json_task.to_workflow(model)
         answer = workflow.run()
@@ -334,13 +348,11 @@ class WorkflowTest(unittest.TestCase):
         model = MagicMock()
         task = Task(
             workflow=DummyWorkflow,
+            repeat_times=3,
             raw_task={"a": 1},
             workflow_args={"output_format": "json"},
-            rollout_args=GenerationConfig(n=3),
         )
         workflow = task.to_workflow(model)
-        answer = workflow.run()
-        self.assertEqual(len(answer), 3)
         workflow.set_repeat_times(2, run_id_base=0)
         self.assertEqual(workflow.repeat_times, 2)
         answer = workflow.run()

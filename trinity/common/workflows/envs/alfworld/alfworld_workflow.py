@@ -107,7 +107,7 @@ class AlfworldWorkflow(MultiTurnWorkflow):
             task=task,
         )
         self.task_desc = task.task_desc or "0"
-        self.repeat_times = task.rollout_args.n
+        self.repeat_times = task.repeat_times
         self.max_env_steps = 30
 
     def set_repeat_times(self, repeat_times, run_id_base):

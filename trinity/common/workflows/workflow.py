@@ -28,6 +28,7 @@ class Task(dict):
     """A Task class that defines a task and its associated reward function / workflow."""
 
     workflow: Type[Workflow]
+    repeat_times: Optional[int] = None
     format_args: FormatConfig = field(default_factory=FormatConfig)
     rollout_args: GenerationConfig = field(default_factory=GenerationConfig)
     workflow_args: dict = field(default_factory=dict)
@@ -102,6 +103,10 @@ class Workflow(ABC):
     @property
     def repeatable(self):
         return True
+
+    @property
+    def rollout_args(self):
+        return asdict(self.task.rollout_args)
 
     def reset(self, task: Task):
         """Reset the workflow."""
@@ -206,10 +211,6 @@ class SimpleWorkflow(Workflow):
             self.reward_fn: RewardFn = reward_fn(**self.reward_fn_args)
         else:
             raise ValueError("`reward_fn` must be a subclass of `RewardFn`")
-        # Rollout args
-        rollout_args = asdict(task.rollout_args)
-        self.rollout_args = rollout_args
-        self.is_eval = task.is_eval
 
     def format_messages(self):
         """Format messages for the instruct model."""

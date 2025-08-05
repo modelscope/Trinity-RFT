@@ -318,6 +318,7 @@ class RolloutDataReader(BufferReader):
             ), "`default_workflow_type` or `workflow_key` is required"
             task = Task(
                 workflow=workflow_class,
+                repeat_times=self.meta.repeat_times,
                 format_args=copy.deepcopy(self.meta.format),
                 rollout_args=copy.deepcopy(self.meta.rollout_args),
                 workflow_args=copy.deepcopy(self.meta.workflow_args),

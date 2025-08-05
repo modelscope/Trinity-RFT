@@ -8,7 +8,6 @@ Reference Paper https://arxiv.org/pdf/2505.00024 for further details.
 import json
 import re
 from collections import Counter
-from dataclasses import asdict
 from typing import List
 
 from trinity.common.experience import Experience
@@ -227,11 +226,6 @@ class ToolCallWorkflow(SimpleWorkflow):
         self.raw_task = task.raw_task
         self.task_desc = task.task_desc
         self.truth = task.truth
-
-        # Rollout args
-        rollout_args = asdict(task.rollout_args)
-        self.rollout_args = rollout_args
-        self.is_eval = task.is_eval
 
         self.workflow_args = task.workflow_args
         self.reward_fn_args = task.reward_fn_args

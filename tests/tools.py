@@ -6,13 +6,7 @@ from typing import Dict, List
 import ray
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 
-from trinity.common.config import (
-    Config,
-    FormatConfig,
-    GenerationConfig,
-    StorageConfig,
-    load_config,
-)
+from trinity.common.config import Config, FormatConfig, StorageConfig, load_config
 from trinity.common.constants import PromptType
 
 
@@ -55,11 +49,6 @@ def get_unittest_dataset_config(
                 prompt_key="question",
                 response_key="answer",
             ),
-            rollout_args=GenerationConfig(
-                n=1,
-                temperature=1.0,
-                logprobs=0,
-            ),
             default_workflow_type="math_workflow",
             default_reward_fn_type="countdown_reward",
         )
@@ -72,11 +61,6 @@ def get_unittest_dataset_config(
                 prompt_key="question",
                 response_key="answer",
             ),
-            rollout_args=GenerationConfig(
-                n=1,
-                temperature=1.0,
-                logprobs=0,
-            ),
             default_workflow_type="math_workflow",
             default_reward_fn_type="math_reward",
         )
@@ -88,11 +72,6 @@ def get_unittest_dataset_config(
             format=FormatConfig(
                 prompt_key="question",
                 response_key="answer",
-            ),
-            rollout_args=GenerationConfig(
-                n=1,
-                temperature=1.0,
-                logprobs=0,
             ),
             default_workflow_type="math_workflow",
             default_reward_fn_type="math_reward",

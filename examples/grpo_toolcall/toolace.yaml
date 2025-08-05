@@ -24,7 +24,6 @@ buffer:
       path: examples/grpo_toolcall/toolace_data
       # format: []
       rollout_args:
-        n: 8
         temperature: 1.0
         logprobs: 0
     eval_tasksets: []

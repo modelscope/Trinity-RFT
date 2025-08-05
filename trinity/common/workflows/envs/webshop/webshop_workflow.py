@@ -215,7 +215,7 @@ class WebShopWorkflow(MultiTurnWorkflow):
 
     def reset(self, task: Task):
         self.task_desc = task.task_desc or "0"
-        self.repeat_times = task.rollout_args.n
+        self.repeat_times = task.repeat_times
 
     def set_repeat_times(self, repeat_times, run_id_base):
         super().set_repeat_times(repeat_times, run_id_base)

@@ -298,17 +298,18 @@ class Scheduler:
 
     def _split_and_submit_tasks(self, tasks: List[Task], batch_id: Union[int, str]) -> None:
         for i, task in enumerate(tasks):
+            assert task.repeat_times is not None, "Task repeat_times should not be None"
             if self.max_repeat_times is None:
                 self.pending_tasks[batch_id].appendleft(
                     TaskWrapper(
                         task=replace(task, batch_id=batch_id, task_id=i),
                         batch_id=batch_id,
                         run_id_base=0,
-                        repeat_times=task.rollout_args.n,
+                        repeat_times=task.repeat_times,
                     )
                 )
                 continue
-            rest_repeat_times = task.rollout_args.n
+            rest_repeat_times = task.repeat_times
             run_id_base = 0
             while rest_repeat_times > 0:
                 repeat_times = min(self.max_repeat_times, rest_repeat_times)

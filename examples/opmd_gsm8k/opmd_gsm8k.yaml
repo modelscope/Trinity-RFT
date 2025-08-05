@@ -25,7 +25,6 @@ buffer:
         prompt_key: 'question'
         response_key: 'answer'
       rollout_args:
-        n: 8
         temperature: 1.0
         logprobs: 0
     default_workflow_type: 'math_workflow'

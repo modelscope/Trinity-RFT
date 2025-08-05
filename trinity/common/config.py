@@ -72,6 +72,7 @@ class StorageConfig:
     name: str = ""
     storage_type: StorageType = StorageType.FILE
     path: Optional[str] = None
+    repeat_times: Optional[int] = None
 
     # only available for StorageType.FILE. When requiring data processing on raw data, set the raw to True.
     raw: bool = False
@@ -460,6 +461,12 @@ class Config:
             )
         if not self.buffer.explorer_input.taskset.name:
             self.buffer.explorer_input.taskset.name = "taskset"
+        if self.buffer.explorer_input.taskset.repeat_times is None:
+            self.buffer.explorer_input.taskset.repeat_times = self.algorithm.repeat_times
+            logger.info(
+                "`buffer.explorer_input.taskset.repeat_times` is set to `algorithm.repeat_times`"
+                f" (={self.algorithm.repeat_times})."
+            )
         if self.mode == "train":
             assert (
                 self.buffer.trainer_input.experience_buffer is not None
@@ -501,6 +508,8 @@ class Config:
             dataset.task_type = TaskType.EVAL
             if not dataset.name:
                 dataset.name = f"eval_taskset_{idx}"
+            if dataset.repeat_times is None:
+                dataset.repeat_times = self.algorithm.repeat_times
             if dataset.default_workflow_type is None:
                 dataset.default_workflow_type = self.buffer.explorer_input.default_workflow_type
             if dataset.default_eval_workflow_type is None:
@@ -565,6 +574,8 @@ class Config:
             )
             if self.buffer.trainer_input.sft_warmup_dataset.ray_namespace is None:
                 self.buffer.trainer_input.sft_warmup_dataset.ray_namespace = self.ray_namespace
+            if self.buffer.trainer_input.sft_warmup_dataset.repeat_times is None:
+                self.buffer.trainer_input.sft_warmup_dataset.repeat_times = 1
 
         # check input/output buffers in experience pipelines
         if self.data_processor.experience_pipeline is not None:

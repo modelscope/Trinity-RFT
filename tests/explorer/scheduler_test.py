@@ -8,7 +8,7 @@ import torch
 
 from tests.tools import get_template_config
 from trinity.buffer.reader.queue_reader import QueueReader
-from trinity.common.config import GenerationConfig, StorageConfig
+from trinity.common.config import StorageConfig
 from trinity.common.constants import StorageType
 from trinity.common.experience import EID, Experience
 from trinity.common.models.model import InferenceModel
@@ -23,7 +23,6 @@ class DummyWorkflow(Workflow):
         super().__init__(task=task, model=model, auxiliary_models=auxiliary_models)
         self.error_type = task.raw_task.get("error_type", "")
         self.seconds = None
-        self.repeat_times = task.rollout_args.n
         if "timeout" in self.error_type:
             parts = self.error_type.split("_")
             if len(parts) > 1:
@@ -51,9 +50,9 @@ class DummyWorkflow(Workflow):
                 prompt_length=2,
                 prompt_text=self.error_type or "success",
                 eid=EID(run=i + self.run_id_base),
-                info={"repeat_times": self.repeat_times},
+                info={"repeat_times": self.task.rollout_args.n},
             )
-            for i in range(self.repeat_times)
+            for i in range(self.task.rollout_args.n)
         ]
 
 
@@ -150,7 +149,7 @@ def generate_tasks(
         timeout_seconds: the timeout for timeout tasks
     """
     tasks = [
-        Task(workflow=DummyWorkflow, raw_task={}, rollout_args=GenerationConfig(n=repeat_times))
+        Task(workflow=DummyWorkflow, repeat_times=repeat_times, raw_task={})
         for _ in range(total_num)
     ]
 
@@ -158,6 +157,7 @@ def generate_tasks(
         [
             Task(
                 workflow=DummyWorkflow,
+                repeat_times=repeat_times,
                 raw_task={"error_type": f"timeout_{timeout_seconds}"},
             )
             for _ in range(timeout_num)
@@ -168,6 +168,7 @@ def generate_tasks(
         [
             Task(
                 workflow=DummyWorkflow,
+                repeat_times=repeat_times,
                 raw_task={"error_type": "exception"},
             )
             for _ in range(exception_num)
