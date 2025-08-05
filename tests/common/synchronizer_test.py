@@ -194,6 +194,14 @@ class TestStateDictBasedSynchronizer(BaseTestSynchronizer):
             target=run_trainer, args=(trainer_config, self.max_steps, self.trainer_intervals)
         )
         trainer_process.start()
+        ray.init(ignore_reinit_error=True)
+        while True:
+            try:
+                ray.get_actor("queue-exp_buffer", namespace=trainer_config.ray_namespace)
+                break
+            except ValueError:
+                print("waiting for trainer to start.")
+                time.sleep(5)
         explorer_process_1 = multiprocessing.Process(
             target=run_explorer,
             args=(explorer1_config, self.max_steps, self.explorer1_intervals),
