@@ -461,7 +461,10 @@ class Config:
             )
         if not self.buffer.explorer_input.taskset.name:
             self.buffer.explorer_input.taskset.name = "taskset"
-        if self.buffer.explorer_input.taskset.repeat_times is None:
+        if (
+            self.buffer.explorer_input.taskset.repeat_times is None
+            or self.buffer.explorer_input.taskset.repeat_times != self.algorithm.repeat_times
+        ):
             self.buffer.explorer_input.taskset.repeat_times = self.algorithm.repeat_times
             logger.info(
                 "`buffer.explorer_input.taskset.repeat_times` is set to `algorithm.repeat_times`"
@@ -509,7 +512,7 @@ class Config:
             if not dataset.name:
                 dataset.name = f"eval_taskset_{idx}"
             if dataset.repeat_times is None:
-                dataset.repeat_times = self.algorithm.repeat_times
+                dataset.repeat_times = 1
             if dataset.default_workflow_type is None:
                 dataset.default_workflow_type = self.buffer.explorer_input.default_workflow_type
             if dataset.default_eval_workflow_type is None:
@@ -574,8 +577,6 @@ class Config:
             )
             if self.buffer.trainer_input.sft_warmup_dataset.ray_namespace is None:
                 self.buffer.trainer_input.sft_warmup_dataset.ray_namespace = self.ray_namespace
-            if self.buffer.trainer_input.sft_warmup_dataset.repeat_times is None:
-                self.buffer.trainer_input.sft_warmup_dataset.repeat_times = 1
 
         # check input/output buffers in experience pipelines
         if self.data_processor.experience_pipeline is not None:

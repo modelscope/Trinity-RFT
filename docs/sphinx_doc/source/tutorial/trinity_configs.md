@@ -239,7 +239,7 @@ The configuration for each task dataset is defined as follows:
   - For `sql` storage type, the path points to the sqlite database file.
 - `subset_name`: The subset name of the task dataset. Default is `None`.
 - `split`: The split of the task dataset. Default is `train`.
-- `repeat_times`: The number of times to repeat a task, used for GRPO-like algorithms. If not set, it will be automatically set to `algorithm.repeat_times`.
+- `repeat_times`: The number of rollouts generated for a task. If not set, it will be automatically set to `algorithm.repeat_times` for `taskset`, and `1` for `eval_tasksets`.
 - `format`: Defines keys for prompts and responses in the dataset.
   - `prompt_key`: Specifies which column in the dataset contains the prompt data.
   - `response_key`: Specifies which column in the dataset contains the response data.
