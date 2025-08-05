@@ -122,7 +122,7 @@ class SFTDataReader(BufferReader):
         )
         self.tokenizer = transformers.AutoTokenizer.from_pretrained(config.tokenizer_path)
 
-    async def read(
+    def read(
         self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
     ) -> List:
         samples = self.dataset.read_batch(batch_size or self.read_batch_size)
@@ -182,6 +182,11 @@ class SFTDataReader(BufferReader):
             raise ValueError(f"Unknown data format: {self.prompt_type}")
         return exp_list
 
+    async def read_async(
+        self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
+    ):
+        return self.read(batch_size, strategy)
+
 
 @FILE_READERS.register_module(DPOAlgorithm.name())
 class DPODataReader(BufferReader):
@@ -212,7 +217,7 @@ class DPODataReader(BufferReader):
         else:
             return item
 
-    async def read(
+    def read(
         self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
     ) -> List:
         batch_data = self.dataset.read_batch(batch_size or self.read_batch_size)
@@ -259,6 +264,11 @@ class DPODataReader(BufferReader):
             exp_list.append(experience)
         return exp_list
 
+    async def read_async(
+        self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
+    ):
+        return self.read(batch_size, strategy)
+
 
 @FILE_READERS.register_module("rollout")
 class RolloutDataReader(BufferReader):
@@ -290,7 +300,7 @@ class RolloutDataReader(BufferReader):
         self.default_workflow_cls = WORKFLOWS.get(meta.default_workflow_type)  # type: ignore
         self.default_reward_fn_cls = REWARD_FUNCTIONS.get(meta.default_reward_fn_type)  # type: ignore
 
-    async def read(
+    def read(
         self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
     ) -> List:
         batch_size = batch_size or self.read_batch_size
@@ -323,6 +333,11 @@ class RolloutDataReader(BufferReader):
             tasks.append(task)
         return tasks
 
+    async def read_async(
+        self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
+    ):
+        return self.read(batch_size, strategy)
+
 
 @FILE_READERS.register_module("raw")
 class RawDataReader(BufferReader):
@@ -333,10 +348,15 @@ class RawDataReader(BufferReader):
     def __len__(self):
         return len(self.dataset)
 
-    async def read(
+    def read(
         self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
     ) -> List:
         if self.returned:
             raise StopIteration
         self.returned = True
         return self.dataset.to_list()
+
+    async def read_async(
+        self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
+    ):
+        return self.read(batch_size, strategy)

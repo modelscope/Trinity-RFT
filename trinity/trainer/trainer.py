@@ -55,26 +55,22 @@ class Trainer:
 
     async def train(self) -> str:
         """Train the model."""
-
-        async def train_loop() -> None:
-            while self.train_continue:
-                try:
-                    self.train_continue = await self.train_step()
-                except Exception:
-                    self.logger.error(f"Error in Trainer (training):\n{traceback.format_exc()}")
-
-        async def sync_loop() -> None:
-            while self.train_continue:
-                try:
+        while self.train_continue:
+            try:
+                train_task = asyncio.create_task(self.train_step())
+                while not train_task.done():
                     if self.need_sync():
                         self.sync_weight()
                     await asyncio.sleep(1)
-                except Exception:
-                    self.logger.error(f"Error in Trainer (synchronize):\n{traceback.format_exc()}")
+                self.train_continue &= await train_task
+                if self.train_continue and self.need_sync():
+                    self.sync_weight()
+            except Exception:
+                self.logger.error(f"Error in Trainer:\n{traceback.format_exc()}")
+                self.train_continue = False
 
-        await asyncio.gather(train_loop(), sync_loop())
-        await self.synchronizer.set_trainer_status.remote(RunningStatus.STOPPED)
         self.engine.save_checkpoint(block_until_saved=True)
+        await self.synchronizer.set_trainer_status.remote(RunningStatus.STOPPED)
         self.logger.info("--------------------\n> Trainer finished.\n--------------------")
         return self.config.trainer.name
 
@@ -89,7 +85,9 @@ class Trainer:
             batch, sample_metrics, repr_samples = await self.sample_strategy.sample(
                 self.train_step_num + 1
             )
-        except StopIteration:
+        except (StopIteration, RuntimeError) as e:
+            if isinstance(e, RuntimeError) and "StopIteration" not in str(e):
+                raise
             self.logger.info("No more samples to train. Stopping training.")
             if (
                 self.config.trainer.save_interval == 0

@@ -9,7 +9,13 @@ class BufferReader(ABC):
     """Interface of the buffer reader."""
 
     @abstractmethod
-    async def read(
+    def read(
         self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
     ) -> List:
         """Read from buffer."""
+
+    @abstractmethod
+    async def read_async(
+        self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
+    ) -> List:
+        """Read from buffer asynchronously."""

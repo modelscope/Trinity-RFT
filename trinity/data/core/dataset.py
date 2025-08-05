@@ -1,4 +1,3 @@
-import asyncio
 from abc import ABC
 from dataclasses import asdict, dataclass, fields, is_dataclass
 from typing import Any, Dict, List, Optional, Union
@@ -87,7 +86,7 @@ class RftDataset:
     def read_from_buffer(self):
         datasets = []
         for buffer in self.input_buffers:
-            exp_list = asyncio.run(buffer.read())
+            exp_list = buffer.read()
             if len(exp_list) > 0 and is_dataclass(exp_list[0]):
                 exp_list = [asdict(exp) for exp in exp_list]
                 if self.original_dataclass is None:

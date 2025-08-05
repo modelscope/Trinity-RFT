@@ -47,13 +47,13 @@ class MixSampleStrategy(SampleStrategy):
     async def sample(self, step: int) -> Tuple[Experiences, Dict, List]:
         metrics = {}
         with Timer(metrics, "read_time"):
-            usual_exp_list = await self.usual_exp_buffer.read()
+            usual_exp_list = await self.usual_exp_buffer.read_async()
             for exp in usual_exp_list:
                 if exp.info is None:
                     exp.info = {}
                 exp.info["is_expert"] = False
 
-            expert_exp_list = await self.expert_exp_buffer.read()
+            expert_exp_list = await self.expert_exp_buffer.read_async()
             for exp in expert_exp_list:
                 exp.reward = 0.0
                 exp.logprobs = torch.zeros_like(

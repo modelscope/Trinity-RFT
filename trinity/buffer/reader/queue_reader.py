@@ -2,6 +2,8 @@
 
 from typing import List, Optional
 
+import ray
+
 from trinity.buffer.buffer_reader import BufferReader
 from trinity.buffer.ray_wrapper import QueueWrapper
 from trinity.common.config import BufferConfig, StorageConfig
@@ -20,7 +22,23 @@ class QueueReader(BufferReader):
         self.read_batch_size = config.read_batch_size
         self.queue = QueueWrapper.get_wrapper(storage_config, config)
 
-    async def read(
+    def read(
+        self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
+    ) -> List:
+        if strategy is not None and strategy != ReadStrategy.FIFO:
+            raise NotImplementedError(f"Read strategy {strategy} not supported for Queue Reader.")
+        try:
+            batch_size = batch_size or self.read_batch_size
+            exps = ray.get(self.queue.get_batch.remote(batch_size, timeout=self.timeout))
+            if len(exps) != batch_size:
+                raise TimeoutError(
+                    f"Read incomplete batch ({len(exps)}/{batch_size}), please check your workflow."
+                )
+        except StopAsyncIteration:
+            raise StopIteration()
+        return exps
+
+    async def read_async(
         self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
     ) -> List:
         if strategy is not None and strategy != ReadStrategy.FIFO:

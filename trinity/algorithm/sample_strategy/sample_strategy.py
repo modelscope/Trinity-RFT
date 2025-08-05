@@ -57,9 +57,9 @@ class WarmupSampleStrategy(SampleStrategy):
         metrics = {}
         with Timer(metrics, "read_time"):
             if step <= self.sft_warmup_steps:
-                exp_list = await self.sft_buffer.read()
+                exp_list = await self.sft_buffer.read_async()
             else:
-                exp_list = await self.exp_buffer.read()
+                exp_list = await self.exp_buffer.read_async()
             repr_samples = representative_sample(exp_list)
         with Timer(metrics, "gather_time"):
             exps = Experiences.gather_experiences(exp_list, self.pad_token_id)  # type: ignore
@@ -81,7 +81,7 @@ class DefaultSampleStrategy(SampleStrategy):
     async def sample(self, step: int, **kwargs) -> Tuple[Any, Dict, List]:
         metrics = {}
         with Timer(metrics, "read_time"):
-            exp_list = await self.exp_buffer.read()
+            exp_list = await self.exp_buffer.read_async()
             repr_samples = representative_sample(exp_list)
         with Timer(metrics, "gather_time"):
             exps = Experiences.gather_experiences(exp_list, self.pad_token_id)  # type: ignore
