@@ -142,6 +142,29 @@ def set_enable_openai_api(**kwargs):
     st.checkbox("Enable OpenAI API", **kwargs)
 
 
+@CONFIG_GENERATORS.register_config(default_value=False, visible=explorer_visible)
+def set_enable_auto_tool_choice(**kwargs):
+    st.checkbox("Enable OpenAI API Auto Tool calls", **kwargs)
+
+
+@CONFIG_GENERATORS.register_config(default_value=None, visible=explorer_visible)
+def set_tool_call_parser(**kwargs):
+    st.text_input(
+        "Tool Call Parser",
+        help="The OpenAI API tool call parser to use (e.g., 'hermes'). Leave empty if not needed.",
+        **kwargs,
+    )
+
+
+@CONFIG_GENERATORS.register_config(default_value=None, visible=explorer_visible)
+def set_reasoning_parser(**kwargs):
+    st.text_input(
+        "Reasoning Parser",
+        help="The OpenAI API reasoning parser to use (e.g., 'deepseek_r1'). Leave empty if not needed.",
+        **kwargs,
+    )
+
+
 def _set_auxiliary_model_idx(idx):
     col1, col2 = st.columns([9, 1])
     col1.text_input(

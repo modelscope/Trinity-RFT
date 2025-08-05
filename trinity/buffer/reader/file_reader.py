@@ -182,6 +182,11 @@ class SFTDataReader(BufferReader):
             raise ValueError(f"Unknown data format: {self.prompt_type}")
         return exp_list
 
+    async def read_async(
+        self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
+    ):
+        return self.read(batch_size, strategy)
+
 
 @FILE_READERS.register_module(DPOAlgorithm.name())
 class DPODataReader(BufferReader):
@@ -259,6 +264,11 @@ class DPODataReader(BufferReader):
             exp_list.append(experience)
         return exp_list
 
+    async def read_async(
+        self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
+    ):
+        return self.read(batch_size, strategy)
+
 
 @FILE_READERS.register_module("rollout")
 class RolloutDataReader(BufferReader):
@@ -330,6 +340,11 @@ class RolloutDataReader(BufferReader):
             tasks.append(task)
         return tasks
 
+    async def read_async(
+        self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
+    ):
+        return self.read(batch_size, strategy)
+
 
 @FILE_READERS.register_module("raw")
 class RawDataReader(BufferReader):
@@ -347,3 +362,8 @@ class RawDataReader(BufferReader):
             raise StopIteration
         self.returned = True
         return self.dataset.to_list()
+
+    async def read_async(
+        self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
+    ):
+        return self.read(batch_size, strategy)

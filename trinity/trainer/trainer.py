@@ -4,6 +4,7 @@ Trainer Class
 """
 from __future__ import annotations
 
+import asyncio
 import traceback
 from abc import ABC, abstractmethod
 from typing import Dict, List, Tuple
@@ -43,41 +44,50 @@ class Trainer:
             buffer_config=config.buffer,
             **config.algorithm.sample_strategy_args,
         )
+        self.train_continue = True
+        self.last_sync_step = None
 
     def prepare(self) -> None:
         """Prepare the trainer."""
         self.engine.prepare()
-        self.last_trainer_sync_step = self.engine.train_step_num
+        self.last_trainer_sync_step = self.train_step_num
         ray.get(self.synchronizer.set_trainer_status.remote(RunningStatus.RUNNING))
 
-    def train(self) -> str:
+    async def train(self) -> str:
         """Train the model."""
-        while True:
+        while self.train_continue:
             try:
-                train_continue = self.train_step()
-                if not train_continue:
-                    break
-                if self.need_sync():
+                train_task = asyncio.create_task(self.train_step())
+                while not train_task.done():
+                    if self.need_sync():
+                        self.sync_weight()
+                    await asyncio.sleep(1)
+                self.train_continue &= await train_task
+                if self.train_continue and self.need_sync():
                     self.sync_weight()
             except Exception:
                 self.logger.error(f"Error in Trainer:\n{traceback.format_exc()}")
-                break
-        ray.get(self.synchronizer.set_trainer_status.remote(RunningStatus.STOPPED))
+                self.train_continue = False
+
         self.engine.save_checkpoint(block_until_saved=True)
+        await self.synchronizer.set_trainer_status.remote(RunningStatus.STOPPED)
         self.logger.info("--------------------\n> Trainer finished.\n--------------------")
         return self.config.trainer.name
 
-    def train_step(self) -> bool:
+    async def train_step(self) -> bool:
         """Train one step.
 
         Returns:
             bool: Whether to continue training.
         """
+        self.logger.info(f"Training at step {self.train_step_num + 1} started.")
         try:
-            batch, sample_metrics, repr_samples = self.sample_strategy.sample(
+            batch, sample_metrics, repr_samples = await self.sample_strategy.sample(
                 self.train_step_num + 1
             )
-        except StopIteration:
+        except (StopIteration, RuntimeError) as e:
+            if isinstance(e, RuntimeError) and "StopIteration" not in str(e):
+                raise
             self.logger.info("No more samples to train. Stopping training.")
             if (
                 self.config.trainer.save_interval == 0
@@ -87,7 +97,9 @@ class Trainer:
                 self.engine.save_checkpoint()
                 self.logger.info(f"Saved at step {self.train_step_num}.")
             return False
+        self.logger.info(f"Sampling at step {self.train_step_num + 1} done.")
         continue_run, metrics = self.engine.train_step(batch)
+        self.logger.info(f"Training at step {self.train_step_num} finished.")
         prefix_metrics(sample_metrics, "sample", metrics)
         self.monitor.log(data=metrics, step=self.train_step_num)
         if self.config.trainer.enable_preview:
@@ -97,10 +109,13 @@ class Trainer:
     def need_sync(self) -> bool:
         """Whether to sync the model weight."""
         if self.config.synchronizer.sync_style == SyncStyle.FIXED:
-            return self.engine.train_step_num % self.config.synchronizer.sync_interval == 0
+            return (
+                self.last_sync_step != self.train_step_num
+                and self.train_step_num % self.config.synchronizer.sync_interval == 0
+            )
         else:
             if self.config.synchronizer.sync_style == SyncStyle.DYNAMIC_BY_TRAINER:
-                delta = self.engine.train_step_num - self.last_trainer_sync_step
+                delta = self.train_step_num - self.last_trainer_sync_step
                 if delta >= self.config.synchronizer.sync_interval:
                     ray.get(self.synchronizer.set_trainer_status.remote(RunningStatus.REQUIRE_SYNC))
             explorer_status_counts = ray.get(self.synchronizer.get_explorer_status_counts.remote())
@@ -111,23 +126,22 @@ class Trainer:
 
     def sync_weight(self) -> None:
         """Sync the model weight."""
-        self.logger.info(
-            f"Trainer synchronizing weights at step {self.engine.train_step_num} starting.."
-        )
+        self.logger.info(f"Trainer synchronizing weights at step {self.train_step_num} starting..")
         if self.config.synchronizer.sync_method == SyncMethod.NCCL:
             result = ray.get(
-                self.synchronizer.ready_to_nccl_sync.remote("trainer", self.engine.train_step_num)
+                self.synchronizer.ready_to_nccl_sync.remote("trainer", self.train_step_num)
             )
             if result is None:
                 self.logger.error("Trainer synchronizing weights failed.")
             else:
                 self.engine.sync_weight()
-                self.last_trainer_sync_step = self.engine.train_step_num
+                self.last_trainer_sync_step = self.train_step_num
         elif self.config.synchronizer.sync_method == SyncMethod.CHECKPOINT:
             self.engine.save_state_dict()
         elif self.config.synchronizer.sync_method == SyncMethod.MEMORY:
             self.engine.upload_state_dict()
-        self.logger.info(f"Trainer synchronizing weights at step {self.engine.train_step_num} end.")
+        self.logger.info(f"Trainer synchronizing weights at step {self.train_step_num} end.")
+        self.last_sync_step = self.train_step_num
         ray.get(self.synchronizer.set_trainer_status.remote(RunningStatus.RUNNING))
 
     def _log_experiences(self, samples: List[Dict]) -> None:
@@ -138,9 +152,9 @@ class Trainer:
             )
             self._sample_exps_to_log.clear()
 
-    def shutdown(self) -> None:
+    async def shutdown(self) -> None:
         self.monitor.close()
-        if ray.get(self.synchronizer.release.remote()) == 0:
+        if await self.synchronizer.release.remote() == 0:
             ray.kill(self.synchronizer)
             self.logger.info("Synchronizer stopped.")
 

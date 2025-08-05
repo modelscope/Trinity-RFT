@@ -13,3 +13,9 @@ class BufferReader(ABC):
         self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
     ) -> List:
         """Read from buffer."""
+
+    @abstractmethod
+    async def read_async(
+        self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
+    ) -> List:
+        """Read from buffer asynchronously."""

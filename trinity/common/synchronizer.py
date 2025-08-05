@@ -184,7 +184,7 @@ class Synchronizer:
                     )
             if self.model_version > current_version:
                 self.set_explorer_status(
-                    RunningStatus.WAITING_SYNC, old_status=RunningStatus.REQUIRE_SYNC
+                    RunningStatus.RUNNING, old_status=RunningStatus.REQUIRE_SYNC
                 )
             return self.model_version
 
@@ -237,10 +237,17 @@ class Synchronizer:
                         await asyncio.wait_for(
                             self._ready_condition.wait_for(
                                 lambda: self.explorer_status_counts[RunningStatus.WAITING_SYNC]
+                                + self.explorer_status_counts[RunningStatus.STOPPED]
                                 == 1,
                             ),
                             timeout=self.config.synchronizer.sync_timeout,
                         )
+                        if self.explorer_status_counts[RunningStatus.STOPPED] == 1:
+                            return sync_failed()
+                    self.set_explorer_status(
+                        RunningStatus.RUNNING,
+                        old_status=RunningStatus.WAITING_SYNC,
+                    )
                 elif module == "explorer":
                     self.set_explorer_status(
                         RunningStatus.WAITING_SYNC, old_status=RunningStatus.REQUIRE_SYNC
@@ -274,13 +281,19 @@ class Synchronizer:
             A reference to the Synchronizer actor.
         """
         if config is not None:
+            if config.mode == "explore" or (
+                config.mode == "train" and config.algorithm.algorithm_type not in {"dpo", "sft"}
+            ):
+                lifetime = "detached"
+            else:
+                lifetime = None
             return (
                 ray.remote(cls)
                 .options(
                     name="synchronizer",
                     namespace=config.ray_namespace,
                     get_if_exists=True,
-                    lifetime="detached",
+                    lifetime=lifetime,
                 )
                 .remote(config)
             )

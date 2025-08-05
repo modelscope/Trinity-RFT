@@ -308,7 +308,13 @@ class vLLMRolloutModel(InferenceModel):
 
         self.api_server_host, self.api_server_port = self.get_available_address()
         await run_api_server_in_ray_actor(
-            self.async_llm, self.api_server_host, self.api_server_port, self.config.model_path
+            self.async_llm,
+            self.api_server_host,
+            self.api_server_port,
+            self.config.model_path,
+            self.config.enable_auto_tool_choice,
+            self.config.tool_call_parser,
+            self.config.reasoning_parser,
         )
 
     async def has_api_server(self) -> bool:

@@ -593,7 +593,9 @@ class ActorRolloutRefWorker(Worker):
                 master_address, master_port = self.get_availale_master_addr_port()
                 world_size = self.config.synchronizer.explorer_world_size + 1
                 print(f"Trainer init_process_group {master_address}:{master_port} ({world_size}).")
-                synchronizer = Synchronizer.get_actor(self.config.synchronizer)
+                synchronizer = Synchronizer.get_actor(
+                    namespace=self.config.synchronizer.ray_namespace
+                )
                 setup_ref = synchronizer.setup_weight_sync_group.remote(
                     master_address, master_port, self.state_dict_meta
                 )
@@ -837,8 +839,6 @@ class ActorRolloutRefWorker(Worker):
 
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
     def load_checkpoint(self, local_path, hdfs_path=None, del_local_after_load=False):
-        print(f" {self._is_actor=} and {self._is_ref=}")
-
         if self._is_actor and self._is_offload_param:
             load_fsdp_model_to_gpu(self.actor_module_fsdp)
 
