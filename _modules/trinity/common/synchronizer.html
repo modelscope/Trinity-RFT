@@ -308,7 +308,7 @@
                     <span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_version</span> <span class="o">&gt;</span> <span class="n">current_version</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">set_explorer_status</span><span class="p">(</span>
-                    <span class="n">RunningStatus</span><span class="o">.</span><span class="n">WAITING_SYNC</span><span class="p">,</span> <span class="n">old_status</span><span class="o">=</span><span class="n">RunningStatus</span><span class="o">.</span><span class="n">REQUIRE_SYNC</span>
+                    <span class="n">RunningStatus</span><span class="o">.</span><span class="n">RUNNING</span><span class="p">,</span> <span class="n">old_status</span><span class="o">=</span><span class="n">RunningStatus</span><span class="o">.</span><span class="n">REQUIRE_SYNC</span>
                 <span class="p">)</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_version</span></div>
 
@@ -364,10 +364,17 @@
                         <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">wait_for</span><span class="p">(</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">_ready_condition</span><span class="o">.</span><span class="n">wait_for</span><span class="p">(</span>
                                 <span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">explorer_status_counts</span><span class="p">[</span><span class="n">RunningStatus</span><span class="o">.</span><span class="n">WAITING_SYNC</span><span class="p">]</span>
+                                <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">explorer_status_counts</span><span class="p">[</span><span class="n">RunningStatus</span><span class="o">.</span><span class="n">STOPPED</span><span class="p">]</span>
                                 <span class="o">==</span> <span class="mi">1</span><span class="p">,</span>
                             <span class="p">),</span>
                             <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_timeout</span><span class="p">,</span>
                         <span class="p">)</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">explorer_status_counts</span><span class="p">[</span><span class="n">RunningStatus</span><span class="o">.</span><span class="n">STOPPED</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                            <span class="k">return</span> <span class="n">sync_failed</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">set_explorer_status</span><span class="p">(</span>
+                        <span class="n">RunningStatus</span><span class="o">.</span><span class="n">RUNNING</span><span class="p">,</span>
+                        <span class="n">old_status</span><span class="o">=</span><span class="n">RunningStatus</span><span class="o">.</span><span class="n">WAITING_SYNC</span><span class="p">,</span>
+                    <span class="p">)</span>
                 <span class="k">elif</span> <span class="n">module</span> <span class="o">==</span> <span class="s2">&quot;explorer&quot;</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">set_explorer_status</span><span class="p">(</span>
                         <span class="n">RunningStatus</span><span class="o">.</span><span class="n">WAITING_SYNC</span><span class="p">,</span> <span class="n">old_status</span><span class="o">=</span><span class="n">RunningStatus</span><span class="o">.</span><span class="n">REQUIRE_SYNC</span>
@@ -404,13 +411,19 @@
 <span class="sd">            A reference to the Synchronizer actor.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;explore&quot;</span> <span class="ow">or</span> <span class="p">(</span>
+                <span class="n">config</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;train&quot;</span> <span class="ow">and</span> <span class="n">config</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">algorithm_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;dpo&quot;</span><span class="p">,</span> <span class="s2">&quot;sft&quot;</span><span class="p">}</span>
+            <span class="p">):</span>
+                <span class="n">lifetime</span> <span class="o">=</span> <span class="s2">&quot;detached&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">lifetime</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">return</span> <span class="p">(</span>
                 <span class="n">ray</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
                 <span class="o">.</span><span class="n">options</span><span class="p">(</span>
                     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;synchronizer&quot;</span><span class="p">,</span>
                     <span class="n">namespace</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">ray_namespace</span><span class="p">,</span>
                     <span class="n">get_if_exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                    <span class="n">lifetime</span><span class="o">=</span><span class="s2">&quot;detached&quot;</span><span class="p">,</span>
+                    <span class="n">lifetime</span><span class="o">=</span><span class="n">lifetime</span><span class="p">,</span>
                 <span class="p">)</span>
                 <span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
             <span class="p">)</span>
