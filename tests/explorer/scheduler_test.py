@@ -161,7 +161,7 @@ def generate_tasks(
     workflow = DummyWorkflow if repeatable else DummyNonRepeatWorkflow
     tasks = [
         Task(
-            workflow=workflow,
+            workflow=workflow,  # type: ignore[type-abstract]
             workflow_args={"step_num": step_num},
             repeat_times=repeat_times,
             raw_task={},
@@ -172,7 +172,7 @@ def generate_tasks(
     tasks.extend(
         [
             Task(
-                workflow=workflow,
+                workflow=workflow,  # type: ignore[type-abstract]
                 workflow_args={"step_num": step_num},
                 repeat_times=repeat_times,
                 raw_task={"error_type": f"timeout_{timeout_seconds}"},
@@ -184,7 +184,7 @@ def generate_tasks(
     tasks.extend(
         [
             Task(
-                workflow=workflow,
+                workflow=workflow,  # type: ignore[type-abstract]
                 workflow_args={"step_num": step_num},
                 repeat_times=repeat_times,
                 raw_task={"error_type": "exception"},
