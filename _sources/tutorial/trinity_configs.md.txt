@@ -213,6 +213,7 @@ buffer:
       storage_type: file
       path: /PATH/TO/DATA
       split: test
+      repeat_times: 1
       format:
         prompt_key: 'question'
         response_key: 'answer'
@@ -238,6 +239,7 @@ The configuration for each task dataset is defined as follows:
   - For `sql` storage type, the path points to the sqlite database file.
 - `subset_name`: The subset name of the task dataset. Default is `None`.
 - `split`: The split of the task dataset. Default is `train`.
+- `repeat_times`: The number of rollouts generated for a task. If not set, it will be automatically set to `algorithm.repeat_times` for `taskset`, and `1` for `eval_tasksets`.
 - `format`: Defines keys for prompts and responses in the dataset.
   - `prompt_key`: Specifies which column in the dataset contains the prompt data.
   - `response_key`: Specifies which column in the dataset contains the response data.
@@ -475,7 +477,7 @@ actor_rollout_ref:
       fsdp_size: -1
       forward_prefetch: False
     # log_prob_micro_batch_size: 4 # will be deprecated, use log_prob_micro_batch_size_per_gpu
-    log_prob_micro_batch_size_per_gpu: 8
+    log_prob_micro_batch_size_per_gpu: 4
     log_prob_use_dynamic_bsz: ${actor_rollout_ref.actor.use_dynamic_bsz}
     log_prob_max_token_len_per_gpu: ${actor_rollout_ref.actor.ppo_max_token_len_per_gpu}
     ulysses_sequence_parallel_size: ${actor_rollout_ref.actor.ulysses_sequence_parallel_size} # sp size

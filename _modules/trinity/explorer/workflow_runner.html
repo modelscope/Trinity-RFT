@@ -161,8 +161,7 @@
         <span class="k">return</span> <span class="kc">True</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_run_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Init workflow from the task and run it.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_workflow_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">workflow</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Workflow is not set in the task.&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="p">(</span>
@@ -173,20 +172,41 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">workflow_instance</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">to_workflow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_models</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">workflow_instance</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflow_instance</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_run_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">,</span> <span class="n">repeat_times</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">run_id_base</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Init workflow from the task and run it.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_create_workflow_instance</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflow_instance</span><span class="o">.</span><span class="n">repeatable</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">workflow_instance</span><span class="o">.</span><span class="n">set_repeat_times</span><span class="p">(</span><span class="n">repeat_times</span><span class="p">,</span> <span class="n">run_id_base</span><span class="p">)</span>
+            <span class="n">exps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflow_instance</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">exps</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">repeat_times</span><span class="p">):</span>
+                <span class="n">new_exps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflow_instance</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">new_exps</span><span class="p">:</span>
+                    <span class="n">exp</span><span class="o">.</span><span class="n">eid</span><span class="o">.</span><span class="n">run</span> <span class="o">=</span> <span class="n">run_id_base</span> <span class="o">+</span> <span class="n">i</span>
+                <span class="n">exps</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">new_exps</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">repeat_times</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_create_workflow_instance</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">exps</span>
 
 <div class="viewcode-block" id="WorkflowRunner.run_task">
 <a class="viewcode-back" href="../../../build_api/trinity.explorer.html#trinity.explorer.workflow_runner.WorkflowRunner.run_task">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">run_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Status</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_task</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">,</span>
+        <span class="n">repeat_times</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">run_id_base</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Status</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Run the task and return the states.&quot;&quot;&quot;</span>
         <span class="c1"># TODO: avoid sending the experiences back to the scheduler to reduce the communication overhead</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">st</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-            <span class="n">exps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_task</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+            <span class="n">exps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_task</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">repeat_times</span><span class="p">,</span> <span class="n">run_id_base</span><span class="p">)</span>
             <span class="k">assert</span> <span class="n">exps</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;An empty experience is generated&quot;</span>
             <span class="n">metrics</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
-            <span class="c1"># set group id</span>
-            <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">exp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">exps</span><span class="p">):</span>
+            <span class="c1"># set eid for each experience</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">exp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">exps</span><span class="p">):</span>
                 <span class="n">exp</span><span class="o">.</span><span class="n">eid</span><span class="o">.</span><span class="n">batch</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">batch_id</span>
                 <span class="n">exp</span><span class="o">.</span><span class="n">eid</span><span class="o">.</span><span class="n">task</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">task_id</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="s2">&quot;info&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">exp</span><span class="o">.</span><span class="n">info</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>

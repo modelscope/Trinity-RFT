@@ -208,6 +208,12 @@ model’s evaluation methodology. For more details on their approach, see:
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">resettable</span></span><a class="headerlink" href="#trinity.common.workflows.eval_workflow.MathEvalWorkflow.resettable" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="trinity.common.workflows.eval_workflow.MathEvalWorkflow.repeatable">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">repeatable</span></span><a class="headerlink" href="#trinity.common.workflows.eval_workflow.MathEvalWorkflow.repeatable" title="Link to this definition"></a></dt>
+<dd><p>A workflow is repeatable if it can be run multiple times within the run() method.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.common.workflows.eval_workflow.MathEvalWorkflow.format_messages">
 <span class="sig-name descname"><span class="pre">format_messages</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/eval_workflow.html#MathEvalWorkflow.format_messages"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.eval_workflow.MathEvalWorkflow.format_messages" title="Link to this definition"></a></dt>
@@ -297,6 +303,12 @@ applications at low cost.</p>
 <dd><p>Return the maximum number of steps in the task.</p>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="trinity.common.workflows.step_wise_workflow.StepWiseRewardWorkflow.repeatable">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">repeatable</span></span><a class="headerlink" href="#trinity.common.workflows.step_wise_workflow.StepWiseRewardWorkflow.repeatable" title="Link to this definition"></a></dt>
+<dd><p>A workflow is repeatable if it can be run multiple times within the run() method.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -349,6 +361,12 @@ applications at low cost.</p>
 <dd><p>Return the maximum number of steps in the task.</p>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="trinity.common.workflows.step_wise_workflow.RewardPropagationWorkflow.repeatable">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">repeatable</span></span><a class="headerlink" href="#trinity.common.workflows.step_wise_workflow.RewardPropagationWorkflow.repeatable" title="Link to this definition"></a></dt>
+<dd><p>A workflow is repeatable if it can be run multiple times within the run() method.</p>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -357,12 +375,17 @@ applications at low cost.</p>
 <p>Base Workflow Class</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.common.workflows.workflow.Task">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.common.workflows.workflow.</span></span><span class="sig-name descname"><span class="pre">Task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">workflow:</span> <span class="pre">~typing.Type[~trinity.common.workflows.workflow.Workflow],</span> <span class="pre">format_args:</span> <span class="pre">~trinity.common.config.FormatConfig</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">rollout_args:</span> <span class="pre">~trinity.common.config.GenerationConfig</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">workflow_args:</span> <span class="pre">dict</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">reward_fn_args:</span> <span class="pre">dict</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">is_eval:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False,</span> <span class="pre">reward_fn:</span> <span class="pre">~typing.Type[~trinity.common.rewards.reward_fn.RewardFn]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">raw_task:</span> <span class="pre">dict</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">batch_id:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">0,</span> <span class="pre">task_id:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/workflow.html#Task"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.workflow.Task" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.common.workflows.workflow.</span></span><span class="sig-name descname"><span class="pre">Task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">workflow:</span> <span class="pre">~typing.Type[~trinity.common.workflows.workflow.Workflow],</span> <span class="pre">repeat_times:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">format_args:</span> <span class="pre">~trinity.common.config.FormatConfig</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">rollout_args:</span> <span class="pre">~trinity.common.config.GenerationConfig</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">workflow_args:</span> <span class="pre">dict</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">reward_fn_args:</span> <span class="pre">dict</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">is_eval:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False,</span> <span class="pre">reward_fn:</span> <span class="pre">~typing.Type[~trinity.common.rewards.reward_fn.RewardFn]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">raw_task:</span> <span class="pre">dict</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">batch_id:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">0,</span> <span class="pre">task_id:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/workflow.html#Task"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.workflow.Task" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
 <p>A Task class that defines a task and its associated reward function / workflow.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="trinity.common.workflows.workflow.Task.workflow">
 <span class="sig-name descname"><span class="pre">workflow</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#trinity.common.workflows.workflow.Workflow" title="trinity.common.workflows.workflow.Workflow"><span class="pre">Workflow</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#trinity.common.workflows.workflow.Task.workflow" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.common.workflows.workflow.Task.repeat_times">
+<span class="sig-name descname"><span class="pre">repeat_times</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#trinity.common.workflows.workflow.Task.repeat_times" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -453,7 +476,7 @@ applications at low cost.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.common.workflows.workflow.Task.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">workflow:</span> <span class="pre">~typing.Type[~trinity.common.workflows.workflow.Workflow],</span> <span class="pre">format_args:</span> <span class="pre">~trinity.common.config.FormatConfig</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">rollout_args:</span> <span class="pre">~trinity.common.config.GenerationConfig</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">workflow_args:</span> <span class="pre">dict</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">reward_fn_args:</span> <span class="pre">dict</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">is_eval:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False,</span> <span class="pre">reward_fn:</span> <span class="pre">~typing.Type[~trinity.common.rewards.reward_fn.RewardFn]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">raw_task:</span> <span class="pre">dict</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">batch_id:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">0,</span> <span class="pre">task_id:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">0</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#trinity.common.workflows.workflow.Task.__init__" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">workflow:</span> <span class="pre">~typing.Type[~trinity.common.workflows.workflow.Workflow],</span> <span class="pre">repeat_times:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">format_args:</span> <span class="pre">~trinity.common.config.FormatConfig</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">rollout_args:</span> <span class="pre">~trinity.common.config.GenerationConfig</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">workflow_args:</span> <span class="pre">dict</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">reward_fn_args:</span> <span class="pre">dict</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">is_eval:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False,</span> <span class="pre">reward_fn:</span> <span class="pre">~typing.Type[~trinity.common.rewards.reward_fn.RewardFn]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">raw_task:</span> <span class="pre">dict</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">batch_id:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">0,</span> <span class="pre">task_id:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">0</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#trinity.common.workflows.workflow.Task.__init__" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -474,10 +497,31 @@ applications at low cost.</p>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">resettable</span></span><a class="headerlink" href="#trinity.common.workflows.workflow.Workflow.resettable" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="trinity.common.workflows.workflow.Workflow.repeatable">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">repeatable</span></span><a class="headerlink" href="#trinity.common.workflows.workflow.Workflow.repeatable" title="Link to this definition"></a></dt>
+<dd><p>A workflow is repeatable if it can be run multiple times within the run() method.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="trinity.common.workflows.workflow.Workflow.rollout_args">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rollout_args</span></span><a class="headerlink" href="#trinity.common.workflows.workflow.Workflow.rollout_args" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.common.workflows.workflow.Workflow.reset">
 <span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#trinity.common.workflows.workflow.Task" title="trinity.common.workflows.workflow.Task"><span class="pre">Task</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/workflow.html#Workflow.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.workflow.Workflow.reset" title="Link to this definition"></a></dt>
 <dd><p>Reset the workflow.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.workflows.workflow.Workflow.set_repeat_times">
+<span class="sig-name descname"><span class="pre">set_repeat_times</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repeat_times</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_id_base</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/common/workflows/workflow.html#Workflow.set_repeat_times"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.workflow.Workflow.set_repeat_times" title="Link to this definition"></a></dt>
+<dd><p>Set the number of times to repeat the workflow.
+:param repeat_times: number of times to repeat the workflow (if repeatable).
+:type repeat_times: int
+:param run_id_base: base run_id for setting run_id in experiences.
+:type run_id_base: int</p>
 </dd></dl>
 
 <dl class="py method">
@@ -497,6 +541,16 @@ applications at low cost.</p>
 <dt class="sig sig-object py" id="trinity.common.workflows.workflow.MultiTurnWorkflow.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#trinity.common.workflows.workflow.Task" title="trinity.common.workflows.workflow.Task"><span class="pre">Task</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.models.html#trinity.common.models.model.ModelWrapper" title="trinity.common.models.model.ModelWrapper"><span class="pre">ModelWrapper</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">OpenAI</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/workflow.html#MultiTurnWorkflow.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.workflow.MultiTurnWorkflow.__init__" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.workflows.workflow.MultiTurnWorkflow.set_repeat_times">
+<span class="sig-name descname"><span class="pre">set_repeat_times</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repeat_times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_id_base</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/workflow.html#MultiTurnWorkflow.set_repeat_times"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.workflow.MultiTurnWorkflow.set_repeat_times" title="Link to this definition"></a></dt>
+<dd><p>Set the number of times to repeat the workflow.
+:param repeat_times: number of times to repeat the workflow (if repeatable).
+:type repeat_times: int
+:param run_id_base: base run_id for setting run_id in experiences.
+:type run_id_base: int</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.common.workflows.workflow.MultiTurnWorkflow.run">
@@ -530,6 +584,16 @@ applications at low cost.</p>
 <dt class="sig sig-object py" id="trinity.common.workflows.workflow.SimpleWorkflow.reset">
 <span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#trinity.common.workflows.workflow.Task" title="trinity.common.workflows.workflow.Task"><span class="pre">Task</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/workflow.html#SimpleWorkflow.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.workflow.SimpleWorkflow.reset" title="Link to this definition"></a></dt>
 <dd><p>Reset the workflow.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.workflows.workflow.SimpleWorkflow.set_repeat_times">
+<span class="sig-name descname"><span class="pre">set_repeat_times</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repeat_times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_id_base</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/workflow.html#SimpleWorkflow.set_repeat_times"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.workflow.SimpleWorkflow.set_repeat_times" title="Link to this definition"></a></dt>
+<dd><p>Set the number of times to repeat the workflow.
+:param repeat_times: number of times to repeat the workflow (if repeatable).
+:type repeat_times: int
+:param run_id_base: base run_id for setting run_id in experiences.
+:type run_id_base: int</p>
 </dd></dl>
 
 <dl class="py method">
@@ -570,12 +634,17 @@ applications at low cost.</p>
 <p>Workflow module</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="trinity.common.workflows.Task">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.common.workflows.</span></span><span class="sig-name descname"><span class="pre">Task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">workflow:</span> <span class="pre">~typing.Type[~trinity.common.workflows.workflow.Workflow],</span> <span class="pre">format_args:</span> <span class="pre">~trinity.common.config.FormatConfig</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">rollout_args:</span> <span class="pre">~trinity.common.config.GenerationConfig</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">workflow_args:</span> <span class="pre">dict</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">reward_fn_args:</span> <span class="pre">dict</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">is_eval:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False,</span> <span class="pre">reward_fn:</span> <span class="pre">~typing.Type[~trinity.common.rewards.reward_fn.RewardFn]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">raw_task:</span> <span class="pre">dict</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">batch_id:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">0,</span> <span class="pre">task_id:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/workflow.html#Task"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.Task" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.common.workflows.</span></span><span class="sig-name descname"><span class="pre">Task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">workflow:</span> <span class="pre">~typing.Type[~trinity.common.workflows.workflow.Workflow],</span> <span class="pre">repeat_times:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">format_args:</span> <span class="pre">~trinity.common.config.FormatConfig</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">rollout_args:</span> <span class="pre">~trinity.common.config.GenerationConfig</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">workflow_args:</span> <span class="pre">dict</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">reward_fn_args:</span> <span class="pre">dict</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">is_eval:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False,</span> <span class="pre">reward_fn:</span> <span class="pre">~typing.Type[~trinity.common.rewards.reward_fn.RewardFn]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">raw_task:</span> <span class="pre">dict</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">batch_id:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">0,</span> <span class="pre">task_id:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/workflow.html#Task"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.Task" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
 <p>A Task class that defines a task and its associated reward function / workflow.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="trinity.common.workflows.Task.workflow">
 <span class="sig-name descname"><span class="pre">workflow</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#trinity.common.workflows.workflow.Workflow" title="trinity.common.workflows.workflow.Workflow"><span class="pre">Workflow</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#trinity.common.workflows.Task.workflow" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.common.workflows.Task.repeat_times">
+<span class="sig-name descname"><span class="pre">repeat_times</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#trinity.common.workflows.Task.repeat_times" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -666,7 +735,7 @@ applications at low cost.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.common.workflows.Task.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">workflow:</span> <span class="pre">~typing.Type[~trinity.common.workflows.workflow.Workflow],</span> <span class="pre">format_args:</span> <span class="pre">~trinity.common.config.FormatConfig</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">rollout_args:</span> <span class="pre">~trinity.common.config.GenerationConfig</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">workflow_args:</span> <span class="pre">dict</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">reward_fn_args:</span> <span class="pre">dict</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">is_eval:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False,</span> <span class="pre">reward_fn:</span> <span class="pre">~typing.Type[~trinity.common.rewards.reward_fn.RewardFn]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">raw_task:</span> <span class="pre">dict</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">batch_id:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">0,</span> <span class="pre">task_id:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">0</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#trinity.common.workflows.Task.__init__" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">workflow:</span> <span class="pre">~typing.Type[~trinity.common.workflows.workflow.Workflow],</span> <span class="pre">repeat_times:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">format_args:</span> <span class="pre">~trinity.common.config.FormatConfig</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">rollout_args:</span> <span class="pre">~trinity.common.config.GenerationConfig</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">workflow_args:</span> <span class="pre">dict</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">reward_fn_args:</span> <span class="pre">dict</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">is_eval:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False,</span> <span class="pre">reward_fn:</span> <span class="pre">~typing.Type[~trinity.common.rewards.reward_fn.RewardFn]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">raw_task:</span> <span class="pre">dict</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">batch_id:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">0,</span> <span class="pre">task_id:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">0</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#trinity.common.workflows.Task.__init__" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -687,10 +756,31 @@ applications at low cost.</p>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">resettable</span></span><a class="headerlink" href="#trinity.common.workflows.Workflow.resettable" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="trinity.common.workflows.Workflow.repeatable">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">repeatable</span></span><a class="headerlink" href="#trinity.common.workflows.Workflow.repeatable" title="Link to this definition"></a></dt>
+<dd><p>A workflow is repeatable if it can be run multiple times within the run() method.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="trinity.common.workflows.Workflow.rollout_args">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rollout_args</span></span><a class="headerlink" href="#trinity.common.workflows.Workflow.rollout_args" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.common.workflows.Workflow.reset">
 <span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#trinity.common.workflows.workflow.Task" title="trinity.common.workflows.workflow.Task"><span class="pre">Task</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/workflow.html#Workflow.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.Workflow.reset" title="Link to this definition"></a></dt>
 <dd><p>Reset the workflow.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.workflows.Workflow.set_repeat_times">
+<span class="sig-name descname"><span class="pre">set_repeat_times</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repeat_times</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_id_base</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/common/workflows/workflow.html#Workflow.set_repeat_times"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.Workflow.set_repeat_times" title="Link to this definition"></a></dt>
+<dd><p>Set the number of times to repeat the workflow.
+:param repeat_times: number of times to repeat the workflow (if repeatable).
+:type repeat_times: int
+:param run_id_base: base run_id for setting run_id in experiences.
+:type run_id_base: int</p>
 </dd></dl>
 
 <dl class="py method">
@@ -720,6 +810,16 @@ applications at low cost.</p>
 <dt class="sig sig-object py" id="trinity.common.workflows.SimpleWorkflow.reset">
 <span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#trinity.common.workflows.workflow.Task" title="trinity.common.workflows.workflow.Task"><span class="pre">Task</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/workflow.html#SimpleWorkflow.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.SimpleWorkflow.reset" title="Link to this definition"></a></dt>
 <dd><p>Reset the workflow.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.workflows.SimpleWorkflow.set_repeat_times">
+<span class="sig-name descname"><span class="pre">set_repeat_times</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repeat_times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_id_base</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/workflow.html#SimpleWorkflow.set_repeat_times"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.SimpleWorkflow.set_repeat_times" title="Link to this definition"></a></dt>
+<dd><p>Set the number of times to repeat the workflow.
+:param repeat_times: number of times to repeat the workflow (if repeatable).
+:type repeat_times: int
+:param run_id_base: base run_id for setting run_id in experiences.
+:type run_id_base: int</p>
 </dd></dl>
 
 <dl class="py method">
@@ -949,6 +1049,12 @@ model’s evaluation methodology. For more details on their approach, see:
 <dt class="sig sig-object py" id="trinity.common.workflows.MathEvalWorkflow.resettable">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">resettable</span></span><a class="headerlink" href="#trinity.common.workflows.MathEvalWorkflow.resettable" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="trinity.common.workflows.MathEvalWorkflow.repeatable">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">repeatable</span></span><a class="headerlink" href="#trinity.common.workflows.MathEvalWorkflow.repeatable" title="Link to this definition"></a></dt>
+<dd><p>A workflow is repeatable if it can be run multiple times within the run() method.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.common.workflows.MathEvalWorkflow.format_messages">
