@@ -144,6 +144,8 @@ def generate_tasks(
     exception_num: int = 0,
     timeout_seconds: int = 10,
     repeat_times: int = 1,
+    step_num: int = 1,
+    repeatable: bool = True,
 ):
     """Generate some tasks for testing
 
@@ -152,16 +154,26 @@ def generate_tasks(
         timeout_num: number of timeout tasks
         exception_num: number of exception tasks
         timeout_seconds: the timeout for timeout tasks
+        repeat_times: number of times to repeat each task
+        step_num: number of steps in each task
+        repeatable: whether to use repeatableworkflow
     """
+    workflow = DummyWorkflow if repeatable else DummyNonRepeatWorkflow
     tasks = [
-        Task(workflow=DummyWorkflow, repeat_times=repeat_times, raw_task={})
+        Task(
+            workflow=workflow,
+            workflow_args={"step_num": step_num},
+            repeat_times=repeat_times,
+            raw_task={},
+        )
         for _ in range(total_num)
     ]
 
     tasks.extend(
         [
             Task(
-                workflow=DummyWorkflow,
+                workflow=workflow,
+                workflow_args={"step_num": step_num},
                 repeat_times=repeat_times,
                 raw_task={"error_type": f"timeout_{timeout_seconds}"},
             )
@@ -172,7 +184,8 @@ def generate_tasks(
     tasks.extend(
         [
             Task(
-                workflow=DummyWorkflow,
+                workflow=workflow,
+                workflow_args={"step_num": step_num},
                 repeat_times=repeat_times,
                 raw_task={"error_type": "exception"},
             )
@@ -181,42 +194,6 @@ def generate_tasks(
     )
 
     return tasks
-
-
-def generate_stepwise_tasks(
-    total_num: int,
-    step_num: int = 1,
-    repeat_times: int = 1,
-    repeatable: bool = True,
-):
-    """Generate some tasks for testing
-
-    Args:
-        total_num: number of normal tasks
-        timeout_num: number of timeout tasks
-        exception_num: number of exception tasks
-        timeout_seconds: the timeout for timeout tasks
-    """
-    if repeatable:
-        return [
-            Task(
-                workflow=DummyWorkflow,
-                workflow_args={"step_num": step_num},
-                repeat_times=repeat_times,
-                raw_task={},
-            )
-            for _ in range(total_num)
-        ]
-    else:
-        return [
-            Task(
-                workflow=DummyNonRepeatWorkflow,
-                workflow_args={"step_num": step_num},
-                repeat_times=repeat_times,
-                raw_task={},
-            )
-            for _ in range(total_num)
-        ]
 
 
 class SchedulerTest(unittest.IsolatedAsyncioTestCase):
@@ -558,9 +535,7 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
         scheduler = Scheduler(self.config, [DummyModel.remote(), DummyModel.remote()])
         await scheduler.start()
         task_num, repeat_times = 5, 4
-        tasks = generate_tasks(task_num, repeat_times=repeat_times)
-        for task in tasks:
-            task.workflow = DummyNonRepeatWorkflow
+        tasks = generate_tasks(task_num, repeat_times=repeat_times, repeatable=False)
 
         batch_num = 2
         exp_list = []
@@ -597,7 +572,7 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
         batch_num = 2
 
         # repeatable stepwise workflow
-        tasks = generate_stepwise_tasks(
+        tasks = generate_tasks(
             task_num, step_num=step_num, repeat_times=repeat_times, repeatable=True
         )
         exp_list = []
@@ -618,7 +593,7 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(unique_ids), len(set(unique_ids)))
 
         # Non-repeatable stepwise workflow
-        tasks = generate_stepwise_tasks(
+        tasks = generate_tasks(
             task_num, step_num=step_num, repeat_times=repeat_times, repeatable=False
         )
         exp_list = []

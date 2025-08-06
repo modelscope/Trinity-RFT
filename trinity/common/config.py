@@ -60,7 +60,7 @@ class GenerationConfig:
     top_p: float = 1.0
     top_k: int = -1
     logprobs: int = 0  # vLLM return `logprobs + 1` elements
-    # repeat each task for `n` times (for GPRO-like algorithms)
+    # repeat each task for `n` times
     # ! DO NOT SET in `buffer.explorer_input.taskset.rollout_args`
     n: int = 1
 
