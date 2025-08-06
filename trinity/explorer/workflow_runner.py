@@ -81,7 +81,6 @@ class WorkflowRunner:
         else:
             exps = []
             for i in range(repeat_times):
-                self.workflow_instance.set_repeat_times(1, run_id_base + i)
                 new_exps = self.workflow_instance.run()
                 for exp in new_exps:
                     exp.eid.run = run_id_base + i

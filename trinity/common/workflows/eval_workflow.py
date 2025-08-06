@@ -53,9 +53,6 @@ class MathEvalWorkflow(Workflow):
     def repeatable(self):
         return False
 
-    def set_repeat_times(self, repeat_times, run_id_base):
-        self.run_id_base = run_id_base
-
     def format_messages(self):
         """Format message for the evaluation of qwen_boxed type."""
         if not self.raw_task or "question" not in self.raw_task:

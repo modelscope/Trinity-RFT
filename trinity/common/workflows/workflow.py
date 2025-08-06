@@ -149,9 +149,8 @@ class MultiTurnWorkflow(Workflow):
         )
 
     def set_repeat_times(self, repeat_times, run_id_base):
+        self.repeat_times = repeat_times
         self.run_id_base = run_id_base
-        if self.repeatable:
-            self.repeat_times = repeat_times
 
     @abstractmethod
     def run(self) -> List[Experience]:
@@ -223,10 +222,9 @@ class SimpleWorkflow(Workflow):
             raise ValueError("`reward_fn` must be a subclass of `RewardFn`")
 
     def set_repeat_times(self, repeat_times, run_id_base):
+        self.repeat_times = repeat_times
+        self.task.rollout_args.n = repeat_times
         self.run_id_base = run_id_base
-        if self.repeatable:
-            self.repeat_times = repeat_times
-            self.task.rollout_args.n = repeat_times
 
     def format_messages(self):
         """Format messages for the instruct model."""

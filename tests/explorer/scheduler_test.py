@@ -77,9 +77,6 @@ class DummyNonRepeatWorkflow(Workflow):
     def repeatable(self):
         return False
 
-    def set_repeat_times(self, repeat_times, run_id_base):
-        self.run_id_base = run_id_base
-
     def reset(self, task: Task):
         self.task = task
         self.reset_flag = True
