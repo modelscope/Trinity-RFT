@@ -29,7 +29,6 @@ class Trainer:
         self.config = config
         self.logger = get_logger(__name__)
         self.synchronizer = Synchronizer.get_actor(config)
-        ray.get(self.synchronizer.acquire.remote())
         self.engine = get_trainer_wrapper(config)
         self.last_trainer_sync_step = 0
         self.monitor = MONITOR.get(config.monitor.monitor_type)(
@@ -154,14 +153,15 @@ class Trainer:
 
     async def shutdown(self) -> None:
         self.monitor.close()
-        if await self.synchronizer.release.remote() == 0:
-            ray.kill(self.synchronizer)
-            self.logger.info("Synchronizer stopped.")
 
     @property
     def train_step_num(self) -> int:
         """Get the current training step number."""
         return self.engine.train_step_num
+
+    def is_alive(self) -> bool:
+        """Check if the trainer is alive."""
+        return True
 
 
 class TrainEngineWrapper(ABC):
