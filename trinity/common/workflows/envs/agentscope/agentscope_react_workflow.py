@@ -119,7 +119,7 @@ You are an agent specialized in solving math problems with tools. Please solve t
 
         # provide the task to the react agent
         msg = Msg("user", self.task_desc, role="user")
-        # Note that the main workflow can have aribitrary step and include different logics
+        # Note that the main workflow can have arbitrary steps and include different logic
         content = self.agent.reply(msg).content
 
         # unify the response format to text

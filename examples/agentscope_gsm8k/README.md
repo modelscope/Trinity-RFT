@@ -103,7 +103,7 @@ synchronizer:
 
 1.  **Prerequisites**: Ensure you have Trinity installed, along with the dependencies for this example (e.g., `agentscope`). Please refer to [Agentscope Github link](https://github.com/modelscope/agentscope).
 
-2. Download the model you want to use, and fillin the configuration files in `examples/agentscope_gsm8k/agentscope_gsm8k.yaml`
+2. Download the model you want to use, and fill in the configuration files in `examples/agentscope_gsm8k/agentscope_gsm8k.yaml`
 
 3.  **Launch the training job**: Run the following command from the root directory of the repository.
 
