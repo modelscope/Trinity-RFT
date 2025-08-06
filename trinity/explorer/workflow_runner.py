@@ -82,7 +82,10 @@ class WorkflowRunner:
             exps = []
             for i in range(repeat_times):
                 self.workflow_instance.set_repeat_times(1, run_id_base + i)
-                exps.extend(self.workflow_instance.run())
+                new_exps = self.workflow_instance.run()
+                for exp in new_exps:
+                    exp.eid.run = run_id_base + i
+                exps.extend(new_exps)
                 if i < repeat_times - 1:
                     self._create_workflow_instance(task)
         return exps
@@ -104,8 +107,6 @@ class WorkflowRunner:
             for i, exp in enumerate(exps):
                 exp.eid.batch = task.batch_id
                 exp.eid.task = task.task_id
-                if not self.workflow_instance.repeatable:
-                    exp.eid.run = run_id_base + i
                 if not hasattr(exp, "info") or exp.info is None:
                     exp.info = {}
                 exp.info["model_version"] = self.model_wrapper.model_version
