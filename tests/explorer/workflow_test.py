@@ -52,18 +52,18 @@ class DummyWorkflow(Workflow):
         self.output_format = task.workflow_args["output_format"]
 
     def set_repeat_times(self, repeat_times, run_id_base):
-        super().set_repeat_times(repeat_times, run_id_base)
         self.repeat_times = repeat_times
+        self.run_id_base = run_id_base
 
     def run(self):
         if self.output_format == "json":
             import json
 
-            return [json.dumps(self.obj)] * self.task.rollout_args.n
+            return [json.dumps(self.obj)] * self.repeat_times
         elif self.output_format == "yaml":
             import yaml
 
-            return [yaml.safe_dump(self.obj)] * self.task.rollout_args.n
+            return [yaml.safe_dump(self.obj)] * self.repeat_times
         else:
             raise ValueError("Invalid output format")
 

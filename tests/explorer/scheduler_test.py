@@ -35,6 +35,10 @@ class DummyWorkflow(Workflow):
     def repeatable(self):
         return True
 
+    def set_repeat_times(self, repeat_times, run_id_base):
+        self.repeat_times = repeat_times
+        self.run_id_base = run_id_base
+
     def run(self) -> List[Experience]:
         if "timeout" in self.error_type:
             time.sleep(self.seconds)
@@ -51,10 +55,10 @@ class DummyWorkflow(Workflow):
                 prompt_length=2,
                 prompt_text=self.error_type or "success",
                 eid=EID(run=i + self.run_id_base, step=step),
-                info={"repeat_times": self.task.rollout_args.n},
+                info={"repeat_times": self.repeat_times},
             )
             for step in range(self.step_num)
-            for i in range(self.task.rollout_args.n)
+            for i in range(self.repeat_times)
         ]
 
 
@@ -72,6 +76,9 @@ class DummyNonRepeatWorkflow(Workflow):
     @property
     def repeatable(self):
         return False
+
+    def set_repeat_times(self, repeat_times, run_id_base):
+        self.run_id_base = run_id_base
 
     def reset(self, task: Task):
         self.task = task

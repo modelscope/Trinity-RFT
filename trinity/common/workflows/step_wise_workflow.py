@@ -70,6 +70,9 @@ class StepWiseRewardWorkflow(Workflow):
     def repeatable(self):
         return False
 
+    def set_repeat_times(self, repeat_times, run_id_base):
+        self.run_id_base = run_id_base
+
 
 class RewardPropagationWorkflow(Workflow):
     """A workflow that propagates rewards across multiple turns."""
@@ -132,3 +135,6 @@ class RewardPropagationWorkflow(Workflow):
     @property
     def repeatable(self):
         return False
+
+    def set_repeat_times(self, repeat_times, run_id_base):
+        self.run_id_base = run_id_base

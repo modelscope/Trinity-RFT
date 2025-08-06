@@ -114,9 +114,15 @@ class Workflow(ABC):
         raise NotImplementedError
 
     def set_repeat_times(self, repeat_times: int, run_id_base: int) -> None:
-        self.run_id_base = run_id_base
-        if self.repeatable:
-            self.task.rollout_args.n = repeat_times
+        """
+        Set the number of times to repeat the workflow.
+        Args:
+            repeat_times (int): number of times to repeat the workflow (if repeatable).
+            run_id_base (int): base run_id for setting run_id in experiences.
+        """
+        raise NotImplementedError(
+            "set_repeat_times() must be implemented for a repeatable workflow."
+        )
 
     @abstractmethod
     def run(self) -> List[Experience]:
@@ -141,6 +147,11 @@ class MultiTurnWorkflow(Workflow):
             model=model,
             auxiliary_models=auxiliary_models,
         )
+
+    def set_repeat_times(self, repeat_times, run_id_base):
+        self.run_id_base = run_id_base
+        if self.repeatable:
+            self.repeat_times = repeat_times
 
     @abstractmethod
     def run(self) -> List[Experience]:
@@ -210,6 +221,12 @@ class SimpleWorkflow(Workflow):
             self.reward_fn: RewardFn = reward_fn(**self.reward_fn_args)
         else:
             raise ValueError("`reward_fn` must be a subclass of `RewardFn`")
+
+    def set_repeat_times(self, repeat_times, run_id_base):
+        self.run_id_base = run_id_base
+        if self.repeatable:
+            self.repeat_times = repeat_times
+            self.task.rollout_args.n = repeat_times
 
     def format_messages(self):
         """Format messages for the instruct model."""

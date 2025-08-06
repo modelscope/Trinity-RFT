@@ -110,10 +110,6 @@ class AlfworldWorkflow(MultiTurnWorkflow):
         self.repeat_times = task.repeat_times
         self.max_env_steps = 30
 
-    def set_repeat_times(self, repeat_times, run_id_base):
-        super().set_repeat_times(repeat_times, run_id_base)
-        self.repeat_times = repeat_times
-
     def get_model_response(self, messages):
         responses = self.model.chat(messages, n=1)
         return responses
