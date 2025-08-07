@@ -3,7 +3,7 @@ name: "ALFWORLD_RFT"
 checkpoint_root_dir: /PATH/TO/CHECKPOINT/ALFWORLD_RFT/
 algorithm:
   algorithm_type: grpo
-  repeat_times: 16
+  repeat_times: 8
 model:
   model_path: /PATH/TO/MODEL/
   max_prompt_tokens: 4096
@@ -13,7 +13,7 @@ cluster:
   gpu_per_node: 8
 buffer:
   total_epochs: 20
-  batch_size: 16
+  batch_size: 32
   max_retry_times: 3
   max_retry_interval: 1
   explorer_input:
@@ -31,6 +31,7 @@ buffer:
     experience_buffer:
       name: alfworld_buffer
       storage_type: queue
+      path: 'sqlite:///alfworld.db'
 explorer:
   runner_num: 32
   max_timeout: 3600
