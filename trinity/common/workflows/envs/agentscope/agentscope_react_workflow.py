@@ -133,12 +133,8 @@ You are an agent specialized in solving math problems with tools. Please solve t
         logger.debug(f"Reward: {reward}")
         experiences = self.model.extract_experience_from_history(clear_history=True)
         logger.debug(f"Experiences extracted len: {len(experiences)}")
-        import uuid
-
-        run_id = uuid.uuid4().hex[:6]
         for i, experience in enumerate(experiences):
             experience.eid.step = i
-            experience.eid.run = run_id
             experience.reward = reward
         logger.debug(
             f"return experience len: {len(experiences)}, run_id: {str(experiences[-1].eid.run)}, final step reward: {experiences[-1].reward}"
