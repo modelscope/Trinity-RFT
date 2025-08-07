@@ -36,7 +36,6 @@ buffer:
     experience_buffer:
       name: gsm8k_buffer
       storage_type: queue
-      path: 'sqlite:///gsm8k_reactv2.db'
     # sft_warmup_steps: 0
     # sft_warmup_dataset: # Uncomment these to enable sft warmup
     #   name: warmup_data
