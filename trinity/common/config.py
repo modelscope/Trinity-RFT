@@ -104,7 +104,7 @@ class StorageConfig:
     reward_fn_args: dict = field(default_factory=dict)
 
     # enable progress bar (tqdm) for _HFBatchReader
-    enable_progress_bar: Optional[bool] = True
+    enable_progress_bar: Optional[bool] = False
 
     # get storage from existing experiment
     ray_namespace: Optional[str] = None
