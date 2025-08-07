@@ -221,9 +221,7 @@ class Explorer:
             return True
         try:
             tasks = await self.taskset.read_async()
-        except (StopIteration, RuntimeError) as e:
-            if isinstance(e, RuntimeError) and "StopIteration" not in str(e):
-                raise
+        except StopAsyncIteration:
             self.logger.warning("No more tasks to explore. Stop exploring.")
             await self.save_checkpoint(sync_weight=False)
             await self.synchronizer.set_explorer_status.remote(
@@ -287,9 +285,7 @@ class Explorer:
                 try:
                     data = await eval_taskset.read_async()
                     self.scheduler.schedule(data, batch_id=eval_batch_id)
-                except (StopIteration, RuntimeError) as e:
-                    if isinstance(e, RuntimeError) and "StopIteration" not in str(e):
-                        raise
+                except StopAsyncIteration:
                     break
 
     async def benchmark(self) -> bool:

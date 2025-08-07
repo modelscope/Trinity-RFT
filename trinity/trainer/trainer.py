@@ -84,9 +84,7 @@ class Trainer:
             batch, sample_metrics, repr_samples = await self.sample_strategy.sample(
                 self.train_step_num + 1
             )
-        except (StopIteration, RuntimeError) as e:
-            if isinstance(e, RuntimeError) and "StopIteration" not in str(e):
-                raise
+        except StopAsyncIteration:
             self.logger.info("No more samples to train. Stopping training.")
             if (
                 self.config.trainer.save_interval == 0

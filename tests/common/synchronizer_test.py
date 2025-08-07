@@ -164,7 +164,14 @@ class TestSynchronizerExit(BaseTestSynchronizer):
         self.assertEqual(
             synchronizer, ray.get_actor("synchronizer", namespace=trainer_config.ray_namespace)
         )
-        time.sleep(5)
+        while True:
+            try:
+                explorer1 = ray.get_actor("explorer1", namespace=trainer_config.ray_namespace)
+                ray.get(explorer1.is_alive.remote())
+                break
+            except ValueError:
+                print("waiting for explorer1 to start.")
+                time.sleep(5)
         trainer_process.terminate()
         trainer_process.join()
         self.assertEqual(
