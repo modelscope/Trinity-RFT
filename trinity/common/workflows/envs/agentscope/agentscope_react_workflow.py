@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """We include the customized math workflows in this file."""
 
-from dataclasses import asdict
 from typing import List, Optional
 
 import openai
@@ -47,11 +46,8 @@ class AgentScopeReactV2Gsm8kWorkflow(Workflow):
             auxiliary_models=auxiliary_models,
         )
 
-        rollout_args = asdict(task.rollout_args)
-        self.rollout_args = rollout_args
-        temperature = rollout_args.get("temperature", 1.0)
-
-        max_tokens = rollout_args.get("max_tokens", 4096)
+        temperature = self.rollout_args.get("temperature", 1.0)
+        max_tokens = self.rollout_args.get("max_tokens", 4096)
 
         agentscope.init(
             model_configs=[
@@ -106,6 +102,10 @@ You are an agent specialized in solving math problems with tools. Please solve t
 
     @property
     def resettable(self):
+        return False
+
+    @property
+    def repeatable(self):
         return False
 
     def run(self):
