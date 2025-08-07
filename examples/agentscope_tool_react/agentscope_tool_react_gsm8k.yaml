@@ -31,10 +31,10 @@ buffer:
       rollout_args:
         temperature: 1.0
     eval_tasksets: []
-    default_workflow_type: 'agentscope_reactv2_gsm8k_workflow'
+    default_workflow_type: 'agentscope_reactv2_math_workflow'
   trainer_input:
     experience_buffer:
-      name: gsm8k_buffer
+      name: agentscope_gsm8k_buffer
       storage_type: queue
     # sft_warmup_steps: 0
     # sft_warmup_dataset: # Uncomment these to enable sft warmup
@@ -67,7 +67,7 @@ synchronizer:
   sync_timeout: 1200
 trainer:
   trainer_type: 'verl'
-  trainer_config_path: 'examples/agentscope_gsm8k/train_gsm8k.yaml'
+  trainer_config_path: 'examples/agentscope_tool_react/train_react.yaml'
   save_interval: 100
 monitor:
   monitor_type: wandb

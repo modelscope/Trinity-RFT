@@ -7,15 +7,14 @@ import openai
 
 from trinity.common.models.model import ModelWrapper
 from trinity.common.rewards.math_reward import MathBoxedRewardFn
-from trinity.common.workflows import Task
-from trinity.common.workflows.workflow import WORKFLOWS, Workflow
+from trinity.common.workflows.workflow import WORKFLOWS, Task, Workflow
 from trinity.utils.log import get_logger
 
 logger = get_logger(__name__)
 
 
-@WORKFLOWS.register_module("agentscope_reactv2_gsm8k_workflow")
-class AgentScopeReactV2Gsm8kWorkflow(Workflow):
+@WORKFLOWS.register_module("agentscope_reactv2_math_workflow")
+class AgentScopeReactV2MathWorkflow(Workflow):
     """
     This workflow serve as an example of how to use the agentscope framework with in the trinity workflow.
     """
@@ -30,7 +29,6 @@ class AgentScopeReactV2Gsm8kWorkflow(Workflow):
         # make sure that we have the corrct import
         try:
             import agentscope
-            from agentscope.agents import ReActAgentV2
             from agentscope.service import ServiceToolkit, execute_python_code
         except ImportError as e:
             error_message = f"AgentScope is not installed. Please install the agentscope framework first before running the workflow. Error: {str(e)}"
@@ -65,21 +63,34 @@ class AgentScopeReactV2Gsm8kWorkflow(Workflow):
             ],
             disable_saving=True,
         )
-        toolkit = ServiceToolkit()
-        toolkit.add(
+        self.toolkit = ServiceToolkit()
+        self.toolkit.add(
             execute_python_code,
             timeout=300,
             use_docker=False,
             maximum_memory_bytes=None,
         )
-        system_prompt = """
-You are an agent specialized in solving math problems with tools. Please solve the math problem given to you. You should return your final answer within \\boxed{{}}.
+        self.reset(task)
+
+    @property
+    def resettable(self):
+        return True
+
+    def reset(self, task: Task):
+        self.system_prompt = """
+You are an agent specialized in solving math problems with tools. Please solve the math problem given to you. You can write and execute python codes to perform calculation or verify your answer. You should return your final answer within \\boxed{{}}. "
 """
+        try:
+            from agentscope.agents import ReActAgentV2
+        except ImportError as e:
+            error_message = f"AgentScope is not installed. Please install the agentscope framework first before running the workflow. Error: {str(e)}"
+            logger.error(error_message)
+            raise ImportError(error_message)
         self.agent = ReActAgentV2(
             name="math_react_agent",
-            sys_prompt=system_prompt,
+            sys_prompt=self.system_prompt,
             model_config_name="my_model",  # replace by your model config name
-            service_toolkit=toolkit,
+            service_toolkit=self.toolkit,
             max_iters=5,
             verbose=False,
         )
@@ -92,17 +103,17 @@ You are an agent specialized in solving math problems with tools. Please solve t
 
         # we get the answer from gsm8k dataset
         try:
-            self.answer = self.truth.split("####")[1].strip()
+            if isinstance(self.truth, str) and "####" in self.truth:
+                # GSM8K dataset
+                self.answer = self.truth.split("####")[1].strip()
+            else:
+                self.answer = str(self.truth)
         except Exception as e:
-            logger.error(f"Error in getting answer from truth: {e}")
-            self.answer = self.truth
+            logger.debug(f"Error in getting answer from truth: {str(e)}")
+            self.answer = str(self.truth)
 
         # we use the boxed format to evaluate the answer
         self.reward_fn = MathBoxedRewardFn()
-
-    @property
-    def resettable(self):
-        return False
 
     @property
     def repeatable(self):
@@ -136,6 +147,10 @@ You are an agent specialized in solving math problems with tools. Please solve t
         for i, experience in enumerate(experiences):
             experience.eid.step = i
             experience.reward = reward
+            turns_metrics = {"agent_turns": len(self.agent.memory.get_memory())}
+            if experience.metrics is None:
+                experience.metrics = {}
+            experience.metrics.update(turns_metrics)
         logger.debug(
             f"return experience len: {len(experiences)}, run_id: {str(experiences[-1].eid.run)}, final step reward: {experiences[-1].reward}"
         )

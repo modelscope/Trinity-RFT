@@ -13,7 +13,7 @@ This example highlights several advanced capabilities of the Trinity-RFT framewo
 Trinity-RFT is designed to be highly modular. You can easily embed complex, pre-existing agent logic from external frameworks like AgentScope directly into a Trinity `Workflow`.
 
 - **No Need for Rewrites**: You don't have to re-implement the intricate logic of your agent (e.g., the ReAct loop, memory management, or tool invocation) within Trinity.
-- **Focus on High-Level Orchestration**: As shown in our `AgentScopeReactV2Gsm8kWorkflow`, the Trinity workflow simply initializes and calls the external agent's `reply` method. Trinity abstracts away the underlying complexity, allowing you to focus on the high-level task orchestration and reward design.
+- **Focus on High-Level Orchestration**: As shown in our `AgentScopeReactV2MathWorkflow`, the Trinity workflow simply initializes and calls the external agent's `reply` method. Trinity abstracts away the underlying complexity, allowing you to focus on the high-level task orchestration and reward design.
 
 ### General Multi-Turn Training
 Modern agentic tasks often involve multiple steps of reasoning, tool use, and observation. Trinity-RFT natively supports training across these multi-turn interactions.
@@ -33,7 +33,7 @@ Below we show you how to perform this step-by-step.
 
 ### The Workflow (`workflow.py`)
 
-The core logic is encapsulated in the `AgentScopeReactV2Gsm8kWorkflow` class.
+The core logic is encapsulated in the `AgentScopeReactV2MathWorkflow` class.
 
 1.  **Initialization (`__init__`)**:
     - It first initializes the AgentScope environment and the desired agent (`ReActAgentV2`).
@@ -103,17 +103,33 @@ synchronizer:
 
 1.  **Prerequisites**: Ensure you have Trinity installed, along with the dependencies for this example (e.g., `agentscope`). Please refer to [Agentscope Github link](https://github.com/modelscope/agentscope).
 
-2. Download the model you want to use, and fill in the configuration files in `examples/agentscope_gsm8k/agentscope_gsm8k.yaml`
+2. Download the model you want to use, and fill in the configuration files in `examples/agentscope_tool_react/agentscope_tool_react_gsm8k.yaml` or `examples/agentscope_tool_react/agentscope_tool_react_dapo.yaml`
 
 3.  **Launch the training job**: Run the following command from the root directory of the repository.
 
     ```bash
-    trinity run --config examples/agentscope_gsm8k/agentscope_gsm8k.yaml
+    trinity run --config examples/agentscope_tool_react/agentscope_tool_react_gsm8k.yaml
     ```
 
-The example here is simple and it can converge in a few minutes on 8 H20 GPUs.
+    or
+
+    ```bash
+    trinity run --config examples/agentscope_tool_react/agentscope_tool_react_dapo.yaml
+    ```
+
+
+The example here for gsm8k dataset is really simple and it can converge in a few minutes on 8 H20 GPUs.
 
 ![](../../docs/sphinx_doc/assets/agentscope_gsm8k_reward.png)
+
+The example here for dapo dataset take a little bit longer, but it also converges.
+
+![](../../docs/sphinx_doc/assets/agentscope_dapo_reward.png)
+
+We can also see that the model generally start to use more tool calls to solve the problems.
+
+![](../../docs/sphinx_doc/assets/agentscope_dapo_turns.png)
+
 
 
 ## Summary
