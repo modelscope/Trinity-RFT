@@ -78,7 +78,7 @@ class AgentScopeReactV2MathWorkflow(Workflow):
 
     def reset(self, task: Task):
         self.system_prompt = """
-You are an agent specialized in solving math problems with tools. Please solve the math problem given to you. You can write and execute python codes to perform calculation or verify your answer. You should return your final answer within \\boxed{{}}. "
+You are an agent specialized in solving math problems with tools. Please solve the math problem given to you. You can write and execute Python code to perform calculation or verify your answer. You should return your final answer within \\boxed{{}}.
 """
         try:
             from agentscope.agents import ReActAgentV2
