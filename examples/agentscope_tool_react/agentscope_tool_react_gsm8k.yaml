@@ -36,11 +36,6 @@ buffer:
     experience_buffer:
       name: agentscope_gsm8k_buffer
       storage_type: queue
-    # sft_warmup_steps: 0
-    # sft_warmup_dataset: # Uncomment these to enable sft warmup
-    #   name: warmup_data
-    #   storage_type: file
-    #   path: '/PATH/TO/WARMUP_DATA/'
 explorer:
   max_repeat_times_per_runner: 1
   eval_interval: 50
