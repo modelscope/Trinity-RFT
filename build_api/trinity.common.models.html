@@ -419,7 +419,8 @@ load the latest checkpoint. Defaults to None.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.common.models.vllm_model.vLLMRolloutModel.logprobs">
 <em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logprobs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/vllm_model.html#vLLMRolloutModel.logprobs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.models.vllm_model.vLLMRolloutModel.logprobs" title="Link to this definition"></a></dt>
-<dd><p>Calculate the logprobs of the given tokens in async.</p>
+<dd><p>Calculate the logprobs of the given tokens in async. Please slice the result carefully
+to align with the actual response length.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>token_ids</strong> (<em>List</em><em>[</em><em>int</em><em>]</em>) – The input token ids (seq_length).</p>
