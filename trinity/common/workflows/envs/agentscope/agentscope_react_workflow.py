@@ -26,7 +26,7 @@ class AgentScopeReactV2MathWorkflow(Workflow):
         model: ModelWrapper,
         auxiliary_models: Optional[List[openai.OpenAI]] = None,
     ):
-        # make sure that we have the corrct import
+        # make sure that we have the correct import
         try:
             import agentscope
             from agentscope.service import ServiceToolkit, execute_python_code
