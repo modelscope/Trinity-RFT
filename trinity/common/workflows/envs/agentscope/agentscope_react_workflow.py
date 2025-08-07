@@ -16,7 +16,7 @@ logger = get_logger(__name__)
 @WORKFLOWS.register_module("agentscope_reactv2_math_workflow")
 class AgentScopeReactV2MathWorkflow(Workflow):
     """
-    This workflow serve as an example of how to use the agentscope framework with in the trinity workflow.
+    This workflow serves as an example of how to use the agentscope framework within the trinity workflow.
     """
 
     def __init__(
