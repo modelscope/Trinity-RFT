@@ -60,9 +60,7 @@ class GenerationConfig:
     top_p: float = 1.0
     top_k: int = -1
     logprobs: int = 0  # vLLM return `logprobs + 1` elements
-    # repeat each task for `n` times (for GPRO-like algorithms)
-    # this field will be automatically set to `algorithm.repeat_times` in
-    # `buffer.explorer_input.taskset.rollout_args`
+    # repeat each task for `n` times
     # ! DO NOT SET in `buffer.explorer_input.taskset.rollout_args`
     n: int = 1
 
@@ -74,6 +72,7 @@ class StorageConfig:
     name: str = ""
     storage_type: StorageType = StorageType.FILE
     path: Optional[str] = None
+    repeat_times: Optional[int] = None
 
     # only available for StorageType.FILE. When requiring data processing on raw data, set the raw to True.
     raw: bool = False
@@ -469,11 +468,15 @@ class Config:
             )
         if not self.buffer.explorer_input.taskset.name:
             self.buffer.explorer_input.taskset.name = "taskset"
-        self.buffer.explorer_input.taskset.rollout_args.n = self.algorithm.repeat_times
-        logger.info(
-            "`buffer.explorer_input.taskset.rollout_args.n` is set to `algorithm.repeat_times`"
-            f" (={self.algorithm.repeat_times})."
-        )
+        if (
+            self.buffer.explorer_input.taskset.repeat_times is None
+            or self.buffer.explorer_input.taskset.repeat_times != self.algorithm.repeat_times
+        ):
+            self.buffer.explorer_input.taskset.repeat_times = self.algorithm.repeat_times
+            logger.info(
+                "`buffer.explorer_input.taskset.repeat_times` is set to `algorithm.repeat_times`"
+                f" (={self.algorithm.repeat_times})."
+            )
         if self.mode == "train":
             assert (
                 self.buffer.trainer_input.experience_buffer is not None
@@ -515,6 +518,8 @@ class Config:
             dataset.task_type = TaskType.EVAL
             if not dataset.name:
                 dataset.name = f"eval_taskset_{idx}"
+            if dataset.repeat_times is None:
+                dataset.repeat_times = 1
             if dataset.default_workflow_type is None:
                 dataset.default_workflow_type = self.buffer.explorer_input.default_workflow_type
             if dataset.default_eval_workflow_type is None:

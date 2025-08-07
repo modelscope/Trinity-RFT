@@ -28,6 +28,7 @@ class Task(dict):
     """A Task class that defines a task and its associated reward function / workflow."""
 
     workflow: Type[Workflow]
+    repeat_times: Optional[int] = None
     format_args: FormatConfig = field(default_factory=FormatConfig)
     rollout_args: GenerationConfig = field(default_factory=GenerationConfig)
     workflow_args: dict = field(default_factory=dict)
@@ -93,14 +94,35 @@ class Workflow(ABC):
         self.task = task
         self.model = model
         self.auxiliary_models = auxiliary_models
+        self.run_id_base = 0
 
     @property
     def resettable(self):
         return False
 
+    @property
+    def repeatable(self):
+        """A workflow is repeatable if it can be run multiple times within the run() method."""
+        return True
+
+    @property
+    def rollout_args(self):
+        return asdict(self.task.rollout_args)
+
     def reset(self, task: Task):
         """Reset the workflow."""
         raise NotImplementedError
+
+    def set_repeat_times(self, repeat_times: int, run_id_base: int) -> None:
+        """
+        Set the number of times to repeat the workflow.
+        Args:
+            repeat_times (int): number of times to repeat the workflow (if repeatable).
+            run_id_base (int): base run_id for setting run_id in experiences.
+        """
+        raise NotImplementedError(
+            "set_repeat_times() must be implemented for a repeatable workflow."
+        )
 
     @abstractmethod
     def run(self) -> List[Experience]:
@@ -125,6 +147,10 @@ class MultiTurnWorkflow(Workflow):
             model=model,
             auxiliary_models=auxiliary_models,
         )
+
+    def set_repeat_times(self, repeat_times, run_id_base):
+        self.repeat_times = repeat_times
+        self.run_id_base = run_id_base
 
     @abstractmethod
     def run(self) -> List[Experience]:
@@ -194,10 +220,11 @@ class SimpleWorkflow(Workflow):
             self.reward_fn: RewardFn = reward_fn(**self.reward_fn_args)
         else:
             raise ValueError("`reward_fn` must be a subclass of `RewardFn`")
-        # Rollout args
-        rollout_args = asdict(task.rollout_args)
-        self.rollout_args = rollout_args
-        self.is_eval = task.is_eval
+
+    def set_repeat_times(self, repeat_times, run_id_base):
+        self.repeat_times = repeat_times
+        self.task.rollout_args.n = repeat_times
+        self.run_id_base = run_id_base
 
     def format_messages(self):
         """Format messages for the instruct model."""
@@ -215,7 +242,7 @@ class SimpleWorkflow(Workflow):
 
         logger.debug("start chat")
         responses = self.model.chat(messages, **self.rollout_args)
-        for run_id, response in enumerate(responses):
+        for i, response in enumerate(responses):
             reward_dict = self.reward_fn(  # type: ignore [misc]
                 response=response.response_text,  # type: ignore [arg-type]
                 truth=self.truth,
@@ -226,7 +253,7 @@ class SimpleWorkflow(Workflow):
             response.metrics.update(reward_dict)
             reward = sum(reward_dict.values())
             response.reward = reward
-            response.eid.run = run_id
+            response.eid.run = i + self.run_id_base
 
             logger.debug(
                 f"self.task_desc: {self.task_desc}, messages: {messages}, response: {response.response_text}, reward: {reward}"

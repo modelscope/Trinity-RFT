@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """We include the customized math workflows in this file."""
 
-from dataclasses import asdict
 from typing import List
 
 from trinity.common.experience import Experience
@@ -24,11 +23,6 @@ class MathBoxedWorkflow(SimpleWorkflow):
         self.raw_task = task.raw_task
         self.task_desc = task.task_desc
         self.truth = task.truth
-
-        # Rollout args
-        rollout_args = asdict(task.rollout_args)
-        self.rollout_args = rollout_args
-        self.is_eval = task.is_eval
 
         self.workflow_args = task.workflow_args
         self.reward_fn_args = task.reward_fn_args
@@ -75,7 +69,7 @@ class MathBoxedWorkflow(SimpleWorkflow):
         else:
             responses = self.model.generate([prompt_text], **self.rollout_args)
 
-        for run_id, response in enumerate(responses):
+        for i, response in enumerate(responses):
             reward_dict = self.reward_fn(  # type: ignore [misc]
                 response=response.response_text,  # type: ignore [arg-type]
                 truth=self.truth,
@@ -89,7 +83,7 @@ class MathBoxedWorkflow(SimpleWorkflow):
             response.metrics.update(reward_dict)
             reward = sum(reward_dict.values())
             response.reward = reward
-            response.eid.run = run_id
+            response.eid.run = i + self.run_id_base
 
             if not self.use_base:
                 logger.debug(

@@ -31,7 +31,7 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(config.trainer.trainer_config.trainer.project_name, config.project)
         self.assertEqual(config.trainer.trainer_config.trainer.experiment_name, config.name)
         self.assertEqual(
-            config.buffer.explorer_input.taskset.rollout_args.n, config.algorithm.repeat_times
+            config.buffer.explorer_input.taskset.repeat_times, config.algorithm.repeat_times
         )
         self.assertEqual(config.model.model_path, config.model.critic_model_path)
         self.assertEqual(config.model.model_path, config.explorer.rollout_model.model_path)

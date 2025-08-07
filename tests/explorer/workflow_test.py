@@ -37,24 +37,33 @@ class DummyWorkflow(Workflow):
         super().__init__(task=task, model=model, auxiliary_models=auxiliary_models)
         self.obj = task.raw_task
         self.output_format = task.workflow_args["output_format"]
+        self.repeat_times = task.rollout_args.n
 
     @property
     def resettable(self):
+        return True
+
+    @property
+    def repeatable(self):
         return True
 
     def reset(self, task: Task):
         self.obj = task.raw_task
         self.output_format = task.workflow_args["output_format"]
 
+    def set_repeat_times(self, repeat_times, run_id_base):
+        self.repeat_times = repeat_times
+        self.run_id_base = run_id_base
+
     def run(self):
         if self.output_format == "json":
             import json
 
-            return [json.dumps(self.obj)]
+            return [json.dumps(self.obj)] * self.repeat_times
         elif self.output_format == "yaml":
             import yaml
 
-            return [yaml.safe_dump(self.obj)]
+            return [yaml.safe_dump(self.obj)] * self.repeat_times
         else:
             raise ValueError("Invalid output format")
 
@@ -76,6 +85,7 @@ class WorkflowTest(unittest.TestCase):
         taskset_config = get_unittest_dataset_config("countdown")
         task = Task(
             workflow=MathWorkflow,
+            repeat_times=taskset_config.repeat_times,
             format_args=taskset_config.format,
             rollout_args=taskset_config.rollout_args,
             is_eval=False,
@@ -110,6 +120,7 @@ class WorkflowTest(unittest.TestCase):
         taskset_config = get_unittest_dataset_config("countdown")
         task = Task(
             workflow=MathWorkflow,
+            repeat_times=taskset_config.repeat_times,
             format_args=taskset_config.format,
             rollout_args=taskset_config.rollout_args,
             is_eval=False,
@@ -138,6 +149,7 @@ class WorkflowTest(unittest.TestCase):
         taskset_config = get_unittest_dataset_config("countdown")
         task = Task(
             workflow=MathWorkflow,
+            repeat_times=taskset_config.repeat_times,
             format_args=taskset_config.format,
             rollout_args=taskset_config.rollout_args,
             is_eval=False,
@@ -162,6 +174,7 @@ class WorkflowTest(unittest.TestCase):
         taskset_config = get_unittest_dataset_config("countdown")
         task = Task(
             workflow=MathBoxedWorkflow,
+            repeat_times=taskset_config.repeat_times,
             format_args=taskset_config.format,
             rollout_args=taskset_config.rollout_args,
             workflow_args={
@@ -182,6 +195,7 @@ class WorkflowTest(unittest.TestCase):
         self.assertEqual(experiences[3].reward, 0.0)
         task_new = Task(
             workflow=MathBoxedWorkflow,
+            repeat_times=taskset_config.repeat_times,
             format_args=taskset_config.format,
             rollout_args=taskset_config.rollout_args,
             workflow_args={
@@ -213,6 +227,7 @@ class WorkflowTest(unittest.TestCase):
         taskset_config = get_unittest_dataset_config("countdown")
         task = Task(
             workflow=MathWorkflow,
+            repeat_times=taskset_config.repeat_times,
             format_args=taskset_config.format,
             rollout_args=taskset_config.rollout_args,
             is_eval=False,
@@ -229,6 +244,7 @@ class WorkflowTest(unittest.TestCase):
         self.assertEqual(experiences[3].reward, 0.1)
         task_new = Task(
             workflow=MathWorkflow,
+            repeat_times=taskset_config.repeat_times,
             format_args=taskset_config.format,
             rollout_args=taskset_config.rollout_args,
             is_eval=False,
@@ -257,6 +273,7 @@ class WorkflowTest(unittest.TestCase):
         task = Task(
             workflow=MathRMWorkflow,
             reward_fn=RMGalleryFn,
+            repeat_times=taskset_config.repeat_times,
             format_args=taskset_config.format,
             rollout_args=taskset_config.rollout_args,
             reward_fn_args={
@@ -287,6 +304,7 @@ class WorkflowTest(unittest.TestCase):
         taskset_config = get_unittest_dataset_config("countdown")
         task = Task(
             workflow=MathEvalWorkflow,
+            repeat_times=taskset_config.repeat_times,
             is_eval=True,
             format_args=taskset_config.format,
             raw_task={
@@ -308,10 +326,16 @@ class WorkflowTest(unittest.TestCase):
     def test_workflow_resettable(self) -> None:
         model = MagicMock()
         json_task = Task(
-            workflow=DummyWorkflow, raw_task={"a": 1}, workflow_args={"output_format": "json"}
+            workflow=DummyWorkflow,
+            repeat_times=1,
+            raw_task={"a": 1},
+            workflow_args={"output_format": "json"},
         )
         yaml_task = Task(
-            workflow=DummyWorkflow, raw_task={"a": 1}, workflow_args={"output_format": "yaml"}
+            workflow=DummyWorkflow,
+            repeat_times=1,
+            raw_task={"a": 1},
+            workflow_args={"output_format": "yaml"},
         )
         workflow = json_task.to_workflow(model)
         answer = workflow.run()
@@ -319,3 +343,17 @@ class WorkflowTest(unittest.TestCase):
         workflow.reset(yaml_task)
         answer = workflow.run()
         self.assertEqual(answer[0], "a: 1\n")
+
+    def test_workflow_repeatable(self) -> None:
+        model = MagicMock()
+        task = Task(
+            workflow=DummyWorkflow,
+            repeat_times=3,
+            raw_task={"a": 1},
+            workflow_args={"output_format": "json"},
+        )
+        workflow = task.to_workflow(model)
+        workflow.set_repeat_times(2, run_id_base=0)
+        self.assertEqual(workflow.repeat_times, 2)
+        answer = workflow.run()
+        self.assertEqual(len(answer), 2)

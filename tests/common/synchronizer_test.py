@@ -34,10 +34,11 @@ CHECKPOINT_ROOT_DIR = os.path.join(os.path.dirname(__file__), "temp_checkpoint_d
 
 
 def trainer_monkey_patch(config: Config, max_steps: int, intervals: List[int]):
-    def new_train_step(self):
+    async def new_train_step(self):
         self.engine.algorithm = ALGORITHM_TYPE.get(config.algorithm.algorithm_type)
         self.engine.global_steps += 1
         self.logger.info(f"Training at step {self.engine.global_steps} started.")
+        await asyncio.sleep(0.1)
         time.sleep(intervals[self.engine.global_steps - 1])
         metrics = {"actor/step": self.engine.global_steps}
         self.monitor.log(data=metrics, step=self.engine.global_steps)
@@ -102,6 +103,79 @@ class BaseTestSynchronizer(unittest.TestCase):
     def tearDown(self):
         checkpoint_path = get_checkpoint_path()
         shutil.rmtree(os.path.join(checkpoint_path, "unittest"))
+
+
+class TestSynchronizerExit(BaseTestSynchronizer):
+    def test_synchronizer(self):
+        config = get_template_config()
+        config.project = "unittest"
+        config.name = f"test_synchronizer_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        config.checkpoint_root_dir = get_checkpoint_path()
+        config.buffer.total_epochs = 1
+        config.buffer.batch_size = 4
+        config.cluster.gpu_per_node = 2
+        config.cluster.node_num = 1
+        config.model.model_path = get_model_path()
+        config.buffer.explorer_input.taskset = get_unittest_dataset_config("countdown")
+        config.buffer.trainer_input.experience_buffer = StorageConfig(
+            name="exp_buffer",
+            storage_type=StorageType.QUEUE,
+            wrap_in_ray=True,
+        )
+        config.synchronizer.sync_method = SyncMethod.CHECKPOINT
+        config.synchronizer.sync_style = SyncStyle.DYNAMIC_BY_EXPLORER
+        config.synchronizer.sync_interval = 2
+        config.trainer.save_interval = 100
+        config.monitor.monitor_type = "tensorboard"
+        trainer_config = deepcopy(config)
+        trainer_config.mode = "train"
+        trainer_config.check_and_update()
+
+        explorer1_config = deepcopy(config)
+        explorer1_config.mode = "explore"
+        explorer1_config.explorer.name = "explorer1"
+        explorer1_config.explorer.rollout_model.engine_num = 1
+        explorer1_config.explorer.rollout_model.tensor_parallel_size = 1
+        explorer1_config.buffer.explorer_output = StorageConfig(
+            name="exp_buffer",
+            storage_type=StorageType.QUEUE,
+            wrap_in_ray=True,
+        )
+        explorer1_config.check_and_update()
+
+        trainer_process = multiprocessing.Process(
+            target=run_trainer, args=(trainer_config, 8, [2, 1, 2, 1, 2, 1, 2, 1])
+        )
+        trainer_process.start()
+        ray.init(ignore_reinit_error=True)
+        while True:
+            try:
+                synchronizer = ray.get_actor("synchronizer", namespace=trainer_config.ray_namespace)
+                break
+            except ValueError:
+                print("waiting for trainer to start.")
+                time.sleep(5)
+        explorer_process_1 = multiprocessing.Process(
+            target=run_explorer,
+            args=(explorer1_config, 8, [0, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5]),
+        )
+        explorer_process_1.start()
+
+        self.assertEqual(
+            synchronizer, ray.get_actor("synchronizer", namespace=trainer_config.ray_namespace)
+        )
+        time.sleep(5)
+        trainer_process.terminate()
+        trainer_process.join()
+        self.assertEqual(
+            synchronizer, ray.get_actor("synchronizer", namespace=trainer_config.ray_namespace)
+        )
+
+        explorer_process_1.terminate()
+        explorer_process_1.join()
+        time.sleep(6)
+        with self.assertRaises(ValueError):
+            ray.get_actor("synchronizer", namespace=trainer_config.ray_namespace)
 
 
 @parameterized_class(

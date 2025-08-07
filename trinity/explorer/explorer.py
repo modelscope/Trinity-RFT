@@ -9,7 +9,6 @@ import traceback
 from collections import deque
 from typing import List, Optional
 
-import ray
 import torch
 
 from trinity.algorithm import ADD_STRATEGY
@@ -140,9 +139,6 @@ class Explorer:
                 )
             self.model_version = new_version
             self.last_sync_step = self.explore_step_num
-            await self.synchronizer.set_explorer_status.remote(
-                RunningStatus.RUNNING, old_status=RunningStatus.WAITING_SYNC
-            )
             self.last_sync_successful = True
         else:
             self.logger.warning(
@@ -163,19 +159,15 @@ class Explorer:
             *[model.sync_model.remote(self.model_version) for model in self.models]
         )
         self.last_sync_step = self.explore_step_num
-        await self.synchronizer.set_explorer_status.remote(
-            RunningStatus.RUNNING, old_status=RunningStatus.WAITING_SYNC
-        )
         self.last_sync_successful = True
 
     async def prepare(self) -> None:
         """Preparation before running."""
         futures = [
             asyncio.create_task(self.scheduler.start()),
-            self.synchronizer.acquire.remote(),
         ]
         if self.experience_buffer:
-            futures.append(asyncio.create_task(self.experience_buffer.acquire()))
+            futures.append(asyncio.create_task(self.experience_buffer.acquire()))  # type: ignore
         if not self.use_nccl_sync:
             master_address, master_port = await self.models[0].get_available_address.remote()
             futures.append(
@@ -183,7 +175,7 @@ class Explorer:
             )
         await asyncio.gather(*futures, return_exceptions=True)
         if self.config.explorer.eval_on_startup and self.explore_step_num == 0:
-            self.eval()
+            await self.eval()
         await self.synchronizer.set_explorer_status.remote(RunningStatus.REQUIRE_SYNC)
 
     async def get_weight(self, name: str) -> torch.Tensor:
@@ -210,7 +202,7 @@ class Explorer:
                     # TODO: support eval on last checkpoint
                     break
                 if self.need_eval():
-                    self.eval()
+                    await self.eval()
                 if await self.need_sync():
                     await self.sync_weight()
             except Exception:
@@ -228,8 +220,10 @@ class Explorer:
             self.explore_step_num += 1
             return True
         try:
-            tasks = self.taskset.read()
-        except StopIteration:
+            tasks = await self.taskset.read_async()
+        except (StopIteration, RuntimeError) as e:
+            if isinstance(e, RuntimeError) and "StopIteration" not in str(e):
+                raise
             self.logger.warning("No more tasks to explore. Stop exploring.")
             await self.save_checkpoint(sync_weight=False)
             await self.synchronizer.set_explorer_status.remote(
@@ -270,7 +264,7 @@ class Explorer:
     def need_eval(self) -> bool:
         return self.explore_step_num % self.config.explorer.eval_interval == 0
 
-    def eval(self):
+    async def eval(self):
         """Evaluation on all evaluation data samples."""
         if len(self.config.buffer.explorer_input.eval_tasksets) == 0:
             self.logger.warning("No evaluation data samples. Skip evaluation.")
@@ -291,8 +285,11 @@ class Explorer:
             self.pending_eval_tasks.append((self.explore_step_num, eval_taskset.name))
             while True:
                 try:
-                    self.scheduler.schedule(eval_taskset.read(), batch_id=eval_batch_id)
-                except StopIteration:
+                    data = await eval_taskset.read_async()
+                    self.scheduler.schedule(data, batch_id=eval_batch_id)
+                except (StopIteration, RuntimeError) as e:
+                    if isinstance(e, RuntimeError) and "StopIteration" not in str(e):
+                        raise
                     break
 
     async def benchmark(self) -> bool:
@@ -300,7 +297,7 @@ class Explorer:
         # benchmark on the latest checkpoint
         if self.config.explorer.bench_on_latest_checkpoint:
             self.explore_step_num = await self._checkpoint_weights_update()
-            self.eval()
+            await self.eval()
             await self._finish_eval_step(prefix="bench")
             return True
 
@@ -319,7 +316,7 @@ class Explorer:
         )
         for step_num in all_ckp_steps:
             self.explore_step_num = await self._checkpoint_weights_update(step_num=step_num)
-            self.eval()
+            await self.eval()
             await self._finish_eval_step(prefix="bench")
         return True
 
@@ -397,8 +394,9 @@ class Explorer:
         self.monitor.log(metric, step)
 
     async def shutdown(self) -> None:
-        self.monitor.close()
-        if await self.synchronizer.release.remote() == 0:
-            ray.kill(self.synchronizer)
-            self.logger.info("Synchronizer stopped.")
         await self.scheduler.stop()
+        self.monitor.close()
+
+    def is_alive(self) -> bool:
+        """Check if the explorer is alive."""
+        return True

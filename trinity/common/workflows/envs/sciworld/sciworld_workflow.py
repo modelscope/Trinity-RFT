@@ -70,7 +70,7 @@ class SciWorldWorkflow(MultiTurnWorkflow):
             task=task,
         )
         self.task_desc = task.task_desc or "0"
-        self.repeat_times = task.rollout_args.n
+        self.repeat_times = task.repeat_times
         self.max_env_steps = 30  # should be less than 100
 
     def get_model_response(self, messages):

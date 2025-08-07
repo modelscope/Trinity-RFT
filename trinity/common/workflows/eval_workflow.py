@@ -49,6 +49,10 @@ class MathEvalWorkflow(Workflow):
     def resettable(self):
         return False
 
+    @property
+    def repeatable(self):
+        return False
+
     def format_messages(self):
         """Format message for the evaluation of qwen_boxed type."""
         if not self.raw_task or "question" not in self.raw_task:

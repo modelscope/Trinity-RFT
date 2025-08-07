@@ -36,7 +36,7 @@ class MathRMWorkflow(SimpleWorkflow):
 
         logger.debug("start chat")
         responses = self.model.chat(messages, **self.rollout_args)
-        for run_id, response in enumerate(responses):
+        for i, response in enumerate(responses):
             reward_dict = self.reward_fn(  # type: ignore
                 response,
                 messages,
@@ -48,7 +48,7 @@ class MathRMWorkflow(SimpleWorkflow):
             response.metrics.update(reward_dict)
             reward = sum(reward_dict.values())
             response.reward = reward
-            response.eid.run = run_id
+            response.eid.run = i + self.run_id_base
 
             logger.debug(
                 f"self.task_desc: {self.task_desc}, messages: {messages}, response: {response.response_text}, reward: {reward}"

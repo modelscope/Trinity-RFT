@@ -8,9 +8,9 @@ import torch
 
 from tests.tools import get_template_config
 from trinity.buffer.reader.queue_reader import QueueReader
-from trinity.common.config import GenerationConfig, StorageConfig
+from trinity.common.config import StorageConfig
 from trinity.common.constants import StorageType
-from trinity.common.experience import Experience
+from trinity.common.experience import EID, Experience
 from trinity.common.models.model import InferenceModel
 from trinity.common.workflows import Task
 from trinity.common.workflows.workflow import WORKFLOWS, Workflow
@@ -21,15 +21,23 @@ from trinity.explorer.scheduler import Scheduler
 class DummyWorkflow(Workflow):
     def __init__(self, *, task, model, auxiliary_models):
         super().__init__(task=task, model=model, auxiliary_models=auxiliary_models)
+        self.step_num = task.workflow_args.get("step_num", 1)
         self.error_type = task.raw_task.get("error_type", "")
         self.seconds = None
-        self.repeat_times = task.rollout_args.n
         if "timeout" in self.error_type:
             parts = self.error_type.split("_")
             if len(parts) > 1:
                 self.seconds = int(parts[-1])
             else:
                 self.seconds = 10
+
+    @property
+    def repeatable(self):
+        return True
+
+    def set_repeat_times(self, repeat_times, run_id_base):
+        self.repeat_times = repeat_times
+        self.run_id_base = run_id_base
 
     def run(self) -> List[Experience]:
         if "timeout" in self.error_type:
@@ -46,9 +54,43 @@ class DummyWorkflow(Workflow):
                 tokens=torch.zeros(5),
                 prompt_length=2,
                 prompt_text=self.error_type or "success",
+                eid=EID(run=i + self.run_id_base, step=step),
                 info={"repeat_times": self.repeat_times},
             )
-            for _ in range(self.repeat_times)
+            for step in range(self.step_num)
+            for i in range(self.repeat_times)
+        ]
+
+
+@WORKFLOWS.register_module("dummy_nonrepeat_workflow")
+class DummyNonRepeatWorkflow(Workflow):
+    def __init__(self, *, task, model, auxiliary_models):
+        super().__init__(task=task, model=model, auxiliary_models=auxiliary_models)
+        self.reset_flag = False
+        self.step_num = task.workflow_args.get("step_num", 1)
+
+    @property
+    def resettable(self):
+        return True
+
+    @property
+    def repeatable(self):
+        return False
+
+    def reset(self, task: Task):
+        self.task = task
+        self.reset_flag = True
+
+    def run(self) -> List[Experience]:
+        return [
+            Experience(
+                eid=EID(run=self.run_id_base, step=step),
+                tokens=torch.zeros(5),
+                prompt_length=2,
+                prompt_text="success",
+                info={"reset_flag": self.reset_flag},
+            )
+            for step in range(self.step_num)
         ]
 
 
@@ -106,6 +148,8 @@ def generate_tasks(
     exception_num: int = 0,
     timeout_seconds: int = 10,
     repeat_times: int = 1,
+    step_num: int = 1,
+    repeatable: bool = True,
 ):
     """Generate some tasks for testing
 
@@ -114,16 +158,27 @@ def generate_tasks(
         timeout_num: number of timeout tasks
         exception_num: number of exception tasks
         timeout_seconds: the timeout for timeout tasks
+        repeat_times: number of times to repeat each task
+        step_num: number of steps in each task
+        repeatable: whether to use repeatableworkflow
     """
+    workflow = DummyWorkflow if repeatable else DummyNonRepeatWorkflow
     tasks = [
-        Task(workflow=DummyWorkflow, raw_task={}, rollout_args=GenerationConfig(n=repeat_times))
+        Task(
+            workflow=workflow,  # type: ignore[type-abstract]
+            workflow_args={"step_num": step_num},
+            repeat_times=repeat_times,
+            raw_task={},
+        )
         for _ in range(total_num)
     ]
 
     tasks.extend(
         [
             Task(
-                workflow=DummyWorkflow,
+                workflow=workflow,  # type: ignore[type-abstract]
+                workflow_args={"step_num": step_num},
+                repeat_times=repeat_times,
                 raw_task={"error_type": f"timeout_{timeout_seconds}"},
             )
             for _ in range(timeout_num)
@@ -133,7 +188,9 @@ def generate_tasks(
     tasks.extend(
         [
             Task(
-                workflow=DummyWorkflow,
+                workflow=workflow,  # type: ignore[type-abstract]
+                workflow_args={"step_num": step_num},
+                repeat_times=repeat_times,
                 raw_task={"error_type": "exception"},
             )
             for _ in range(exception_num)
@@ -449,9 +506,11 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(TimeoutError):
             self.queue.read(batch_size=1)
 
-        # test task_id and unique_id
+        # test task_id, run_id and unique_id
         group_ids = [exp.eid.tid for exp in exp_list]
         self.assertEqual(len(set(group_ids)), 11)  # 4 + 4 + 3
+        run_ids = [exp.eid.rid for exp in exp_list]
+        self.assertEqual(len(run_ids), len(set(run_ids)))
         unique_ids = [exp.eid.uid for exp in exp_list]
         self.assertEqual(len(unique_ids), len(set(unique_ids)))
 
@@ -473,6 +532,90 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(len(exps), 2 * 4)
 
         await scheduler.stop()
+
+    async def test_non_repeatable_workflow(self):
+        self.config.explorer.max_repeat_times_per_runner = 2
+        self.config.check_and_update()
+        scheduler = Scheduler(self.config, [DummyModel.remote(), DummyModel.remote()])
+        await scheduler.start()
+        task_num, repeat_times = 5, 4
+        tasks = generate_tasks(task_num, repeat_times=repeat_times, repeatable=False)
+
+        batch_num = 2
+        exp_list = []
+        for i in range(1, batch_num + 1):
+            scheduler.schedule(tasks, batch_id=i)
+            statuses, _ = await scheduler.get_results(batch_id=i)
+            self.assertEqual(len(statuses), task_num * repeat_times / 2)
+            exps = self.queue.read(batch_size=task_num * repeat_times)
+            self.assertEqual(len(exps), task_num * repeat_times)
+            exp_list.extend(exps)
+
+        # test task_id, run_id and unique_id
+        group_ids = [exp.eid.tid for exp in exp_list]
+        self.assertEqual(len(set(group_ids)), batch_num * task_num)
+        run_ids = [exp.eid.rid for exp in exp_list]
+        self.assertEqual(len(set(run_ids)), batch_num * task_num * repeat_times)
+        unique_ids = [exp.eid.uid for exp in exp_list]
+        self.assertEqual(len(unique_ids), len(set(unique_ids)))
+
+        # test reset used properly
+        runner_num = (
+            self.config.explorer.runner_per_model * self.config.explorer.max_repeat_times_per_runner
+        )
+        self.assertEqual(
+            sum([exp.info["reset_flag"] for exp in exp_list]), len(exp_list) - runner_num
+        )
+
+    async def test_stepwise_experience_eid(self):
+        self.config.explorer.max_repeat_times_per_runner = 2
+        self.config.check_and_update()
+        scheduler = Scheduler(self.config, [DummyModel.remote(), DummyModel.remote()])
+        await scheduler.start()
+        task_num, repeat_times, step_num = 2, 4, 3
+        batch_num = 2
+
+        # repeatable stepwise workflow
+        tasks = generate_tasks(
+            task_num, step_num=step_num, repeat_times=repeat_times, repeatable=True
+        )
+        exp_list = []
+        for i in range(1, batch_num + 1):
+            scheduler.schedule(tasks, batch_id=i)
+            statuses, _ = await scheduler.get_results(batch_id=i)
+            self.assertEqual(len(statuses), task_num * repeat_times / 2)
+            exps = self.queue.read(batch_size=task_num * repeat_times * step_num)
+            self.assertEqual(len(exps), task_num * repeat_times * step_num)
+            exp_list.extend(exps)
+
+        # test task_id, run_id and unique_id
+        group_ids = [exp.eid.tid for exp in exp_list]
+        self.assertEqual(len(set(group_ids)), batch_num * task_num)
+        run_ids = [exp.eid.rid for exp in exp_list]
+        self.assertEqual(len(set(run_ids)), batch_num * task_num * repeat_times)
+        unique_ids = [exp.eid.uid for exp in exp_list]
+        self.assertEqual(len(unique_ids), len(set(unique_ids)))
+
+        # Non-repeatable stepwise workflow
+        tasks = generate_tasks(
+            task_num, step_num=step_num, repeat_times=repeat_times, repeatable=False
+        )
+        exp_list = []
+        for i in range(1, batch_num + 1):
+            scheduler.schedule(tasks, batch_id=i)
+            statuses, _ = await scheduler.get_results(batch_id=i)
+            self.assertEqual(len(statuses), task_num * repeat_times / 2)
+            exps = self.queue.read(batch_size=task_num * repeat_times * step_num)
+            self.assertEqual(len(exps), task_num * repeat_times * step_num)
+            exp_list.extend(exps)
+
+        # test task_id, run_id and unique_id
+        group_ids = [exp.eid.tid for exp in exp_list]
+        self.assertEqual(len(set(group_ids)), batch_num * task_num)
+        run_ids = [exp.eid.rid for exp in exp_list]
+        self.assertEqual(len(set(run_ids)), batch_num * task_num * repeat_times)
+        unique_ids = [exp.eid.uid for exp in exp_list]
+        self.assertEqual(len(unique_ids), len(set(unique_ids)))
 
     def tearDown(self):
         try:

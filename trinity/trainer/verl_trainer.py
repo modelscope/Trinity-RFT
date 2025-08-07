@@ -285,11 +285,9 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         self.actor_rollout_wg.upload_state_dict(self.global_steps)
 
     def train_step(self, batch: Experiences) -> Tuple[bool, Dict]:  # noqa C901
-        self.logger.info(f"Training at step {self.global_steps + 1} started.")
         batch = to_data_proto(batch)
         metrics = {}
         self.global_steps += 1
-        self.logger.info(f"Sampling at step {self.global_steps} done.")
         timing_raw = {}
         algorithm_config = self.algorithm_manager.get_current_algorithm_config(self.global_steps)
         algorithm = ALGORITHM_TYPE.get(algorithm_config.algorithm_type)
@@ -369,7 +367,6 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             with marked_timer("save_checkpoint", timing_raw):
                 self.save_checkpoint()
             self.logger.info(f"Saved at step {self.global_steps}.")
-        self.logger.info(f"Training at step {self.global_steps} finished.")
         return train_status, metrics
 
     def save_checkpoint(self, block_until_saved: bool = False) -> None:

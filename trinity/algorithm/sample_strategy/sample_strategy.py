@@ -16,7 +16,7 @@ class SampleStrategy(ABC):
         self.pad_token_id = buffer_config.pad_token_id
 
     @abstractmethod
-    def sample(self, step: int) -> Tuple[Experiences, Dict, List]:
+    async def sample(self, step: int) -> Tuple[Experiences, Dict, List]:
         """Sample data from buffer.
 
         Args:
@@ -53,13 +53,13 @@ class WarmupSampleStrategy(SampleStrategy):
         else:
             self.sft_buffer = None
 
-    def sample(self, step: int, **kwargs) -> Tuple[Experiences, Dict, List]:
+    async def sample(self, step: int, **kwargs) -> Tuple[Experiences, Dict, List]:
         metrics = {}
         with Timer(metrics, "read_time"):
             if step <= self.sft_warmup_steps:
-                exp_list = self.sft_buffer.read()
+                exp_list = await self.sft_buffer.read_async()
             else:
-                exp_list = self.exp_buffer.read()
+                exp_list = await self.exp_buffer.read_async()
             repr_samples = representative_sample(exp_list)
         with Timer(metrics, "gather_time"):
             exps = Experiences.gather_experiences(exp_list, self.pad_token_id)  # type: ignore
@@ -78,10 +78,10 @@ class DefaultSampleStrategy(SampleStrategy):
             buffer_config.trainer_input.experience_buffer, buffer_config  # type: ignore
         )
 
-    def sample(self, step: int, **kwargs) -> Tuple[Any, Dict, List]:
+    async def sample(self, step: int, **kwargs) -> Tuple[Any, Dict, List]:
         metrics = {}
         with Timer(metrics, "read_time"):
-            exp_list = self.exp_buffer.read()
+            exp_list = await self.exp_buffer.read_async()
             repr_samples = representative_sample(exp_list)
         with Timer(metrics, "gather_time"):
             exps = Experiences.gather_experiences(exp_list, self.pad_token_id)  # type: ignore

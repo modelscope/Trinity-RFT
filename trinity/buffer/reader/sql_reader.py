@@ -25,3 +25,11 @@ class SQLReader(BufferReader):
             return ray.get(self.db_wrapper.read.remote(batch_size, strategy))
         else:
             return self.db_wrapper.read(batch_size, strategy)
+
+    async def read_async(
+        self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
+    ) -> List:
+        if self.wrap_in_ray:
+            return await self.db_wrapper.read.remote(batch_size, strategy)
+        else:
+            return self.db_wrapper.read(batch_size, strategy)

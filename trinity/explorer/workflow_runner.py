@@ -60,8 +60,7 @@ class WorkflowRunner:
     def is_alive(self):
         return True
 
-    def _run_task(self, task: Task) -> List[Experience]:
-        """Init workflow from the task and run it."""
+    def _create_workflow_instance(self, task: Task) -> None:
         if task.workflow is None:
             raise ValueError("Workflow is not set in the task.")
         if (
@@ -72,18 +71,39 @@ class WorkflowRunner:
             self.workflow_instance = task.to_workflow(self.model_wrapper, self.auxiliary_models)
         else:
             self.workflow_instance.reset(task)
-        return self.workflow_instance.run()
 
-    def run_task(self, task: Task) -> Tuple[Status, List[Experience]]:
+    def _run_task(self, task: Task, repeat_times: int, run_id_base: int) -> List[Experience]:
+        """Init workflow from the task and run it."""
+        self._create_workflow_instance(task)
+        if self.workflow_instance.repeatable:
+            self.workflow_instance.set_repeat_times(repeat_times, run_id_base)
+            exps = self.workflow_instance.run()
+        else:
+            exps = []
+            for i in range(repeat_times):
+                new_exps = self.workflow_instance.run()
+                for exp in new_exps:
+                    exp.eid.run = run_id_base + i
+                exps.extend(new_exps)
+                if i < repeat_times - 1:
+                    self._create_workflow_instance(task)
+        return exps
+
+    def run_task(
+        self,
+        task: Task,
+        repeat_times: int = 1,
+        run_id_base: int = 0,
+    ) -> Tuple[Status, List[Experience]]:
         """Run the task and return the states."""
         # TODO: avoid sending the experiences back to the scheduler to reduce the communication overhead
         try:
             st = time.time()
-            exps = self._run_task(task)
+            exps = self._run_task(task, repeat_times, run_id_base)
             assert exps is not None and len(exps) > 0, "An empty experience is generated"
             metrics: dict[str, List[float]] = defaultdict(list)
-            # set group id
-            for _, exp in enumerate(exps):
+            # set eid for each experience
+            for i, exp in enumerate(exps):
                 exp.eid.batch = task.batch_id
                 exp.eid.task = task.task_id
                 if not hasattr(exp, "info") or exp.info is None:
