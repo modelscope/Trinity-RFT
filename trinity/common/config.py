@@ -648,7 +648,9 @@ class Config:
                 ]
 
         # set read_batch_size / pad_token_id / tokenizer_path
-        self.buffer.read_batch_size = self.buffer.batch_size * self.algorithm.repeat_times
+        # self.buffer.read_batch_size = self.buffer.batch_size * self.algorithm.repeat_times
+        logger.warning("Warning! Set `buffer.read_batch_size` *= `30`")
+        self.buffer.read_batch_size = self.buffer.batch_size * self.algorithm.repeat_times * 30
         if self.buffer.pad_token_id is None:
             from transformers import AutoTokenizer
 
