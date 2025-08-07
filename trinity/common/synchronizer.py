@@ -30,7 +30,7 @@ class Synchronizer:
         checkpoint_shard_counter: Tracks how many shards are received from trainer for a specific train step.
     """
 
-    def __init__(self, config: Config, module_ref):
+    def __init__(self, config: Config, module_ref: ray.actor.ActorHandle):
         self.logger = get_logger(__name__)
         self.config = config
         self.trainer_status = RunningStatus.STOPPED
@@ -40,23 +40,28 @@ class Synchronizer:
         self.model_version = 0
         self.checkpoint_shard_counter = defaultdict(lambda: 0)
         self.ref_count = 0
-        self._modules = [module_ref]
+        self._modules = {module_ref}
         asyncio.create_task(self._check_modules())
 
-    def add_module(self, module_ref) -> None:
-        self._modules.append(module_ref)
+    def add_module(self, module_ref: ray.actor.ActorHandle) -> None:
+        """Adds a module to be tracked by the synchronizer.
+
+        Args:
+            module_ref: The Ray actor handle of the module to track.
+        """
+        self._modules.add(module_ref)
 
     async def _check_modules(self) -> None:
         while len(self._modules) > 0:
-            alive_modules = []
+            alive_modules = set()
             for module in self._modules:
                 try:
                     await module.is_alive.remote()
-                    alive_modules.append(module)
-                except Exception:
+                    alive_modules.add(module)
+                except ray.exceptions.RayActorError:
                     pass
             self._modules = alive_modules
-            await asyncio.sleep(1)
+            await asyncio.sleep(5)
         self.logger.info("Synchronizer stopped.")
         ray.actor.exit_actor()
 

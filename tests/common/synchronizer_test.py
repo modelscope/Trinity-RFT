@@ -173,6 +173,7 @@ class TestSynchronizerExit(BaseTestSynchronizer):
 
         explorer_process_1.terminate()
         explorer_process_1.join()
+        time.sleep(6)
         with self.assertRaises(ValueError):
             ray.get_actor("synchronizer", namespace=trainer_config.ray_namespace)
 

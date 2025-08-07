@@ -167,7 +167,7 @@ class Explorer:
             asyncio.create_task(self.scheduler.start()),
         ]
         if self.experience_buffer:
-            futures.append(asyncio.create_task(self.experience_buffer.acquire()))
+            futures.append(asyncio.create_task(self.experience_buffer.acquire()))  # type: ignore
         if not self.use_nccl_sync:
             master_address, master_port = await self.models[0].get_available_address.remote()
             futures.append(
