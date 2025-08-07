@@ -19,8 +19,8 @@ algorithm:
     read_batch_size_usual: 192
 model:
   model_path: /PATH/TO/MODEL/
-  max_prompt_tokens: 1024
   max_response_tokens: 10240
+  max_model_len: 11264
 cluster:
   node_num: 1
   gpu_per_node: 8

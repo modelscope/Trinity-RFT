@@ -3,6 +3,8 @@ name: grpo_math_example
 checkpoint_root_dir: /PATH/TO/CHECKPOINT/
 model:
   model_path: /PATH/TO/MODEL/
+  max_response_tokens: 3072
+  max_model_len: 4096
 algorithm:
   algorithm_type: grpo
   repeat_times: 8
@@ -44,8 +46,6 @@ explorer:
     enable_prefix_caching: false
     enforce_eager: true
     dtype: bfloat16
-    max_prompt_tokens: 1024
-    max_response_tokens: 3072
     seed: 42
 synchronizer:
   sync_method: 'nccl'

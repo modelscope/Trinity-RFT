@@ -7,8 +7,8 @@ algorithm:
   repeat_times: 8
 model:
   model_path: /PATH/TO/MODEL/
-  max_prompt_tokens: 256
   max_response_tokens: 1024
+  model_model_len: 1280
 cluster:
   node_num: 1
   gpu_per_node: 4

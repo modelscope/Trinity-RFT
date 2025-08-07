@@ -53,7 +53,6 @@ class vLLMRolloutModel(InferenceModel):
             temperature=0.0,
             max_tokens=config.max_response_tokens,
             min_tokens=1,
-            truncate_prompt_tokens=config.max_prompt_tokens,
             skip_special_tokens=True,
             include_stop_str_in_output=False,
             output_kind=RequestOutputKind.FINAL_ONLY,
@@ -61,9 +60,7 @@ class vLLMRolloutModel(InferenceModel):
         )
         self.enable_thinking = config.enable_thinking
         self.request_id = 0
-        max_model_len = None
-        if config.max_prompt_tokens is not None and config.max_response_tokens is not None:
-            max_model_len = config.max_prompt_tokens + config.max_response_tokens
+        max_model_len = config.max_model_len
         engine_args = vllm.AsyncEngineArgs(
             model=config.model_path,
             enforce_eager=config.enforce_eager,
@@ -144,6 +141,7 @@ class vLLMRolloutModel(InferenceModel):
             A list of experiences.
         """
         output = await self._generate_internal(prompt=prompt, **kwargs)
+        print(f"!!!!!! {len(output.outputs[0].token_ids) = }, {output.outputs[0].token_ids = }")
         experiences = [
             Experience(
                 tokens=torch.cat(

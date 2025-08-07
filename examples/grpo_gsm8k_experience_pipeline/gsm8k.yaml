@@ -24,11 +24,10 @@ data_processor:
       - stats_key: 'llm_quality_score'
         op_type: ADD
         weight: 1.0
-
 model:
   model_path: /PATH/TO/MODEL/
-  max_prompt_tokens: 256
   max_response_tokens: 1024
+  max_model_len: 1280
 cluster:
   node_num: 1
   gpu_per_node: 8

@@ -3,6 +3,7 @@ name: dapo
 checkpoint_root_dir: /PATH/TO/CHECKPOINT/
 model:
   model_path: /PATH/TO/MODEL/
+  max_token_len: 21504
 algorithm:
   algorithm_type: grpo
   repeat_times: 16
@@ -66,8 +67,6 @@ explorer:
     enable_prefix_caching: false
     enforce_eager: true
     dtype: bfloat16
-    max_prompt_tokens: 1024
-    max_response_tokens: 20480
     seed: 42
 synchronizer:
   sync_method: 'nccl'

@@ -90,13 +90,13 @@ def set_critic_model_path(**kwargs):
 
 
 @CONFIG_GENERATORS.register_config(default_value=1024)
-def set_max_prompt_tokens(**kwargs):
-    st.number_input("Max Prompt Tokens", min_value=1, **kwargs)
-
-
-@CONFIG_GENERATORS.register_config(default_value=1024)
 def set_max_response_tokens(**kwargs):
-    st.number_input("Max Response Tokens", min_value=1, **kwargs)
+    st.number_input("Max Response Length", min_value=1, **kwargs)
+
+
+@CONFIG_GENERATORS.register_config(default_value=2048)
+def set_max_model_len(**kwargs):
+    st.number_input("Max Token Length", min_value=1, **kwargs)
 
 
 # Cluster Config
