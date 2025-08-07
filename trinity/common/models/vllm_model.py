@@ -141,7 +141,6 @@ class vLLMRolloutModel(InferenceModel):
             A list of experiences.
         """
         output = await self._generate_internal(prompt=prompt, **kwargs)
-        print(f"!!!!!! {len(output.outputs[0].token_ids) = }, {output.outputs[0].token_ids = }")
         experiences = [
             Experience(
                 tokens=torch.cat(

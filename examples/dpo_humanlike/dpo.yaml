@@ -9,7 +9,7 @@ algorithm:
 checkpoint_root_dir: /PATH/TO/CHECKPOINT/
 model:
   model_path: /PATH/TO/MODEL
-  max_prompt_tokens: 512
+  max_response_tokens: 1024
   max_model_len: 1536
 cluster:
   node_num: 1
