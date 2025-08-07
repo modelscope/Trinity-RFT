@@ -120,7 +120,7 @@ You are an agent specialized in solving math problems with tools. Please solve t
         return False
 
     def run(self):
-        # make sure that we have the corrct import
+        # make sure that we have the correct import
         try:
             from agentscope.message import Msg
         except ImportError as e:
