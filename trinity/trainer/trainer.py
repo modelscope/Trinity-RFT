@@ -17,7 +17,7 @@ from trinity.algorithm.utils import prefix_metrics
 from trinity.common.config import Config
 from trinity.common.constants import RunningStatus, SyncMethod, SyncStyle
 from trinity.common.experience import Experiences
-from trinity.common.synchronizer import Synchronizer
+from trinity.manager.synchronizer import Synchronizer
 from trinity.utils.log import get_logger
 from trinity.utils.monitor import MONITOR
 
@@ -74,7 +74,7 @@ class Trainer:
         return self.config.trainer.name
 
     async def train_step(self) -> bool:
-        """Train one step.
+        """Train one step. test
 
         Returns:
             bool: Whether to continue training.

@@ -23,9 +23,9 @@ from trinity.common.constants import (
     SyncStyle,
 )
 from trinity.common.models import create_inference_models
-from trinity.common.synchronizer import Synchronizer
 from trinity.explorer.scheduler import Scheduler
 from trinity.manager.manager import CacheManager
+from trinity.manager.synchronizer import Synchronizer
 from trinity.utils.log import get_logger
 from trinity.utils.monitor import MONITOR, gather_metrics
 
