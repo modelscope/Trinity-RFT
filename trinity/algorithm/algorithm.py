@@ -196,3 +196,25 @@ class MIXAlgorithm(AlgorithmType):
             "advantage_fn": "grpo",
             "sample_strategy": "mix",
         }
+
+
+@ALGORITHM_TYPE.register_module("raft")
+class RAFTAlgorithm(AlgorithmType):
+    """RAFT Algorithm.
+    Same with SFT and named differently as sft is already used for sft_to_rft.
+    """
+
+    use_critic: bool = False
+    use_reference: bool = False
+    compute_advantage_in_trainer: bool = False
+    can_balance_batch: bool = True
+    schema: type = ExperienceModel
+
+    @classmethod
+    def default_config(cls) -> Dict:
+        return {
+            "sample_strategy": "default",
+            "policy_loss_fn": "sft",
+            "kl_loss_fn": "none",
+            "entropy_loss_fn": "none",
+        }
