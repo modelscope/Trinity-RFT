@@ -43,13 +43,10 @@ class QueueReader(BufferReader):
     ) -> List:
         if strategy is not None and strategy != ReadStrategy.FIFO:
             raise NotImplementedError(f"Read strategy {strategy} not supported for Queue Reader.")
-        try:
-            batch_size = batch_size or self.read_batch_size
-            exps = await self.queue.get_batch.remote(batch_size, timeout=self.timeout)
-            if len(exps) != batch_size:
-                raise TimeoutError(
-                    f"Read incomplete batch ({len(exps)}/{batch_size}), please check your workflow."
-                )
-        except StopAsyncIteration:
-            raise StopIteration()
+        batch_size = batch_size or self.read_batch_size
+        exps = await self.queue.get_batch.remote(batch_size, timeout=self.timeout)
+        if len(exps) != batch_size:
+            raise TimeoutError(
+                f"Read incomplete batch ({len(exps)}/{batch_size}), please check your workflow."
+            )
         return exps

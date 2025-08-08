@@ -30,7 +30,7 @@ class Synchronizer:
         checkpoint_shard_counter: Tracks how many shards are received from trainer for a specific train step.
     """
 
-    def __init__(self, config: Config):
+    def __init__(self, config: Config, module_ref: ray.actor.ActorHandle):
         self.logger = get_logger(__name__)
         self.config = config
         self.trainer_status = RunningStatus.STOPPED
@@ -40,6 +40,34 @@ class Synchronizer:
         self.model_version = 0
         self.checkpoint_shard_counter = defaultdict(lambda: 0)
         self.ref_count = 0
+        self._modules = {module_ref}
+        self._modules_lock = asyncio.Lock()
+        asyncio.create_task(self._check_modules())
+
+    async def add_module(self, module_ref: ray.actor.ActorHandle) -> None:
+        """Adds a module to be tracked by the synchronizer.
+
+        Args:
+            module_ref: The Ray actor handle of the module to track.
+        """
+        async with self._modules_lock:
+            if module_ref not in self._modules:
+                self._modules.add(module_ref)
+
+    async def _check_modules(self) -> None:
+        while len(self._modules) > 0:
+            alive_modules = set()
+            async with self._modules_lock:
+                for module in self._modules:
+                    try:
+                        await module.is_alive.remote()
+                        alive_modules.add(module)
+                    except ray.exceptions.RayActorError:
+                        pass
+                self._modules = alive_modules
+            await asyncio.sleep(1)
+        self.logger.info("Synchronizer stopped.")
+        ray.actor.exit_actor()
 
     async def set_trainer_status(self, status: RunningStatus):
         """Update the status of the trainer."""
@@ -52,7 +80,7 @@ class Synchronizer:
         """Get the current status of the trainer."""
         return self.trainer_status
 
-    def set_explorer_status(
+    async def set_explorer_status(
         self, status: RunningStatus, old_status: Optional[RunningStatus] = None
     ):
         """
@@ -183,7 +211,7 @@ class Synchronizer:
                         timeout=self.config.synchronizer.sync_timeout,
                     )
             if self.model_version > current_version:
-                self.set_explorer_status(
+                await self.set_explorer_status(
                     RunningStatus.RUNNING, old_status=RunningStatus.REQUIRE_SYNC
                 )
             return self.model_version
@@ -207,10 +235,10 @@ class Synchronizer:
             sum(self.explorer_status_counts.values()) == 1
         ), "NCCL sync is only supported for one explorer."
 
-        def sync_failed():
+        async def sync_failed():
             if module == "explorer":
                 another_module = "Trainer"
-                self.set_explorer_status(
+                await self.set_explorer_status(
                     RunningStatus.REQUIRE_SYNC, old_status=RunningStatus.WAITING_SYNC
                 )
             else:
@@ -225,7 +253,7 @@ class Synchronizer:
             if key != RunningStatus.STOPPED
         )
         if non_stop_cnt == 0:
-            return sync_failed()
+            return await sync_failed()
 
         async with self._ready_condition:
             try:
@@ -243,13 +271,13 @@ class Synchronizer:
                             timeout=self.config.synchronizer.sync_timeout,
                         )
                         if self.explorer_status_counts[RunningStatus.STOPPED] == 1:
-                            return sync_failed()
-                    self.set_explorer_status(
+                            return await sync_failed()
+                    await self.set_explorer_status(
                         RunningStatus.RUNNING,
                         old_status=RunningStatus.WAITING_SYNC,
                     )
                 elif module == "explorer":
-                    self.set_explorer_status(
+                    await self.set_explorer_status(
                         RunningStatus.WAITING_SYNC, old_status=RunningStatus.REQUIRE_SYNC
                     )
                     self._ready_condition.notify_all()
@@ -262,11 +290,11 @@ class Synchronizer:
                             timeout=self.config.synchronizer.sync_timeout,
                         )
                         if self.trainer_status == RunningStatus.STOPPED:
-                            return sync_failed()
+                            return await sync_failed()
                     self.trainer_status = RunningStatus.RUNNING
                 return self.model_version
             except asyncio.TimeoutError:
-                return sync_failed()
+                return await sync_failed()
 
     @classmethod
     def get_actor(cls, config: Optional[Config] = None, namespace: Optional[str] = None):
@@ -281,27 +309,16 @@ class Synchronizer:
             A reference to the Synchronizer actor.
         """
         if config is not None:
-            if config.mode == "explore" or (
-                config.mode == "train" and config.algorithm.algorithm_type not in {"dpo", "sft"}
-            ):
-                lifetime = "detached"
-            else:
-                lifetime = None
-            return (
+            module_ref = ray.get_runtime_context().current_actor
+            synchronizer = (
                 ray.remote(cls)
                 .options(
                     name="synchronizer",
                     namespace=config.ray_namespace,
                     get_if_exists=True,
-                    lifetime=lifetime,
+                    lifetime="detached",
                 )
-                .remote(config)
+                .remote(config, module_ref=module_ref)
             )
+            synchronizer.add_module.remote(module_ref)
         return ray.get_actor("synchronizer", namespace=namespace)
-
-    def acquire(self):
-        self.ref_count += 1
-
-    def release(self):
-        self.ref_count -= 1
-        return self.ref_count

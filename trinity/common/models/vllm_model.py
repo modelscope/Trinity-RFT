@@ -169,7 +169,8 @@ class vLLMRolloutModel(InferenceModel):
         return experiences
 
     async def logprobs(self, token_ids: List[int]) -> torch.Tensor:
-        """Calculate the logprobs of the given tokens in async.
+        """Calculate the logprobs of the given tokens in async. Please slice the result carefully
+        to align with the actual response length.
 
         Args:
             token_ids (List[int]): The input token ids (seq_length).
@@ -214,11 +215,11 @@ class vLLMRolloutModel(InferenceModel):
             self.chat_template = self.tokenizer.get_chat_template()
         token_ids, action_mask, prompt_length = self.action_mask_method(
             self.tokenizer, messages, self.chat_template
-        )
-        logprobs = await self.logprobs(token_ids=token_ids.tolist())
+        )  # (seq_length, ), (seq_length, )
+        logprobs = await self.logprobs(token_ids=token_ids.tolist())  # (seq_length - 1,)
         return Experience(
             tokens=token_ids,
-            logprobs=logprobs,
+            logprobs=logprobs[prompt_length - 1 :],
             prompt_length=prompt_length,
             action_mask=action_mask[prompt_length:],  # Exclude the prompt tokens
         )
