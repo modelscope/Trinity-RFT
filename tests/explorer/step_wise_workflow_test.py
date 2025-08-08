@@ -106,7 +106,7 @@ class WorkflowTest(unittest.TestCase):
         for exp in experiences:
             self.assertAlmostEqual(exp.reward, expected_reward)  # type: ignore
 
-    def test_workflow_stops_at_max_env_steps(self) -> None:
+    def test_workflows_stop_at_max_env_steps(self) -> None:
         task = Task(
             workflow=DummyStepWiseRewardWorkflow,
             repeat_times=self.taskset_config.repeat_times,
@@ -116,10 +116,27 @@ class WorkflowTest(unittest.TestCase):
         experiences = workflow.run()
         self.assertEqual(len(experiences), 3)
 
-    def test_workflow_raises_error(self) -> None:
+        task = Task(
+            workflow=DummyRewardPropagationWorkflow,
+            repeat_times=self.taskset_config.repeat_times,
+            workflow_args={"max_env_steps": 3, "actual_steps": 100},  # actual > max
+        )
+        workflow = task.to_workflow(model=self.model)
+        experiences = workflow.run()
+        self.assertEqual(len(experiences), 3)
+
+    def test_workflows_raise_error(self) -> None:
         self.model.enable_history = False
         task = Task(
             workflow=DummyStepWiseRewardWorkflow,
+            repeat_times=self.taskset_config.repeat_times,
+            workflow_args={"max_env_steps": 10, "actual_steps": 5},
+        )
+        with self.assertRaises(AssertionError):
+            task.to_workflow(model=self.model)
+
+        task = Task(
+            workflow=DummyRewardPropagationWorkflow,
             repeat_times=self.taskset_config.repeat_times,
             workflow_args={"max_env_steps": 10, "actual_steps": 5},
         )
