@@ -69,7 +69,7 @@ class WorkflowTest(unittest.TestCase):
         self.model = MagicMock()
         self.model.enable_history = True
         self.model.extract_experience_from_history.side_effect = lambda: [
-            MockResponse(f"The answer is \boxed{42}")
+            MockResponse(f"The answer is \\boxed{42}")
         ]
         self.taskset_config = get_unittest_dataset_config("countdown")
 
