@@ -164,7 +164,7 @@ class TestSynchronizerExit(BaseTestSynchronizer):
         self.assertEqual(
             synchronizer, ray.get_actor("synchronizer", namespace=trainer_config.ray_namespace)
         )
-        while True:
+        for _ in range(12):  # Wait for up to 60 seconds
             try:
                 explorer1 = ray.get_actor("explorer1", namespace=trainer_config.ray_namespace)
                 ray.get(explorer1.is_alive.remote())

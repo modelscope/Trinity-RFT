@@ -74,7 +74,7 @@ class Trainer:
         return self.config.trainer.name
 
     async def train_step(self) -> bool:
-        """Train one step. test
+        """Train one step.
 
         Returns:
             bool: Whether to continue training.

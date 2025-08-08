@@ -50,8 +50,8 @@ class Synchronizer:
         Args:
             module_ref: The Ray actor handle of the module to track.
         """
-        if module_ref not in self._modules:
-            async with self._modules_lock:
+        async with self._modules_lock:
+            if module_ref not in self._modules:
                 self._modules.add(module_ref)
 
     async def _check_modules(self) -> None:
