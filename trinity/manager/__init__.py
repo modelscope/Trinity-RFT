@@ -1,7 +1,7 @@
-from trinity.trainer.trainer import TrainEngineWrapper, Trainer, get_trainer_wrapper
+from trinity.manager.manager import CacheManager
+from trinity.manager.synchronizer import Synchronizer
 
 __all__ = [
-    "Trainer",
-    "TrainEngineWrapper",
-    "get_trainer_wrapper",
+    "CacheManager",
+    "Synchronizer",
 ]

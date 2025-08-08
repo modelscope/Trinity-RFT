@@ -8,7 +8,7 @@ services:
       - RAY_ADDRESS=auto
       - CHECKPOINT_ROOT_DIR=/mnt/checkpoints
       - DATA_ROOT_DIR=/mnt/data
-      - MODEL_PATH=/mnt/models/Qwen3-1.7B
+      - MODEL_PATH=/mnt/models/Qwen3-0.6B
       - CHECKPOINT_PATH=/mnt/checkpoints
     working_dir: /workspace
     networks:

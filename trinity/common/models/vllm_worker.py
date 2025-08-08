@@ -4,7 +4,7 @@ import ray
 import torch
 import torch.distributed
 
-from trinity.common.synchronizer import Synchronizer
+from trinity.manager.synchronizer import Synchronizer
 from trinity.utils.distributed import init_process_group
 from trinity.utils.log import get_logger
 

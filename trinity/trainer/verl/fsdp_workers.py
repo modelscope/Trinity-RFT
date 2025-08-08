@@ -77,7 +77,7 @@ from verl.workers.sharding_manager.fsdp_ulysses import FSDPUlyssesShardingManage
 
 from trinity.common.config import AlgorithmConfig
 from trinity.common.constants import ROLLOUT_WEIGHT_SYNC_GROUP_NAME, SyncMethod
-from trinity.common.synchronizer import Synchronizer
+from trinity.manager.synchronizer import Synchronizer
 from trinity.trainer.verl.fsdp_checkpoint_manager import FSDPCheckpointManager
 from trinity.utils.distributed import init_process_group
 

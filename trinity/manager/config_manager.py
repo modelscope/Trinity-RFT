@@ -133,7 +133,7 @@ class ConfigManager:
 
         self.get_configs("total_epochs", "train_batch_size", "ppo_epochs", "repeat_times")
 
-        self.get_configs("storage_type", "max_prompt_tokens", "max_response_tokens")
+        self.get_configs("storage_type", "max_response_tokens", "max_model_len")
 
         self.get_configs("sync_interval", "eval_interval", "save_interval")
 
@@ -166,7 +166,7 @@ class ConfigManager:
         self.get_configs("checkpoint_root_dir")
 
         self.get_configs("monitor_type", "node_num", "gpu_per_node")
-        self.get_configs("max_prompt_tokens", "max_response_tokens")
+        self.get_configs("max_response_tokens", "max_model_len")
 
     def _expert_buffer_part(self):
         self.get_configs("total_epochs", "train_batch_size")
@@ -351,8 +351,8 @@ class ConfigManager:
         else:
             fsdp_config = {}
 
-        ppo_max_token_len_per_gpu = st.session_state["repeat_times"] * (
-            st.session_state["max_prompt_tokens"] + st.session_state["max_response_tokens"]
+        ppo_max_token_len_per_gpu = (
+            st.session_state["repeat_times"] * st.session_state["max_model_len"]
         )
 
         trainer_config = {
@@ -615,8 +615,8 @@ class ConfigManager:
                 key: st.session_state[key]
                 for key in self.inference_model_keys
                 if key != "model_path"
-                # "max_prompt_tokens": None,  # TODO
                 # "max_response_tokens": None,  # TODO
+                # "max_model_len": None,  # TODO
                 # "chat_template": None,  # TODO: add chat template
             },
             "auxiliary_models": [],
@@ -664,8 +664,8 @@ class ConfigManager:
                 "data_processor": {},  # TODO: Add data processor config
                 "model": {
                     "model_path": st.session_state["model_path"],
-                    "max_prompt_tokens": st.session_state["max_prompt_tokens"],
                     "max_response_tokens": st.session_state["max_response_tokens"],
+                    "max_model_len": st.session_state["max_model_len"],
                 },
                 "cluster": {
                     "node_num": st.session_state["node_num"],

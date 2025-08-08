@@ -199,6 +199,7 @@ class ModelWrapperTest(RayUnittestBaseAysnc):
         self.assertTrue(
             torch.equal(result_dict["assistant_masks"][0][prompt_length:], exp.action_mask)
         )
+        self.assertTrue(exp.logprobs.shape[0] == exp.tokens.shape[0] - prompt_length)
         self.assertTrue(torch.equal(result_dict["input_ids"][0], exp.tokens))
         self.assertRaises(ValueError, self.model_wrapper.get_openai_client)
         if self.config.explorer.rollout_model.enable_history:

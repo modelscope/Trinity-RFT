@@ -26,11 +26,10 @@ data_processor:
     dj_process_desc: 'Please compute difficulty scores for these math questions.'
     agent_model_name: 'qwen-max'
     clean_strategy: 'iterative'
-
 model:
   model_path: /PATH/TO/MODEL/
-  max_prompt_tokens: 256
   max_response_tokens: 1024
+  max_model_len: 1280
 cluster:
   node_num: 1
   gpu_per_node: 8

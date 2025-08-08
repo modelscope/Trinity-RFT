@@ -29,7 +29,7 @@ from verl.utils.fsdp_utils import (
 from verl.utils.logger import log_with_rank
 
 from trinity.common.constants import SyncMethod
-from trinity.common.synchronizer import Synchronizer
+from trinity.manager.synchronizer import Synchronizer
 
 
 class FSDPCheckpointManager(OldFSDPCheckpointManager):

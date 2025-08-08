@@ -4,11 +4,10 @@ checkpoint_root_dir: /PATH/TO/CHECKPOINT/
 algorithm:
   algorithm_type: grpo
   repeat_times: 8
-
 model:
   model_path: /PATH/TO/MODEL/
-  max_prompt_tokens: 4096
   max_response_tokens: 8192
+  max_model_len: 12288
 cluster:
   node_num: 1
   gpu_per_node: 8
