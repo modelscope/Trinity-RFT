@@ -134,10 +134,15 @@ You are an agent specialized in solving math problems with tools. Please solve t
         content = self.agent.reply(msg).content
 
         # unify the response format to text
-        if isinstance(content, list):
-            response_text = content[0]["text"]
-        else:
-            response_text = content
+        try:
+            if isinstance(content, list):
+                response_text = content[0]["text"]
+            else:
+                response_text = content
+        except Exception as e:
+            error_message = f"Error in processing the response: {e}"
+            logger.info(error_message)
+            response_text = str(content)
 
         reward = self.reward_fn(response_text, self.answer)
         reward = sum(reward.values())
