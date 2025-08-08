@@ -1070,6 +1070,41 @@ model’s evaluation methodology. For more details on their approach, see:
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="trinity.common.workflows.AgentScopeReactV2MathWorkflow">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.common.workflows.</span></span><span class="sig-name descname"><span class="pre">AgentScopeReactV2MathWorkflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#trinity.common.workflows.workflow.Task" title="trinity.common.workflows.workflow.Task"><span class="pre">Task</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.models.html#trinity.common.models.model.ModelWrapper" title="trinity.common.models.model.ModelWrapper"><span class="pre">ModelWrapper</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">OpenAI</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/agentscope/agentscope_react_workflow.html#AgentScopeReactV2MathWorkflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.AgentScopeReactV2MathWorkflow" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#trinity.common.workflows.workflow.Workflow" title="trinity.common.workflows.workflow.Workflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">Workflow</span></code></a></p>
+<p>This workflow serves as an example of how to use the agentscope framework within the trinity workflow.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.workflows.AgentScopeReactV2MathWorkflow.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#trinity.common.workflows.workflow.Task" title="trinity.common.workflows.workflow.Task"><span class="pre">Task</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.models.html#trinity.common.models.model.ModelWrapper" title="trinity.common.models.model.ModelWrapper"><span class="pre">ModelWrapper</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">OpenAI</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/agentscope/agentscope_react_workflow.html#AgentScopeReactV2MathWorkflow.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.AgentScopeReactV2MathWorkflow.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="trinity.common.workflows.AgentScopeReactV2MathWorkflow.resettable">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">resettable</span></span><a class="headerlink" href="#trinity.common.workflows.AgentScopeReactV2MathWorkflow.resettable" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.workflows.AgentScopeReactV2MathWorkflow.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#trinity.common.workflows.workflow.Task" title="trinity.common.workflows.workflow.Task"><span class="pre">Task</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/agentscope/agentscope_react_workflow.html#AgentScopeReactV2MathWorkflow.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.AgentScopeReactV2MathWorkflow.reset" title="Link to this definition"></a></dt>
+<dd><p>Reset the workflow.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="trinity.common.workflows.AgentScopeReactV2MathWorkflow.repeatable">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">repeatable</span></span><a class="headerlink" href="#trinity.common.workflows.AgentScopeReactV2MathWorkflow.repeatable" title="Link to this definition"></a></dt>
+<dd><p>A workflow is repeatable if it can be run multiple times within the run() method.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.workflows.AgentScopeReactV2MathWorkflow.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/agentscope/agentscope_react_workflow.html#AgentScopeReactV2MathWorkflow.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.AgentScopeReactV2MathWorkflow.run" title="Link to this definition"></a></dt>
+<dd><p>Run workflow and return a list of experiences.</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 </section>
 
