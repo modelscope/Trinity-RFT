@@ -17,8 +17,8 @@ algorithm:
 
 model:
   model_path: ''
-  max_prompt_tokens: 2048
   max_response_tokens: 2048
+  max_model_len: 4096
 cluster:  # 2 for explorer, 2 for trainer
   node_num: 2
   gpu_per_node: 2
