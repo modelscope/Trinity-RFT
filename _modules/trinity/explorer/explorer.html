@@ -113,9 +113,9 @@
     <span class="n">SyncStyle</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_inference_models</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.synchronizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Synchronizer</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.explorer.scheduler</span><span class="w"> </span><span class="kn">import</span> <span class="n">Scheduler</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.manager.manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">CacheManager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.manager.synchronizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Synchronizer</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.monitor</span><span class="w"> </span><span class="kn">import</span> <span class="n">MONITOR</span><span class="p">,</span> <span class="n">gather_metrics</span>
 
@@ -330,9 +330,7 @@
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">tasks</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">taskset</span><span class="o">.</span><span class="n">read_async</span><span class="p">()</span>
-        <span class="k">except</span> <span class="p">(</span><span class="ne">StopIteration</span><span class="p">,</span> <span class="ne">RuntimeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="ne">RuntimeError</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;StopIteration&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
-                <span class="k">raise</span>
+        <span class="k">except</span> <span class="ne">StopAsyncIteration</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No more tasks to explore. Stop exploring.&quot;</span><span class="p">)</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_checkpoint</span><span class="p">(</span><span class="n">sync_weight</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">set_explorer_status</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span>
@@ -405,9 +403,7 @@
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">eval_taskset</span><span class="o">.</span><span class="n">read_async</span><span class="p">()</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">schedule</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">batch_id</span><span class="o">=</span><span class="n">eval_batch_id</span><span class="p">)</span>
-                <span class="k">except</span> <span class="p">(</span><span class="ne">StopIteration</span><span class="p">,</span> <span class="ne">RuntimeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="ne">RuntimeError</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;StopIteration&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
-                        <span class="k">raise</span>
+                <span class="k">except</span> <span class="ne">StopAsyncIteration</span><span class="p">:</span>
                     <span class="k">break</span></div>
 
 

@@ -201,10 +201,26 @@
         <span class="k">return</span> <span class="n">batch</span>
 
 
+<div class="viewcode-block" id="BaseFileReader">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.html#trinity.buffer.reader.file_reader.BaseFileReader">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BaseFileReader</span><span class="p">(</span><span class="n">BufferReader</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseFileReader.read_async">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.html#trinity.buffer.reader.file_reader.BaseFileReader.read_async">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">read_async</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">strategy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ReadStrategy</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">strategy</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">StopIteration</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">StopAsyncIteration</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span></div>
+</div>
+
+
+
 <div class="viewcode-block" id="SFTDataReader">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.html#trinity.buffer.reader.file_reader.SFTDataReader">[docs]</a>
 <span class="nd">@FILE_READERS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="n">SFTAlgorithm</span><span class="o">.</span><span class="n">name</span><span class="p">())</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">SFTDataReader</span><span class="p">(</span><span class="n">BufferReader</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SFTDataReader</span><span class="p">(</span><span class="n">BaseFileReader</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Reader for SFT file data.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="SFTDataReader.__init__">
@@ -290,14 +306,6 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown data format: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">exp_list</span></div>
-
-
-<div class="viewcode-block" id="SFTDataReader.read_async">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.html#trinity.buffer.reader.file_reader.SFTDataReader.read_async">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">read_async</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">strategy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ReadStrategy</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">strategy</span><span class="p">)</span></div>
 </div>
 
 
@@ -305,7 +313,7 @@
 <div class="viewcode-block" id="DPODataReader">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.html#trinity.buffer.reader.file_reader.DPODataReader">[docs]</a>
 <span class="nd">@FILE_READERS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="n">DPOAlgorithm</span><span class="o">.</span><span class="n">name</span><span class="p">())</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">DPODataReader</span><span class="p">(</span><span class="n">BufferReader</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DPODataReader</span><span class="p">(</span><span class="n">BaseFileReader</span><span class="p">):</span>
 <div class="viewcode-block" id="DPODataReader.__init__">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.html#trinity.buffer.reader.file_reader.DPODataReader.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meta</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">):</span>
@@ -384,14 +392,6 @@
             <span class="p">)</span>
             <span class="n">exp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">experience</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">exp_list</span></div>
-
-
-<div class="viewcode-block" id="DPODataReader.read_async">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.html#trinity.buffer.reader.file_reader.DPODataReader.read_async">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">read_async</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">strategy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ReadStrategy</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">strategy</span><span class="p">)</span></div>
 </div>
 
 
@@ -399,7 +399,7 @@
 <div class="viewcode-block" id="RolloutDataReader">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.html#trinity.buffer.reader.file_reader.RolloutDataReader">[docs]</a>
 <span class="nd">@FILE_READERS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;rollout&quot;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">RolloutDataReader</span><span class="p">(</span><span class="n">BufferReader</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RolloutDataReader</span><span class="p">(</span><span class="n">BaseFileReader</span><span class="p">):</span>
 <div class="viewcode-block" id="RolloutDataReader.__init__">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.html#trinity.buffer.reader.file_reader.RolloutDataReader.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meta</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">):</span>
@@ -472,14 +472,6 @@
             <span class="p">)</span>
             <span class="n">tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">tasks</span></div>
-
-
-<div class="viewcode-block" id="RolloutDataReader.read_async">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.html#trinity.buffer.reader.file_reader.RolloutDataReader.read_async">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">read_async</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">strategy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ReadStrategy</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">strategy</span><span class="p">)</span></div>
 </div>
 
 
@@ -487,7 +479,7 @@
 <div class="viewcode-block" id="RawDataReader">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.html#trinity.buffer.reader.file_reader.RawDataReader">[docs]</a>
 <span class="nd">@FILE_READERS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;raw&quot;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">RawDataReader</span><span class="p">(</span><span class="n">BufferReader</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RawDataReader</span><span class="p">(</span><span class="n">BaseFileReader</span><span class="p">):</span>
 <div class="viewcode-block" id="RawDataReader.__init__">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.html#trinity.buffer.reader.file_reader.RawDataReader.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meta</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">BufferConfig</span><span class="p">]):</span>
@@ -507,14 +499,6 @@
             <span class="k">raise</span> <span class="ne">StopIteration</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">returned</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span></div>
-
-
-<div class="viewcode-block" id="RawDataReader.read_async">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.html#trinity.buffer.reader.file_reader.RawDataReader.read_async">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">read_async</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">strategy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ReadStrategy</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">strategy</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

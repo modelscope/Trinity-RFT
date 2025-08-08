@@ -27,6 +27,14 @@ trinity.manager.manager module
    :undoc-members:
    :show-inheritance:
 
+trinity.manager.synchronizer module
+-----------------------------------
+
+.. automodule:: trinity.manager.synchronizer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

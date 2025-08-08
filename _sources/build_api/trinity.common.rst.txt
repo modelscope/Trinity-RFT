@@ -37,14 +37,6 @@ trinity.common.experience module
    :undoc-members:
    :show-inheritance:
 
-trinity.common.synchronizer module
-----------------------------------
-
-.. automodule:: trinity.common.synchronizer
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 trinity.common.verl\_config module
 ----------------------------------
 

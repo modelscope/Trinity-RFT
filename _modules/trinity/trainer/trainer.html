@@ -107,18 +107,18 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunningStatus</span><span class="p">,</span> <span class="n">SyncMethod</span><span class="p">,</span> <span class="n">SyncStyle</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experiences</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.synchronizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Synchronizer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.manager.synchronizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Synchronizer</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.monitor</span><span class="w"> </span><span class="kn">import</span> <span class="n">MONITOR</span>
 
 
 <div class="viewcode-block" id="Trainer">
-<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.manager.Trainer">[docs]</a>
+<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.trainer.Trainer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Trainer</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Consume the experience and train the model.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Trainer.__init__">
-<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.manager.Trainer.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.trainer.Trainer.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
@@ -142,7 +142,7 @@
 
 
 <div class="viewcode-block" id="Trainer.prepare">
-<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.manager.Trainer.prepare">[docs]</a>
+<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.trainer.Trainer.prepare">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare the trainer.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">prepare</span><span class="p">()</span>
@@ -151,7 +151,7 @@
 
 
 <div class="viewcode-block" id="Trainer.train">
-<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.manager.Trainer.train">[docs]</a>
+<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.trainer.Trainer.train">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Train the model.&quot;&quot;&quot;</span>
         <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_continue</span><span class="p">:</span>
@@ -175,7 +175,7 @@
 
 
 <div class="viewcode-block" id="Trainer.train_step">
-<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.manager.Trainer.train_step">[docs]</a>
+<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.trainer.Trainer.train_step">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">train_step</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Train one step.</span>
 
@@ -187,9 +187,7 @@
             <span class="n">batch</span><span class="p">,</span> <span class="n">sample_metrics</span><span class="p">,</span> <span class="n">repr_samples</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_strategy</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">train_step_num</span> <span class="o">+</span> <span class="mi">1</span>
             <span class="p">)</span>
-        <span class="k">except</span> <span class="p">(</span><span class="ne">StopIteration</span><span class="p">,</span> <span class="ne">RuntimeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="ne">RuntimeError</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;StopIteration&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
-                <span class="k">raise</span>
+        <span class="k">except</span> <span class="ne">StopAsyncIteration</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;No more samples to train. Stopping training.&quot;</span><span class="p">)</span>
             <span class="k">if</span> <span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">save_interval</span> <span class="o">==</span> <span class="mi">0</span>
@@ -210,7 +208,7 @@
 
 
 <div class="viewcode-block" id="Trainer.need_sync">
-<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.manager.Trainer.need_sync">[docs]</a>
+<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.trainer.Trainer.need_sync">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">need_sync</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether to sync the model weight.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_style</span> <span class="o">==</span> <span class="n">SyncStyle</span><span class="o">.</span><span class="n">FIXED</span><span class="p">:</span>
@@ -231,7 +229,7 @@
 
 
 <div class="viewcode-block" id="Trainer.sync_weight">
-<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.manager.Trainer.sync_weight">[docs]</a>
+<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.trainer.Trainer.sync_weight">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">sync_weight</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sync the model weight.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Trainer synchronizing weights at step </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">train_step_num</span><span class="si">}</span><span class="s2"> starting..&quot;</span><span class="p">)</span>
@@ -262,7 +260,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_sample_exps_to_log</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Trainer.shutdown">
-<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.manager.Trainer.shutdown">[docs]</a>
+<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.trainer.Trainer.shutdown">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
@@ -273,7 +271,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">train_step_num</span>
 
 <div class="viewcode-block" id="Trainer.is_alive">
-<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.manager.Trainer.is_alive">[docs]</a>
+<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.trainer.Trainer.is_alive">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the trainer is alive.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="kc">True</span></div>
@@ -282,12 +280,12 @@
 
 
 <div class="viewcode-block" id="TrainEngineWrapper">
-<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.manager.TrainEngineWrapper">[docs]</a>
+<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.trainer.TrainEngineWrapper">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TrainEngineWrapper</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A wrapper class to wrap various training engines.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="TrainEngineWrapper.prepare">
-<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.manager.TrainEngineWrapper.prepare">[docs]</a>
+<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.trainer.TrainEngineWrapper.prepare">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Do some preparation before training started.&quot;&quot;&quot;</span></div>
@@ -299,7 +297,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the current training step number.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="TrainEngineWrapper.train_step">
-<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.manager.TrainEngineWrapper.train_step">[docs]</a>
+<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.trainer.TrainEngineWrapper.train_step">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">train_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="n">Experiences</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Training one step.</span>
@@ -314,28 +312,28 @@
 
 
 <div class="viewcode-block" id="TrainEngineWrapper.save_checkpoint">
-<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.manager.TrainEngineWrapper.save_checkpoint">[docs]</a>
+<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.trainer.TrainEngineWrapper.save_checkpoint">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">save_checkpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">block_until_saved</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Save the checkpoint.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="TrainEngineWrapper.sync_weight">
-<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.manager.TrainEngineWrapper.sync_weight">[docs]</a>
+<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.trainer.TrainEngineWrapper.sync_weight">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">sync_weight</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sync the model weight.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="TrainEngineWrapper.upload_state_dict">
-<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.manager.TrainEngineWrapper.upload_state_dict">[docs]</a>
+<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.trainer.TrainEngineWrapper.upload_state_dict">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">upload_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Upload the state dict to Synchronizer.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="TrainEngineWrapper.save_state_dict">
-<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.manager.TrainEngineWrapper.save_state_dict">[docs]</a>
+<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.trainer.TrainEngineWrapper.save_state_dict">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">save_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Only save the model state dict for Synchronizer.&quot;&quot;&quot;</span></div>
@@ -344,7 +342,7 @@
 
 
 <div class="viewcode-block" id="get_trainer_wrapper">
-<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.manager.get_trainer_wrapper">[docs]</a>
+<a class="viewcode-back" href="../../../build_api/trinity.trainer.html#trinity.trainer.trainer.get_trainer_wrapper">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_trainer_wrapper</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TrainEngineWrapper</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a trainer wrapper.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_type</span> <span class="o">==</span> <span class="s2">&quot;verl&quot;</span><span class="p">:</span>
