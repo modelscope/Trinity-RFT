@@ -239,7 +239,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;total_epochs&quot;</span><span class="p">,</span> <span class="s2">&quot;train_batch_size&quot;</span><span class="p">,</span> <span class="s2">&quot;ppo_epochs&quot;</span><span class="p">,</span> <span class="s2">&quot;repeat_times&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;storage_type&quot;</span><span class="p">,</span> <span class="s2">&quot;max_prompt_tokens&quot;</span><span class="p">,</span> <span class="s2">&quot;max_response_tokens&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;storage_type&quot;</span><span class="p">,</span> <span class="s2">&quot;max_response_tokens&quot;</span><span class="p">,</span> <span class="s2">&quot;max_model_len&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;sync_interval&quot;</span><span class="p">,</span> <span class="s2">&quot;eval_interval&quot;</span><span class="p">,</span> <span class="s2">&quot;save_interval&quot;</span><span class="p">)</span>
 
@@ -273,7 +273,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;checkpoint_root_dir&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;monitor_type&quot;</span><span class="p">,</span> <span class="s2">&quot;node_num&quot;</span><span class="p">,</span> <span class="s2">&quot;gpu_per_node&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;max_prompt_tokens&quot;</span><span class="p">,</span> <span class="s2">&quot;max_response_tokens&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;max_response_tokens&quot;</span><span class="p">,</span> <span class="s2">&quot;max_model_len&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_expert_buffer_part</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;total_epochs&quot;</span><span class="p">,</span> <span class="s2">&quot;train_batch_size&quot;</span><span class="p">)</span>
@@ -461,8 +461,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">fsdp_config</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="n">ppo_max_token_len_per_gpu</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;repeat_times&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span>
-            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_prompt_tokens&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_response_tokens&quot;</span><span class="p">]</span>
+        <span class="n">ppo_max_token_len_per_gpu</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;repeat_times&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_model_len&quot;</span><span class="p">]</span>
         <span class="p">)</span>
 
         <span class="n">trainer_config</span> <span class="o">=</span> <span class="p">{</span>
@@ -725,8 +725,8 @@
                 <span class="n">key</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
                 <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inference_model_keys</span>
                 <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;model_path&quot;</span>
-                <span class="c1"># &quot;max_prompt_tokens&quot;: None,  # TODO</span>
                 <span class="c1"># &quot;max_response_tokens&quot;: None,  # TODO</span>
+                <span class="c1"># &quot;max_model_len&quot;: None,  # TODO</span>
                 <span class="c1"># &quot;chat_template&quot;: None,  # TODO: add chat template</span>
             <span class="p">},</span>
             <span class="s2">&quot;auxiliary_models&quot;</span><span class="p">:</span> <span class="p">[],</span>
@@ -776,8 +776,8 @@
                 <span class="s2">&quot;data_processor&quot;</span><span class="p">:</span> <span class="p">{},</span>  <span class="c1"># TODO: Add data processor config</span>
                 <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="s2">&quot;model_path&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;model_path&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;max_prompt_tokens&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_prompt_tokens&quot;</span><span class="p">],</span>
                     <span class="s2">&quot;max_response_tokens&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_response_tokens&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;max_model_len&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;max_model_len&quot;</span><span class="p">],</span>
                 <span class="p">},</span>
                 <span class="s2">&quot;cluster&quot;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="s2">&quot;node_num&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;node_num&quot;</span><span class="p">],</span>
