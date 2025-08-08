@@ -161,6 +161,15 @@ class Trainer:
         """Check if the trainer is alive."""
         return True
 
+    @classmethod
+    def get_actor(cls, config: Config):
+        """Get a Ray actor for the trainer."""
+        return (
+            ray.remote(cls)
+            .options(name=config.trainer.name, namespace=ray.get_runtime_context().namespace)
+            .remote(config)
+        )
+
 
 class TrainEngineWrapper(ABC):
     """A wrapper class to wrap various training engines."""

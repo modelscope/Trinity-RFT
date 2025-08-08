@@ -6,7 +6,6 @@ from collections import defaultdict
 from dataclasses import dataclass
 from typing import List, Optional, Tuple
 
-from trinity.buffer import get_buffer_writer
 from trinity.common.config import Config
 from trinity.common.experience import Experience
 from trinity.common.models.model import InferenceModel, ModelWrapper
@@ -34,10 +33,6 @@ class WorkflowRunner:
         runner_id: Optional[int] = None,
     ) -> None:
         self.config = config
-        self.experience_buffer = get_buffer_writer(
-            self.config.buffer.explorer_output,  # type: ignore
-            self.config.buffer,
-        )
         self.model = model
         self.model_wrapper = ModelWrapper(
             model,
@@ -55,7 +50,6 @@ class WorkflowRunner:
         self.logger = get_logger(__name__)
         self.workflow_instance = None
         self.runner_id = runner_id
-        self.return_experiences = self.config.explorer.collect_experiences
 
     def is_alive(self):
         return True
@@ -125,11 +119,8 @@ class WorkflowRunner:
             if task.is_eval:
                 # If the task is an evaluation task, we do not record the experiences to the buffer
                 return Status(True, metric=metric), []
-            elif self.return_experiences:
-                return Status(True, metric=metric), exps
             else:
-                self.experience_buffer.write(exps)
-                return Status(True, metric=metric), []
+                return Status(True, metric=metric), exps
 
         except Exception as e:
             error_trace_back = traceback.format_exc()

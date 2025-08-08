@@ -22,9 +22,9 @@ def gather_metrics(metric_list: List[Dict], prefix: str) -> Dict:
     stats_df = numeric_df.agg(["mean", "max", "min"])
     metric = {}
     for col in stats_df.columns:
-        metric[f"{prefix}/{col}/mean"] = stats_df.loc["mean", col]
-        metric[f"{prefix}/{col}/max"] = stats_df.loc["max", col]
-        metric[f"{prefix}/{col}/min"] = stats_df.loc["min", col]
+        metric[f"{prefix}/{col}/mean"] = stats_df.loc["mean", col].item()
+        metric[f"{prefix}/{col}/max"] = stats_df.loc["max", col].item()
+        metric[f"{prefix}/{col}/min"] = stats_df.loc["min", col].item()
     return metric
 
 

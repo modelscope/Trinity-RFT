@@ -6,7 +6,7 @@ import pickle
 import uuid
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Optional
+from typing import Dict, List, Literal, Optional
 
 import torch
 from torch import Tensor
@@ -545,3 +545,24 @@ def gather_returns(experiences, max_response_length: int) -> Optional[Tensor]:
             for exp in experiences
         ]
     )
+
+
+def group_by(
+    experiences: List[Experience], id_type: Literal["task", "run", "step"]
+) -> Dict[str, List[Experience]]:
+    """Group experiences by ID."""
+    if id_type == "task":
+        id_type = "tid"
+    elif id_type == "run":
+        id_type = "rid"
+    elif id_type == "step":
+        id_type = "sid"
+    else:
+        raise ValueError(f"Unknown id_type: {id_type}")
+    grouped = {}
+    for exp in experiences:
+        group_id = getattr(exp.eid, id_type)
+        if group_id not in grouped:
+            grouped[group_id] = []
+        grouped[group_id].append(exp)
+    return grouped

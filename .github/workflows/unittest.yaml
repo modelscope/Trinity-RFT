@@ -31,8 +31,17 @@ jobs:
     - name: Check ray status
       working-directory: trinity-${{ github.run_id }}/.github/workflows/docker
       run: |
-        docker compose exec trinity-node-1 ray status
-        docker compose exec trinity-node-2 ray status
+        MAX_RETRIES=20
+        RETRY_INTERVAL=5
+        for i in $(seq 1 $MAX_RETRIES); do
+          docker compose exec trinity-node-1 ray status && docker compose exec trinity-node-2 ray status && break
+          echo "Waiting for ray cluster to be ready... ($i/$MAX_RETRIES)"
+          sleep $RETRY_INTERVAL
+          if [ "$i" -eq "$MAX_RETRIES" ]; then
+            echo "Ray cluster failed to start after $MAX_RETRIES retries."
+            exit 1
+          fi
+        done
 
     - name: Decide test type
       id: test_type
@@ -89,7 +98,7 @@ jobs:
         fi
 
     - name: Upload test results
-      if: env.tests_run == 'true'
+      if: env.tests_run == 'true' || failure()
       uses: actions/upload-artifact@v4
       with:
         name: pytest-results
@@ -97,7 +106,7 @@ jobs:
       continue-on-error: true
 
     - name: Publish Test Report
-      if: env.tests_run == 'true'
+      if: env.tests_run == 'true' || failure()
       uses: ctrf-io/github-test-reporter@v1
       with:
         report-path: trinity-${{ github.run_id }}/report.json

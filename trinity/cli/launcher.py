@@ -9,12 +9,7 @@ from pprint import pprint
 import ray
 
 from trinity.common.config import Config, load_config
-from trinity.common.constants import DataProcessorPipelineType
-from trinity.data.utils import (
-    activate_data_processor,
-    stop_data_processor,
-    validate_data_pipeline,
-)
+from trinity.data.utils import check_and_activate_data_processor, stop_data_processor
 from trinity.explorer.explorer import Explorer
 from trinity.trainer.trainer import Trainer
 from trinity.utils.log import get_logger
@@ -26,14 +21,7 @@ logger = get_logger(__name__)
 def bench(config: Config) -> None:
     """Evaluate model."""
     config.explorer.name = "benchmark"
-    explorer = (
-        ray.remote(Explorer)
-        .options(
-            name=config.explorer.name,
-            namespace=ray.get_runtime_context().namespace,
-        )
-        .remote(config)
-    )
+    explorer = Explorer.get_actor(config)
     try:
         ray.get(explorer.prepare.remote())
         ray.get(explorer.benchmark.remote())
@@ -47,14 +35,7 @@ def bench(config: Config) -> None:
 def explore(config: Config) -> None:
     """Run explorer."""
     try:
-        explorer = (
-            ray.remote(Explorer)
-            .options(
-                name=config.explorer.name,
-                namespace=ray.get_runtime_context().namespace,
-            )
-            .remote(config)
-        )
+        explorer = Explorer.get_actor(config)
         ray.get(explorer.prepare.remote())
         ray.get(explorer.sync_weight.remote())
         ray.get(explorer.explore.remote())
@@ -67,14 +48,7 @@ def explore(config: Config) -> None:
 def train(config: Config) -> None:
     """Run trainer."""
     try:
-        trainer = (
-            ray.remote(Trainer)
-            .options(
-                name=config.trainer.name,
-                namespace=ray.get_runtime_context().namespace,
-            )
-            .remote(config)
-        )
+        trainer = Trainer.get_actor(config)
         ray.get(trainer.prepare.remote())
         ray.get(trainer.sync_weight.remote())
         ray.get(trainer.train.remote())
@@ -94,23 +68,8 @@ def both(config: Config) -> None:
     the latest step. The specific number of experiences may vary for different
     algorithms and tasks.
     """
-    namespace = ray.get_runtime_context().namespace
-    explorer = (
-        ray.remote(Explorer)
-        .options(
-            name=config.explorer.name,
-            namespace=namespace,
-        )
-        .remote(config)
-    )
-    trainer = (
-        ray.remote(Trainer)
-        .options(
-            name=config.trainer.name,
-            namespace=namespace,
-        )
-        .remote(config)
-    )
+    explorer = Explorer.get_actor(config)
+    trainer = Trainer.get_actor(config)
     ray.get([explorer.__ray_ready__.remote(), trainer.__ray_ready__.remote()])
     ray.get(
         [
@@ -165,29 +124,7 @@ def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
     pprint(config)
     # try to activate task pipeline for raw data
     data_processor_config = config.data_processor
-    if (
-        data_processor_config.data_processor_url is not None
-        and data_processor_config.task_pipeline is not None
-        and validate_data_pipeline(
-            data_processor_config.task_pipeline, DataProcessorPipelineType.TASK
-        )
-    ):
-        activate_data_processor(
-            f"{data_processor_config.data_processor_url}/{DataProcessorPipelineType.TASK.value}",
-            config_path,
-        )
-    # try to activate experience pipeline for experiences
-    if (
-        data_processor_config.data_processor_url is not None
-        and data_processor_config.experience_pipeline is not None
-        and validate_data_pipeline(
-            data_processor_config.experience_pipeline, DataProcessorPipelineType.EXPERIENCE
-        )
-    ):
-        activate_data_processor(
-            f"{data_processor_config.data_processor_url}/{DataProcessorPipelineType.EXPERIENCE.value}",
-            config_path,
-        )
+    check_and_activate_data_processor(data_processor_config, config_path)
     if dlc:
         from trinity.utils.dlc_utils import setup_ray_cluster
 

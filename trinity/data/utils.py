@@ -1,8 +1,23 @@
-from trinity.common.config import DataPipelineConfig
+from trinity.common.config import DataPipelineConfig, DataProcessorConfig
 from trinity.common.constants import DataProcessorPipelineType
 from trinity.utils.log import get_logger
 
 logger = get_logger(__name__)
+
+
+def check_and_activate_data_processor(data_processor_config: DataProcessorConfig, config_path: str):
+    if (
+        data_processor_config.data_processor_url is not None
+        and data_processor_config.task_pipeline is not None
+        and validate_data_pipeline(
+            data_processor_config.task_pipeline, DataProcessorPipelineType.TASK
+        )
+    ):
+        activate_data_processor(
+            f"{data_processor_config.data_processor_url}/{DataProcessorPipelineType.TASK.value}",
+            config_path,
+        )
+    # TODO: check and activate experience pipeline
 
 
 def activate_data_processor(data_processor_url: str, config_path: str):
