@@ -18,14 +18,14 @@ For users' convenience, future versions will gradually reduce parameters in `tra
 **A:** The following parameters are closely related:
 
 - `buffer.batch_size`: The number of tasks in a batch, effective for both the explorer and the trainer.
-- `actor_rollout_ref.actor.ppo_mini_batch_size`: In the configuration, this value represents the number of tasks in a mini-batch, overridden by `buffer.batch_size`; but in the `update_policy` function, its value becomes the number of experiences in a mini-batch per GPU, i.e., `buffer.batch_size * algorithm.repeat_times (/ ngpus_trainer)`. The expression of dividing `ngpus_trainer` is caused by implict data allocation to GPUs, but this do not affects the result after gradient accumulation.
+- `actor_rollout_ref.actor.ppo_mini_batch_size`: The number of experiences in a mini-batch, overridden by `buffer.train_batch_size`; but in the `update_policy` function, its value becomes the number of experiences in a mini-batch per GPU, i.e., `buffer.train_batch_size (/ ngpus_trainer)`. The expression of dividing `ngpus_trainer` is caused by implict data allocation to GPUs, but this do not affects the result after gradient accumulation.
 - `actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu`: The number of experiences in a micro-batch per GPU.
 
 A minimal example showing their usage is as follows:
 
 ```python
 def update_policy(batch_exps):
-    dataloader = batch_epxs.split(ppo_mini_batch_size) # here `ppo_mini_batch_size` is in terms of experiences
+    dataloader = batch_exps.split(ppo_mini_batch_size)
     for _ in range(ppo_epochs):
         for batch_idx, data in enumerate(dataloader):
             # Split data

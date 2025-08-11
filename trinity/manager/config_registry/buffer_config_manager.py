@@ -12,6 +12,16 @@ def set_total_epochs(**kwargs):
     st.number_input("Total Epochs", min_value=1, **kwargs)
 
 
+@CONFIG_GENERATORS.register_config(default_value=96)
+def set_explore_batch_size(**kwargs):
+    st.number_input(
+        "Task Batch Size",
+        min_value=1,
+        help="Number of tasks to explore in one explore step",
+        **kwargs,
+    )
+
+
 def _str_for_train_batch_size():
     trainer_gpu_num_str = (
         "`gpu_per_node * node_num - engine_num * tensor_parallel_size`"
@@ -19,6 +29,7 @@ def _str_for_train_batch_size():
         else "`gpu_per_node * node_num`"
     )
     return (
+        f"Usually set to `task_batch_size` * `repeat_times`."
         f"Please ensure that `train_batch_size` can be divided by "
         f"{trainer_gpu_num_str} = {st.session_state['trainer_gpu_num']}."
     )
@@ -241,7 +252,7 @@ def set_default_reward_fn_type(**kwargs):
 def set_system_prompt(**kwargs):
     st.text_area(
         "System Prompt",
-        placeholder="System prompt is used to guide the model behavior.",
+        placeholder="""You are a helpful assistant that solves MATH problems....""",
         **kwargs,
     )
 

@@ -299,9 +299,9 @@ class veRLConfig:
             self.trainer.n_gpus_per_node = config.cluster.gpu_per_node
 
         world_size = self.trainer.nnodes * self.trainer.n_gpus_per_node
-        if config.buffer.batch_size % world_size != 0:
+        if config.buffer.train_batch_size % world_size != 0:
             raise ValueError(
-                f"batch_size ({config.buffer.batch_size}) must be divisible by ({world_size})"
+                f"batch_size ({config.buffer.train_batch_size}) must be divisible by ({world_size})"
             )
 
         self.trainer.sync_freq = config.synchronizer.sync_interval
@@ -317,9 +317,8 @@ class veRLConfig:
             self.trainer.resume_mode = "auto"
 
         self.buffer = config.buffer
-        # TODO: use dynamic read_batch_size to support multi-round scenarios
         # Get the experiences of one explore step
-        self.data.train_batch_size = config.buffer.batch_size
+        self.data.train_batch_size = config.buffer.train_batch_size
 
         self.synchronizer = config.synchronizer
         self.actor_rollout_ref.synchronizer = config.synchronizer
@@ -330,16 +329,13 @@ class veRLConfig:
         self.actor_rollout_ref.model.custom_chat_template = config.model.custom_chat_template
         self.critic.model.path = config.model.critic_model_path
         self.critic.model.tokenizer_path = config.model.critic_model_path
-        self.actor_rollout_ref.actor.ppo_mini_batch_size = (
-            config.buffer.batch_size
-        )  # TODO: may allow user to change
+        self.actor_rollout_ref.actor.ppo_mini_batch_size = config.buffer.train_batch_size
         self.actor_rollout_ref.rollout.temperature = (
             config.buffer.explorer_input.taskset.rollout_args.temperature
         )
         self.actor_rollout_ref.rollout.n = config.algorithm.repeat_times
-        self.critic.ppo_mini_batch_size = config.buffer.batch_size
+        self.critic.ppo_mini_batch_size = config.buffer.train_batch_size
         self.critic.rollout_n = self.actor_rollout_ref.rollout.n
-        self.critic.synchronizer = config.synchronizer
 
         if config.trainer.actor_grad_clip is not None:
             self.actor_rollout_ref.actor.grad_clip = config.trainer.actor_grad_clip

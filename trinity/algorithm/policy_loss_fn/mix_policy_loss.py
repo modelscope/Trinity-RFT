@@ -32,23 +32,20 @@ class MIXPolicyLossFn(PolicyLossFn):
         clip_range_low: Optional[float] = None,
         clip_range_high: Optional[float] = None,
         use_dynamic_bsz: Optional[bool] = None,
-        repeat_times: int = 1,
         ppo_mini_batch_size: int = 1,
         ppo_micro_batch_size_per_gpu: int = 1,
         ngpus_trainer: int = 1,
-        read_batch_size_usual: int = 1,
-        read_batch_size_expert: int = 1,
+        train_batch_size_usual: int = 1,
+        train_batch_size_expert: int = 1,
         use_token_level_loss_in_sft: bool = True,
     ) -> None:
         super().__init__(backend=backend)
         self.mu = mu
         self.use_dynamic_bsz = use_dynamic_bsz
-        self.experience_per_gpu = ppo_mini_batch_size * repeat_times // ngpus_trainer
-        self.gradient_accumulation = (
-            ppo_mini_batch_size * repeat_times // ppo_micro_batch_size_per_gpu
-        )
-        self.read_batch_size_usual = read_batch_size_usual // ngpus_trainer
-        self.read_batch_size_expert = read_batch_size_expert // ngpus_trainer
+        self.experience_per_gpu = ppo_mini_batch_size // ngpus_trainer
+        self.gradient_accumulation = ppo_mini_batch_size // ppo_micro_batch_size_per_gpu
+        self.train_batch_size_usual = train_batch_size_usual // ngpus_trainer
+        self.train_batch_size_expert = train_batch_size_expert // ngpus_trainer
         self.grpo_loss_fn = PPOPolicyLossFn(
             clip_range=clip_range,
             clip_range_low=clip_range_low,
@@ -74,14 +71,14 @@ class MIXPolicyLossFn(PolicyLossFn):
 
         if self.use_dynamic_bsz:
             per_micro_batch_weight_usual = self.experience_per_gpu / (
-                logprob.shape[0] * self.read_batch_size_usual
+                logprob.shape[0] * self.train_batch_size_usual
             )
             per_micro_batch_weight_expert = self.experience_per_gpu / (
-                logprob.shape[0] * self.read_batch_size_expert
+                logprob.shape[0] * self.train_batch_size_expert
             )
         else:
-            per_micro_batch_weight_usual = self.gradient_accumulation / self.read_batch_size_usual  # type: ignore
-            per_micro_batch_weight_expert = self.gradient_accumulation / self.read_batch_size_expert  # type: ignore
+            per_micro_batch_weight_usual = self.gradient_accumulation / self.train_batch_size_usual  # type: ignore
+            per_micro_batch_weight_expert = self.gradient_accumulation / self.train_batch_size_expert  # type: ignore
 
         if n_usual_exp > 0:
             grpo_loss, grpo_metrics = self.grpo_loss_fn(

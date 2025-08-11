@@ -80,12 +80,12 @@ class MixSampleStrategy(SampleStrategy):
     def __init__(self, buffer_config: BufferConfig, **kwargs):
         super().__init__(buffer_config)
         self.expert_data_ratio = kwargs.get("expert_data_ratio", 0.5)
-        tot_batch_size = buffer_config.read_batch_size
+        tot_batch_size = buffer_config.train_batch_size
         expert_batch_size = ceil(self.expert_data_ratio * tot_batch_size)
 
         # experience buffer
         usual_buffer_config = copy.deepcopy(buffer_config)
-        usual_buffer_config.read_batch_size = tot_batch_size - expert_batch_size
+        usual_buffer_config.train_batch_size = tot_batch_size - expert_batch_size
         self.usual_exp_buffer = get_buffer_reader(
             buffer_config.trainer_input.experience_buffer, usual_buffer_config  # type: ignore
         )
@@ -97,7 +97,7 @@ class MixSampleStrategy(SampleStrategy):
 
         # expert experience buffer
         expert_buffer_config = copy.deepcopy(buffer_config)
-        expert_buffer_config.read_batch_size = expert_batch_size
+        expert_buffer_config.train_batch_size = expert_batch_size
         self.expert_exp_buffer = get_buffer_reader(
             buffer_config.trainer_input.sft_warmup_dataset, expert_buffer_config
         )
@@ -157,23 +157,20 @@ class MIXPolicyLossFn(PolicyLossFn):
         clip_range_low: Optional[float] = None,
         clip_range_high: Optional[float] = None,
         use_dynamic_bsz: Optional[bool] = None,
-        repeat_times: Optional[int] = None,
-        ppo_mini_batch_size: Optional[int] = None,
-        ppo_micro_batch_size_per_gpu: Optional[int] = None,
-        ngpus_trainer: Optional[int] = None,
-        read_batch_size_usual: Optional[int] = None,
-        read_batch_size_expert: Optional[int] = None,
+        ppo_mini_batch_size: int = 1,
+        ppo_micro_batch_size_per_gpu: int = 1,
+        ngpus_trainer: int = 1,
+        train_batch_size_usual: int = 1,
+        train_batch_size_expert: int = 1,
         use_token_level_loss_in_sft: bool = True,
     ) -> None:
         super().__init__(backend=backend)
         self.mu = mu
         self.use_dynamic_bsz = use_dynamic_bsz
-        self.experience_per_gpu = ppo_mini_batch_size * repeat_times // ngpus_trainer  # type: ignore
-        self.gradient_accumulation = (
-            ppo_mini_batch_size * repeat_times // ppo_micro_batch_size_per_gpu  # type: ignore
-        )
-        self.read_batch_size_usual = read_batch_size_usual
-        self.read_batch_size_expert = read_batch_size_expert
+        self.experience_per_gpu = ppo_mini_batch_size // ngpus_trainer
+        self.gradient_accumulation = ppo_mini_batch_size // ppo_micro_batch_size_per_gpu
+        self.train_batch_size_usual = train_batch_size_usual
+        self.train_batch_size_expert = train_batch_size_expert
         self.grpo_loss_fn = PPOPolicyLossFn(
             clip_range=clip_range,
             clip_range_low=clip_range_low,
@@ -199,14 +196,14 @@ class MIXPolicyLossFn(PolicyLossFn):
 
         if self.use_dynamic_bsz:
             per_micro_batch_weight_usual = self.experience_per_gpu / (
-                logprob.shape[0] * self.read_batch_size_usual
+                logprob.shape[0] * self.train_batch_size_usual
             )
             per_micro_batch_weight_expert = self.experience_per_gpu / (
-                logprob.shape[0] * self.read_batch_size_expert
+                logprob.shape[0] * self.train_batch_size_expert
             )
         else:
-            per_micro_batch_weight_usual = self.gradient_accumulation / self.read_batch_size_usual  # type: ignore
-            per_micro_batch_weight_expert = self.gradient_accumulation / self.read_batch_size_expert  # type: ignore
+            per_micro_batch_weight_usual = self.gradient_accumulation / self.train_batch_size_usual  # type: ignore
+            per_micro_batch_weight_expert = self.gradient_accumulation / self.train_batch_size_expert  # type: ignore
 
         if n_usual_exp > 0:
             grpo_loss, grpo_metrics = self.grpo_loss_fn(
@@ -272,11 +269,11 @@ algorithm:
     use_token_level_loss_in_sft: False
     use_dynamic_bsz: False
     repeat_times: 8
-    ppo_mini_batch_size: 32
+    ppo_mini_batch_size: 256
     ppo_micro_batch_size_per_gpu: 4
     ngpus_trainer: 4
-    read_batch_size_expert: 64
-    read_batch_size_usual: 192
+    train_batch_size_expert: 64
+    train_batch_size_usual: 192
 ```
 
 With the above configurations, the experiment can be run with the following command:

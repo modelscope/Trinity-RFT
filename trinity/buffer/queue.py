@@ -48,7 +48,7 @@ class QueueBuffer(ABC):
         if storage_config.use_priority_queue:
             reuse_cooldown_time = storage_config.reuse_cooldown_time
             replay_buffer_kwargs = storage_config.replay_buffer_kwargs
-            capacity = min(storage_config.capacity, config.read_batch_size * 2)
+            capacity = min(storage_config.capacity, config.train_batch_size * 2)
             logger.info(
                 f"Using AsyncPriorityQueue with capacity {capacity}, reuse_cooldown_time {reuse_cooldown_time}."
             )

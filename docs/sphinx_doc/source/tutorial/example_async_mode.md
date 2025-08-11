@@ -74,7 +74,7 @@ cluster:
   gpu_per_node: 4
 buffer:
   total_epochs: 1
-  batch_size: 64
+  train_batch_size: 512
   explorer_input:
     taskset:
       name: gsm8k

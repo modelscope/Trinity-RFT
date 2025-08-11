@@ -131,9 +131,9 @@ class ConfigManager:
         st.header("Important Configs")
         self.get_configs("node_num", "gpu_per_node", "engine_num", "tensor_parallel_size")
 
-        self.get_configs("total_epochs", "train_batch_size", "ppo_epochs", "repeat_times")
+        self.get_configs("total_epochs", "explore_batch_size", "train_batch_size", "repeat_times")
 
-        self.get_configs("storage_type", "max_response_tokens", "max_model_len")
+        self.get_configs("storage_type", "max_response_tokens", "max_model_len", "ppo_epochs")
 
         self.get_configs("sync_interval", "eval_interval", "save_interval")
 
@@ -145,9 +145,7 @@ class ConfigManager:
         if st.session_state["sft_warmup_steps"] > 0:
             self.get_configs("sft_warmup_dataset_args")
 
-        self.get_configs(
-            "default_workflow_type", "default_eval_workflow_type", "default_reward_fn_type"
-        )
+        self.get_configs("default_workflow_type", "default_reward_fn_type")
 
         self.get_configs(
             "actor_ppo_micro_batch_size_per_gpu",
@@ -169,11 +167,9 @@ class ConfigManager:
         self.get_configs("max_response_tokens", "max_model_len")
 
     def _expert_buffer_part(self):
-        self.get_configs("total_epochs", "train_batch_size")
+        self.get_configs("total_epochs", "explore_batch_size", "train_batch_size")
 
-        self.get_configs(
-            "default_workflow_type", "default_eval_workflow_type", "default_reward_fn_type"
-        )
+        self.get_configs("default_workflow_type", "default_reward_fn_type")
         self.get_configs("system_prompt")
         self.get_configs("reply_prefix")
 
@@ -510,7 +506,8 @@ class ConfigManager:
         )  # TODO
 
         buffer_config = {
-            "batch_size": st.session_state["train_batch_size"],
+            "batch_size": st.session_state["explore_batch_size"],
+            "train_batch_size": st.session_state["train_batch_size"],
             "total_epochs": st.session_state["total_epochs"],
             "explorer_input": {},
             "trainer_input": {
@@ -552,7 +549,6 @@ class ConfigManager:
                 },
                 "eval_tasksets": [],
                 "default_workflow_type": st.session_state["default_workflow_type"],
-                "default_eval_workflow_type": st.session_state["default_eval_workflow_type"],
                 "default_reward_fn_type": st.session_state["default_reward_fn_type"],
                 "system_prompt": st.session_state["system_prompt"],
                 "reply_prefix": st.session_state["reply_prefix"],

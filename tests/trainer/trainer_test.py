@@ -274,7 +274,7 @@ class TestTrainerDPO(BaseTrainerCase):
         self.config.buffer.total_epochs = 2
         self.config.buffer.total_steps = 4  # step has higher priority than epoch
         self.config.synchronizer.sync_interval = 4
-        # self.config.buffer.batch_size = 32
+        self.config.buffer.train_batch_size = 8
         self.config.buffer.trainer_input.experience_buffer = get_unittest_dataset_config("dpo")
         self.config.check_and_update()
         self.config.trainer.trainer_config.trainer.max_actor_ckpt_to_keep = 2
@@ -301,6 +301,7 @@ class TestTrainerSFT(BaseTrainerCase):
         self.config.algorithm.kl_loss_fn = "none"
         self.config.algorithm.entropy_loss_fn = "none"
         self.config.synchronizer.sync_interval = 4
+        self.config.buffer.train_batch_size = 12
         self.config.buffer.total_epochs = 2
         self.config.buffer.trainer_input.experience_buffer = get_unittest_dataset_config(
             "sft_for_gsm8k"
@@ -367,6 +368,7 @@ class TestFullyAsyncMode(unittest.TestCase):
         config.monitor.monitor_type = "tensorboard"
         trainer_config = deepcopy(config)
         trainer_config.mode = "train"
+        trainer_config.buffer.train_batch_size = 4
         trainer_config.check_and_update()
 
         explorer1_config = deepcopy(config)

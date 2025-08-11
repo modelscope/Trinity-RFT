@@ -28,7 +28,7 @@ class TestSQLBuffer(RayUnittestBaseAysnc):
         config = BufferConfig(
             max_retry_times=3,
             max_retry_interval=1,
-            read_batch_size=read_batch_size,
+            train_batch_size=read_batch_size,
         )
         sql_writer = SQLWriter(meta, config)
         sql_reader = SQLReader(meta, config)

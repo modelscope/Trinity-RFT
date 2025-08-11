@@ -13,7 +13,7 @@ cluster:
   gpu_per_node: 8
 buffer:
   total_epochs: 1
-  batch_size: 32
+  train_batch_size: 64
   max_retry_times: 3
   max_retry_interval: 1
   trainer_input:

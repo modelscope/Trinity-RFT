@@ -307,6 +307,7 @@ class BufferConfig:
     """Config for buffer."""
 
     batch_size: int = 1
+    train_batch_size: int = -1  # default to `batch_size` * `algorithm.n`
     total_epochs: int = 1
     total_steps: Optional[int] = None
 
@@ -322,7 +323,6 @@ class BufferConfig:
     max_retry_interval: int = 1
 
     # ! DO NOT SET FOLLOWING FIELDS
-    read_batch_size: int = 1  # automatically set
     tokenizer_path: Optional[str] = None  # automatically set
     pad_token_id: Optional[int] = None  # automatically set
     cache_dir: Optional[str] = None  # automatically set
@@ -650,8 +650,19 @@ class Config:
                     exp_pipeline_output_buffers.name
                 ]
 
-        # set read_batch_size / pad_token_id / tokenizer_path
-        self.buffer.read_batch_size = self.buffer.batch_size * self.algorithm.repeat_times
+        # check train_batch_size
+        if self.buffer.train_batch_size == -1:
+            if self.mode == "train" or self.algorithm.algorithm_type in ["sft", "dpo"]:
+                raise ValueError(
+                    "`buffer.train_batch_size` is required when `mode` is 'train' or `algorithm.algorithm_type` is "
+                    "'sft' or 'dpo'"
+                )
+            logger.info(
+                "`buffer.train_batch_size` is set to `buffer.batch_size` * `algorithm.repeat_times`"
+            )
+            self.buffer.train_batch_size = self.buffer.batch_size * self.algorithm.repeat_times
+
+        # set pad_token_id / tokenizer_path
         if self.buffer.pad_token_id is None:
             from transformers import AutoTokenizer
 
