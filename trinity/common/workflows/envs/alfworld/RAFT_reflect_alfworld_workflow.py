@@ -600,16 +600,8 @@ class RAFTReflectAlfworldWorkflow(Workflow):
             trajectory, success, reward, steps
         )
         if error:
-            default_experience = Experience(
-                tokens=torch.tensor([0], dtype=torch.long),
-                prompt_length=0,
-                action_mask=torch.tensor([False], dtype=torch.bool),
-                logprobs=torch.tensor([0.0], dtype=torch.float),
-                info={
-                    "error_reason": f"SFT construction failed: {str(error)}",
-                    "early_return": True,
-                },
-                metrics={"success": 0.0, "reward": float(reward), "steps": float(steps)},
+            default_experience = self.generate_default_empty_experience(
+                f"SFT data construction failed: {str(error)}",
             )
             return [default_experience]
 

@@ -201,7 +201,8 @@ class MIXAlgorithm(AlgorithmType):
 @ALGORITHM_TYPE.register_module("raft")
 class RAFTAlgorithm(AlgorithmType):
     """RAFT Algorithm.
-    Same with SFT and named differently as sft is already used for sft_to_rft.
+    This algorithm is conceptually similar to Supervised Fine-Tuning (SFT)
+    but is designed to work with `ExperienceModel` schema from rollouts.
     """
 
     use_critic: bool = False
