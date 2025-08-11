@@ -1,10 +1,11 @@
 from copy import deepcopy
-from typing import Optional, List, Tuple, Dict
+from typing import Dict, List, Optional, Tuple
 
 from trinity.buffer.operators import EXPERIENCE_OPERATORS, ExperienceOperator
-from trinity.common.experience import Experience
 from trinity.common.config import RewardShapingConfig
 from trinity.common.constants import OpType
+from trinity.common.experience import Experience
+
 
 @EXPERIENCE_OPERATORS.register_module("reward_shaping_mapper")
 class RewardShapingMapper(ExperienceOperator):
@@ -17,7 +18,7 @@ class RewardShapingMapper(ExperienceOperator):
 
     def __init__(self, reward_shaping_configs: Optional[List[RewardShapingConfig]] = None):
         if reward_shaping_configs is None:
-            reward_shaping_configs =[]
+            reward_shaping_configs = []
         self.reward_shaping_configs = reward_shaping_configs
 
     def process(self, exps: List[Experience]) -> Tuple[List[Experience], Dict]:
@@ -45,11 +46,11 @@ class RewardShapingMapper(ExperienceOperator):
         if tgt_stats not in exp_info:
             return exp
         if op_type == OpType.ADD:
-            exp.reward += (reward_shaping_config.weight * exp_info[tgt_stats])
+            exp.reward += reward_shaping_config.weight * exp_info[tgt_stats]
         elif op_type == OpType.MUL:
-            exp.reward *= (reward_shaping_config.weight * exp_info[tgt_stats])
+            exp.reward *= reward_shaping_config.weight * exp_info[tgt_stats]
         elif op_type == OpType.SUB:
-            exp.reward -= (reward_shaping_config.weight * exp_info[tgt_stats])
+            exp.reward -= reward_shaping_config.weight * exp_info[tgt_stats]
         elif op_type == OpType.DIV:
-            exp.reward /= (reward_shaping_config.weight * exp_info[tgt_stats])
+            exp.reward /= reward_shaping_config.weight * exp_info[tgt_stats]
         return exp
