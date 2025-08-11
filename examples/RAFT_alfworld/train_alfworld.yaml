@@ -37,7 +37,7 @@ actor_rollout_ref:
     ulysses_sequence_parallel_size: ${actor_rollout_ref.actor.ulysses_sequence_parallel_size}
 
 trainer:
-  balance_batch: False
+  balance_batch: True
   resume_mode: disable
   default_hdfs_dir: null
   remove_previous_ckpt_in_save: True

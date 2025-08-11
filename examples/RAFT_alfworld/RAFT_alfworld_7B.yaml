@@ -57,7 +57,7 @@ explorer:
     engine_type: vllm_async
     engine_num: 4
     tensor_parallel_size: 1
-    enable_prefix_caching: false
+    enable_prefix_caching: true
     enforce_eager: false
     dtype: bfloat16
     gpu_memory_utilization: 0.86
