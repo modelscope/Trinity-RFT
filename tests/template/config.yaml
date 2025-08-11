@@ -24,7 +24,6 @@ cluster:  # 2 for explorer, 2 for trainer
 buffer:
   total_epochs: 1
   batch_size: 4
-  train_batch_size: 4
   max_retry_times: 3
   max_retry_interval: 1
   explorer_input:
