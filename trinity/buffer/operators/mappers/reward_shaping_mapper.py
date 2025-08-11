@@ -1,7 +1,6 @@
 from typing import Dict, List, Optional, Tuple
 
 from trinity.buffer.operators import EXPERIENCE_OPERATORS, ExperienceOperator
-from trinity.common.config import RewardShapingConfig
 from trinity.common.constants import OpType
 from trinity.common.experience import Experience
 
@@ -15,7 +14,25 @@ class RewardShapingMapper(ExperienceOperator):
         and the necessary stats are already calculated and stored in the Experience info field.
     """
 
-    def __init__(self, reward_shaping_configs: Optional[List[RewardShapingConfig]] = None):
+    def __init__(self, reward_shaping_configs: Optional[List[Dict]] = None):
+        """
+        Initialization method.
+
+        :param reward_shaping_configs: the configs for reward shaping. Must be a list of dict, where the dict should
+            include 3 fields:
+                - stats_key: the field key name of target stats used to shape the reward.
+                - op_type: the type of operator to applied between the reward and the target stats. Should be one of
+                    {"ADD", "SUB", "MUL", "DIV"}
+                - weight: the weight for the target stats.
+            For example:
+            [
+                {
+                    "stats_key": "quality_score",
+                    "op_type": "ADD",
+                    "weight": 1.0,
+                }
+            ]
+        """
         if reward_shaping_configs is None:
             reward_shaping_configs = []
         self.reward_shaping_configs = reward_shaping_configs
@@ -32,12 +49,16 @@ class RewardShapingMapper(ExperienceOperator):
             res_exps.append(res_exp)
         return res_exps, {}
 
-    def _reward_shaping_single(self, exp: Experience, reward_shaping_config: RewardShapingConfig):
+    def _reward_shaping_single(self, exp: Experience, reward_shaping_config: Dict):
         """
         Re-shaping the existing reward of one experience based on the given reward_shaping_config.
         """
-        tgt_stats = reward_shaping_config.stats_key
-        op_type = reward_shaping_config.op_type
+        tgt_stats = reward_shaping_config.get("stats_key", None)
+        op_type = OpType[reward_shaping_config.get("op_type", "ADD")]
+        weight = reward_shaping_config.get("weight", 1.0)
+        # if the target stats is not specified, skip the stats and return the original experience
+        if tgt_stats is None:
+            return exp
         exp_info = exp.info
         if exp_info is None or len(exp_info) == 0:
             return exp
@@ -45,13 +66,13 @@ class RewardShapingMapper(ExperienceOperator):
         if tgt_stats not in exp_info:
             return exp
         if op_type == OpType.ADD:
-            exp.reward += reward_shaping_config.weight * exp_info[tgt_stats]
+            exp.reward += weight * exp_info[tgt_stats]
         elif op_type == OpType.MUL:
-            exp.reward *= reward_shaping_config.weight * exp_info[tgt_stats]
+            exp.reward *= weight * exp_info[tgt_stats]
         elif op_type == OpType.SUB:
-            exp.reward -= reward_shaping_config.weight * exp_info[tgt_stats]
+            exp.reward -= weight * exp_info[tgt_stats]
         elif op_type == OpType.DIV:
-            divisor = reward_shaping_config.weight * exp_info[tgt_stats]
+            divisor = weight * exp_info[tgt_stats]
             if divisor != 0:
                 exp.reward /= divisor
         return exp

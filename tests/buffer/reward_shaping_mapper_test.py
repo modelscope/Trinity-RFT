@@ -5,8 +5,7 @@ from typing import List
 import torch
 
 from trinity.buffer.pipelines.experience_pipeline import ExperienceOperator
-from trinity.common.config import OperatorConfig, RewardShapingConfig
-from trinity.common.constants import OpType
+from trinity.common.config import OperatorConfig
 from trinity.common.experience import EID, Experience
 
 
@@ -38,16 +37,16 @@ class TestRewardShapingMapper(unittest.TestCase):
                 name="reward_shaping_mapper",
                 args={
                     "reward_shaping_configs": [
-                        RewardShapingConfig(
-                            stats_key="quality_score",
-                            op_type=OpType.ADD,
-                            weight=1.0,
-                        ),
-                        RewardShapingConfig(
-                            stats_key="difficulty_score",
-                            op_type=OpType.MUL,
-                            weight=0.5,
-                        ),
+                        {
+                            "stats_key": "quality_score",
+                            "op_type": "ADD",
+                            "weight": 1.0,
+                        },
+                        {
+                            "stats_key": "difficulty_score",
+                            "op_type": "MUL",
+                            "weight": 0.5,
+                        },
                     ]
                 },
             )
