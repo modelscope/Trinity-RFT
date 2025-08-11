@@ -124,7 +124,7 @@ class TestTrainerCountdown(BaseTrainerCase):
 
 class TestStepAheadAsyncRL(BaseTrainerCase):
     def test_trainer(self):
-        """Test the explore step ahead trainer"""
+        """Test the explore step ahead trainer."""
         # train 4 step, sync_offset=1, sync_interval=2
         # Explorer:
         # | 1 | 2 | 3 |sync| 4 |
