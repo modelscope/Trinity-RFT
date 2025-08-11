@@ -1,4 +1,3 @@
-from copy import deepcopy
 from typing import Dict, List, Optional, Tuple
 
 from trinity.buffer.operators import EXPERIENCE_OPERATORS, ExperienceOperator
@@ -27,7 +26,7 @@ class RewardShapingMapper(ExperienceOperator):
             # skip experiences that don't have reward
             if exp.reward is None:
                 continue
-            res_exp = deepcopy(exp)
+            res_exp = exp
             for reward_shaping_config in self.reward_shaping_configs:
                 res_exp = self._reward_shaping_single(res_exp, reward_shaping_config)
             res_exps.append(res_exp)
@@ -52,5 +51,7 @@ class RewardShapingMapper(ExperienceOperator):
         elif op_type == OpType.SUB:
             exp.reward -= reward_shaping_config.weight * exp_info[tgt_stats]
         elif op_type == OpType.DIV:
-            exp.reward /= reward_shaping_config.weight * exp_info[tgt_stats]
+            divisor = reward_shaping_config.weight * exp_info[tgt_stats]
+            if divisor != 0:
+                exp.reward /= divisor
         return exp

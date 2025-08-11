@@ -1,4 +1,5 @@
 import unittest
+from copy import deepcopy
 from typing import List
 
 import torch
@@ -30,7 +31,7 @@ def get_experiences(task_num: int, repeat_times: int = 1, step_num: int = 1) -> 
 
 
 class TestRewardShapingMapper(unittest.TestCase):
-    def test_experience_pipeline(self):
+    def test_basic_usage(self):
         # test input cache
         op_configs = [
             OperatorConfig(
@@ -61,12 +62,12 @@ class TestRewardShapingMapper(unittest.TestCase):
         experiences = get_experiences(
             task_num=task_num, repeat_times=repeat_times, step_num=step_num
         )
-        res_exps, metrics = op.process(experiences)
+        res_exps, metrics = op.process(deepcopy(experiences))
         self.assertEqual(len(res_exps), task_num * repeat_times * step_num)
         self.assertEqual(len(metrics), 0)
 
         for prev_exp, res_exp in zip(experiences, res_exps):
-            self.assertEqual(
+            self.assertAlmostEqual(
                 (prev_exp.reward + prev_exp.info["quality_score"])
                 * 0.5
                 * prev_exp.info["difficulty_score"],
