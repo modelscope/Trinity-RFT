@@ -1,0 +1,147 @@
+mode: both
+project: Trinity-RFT-test
+group: gsm8k-bench
+name: qwen2.5-1.5B
+checkpoint_root_dir: placeholder
+algorithm:
+  algorithm_type: grpo
+  repeat_times: 8
+  sample_strategy: warmup
+  policy_loss_fn: ppo
+  advantage_fn: grpo
+  kl_penalty_fn: none
+  kl_loss_fn: k2
+  entropy_loss_fn: default
+data_processor: {}
+model:
+  model_path: Qwen/Qwen2.5-1.5B-Instruct
+  max_prompt_tokens: 256
+  max_response_tokens: 1024
+cluster:
+  node_num: 1
+  gpu_per_node: 8
+buffer:
+  batch_size: 96
+  total_epochs: 20
+  explorer_input:
+    taskset:
+      name: taskset
+      storage_type: file
+      path: openai/gsm8k
+      split: train
+      subset_name: main
+      format:
+        prompt_key: question
+        response_key: answer
+      rollout_args:
+        temperature: 1.0
+        logprobs: 0
+    eval_tasksets: []
+    default_workflow_type: math_workflow
+    default_reward_fn_type: math_reward
+    system_prompt: null
+    reply_prefix: null
+  trainer_input:
+    experience_buffer:
+      name: experience_buffer
+      storage_type: queue
+      path: ''
+      use_priority_queue: true
+      replay_buffer_kwargs:
+        priority_fn: linear_decay
+        decay: 0.1
+    sft_warmup_steps: 0
+  max_retry_times: 3
+  max_retry_interval: 1
+explorer:
+  runner_per_model: 8
+  max_timeout: 900
+  max_retry_times: 2
+  rollout_model:
+    engine_type: vllm_async
+    engine_num: 2
+    tensor_parallel_size: 1
+    use_v1: true
+    enforce_eager: false
+    enable_prefix_caching: false
+    enable_chunked_prefill: false
+    gpu_memory_utilization: 0.9
+    dtype: bfloat16
+    seed: 42
+    enable_thinking: false
+    enable_openai_api: false
+  auxiliary_models: []
+  eval_interval: 1000
+  bench_on_latest_checkpoint: true
+trainer:
+  trainer_type: verl
+  save_interval: 100
+  enable_preview: true
+  actor_grad_clip: 1.0
+  trainer_config:
+    actor_rollout_ref:
+      model:
+        external_lib: null
+        override_config: {}
+        enable_gradient_checkpointing: true
+        use_remove_padding: true
+        use_fused_kernels: false
+        # fused_kernel_options:
+        #   impl_backend: triton
+      actor:
+        strategy: fsdp
+        ppo_micro_batch_size_per_gpu: 4
+        use_dynamic_bsz: true
+        ppo_max_token_len_per_gpu: 10240
+        ppo_epochs: 1
+        shuffle: false
+        ulysses_sequence_parallel_size: 1
+        checkpoint:
+          load_contents:
+          - model
+          - optimizer
+          - extra
+          save_contents:
+          - model
+          - optimizer
+          - extra
+        optim:
+          lr: 1.0e-05
+          lr_warmup_steps_ratio: 0.0
+          warmup_style: constant
+          total_training_steps: -1
+        fsdp_config:
+          wrap_policy:
+            min_num_params: 0
+          param_offload: false
+          optimizer_offload: false
+          fsdp_size: -1
+      ref:
+        fsdp_config:
+          wrap_policy:
+            min_num_params: 0
+          param_offload: false
+          optimizer_offload: false
+          fsdp_size: -1
+        log_prob_micro_batch_size_per_gpu: 8
+        log_prob_use_dynamic_bsz: true
+        log_prob_max_token_len_per_gpu: 10240
+        ulysses_sequence_parallel_size: 1
+    trainer:
+      balance_batch: true
+      total_training_steps: 100
+      resume_mode: auto
+      resume_from_path: ''
+      default_hdfs_dir: null
+      remove_previous_ckpt_in_save: false
+      del_local_ckpt_after_load: false
+      val_before_train: false
+      max_actor_ckpt_to_keep: null
+      max_critic_ckpt_to_keep: null
+monitor:
+  monitor_type: wandb
+synchronizer:
+  sync_method: nccl
+  sync_style: fixed
+  sync_interval: 2
+  sync_timeout: 1200

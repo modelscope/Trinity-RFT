@@ -321,4 +321,5 @@ class Synchronizer:
                 .remote(config, module_ref=module_ref)
             )
             synchronizer.add_module.remote(module_ref)
+            return synchronizer
         return ray.get_actor("synchronizer", namespace=namespace)
