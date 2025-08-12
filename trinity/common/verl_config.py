@@ -13,7 +13,7 @@ logger = get_logger(__name__)
 
 @dataclass
 class Data:
-    train_batch_size: int = 1024  # kept for RayPPOTrainer._validate_config
+    train_batch_size: int = 1024  # kept to pass RayPPOTrainer._validate_config
 
 
 @dataclass
@@ -315,6 +315,9 @@ class veRLConfig:
             self.trainer.resume_mode = "auto"
 
         self.buffer = config.buffer
+        self.data.train_batch_size = (
+            config.buffer.train_batch_size
+        )  # kept to pass RayPPOTrainer._validate_config
 
         self.synchronizer = config.synchronizer
         self.actor_rollout_ref.synchronizer = config.synchronizer

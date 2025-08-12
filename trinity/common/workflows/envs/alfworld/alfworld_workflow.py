@@ -179,8 +179,8 @@ class AlfworldWorkflow(MultiTurnWorkflow):
         return self.generate_env_inference_samples(env, rollout_n)
 
 
-@WORKFLOWS.register_module("alfworld_workflow_v2")
-class AlfworldWorkflowV2(RewardPropagationWorkflow):
+@WORKFLOWS.register_module("step_wise_alfworld_workflow")
+class StepWiseAlfworldWorkflow(RewardPropagationWorkflow):
     """
     An Alfworld workflow refactored to use the RewardPropagationWorkflow base class.
 

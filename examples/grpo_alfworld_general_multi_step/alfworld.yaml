@@ -1,5 +1,5 @@
 project: "ALFWORLD"
-name: "ALFWORLD_RFTv2"
+name: "Step_Wise_Alfworld"
 checkpoint_root_dir: /PATH/TO/CHECKPOINT/ALFWORLD_RFT/
 algorithm:
   algorithm_type: grpo
@@ -7,14 +7,15 @@ algorithm:
   add_strategy: step_wise_grpo
 model:
   model_path: /PATH/TO/MODEL/
-  max_prompt_tokens: 4096
   max_response_tokens: 16384
+  max_model_len: 20480
 cluster:
   node_num: 1
   gpu_per_node: 8
 buffer:
   total_epochs: 20
   batch_size: 16
+  train_batch_size: 7680 # 16 * 16 * 30
   max_retry_times: 3
   max_retry_interval: 1
   explorer_input:
@@ -30,7 +31,7 @@ buffer:
       workflow_args:
         max_env_steps: 30
       enable_progress_bar: false
-    default_workflow_type: 'alfworld_workflow_v2'
+    default_workflow_type: 'step_wise_alfworld_workflow'
   trainer_input:
     experience_buffer:
       name: alfworld_buffer
