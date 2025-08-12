@@ -126,23 +126,20 @@
         <span class="n">clip_range_low</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">clip_range_high</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">use_dynamic_bsz</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">repeat_times</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">ppo_mini_batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">ppo_micro_batch_size_per_gpu</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">ngpus_trainer</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="n">read_batch_size_usual</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="n">read_batch_size_expert</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">train_batch_size_usual</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">train_batch_size_expert</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">use_token_level_loss_in_sft</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mu</span> <span class="o">=</span> <span class="n">mu</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_dynamic_bsz</span> <span class="o">=</span> <span class="n">use_dynamic_bsz</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">experience_per_gpu</span> <span class="o">=</span> <span class="n">ppo_mini_batch_size</span> <span class="o">*</span> <span class="n">repeat_times</span> <span class="o">//</span> <span class="n">ngpus_trainer</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">gradient_accumulation</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">ppo_mini_batch_size</span> <span class="o">*</span> <span class="n">repeat_times</span> <span class="o">//</span> <span class="n">ppo_micro_batch_size_per_gpu</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size_usual</span> <span class="o">=</span> <span class="n">read_batch_size_usual</span> <span class="o">//</span> <span class="n">ngpus_trainer</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size_expert</span> <span class="o">=</span> <span class="n">read_batch_size_expert</span> <span class="o">//</span> <span class="n">ngpus_trainer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experience_per_gpu</span> <span class="o">=</span> <span class="n">ppo_mini_batch_size</span> <span class="o">//</span> <span class="n">ngpus_trainer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gradient_accumulation</span> <span class="o">=</span> <span class="n">ppo_mini_batch_size</span> <span class="o">//</span> <span class="n">ppo_micro_batch_size_per_gpu</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_batch_size_usual</span> <span class="o">=</span> <span class="n">train_batch_size_usual</span> <span class="o">//</span> <span class="n">ngpus_trainer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_batch_size_expert</span> <span class="o">=</span> <span class="n">train_batch_size_expert</span> <span class="o">//</span> <span class="n">ngpus_trainer</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">grpo_loss_fn</span> <span class="o">=</span> <span class="n">PPOPolicyLossFn</span><span class="p">(</span>
             <span class="n">clip_range</span><span class="o">=</span><span class="n">clip_range</span><span class="p">,</span>
             <span class="n">clip_range_low</span><span class="o">=</span><span class="n">clip_range_low</span><span class="p">,</span>
@@ -169,14 +166,14 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_dynamic_bsz</span><span class="p">:</span>
             <span class="n">per_micro_batch_weight_usual</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experience_per_gpu</span> <span class="o">/</span> <span class="p">(</span>
-                <span class="n">logprob</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size_usual</span>
+                <span class="n">logprob</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_batch_size_usual</span>
             <span class="p">)</span>
             <span class="n">per_micro_batch_weight_expert</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experience_per_gpu</span> <span class="o">/</span> <span class="p">(</span>
-                <span class="n">logprob</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size_expert</span>
+                <span class="n">logprob</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_batch_size_expert</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">per_micro_batch_weight_usual</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gradient_accumulation</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size_usual</span>  <span class="c1"># type: ignore</span>
-            <span class="n">per_micro_batch_weight_expert</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gradient_accumulation</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size_expert</span>  <span class="c1"># type: ignore</span>
+            <span class="n">per_micro_batch_weight_usual</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gradient_accumulation</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_batch_size_usual</span>  <span class="c1"># type: ignore</span>
+            <span class="n">per_micro_batch_weight_expert</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gradient_accumulation</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_batch_size_expert</span>  <span class="c1"># type: ignore</span>
 
         <span class="k">if</span> <span class="n">n_usual_exp</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">grpo_loss</span><span class="p">,</span> <span class="n">grpo_metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grpo_loss_fn</span><span class="p">(</span>

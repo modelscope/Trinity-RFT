@@ -116,12 +116,12 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">buffer_config</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">expert_data_ratio</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;expert_data_ratio&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
-        <span class="n">tot_batch_size</span> <span class="o">=</span> <span class="n">buffer_config</span><span class="o">.</span><span class="n">read_batch_size</span>
+        <span class="n">tot_batch_size</span> <span class="o">=</span> <span class="n">buffer_config</span><span class="o">.</span><span class="n">train_batch_size</span>
         <span class="n">expert_batch_size</span> <span class="o">=</span> <span class="n">ceil</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expert_data_ratio</span> <span class="o">*</span> <span class="n">tot_batch_size</span><span class="p">)</span>
 
         <span class="c1"># experience buffer</span>
         <span class="n">usual_buffer_config</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">buffer_config</span><span class="p">)</span>
-        <span class="n">usual_buffer_config</span><span class="o">.</span><span class="n">read_batch_size</span> <span class="o">=</span> <span class="n">tot_batch_size</span> <span class="o">-</span> <span class="n">expert_batch_size</span>
+        <span class="n">usual_buffer_config</span><span class="o">.</span><span class="n">train_batch_size</span> <span class="o">=</span> <span class="n">tot_batch_size</span> <span class="o">-</span> <span class="n">expert_batch_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">usual_exp_buffer</span> <span class="o">=</span> <span class="n">get_buffer_reader</span><span class="p">(</span>
             <span class="n">buffer_config</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="p">,</span> <span class="n">usual_buffer_config</span>  <span class="c1"># type: ignore</span>
         <span class="p">)</span>
@@ -133,7 +133,7 @@
 
         <span class="c1"># expert experience buffer</span>
         <span class="n">expert_buffer_config</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">buffer_config</span><span class="p">)</span>
-        <span class="n">expert_buffer_config</span><span class="o">.</span><span class="n">read_batch_size</span> <span class="o">=</span> <span class="n">expert_batch_size</span>
+        <span class="n">expert_buffer_config</span><span class="o">.</span><span class="n">train_batch_size</span> <span class="o">=</span> <span class="n">expert_batch_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">expert_exp_buffer</span> <span class="o">=</span> <span class="n">get_buffer_reader</span><span class="p">(</span>
             <span class="n">buffer_config</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">sft_warmup_dataset</span><span class="p">,</span> <span class="n">expert_buffer_config</span>
         <span class="p">)</span></div>

@@ -2887,8 +2887,6 @@
         <li><a href="build_api/trinity.buffer.reader.html#trinity.buffer.reader.sql_reader.SQLReader.read_async">(trinity.buffer.reader.sql_reader.SQLReader method)</a>
 </li>
       </ul></li>
-      <li><a href="build_api/trinity.common.html#trinity.common.config.BufferConfig.read_batch_size">read_batch_size (trinity.common.config.BufferConfig attribute)</a>
-</li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.TrainerInput.read_experience_strategy">read_experience_strategy (trinity.common.config.TrainerInput attribute)</a>
 </li>
       <li><a href="build_api/trinity.common.html#trinity.common.constants.ReadStrategy">ReadStrategy (class in trinity.common.constants)</a>
@@ -3449,6 +3447,8 @@
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_critic_warmup_style">set_critic_warmup_style() (in module trinity.manager.config_registry.trainer_config_manager)</a>
 </li>
+      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.set_default_eval_workflow_type">set_default_eval_workflow_type() (in module trinity.manager.config_registry.buffer_config_manager)</a>
+</li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.trainer_config_manager.set_default_hdfs_dir">set_default_hdfs_dir() (in module trinity.manager.config_registry.trainer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.set_default_reward_fn_type">set_default_reward_fn_type() (in module trinity.manager.config_registry.buffer_config_manager)</a>
@@ -3494,6 +3494,8 @@
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.set_experience_buffer_path">set_experience_buffer_path() (in module trinity.manager.config_registry.buffer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_expert_data_ratio_in_sample_strategy">set_expert_data_ratio_in_sample_strategy() (in module trinity.manager.config_registry.algorithm_config_manager)</a>
+</li>
+      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.buffer_config_manager.set_explore_batch_size">set_explore_batch_size() (in module trinity.manager.config_registry.buffer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.explorer_config_manager.set_explorer_max_retry_times">set_explorer_max_retry_times() (in module trinity.manager.config_registry.explorer_config_manager)</a>
 </li>
@@ -3559,10 +3561,10 @@
         <li><a href="build_api/trinity.manager.html#trinity.manager.synchronizer.Synchronizer.set_model_state_dict_with_step_num">(trinity.manager.synchronizer.Synchronizer method)</a>
 </li>
       </ul></li>
-      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.set_monitor_type">set_monitor_type() (in module trinity.manager.config_registry.model_config_manager)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.set_monitor_type">set_monitor_type() (in module trinity.manager.config_registry.model_config_manager)</a>
+</li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_mu_in_policy_loss_fn">set_mu_in_policy_loss_fn() (in module trinity.manager.config_registry.algorithm_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.set_node_num">set_node_num() (in module trinity.manager.config_registry.model_config_manager)</a>
@@ -4041,8 +4043,12 @@
         <li><a href="build_api/trinity.trainer.html#trinity.trainer.trainer.Trainer.train">(trinity.trainer.trainer.Trainer method)</a>
 </li>
       </ul></li>
-      <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Data.train_batch_size">train_batch_size (trinity.common.verl_config.Data attribute)</a>
+      <li><a href="build_api/trinity.common.html#trinity.common.config.BufferConfig.train_batch_size">train_batch_size (trinity.common.config.BufferConfig attribute)</a>
+
+      <ul>
+        <li><a href="build_api/trinity.common.html#trinity.common.verl_config.Data.train_batch_size">(trinity.common.verl_config.Data attribute)</a>
 </li>
+      </ul></li>
       <li><a href="build_api/trinity.trainer.html#trinity.trainer.TrainEngineWrapper.train_step">train_step() (trinity.trainer.TrainEngineWrapper method)</a>
 
       <ul>
@@ -4359,6 +4365,8 @@
         <li><a href="build_api/trinity.buffer.html#module-trinity.buffer">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     trinity.buffer.buffer
 
@@ -4366,8 +4374,6 @@
         <li><a href="build_api/trinity.buffer.html#module-trinity.buffer.buffer">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     trinity.buffer.buffer_reader
 

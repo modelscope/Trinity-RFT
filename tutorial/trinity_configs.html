@@ -268,6 +268,7 @@
 <p>Configures the data buffers used by the explorer and trainer.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">buffer</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32</span>
+<span class="w">  </span><span class="nt">train_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">256</span>
 <span class="w">  </span><span class="nt">total_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
 
 <span class="w">  </span><span class="nt">explorer_input</span><span class="p">:</span>
@@ -291,6 +292,7 @@
 </div>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">batch_size</span></code>: Number of tasks used per training step. <em>Please do not multiply this value by the <code class="docutils literal notranslate"><span class="pre">algorithm.repeat_times</span></code> manually</em>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">train_batch_size</span></code>: Number of experiences used per training step. Defaults to <code class="docutils literal notranslate"><span class="pre">batch_size</span></code> * <code class="docutils literal notranslate"><span class="pre">algorithm.repeat_times</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">total_epochs</span></code>: Total number of training epochs.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">total_steps</span></code>: Optional. The total number of training steps. If specified, <code class="docutils literal notranslate"><span class="pre">total_epochs</span></code> will be ignored.</p></li>
 </ul>
@@ -560,7 +562,6 @@
 <span class="w">      </span><span class="nt">impl_backend</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
 <span class="w">  </span><span class="nt">actor</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fsdp</span><span class="w">  </span><span class="c1"># This is for backward-compatibility</span>
-<span class="w">    </span><span class="nt">ppo_mini_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">128</span>
 <span class="w">    </span><span class="c1"># ppo_micro_batch_size: 8 # will be deprecated, use ppo_micro_batch_size_per_gpu</span>
 <span class="w">    </span><span class="nt">ppo_micro_batch_size_per_gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
 <span class="w">    </span><span class="nt">use_dynamic_bsz</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
@@ -625,7 +626,6 @@
 <span class="w">        </span><span class="nt">min_num_params</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
 <span class="w">      </span><span class="nt">fsdp_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-1</span>
 <span class="w">      </span><span class="nt">forward_prefetch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
-<span class="w">  </span><span class="nt">ppo_mini_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${actor_rollout_ref.actor.ppo_mini_batch_size}</span>
 <span class="w">  </span><span class="nt">ppo_micro_batch_size_per_gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
 <span class="w">  </span><span class="nt">forward_micro_batch_size_per_gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${critic.ppo_micro_batch_size_per_gpu}</span>
 <span class="w">  </span><span class="nt">use_dynamic_bsz</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${actor_rollout_ref.actor.use_dynamic_bsz}</span>
