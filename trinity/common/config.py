@@ -307,7 +307,7 @@ class BufferConfig:
     """Config for buffer."""
 
     batch_size: int = 1
-    train_batch_size: int = -1  # default to `batch_size` * `algorithm.n`
+    train_batch_size: int = 0  # default to `batch_size` * `algorithm.n`
     total_epochs: int = 1
     total_steps: Optional[int] = None
 
@@ -651,7 +651,7 @@ class Config:
                 ]
 
         # check train_batch_size
-        if self.buffer.train_batch_size == -1:
+        if self.buffer.train_batch_size:
             if self.mode == "train" or self.algorithm.algorithm_type in ["sft", "dpo"]:
                 raise ValueError(
                     "`buffer.train_batch_size` is required when `mode` is 'train' or `algorithm.algorithm_type` is "

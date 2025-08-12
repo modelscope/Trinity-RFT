@@ -12,11 +12,6 @@ logger = get_logger(__name__)
 
 
 @dataclass
-class Data:
-    train_batch_size: int = 1024
-
-
-@dataclass
 class FusedKernelOptions:
     impl_backend: Optional[str] = None
 
@@ -72,9 +67,7 @@ class Actor:
     ppo_micro_batch_size: Optional[int] = None
     ppo_micro_batch_size_per_gpu: int = 1
     use_dynamic_bsz: bool = False
-    ppo_max_token_len_per_gpu: int = (
-        16384  # n * ${data.max_prompt_length} + ${data.max_response_length}
-    )
+    ppo_max_token_len_per_gpu: int = 16384
     grad_clip: float = 1.0
     ppo_epochs: int = 1
     shuffle: bool = False
@@ -256,7 +249,6 @@ class Trainer:
 
 @dataclass
 class veRLConfig:
-    data: Data = field(default_factory=Data)
     actor_rollout_ref: ActorRolloutRef = field(default_factory=ActorRolloutRef)
     critic: Critic = field(default_factory=Critic)
     reward_model: RewardModel = field(default_factory=RewardModel)
@@ -317,8 +309,6 @@ class veRLConfig:
             self.trainer.resume_mode = "auto"
 
         self.buffer = config.buffer
-        # Get the experiences of one explore step
-        self.data.train_batch_size = config.buffer.train_batch_size
 
         self.synchronizer = config.synchronizer
         self.actor_rollout_ref.synchronizer = config.synchronizer
