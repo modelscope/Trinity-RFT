@@ -233,6 +233,21 @@ Other workflows: conduct multi-turn task for the given dataset.
     )
 
 
+@CONFIG_GENERATORS.register_config(default_value="math_workflow")
+def set_default_eval_workflow_type(**kwargs):
+    st.selectbox(
+        "Default Eval Workflow Type :orange-badge[(Needs review)]",
+        WORKFLOWS.modules.keys(),
+        help=r"""`simple_workflow`: call 'model.chat()' to get responses.
+
+`math_workflow`: call 'model.chat()' with a pre-defined system prompt to get responses.
+
+Other workflows: conduct multi-turn task for the given dataset.
+""",
+        **kwargs,
+    )
+
+
 @CONFIG_GENERATORS.register_config(default_value="math_reward")
 def set_default_reward_fn_type(**kwargs):
     st.selectbox(
