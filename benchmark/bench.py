@@ -65,46 +65,47 @@ def prepare_configs(args, rank, current_time):
 
     current_time_str = time.strftime("%Y%m%d-%H%M%S", time.localtime(current_time))
     run_path = os.path.join(base_path, "runs", current_time_str)
-    if rank != 0:
-        return os.path.join(run_path, "config.yaml")
-    os.makedirs(run_path)
-
-    with open(os.path.join(base_path, "config", f"{args.dataset}-template.yaml")) as f:
-        config = yaml.load(f, Loader=yaml.FullLoader)
-
-    config["name"] += f"-{current_time_str}"
-    config["checkpoint_root_dir"] = os.path.join(run_path, "checkpoints")
-    set_engine_num(config, args)
-    config["model"]["model_path"] = (
-        args.model_path
-        or os.environ.get("MODEL_PATH")
-        or config["model"]["model_path"]
-        or "Qwen/Qwen2.5-1.5B-Instruct"
-    )
-    if ALGORITHM_TYPE.get(config["algorithm"]["algorithm_type"]).use_critic:
-        config["model"]["critic_model_path"] = (
-            args.critic_model_path
-            or config["model"].get("critic_model_path")
-            or config["model"]["model_path"]
-        )
-        if args.critic_lr:
-            config["trainer"]["trainer_config"]["critic"]["optim"]["lr"] = args.critic_lr
-    config["buffer"]["explorer_input"]["taskset"]["path"] = (
-        args.taskset_path
-        or os.environ.get("TASKSET_PATH")
-        or config["buffer"]["explorer_input"]["taskset"]["path"]
-    )
-    assert (
-        config["buffer"]["explorer_input"]["taskset"]["path"] is not None
-    ), "Please specify taskset path."
-    if args.lr:
-        config["trainer"]["trainer_config"]["actor_rollout_ref"]["actor"]["optim"]["lr"] = args.lr
-    if args.sync_interval:
-        config["synchronizer"]["sync_interval"] = args.sync_interval
-
     config_path = os.path.join(run_path, "config.yaml")
-    with open(config_path, "w") as f:
-        yaml.dump(config, f, allow_unicode=True, sort_keys=False)
+    if rank == 0:
+        os.makedirs(run_path)
+
+        with open(os.path.join(base_path, "config", f"{args.dataset}-template.yaml")) as f:
+            config = yaml.safe_load(f)
+
+        config["name"] += f"-{current_time_str}"
+        config["checkpoint_root_dir"] = os.path.join(run_path, "checkpoints")
+        set_engine_num(config, args)
+        config["model"]["model_path"] = (
+            args.model_path
+            or os.environ.get("MODEL_PATH")
+            or config["model"]["model_path"]
+            or "Qwen/Qwen2.5-1.5B-Instruct"
+        )
+        if ALGORITHM_TYPE.get(config["algorithm"]["algorithm_type"]).use_critic:
+            config["model"]["critic_model_path"] = (
+                args.critic_model_path
+                or config["model"].get("critic_model_path")
+                or config["model"]["model_path"]
+            )
+            if args.critic_lr:
+                config["trainer"]["trainer_config"]["critic"]["optim"]["lr"] = args.critic_lr
+        config["buffer"]["explorer_input"]["taskset"]["path"] = (
+            args.taskset_path
+            or os.environ.get("TASKSET_PATH")
+            or config["buffer"]["explorer_input"]["taskset"]["path"]
+        )
+        assert (
+            config["buffer"]["explorer_input"]["taskset"]["path"] is not None
+        ), "Please specify taskset path."
+        if args.lr:
+            config["trainer"]["trainer_config"]["actor_rollout_ref"]["actor"]["optim"][
+                "lr"
+            ] = args.lr
+        if args.sync_interval:
+            config["synchronizer"]["sync_interval"] = args.sync_interval
+
+        with open(config_path, "w") as f:
+            yaml.dump(config, f, allow_unicode=True, sort_keys=False)
     return config_path
 
 
@@ -122,7 +123,6 @@ def setup_dlc():
     else:
         time_tensor = torch.tensor([0.0], device="cpu")
     dist.broadcast(time_tensor, src=0)
-    dist.destroy_process_group()
     return envs["RANK"], time_tensor.item()
 
 
@@ -141,6 +141,8 @@ def main(args):
         config_path,
     ]
     if args.dlc:
+        dist.barrier()
+        dist.destroy_process_group()
         cmd_list.append("--dlc")
     subprocess.run(cmd_list, check=True)
 
