@@ -81,7 +81,7 @@ In general multi-step scenarios, each run may generate various number of experie
 
 - `buffer.train_batch_size`: The number of experiences to be sampled from the buffer for training, which can be different from the number of generated experiences in each explore step.
 
-- `buffer.trainer_input.use_priority_queue = true`: Using `PriorityQueue` allows the model to use the experiences with higher priority. 
+- `buffer.trainer_input.use_priority_queue = true`: Using `PriorityQueue` allows the model to use the experiences with higher priority.
 
 - `synchronizer.sync_style = dynamic_by_explorer`: The explorer determines when to synchronize the model weights with the trainer.
 
@@ -193,9 +193,9 @@ You may revise the configurations properly and run the experiment!
 trinity run --config examples/grpo_alfworld_general_multi_step/alfworld.yaml
 ```
 
-The results are shown in the following figure. [TODO: update the image with new name]
+The results are shown in the following figure.
 
-![](../../assets/alfworldv2_reward.png) 
+![](../../assets/alfworldv2_reward.png)
 
 
 Note that we use a Qwen2.5-3B model fine-tuned with SFT as our starting point, ensuring that the model has some basic understanding of the environment.
