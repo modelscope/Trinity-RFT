@@ -2,17 +2,16 @@ mode: both
 project: Trinity-RFT-test
 group: countdown-bench
 name: qwen2.5-1.5B
-checkpoint_root_dir: /mnt/data/chenyushuo.cys/Trinity/checkpoints/
+checkpoint_root_dir: placeholder
 algorithm:
   algorithm_type: ppo
   repeat_times: 5
   advantage_fn: ppo
 data_processor: {}
 model:
-  model_path: /mnt/data/chenyushuo.cys/rlhf_space/models/Qwen2.5-1.5B-Inst
+  model_path: Qwen/Qwen2.5-1.5B-Instruct
   max_prompt_tokens: 256
   max_response_tokens: 1024
-  critic_model_path: /mnt/data/chenyushuo.cys/rlhf_space/models/Qwen2.5-1.5B-Inst
 cluster:
   node_num: 1
   gpu_per_node: 8
@@ -23,7 +22,7 @@ buffer:
     taskset:
       name: taskset
       storage_type: file
-      path: /mnt/data/chenyushuo.cys/AS-RFT/countdown_dataset/oneshot-split/
+      path: null
       split: train
       subset_name: null
       format:
@@ -85,7 +84,6 @@ trainer:
         use_remove_padding: true
       actor:
         strategy: fsdp
-        ppo_mini_batch_size: 96
         ppo_micro_batch_size_per_gpu: 4
         use_dynamic_bsz: true
         ppo_max_token_len_per_gpu: 6400
@@ -161,7 +159,6 @@ trainer:
           param_offload: false
           optimizer_offload: false
           fsdp_size: -1
-      ppo_mini_batch_size: 96
       ppo_micro_batch_size_per_gpu: 8
       forward_micro_batch_size_per_gpu: 8
       use_dynamic_bsz: true
