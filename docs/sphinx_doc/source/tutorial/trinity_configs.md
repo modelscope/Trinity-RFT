@@ -129,14 +129,14 @@ Defines the model paths and token limits.
 model:
   model_path: /PATH/TO/MODEL/
   critic_model_path: ''
-  max_prompt_tokens: 4096
   max_response_tokens: 16384
+  max_model_len: 20480
 ```
 
 - `model_path`: Path to the model being trained.
 - `critic_model_path`: Optional path to a separate critic model. If empty, defaults to `model_path`.
-- `max_prompt_tokens`: Maximum number of tokens allowed in input prompts.
 - `max_response_tokens`: Maximum number of tokens allowed in generated responses.
+- `max_model_len`: Maximum number of tokens in a sequence.
 
 ---
 
@@ -162,6 +162,7 @@ Configures the data buffers used by the explorer and trainer.
 ```yaml
 buffer:
   batch_size: 32
+  train_batch_size: 256
   total_epochs: 100
 
   explorer_input:
@@ -184,6 +185,7 @@ buffer:
 ```
 
 - `batch_size`: Number of tasks used per training step. *Please do not multiply this value by the `algorithm.repeat_times` manually*.
+- `train_batch_size`: Number of experiences used per training step. Defaults to `batch_size` * `algorithm.repeat_times`.
 - `total_epochs`: Total number of training epochs.
 - `total_steps`: Optional. The total number of training steps. If specified, `total_epochs` will be ignored.
 
@@ -440,11 +442,10 @@ actor_rollout_ref:
       impl_backend: None
   actor:
     strategy: fsdp  # This is for backward-compatibility
-    ppo_mini_batch_size: 128
     # ppo_micro_batch_size: 8 # will be deprecated, use ppo_micro_batch_size_per_gpu
     ppo_micro_batch_size_per_gpu: 4
     use_dynamic_bsz: True
-    ppo_max_token_len_per_gpu: 16384 # n * ${data.max_prompt_length} + ${data.max_response_length}
+    ppo_max_token_len_per_gpu: 16384 # n * ${data.max_model_len}
     grad_clip: 1.0
     ppo_epochs: 1
     shuffle: False
@@ -505,7 +506,6 @@ critic:
         min_num_params: 0
       fsdp_size: -1
       forward_prefetch: False
-  ppo_mini_batch_size: ${actor_rollout_ref.actor.ppo_mini_batch_size}
   ppo_micro_batch_size_per_gpu: 8
   forward_micro_batch_size_per_gpu: ${critic.ppo_micro_batch_size_per_gpu}
   use_dynamic_bsz: ${actor_rollout_ref.actor.use_dynamic_bsz}

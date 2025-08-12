@@ -77,7 +77,7 @@ from verl.workers.sharding_manager.fsdp_ulysses import FSDPUlyssesShardingManage
 
 from trinity.common.config import AlgorithmConfig
 from trinity.common.constants import ROLLOUT_WEIGHT_SYNC_GROUP_NAME, SyncMethod
-from trinity.common.synchronizer import Synchronizer
+from trinity.manager.synchronizer import Synchronizer
 from trinity.trainer.verl.fsdp_checkpoint_manager import FSDPCheckpointManager
 from trinity.utils.distributed import init_process_group
 
@@ -150,7 +150,7 @@ class ActorRolloutRefWorker(Worker):
 
         # normalize config
         if self._is_actor:
-            self.config.actor.ppo_mini_batch_size *= self.config.rollout.n
+            # note: no need to conduct `ppo_mini_batch_size *= rollout_n` anymore
             self.config.actor.ppo_mini_batch_size //= (
                 self.device_mesh.size() // self.ulysses_sequence_parallel_size
             )
@@ -904,7 +904,7 @@ class CriticWorker(Worker):
         self._is_offload_optimizer = self.config.model.fsdp_config.optimizer_offload
 
         # normalize config
-        self.config.ppo_mini_batch_size *= self.config.rollout_n
+        # note: no need to conduct `ppo_mini_batch_size *= rollout_n` anymore
         self.config.ppo_mini_batch_size //= (
             torch.distributed.get_world_size() // self.ulysses_sequence_parallel_size
         )

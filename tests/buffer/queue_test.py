@@ -55,10 +55,10 @@ class TestQueueBuffer(RayUnittestBaseAysnc):
             exp.info = {"model_version": 0, "use_count": 0}
         for _ in range(self.total_num // self.put_batch_size):
             await writer.write_async(exps)
-        for _ in range(self.total_num // self.read_batch_size):
+        for _ in range(self.total_num // self.train_batch_size):
             exps = reader.read()
-            self.assertEqual(len(exps), self.read_batch_size)
-            print(f"finish read {self.read_batch_size} experience")
+            self.assertEqual(len(exps), self.train_batch_size)
+            print(f"finish read {self.train_batch_size} experience")
         exps = [
             Experience(
                 tokens=torch.tensor([float(j) for j in range(i + 1)]),
@@ -94,13 +94,13 @@ class TestQueueBuffer(RayUnittestBaseAysnc):
 
     async def test_priority_queue_capacity(self):
         # test queue capacity
-        self.config.read_batch_size = 4
+        self.config.train_batch_size = 4
         meta = StorageConfig(
             name="test_buffer_small",
             algorithm_type="ppo",
             storage_type=StorageType.QUEUE,
             max_read_timeout=1,
-            capacity=100,  # priority will use 2 * read_batch_size as capacity (8)
+            capacity=100,  # priority will use 2 * train_batch_size as capacity (8)
             path=BUFFER_FILE_PATH,
             use_priority_queue=True,
             replay_buffer_kwargs={"priority_fn": "linear_decay", "decay": 0.6},
@@ -303,12 +303,12 @@ class TestQueueBuffer(RayUnittestBaseAysnc):
     def setUp(self):
         self.total_num = 8
         self.put_batch_size = 2
-        self.read_batch_size = 4
+        self.train_batch_size = 4
 
         self.config = BufferConfig(
             max_retry_times=3,
             max_retry_interval=1,
-            read_batch_size=self.read_batch_size,
+            train_batch_size=self.train_batch_size,
         )
         if os.path.exists(BUFFER_FILE_PATH):
             os.remove(BUFFER_FILE_PATH)

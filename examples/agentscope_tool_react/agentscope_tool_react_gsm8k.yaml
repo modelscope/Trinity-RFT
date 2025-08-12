@@ -1,19 +1,21 @@
-project: "Trinity-RFT-gsm8k"
-name: "qwen2.5-1.5B-gsm8k"
+project: "Trinity-RFT-gsm8k-reactv2"
+name: "Qwen3-4B-gsm8k-reactv2"
 checkpoint_root_dir: /PATH/TO/CHECKPOINT/
 algorithm:
   algorithm_type: grpo
   repeat_times: 8
+  add_strategy: step_wise_grpo
+
 model:
-  model_path: /PATH/TO/MODEL/
-  max_response_tokens: 1024
-  max_model_len: 1280
+  model_path: /PATH/TO/MODEL/Qwen3-4B
+  max_response_tokens: 16384
+  max_model_len: 24576
 cluster:
   node_num: 1
   gpu_per_node: 8
 buffer:
   total_epochs: 1
-  batch_size: 96
+  batch_size: 32
   max_retry_times: 3
   max_retry_interval: 1
   explorer_input:
@@ -28,42 +30,39 @@ buffer:
         response_key: 'answer'
       rollout_args:
         temperature: 1.0
-    eval_tasksets:
-    - name: gsm8k-eval
-      storage_type: file
-      path: 'openai/gsm8k'
-      subset_name: 'main'
-      split: 'test'
-      format:
-        prompt_key: 'question'
-        response_key: 'answer'
-    default_workflow_type: 'math_workflow'
+    eval_tasksets: []
+    default_workflow_type: 'agentscope_reactv2_math_workflow'
   trainer_input:
     experience_buffer:
-      name: gsm8k_buffer
+      name: agentscope_gsm8k_buffer
       storage_type: queue
-      path: 'sqlite:///gsm8k.db'
-    # sft_warmup_steps: 0
-    # sft_warmup_dataset: # Uncomment these to enable sft warmup
-    #   name: warmup_data
-    #   storage_type: file
-    #   path: '/PATH/TO/WARMUP_DATA/'
 explorer:
+  max_repeat_times_per_runner: 1
   eval_interval: 50
-  runner_num: 32
+  runner_num: 4
+  max_timeout: 360
   rollout_model:
     engine_type: vllm_async
-    engine_num: 2
+    engine_num: 4
     tensor_parallel_size: 1
     enable_prefix_caching: false
     enforce_eager: true
+    enable_openai_api: true
+    enable_history: true
     dtype: bfloat16
     seed: 42
+    enable_auto_tool_choice: true
+    tool_call_parser: hermes
+    reasoning_parser: deepseek_r1
+    enable_thinking: true
 synchronizer:
+  sync_style: dynamic_by_explorer
   sync_method: 'nccl'
-  sync_interval: 1
+  sync_interval: 2
   sync_timeout: 1200
 trainer:
   trainer_type: 'verl'
-  trainer_config_path: 'examples/grpo_gsm8k/train_gsm8k.yaml'
+  trainer_config_path: 'examples/agentscope_tool_react/train_react.yaml'
   save_interval: 100
+monitor:
+  monitor_type: wandb

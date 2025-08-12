@@ -127,8 +127,8 @@ def set_seed(**kwargs):
     st.number_input("Seed", step=1, **kwargs)
 
 
-# TODO: max_prompt_tokens
 # TODO: max_response_tokens
+# TODO: max_model_len
 # TODO: chat_template
 
 

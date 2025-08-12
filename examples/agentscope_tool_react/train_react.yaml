@@ -4,16 +4,16 @@ actor_rollout_ref:
     external_lib: null
     override_config: { }
     enable_gradient_checkpointing: True
-    use_remove_padding: False
+    use_remove_padding: True  # False
   actor:
     strategy: fsdp  # This is for backward-compatibility
-    ppo_micro_batch_size_per_gpu: 1
-    use_dynamic_bsz: False
-    ppo_max_token_len_per_gpu: 16384
+    ppo_micro_batch_size_per_gpu: 4
+    use_dynamic_bsz: True # False
+    ppo_max_token_len_per_gpu: 24576
     grad_clip: 1.0
     ppo_epochs: 1
     shuffle: False
-    ulysses_sequence_parallel_size: 1 # sp size
+    ulysses_sequence_parallel_size: 2 # sp size
     optim:
       lr: 1e-6
       lr_warmup_steps_ratio: 0.  # the total steps will be injected during runtime
@@ -33,7 +33,7 @@ actor_rollout_ref:
       wrap_policy:
         # transformer_layer_cls_to_wrap: None
         min_num_params: 0
-    log_prob_micro_batch_size_per_gpu: 1
+    log_prob_micro_batch_size_per_gpu: 16
     log_prob_use_dynamic_bsz: ${actor_rollout_ref.actor.use_dynamic_bsz}
     log_prob_max_token_len_per_gpu: ${actor_rollout_ref.actor.ppo_max_token_len_per_gpu}
     ulysses_sequence_parallel_size: ${actor_rollout_ref.actor.ulysses_sequence_parallel_size} # sp size

@@ -347,10 +347,10 @@ async def run_api_server_in_ray_actor(
     reasoning_parser: Optional[str] = None,
 ):
     vllm_version = get_vllm_version()
-    if vllm_version < parse_version("0.8.5") or vllm_version >= parse_version("0.10.0"):
+    if vllm_version < parse_version("0.8.5") or vllm_version > parse_version("0.10.0"):
         raise ValueError(
             f"Unsupported vllm version: {vllm.__version__}. "
-            "This patch requires vllm version >= 0.8.5, < 0.10.0."
+            "This patch requires vllm version >= 0.8.5, <= 0.10.0."
         )
 
     parser = FlexibleArgumentParser(description="Run the OpenAI API server.")

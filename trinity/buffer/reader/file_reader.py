@@ -99,8 +99,18 @@ class _HFBatchReader:
         return batch
 
 
+class BaseFileReader(BufferReader):
+    async def read_async(
+        self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
+    ):
+        try:
+            return self.read(batch_size, strategy)
+        except StopIteration as e:
+            raise StopAsyncIteration from e
+
+
 @FILE_READERS.register_module(SFTAlgorithm.name())
-class SFTDataReader(BufferReader):
+class SFTDataReader(BaseFileReader):
     """Reader for SFT file data."""
 
     def __init__(self, meta: StorageConfig, config: BufferConfig):
@@ -110,7 +120,7 @@ class SFTDataReader(BufferReader):
         self.messages_key = meta.format.messages_key
         self.prompt_key = meta.format.prompt_key
         self.response_key = meta.format.response_key
-        self.read_batch_size = config.batch_size
+        self.read_batch_size = config.train_batch_size
         self.dataset = _HFBatchReader(
             load_dataset(meta.path, name=subset_name, split=self.split),
             name=meta.name,
@@ -182,14 +192,9 @@ class SFTDataReader(BufferReader):
             raise ValueError(f"Unknown data format: {self.prompt_type}")
         return exp_list
 
-    async def read_async(
-        self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
-    ):
-        return self.read(batch_size, strategy)
-
 
 @FILE_READERS.register_module(DPOAlgorithm.name())
-class DPODataReader(BufferReader):
+class DPODataReader(BaseFileReader):
     def __init__(self, meta: StorageConfig, config: BufferConfig):
         self.split = meta.split
         subset_name = meta.subset_name
@@ -197,7 +202,7 @@ class DPODataReader(BufferReader):
         self.prompt_key = meta.format.prompt_key
         self.chosen_key = meta.format.chosen_key
         self.rejected_key = meta.format.rejected_key
-        self.read_batch_size = config.batch_size
+        self.read_batch_size = config.train_batch_size
         self.dataset = _HFBatchReader(
             load_dataset(meta.path, name=subset_name, split=self.split),
             name=meta.name,
@@ -264,14 +269,9 @@ class DPODataReader(BufferReader):
             exp_list.append(experience)
         return exp_list
 
-    async def read_async(
-        self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
-    ):
-        return self.read(batch_size, strategy)
-
 
 @FILE_READERS.register_module("rollout")
-class RolloutDataReader(BufferReader):
+class RolloutDataReader(BaseFileReader):
     def __init__(self, meta: StorageConfig, config: BufferConfig):
         self.meta = meta
         self.name = meta.name
@@ -340,14 +340,9 @@ class RolloutDataReader(BufferReader):
             tasks.append(task)
         return tasks
 
-    async def read_async(
-        self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
-    ):
-        return self.read(batch_size, strategy)
-
 
 @FILE_READERS.register_module("raw")
-class RawDataReader(BufferReader):
+class RawDataReader(BaseFileReader):
     def __init__(self, meta: StorageConfig, config: Optional[BufferConfig]):
         self.returned = False
         self.dataset = load_dataset(meta.path, name=meta.subset_name, split=meta.split)
@@ -362,8 +357,3 @@ class RawDataReader(BufferReader):
             raise StopIteration
         self.returned = True
         return self.dataset.to_list()
-
-    async def read_async(
-        self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
-    ):
-        return self.read(batch_size, strategy)

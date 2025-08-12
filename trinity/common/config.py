@@ -3,6 +3,7 @@
 import os
 from dataclasses import dataclass, field
 from datetime import datetime
+from enum import Enum
 from typing import Any, Dict, List, Optional
 
 from omegaconf import OmegaConf
@@ -104,7 +105,7 @@ class StorageConfig:
     reward_fn_args: dict = field(default_factory=dict)
 
     # enable progress bar (tqdm) for _HFBatchReader
-    enable_progress_bar: Optional[bool] = True
+    enable_progress_bar: Optional[bool] = False
 
     # get storage from existing experiment
     ray_namespace: Optional[str] = None
@@ -176,7 +177,8 @@ class ModelConfig:
     # source model path
     model_path: str = ""
     critic_model_path: str = ""
-    max_prompt_tokens: Optional[int] = None
+    max_model_len: Optional[int] = None
+    max_prompt_tokens: Optional[int] = None  # deprecated
     max_response_tokens: Optional[int] = None
     custom_chat_template: Optional[str] = None
 
@@ -198,8 +200,10 @@ class InferenceModelConfig:
     dtype: str = "bfloat16"
     seed: int = 42
 
+    # if not set, use `model.max_model_len`
+    max_model_len: Optional[int] = None
     # if not set, use `model.max_prompt_tokens`
-    max_prompt_tokens: Optional[int] = None
+    max_prompt_tokens: Optional[int] = None  # deprecated
     # if not set, use `model.max_response_tokens`
     max_response_tokens: Optional[int] = None
 
@@ -304,6 +308,7 @@ class BufferConfig:
     """Config for buffer."""
 
     batch_size: int = 1
+    train_batch_size: int = 0  # default to `batch_size` * `algorithm.n`
     total_epochs: int = 1
     total_steps: Optional[int] = None
 
@@ -319,7 +324,6 @@ class BufferConfig:
     max_retry_interval: int = 1
 
     # ! DO NOT SET FOLLOWING FIELDS
-    read_batch_size: int = 1  # automatically set
     tokenizer_path: Optional[str] = None  # automatically set
     pad_token_id: Optional[int] = None  # automatically set
     cache_dir: Optional[str] = None  # automatically set
@@ -383,7 +387,7 @@ class MonitorConfig:
     # TODO: support multiple monitors (List[str])
     monitor_type: str = "tensorboard"
     # the default args for monitor
-    monitor_args: Dict = field(default_factory=dict)
+    monitor_args: Optional[Dict] = None
     # whether to enable ray timeline profile
     # the output file will be saved to `cache_dir/timeline.json`
     enable_ray_timeline: bool = False
@@ -538,7 +542,7 @@ class Config:
         self.buffer.explorer_input.eval_tasksets = remained_tasksets
 
         # check trainer_input.experience_buffer
-        if self.mode == "both":
+        if self.mode == "both" or self.mode == "explore":
             if self.buffer.trainer_input.experience_buffer is None:
                 self.buffer.trainer_input.experience_buffer = StorageConfig(
                     name="experience_buffer",
@@ -647,10 +651,19 @@ class Config:
                     exp_pipeline_output_buffers.name
                 ]
 
-        # set read_batch_size / pad_token_id / tokenizer_path
-        # self.buffer.read_batch_size = self.buffer.batch_size * self.algorithm.repeat_times
-        logger.warning("Warning! Set `buffer.read_batch_size` *= `30`")
-        self.buffer.read_batch_size = self.buffer.batch_size * self.algorithm.repeat_times * 30
+        # check train_batch_size
+        if not self.buffer.train_batch_size:
+            if self.mode == "train" or self.algorithm.algorithm_type in ["sft", "dpo"]:
+                raise ValueError(
+                    "`buffer.train_batch_size` is required when `mode` is 'train' or `algorithm.algorithm_type` is "
+                    "'sft' or 'dpo'"
+                )
+            logger.info(
+                "`buffer.train_batch_size` is set to `buffer.batch_size` * `algorithm.repeat_times`"
+            )
+            self.buffer.train_batch_size = self.buffer.batch_size * self.algorithm.repeat_times
+
+        # set pad_token_id / tokenizer_path
         if self.buffer.pad_token_id is None:
             from transformers import AutoTokenizer
 
@@ -760,6 +773,20 @@ class Config:
             self.explorer.rollout_model.max_prompt_tokens = self.model.max_prompt_tokens
         if self.explorer.rollout_model.max_response_tokens is None:
             self.explorer.rollout_model.max_response_tokens = self.model.max_response_tokens
+        if self.explorer.rollout_model.max_model_len is None:
+            self.explorer.rollout_model.max_model_len = self.model.max_model_len
+        if (
+            self.explorer.rollout_model.max_model_len is None
+            and self.explorer.rollout_model.max_prompt_tokens is not None
+            and self.explorer.rollout_model.max_response_tokens is not None
+        ):
+            logger.warning(
+                "`max_prompt_tokens` is deprecated, please set `max_model_len` directly."
+            )
+            self.explorer.rollout_model.max_model_len = (
+                self.explorer.rollout_model.max_prompt_tokens
+                + self.explorer.rollout_model.max_response_tokens
+            )
 
         # check synchronizer
         self.synchronizer.ray_namespace = self.ray_namespace
@@ -778,6 +805,14 @@ class Config:
 
         self._check_interval()
 
+        # check monitor
+        from trinity.utils.monitor import MONITOR
+
+        monitor_cls = MONITOR.get(self.monitor.monitor_type)
+        if monitor_cls is None:
+            raise ValueError(f"Invalid monitor type: {self.monitor.monitor_type}")
+        if self.monitor.monitor_args is None:
+            self.monitor.monitor_args = monitor_cls.default_args()
         # create a job dir in <checkpoint_root_dir>/<project>/<name>/monitor
         self.monitor.cache_dir = os.path.join(self.checkpoint_job_dir, "monitor")
         try:
@@ -815,6 +850,29 @@ class Config:
             self.trainer.trainer_config.synchronize_config(self)
         else:
             self.trainer.trainer_config = None
+
+    def flatten(self) -> Dict[str, Any]:
+        """Flatten the config into a single-level dict with dot-separated keys for nested fields."""
+
+        def _flatten(obj, parent_key="", sep="."):
+            items = {}
+            if hasattr(obj, "__dataclass_fields__"):
+                obj = vars(obj)
+            if isinstance(obj, dict):
+                for k, v in obj.items():
+                    new_key = f"{parent_key}{sep}{k}" if parent_key else k
+                    items.update(_flatten(v, new_key, sep=sep))
+            elif isinstance(obj, list):
+                for i, v in enumerate(obj):
+                    new_key = f"{parent_key}{sep}{i}" if parent_key else str(i)
+                    items.update(_flatten(v, new_key, sep=sep))
+            elif isinstance(obj, Enum):
+                items[parent_key] = obj.value
+            else:
+                items[parent_key] = obj
+            return items
+
+        return _flatten(self)
 
 
 def load_config(config_path: str) -> Config:

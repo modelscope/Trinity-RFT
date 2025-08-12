@@ -7,10 +7,9 @@ actor_rollout_ref:
     use_remove_padding: True
   actor:
     strategy: fsdp  # This is for backward-compatibility
-    ppo_mini_batch_size: 4
     ppo_micro_batch_size_per_gpu: 1
     use_dynamic_bsz: True
-    ppo_max_token_len_per_gpu: 16384 # n * ${data.max_prompt_length} + ${data.max_response_length}
+    ppo_max_token_len_per_gpu: 16384
     grad_clip: 1.0
     ppo_epochs: 1
     shuffle: False
@@ -70,7 +69,6 @@ critic:
         min_num_params: 0
       fsdp_size: -1
       forward_prefetch: False
-  ppo_mini_batch_size: ${actor_rollout_ref.actor.ppo_mini_batch_size}
   ppo_micro_batch_size_per_gpu: 1
   forward_micro_batch_size_per_gpu: ${critic.ppo_micro_batch_size_per_gpu}
   use_dynamic_bsz: ${actor_rollout_ref.actor.use_dynamic_bsz}

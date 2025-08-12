@@ -7,14 +7,14 @@ algorithm:
   repeat_times: 8
 model:
   model_path: /PATH/TO/MODEL/
-  max_prompt_tokens: 256
   max_response_tokens: 1024
+  max_model_len: 1280
 cluster:
   node_num: 1
   gpu_per_node: 4
 buffer:
   total_epochs: 1
-  batch_size: 96
+  train_batch_size: 768
   max_retry_times: 3
   max_retry_interval: 1
   explorer_input:

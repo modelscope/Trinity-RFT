@@ -6,14 +6,14 @@ algorithm:
   algorithm_type: sft
 model:
   model_path: /PATH/TO/MODEL/
-  max_prompt_tokens: 512
   max_response_tokens: 10240
+  max_model_len: 10752
 cluster:
   node_num: 1
   gpu_per_node: 8
 buffer:
   total_epochs: 1
-  batch_size: 32
+  train_batch_size: 64
   max_retry_times: 3
   max_retry_interval: 1
   trainer_input:

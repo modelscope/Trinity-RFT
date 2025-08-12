@@ -13,7 +13,7 @@ logger = get_logger(__name__)
 
 @dataclass
 class Data:
-    train_batch_size: int = 1024
+    train_batch_size: int = 1024  # kept for RayPPOTrainer._validate_config
 
 
 @dataclass
@@ -72,9 +72,7 @@ class Actor:
     ppo_micro_batch_size: Optional[int] = None
     ppo_micro_batch_size_per_gpu: int = 1
     use_dynamic_bsz: bool = False
-    ppo_max_token_len_per_gpu: int = (
-        16384  # n * ${data.max_prompt_length} + ${data.max_response_length}
-    )
+    ppo_max_token_len_per_gpu: int = 16384
     grad_clip: float = 1.0
     ppo_epochs: int = 1
     shuffle: bool = False
@@ -299,9 +297,9 @@ class veRLConfig:
             self.trainer.n_gpus_per_node = config.cluster.gpu_per_node
 
         world_size = self.trainer.nnodes * self.trainer.n_gpus_per_node
-        if config.buffer.batch_size % world_size != 0:
+        if config.buffer.train_batch_size % world_size != 0:
             raise ValueError(
-                f"batch_size ({config.buffer.batch_size}) must be divisible by ({world_size})"
+                f"batch_size ({config.buffer.train_batch_size}) must be divisible by ({world_size})"
             )
 
         self.trainer.sync_freq = config.synchronizer.sync_interval
@@ -317,11 +315,6 @@ class veRLConfig:
             self.trainer.resume_mode = "auto"
 
         self.buffer = config.buffer
-        # TODO: use dynamic read_batch_size to support multi-round scenarios
-        # Get the experiences of one explore step
-        # self.data.train_batch_size = config.buffer.batch_size
-        logger.warning("Warning! Set `train_batch_size` *= `30`")
-        self.data.train_batch_size = config.buffer.batch_size * 30
 
         self.synchronizer = config.synchronizer
         self.actor_rollout_ref.synchronizer = config.synchronizer
@@ -332,20 +325,13 @@ class veRLConfig:
         self.actor_rollout_ref.model.custom_chat_template = config.model.custom_chat_template
         self.critic.model.path = config.model.critic_model_path
         self.critic.model.tokenizer_path = config.model.critic_model_path
-        # self.actor_rollout_ref.actor.ppo_mini_batch_size = (
-        #     config.buffer.batch_size
-        # )  # TODO: may allow user to change
-        logger.warning("Warning! Set `actor.ppo_mini_batch_size` *= `30`")
-        self.actor_rollout_ref.actor.ppo_mini_batch_size = config.buffer.batch_size * 30
+        self.actor_rollout_ref.actor.ppo_mini_batch_size = config.buffer.train_batch_size
         self.actor_rollout_ref.rollout.temperature = (
             config.buffer.explorer_input.taskset.rollout_args.temperature
         )
         self.actor_rollout_ref.rollout.n = config.algorithm.repeat_times
-        # self.critic.ppo_mini_batch_size = config.buffer.batch_size
-        logger.warning("Warning! Set `critic.ppo_mini_batch_size` *= `30`")
-        self.critic.ppo_mini_batch_size = config.buffer.batch_size * 30
+        self.critic.ppo_mini_batch_size = config.buffer.train_batch_size
         self.critic.rollout_n = self.actor_rollout_ref.rollout.n
-        self.critic.synchronizer = config.synchronizer
 
         if config.trainer.actor_grad_clip is not None:
             self.actor_rollout_ref.actor.grad_clip = config.trainer.actor_grad_clip

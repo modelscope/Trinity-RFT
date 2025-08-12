@@ -9,7 +9,6 @@ import traceback
 from collections import deque
 from typing import List, Optional
 
-import ray
 import torch
 
 from trinity.algorithm import ADD_STRATEGY
@@ -24,9 +23,9 @@ from trinity.common.constants import (
     SyncStyle,
 )
 from trinity.common.models import create_inference_models
-from trinity.common.synchronizer import Synchronizer
 from trinity.explorer.scheduler import Scheduler
 from trinity.manager.manager import CacheManager
+from trinity.manager.synchronizer import Synchronizer
 from trinity.utils.log import get_logger
 from trinity.utils.monitor import MONITOR, gather_metrics
 
@@ -166,10 +165,9 @@ class Explorer:
         """Preparation before running."""
         futures = [
             asyncio.create_task(self.scheduler.start()),
-            self.synchronizer.acquire.remote(),
         ]
         if self.experience_buffer:
-            futures.append(asyncio.create_task(self.experience_buffer.acquire()))
+            futures.append(asyncio.create_task(self.experience_buffer.acquire()))  # type: ignore
         if not self.use_nccl_sync:
             master_address, master_port = await self.models[0].get_available_address.remote()
             futures.append(
@@ -223,9 +221,7 @@ class Explorer:
             return True
         try:
             tasks = await self.taskset.read_async()
-        except (StopIteration, RuntimeError) as e:
-            if isinstance(e, RuntimeError) and "StopIteration" not in str(e):
-                raise
+        except StopAsyncIteration:
             self.logger.warning("No more tasks to explore. Stop exploring.")
             await self.save_checkpoint(sync_weight=False)
             await self.synchronizer.set_explorer_status.remote(
@@ -289,9 +285,7 @@ class Explorer:
                 try:
                     data = await eval_taskset.read_async()
                     self.scheduler.schedule(data, batch_id=eval_batch_id)
-                except (StopIteration, RuntimeError) as e:
-                    if isinstance(e, RuntimeError) and "StopIteration" not in str(e):
-                        raise
+                except StopAsyncIteration:
                     break
 
     async def benchmark(self) -> bool:
@@ -398,6 +392,7 @@ class Explorer:
     async def shutdown(self) -> None:
         await self.scheduler.stop()
         self.monitor.close()
-        if await self.synchronizer.release.remote() == 0:
-            ray.kill(self.synchronizer)
-            self.logger.info("Synchronizer stopped.")
+
+    def is_alive(self) -> bool:
+        """Check if the explorer is alive."""
+        return True

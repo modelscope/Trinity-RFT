@@ -61,7 +61,7 @@ cluster:
   gpu_per_node: 8
 buffer:
   total_epochs: 2
-  batch_size: 64
+  train_batch_size: 64
   trainer_input:
     experience_buffer:
       name: human_like_dpo
@@ -95,7 +95,7 @@ cluster:
   gpu_per_node: 2
 buffer:
   total_epochs: 5
-  batch_size: 64
+  train_batch_size: 64
   trainer_input:
     experience_buffer:
       name: <sft_dataset_name>
