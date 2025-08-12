@@ -331,7 +331,7 @@ class TestAPIServerToolCall(RayUnittestBase):
     def setUp(self):
         self.config = get_template_config()
         self.config.mode = "explore"
-        self.config.model.model_path = get_model_path()
+        self.config.model.model_path = get_api_model_path()
         self.config.explorer.rollout_model.engine_type = "vllm_async"
         self.config.explorer.rollout_model.engine_num = 1
         self.config.explorer.rollout_model.tensor_parallel_size = 1
@@ -354,11 +354,13 @@ class TestAPIServerToolCall(RayUnittestBase):
         )
 
     def test_api_tool_calls(self):
-        """Tests the full conversation flow of a tool call via the OpenAI API."""
+        """Tests the full conversation flow of a tool call via the OpenAI API.
+        Note: This test require a model that supports tool calls and thinking mode, e.g. Qwen3-1.7B.
+        """
         import json
         import time
 
-        tokenizer = AutoTokenizer.from_pretrained(get_model_path())
+        tokenizer = AutoTokenizer.from_pretrained(get_api_model_path())
         print_debug("\n\n" + "=" * 30 + " Running test_api_tool_calls " + "=" * 30)
         start_time = time.time()
 

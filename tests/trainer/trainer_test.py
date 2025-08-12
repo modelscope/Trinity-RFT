@@ -301,7 +301,7 @@ class TestTrainerSFT(BaseTrainerCase):
         self.config.algorithm.kl_loss_fn = "none"
         self.config.algorithm.entropy_loss_fn = "none"
         self.config.synchronizer.sync_interval = 4
-        self.config.buffer.train_batch_size = 12
+        self.config.buffer.train_batch_size = 4
         self.config.buffer.total_epochs = 2
         self.config.buffer.trainer_input.experience_buffer = get_unittest_dataset_config(
             "sft_for_gsm8k"
