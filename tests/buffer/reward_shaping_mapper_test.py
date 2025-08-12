@@ -67,8 +67,8 @@ class TestRewardShapingMapper(unittest.TestCase):
 
         for prev_exp, res_exp in zip(experiences, res_exps):
             self.assertAlmostEqual(
-                (prev_exp.reward + prev_exp.info["quality_score"])
+                (prev_exp.reward + prev_exp.info["llm_quality_score"])
                 * 0.5
-                * prev_exp.info["difficulty_score"],
+                * prev_exp.info["llm_difficulty_score"],
                 res_exp.reward,
             )
