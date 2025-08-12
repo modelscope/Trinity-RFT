@@ -142,7 +142,7 @@ def main(args):
     ]
     if args.dlc:
         cmd_list.append("--dlc")
-    subprocess.run(cmd_list)
+    subprocess.run(cmd_list, check=True)
 
 
 if __name__ == "__main__":
