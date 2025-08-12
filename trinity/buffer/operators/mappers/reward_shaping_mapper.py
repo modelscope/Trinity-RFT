@@ -7,31 +7,33 @@ from trinity.common.experience import Experience
 
 @EXPERIENCE_OPERATORS.register_module("reward_shaping_mapper")
 class RewardShapingMapper(ExperienceOperator):
-    """
-    Re-shaping the existing rewards of experiences based on rules or other advanced methods.
+    """Re-shaping the existing rewards of experiences based on rules or other advanced methods.
 
-    Note: This mapper assumes that the reward is already calculated and stored in the Experience object,
+    Note:
+        This mapper assumes that the reward is already calculated and stored in the Experience object,
         and the necessary stats are already calculated and stored in the Experience info field.
     """
 
     def __init__(self, reward_shaping_configs: Optional[List[Dict]] = None):
-        """
-        Initialization method.
+        """Initializes the RewardShapingMapper.
 
-        :param reward_shaping_configs: the configs for reward shaping. Must be a list of dict, where the dict should
-            include 3 fields:
-                - stats_key: the field key name of target stats used to shape the reward.
-                - op_type: the type of operator to applied between the reward and the target stats. Should be one of
-                    {"ADD", "SUB", "MUL", "DIV"}
-                - weight: the weight for the target stats.
-            For example:
-            [
-                {
-                    "stats_key": "quality_score",
-                    "op_type": "ADD",
-                    "weight": 1.0,
-                }
-            ]
+        Args:
+            reward_shaping_configs (list[dict], optional): A list of dictionaries containing reward shaping
+                configurations. Each dictionary should include the following keys:
+
+                - stats_key (str): The field key name of target stats used to shape the reward.
+                - op_type (str): The type of operator to apply between the reward and the target stats.
+                  Should be one of {"ADD", "SUB", "MUL", "DIV"}.
+                - weight (float): The weight for the target stats.
+
+                Example:
+                    [
+                        {
+                            "stats_key": "llm_quality_score",
+                            "op_type": "ADD",
+                            "weight": 1.0,
+                        }
+                    ]
         """
         if reward_shaping_configs is None:
             reward_shaping_configs = []
@@ -50,8 +52,19 @@ class RewardShapingMapper(ExperienceOperator):
         return res_exps, {}
 
     def _reward_shaping_single(self, exp: Experience, reward_shaping_config: Dict):
-        """
-        Re-shaping the existing reward of one experience based on the given reward_shaping_config.
+        """Re-shapes the existing reward of one experience based on the given reward_shaping_config.
+
+        Args:
+            exp (Experience): The experience object whose reward is to be reshaped.
+            reward_shaping_config (dict): A dictionary containing the reward shaping configuration.
+                It should include the following keys:
+                - stats_key (str): The field key name of target stats used to shape the reward.
+                - op_type (str): The type of operator to apply between the reward and the target stats.
+                  Should be one of {"ADD", "SUB", "MUL", "DIV"}.
+                - weight (float): The weight for the target stats.
+
+        Returns:
+            Experience: The experience object with the reshaped reward.
         """
         tgt_stats = reward_shaping_config.get("stats_key", None)
         op_type = OpType[reward_shaping_config.get("op_type", "ADD")]

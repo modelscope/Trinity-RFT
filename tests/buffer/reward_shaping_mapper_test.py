@@ -19,8 +19,8 @@ def get_experiences(task_num: int, repeat_times: int = 1, step_num: int = 1) -> 
             reward=j,
             logprobs=torch.tensor([0.1]),
             info={
-                "quality_score": i,
-                "difficulty_score": k,
+                "llm_quality_score": i,
+                "llm_difficulty_score": k,
             },
         )
         for i in range(task_num)
@@ -38,12 +38,12 @@ class TestRewardShapingMapper(unittest.TestCase):
                 args={
                     "reward_shaping_configs": [
                         {
-                            "stats_key": "quality_score",
+                            "stats_key": "llm_quality_score",
                             "op_type": "ADD",
                             "weight": 1.0,
                         },
                         {
-                            "stats_key": "difficulty_score",
+                            "stats_key": "llm_difficulty_score",
                             "op_type": "MUL",
                             "weight": 0.5,
                         },
