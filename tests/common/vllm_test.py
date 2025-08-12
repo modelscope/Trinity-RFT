@@ -23,6 +23,15 @@ def get_model_path() -> str:
     return path
 
 
+def get_api_model_path() -> str:
+    path = os.environ.get("API_MODEL_PATH")
+    if not path:
+        raise EnvironmentError(
+            "Please set `export API_MODEL_PATH=<your_api_model_checkpoint_dir>` before running this test."
+        )
+    return path
+
+
 DEBUG = False
 
 

@@ -651,7 +651,7 @@ class Config:
                 ]
 
         # check train_batch_size
-        if self.buffer.train_batch_size:
+        if not self.buffer.train_batch_size:
             if self.mode == "train" or self.algorithm.algorithm_type in ["sft", "dpo"]:
                 raise ValueError(
                     "`buffer.train_batch_size` is required when `mode` is 'train' or `algorithm.algorithm_type` is "

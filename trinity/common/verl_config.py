@@ -12,6 +12,11 @@ logger = get_logger(__name__)
 
 
 @dataclass
+class Data:
+    train_batch_size: int = 1024  # kept for RayPPOTrainer._validate_config
+
+
+@dataclass
 class FusedKernelOptions:
     impl_backend: Optional[str] = None
 
@@ -249,6 +254,7 @@ class Trainer:
 
 @dataclass
 class veRLConfig:
+    data: Data = field(default_factory=Data)
     actor_rollout_ref: ActorRolloutRef = field(default_factory=ActorRolloutRef)
     critic: Critic = field(default_factory=Critic)
     reward_model: RewardModel = field(default_factory=RewardModel)
