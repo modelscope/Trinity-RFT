@@ -194,8 +194,14 @@ class StepWiseAlfworldWorkflow(RewardPropagationWorkflow):
         model: ModelWrapper,
         task: Task,
         auxiliary_models: Optional[List] = None,
+        use_openai_client: bool = False,
     ):
-        super().__init__(model=model, task=task, auxiliary_models=auxiliary_models)
+        super().__init__(
+            model=model,
+            task=task,
+            auxiliary_models=auxiliary_models,
+            use_openai_client=use_openai_client,
+        )
         self.game_file_path = task.task_desc or "0"
         self.max_env_steps = task.workflow_args.get("max_env_steps", 30)
 
