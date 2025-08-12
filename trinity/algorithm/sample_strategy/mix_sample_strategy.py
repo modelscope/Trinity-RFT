@@ -22,12 +22,12 @@ class MixSampleStrategy(SampleStrategy):
     def __init__(self, buffer_config: BufferConfig, **kwargs):
         super().__init__(buffer_config)
         self.expert_data_ratio = kwargs.get("expert_data_ratio", 0.5)
-        tot_batch_size = buffer_config.read_batch_size
+        tot_batch_size = buffer_config.train_batch_size
         expert_batch_size = ceil(self.expert_data_ratio * tot_batch_size)
 
         # experience buffer
         usual_buffer_config = copy.deepcopy(buffer_config)
-        usual_buffer_config.read_batch_size = tot_batch_size - expert_batch_size
+        usual_buffer_config.train_batch_size = tot_batch_size - expert_batch_size
         self.usual_exp_buffer = get_buffer_reader(
             buffer_config.trainer_input.experience_buffer, usual_buffer_config  # type: ignore
         )
@@ -39,7 +39,7 @@ class MixSampleStrategy(SampleStrategy):
 
         # expert experience buffer
         expert_buffer_config = copy.deepcopy(buffer_config)
-        expert_buffer_config.read_batch_size = expert_batch_size
+        expert_buffer_config.train_batch_size = expert_batch_size
         self.expert_exp_buffer = get_buffer_reader(
             buffer_config.trainer_input.sft_warmup_dataset, expert_buffer_config
         )

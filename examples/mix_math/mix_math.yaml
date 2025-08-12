@@ -12,11 +12,11 @@ algorithm:
     use_token_level_loss_in_sft: False
     use_dynamic_bsz: False
     repeat_times: 8
-    ppo_mini_batch_size: 32
+    ppo_mini_batch_size: 256
     ppo_micro_batch_size_per_gpu: 4
     ngpus_trainer: 4
-    read_batch_size_expert: 64
-    read_batch_size_usual: 192
+    train_batch_size_expert: 64
+    train_batch_size_usual: 192
 model:
   model_path: /PATH/TO/MODEL/
   max_response_tokens: 10240

@@ -19,7 +19,7 @@ class QueueReader(BufferReader):
     def __init__(self, storage_config: StorageConfig, config: BufferConfig):
         assert storage_config.storage_type == StorageType.QUEUE
         self.timeout = storage_config.max_read_timeout
-        self.read_batch_size = config.read_batch_size
+        self.read_batch_size = config.train_batch_size
         self.queue = QueueWrapper.get_wrapper(storage_config, config)
 
     def read(

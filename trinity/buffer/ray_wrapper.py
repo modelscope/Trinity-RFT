@@ -49,7 +49,7 @@ class DBWrapper:
             self.logger.warning("Failed to create database, assuming it already exists.")
 
         self.session = sessionmaker(bind=self.engine)
-        self.batch_size = config.read_batch_size
+        self.batch_size = config.train_batch_size
         self.max_retry_times = config.max_retry_times
         self.max_retry_interval = config.max_retry_interval
         self.ref_count = 0
@@ -97,7 +97,7 @@ class DBWrapper:
             raise NotImplementedError(f"Unsupported strategy {strategy} by SQLStorage")
 
         exp_list = []
-        batch_size = batch_size or self.batch_size
+        batch_size = batch_size or self.batch_size  # type: ignore
         while len(exp_list) < batch_size:
             if len(exp_list):
                 self.logger.info("waiting for experiences...")

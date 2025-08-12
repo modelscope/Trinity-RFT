@@ -129,6 +129,7 @@ class TestSynchronizerExit(BaseTestSynchronizer):
         config.monitor.monitor_type = "tensorboard"
         trainer_config = deepcopy(config)
         trainer_config.mode = "train"
+        trainer_config.buffer.train_batch_size = 4
         trainer_config.check_and_update()
 
         explorer1_config = deepcopy(config)
@@ -253,6 +254,7 @@ class TestStateDictBasedSynchronizer(BaseTestSynchronizer):
         config.monitor.monitor_type = "tensorboard"
         trainer_config = deepcopy(config)
         trainer_config.mode = "train"
+        trainer_config.buffer.train_batch_size = 4
         trainer_config.check_and_update()
 
         explorer1_config = deepcopy(config)

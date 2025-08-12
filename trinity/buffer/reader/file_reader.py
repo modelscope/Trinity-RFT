@@ -120,7 +120,7 @@ class SFTDataReader(BaseFileReader):
         self.messages_key = meta.format.messages_key
         self.prompt_key = meta.format.prompt_key
         self.response_key = meta.format.response_key
-        self.read_batch_size = config.batch_size
+        self.read_batch_size = config.train_batch_size
         self.dataset = _HFBatchReader(
             load_dataset(meta.path, name=subset_name, split=self.split),
             name=meta.name,
@@ -202,7 +202,7 @@ class DPODataReader(BaseFileReader):
         self.prompt_key = meta.format.prompt_key
         self.chosen_key = meta.format.chosen_key
         self.rejected_key = meta.format.rejected_key
-        self.read_batch_size = config.batch_size
+        self.read_batch_size = config.train_batch_size
         self.dataset = _HFBatchReader(
             load_dataset(meta.path, name=subset_name, split=self.split),
             name=meta.name,
