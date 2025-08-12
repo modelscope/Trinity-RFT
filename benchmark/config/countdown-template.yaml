@@ -1,7 +1,7 @@
 mode: both
-project: Trinity-RFT-test
+project: Trinity-RFT
 group: countdown-bench
-name: qwen2.5-1.5B
+name: countdown-qwen2.5-1.5B
 checkpoint_root_dir: placeholder
 algorithm:
   algorithm_type: ppo
