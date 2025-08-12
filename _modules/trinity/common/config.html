@@ -93,6 +93,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">omegaconf</span><span class="w"> </span><span class="kn">import</span> <span class="n">OmegaConf</span>
@@ -523,7 +524,7 @@
     <span class="c1"># TODO: support multiple monitors (List[str])</span>
     <span class="n">monitor_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;tensorboard&quot;</span>
     <span class="c1"># the default args for monitor</span>
-    <span class="n">monitor_args</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">monitor_args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="c1"># whether to enable ray timeline profile</span>
     <span class="c1"># the output file will be saved to `cache_dir/timeline.json`</span>
     <span class="n">enable_ray_timeline</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
@@ -941,6 +942,14 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_interval</span><span class="p">()</span>
 
+        <span class="c1"># check monitor</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.monitor</span><span class="w"> </span><span class="kn">import</span> <span class="n">MONITOR</span>
+
+        <span class="n">monitor_cls</span> <span class="o">=</span> <span class="n">MONITOR</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">monitor_type</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">monitor_cls</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid monitor type: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">monitor_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">monitor_args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">monitor_args</span> <span class="o">=</span> <span class="n">monitor_cls</span><span class="o">.</span><span class="n">default_args</span><span class="p">()</span>
         <span class="c1"># create a job dir in &lt;checkpoint_root_dir&gt;/&lt;project&gt;/&lt;name&gt;/monitor</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">cache_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_job_dir</span><span class="p">,</span> <span class="s2">&quot;monitor&quot;</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
@@ -978,6 +987,32 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config</span><span class="o">.</span><span class="n">synchronize_config</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="Config.flatten">
+<a class="viewcode-back" href="../../../build_api/trinity.common.html#trinity.common.config.Config.flatten">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">flatten</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Flatten the config into a single-level dict with dot-separated keys for nested fields.&quot;&quot;&quot;</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">_flatten</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">parent_key</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">):</span>
+            <span class="n">items</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;__dataclass_fields__&quot;</span><span class="p">):</span>
+                <span class="n">obj</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">new_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">parent_key</span><span class="si">}{</span><span class="n">sep</span><span class="si">}{</span><span class="n">k</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">parent_key</span> <span class="k">else</span> <span class="n">k</span>
+                    <span class="n">items</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_flatten</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">new_key</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="n">sep</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+                    <span class="n">new_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">parent_key</span><span class="si">}{</span><span class="n">sep</span><span class="si">}{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">parent_key</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                    <span class="n">items</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_flatten</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">new_key</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="n">sep</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
+                <span class="n">items</span><span class="p">[</span><span class="n">parent_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">value</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">items</span><span class="p">[</span><span class="n">parent_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span>
+            <span class="k">return</span> <span class="n">items</span>
+
+        <span class="k">return</span> <span class="n">_flatten</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 </div>
 
 
