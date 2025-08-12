@@ -3,6 +3,7 @@
 import os
 from dataclasses import dataclass, field
 from datetime import datetime
+from enum import Enum
 from typing import Any, Dict, List, Optional
 
 from omegaconf import OmegaConf
@@ -386,7 +387,7 @@ class MonitorConfig:
     # TODO: support multiple monitors (List[str])
     monitor_type: str = "tensorboard"
     # the default args for monitor
-    monitor_args: Dict = field(default_factory=dict)
+    monitor_args: Optional[Dict] = None
     # whether to enable ray timeline profile
     # the output file will be saved to `cache_dir/timeline.json`
     enable_ray_timeline: bool = False
@@ -804,6 +805,14 @@ class Config:
 
         self._check_interval()
 
+        # check monitor
+        from trinity.utils.monitor import MONITOR
+
+        monitor_cls = MONITOR.get(self.monitor.monitor_type)
+        if monitor_cls is None:
+            raise ValueError(f"Invalid monitor type: {self.monitor.monitor_type}")
+        if self.monitor.monitor_args is None:
+            self.monitor.monitor_args = monitor_cls.default_args()
         # create a job dir in <checkpoint_root_dir>/<project>/<name>/monitor
         self.monitor.cache_dir = os.path.join(self.checkpoint_job_dir, "monitor")
         try:
@@ -841,6 +850,29 @@ class Config:
             self.trainer.trainer_config.synchronize_config(self)
         else:
             self.trainer.trainer_config = None
+
+    def flatten(self) -> Dict[str, Any]:
+        """Flatten the config into a single-level dict with dot-separated keys for nested fields."""
+
+        def _flatten(obj, parent_key="", sep="."):
+            items = {}
+            if hasattr(obj, "__dataclass_fields__"):
+                obj = vars(obj)
+            if isinstance(obj, dict):
+                for k, v in obj.items():
+                    new_key = f"{parent_key}{sep}{k}" if parent_key else k
+                    items.update(_flatten(v, new_key, sep=sep))
+            elif isinstance(obj, list):
+                for i, v in enumerate(obj):
+                    new_key = f"{parent_key}{sep}{i}" if parent_key else str(i)
+                    items.update(_flatten(v, new_key, sep=sep))
+            elif isinstance(obj, Enum):
+                items[parent_key] = obj.value
+            else:
+                items[parent_key] = obj
+            return items
+
+        return _flatten(self)
 
 
 def load_config(config_path: str) -> Config:

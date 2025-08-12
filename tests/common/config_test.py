@@ -74,6 +74,14 @@ class TestConfig(unittest.TestCase):
         timestamp = config.name.split("_")[-1]
         self.assertTrue(datetime.datetime.strptime(timestamp, "%Y%m%d%H%M%S"))
 
+    def test_config_flatten(self):
+        config = get_template_config()
+        flat_config = config.flatten()
+        self.assertIsInstance(flat_config, dict)
+        for key, value in flat_config.items():
+            self.assertIsInstance(key, str)
+            self.assertNotIsInstance(value, dict)
+
     def tearDown(self):
         if os.path.exists(CHECKPOINT_ROOT_DIR):
             shutil.rmtree(CHECKPOINT_ROOT_DIR)
