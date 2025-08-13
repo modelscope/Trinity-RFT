@@ -1,38 +1,35 @@
-# Trinity Benchmark Runner
+# Welcome to the Trinity Benchmark Runner 🌟
 
-This Python script is designed to simplify the process of reproducing benchmarks for the **Trinity** system. It provides a command-line interface (CLI) that allows users to easily configure and launch training or inference runs using different datasets, model paths, hardware setups, and algorithm parameters.
-
----
-
-## 🚀 Features
-
-- Supports both single-node and multi-node distributed training.
-- Automates configuration based on user input and cluster resources.
-- Works with different datasets (e.g., `gsm8k`, `countdown`).
-- Allows custom learning rates, sync intervals, and model configurations.
-- Designed to run both locally and in cloud environments like **Aliyun PAI DLC**.
+This tool makes it easy to run benchmarks for the **Trinity** system! Whether you're testing training performance or inference speed, this CLI lets you configure and launch experiments quickly—no complex setup required. Just pick your dataset, hardware, and model settings, and let the tool handle the rest.
 
 ---
 
-## 🛠️ Usage
+## 🚀 What You Can Do
 
-To run the benchmark, use the following command structure:
+- **Single or Multi-Machine Training**: Run experiments on one computer or scale across multiple nodes.
+- **Auto-Config**: The tool adjusts settings based on your cluster resources and inputs.
+- **Flexible Datasets**: Works with datasets like `gsm8k` and `countdown`.
+- **Custom Settings**: Tweak learning rates, sync intervals, and model configurations.
+- **Cloud Ready**: Supports local runs *and* cloud environments like **Aliyun PAI DLC**.
 
+---
+
+## 🛠️ How to Use It
+
+### 1. Basic Command Structure
 ```bash
 python bench.py <dataset> [options]
 ```
 
-### Example Command
-
+### 2. Example: Run a Benchmark
 ```bash
-python bench.py gsm8k --node_num 1 --gpu_per_node 8 --model_path /path/to/model
+python bench.py gsm8k --node_num 1 --gpu_per_node 8 --model_path /your/model/path
 ```
 
-### Available Arguments
-
-| Argument | Description |
-|----------|-------------|
-| `dataset` | Dataset name (`gsm8k`, `countdown`) |
+### 3. Key Options Explained
+| Option | What It Does |
+|--------|--------------|
+| `dataset` | Choose `gsm8k` or `countdown` |
 | `--dlc` | Use when running in Aliyun PAI DLC environment |
 | `--node_num` | Number of nodes in the cluster (default: 1) |
 | `--gpu_per_node` | Number of GPUs per node (default: 8) |
@@ -46,26 +43,45 @@ python bench.py gsm8k --node_num 1 --gpu_per_node 8 --model_path /path/to/model
 | `--critic_lr` | Learning rate for critic model |
 | `--sync_interval` | Synchronization interval between Trainer and Explorer |
 
----
-
-## 📂 Output Structure
-
-After running the script, the output will be saved in the `runs/<timestamp>/` directory. The folder contains:
-
-- `config.yaml`: Final configuration used for the run.
-- `checkpoints/`: Saved model checkpoints during training.
 
 ---
 
-## 📊 Benchmark Results
+## 📂 What Gets Saved
 
-[WORKING IN PROGRESS]
+After running a benchmark, results are stored in `runs/<timestamp>/`:
+- `config.yaml`: The exact settings used for your run.
+- `checkpoints/`: Model snapshots saved during training.
 
 ---
 
-## 🧪 Tips for Reproducing
+## 📊 Benchmark Examples
 
-- Ensure all required models and tasksets are pre-downloaded or accessible at specified paths.
-- For multi-node runs, set up proper network communication and shared storage.
-- When using vLLM, verify your installation supports it and adjust the tensor parallelism accordingly.
-- If using Aliyun PAI DLC, make sure to include the `--dlc` flag.
+### 1. GSM8K
+To reproduce this experiment:
+```bash
+python bench.py gsm8k --model_path /path/to/Qwen/Qwen2.5-1.5B-Instruct
+```
+#### GSM8K Results
+![View Results](../docs/sphinx_doc/assets/gsm8k-bench.png)
+
+### 2. Countdown
+First generate data, then run the benchmark:
+```bash
+# Step 1: Generate data
+python benchmark/scripts/gen-countdown-data.py --local_dir /your/data/path
+# Step 2: Run benchmark
+python bench.py countdown --model_path /path/to/Qwen/Qwen2.5-1.5B-Instruct --taskset_path /your/data/path
+```
+#### Countdown Results
+![View Results](../docs/sphinx_doc/assets/gsm8k-bench.png)
+
+*More benchmarks will be added soon!*
+
+---
+
+## ✅ Tips for Success
+
+1. **Pre-Download Models**: Make sure all models and tasksets are ready at the paths you specify.
+2. **Multi-Node Setup**: If using multiple nodes, ensure they can communicate and share storage.
+3. **vLLM Users**: Check your vLLM installation supports the features you need (like tensor parallelism).
+4. **Aliyun Users**: Don’t forget the `--dlc` flag when running in PAI DLC!
