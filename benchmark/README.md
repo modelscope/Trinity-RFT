@@ -62,6 +62,7 @@ To reproduce this experiment:
 python bench.py gsm8k --model_path /path/to/Qwen/Qwen2.5-1.5B-Instruct
 ```
 #### GSM8K Results
+The chart below shows performance based on this [commit](https://github.com/modelscope/Trinity-RFT/tree/068da409d215bb2450d93b6b7a56740d4751669d).
 ![View Results](../docs/sphinx_doc/assets/gsm8k-bench.png)
 
 ### 2. Countdown
@@ -73,6 +74,7 @@ python benchmark/scripts/gen-countdown-data.py --local_dir /your/data/path
 python bench.py countdown --model_path /path/to/Qwen/Qwen2.5-1.5B-Instruct --taskset_path /your/data/path
 ```
 #### Countdown Results
+The chart below shows performance based on this [commit](https://github.com/modelscope/Trinity-RFT/tree/068da409d215bb2450d93b6b7a56740d4751669d).
 ![View Results](../docs/sphinx_doc/assets/gsm8k-bench.png)
 
 *More benchmarks will be added soon!*
