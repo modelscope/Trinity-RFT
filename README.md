@@ -332,7 +332,7 @@ Tutorials for running different RFT modes:
 
 Tutorials for adapting Trinity-RFT to a new multi-turn agentic scenario:
 
-+ [Multi-turn tasks](./docs/sphinx_doc/source/tutorial/example_multi_turn.md)
++ [Concatenated Multi-turn tasks](./docs/sphinx_doc/source/tutorial/example_multi_turn.md)
 
 Tutorials for adapting Trinity-RFT to a general multi-step agentic scenario:
 

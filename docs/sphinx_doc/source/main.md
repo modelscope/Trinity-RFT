@@ -8,6 +8,7 @@
 
 ## 🚀 News
 
+* [2025-08] We now support training on general multi-step workflows! Please check out examples for [ALFWorld](./docs/sphinx_doc/source/tutorial/example_step_wise.md) and [ReAct](./docs/sphinx_doc/source/tutorial/example_react.md).
 * [2025-07] Trinity-RFT v0.2.0 is released.
 * [2025-07] We update the [technical report](https://arxiv.org/abs/2505.17826) (arXiv v2) with new features, examples, and experiments.
 * [2025-06] Trinity-RFT v0.1.1 is released.
@@ -309,7 +310,12 @@ Tutorials for running different RFT modes:
 
 Tutorials for adapting Trinity-RFT to a new multi-turn agentic scenario:
 
-+ [Multi-turn tasks](/tutorial/example_multi_turn.md)
++ [Concatenated Multi-turn tasks](./docs/sphinx_doc/source/tutorial/example_multi_turn.md)
+
+Tutorials for adapting Trinity-RFT to a general multi-step agentic scenario:
+
++ [General Multi-Step tasks](./docs/sphinx_doc/source/tutorial/example_step_wise.md)
++ [ReAct agent tasks](./docs/sphinx_doc/source/tutorial/example_react.md)
 
 
 Tutorials for data-related functionalities:

@@ -132,7 +132,7 @@ class Workflow(ABC):
 
 class MultiTurnWorkflow(Workflow):
     """
-    The base workflow class for multi-turn tasks.
+    The base workflow class for concatenated multi-turn tasks.
     """
 
     def __init__(
