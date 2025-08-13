@@ -175,6 +175,28 @@ class DPOAlgorithm(AlgorithmType):
             config.algorithm.kl_loss_fn = "k2"
             logger.warning("DPO must use KL loss. Set `algorithm.kl_loss_fn` to `k2`")
 
+@ALGORITHM_TYPE.register_module("asymre")
+class AsymREAlgorithm(AlgorithmType):
+    """AsymRE algorithm."""
+
+    use_critic: bool = False
+    use_reference: bool = False
+    use_advantage: bool = True
+    can_balance_batch: bool = True
+    schema: type = ExperienceModel
+
+    @classmethod
+    def default_config(cls) -> Dict:
+        return {
+            "repeat_times": 2,
+            "sample_strategy": "warmup",
+            "policy_loss_fn": "opmd",
+            "advantage_fn": "asymre",
+            "kl_penalty_fn": "none",
+            "kl_loss_fn": "none",
+            "entropy_loss_fn": "none",
+        }
+    
 
 @ALGORITHM_TYPE.register_module("mix")
 class MIXAlgorithm(AlgorithmType):
