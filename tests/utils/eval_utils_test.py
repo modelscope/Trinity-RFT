@@ -32,7 +32,7 @@ class TestMathEvalUtils(unittest.TestCase):
         ]
 
         for i, (input_str, expected_output, description) in enumerate(test_cases):
-            with self.subTest(f"Case {i+1}: {description}"):
+            with self.subTest(f"Case {i + 1}: {description}"):
                 actual_output = extract_answer(input_str)
                 self.assertEqual(
                     actual_output,
@@ -58,7 +58,7 @@ class TestMathEvalUtils(unittest.TestCase):
         ]
 
         for i, (response, ground_truth, expected_correct, description) in enumerate(test_cases):
-            with self.subTest(f"Case {i+1}: {description}"):
+            with self.subTest(f"Case {i + 1}: {description}"):
                 accuracy, details = verify_math_answer(response, ground_truth)
                 is_correct = accuracy == 1.0
                 self.assertEqual(
@@ -88,7 +88,7 @@ class TestEvalUtils(unittest.TestCase):
         ]
 
         for i, (str1, str2, expected_output, description) in enumerate(test_cases):
-            with self.subTest(f"Case {i+1}: {description}"):
+            with self.subTest(f"Case {i + 1}: {description}"):
                 actual_output = is_equiv(str1, str2)
                 self.assertEqual(
                     actual_output,

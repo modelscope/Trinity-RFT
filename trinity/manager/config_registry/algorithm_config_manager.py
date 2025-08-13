@@ -4,7 +4,6 @@ from trinity.algorithm.advantage_fn import (
     ADVANTAGE_FN,
     GRPOAdvantageFn,
     OPMDAdvantageFn,
-    ASYMREAdvantageFn,
     PPOAdvantageFn,
 )
 from trinity.algorithm.algorithm import ALGORITHM_TYPE, PPOAlgorithm
