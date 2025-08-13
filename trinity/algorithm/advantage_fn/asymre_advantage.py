@@ -38,7 +38,7 @@ class ASYMREAdvantageFn(AdvantageFn):
         """
         token_level_rewards = exps.batch["token_level_rewards"]
         eos_mask = exps.batch["response_mask"]
-        
+
         index = exps.non_tensor_batch["uid"]
         asymre_baseline_shift = self.asymre_baseline_shift
 
@@ -57,7 +57,9 @@ class ASYMREAdvantageFn(AdvantageFn):
                     id2baseline[idx] = torch.tensor(0.0)
                     # TODO: consider id2baseline[idx] = id2score[idx] (so that this sample won't take effect?)
                 elif len(id2score[idx]) > 1:
-                    id2baseline[idx] = torch.mean(torch.tensor(id2score[idx])) + asymre_baseline_shift
+                    id2baseline[idx] = (
+                        torch.mean(torch.tensor(id2score[idx])) + asymre_baseline_shift
+                    )
                 else:
                     raise ValueError(f"no score in prompt index: {idx}")
             for i in range(bsz):

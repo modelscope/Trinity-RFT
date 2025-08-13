@@ -108,10 +108,22 @@ def compute_score(solution_str, ground_truth) -> float:
     retval = 0.0
     try:
         string_in_last_boxed = last_boxed_only_string(solution_str)
+        original_ground_truth = ground_truth
+        boxed_ground_truth = last_boxed_only_string(ground_truth)
+        # Determine if ground_truth was raw (had boxed content) or already processed
+        ground_truth_was_raw = boxed_ground_truth is not None
         if string_in_last_boxed is not None:
             answer = remove_boxed(string_in_last_boxed)
+            if ground_truth_was_raw:
+                # Ground truth had boxed content - remove it
+                ground_truth = remove_boxed(boxed_ground_truth)
+            else:
+                # Ground truth had no boxed content - use as is
+                ground_truth = original_ground_truth
             if is_equiv(answer, ground_truth):
                 retval = 1.0
+        # logger.warning(answer, " ", ground_truth, " ", retval)
+
     except Exception as e:
         print(e)
 
