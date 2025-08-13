@@ -13,7 +13,7 @@ algorithm:
 cluster:
   node_num: 1
   gpu_per_node: 8
-  
+
 buffer:
   total_steps: 2000    # Exactly 2000 training steps as desired
   batch_size: 16       # 128 trajectories per gradient step, batch_size is the number of tasks per batch
@@ -54,10 +54,10 @@ explorer:
   runner_num: 32
   rollout_model:
     engine_type: vllm_async
-    engine_num: 4  
+    engine_num: 4
     tensor_parallel_size: 1  # Each engine uses 1 GPU
-    enable_prefix_caching: false  
-    enforce_eager: true  
+    enable_prefix_caching: false
+    enforce_eager: true
     dtype: bfloat16
     max_prompt_tokens: 1024
     max_response_tokens: 2048
