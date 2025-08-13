@@ -44,7 +44,9 @@
 <li class="toctree-l1"><a class="reference internal" href="tutorial/example_reasoning_basic.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial/example_reasoning_advanced.html">Off-Policy RFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial/example_async_mode.html">Asynchronous RFT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial/example_multi_turn.html">Multi-Turn RFT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/example_multi_turn.html">Concatenated Multi-Turn RFT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/example_step_wise.html">General Multi-Step RFT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/example_react.html">Multi-Step ReAct</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial/example_dpo.html">Offline DPO and SFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial/example_data_functionalities.html">Data Processing</a></li>
 </ul>
@@ -408,6 +410,8 @@
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.step_wise_workflow.RewardPropagationWorkflow.__init__">(trinity.common.workflows.step_wise_workflow.RewardPropagationWorkflow method)</a>
 </li>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.step_wise_workflow.StepWiseRewardWorkflow.__init__">(trinity.common.workflows.step_wise_workflow.StepWiseRewardWorkflow method)</a>
+</li>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.StepWiseAlfworldWorkflow.__init__">(trinity.common.workflows.StepWiseAlfworldWorkflow method)</a>
 </li>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.Task.__init__">(trinity.common.workflows.Task method)</a>
 </li>
@@ -2199,6 +2203,8 @@
       <ul>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.step_wise_workflow.StepWiseRewardWorkflow.max_step_num">(trinity.common.workflows.step_wise_workflow.StepWiseRewardWorkflow property)</a>
 </li>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.StepWiseAlfworldWorkflow.max_step_num">(trinity.common.workflows.StepWiseAlfworldWorkflow property)</a>
+</li>
       </ul></li>
       <li><a href="build_api/trinity.common.html#trinity.common.config.ExplorerConfig.max_timeout">max_timeout (trinity.common.config.ExplorerConfig attribute)</a>
 </li>
@@ -3086,6 +3092,8 @@
       <ul>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.step_wise_workflow.StepWiseRewardWorkflow.reward">(trinity.common.workflows.step_wise_workflow.StepWiseRewardWorkflow method)</a>
 </li>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.StepWiseAlfworldWorkflow.reward">(trinity.common.workflows.StepWiseAlfworldWorkflow method)</a>
+</li>
       </ul></li>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.Task.reward_fn">reward_fn (trinity.common.workflows.Task attribute)</a>
 
@@ -3197,6 +3205,8 @@
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.step_wise_workflow.RewardPropagationWorkflow.run">(trinity.common.workflows.step_wise_workflow.RewardPropagationWorkflow method)</a>
 </li>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.step_wise_workflow.StepWiseRewardWorkflow.run">(trinity.common.workflows.step_wise_workflow.StepWiseRewardWorkflow method)</a>
+</li>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.StepWiseAlfworldWorkflow.run">(trinity.common.workflows.StepWiseAlfworldWorkflow method)</a>
 </li>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.ToolCallWorkflow.run">(trinity.common.workflows.ToolCallWorkflow method)</a>
 </li>
@@ -3561,10 +3571,10 @@
         <li><a href="build_api/trinity.manager.html#trinity.manager.synchronizer.Synchronizer.set_model_state_dict_with_step_num">(trinity.manager.synchronizer.Synchronizer method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.set_monitor_type">set_monitor_type() (in module trinity.manager.config_registry.model_config_manager)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.algorithm_config_manager.set_mu_in_policy_loss_fn">set_mu_in_policy_loss_fn() (in module trinity.manager.config_registry.algorithm_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.html#trinity.manager.config_registry.model_config_manager.set_node_num">set_node_num() (in module trinity.manager.config_registry.model_config_manager)</a>
@@ -3782,7 +3792,11 @@
       <ul>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.step_wise_workflow.StepWiseRewardWorkflow.step">(trinity.common.workflows.step_wise_workflow.StepWiseRewardWorkflow method)</a>
 </li>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.StepWiseAlfworldWorkflow.step">(trinity.common.workflows.StepWiseAlfworldWorkflow method)</a>
+</li>
       </ul></li>
+      <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.StepWiseAlfworldWorkflow">StepWiseAlfworldWorkflow (class in trinity.common.workflows)</a>
+</li>
       <li><a href="build_api/trinity.algorithm.add_strategy.html#trinity.algorithm.add_strategy.StepWiseGRPOStrategy">StepWiseGRPOStrategy (class in trinity.algorithm.add_strategy)</a>
 
       <ul>

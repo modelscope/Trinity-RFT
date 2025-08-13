@@ -48,7 +48,9 @@
 <li class="toctree-l1"><a class="reference internal" href="tutorial/example_reasoning_basic.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial/example_reasoning_advanced.html">Off-Policy RFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial/example_async_mode.html">Asynchronous RFT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial/example_multi_turn.html">Multi-Turn RFT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/example_multi_turn.html">Concatenated Multi-Turn RFT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/example_step_wise.html">General Multi-Step RFT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/example_react.html">Multi-Step ReAct</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial/example_dpo.html">Offline DPO and SFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial/example_data_functionalities.html">Data Processing</a></li>
 </ul>
@@ -99,6 +101,7 @@
 <section id="news">
 <h3>🚀 News<a class="headerlink" href="#news" title="Link to this heading"></a></h3>
 <ul class="simple">
+<li><p>[2025-08] We now support training on general multi-step workflows! Please check out examples for <a class="reference internal" href="#./docs/sphinx_doc/source/tutorial/example_step_wise.md"><span class="xref myst">ALFWorld</span></a> and <a class="reference internal" href="#./docs/sphinx_doc/source/tutorial/example_react.md"><span class="xref myst">ReAct</span></a>.</p></li>
 <li><p>[2025-07] Trinity-RFT v0.2.0 is released.</p></li>
 <li><p>[2025-07] We update the <a class="reference external" href="https://arxiv.org/abs/2505.17826">technical report</a> (arXiv v2) with new features, examples, and experiments.</p></li>
 <li><p>[2025-06] Trinity-RFT v0.1.1 is released.</p></li>
@@ -322,7 +325,12 @@ wandb<span class="w"> </span>login
 </ul>
 <p>Tutorials for adapting Trinity-RFT to a new multi-turn agentic scenario:</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="tutorial/example_multi_turn.html"><span class="std std-doc">Multi-turn tasks</span></a></p></li>
+<li><p><a class="reference internal" href="#./docs/sphinx_doc/source/tutorial/example_multi_turn.md"><span class="xref myst">Concatenated Multi-turn tasks</span></a></p></li>
+</ul>
+<p>Tutorials for adapting Trinity-RFT to a general multi-step agentic scenario:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#./docs/sphinx_doc/source/tutorial/example_step_wise.md"><span class="xref myst">General Multi-Step tasks</span></a></p></li>
+<li><p><a class="reference internal" href="#./docs/sphinx_doc/source/tutorial/example_react.md"><span class="xref myst">ReAct agent tasks</span></a></p></li>
 </ul>
 <p>Tutorials for data-related functionalities:</p>
 <ul class="simple">

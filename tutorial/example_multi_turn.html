@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Multi-Turn RFT &mdash; Trinity-RFT 0.2.1.dev0 documentation</title>
+  <title>Concatenated Multi-Turn RFT &mdash; Trinity-RFT 0.2.1.dev0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
@@ -19,7 +19,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Offline DPO and SFT" href="example_dpo.html" />
+    <link rel="next" title="General Multi-Step RFT" href="example_step_wise.html" />
     <link rel="prev" title="Asynchronous RFT" href="example_async_mode.html" /> 
 </head>
 
@@ -47,7 +47,7 @@
 <li class="toctree-l1"><a class="reference internal" href="example_reasoning_basic.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_reasoning_advanced.html">Off-Policy RFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_async_mode.html">Asynchronous RFT</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Multi-Turn RFT</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Concatenated Multi-Turn RFT</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#step-1-environments-data-preparation">Step 1: Environments &amp; Data preparation</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#environment-preparation">Environment Preparation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#data-preparation">Data Preparation</a></li>
@@ -57,6 +57,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#advance-how-to-build-your-own-environment">Advance: How to build your own environment</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="example_step_wise.html">General Multi-Step RFT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_react.html">Multi-Step ReAct</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_dpo.html">Offline DPO and SFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_data_functionalities.html">Data Processing</a></li>
 </ul>
@@ -89,7 +91,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Multi-Turn RFT</li>
+      <li class="breadcrumb-item active">Concatenated Multi-Turn RFT</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/modelscope/Trinity-RFT/blob/main/docs/sphinx_doc/source/tutorial/example_multi_turn.md" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -99,8 +101,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section class="tex2jax_ignore mathjax_ignore" id="multi-turn-rft">
-<h1>Multi-Turn RFT<a class="headerlink" href="#multi-turn-rft" title="Link to this heading"></a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="concatenated-multi-turn-rft">
+<h1>Concatenated Multi-Turn RFT<a class="headerlink" href="#concatenated-multi-turn-rft" title="Link to this heading"></a></h1>
 <p>In Trinity-RFT, we support Agentic RL with multiple rounds of interaction with environments.</p>
 <p>Trinity’s decoupled design allows you to easily define custom interaction methods between environments and agents through Workflow configuration, to collect corresponding <code class="docutils literal notranslate"><span class="pre">experiences</span></code> for RL training.</p>
 <p>Below, we will first provide two multi-round environment Workflows - ALFworld and WebShop - as examples of multi-round interaction.</p>
@@ -249,7 +251,7 @@ trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="example_async_mode.html" class="btn btn-neutral float-left" title="Asynchronous RFT" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="example_dpo.html" class="btn btn-neutral float-right" title="Offline DPO and SFT" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="example_step_wise.html" class="btn btn-neutral float-right" title="General Multi-Step RFT" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
