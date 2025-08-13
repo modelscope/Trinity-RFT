@@ -6,7 +6,16 @@ from typing import Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
-import wandb
+
+try:
+    import wandb
+except ImportError:
+    wandb = None
+
+try:
+    import mlflow
+except ImportError:
+    mlflow = None
 from torch.utils.tensorboard import SummaryWriter
 
 from trinity.common.config import Config
@@ -77,6 +86,11 @@ class Monitor(ABC):
                 metrics[key] = val
         return metrics
 
+    @classmethod
+    def default_args(cls) -> Dict:
+        """Return default arguments for the monitor."""
+        return {}
+
 
 @MONITOR.register_module("tensorboard")
 class TensorboardMonitor(Monitor):
@@ -103,11 +117,24 @@ class TensorboardMonitor(Monitor):
 
 @MONITOR.register_module("wandb")
 class WandbMonitor(Monitor):
+    """Monitor with Weights & Biases.
+
+    Args:
+        base_url (`Optional[str]`): The base URL of the W&B server. If not provided, use the environment variable `WANDB_BASE_URL`.
+        api_key (`Optional[str]`): The API key for W&B. If not provided, use the environment variable `WANDB_API_KEY`.
+    """
+
     def __init__(
         self, project: str, group: str, name: str, role: str, config: Config = None
     ) -> None:
+        assert wandb is not None, "wandb is not installed. Please install it to use WandbMonitor."
         if not group:
             group = name
+        monitor_args = config.monitor.monitor_args or {}
+        if base_url := monitor_args.get("base_url"):
+            os.environ["WANDB_BASE_URL"] = base_url
+        if api_key := monitor_args.get("api_key"):
+            os.environ["WANDB_API_KEY"] = api_key
         self.logger = wandb.init(
             project=project,
             group=group,
@@ -129,3 +156,65 @@ class WandbMonitor(Monitor):
 
     def close(self) -> None:
         self.logger.finish()
+
+    @classmethod
+    def default_args(cls) -> Dict:
+        """Return default arguments for the monitor."""
+        return {
+            "base_url": None,
+            "api_key": None,
+        }
+
+
+@MONITOR.register_module("mlflow")
+class MlflowMonitor(Monitor):
+    """Monitor with MLflow.
+
+    Args:
+        uri (`Optional[str]`): The tracking server URI. If not provided, the default is `http://localhost:5000`.
+        username (`Optional[str]`): The username to login. If not provided, the default is `None`.
+        password (`Optional[str]`): The password to login. If not provided, the default is `None`.
+    """
+
+    def __init__(
+        self, project: str, group: str, name: str, role: str, config: Config = None
+    ) -> None:
+        assert (
+            mlflow is not None
+        ), "mlflow is not installed. Please install it to use MlflowMonitor."
+        monitor_args = config.monitor.monitor_args or {}
+        if username := monitor_args.get("username"):
+            os.environ["MLFLOW_TRACKING_USERNAME"] = username
+        if password := monitor_args.get("password"):
+            os.environ["MLFLOW_TRACKING_PASSWORD"] = password
+        mlflow.set_tracking_uri(config.monitor.monitor_args.get("uri", "http://localhost:5000"))
+        mlflow.set_experiment(project)
+        mlflow.start_run(
+            run_name=f"{name}_{role}",
+            tags={
+                "group": group,
+                "role": role,
+            },
+        )
+        mlflow.log_params(config.flatten())
+        self.console_logger = get_logger(__name__)
+
+    def log_table(self, table_name: str, experiences_table: pd.DataFrame, step: int):
+        pass
+
+    def log(self, data: dict, step: int, commit: bool = False) -> None:
+        """Log metrics."""
+        mlflow.log_metrics(metrics=data, step=step)
+        self.console_logger.info(f"Step {step}: {data}")
+
+    def close(self) -> None:
+        mlflow.end_run()
+
+    @classmethod
+    def default_args(cls) -> Dict:
+        """Return default arguments for the monitor."""
+        return {
+            "uri": "http://localhost:5000",
+            "username": None,
+            "password": None,
+        }

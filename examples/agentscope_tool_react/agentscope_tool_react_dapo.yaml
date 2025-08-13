@@ -5,7 +5,6 @@ algorithm:
   algorithm_type: grpo
   repeat_times: 8
   add_strategy: step_wise_grpo
-
 model:
   model_path: /PATH/TO/MODEL/Qwen3-8B
   max_response_tokens: 16384
@@ -16,6 +15,7 @@ cluster:
 buffer:
   total_epochs: 1
   batch_size: 32
+  train_batch_size: 512
   max_retry_times: 3
   max_retry_interval: 1
   explorer_input:
@@ -42,7 +42,6 @@ explorer:
   runner_num: 4
   max_timeout: 360
   rollout_model:
-    engine_type: vllm_async
     engine_num: 4
     tensor_parallel_size: 1
     enable_prefix_caching: false

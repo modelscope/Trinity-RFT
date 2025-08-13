@@ -10,14 +10,19 @@ from trinity.common.workflows.workflow import Task, Workflow
 class StepWiseRewardWorkflow(Workflow):
     """A workflow that implements step-wise rewards for tasks."""
 
-    def __init__(self, *, task: Task, model: ModelWrapper, auxiliary_models=None):
+    def __init__(
+        self, *, task: Task, model: ModelWrapper, auxiliary_models=None, use_openai_client=True
+    ):
         super().__init__(task=task, model=model, auxiliary_models=auxiliary_models)
         assert model.enable_history, (
             "Rollout Model must have history enabled for step-wise rewards, please "
             "set `explorer.rollout_model.enable_history` to `True` in your config."
         )
         # use the rollout model's OpenAI client to write your agent application
-        self.client: openai.OpenAI = model.get_openai_client()
+        if use_openai_client:
+            self.client: openai.OpenAI = model.get_openai_client()
+        else:
+            self.client = None
 
     def run(self) -> list[Experience]:
         """Run the workflow and return a list of experiences with step-wise rewards."""
@@ -74,14 +79,19 @@ class StepWiseRewardWorkflow(Workflow):
 class RewardPropagationWorkflow(Workflow):
     """A workflow that propagates rewards across multiple turns."""
 
-    def __init__(self, *, task: Task, model: ModelWrapper, auxiliary_models=None):
+    def __init__(
+        self, *, task: Task, model: ModelWrapper, auxiliary_models=None, use_openai_client=True
+    ):
         super().__init__(task=task, model=model, auxiliary_models=auxiliary_models)
         assert model.enable_history, (
             "Rollout Model must have history enabled for step-wise rewards, please "
             "set `explorer.rollout_model.enable_history` to `True` in your config."
         )
         # use the rollout model's OpenAI client to write your agent application
-        self.client: openai.OpenAI = model.get_openai_client()
+        if use_openai_client:
+            self.client: openai.OpenAI = model.get_openai_client()
+        else:
+            self.client = None
 
     def run(self) -> list[Experience]:
         """Run the workflow and return a list of experiences with step-wise rewards."""
@@ -101,6 +111,9 @@ class RewardPropagationWorkflow(Workflow):
         reward = self.reward(experiences)
         for exp in experiences:
             exp.reward = reward
+            if exp.metrics is None:
+                exp.metrics = {}
+            exp.metrics["actual_env_steps"] = step + 1  # +1 because step starts from 0
         return experiences
 
     @abstractmethod

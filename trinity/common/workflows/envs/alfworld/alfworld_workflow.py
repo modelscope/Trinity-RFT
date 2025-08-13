@@ -3,6 +3,7 @@ from typing import List, Optional
 
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
+from trinity.common.workflows.step_wise_workflow import RewardPropagationWorkflow
 from trinity.common.workflows.workflow import WORKFLOWS, MultiTurnWorkflow, Task
 
 EXAMPLE_PROMPT = """
@@ -108,7 +109,7 @@ class AlfworldWorkflow(MultiTurnWorkflow):
         )
         self.task_desc = task.task_desc or "0"
         self.repeat_times = task.repeat_times
-        self.max_env_steps = 30
+        self.max_env_steps = task.workflow_args.get("max_env_steps", 30)
 
     def get_model_response(self, messages):
         responses = self.model.chat(messages, n=1)
@@ -177,3 +178,118 @@ class AlfworldWorkflow(MultiTurnWorkflow):
             raise ImportError(error_message)
         env = create_environment(game_file_path)
         return self.generate_env_inference_samples(env, rollout_n)
+
+
+@WORKFLOWS.register_module("step_wise_alfworld_workflow")
+class StepWiseAlfworldWorkflow(RewardPropagationWorkflow):
+    """
+    An Alfworld workflow refactored to use the RewardPropagationWorkflow base class.
+
+    This workflow manages an Alfworld environment, interacts with it step-by-step
+    using a model, and calculates a final reward based on the episode's outcome.
+    """
+
+    def __init__(
+        self,
+        model: ModelWrapper,
+        task: Task,
+        auxiliary_models: Optional[List] = None,
+        use_openai_client: bool = False,
+    ):
+        super().__init__(
+            model=model,
+            task=task,
+            auxiliary_models=auxiliary_models,
+            use_openai_client=use_openai_client,
+        )
+        self.game_file_path = task.task_desc or "0"
+        self.max_env_steps = task.workflow_args.get("max_env_steps", 30)
+
+        self._setup_environment()
+
+        self.observation: Optional[str] = None
+        self.done: bool = False
+        self.final_reward: float = 0.0
+        self.memory: List[dict] = []
+
+    def _setup_environment(self):
+        """Initializes the Alfworld text-based environment."""
+        try:
+            import textworld
+            import textworld.gym
+            from alfworld.agents.environment.alfred_tw_env import (
+                AlfredDemangler,
+                AlfredExpert,
+                AlfredExpertType,
+            )
+
+            def create_environment(game_file):
+                expert = AlfredExpert(expert_type=AlfredExpertType.HANDCODED)
+                request_infos = textworld.EnvInfos(
+                    description=True, inventory=True, admissible_commands=True
+                )
+                env_id = textworld.gym.register_game(
+                    game_file, request_infos, wrappers=[AlfredDemangler(), expert]
+                )
+                env = textworld.gym.make(env_id)
+                return env
+
+            self.env = create_environment(self.game_file_path)
+
+        except ImportError as e:
+            error_message = (
+                f"Error importing Alfworld dependencies: {e}. Please ensure "
+                "Alfworld is installed correctly by following the instructions at "
+                "https://github.com/alfworld/alfworld"
+            )
+            raise ImportError(error_message)
+
+    def run(self) -> List[Experience]:
+        # Reset environment and state for a new episode
+        self.observation, info = self.env.reset()
+        self.done = False
+        self.final_reward = -0.1
+
+        self.memory.clear()
+        self.memory.append({"role": "system", "content": AlfWORLD_SYSTEM_PROMPT})
+
+        return super().run()
+
+    def step(self, step_num: int) -> bool:
+        if self.done:
+            return False
+
+        # Format observation for the model
+        format_obs = format_observation(self.observation)  # type: ignore
+        self.memory.append({"role": "user", "content": format_obs})
+
+        # Get action from the model
+        responses = self.model.chat(self.memory)
+        response_text = responses[0].response_text
+        self.memory.append({"role": "assistant", "content": response_text})
+        action = parse_action(response_text)
+
+        # Execute action in the environment
+        observation, reward, done, info = self.env.step(action)
+
+        # Update internal state
+        self.observation = observation
+        self.done = done
+        if self.done:
+            self.final_reward = reward
+
+        # Return False to stop the run if the episode is done
+        return not self.done
+
+    def reward(self, exps: list[Experience]) -> float:
+        return self.final_reward
+
+    @property
+    def max_step_num(self) -> int:
+        """Return the maximum number of steps allowed in an episode."""
+        return self.max_env_steps
+
+    def __del__(self):
+        """Ensures the environment is closed when the workflow object is destroyed."""
+        if hasattr(self, "env"):
+            self.env.close()
