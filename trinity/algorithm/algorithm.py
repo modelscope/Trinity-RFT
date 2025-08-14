@@ -182,7 +182,7 @@ class AsymREAlgorithm(AlgorithmType):
 
     use_critic: bool = False
     use_reference: bool = False
-    use_advantage: bool = True
+    compute_advantage_in_trainer: bool = True
     can_balance_batch: bool = True
     schema: type = ExperienceModel
 
