@@ -176,6 +176,52 @@ class DPOAlgorithm(AlgorithmType):
             logger.warning("DPO must use KL loss. Set `algorithm.kl_loss_fn` to `k2`")
 
 
+@ALGORITHM_TYPE.register_module("topr")
+class TOPRAlgorithm(AlgorithmType):
+    """TOPR algorithm. See https://arxiv.org/pdf/2503.14286v1"""
+
+    use_critic: bool = False
+    use_reference: bool = True
+    compute_advantage_in_trainer: bool = False
+    can_balance_batch: bool = True
+    schema: type = ExperienceModel
+
+    @classmethod
+    def default_config(cls) -> Dict:
+        return {
+            "repeat_times": 2,
+            "add_strategy": "reinforce",  # or simply use grpo
+            "sample_strategy": "warmup",
+            "policy_loss_fn": "topr",
+            "kl_penalty_fn": "none",
+            "kl_loss_fn": "k2",
+            "entropy_loss_fn": "default",
+        }
+
+
+@ALGORITHM_TYPE.register_module("cispo")
+class CISPOAlgorithm(AlgorithmType):
+    """CISPO algorithm. See https://arxiv.org/abs/2506.13585"""
+
+    use_critic: bool = False
+    use_reference: bool = True
+    compute_advantage_in_trainer: bool = False
+    can_balance_batch: bool = True
+    schema: type = ExperienceModel
+
+    @classmethod
+    def default_config(cls) -> Dict:
+        return {
+            "repeat_times": 2,
+            "add_strategy": "grpo",
+            "sample_strategy": "warmup",
+            "policy_loss_fn": "cispo",
+            "kl_penalty_fn": "none",
+            "kl_loss_fn": "k2",
+            "entropy_loss_fn": "default",
+        }
+
+
 @ALGORITHM_TYPE.register_module("mix")
 class MIXAlgorithm(AlgorithmType):
     """MIX algorithm."""

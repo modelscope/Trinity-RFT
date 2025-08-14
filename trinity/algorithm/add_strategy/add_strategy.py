@@ -91,6 +91,38 @@ class GroupAdvantageStrategy(AddStrategy):
         return cnt, metrics
 
 
+@ADD_STRATEGY.register_module("reinforce")
+class REINFORCEAddStrategy(GroupAdvantageStrategy):
+    """An example AddStrategy that simply use rewards as advantages."""
+
+    def __init__(self, writer: BufferWriter, **kwargs) -> None:
+        super().__init__(writer)
+
+    def group_experiences(self, exps):
+        return group_by(exps, id_type="task")
+
+    def calculate_group_advantage(
+        self, group_id: str, exps: List[Experience]
+    ) -> Tuple[List[Experience], Dict]:
+        with torch.no_grad():
+            rewards = torch.tensor([exp.reward for exp in exps], dtype=torch.float32)
+            group_reward_mean = torch.mean(rewards)
+            for exp in exps:
+                score = torch.tensor(exp.reward, dtype=torch.float32)
+                exp.advantages = score * exp.action_mask
+                exp.returns = exp.advantages.clone()
+
+            metrics = {
+                "reward_mean": group_reward_mean.item(),
+            }
+
+        return exps, metrics
+
+    @classmethod
+    def default_args(cls) -> dict:
+        return {}
+
+
 @ADD_STRATEGY.register_module("grpo")
 class GRPOAddStrategy(GroupAdvantageStrategy):
     """An example AddStrategy that calculates GRPO advantages."""
