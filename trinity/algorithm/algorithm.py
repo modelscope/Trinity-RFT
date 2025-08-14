@@ -115,7 +115,7 @@ class OPMDAlgorithm(AlgorithmType):
 
     use_critic: bool = False
     use_reference: bool = True
-    compute_advantage_in_trainer: bool = False
+    compute_advantage_in_trainer: bool = True
     can_balance_batch: bool = True
     schema: type = ExperienceModel
 
