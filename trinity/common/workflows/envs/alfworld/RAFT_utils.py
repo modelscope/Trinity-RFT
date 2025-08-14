@@ -9,9 +9,6 @@ import torch
 from jinja2 import Environment, FileSystemLoader
 
 from trinity.common.experience import Experience
-from trinity.utils.log import get_logger
-
-logger = get_logger(__name__)
 
 
 # Setup Jinja2 environment for prompt templates
@@ -44,7 +41,7 @@ def parse_response(response):
         else:
             return {"experience": "", "think": "", "action": ""}
     except Exception as e:
-        logger.warning(f"Error parsing response: {e}")
+        print(f"Error parsing response: {e}")
         return {"experience": "", "think": "", "action": ""}
 
 
@@ -127,12 +124,24 @@ def process_messages_to_experience(model, messages, info=None) -> Experience:
 
         return converted_experience
     except Exception as e:
-        logger.warning(f"Failed to convert messages to experience: {e}")
+        print(f"Failed to convert messages to experience: {e}")
         return generate_default_empty_experience(
             f"Experience conversion failed: {str(e)}",
             info=info,
             metrics={k: float(v) for k, v in info.items() if isinstance(v, (float, int))},
         )
+
+
+def generate_reward_feedback(reward: float, steps: int, done: bool, max_env_steps: int) -> str:
+    """Generate natural language feedback about the attempt's performance"""
+    if done and reward >= 1:
+        return f"In your attempt, you successfully completed the task in {steps} steps with a reward of {reward:.3f}. Try to maintain this success while being more efficient."
+    elif done and reward < 1:
+        return f"In your attempt, you completed the task in {steps} steps but only achieved a reward of {reward:.3f}. You need to improve your performance to achieve full success."
+    elif not done and steps >= max_env_steps:
+        return f"In your attempt, you reached the maximum step limit of {max_env_steps} steps without completing the task (reward: {reward:.3f}). You need to be more efficient and focused to complete the task within the step limit."
+    else:
+        return f"In your attempt, you stopped after {steps} steps with a reward of {reward:.3f} without completing the task. You need to improve your strategy and persistence to achieve success."
 
 
 def save_task_data(
@@ -147,8 +156,6 @@ def save_task_data(
     second_steps: Optional[int],
     second_success: Optional[bool],
     kept_for_sft: bool,
-    is_eval: bool,
-    eval_dir: str,
     sft_dir: str,
     non_sft_dir: str,
     training_data: Optional[List[Dict[str, str]]] = None,
@@ -177,10 +184,8 @@ def save_task_data(
         "kept_for_sft": kept_for_sft,
     }
 
-    # Determine folder based on eval mode and SFT data status (following webshop pattern)
-    if is_eval:
-        target_dir = eval_dir
-    elif kept_for_sft:
+    # Determine folder based on SFT data status (following webshop pattern)
+    if kept_for_sft:
         target_dir = sft_dir
     else:
         target_dir = non_sft_dir

@@ -14,10 +14,6 @@ from trinity.common.workflows.envs.alfworld.RAFT_utils import (
     validate_trajectory_format,
 )
 from trinity.common.workflows.workflow import WORKFLOWS, Task, Workflow
-from trinity.utils.log import get_logger
-
-logger = get_logger(__name__)
-logger.setLevel("INFO")
 
 
 @WORKFLOWS.register_module("RAFT_alfworld_workflow")
@@ -138,13 +134,30 @@ class RAFTAlfworldWorkflow(Workflow):
         # If timeout, return the last reward from environment instead of fixed value
         return trajectory, last_reward, False, self.max_env_steps, parsed_steps
 
+    def _execute_first_attempt(self) -> tuple:
+        """Execute the first attempt and return results"""
+        env = self.create_environment(self.game_file_path)
+
+        try:
+            trajectory, reward, done, steps, parsed_steps = self.run_single_rollout(env)
+        except Exception as e:
+            print(f"Single rollout failed: {e}")
+            env.close()
+            raise e
+
+        env.close()
+        success = done and reward >= 1
+        traj_format_valid = validate_trajectory_format(parsed_steps)
+
+        return trajectory, reward, done, steps, parsed_steps, success, traj_format_valid
+
     def eval_alfworld(self) -> List[Experience]:
         """Evaluate a single alfworld trajectory"""
         env = self.create_environment(self.game_file_path)
         try:
             trajectory, reward, done, steps, parsed_steps = self.run_single_rollout(env)
         except Exception as e:
-            logger.warning(f"Single rollout failed during eval: {e}")
+            print(f"Single rollout failed during eval: {e}")
             env.close()
             return [generate_default_empty_experience(f"Eval rollout failed: {str(e)}")]
         env.close()
@@ -168,20 +181,19 @@ class RAFTAlfworldWorkflow(Workflow):
         if self.is_eval:
             return self.eval_alfworld()
 
-        env = self.create_environment(self.game_file_path)
-
-        # Single rollout execution with RAFT guidance
+        # Execute first attempt
         try:
-            trajectory, reward, done, steps, parsed_steps = self.run_single_rollout(env)
+            (
+                trajectory,
+                reward,
+                done,
+                steps,
+                parsed_steps,
+                success,
+                traj_format_valid,
+            ) = self._execute_first_attempt()
         except Exception as e:
-            logger.warning(f"Single rollout failed: {e}")
-            env.close()
             return [generate_default_empty_experience(f"Training rollout failed: {str(e)}")]
-        env.close()
-
-        # Determine success based on Alfworld's reward system
-        success = done and reward >= 1
-        traj_format_valid = validate_trajectory_format(parsed_steps)
 
         print(f"Task result: done={done}, reward={reward:.3f}, steps={steps}, success={success}")
 

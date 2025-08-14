@@ -5,25 +5,24 @@ from typing import Any, Dict, List, Optional
 
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
+from trinity.common.workflows.envs.alfworld.RAFT_alfworld_workflow import (
+    RAFTAlfworldWorkflow,
+)
 from trinity.common.workflows.envs.alfworld.RAFT_utils import (
     create_alfworld_environment,
     format_observation,
     generate_default_empty_experience,
-    get_jinja_env,
+    generate_reward_feedback,
     parse_response,
     process_messages_to_experience,
     save_task_data,
     validate_trajectory_format,
 )
-from trinity.common.workflows.workflow import WORKFLOWS, Task, Workflow
-from trinity.utils.log import get_logger
-
-logger = get_logger(__name__)
-logger.setLevel("INFO")
+from trinity.common.workflows.workflow import WORKFLOWS, Task
 
 
 @WORKFLOWS.register_module("RAFT_reflect_alfworld_workflow")
-class RAFTReflectAlfworldWorkflow(Workflow):
+class RAFTReflectAlfworldWorkflow(RAFTAlfworldWorkflow):
     """
     RAFT workflow for alfworld using trajectory context.
 
@@ -44,113 +43,21 @@ class RAFTReflectAlfworldWorkflow(Workflow):
             task=task,
             auxiliary_models=auxiliary_models,
         )
-        # Initialize workflow parameters
-        self.temperature = getattr(task.rollout_args, "temperature", 1.0)
-        self.top_k = getattr(task.rollout_args, "top_k", 20)
-        self.top_p = getattr(task.rollout_args, "top_p", 0.95)
-        self.max_env_steps = 50
-        self.max_tokens = 4096
-        self.task = task
-        self.is_eval = task.is_eval
 
-        # Create data directories
+        # Create data directories specific to reflect workflow
         self.data_dir = "RAFT_reflect_alfworld_data"
-        self.eval_dir = os.path.join(self.data_dir, "eval")
         self.sft_dir = os.path.join(self.data_dir, "sft_data")
         self.non_sft_dir = os.path.join(self.data_dir, "non_sft_data")
 
-        os.makedirs(self.eval_dir, exist_ok=True)
         os.makedirs(self.sft_dir, exist_ok=True)
         os.makedirs(self.non_sft_dir, exist_ok=True)
 
-        # Setup Jinja2 templates
-        self.jinja_env = get_jinja_env()
-        self.alfworld_system_template = self.jinja_env.get_template("alfworld_system.j2")
+        # Setup additional template for second attempt
         self.second_attempt_template = self.jinja_env.get_template("second_attempt_guidance.j2")
 
         print(
-            f"Initializing RAFTAlfworldWorkflow with RAFT learning, temperature={self.temperature}"
+            f"Initializing RAFTReflectAlfworldWorkflow with RAFT learning, temperature={self.temperature}"
         )
-        self.reset(task)
-
-    def reset(self, task: Task):
-        """Reset the workflow with a new task"""
-        self.game_file_path = task.task_desc or task.raw_task.get("game_file", "")
-        self.is_eval = task.is_eval
-
-    def create_environment(self, game_file):
-        """Create alfworld environment"""
-        return create_alfworld_environment(game_file)
-
-    def run_single_rollout(
-        self, env
-    ) -> tuple[List[Dict[str, str]], float, bool, int, List[Dict[str, str]]]:
-        """Run a single rollout with RAFT-guided actions"""
-        observation, info = env.reset()
-        trajectory = []
-        parsed_steps = []  # Store parsed experience, think, action for each step
-        action_history = []  # Track last 3 actions for repetition detection
-
-        trajectory.append({"role": "system", "content": self.alfworld_system_template.render()})
-
-        # Track the last reward from environment
-        last_reward = 0.0
-
-        for step in range(self.max_env_steps):
-            trajectory.append({"role": "user", "content": format_observation(observation)})
-
-            # Get model response with RAFT guidance
-            responses = self.model.chat(
-                trajectory,
-                n=1,
-                temperature=self.temperature,
-                top_k=self.top_k,
-                top_p=self.top_p,
-                max_tokens=self.max_tokens,
-            )
-            response_text = responses[0].response_text.strip()
-            trajectory.append({"role": "assistant", "content": response_text})
-
-            # Parse the three components
-            parsed = parse_response(response_text)
-            experience_text, think_text, action_text = (
-                parsed["experience"],
-                parsed["think"],
-                parsed["action"],
-            )
-
-            # Store parsed step for SFT data construction
-            parsed_steps.append(
-                {
-                    "observation": observation,
-                    "experience": experience_text,
-                    "think": think_text,
-                    "action": action_text,
-                    "full_response": response_text,
-                }
-            )
-
-            # Check for consecutive action repetition
-            action_history.append(action_text)
-            if len(action_history) > 3:
-                action_history.pop(0)
-
-            # If last 3 actions are the same, terminate with failure
-            if len(action_history) >= 3 and all(
-                action == action_history[0] for action in action_history
-            ):
-                print(f"Terminating due to 3 consecutive identical actions: {action_text}")
-                return trajectory, 0.0, False, step + 1, parsed_steps
-
-            # Execute action in environment
-            observation, reward, done, info = env.step(action_text)
-            last_reward = reward  # Always track the latest reward from environment
-
-            if done:
-                return trajectory, reward, done, step + 1, parsed_steps
-
-        # If timeout, return the last reward from environment instead of fixed value
-        return trajectory, last_reward, False, self.max_env_steps, parsed_steps
 
     def construct_sft_data(
         self,
@@ -185,17 +92,6 @@ class RAFTReflectAlfworldWorkflow(Workflow):
             new_parsed_steps,
         )
 
-    def generate_reward_feedback(self, reward: float, steps: int, done: bool) -> str:
-        """Generate natural language feedback about the attempt's performance"""
-        if done and reward >= 1:
-            return f"In your attempt, you successfully completed the task in {steps} steps with a reward of {reward:.3f}. Try to maintain this success while being more efficient."
-        elif done and reward < 1:
-            return f"In your attempt, you completed the task in {steps} steps but only achieved a reward of {reward:.3f}. You need to improve your performance to achieve full success."
-        elif not done and steps >= self.max_env_steps:
-            return f"In your attempt, you reached the maximum step limit of {self.max_env_steps} steps without completing the task (reward: {reward:.3f}). You need to be more efficient and focused to complete the task within the step limit."
-        else:
-            return f"In your attempt, you stopped after {steps} steps with a reward of {reward:.3f} without completing the task. You need to improve your strategy and persistence to achieve success."
-
     def re_explore_with_context(
         self,
         first_trajectory: List[Dict[str, str]],
@@ -213,8 +109,8 @@ class RAFTReflectAlfworldWorkflow(Workflow):
         context_messages = first_trajectory.copy()
 
         # Add reward feedback about first attempt
-        reward_feedback = self.generate_reward_feedback(
-            original_reward, original_steps, original_success
+        reward_feedback = generate_reward_feedback(
+            original_reward, original_steps, original_success, self.max_env_steps
         )
         context_messages.append(
             {
@@ -276,96 +172,6 @@ class RAFTReflectAlfworldWorkflow(Workflow):
         env.close()
         return sft_trajectory, reward, False, self.max_env_steps, parsed_steps
 
-    def eval_alfworld(self) -> List[Experience]:
-        """Evaluate a single alfworld trajectory"""
-        env = create_alfworld_environment(self.game_file_path)
-        try:
-            trajectory, reward, done, steps, parsed_steps = self.run_single_rollout(env)
-        except Exception as e:
-            logger.warning(f"Single rollout failed during eval: {e}")
-            env.close()
-            return [generate_default_empty_experience(f"Eval rollout failed: {str(e)}")]
-        env.close()
-
-        # Save eval data
-        task_id = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
-        success = done and reward >= 1
-
-        save_task_data(
-            task_id=task_id,
-            game_file_path=self.game_file_path,
-            first_trajectory=trajectory,
-            first_reward=reward,
-            first_steps=steps,
-            first_success=success,
-            second_trajectory=trajectory,
-            second_reward=reward,
-            second_steps=steps,
-            second_success=success,
-            kept_for_sft=False,
-            is_eval=self.is_eval,
-            eval_dir=self.eval_dir,
-            sft_dir=self.sft_dir,
-            non_sft_dir=self.non_sft_dir,
-            training_data=trajectory,
-        )
-
-        # Convert trajectory to experience
-        experience = generate_default_empty_experience(
-            msg="Eval completed successfully",
-            info={"task_id": task_id, "success": success, "reward": reward, "steps": steps},
-            metrics={"success": float(success), "reward": float(reward), "steps": float(steps)},
-        )
-
-        return [experience]
-
-    def _execute_first_attempt(self, task_id: str) -> tuple:
-        """Execute the first attempt and return results"""
-        env = create_alfworld_environment(self.game_file_path)
-
-        try:
-            trajectory, reward, done, steps, parsed_steps = self.run_single_rollout(env)
-        except Exception as e:
-            logger.warning(f"Single rollout failed: {e}")
-            env.close()
-            raise e
-
-        env.close()
-        success = done and reward >= 1
-        traj_format_valid = validate_trajectory_format(parsed_steps)
-
-        return trajectory, reward, done, steps, parsed_steps, success, traj_format_valid
-
-    def _handle_first_attempt_success(
-        self, task_id: str, trajectory: list, reward: float, steps: int, success: bool
-    ) -> List[Experience]:
-        """Handle successful first attempt"""
-        print("✅ Task completed successfully in the first attempt!")
-
-        save_task_data(
-            task_id=task_id,
-            game_file_path=self.game_file_path,
-            first_trajectory=trajectory,
-            first_reward=reward,
-            first_steps=steps,
-            first_success=success,
-            second_trajectory=None,
-            second_reward=None,
-            second_steps=None,
-            second_success=None,
-            kept_for_sft=False,
-            is_eval=self.is_eval,
-            eval_dir=self.eval_dir,
-            sft_dir=self.sft_dir,
-            non_sft_dir=self.non_sft_dir,
-            training_data=None,
-        )
-
-        experience = process_messages_to_experience(
-            self.model, trajectory, info={"success": success, "reward": reward, "steps": steps}
-        )
-        return [experience]
-
     def _handle_invalid_format_success(
         self, success: bool, reward: float, steps: int
     ) -> List[Experience]:
@@ -387,7 +193,7 @@ class RAFTReflectAlfworldWorkflow(Workflow):
             )
             return sft_messages, re_explore_info, new_parsed_steps, None
         except Exception as e:
-            logger.warning(f"SFT data construction failed: {e}")
+            print(f"SFT data construction failed: {e}")
             return None, None, None, e
 
     def _build_metrics(
@@ -433,13 +239,17 @@ class RAFTReflectAlfworldWorkflow(Workflow):
                 parsed_steps,
                 success,
                 traj_format_valid,
-            ) = self._execute_first_attempt(task_id)
+            ) = self._execute_first_attempt()
         except Exception as e:
             return [generate_default_empty_experience(f"Training rollout failed: {str(e)}")]
 
         # Handle first attempt success cases
         if reward >= 1 and traj_format_valid:
-            return self._handle_first_attempt_success(task_id, trajectory, reward, steps, success)
+            print("✅ Task completed successfully in the first attempt!")
+            experience = process_messages_to_experience(
+                self.model, trajectory, info={"success": success, "reward": reward, "steps": steps}
+            )
+            return [experience]
         elif not traj_format_valid and reward >= 1:
             return self._handle_invalid_format_success(success, reward, steps)
 
@@ -478,8 +288,6 @@ class RAFTReflectAlfworldWorkflow(Workflow):
         # Save detailed task data
         save_task_data(
             game_file_path=self.game_file_path,
-            is_eval=self.is_eval,
-            eval_dir=self.eval_dir,
             sft_dir=self.sft_dir,
             non_sft_dir=self.non_sft_dir,
             task_id=task_id,
@@ -500,11 +308,3 @@ class RAFTReflectAlfworldWorkflow(Workflow):
             experiences.append(generate_default_empty_experience())
 
         return experiences
-
-    def resettable(self) -> bool:
-        """Indicate that this workflow can be reset to avoid re-initialization"""
-        return True
-
-    def set_repeat_times(self, repeat_times, run_id_base):
-        self.repeat_times = repeat_times
-        self.run_id_base = run_id_base
