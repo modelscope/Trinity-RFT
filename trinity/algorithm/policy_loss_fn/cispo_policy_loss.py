@@ -56,7 +56,7 @@ class CISPOPolicyLossFn(PolicyLossFn):
         masked_frac = masked_mean(mask, action_mask)
 
         metrics = {
-            "cispo_loss": cispo_loss.detach().item(),
+            "cispo_loss": loss.detach().item(),
             "ppo_kl": ppo_kl.detach().item(),
             "masked_frac": masked_frac.detach().item(),
         }
