@@ -149,7 +149,7 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("dataset", type=str, choices=["gsm8k", "countdown"])
+    parser.add_argument("dataset", type=str, choices=["gsm8k", "countdown", "openr1"])
     parser.add_argument(
         "--dlc", action="store_true", help="Specify when running in Aliyun PAI DLC."
     )
