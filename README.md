@@ -89,7 +89,7 @@ It is designed to support diverse application scenarios and serve as a unified p
 <summary>Figure: Concatenated and general multi-step workflows</summary>
 
 <p align="center">
-  <img src="https://img.alicdn.com/imgextra/i2/O1CN017CoAkP1ccTEmEItVZ_!!6000000003621-2-tps-1262-695.png" alt="Trinity-RFT-multi-step">
+  <img src="https://img.alicdn.com/imgextra/i1/O1CN01z1i7kk1jlMEVa8ZHV_!!6000000004588-2-tps-1262-695.png" alt="Trinity-RFT-multi-step">
 </p>
 
 </details>
