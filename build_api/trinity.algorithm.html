@@ -869,6 +869,46 @@
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="trinity.algorithm.algorithm.RAFTAlgorithm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.algorithm.</span></span><span class="sig-name descname"><span class="pre">RAFTAlgorithm</span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#RAFTAlgorithm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.RAFTAlgorithm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#trinity.algorithm.algorithm.AlgorithmType" title="trinity.algorithm.algorithm.AlgorithmType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlgorithmType</span></code></a></p>
+<p>RAFT Algorithm.
+This algorithm is conceptually similar to Supervised Fine-Tuning (SFT)
+but is designed to work with <cite>ExperienceModel</cite> schema from rollouts.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.algorithm.algorithm.RAFTAlgorithm.use_critic">
+<span class="sig-name descname"><span class="pre">use_critic</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#trinity.algorithm.algorithm.RAFTAlgorithm.use_critic" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.algorithm.algorithm.RAFTAlgorithm.use_reference">
+<span class="sig-name descname"><span class="pre">use_reference</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#trinity.algorithm.algorithm.RAFTAlgorithm.use_reference" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.algorithm.algorithm.RAFTAlgorithm.compute_advantage_in_trainer">
+<span class="sig-name descname"><span class="pre">compute_advantage_in_trainer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#trinity.algorithm.algorithm.RAFTAlgorithm.compute_advantage_in_trainer" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.algorithm.algorithm.RAFTAlgorithm.can_balance_batch">
+<span class="sig-name descname"><span class="pre">can_balance_batch</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#trinity.algorithm.algorithm.RAFTAlgorithm.can_balance_batch" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trinity.algorithm.algorithm.RAFTAlgorithm.schema">
+<span class="sig-name descname"><span class="pre">schema</span></span><a class="headerlink" href="#trinity.algorithm.algorithm.RAFTAlgorithm.schema" title="Link to this definition"></a></dt>
+<dd><p>alias of <a class="reference internal" href="trinity.buffer.schema.html#trinity.buffer.schema.sql_schema.ExperienceModel" title="trinity.buffer.schema.sql_schema.ExperienceModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExperienceModel</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.algorithm.RAFTAlgorithm.default_config">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/algorithm.html#RAFTAlgorithm.default_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.algorithm.RAFTAlgorithm.default_config" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </section>
 <section id="module-trinity.algorithm.algorithm_manager">
 <span id="trinity-algorithm-algorithm-manager-module"></span><h2>trinity.algorithm.algorithm_manager module<a class="headerlink" href="#module-trinity.algorithm.algorithm_manager" title="Link to this heading"></a></h2>

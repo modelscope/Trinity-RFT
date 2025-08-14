@@ -342,6 +342,35 @@
         <span class="p">}</span></div>
 </div>
 
+
+
+<div class="viewcode-block" id="RAFTAlgorithm">
+<a class="viewcode-back" href="../../../build_api/trinity.algorithm.html#trinity.algorithm.algorithm.RAFTAlgorithm">[docs]</a>
+<span class="nd">@ALGORITHM_TYPE</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;raft&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RAFTAlgorithm</span><span class="p">(</span><span class="n">AlgorithmType</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;RAFT Algorithm.</span>
+<span class="sd">    This algorithm is conceptually similar to Supervised Fine-Tuning (SFT)</span>
+<span class="sd">    but is designed to work with `ExperienceModel` schema from rollouts.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">use_critic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">use_reference</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">compute_advantage_in_trainer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">can_balance_batch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">schema</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">ExperienceModel</span>
+
+<div class="viewcode-block" id="RAFTAlgorithm.default_config">
+<a class="viewcode-back" href="../../../build_api/trinity.algorithm.html#trinity.algorithm.algorithm.RAFTAlgorithm.default_config">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">default_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;sample_strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;policy_loss_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;sft&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;kl_loss_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;entropy_loss_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
+        <span class="p">}</span></div>
+</div>
+
 </pre></div>
 
            </div>
