@@ -7,8 +7,8 @@ algorithm:
   algorithm_type: asymre
   policy_loss_fn_args:
     tau: 0
-  advantage_fn_args:
-    asymre_baseline_shift: -0.1
+  add_strategy_args:
+    baseline_shift: -0.1  # Baseline shift for the AsymREAddStrategy
   repeat_times: 8
 cluster:
   node_num: 1
