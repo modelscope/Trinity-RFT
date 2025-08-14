@@ -182,7 +182,7 @@ class AsymREAlgorithm(AlgorithmType):
 
     use_critic: bool = False
     use_reference: bool = False
-    compute_advantage_in_trainer: bool = True
+    compute_advantage_in_trainer: bool = False
     can_balance_batch: bool = True
     schema: type = ExperienceModel
 
@@ -192,7 +192,7 @@ class AsymREAlgorithm(AlgorithmType):
             "repeat_times": 2,
             "sample_strategy": "warmup",
             "policy_loss_fn": "opmd",
-            "advantage_fn": "asymre",
+            "add_strategy": "asymre",
             "kl_penalty_fn": "none",
             "kl_loss_fn": "none",
             "entropy_loss_fn": "none",
