@@ -1,6 +1,6 @@
 # Welcome to the Trinity Benchmark Runner 🌟
 
-This tool makes it easy to run benchmarks for the **Trinity** system! Whether you're testing training performance or inference speed, this CLI lets you configure and launch experiments quickly—no complex setup required. Just pick your dataset, hardware, and model settings, and let the tool handle the rest.
+This tool makes it easy to run benchmarks for the **Trinity-RFT**. Whether you're testing training performance or inference speed, this CLI lets you configure and launch experiments quickly—no complex setup required. Just pick your dataset, hardware, and model settings, and let the tool handle the rest.
 
 ---
 
