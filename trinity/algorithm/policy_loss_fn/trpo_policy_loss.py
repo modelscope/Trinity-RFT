@@ -31,16 +31,8 @@ class TOPRPolicyLossFn(PolicyLossFn):
         Compute TOPR policy loss.
 
         In TOPR:
-        - α = [π(y|x)/μ(y|x)]^1 if R(x,y) < threshold else 1
-        - loss = -α * r(x,y) * log π(y|x)
-
-        Since we want to maximize α * r(x,y) * log π(y|x), we minimize its negative.
-
-        Args:
-            logprob: Log probabilities from current policy π
-            old_logprob: Log probabilities from reference policy μ
-            action_mask: Mask for valid actions
-            advantages: Rewards R(x,y) in TOPR terminology
+        - α = [π(y|x)/μ(y|x)]_0^1 if R(x,y) <= threshold else 1
+        - loss = -sg(α) * r(x,y) * log π(y|x)
         """
         # in Orginal TOPR paper, advantages are simply rewards
         # However, we can use advantages as rewards(Baseline Trick)
