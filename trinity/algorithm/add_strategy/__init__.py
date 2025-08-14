@@ -1,9 +1,9 @@
 from trinity.algorithm.add_strategy.add_strategy import (
     ADD_STRATEGY,
     AddStrategy,
+    AsymREAddStrategy,
     GRPOAddStrategy,
     OPMDAddStrategy,
-    AsymREAddStrategy,
     RewardVarianceAddStrategy,
 )
 from trinity.algorithm.add_strategy.correct_bias_add_strategy import (

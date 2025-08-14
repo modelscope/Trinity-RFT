@@ -3,8 +3,9 @@
 
 import unittest
 
-from trinity.utils.eval_utils import is_equiv, compute_score
+from trinity.utils.eval_utils import compute_score, is_equiv
 from trinity.utils.math_eval_utils import extract_answer, verify_math_answer
+
 
 class TestComputeScore(unittest.TestCase):
     """
@@ -96,7 +97,7 @@ class TestComputeScore(unittest.TestCase):
         truth_incorrect = "\\boxed{A}"
         self.assertEqual(compute_score(solution, truth_correct), 1.0)
         self.assertEqual(compute_score(solution, truth_incorrect), 0.0)
-        
+
 
 class TestMathEvalUtils(unittest.TestCase):
     def test_extract_answer(self):
