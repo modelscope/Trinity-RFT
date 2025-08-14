@@ -448,9 +448,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Waiting for all tasks to complete&quot;</span><span class="p">)</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">wait_all</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;All tasks before step </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">explore_step_num</span><span class="si">}</span><span class="s2"> have completed.&quot;</span><span class="p">)</span>
-        <span class="n">log_task</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_finish_steps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_sync_step</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">explore_step_num</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_version</span><span class="p">)</span>
-        <span class="p">)</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_finish_steps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_sync_step</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">explore_step_num</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_version</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">sync_weight</span><span class="p">:</span>
             <span class="c1"># sync weights</span>
@@ -462,9 +460,6 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Explorer sync_weights at step </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">explore_step_num</span><span class="si">}</span><span class="s2"> finished, model version = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model_version</span><span class="si">}</span><span class="s2">.&quot;</span>
             <span class="p">)</span>
-
-        <span class="c1"># overlay log and weight sync</span>
-        <span class="k">await</span> <span class="n">log_task</span>
 
         <span class="c1"># save explore checkpoint</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">save_explorer</span><span class="p">(</span>
