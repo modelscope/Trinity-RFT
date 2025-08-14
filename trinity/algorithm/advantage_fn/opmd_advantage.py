@@ -1,15 +1,22 @@
 """OPMD advantage computation"""
 
 from collections import defaultdict
-from typing import Dict, Tuple
+from typing import Dict, List, Tuple
 
 import torch
 from verl import DataProto
 
-from trinity.algorithm.advantage_fn import ADVANTAGE_FN, AdvantageFn
+from trinity.algorithm.advantage_fn.advantage_fn import (
+    ADVANTAGE_FN,
+    AdvantageFn,
+    GroupAdvantage,
+)
+from trinity.common.experience import Experience, group_by
+from trinity.utils.annotations import Deprecated
 
 
-@ADVANTAGE_FN.register_module("opmd")
+@Deprecated
+@ADVANTAGE_FN.register_module("opmd_verl")
 class OPMDAdvantageFn(AdvantageFn):
     """OPMD advantage computation"""
 
@@ -94,3 +101,44 @@ class OPMDAdvantageFn(AdvantageFn):
             "opmd_baseline": "mean",
             "tau": 1.0,
         }
+
+
+@ADVANTAGE_FN.register_module("opmd")
+class OPMDGroupAdvantage(GroupAdvantage):
+    """OPMD Group Advantage computation"""
+
+    def __init__(self, opmd_baseline: str = "mean", tau: float = 1.0, **kwargs) -> None:
+        super().__init__(**kwargs)
+        self.opmd_baseline = opmd_baseline
+        self.tau = tau
+
+    def group_experiences(self, exps):
+        return group_by(exps, id_type="task")
+
+    def calculate_group_advantage(
+        self, group_id: str, exps: List[Experience]
+    ) -> Tuple[List[Experience], Dict]:
+        with torch.no_grad():
+            if len(exps) == 1:
+                group_baseline = torch.tensor(0.0)
+            else:
+                group_rewards = torch.tensor([exp.reward for exp in exps], dtype=torch.float32)
+                if self.opmd_baseline == "mean":
+                    group_baseline = torch.mean(group_rewards)
+                else:
+                    group_baseline = self.tau * (
+                        torch.logsumexp(group_rewards / self.tau, dim=-1)
+                        - torch.log(torch.tensor(len(exps)))
+                    )
+            for exp in exps:
+                score = exp.reward - group_baseline
+                exp.advantages = score * exp.action_mask
+                exp.returns = exp.advantages.clone()
+            metrics = {
+                "group_baseline": group_baseline,
+            }
+        return exps, metrics
+
+    @classmethod
+    def default_args(cls) -> dict:
+        return {"opmd_baseline": "mean", "tau": 1.0}

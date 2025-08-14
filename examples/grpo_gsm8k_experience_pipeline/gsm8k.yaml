@@ -7,23 +7,23 @@ algorithm:
 data_processor:
   data_processor_url: 'http://127.0.0.1:5005/data_processor'
   # experience pipeline related
-  experience_pipeline:
-    # I/O buffers
-    input_buffers:
-      - name: gsm8k_exp_output
-    output_buffer:
-      name: reshaped_gsm8k_exp_input
-    # format mapping
-    format:
-      reward_key: 'reward'  # the key name of the reward in the experience
-    # data active iterator related
-    dj_config_path: 'examples/grpo_gsm8k_experience_pipeline/dj_scoring_exp.yaml'
-    clean_strategy: 'iterative'
-    # reward shaping
-    reward_shaping:
-      - stats_key: 'llm_quality_score'
-        op_type: ADD
-        weight: 1.0
+  # experience_pipeline:
+  #   # I/O buffers
+  #   input_buffers:
+  #     - name: gsm8k_exp_output
+  #   output_buffer:
+  #     name: reshaped_gsm8k_exp_input
+  #   # format mapping
+  #   format:
+  #     reward_key: 'reward'  # the key name of the reward in the experience
+  #   # data active iterator related
+  #   dj_config_path: 'examples/grpo_gsm8k_experience_pipeline/dj_scoring_exp.yaml'
+  #   clean_strategy: 'iterative'
+  #   # reward shaping
+  #   reward_shaping:
+  #     - stats_key: 'llm_quality_score'
+  #       op_type: ADD
+  #       weight: 1.0
 model:
   model_path: /PATH/TO/MODEL/
   max_response_tokens: 1024

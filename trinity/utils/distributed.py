@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """For distributed training with multiple process groups."""
 import ipaddress
+import socket
 from datetime import timedelta
 from typing import Any, Optional, Union
 
@@ -21,6 +22,12 @@ def is_ipv6_address(ip_str: str) -> bool:
         return isinstance(ip, ipaddress.IPv6Address)
     except ValueError:
         return False
+
+
+def get_available_port() -> int:
+    with socket.socket() as s:
+        s.bind(("", 0))
+        return s.getsockname()[1]
 
 
 def init_process_group(

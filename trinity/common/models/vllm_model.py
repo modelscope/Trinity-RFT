@@ -52,11 +52,12 @@ class vLLMRolloutModel(InferenceModel):
             n=1,
             temperature=0.0,
             max_tokens=config.max_response_tokens,
-            min_tokens=1,
+            min_tokens=config.min_response_tokens,
             skip_special_tokens=True,
             include_stop_str_in_output=False,
             output_kind=RequestOutputKind.FINAL_ONLY,
             logprobs=0,
+            ignore_eos=config.ignore_eos,
         )
         self.enable_thinking = config.enable_thinking
         self.request_id = 0
