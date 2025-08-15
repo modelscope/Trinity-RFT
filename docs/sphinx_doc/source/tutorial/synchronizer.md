@@ -42,7 +42,7 @@ async def train(self) -> str:
 ```
 
 The Trainer checks whether synchronization is needed:
-- During data collecting in training.
+- During data collection in training.
 - After completing each training step.
 
 If so, it triggers `sync_weight()` through the Synchronizer.
@@ -179,14 +179,14 @@ These states help prevent race conditions and ensure smooth coordination.
 #### 🔹 Fixed Style + NCCL Sync
 - Synchronizer schedules sync every `N` steps.
 - Both sides pause briefly for direct GPU sync.
-- The state of trainer toggle predictably between `RUNNING` ↔ `WAITING_SYNC`, and the state of explorer toggles among `RUNNING` → `REQUIRE_SYNC` → `WAITING_SYNC`.
+- The state of the trainer toggles predictably between `RUNNING` ↔ `WAITING_SYNC`, and the state of the explorer toggles among `RUNNING` → `REQUIRE_SYNC` → `WAITING_SYNC`.
 
 ![FIXED_STYLE_NCCL_SYNC](../../assets/FIXED-NCCL.png)
 
 #### 🔹 Fixed Style + CHECKPOINT/MEMORY
 - Trainer saves or sends weights periodically.
 - Explorer checks at each interval and pulls updates.
-- The state of trainer remain at `RUNNING`, and the state of explorer toggles between `RUNNING` ↔ `REQUIRE_SYNC`.
+- The state of the trainer remains at `RUNNING`, and the state of the explorer toggles between `RUNNING` ↔ `REQUIRE_SYNC`.
 
 ![FIXED_STYLE_STATEDICT_SYNC](../../assets/FIXED-STATEDICT.png)
 
@@ -194,19 +194,16 @@ These states help prevent race conditions and ensure smooth coordination.
 #### 🔹 Dynamic Style + NCCL
 - Explorer signals `REQUIRE_SYNC` after enough data.
 - Trainer sees the signal and initiates NCCL sync.
-- The state of trainer toggle predictably between `RUNNING` ↔ `WAITING_SYNC`, and the state of explorer toggles between `RUNNING` → `REQUIRE_SYNC` → `WAITING_SYNC`.
+- The state of the trainer toggles predictably between `RUNNING` ↔ `WAITING_SYNC`, and the state of the explorer toggles between `RUNNING` → `REQUIRE_SYNC` → `WAITING_SYNC`.
 
 ![DYN_STYLE_NCCL_SYNC](../../assets/DYN-NCCL.png)
 
 #### 🔹 Dynamic Style + CHECKPOINT/MEMORY
 - Explorer signals `REQUIRE_SYNC` after enough data.
 - Trainer sees the signal and pushes weights to synchronizer.
-- The state of trainer remain at `RUNNING`, and the state of explorer toggles between `RUNNING` ↔ `REQUIRE_SYNC`.
+- The state of the trainer remains at `RUNNING`, and the state of the explorer toggles between `RUNNING` ↔ `REQUIRE_SYNC`.
 
 ![DYN_STYLE_STATEDICT_SYNC](../../assets/DYN-STATEDICT.png)
-
-
-> 📊 Visual diagrams (in original doc) illustrate these transitions clearly.
 
 ---
 
@@ -250,4 +247,4 @@ These states help prevent race conditions and ensure smooth coordination.
 🎯 **Bottom Line**:
 The Synchronizer makes distributed reinforcement learning **scalable, efficient, and reliable** by intelligently managing when and how model updates flow between training and exploration.
 
-Use it wisely — and your RL pipeline will run smoother than ever.
+Properly configuring the Synchronizer is key to an efficient and stable RL pipeline.
