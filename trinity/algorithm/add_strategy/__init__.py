@@ -1,6 +1,7 @@
 from trinity.algorithm.add_strategy.add_strategy import (
     ADD_STRATEGY,
     AddStrategy,
+    AsymREAddStrategy,
     GRPOAddStrategy,
     OPMDAddStrategy,
     RewardVarianceAddStrategy,
@@ -18,6 +19,7 @@ __all__ = [
     "AddStrategy",
     "GRPOAddStrategy",
     "OPMDAddStrategy",
+    "AsymREAddStrategy",
     "StepWiseGRPOStrategy",
     "RewardVarianceAddStrategy",
     "CorrectBiasAddStrategy",
