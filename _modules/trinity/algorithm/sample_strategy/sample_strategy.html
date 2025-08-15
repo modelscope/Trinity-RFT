@@ -55,6 +55,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorial/trinity_programming_guide.html">Developer Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorial/trinity_configs.html">Configuration Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorial/example_mix_algo.html">Algorithm Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial/synchronizer.html">Synchronizer in Trinity-RFT</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">FAQ</span></p>
 <ul>
@@ -104,16 +105,16 @@
 
 
 <div class="viewcode-block" id="SampleStrategy">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.html#trinity.algorithm.SampleStrategy">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.html#trinity.algorithm.SampleStrategy">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SampleStrategy</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <div class="viewcode-block" id="SampleStrategy.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.html#trinity.algorithm.SampleStrategy.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.html#trinity.algorithm.SampleStrategy.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pad_token_id</span> <span class="o">=</span> <span class="n">buffer_config</span><span class="o">.</span><span class="n">pad_token_id</span></div>
 
 
 <div class="viewcode-block" id="SampleStrategy.sample">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.html#trinity.algorithm.SampleStrategy.sample">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.html#trinity.algorithm.SampleStrategy.sample">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Experiences</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sample data from buffer.</span>
@@ -129,7 +130,7 @@
 
 
 <div class="viewcode-block" id="SampleStrategy.default_args">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.html#trinity.algorithm.SampleStrategy.default_args">[docs]</a>
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.html#trinity.algorithm.SampleStrategy.default_args">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">default_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>

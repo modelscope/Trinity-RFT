@@ -34,6 +34,7 @@ Welcome to Trinity-RFT's documentation!
    tutorial/trinity_programming_guide.md
    tutorial/trinity_configs.md
    tutorial/example_mix_algo.md
+   tutorial/synchronizer.md
 
 .. toctree::
    :maxdepth: 2
