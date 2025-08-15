@@ -30,6 +30,15 @@ def get_available_port() -> int:
         return s.getsockname()[1]
 
 
+def is_port_available(port: int, host="127.0.0.1") -> bool:
+    with socket.socket() as s:
+        try:
+            s.bind((host, port))
+            return True
+        except OSError:
+            return False
+
+
 def init_process_group(
     host: str,
     port: int,

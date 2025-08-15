@@ -27,9 +27,7 @@ def create():
     """Create a new data juicer session.
 
     Args:
-        config (dict): Configuration parameters for the session. Must include one of the following, and the priority is from high to low:
-
-
+        config (dict): Configuration parameters for the session.
 
     For example, the config should look like this:
     .. code-block:: python
@@ -85,11 +83,9 @@ def process_experience():
     session = sessions[session_id]
     try:
         # from_hf_datasets and to_hf_datasets should be imported from trinity.common.experience
-        processed_ds, metrics = session.process(ds)
-        print(f"Processed {len(ds)} experiences, got {len(processed_ds)} after processing.")
-    except Exception as e:
-        print(f"Error processing experiences: {traceback.format_exc()}")
-        return jsonify({"error": f"Processing failed: {e}"}), 500
+        processed_ds, metrics = session.process_experience(ds)
+    except Exception:
+        return jsonify({"error": f"Experience processing failed:\n{traceback.format_exc()}"}), 500
 
     # Serialize processed experiences to parquet in-memory
     return_bytes = serialize_dataset_to_arrow(processed_ds)
@@ -100,6 +96,25 @@ def process_experience():
     response.headers["Content-Type"] = "application/octet-stream"
     response.headers["Content-Disposition"] = "attachment; filename=processed.arrow"
     return response
+
+
+@app.route("/process_task", methods=["POST"])
+def process_task():
+    """Process a task for a given session.
+    Different from process_experience which process a batch of experiences,
+    this endpoint process a whole taskset.
+    """
+    data = request.json
+    session_id = data.get("session_id")
+    if not session_id or session_id not in sessions:
+        return jsonify({"error": "Session ID not found."}), 404
+
+    session = sessions[session_id]
+    try:
+        metrics = session.process_task()
+        return jsonify({"metrics": metrics})
+    except Exception:
+        return jsonify({"error": f"Task processing failed:\n{traceback.format_exc()}"}), 500
 
 
 @app.route("/close", methods=["POST"])
