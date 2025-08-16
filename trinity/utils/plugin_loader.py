@@ -10,27 +10,39 @@ from trinity.utils.log import get_logger
 
 logger = get_logger(__name__)
 
+loaded_dirs = []
 
-def load_plugins(plugin_dir: str) -> None:
+
+def load_plugins(plugin_dirs: str = None) -> None:
     """
     Load plugin modules from a directory.
     """
-    if plugin_dir is None:
-        plugin_dir = Path(__file__).parent.parent / "plugins"
-    if not os.path.exists(plugin_dir):
-        logger.error(f"--plugin-dir [{plugin_dir}] does not exist.")
-        return None
-    if not os.path.isdir(plugin_dir):
-        logger.error(f"--plugin-dir [{plugin_dir}] is not a directory.")
-        return None
-
-    logger.info(f"Loading plugin modules from [{plugin_dir}]...")
-    for file in Path(plugin_dir).glob("*.py"):
-        if file.name.startswith("__"):
+    global loaded_dirs
+    if plugin_dirs is None:
+        plugin_dirs = Path(__file__).parent.parent / "plugins"
+        if os.environ.get("PLUGIN_DIRS", None):
+            plugin_dirs = os.pathsep.join(plugin_dirs, os.environ["PLUGIN_DIRS"])
+    for plugin_dir in plugin_dirs.split(os.pathsep):
+        plugin_dir = plugin_dir.strip()
+        if not plugin_dir:
             continue
-        logger.info(f"Loading plugin modules from [{file}]...")
-        # load modules from file
-        load_from_file(os.path.join(plugin_dir, file))
+        if plugin_dir in loaded_dirs:
+            continue
+        if not os.path.exists(plugin_dir):
+            logger.error(f"--plugin-dir [{plugin_dir}] does not exist.")
+            continue
+        if not os.path.isdir(plugin_dir):
+            logger.error(f"--plugin-dir [{plugin_dir}] is not a directory.")
+            continue
+
+        logger.info(f"Loading plugin modules from [{plugin_dir}]...")
+        loaded_dirs.append(plugin_dir)
+        for file in Path(plugin_dir).glob("*.py"):
+            if file.name.startswith("__"):
+                continue
+            logger.info(f"Loading plugin modules from [{file}]...")
+            # load modules from file
+            load_from_file(os.path.join(plugin_dir, file))
 
 
 def load_from_file(file_path: str):

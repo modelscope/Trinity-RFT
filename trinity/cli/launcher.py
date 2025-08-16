@@ -188,16 +188,23 @@ def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
             f"{data_processor_config.data_processor_url}/{DataProcessorPipelineType.EXPERIENCE.value}",
             config_path,
         )
+    envs = os.environ.copy()
+    if "PLUGIN_DIRS" in envs:
+        envs["PLUGIN_DIRS"] = os.pathsep.join(plugin_dir, envs["PLUGIN_DIRS"])
+    else:
+        envs["PLUGIN_DIRS"] = plugin_dir
     if dlc:
         from trinity.utils.dlc_utils import setup_ray_cluster
 
-        setup_ray_cluster(namespace=config.ray_namespace)
+        setup_ray_cluster(namespace=config.ray_namespace, envs=envs)
     else:
         from trinity.utils.dlc_utils import is_running
 
         if not is_running:
             raise RuntimeError("Ray is not running, please start it by `ray start --head`.")
-        ray.init(namespace=config.ray_namespace, ignore_reinit_error=True)
+        ray.init(
+            namespace=config.ray_namespace, ignore_reinit_error=True, runtime_env={"env_vars": envs}
+        )
     try:
         if config.mode == "explore":
             explore(config)
