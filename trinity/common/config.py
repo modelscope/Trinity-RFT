@@ -7,6 +7,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional
 
 from omegaconf import OmegaConf
+from verl.utils import set_pad_token_id
 
 from trinity.common.constants import (
     EXPLORER_NAME,
@@ -668,9 +669,10 @@ class Config:
             from transformers import AutoTokenizer
 
             try:
-                self.buffer.pad_token_id = AutoTokenizer.from_pretrained(
-                    self.model.model_path
-                ).pad_token_id
+                tokenizer = AutoTokenizer.from_pretrained(self.model.model_path)
+                set_pad_token_id(tokenizer)
+                self.buffer.pad_token_id = tokenizer.pad_token_id
+
             except Exception:
                 logger.warning(f"Failed to get pad token id from model {self.model.model_path}")
                 self.buffer.pad_token_id = 0

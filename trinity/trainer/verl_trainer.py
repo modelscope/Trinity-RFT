@@ -38,8 +38,6 @@ from trinity.trainer.trainer import TrainEngineWrapper
 from trinity.trainer.verl.utils import compute_data_metrics, to_data_proto
 from trinity.utils.log import get_logger
 
-logger = get_logger(__name__)
-
 
 class _InternalDataLoader:
     def __init__(self, config):
@@ -84,13 +82,6 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         # instantiate tokenizer
 
         tokenizer = hf_tokenizer(local_path)
-
-        # overide the pad_token_id in config
-        if global_config.buffer.pad_token_id is None:
-            global_config.buffer.pad_token_id = tokenizer.pad_token_id
-            logger.warning(
-                f"pad_token_id is not set, using {global_config.buffer.pad_token_id} as pad_token_id"
-            )
 
         # define worker classes
         if config.actor_rollout_ref.actor.strategy == "fsdp":
