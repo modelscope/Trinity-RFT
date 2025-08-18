@@ -10,13 +10,15 @@ from datasets import Dataset
 
 from trinity.common.config import DataJuicerServiceConfig
 from trinity.common.experience import Experience, from_hf_datasets, to_hf_datasets
-from trinity.utils.distributed import get_available_port
+from trinity.utils.distributed import get_available_port, is_port_available
+from trinity.utils.log import get_logger
 
 
 class DataJuicerClient:
     """Client for interacting with the DataJuicer server."""
 
     def __init__(self, config: DataJuicerServiceConfig):
+        self.logger = get_logger(__name__)
         self.config = config
         self.url = config.server_url
         self.session_id = None
@@ -35,6 +37,11 @@ class DataJuicerClient:
 
         if not self.config.port:
             self.config.port = get_available_port()
+        elif not is_port_available(self.config.port):
+            self.config.port = get_available_port()
+        self.logger.info(
+            f"Starting DataJuicer server at {self.config.server_url} on port {self.config.port}"
+        )
         self.url = f"http://localhost:{self.config.port}"
         server_process = Process(
             target=main, kwargs={"host": "localhost", "port": self.config.port, "debug": False}
@@ -47,6 +54,7 @@ class DataJuicerClient:
                     break
             except ConnectionError:
                 time.sleep(5)
+        self.logger.info(f"DataJuicer server at {self.url} started successfully.")
         return server_process
 
     def _check_connection(self) -> bool:
@@ -93,6 +101,18 @@ class DataJuicerClient:
             for stats_key in sample["__dj__stats__"]:
                 exp.info[stats_key] = sample["__dj__stats__"][stats_key]
         return exps, metrics
+
+    def process_task(self) -> Dict:
+        """Process a task using the Data-Juicer service."""
+        if not self.session_id:
+            raise ValueError("DataJuicer session is not initialized.")
+        json_data = {"session_id": self.session_id}
+        response = requests.post(f"{self.url}/process_task", json=json_data)
+        if response.status_code != 200:
+            raise RuntimeError(
+                f"Failed to process task: {response.status_code}, {response.json().get('error')}"
+            )
+        return response.json().get("metrics")
 
     def close(self):
         """Close the DataJuicer client connection."""

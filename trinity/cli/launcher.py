@@ -8,8 +8,8 @@ from pprint import pprint
 
 import ray
 
+from trinity.buffer.pipelines.task_pipeline import check_and_run_task_pipeline
 from trinity.common.config import Config, load_config
-from trinity.data.utils import check_and_activate_data_processor
 from trinity.explorer.explorer import Explorer
 from trinity.trainer.trainer import Trainer
 from trinity.utils.log import get_logger
@@ -122,9 +122,8 @@ def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
     config = load_config(config_path)
     config.check_and_update()
     pprint(config)
-    # try to activate task pipeline for raw data
-    data_processor_config = config.data_processor
-    check_and_activate_data_processor(data_processor_config, config_path)
+    # try to run task pipeline for raw data
+    check_and_run_task_pipeline(config)
     if dlc:
         from trinity.utils.dlc_utils import setup_ray_cluster
 

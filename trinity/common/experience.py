@@ -359,7 +359,7 @@ def split_dpo_experience_to_single_turn(experiences: List[Experience]) -> List[E
     return single_turn_experiences
 
 
-@dataclass(frozen=True)
+@dataclass
 class Experiences:
     """A container for a batch of experiences, for high performance communication usage.
 

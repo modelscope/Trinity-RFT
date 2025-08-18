@@ -1,3 +1,4 @@
+import os
 from typing import Dict, Tuple
 
 from datasets import Dataset
@@ -24,15 +25,38 @@ class DataJuicerSession:
         Args:
             config (DataJuicerConfigModel): Configuration parameters provided by Trinity.
         """
-        self.config: Namespace = parse_config(config)
+        self.config = config
+        self.dj_config: Namespace = parse_config(config)
 
-    def process(self, ds: Dataset) -> Tuple[Dataset, Dict]:
-        # TODO: Implement the processing logic using data juicer executor
+    def process_experience(self, ds: Dataset) -> Tuple[Dataset, Dict]:
+        """Process a batch of experiences.
+
+        Args:
+            ds (Dataset): The input dataset containing a batch of experiences.
+
+        Returns:
+            Tuple[Dataset, Dict]: The processed dataset and extracted metrics.
+        """
         from data_juicer.core.data import NestedDataset
         from data_juicer.core.executor.default_executor import DefaultExecutor
 
-        dj_executor = DefaultExecutor(cfg=self.config)
+        dj_executor = DefaultExecutor(cfg=self.dj_config)
 
         ds = dj_executor.run(NestedDataset(ds))
         metrics = extract_metrics(ds)
         return ds, metrics
+
+    def process_task(self) -> Dict:
+        """
+        Process task datasets using Data-Juicer
+        """
+        from data_juicer.core.executor.default_executor import DefaultExecutor
+
+        dj_executor = DefaultExecutor(cfg=self.dj_config)
+
+        ds: Dataset = dj_executor.run()
+        # sort the output dataset in priority
+        if "priority" in ds.features:
+            ds.sort_by("priority", reverse=True)
+        ds.to_json(os.path.join(self.config.output_dir, "output.jsonl"))  # type: ignore [arg-type]
+        return {"sample_num": ds.num_rows}

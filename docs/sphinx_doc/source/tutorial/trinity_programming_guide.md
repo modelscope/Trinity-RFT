@@ -12,7 +12,7 @@ Below is a table summarizing the modules and components that developers with dif
 | Enhance the RL process from the data perspective. | *Buffer* | `Operator` |
 
 ```{note}
-Trinity-RFT is still under development, and the following interfaces may change. Please read this section in conjunction with the latest code.
+Trinity-RFT is under active development, and the following interfaces may change. Please refer to the latest code when using this guide.
 ```
 
 ---
@@ -214,12 +214,6 @@ __all__ = [
     # existing __all__ lines
     "ExampleWorkflow",
 ]
-```
-
-For workflows that are not intended to be contributed to Trinity-RFT project, you can just place the above code in `trinity/plugins`. Trinity-RFT will automatically detect and load all custom modules in this folder.
-
-```{tip}
-You can specify the directory where your custom modules are located by setting `--plugin-dir` when starting Trinity-RFT. If you don't specify `--plugin-dir`, Trinity-RFT will use `<Trinity_RFT_ROOT_DIR>/trinity/plugins` as the default directory.
 ```
 
 #### Avoid Re-initialization
@@ -728,21 +722,20 @@ By meticulously following these steps, you can ensure that new parameters are su
 
 ---
 
-## Check Code Style
+## Contributing your Code
 
-Before submitting the code, make sure it passes the code style check. Follow these steps:
+For modules that are prepared to be contributed to the Trinity-RFT project, please follow the steps below:
 
-```shell
-# Install code style checking tools
-cd <path_to_trinity_rft>
-# bash
-pip install -e .[dev]
-# zsh
-# pip install -e .\[dev\]
+1. Implement your code in the appropriate directory, such as `trinity/common/workflows` for workflows, `trinity/algorithm` for algorithms, `trinity/buffer/operators` for operators.
 
-# Run code style checks
-pre-commit run --all-files
+2. Register your module in the corresponding `__init__.py` file of the directory.
 
-# Commit the code after all checks pass
-git commit -am "create example workflow"
+3. Add tests for your module in the `tests` directory, following the naming conventions and structure of existing tests.
+
+4. Before submitting the code, make sure it passes the code style check with `pre-commit run --all-files`.
+
+5. Submit a pull request to the Trinity-RFT repository, including a clear description of your changes.
+
+```{tip}
+For modules that only used for local testing or not intended for contribution, you can place them in the `trinity/plugins` directory. Trinity-RFT will automatically load all modules in this directory, and you can use those modules without adding them to the `__init__.py` file. You can specify another directory by setting the `--plugin-dir` option when running Trinity-RFT, e.g., `trinity run --config /path/to/your/config --plugin-dir /path/to/your/plugins`.
 ```

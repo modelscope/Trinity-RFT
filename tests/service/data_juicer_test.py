@@ -1,3 +1,5 @@
+import os
+import shutil
 import time
 import unittest
 from multiprocessing import Process
@@ -12,15 +14,22 @@ import ray
 import torch
 from jsonargparse import Namespace
 
-from tests.tools import RayUnittestBaseAysnc, get_template_config
+from tests.tools import RayUnittestBase, RayUnittestBaseAysnc, get_template_config
 from trinity.buffer.buffer import get_buffer_reader
-from trinity.buffer.pipelines import ExperiencePipeline
-from trinity.common.config import DataJuicerServiceConfig, OperatorConfig
+from trinity.buffer.pipelines import ExperiencePipeline, check_and_run_task_pipeline
+from trinity.common.config import (
+    DataJuicerServiceConfig,
+    OperatorConfig,
+    StorageConfig,
+    TaskPipelineConfig,
+)
 from trinity.common.experience import Experience
 from trinity.service.data_juicer.client import DataJuicerClient
 from trinity.service.data_juicer.server.server import main
 from trinity.service.data_juicer.server.utils import DJConfig, parse_config
 from trinity.utils.distributed import get_available_port
+
+TASKSET_OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "taskset_output")
 
 
 class TestDataJuicer(unittest.TestCase):
@@ -129,7 +138,7 @@ class TestDataJuicer(unittest.TestCase):
         self.assertIsNone(client.server)
 
 
-class TestDataJuicerOperators(RayUnittestBaseAysnc):
+class TestDataJuicerExperiencePipeline(RayUnittestBaseAysnc):
     async def test_data_juicer_operators(self):
         config = get_template_config()
         config.service.data_juicer = DataJuicerServiceConfig(
@@ -198,3 +207,68 @@ class TestDataJuicerOperators(RayUnittestBaseAysnc):
         with self.assertRaises(TimeoutError):
             reader.read(batch_size=1)
         await pipeline.close.remote()
+
+
+class TestDataJuicerTaskPipeline(RayUnittestBase):
+    def setUp(self):
+        if os.path.exists(TASKSET_OUTPUT_DIR):
+            shutil.rmtree(TASKSET_OUTPUT_DIR)
+
+    def test_data_juicer_task_pipeline(self):
+        config = get_template_config()
+        config.service.data_juicer = DataJuicerServiceConfig(
+            auto_start=True,
+        )
+        config.data_processor.task_pipeline = TaskPipelineConfig(
+            operators=[
+                OperatorConfig(
+                    name="text_length_filter",
+                    args={
+                        "min_len": 10,
+                        "max_len": 500,
+                        "text_key": "question",
+                    },
+                ),
+                OperatorConfig(
+                    name="word_repetition_filter",
+                    args={
+                        "rep_len": 3,
+                        "min_ratio": 0.0,
+                        "max_ratio": 0.2,
+                        "text_key": "question",
+                    },
+                ),
+            ],
+            inputs=[
+                os.path.join(
+                    os.path.dirname(os.path.dirname(__file__)),
+                    "template",
+                    "data",
+                    "gsm8k",
+                    "train.jsonl",
+                ),
+                os.path.join(
+                    os.path.dirname(os.path.dirname(__file__)),
+                    "template",
+                    "data",
+                    "countdown",
+                    "train.jsonl",
+                ),
+            ],
+            target_fields=["question", "answer"],
+        )
+        config.buffer.explorer_input.taskset = StorageConfig(
+            name="taskset",
+            path=TASKSET_OUTPUT_DIR,
+        )
+        config.check_and_update()
+        metrics = check_and_run_task_pipeline(config)
+        self.assertTrue("sample_num" in metrics)
+        self.assertEqual(metrics["sample_num"], 16)
+        from datasets import load_dataset
+
+        ds = load_dataset(
+            TASKSET_OUTPUT_DIR,
+            split="train",
+        )
+        self.assertEqual(ds.num_rows, 16)

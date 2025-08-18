@@ -141,7 +141,10 @@ class OperatorConfig:
 @Experimental
 @dataclass
 class ExperiencePipelineConfig:
-    """Config for experience pipeline."""
+    """Config for experience pipeline.
+
+    Experience Pipeline is used to pre-process rollout experiences for better training.
+    """
 
     # The list of experience operators to apply, operators will be applied in the order they are defined
     operators: List[OperatorConfig] = field(default_factory=list)
@@ -157,6 +160,32 @@ class ExperiencePipelineConfig:
     inputs: Dict[str, StorageConfig] = field(default_factory=dict)
     # The output buffer will automatically set to the trainer input buffer, so we do not need to set it here.
     output: Optional[StorageConfig] = None
+
+
+@Experimental
+@dataclass
+class TaskPipelineConfig:
+    """Config for task pipeline.
+
+    Task Pipeline is used to pre-process raw tasks for better exploring. Currently, we only support using
+    Data-Juicer operators for task pipeline.
+    """
+
+    # The list of data-juicer operators to apply, operators will be applied in the order they are defined
+    operators: List[OperatorConfig] = field(default_factory=list)
+    # number of process
+    num_process: int = 4
+    # The path to the Data-Juicer config file. If set, operators and num_process will be ignored
+    config_path: Optional[str] = None
+
+    # Raw input tasksets. Currently, task pipeline only support local file as inputs,
+    # e.g., /path/to/file.jsonl or /path/to/file.parquet, not a directory or huggingface path
+    inputs: List[str] = field(default_factory=list)
+    # Output task buffer, if not set, use `buffer.explorer_input.taskset`. In most cases, users do not need to set this field.
+    output: Optional[StorageConfig] = None
+
+    # The list of fields extracted from the input tasksets and processed into the output taskset
+    target_fields: List[str] = field(default_factory=list)
 
 
 @dataclass
@@ -193,7 +222,7 @@ class DataProcessorConfig:
 
     # support two types of data pipelines for now
     # 1. For task. Data preprocessing from raw dataset to the task set
-    task_pipeline: Optional[DataPipelineConfig] = None
+    task_pipeline: Optional[TaskPipelineConfig] = None
     # 2. For experience. Data processing for rollouts
     experience_pipeline: Optional[ExperiencePipelineConfig] = field(
         default_factory=ExperiencePipelineConfig
@@ -656,7 +685,7 @@ class Config:
             if self.buffer.trainer_input.sft_warmup_dataset.ray_namespace is None:
                 self.buffer.trainer_input.sft_warmup_dataset.ray_namespace = self.ray_namespace
 
-        # check input/output buffers in experience pipelines
+        # check input/output buffers in pipelines
         if self.data_processor.experience_pipeline is not None:
             if (
                 self.data_processor.experience_pipeline.save_input
@@ -667,6 +696,16 @@ class Config:
                 )
                 logger.info(
                     f"Auto set `data_processor.experience_pipeline.input_save_path` to {self.data_processor.experience_pipeline.input_save_path}"
+                )
+        if self.data_processor.task_pipeline is not None:
+            if self.data_processor.task_pipeline.output is None:
+                self.data_processor.task_pipeline.output = self.buffer.explorer_input.taskset
+            if self.data_processor.task_pipeline.output.path and os.path.exists(
+                self.data_processor.task_pipeline.output.path
+            ):
+                raise ValueError(
+                    f"Task pipeline output path {self.data_processor.task_pipeline.output.path} already exists.\n"
+                    "Please choose a different output path to avoid overwriting."
                 )
 
         # check train_batch_size

@@ -29,11 +29,18 @@ class DataJuicerOperator(ExperienceOperator):
 
         Note:
             - Must include one of the following, and the priority is from high to low:
-                - `operators` (`List[Dict]`)
                 - `config_path` (`str`)
+                - `operators` (`List[Dict]`)
         """
         self.client = DataJuicerClient(config=service_config)
-        self.client.initialize({"operators": operators, "config_path": config_path, "np": np})
+        self.client.initialize(
+            {
+                "operators": operators,
+                "config_path": config_path,
+                "np": np,
+                "pipeline_type": "experience",
+            }
+        )
 
     def process(self, exps: List[Experience]) -> Tuple[List[Experience], Dict]:
         return self.client.process_experience(exps)

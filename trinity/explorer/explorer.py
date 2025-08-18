@@ -218,7 +218,7 @@ class Explorer:
                 if self.last_sync_successful
                 else RunningStatus.REQUIRE_SYNC,
             )
-            await self.experience_pipeline.close.remote()
+            await self.shutdown()
             return False
         self.scheduler.schedule(tasks, batch_id=self.explore_step_num + 1)
         self.explore_step_num += 1
@@ -305,9 +305,7 @@ class Explorer:
         return True
 
     async def save_checkpoint(self, sync_weight: bool = False) -> None:
-        log_task = asyncio.create_task(
-            self._finish_steps(self.last_sync_step + 1, self.explore_step_num, self.model_version)
-        )
+        await self._finish_steps(self.last_sync_step + 1, self.explore_step_num, self.model_version)
 
         if sync_weight:
             # sync weights
@@ -319,9 +317,6 @@ class Explorer:
             self.logger.info(
                 f"Explorer sync_weights at step {self.explore_step_num} finished, model version = {self.model_version}."
             )
-
-        # overlay log and weight sync
-        await log_task
 
         # save explore checkpoint
         self.cache.save_explorer(
@@ -371,8 +366,18 @@ class Explorer:
         self.monitor.log(metric, step)
 
     async def shutdown(self) -> None:
-        await self.scheduler.stop()
-        self.monitor.close()
+        if self.scheduler:
+            await self.scheduler.stop()
+            self.scheduler = None
+        if self.experience_pipeline:
+            await self.experience_pipeline.close.remote()
+            self.experience_pipeline = None
+        if self.monitor:
+            self.monitor.close()
+            self.monitor = None
+        self.logger.info(
+            f"Explorer ({self.config.explorer.name}) shutdown successfully at step {self.explore_step_num}."
+        )
 
     def is_alive(self) -> bool:
         """Check if the explorer is alive."""
