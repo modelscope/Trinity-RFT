@@ -53,6 +53,7 @@ class vLLMRolloutModel(InferenceModel):
             temperature=0.0,
             max_tokens=config.max_response_tokens,
             min_tokens=1,
+            truncate_prompt_tokens=config.max_model_len-1,
             skip_special_tokens=True,
             include_stop_str_in_output=False,
             output_kind=RequestOutputKind.FINAL_ONLY,
