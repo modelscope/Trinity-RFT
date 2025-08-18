@@ -11,7 +11,6 @@ algorithm:
     clip_range: 0.2
     use_token_level_loss_in_sft: true
     use_dynamic_bsz: true
-    repeat_times: 8
     ppo_mini_batch_size: 320
     ppo_micro_batch_size_per_gpu: 4
     ngpus_trainer: 4
@@ -25,7 +24,7 @@ cluster:
   node_num: 1
   gpu_per_node: 8
 buffer:
-  total_epochs: 1
+  total_epochs: 10
   batch_size: 40
   max_retry_times: 3
   max_retry_interval: 1
@@ -56,6 +55,7 @@ buffer:
       storage_type: queue
       path: /PATH/TO/BUFFER/
     sft_warmup_dataset:
+      total_epochs: 10
       name: math_sft
       storage_type: file
       algorithm_type: sft
