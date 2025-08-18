@@ -7,7 +7,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional
 
 from omegaconf import OmegaConf
-from verl.utils import set_pad_token_id
+from verl.utils.tokenizer import set_pad_token_id
 
 from trinity.common.constants import (
     EXPLORER_NAME,
