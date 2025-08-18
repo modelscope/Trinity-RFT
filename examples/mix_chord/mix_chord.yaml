@@ -1,6 +1,6 @@
 project: "mix_chord"
 name: "test_mix_chord"
-checkpoint_root_dir: /PATH/TO/checkpoints/
+checkpoint_root_dir: /PATH/TO/CHECKPOINT/
 algorithm:
   algorithm_type: mix_chord
   repeat_times: 8
@@ -23,7 +23,7 @@ algorithm:
     train_batch_size_expert: 64
     train_batch_size_usual: 256
 model:
-  model_path: /cpfs/data/shared/qwen/Qwen2.5-7B-Instruct
+  model_path: /PATH/TO/MODEL/
   max_response_tokens: 10240
   max_model_len: 11264
 cluster:
@@ -38,7 +38,7 @@ buffer:
     taskset:
       name: openr1_data_filtered_int
       storage_type: file
-      path: /your_path/to/rl_dataset
+      path: /PATH/TO/RL_DATASET
       format:
         prompt_key: 'problem'
         response_key: 'answer'
@@ -58,7 +58,7 @@ buffer:
       name: SFT_data
       storage_type: file
       algorithm_type: sft
-      path: /your_path/to/sft_dataset
+      path: /PATH/TO/SFT_DATASET
       split: 'train'
       format:
         prompt_type: messages
