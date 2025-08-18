@@ -187,10 +187,8 @@ def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
             config_path,
         )
     envs = os.environ.copy()
-    if "PLUGIN_DIRS" in envs:
-        envs["PLUGIN_DIRS"] = os.pathsep.join([plugin_dir, envs["PLUGIN_DIRS"]])
-    else:
-        envs["PLUGIN_DIRS"] = plugin_dir or ""
+    all_plugin_dirs = [d for d in (plugin_dir, envs.get("PLUGIN_DIRS")) if d]
+    envs["PLUGIN_DIRS"] = os.pathsep.join(all_plugin_dirs)
     if dlc:
         from trinity.utils.dlc_utils import setup_ray_cluster
 
