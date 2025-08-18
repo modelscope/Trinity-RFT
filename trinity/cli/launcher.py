@@ -9,7 +9,7 @@ from pprint import pprint
 import ray
 
 from trinity.common.config import Config, load_config
-from trinity.data.utils import check_and_activate_data_processor, stop_data_processor
+from trinity.data.utils import check_and_activate_data_processor
 from trinity.explorer.explorer import Explorer
 from trinity.trainer.trainer import Trainer
 from trinity.utils.log import get_logger
