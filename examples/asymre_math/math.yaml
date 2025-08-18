@@ -1,3 +1,6 @@
+# Configuration file for the AsymRE Math project.
+# REINFORCE for off-Policy Reinforcement Learning: Balancing positive and negative rewards
+# https://arxiv.org/abs/2506.20520.
 project: "Trinity-RFT-MATH"
 name: asymre_math
 checkpoint_root_dir:  /PATH/TO/CHECKPOINT/
@@ -64,7 +67,7 @@ explorer:
     seed: 42
 synchronizer:
   sync_method: 'nccl'
-  sync_interval: 500
+  sync_interval: 250
   sync_timeout: 3600  # Increased from 2000 to 3600 seconds (1 hour)
 trainer:
   trainer_type: 'verl'
