@@ -225,6 +225,8 @@ class Experience:
         res = {
             "eid": self.eid,
             "type": self.experience_type,
+            "prompt_length": self.prompt_length,
+            "response_length": len(self.tokens) - self.prompt_length,  # type: ignore [arg-type]
             "info": self.info,
             "metrics": self.metrics,
         }

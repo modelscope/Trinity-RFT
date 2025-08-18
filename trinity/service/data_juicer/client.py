@@ -1,7 +1,7 @@
 import io
 import json
 import time
-from multiprocessing import Process
+from multiprocessing import Process, set_start_method
 from typing import Dict, List, Tuple
 
 import pyarrow as pa
@@ -43,6 +43,7 @@ class DataJuicerClient:
             f"Starting DataJuicer server at {self.config.server_url} on port {self.config.port}"
         )
         self.url = f"http://localhost:{self.config.port}"
+        set_start_method("spawn", force=True)
         server_process = Process(
             target=main, kwargs={"host": "localhost", "port": self.config.port, "debug": False}
         )
@@ -90,7 +91,16 @@ class DataJuicerClient:
                 f"Failed to process experiences: {response.status_code}, {response.json().get('error')}"
             )
         metrics = json.loads(response.headers.get("X-Metrics"))
-        exps = from_hf_datasets(deserialize_arrow_to_dataset(response.content))
+        dataset = deserialize_arrow_to_dataset(response.content)
+        exps = from_hf_datasets(dataset)
+        # move all computed stats into the info field of experiences
+        for exp, sample in zip(exps, dataset):
+            if "__dj__stats__" not in sample:
+                continue
+            if exp.info is None:
+                exp.info = {}
+            for stats_key in sample["__dj__stats__"]:
+                exp.info[stats_key] = sample["__dj__stats__"][stats_key]
         return exps, metrics
 
     def process_task(self) -> Dict:

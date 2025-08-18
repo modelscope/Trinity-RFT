@@ -63,7 +63,9 @@ class TestRewardShapingMapper(unittest.TestCase):
         )
         res_exps, metrics = op.process(deepcopy(experiences))
         self.assertEqual(len(res_exps), task_num * repeat_times * step_num)
-        self.assertEqual(len(metrics), 0)
+        self.assertIn("reward_diff/mean", metrics)
+        self.assertIn("reward_diff/min", metrics)
+        self.assertIn("reward_diff/max", metrics)
 
         for prev_exp, res_exp in zip(experiences, res_exps):
             self.assertAlmostEqual(
