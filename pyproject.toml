@@ -42,7 +42,7 @@ dependencies = [
     "jsonlines",
     "sortedcontainers",
     "word2number",
-    "transformers<4.54.0",
+    "transformers<4.54.0",  # TODO: remove when https://github.com/vllm-project/vllm-ascend/issues/2046 is fixed
 ]
 
 [project.scripts]
