@@ -57,6 +57,12 @@ class RewardShapingMapper(ExperienceOperator):
             res_reward = res_exp.reward
             reward_diff.append(res_reward - previous_reward)
             res_exps.append(res_exp)
+        if len(reward_diff) == 0:
+            return res_exps, {
+                "reward_diff/mean": 0,
+                "reward_diff/min": 0,
+                "reward_diff/max": 0,
+            }
         metrics = {
             "reward_diff/mean": 1.0 * sum(reward_diff) / len(reward_diff),
             "reward_diff/min": min(reward_diff),

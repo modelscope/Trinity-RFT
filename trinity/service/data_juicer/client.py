@@ -88,6 +88,8 @@ class DataJuicerClient:
         for exp, sample in zip(exps, dataset):
             if "__dj__stats__" not in sample:
                 continue
+            if exp.info is None:
+                exp.info = {}
             for stats_key in sample["__dj__stats__"]:
                 exp.info[stats_key] = sample["__dj__stats__"][stats_key]
         return exps, metrics

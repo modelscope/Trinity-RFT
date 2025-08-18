@@ -34,17 +34,6 @@ def activate_data_processor(data_processor_url: str, config_path: str):
         return
 
 
-def stop_data_processor(base_data_processor_url: str):
-    """Stop all pipelines in the data processor"""
-    from trinity.cli.client import request
-
-    logger.info(f"Stopping all pipelines in {base_data_processor_url}...")
-    res = request(url=f"{base_data_processor_url}/close")
-    if res["return_code"] != 0:
-        logger.error(f"Failed to stop all data pipelines: {res['return_msg']}.")
-        return
-
-
 def validate_data_pipeline(
     data_pipeline_config: DataPipelineConfig, pipeline_type: DataProcessorPipelineType
 ):
