@@ -13,7 +13,6 @@ from trinity.common.config import Config, load_config
 from trinity.explorer.explorer import Explorer
 from trinity.trainer.trainer import Trainer
 from trinity.utils.log import get_logger
-from trinity.utils.plugin_loader import load_plugins
 
 logger = get_logger(__name__)
 
@@ -118,22 +117,29 @@ def both(config: Config) -> None:
 
 
 def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
-    load_plugins(plugin_dir)
     config = load_config(config_path)
     config.check_and_update()
     pprint(config)
+
     # try to run task pipeline for raw data
     check_and_run_task_pipeline(config)
+
+    envs = os.environ.copy()
+    all_plugin_dirs = [d for d in (plugin_dir, envs.get("PLUGIN_DIRS")) if d]
+    envs["PLUGIN_DIRS"] = os.pathsep.join(all_plugin_dirs)
+
     if dlc:
         from trinity.utils.dlc_utils import setup_ray_cluster
 
-        setup_ray_cluster(namespace=config.ray_namespace)
+        setup_ray_cluster(namespace=config.ray_namespace, envs=envs)
     else:
         from trinity.utils.dlc_utils import is_running
 
         if not is_running:
             raise RuntimeError("Ray is not running, please start it by `ray start --head`.")
-        ray.init(namespace=config.ray_namespace, ignore_reinit_error=True)
+        ray.init(
+            namespace=config.ray_namespace, ignore_reinit_error=True, runtime_env={"env_vars": envs}
+        )
     try:
         if config.mode == "explore":
             explore(config)
