@@ -59,6 +59,33 @@ class DefaultEntropyLossFn(EntropyLossFn):
         return entropy_loss * self.entropy_coef, {"entropy_loss": entropy_loss.detach().item()}
 
 
+@ENTROPY_LOSS_FN.register_module("mix")
+class MixEntropyLossFn(EntropyLossFn):
+    """
+    Basic entropy loss function for mix algorithm.
+    """
+
+    def __init__(self, entropy_coef: float):
+        self.entropy_coef = entropy_coef
+
+    def __call__(
+        self,
+        entropy: torch.Tensor,
+        action_mask: torch.Tensor,
+        expert_mask: torch.Tensor = None,
+        **kwargs,
+    ) -> Tuple[torch.Tensor, Dict]:
+        if expert_mask is None:
+            raise ValueError("expert_mask is required for MixEntropyLossFn")
+        assert (
+            len(expert_mask) == entropy.shape[0]
+        ), f"Error: {len(expert_mask)=} != {entropy.shape[0]=}"
+        entropy = entropy[~expert_mask]
+        action_mask = action_mask[~expert_mask]
+        entropy_loss = masked_mean(entropy, action_mask)
+        return entropy_loss * self.entropy_coef, {"entropy_loss": entropy_loss.detach().item()}
+
+
 @ENTROPY_LOSS_FN.register_module("none")
 class DummyEntropyLossFn(EntropyLossFn):
     """

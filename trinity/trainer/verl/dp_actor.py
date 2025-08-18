@@ -196,6 +196,7 @@ class DataParallelPPOActor(DPActor):
                     entropy_loss, entropy_loss_metrics = self.entropy_loss_fn(  # type: ignore
                         entropy=entropy,
                         action_mask=response_mask,
+                        **data,
                     )
                     prefix_metrics(
                         src_metrics=entropy_loss_metrics,

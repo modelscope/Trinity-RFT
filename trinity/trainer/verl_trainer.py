@@ -375,7 +375,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             self._save_checkpoint()
         if block_until_saved:
             self.actor_rollout_wg.wait_on_save_thread()
-            if self.algorithm.use_critic:
+            if self.algorithm and self.algorithm.use_critic:
                 self.critic_wg.wait_on_save_thread()
 
     def sync_weight(self) -> None:

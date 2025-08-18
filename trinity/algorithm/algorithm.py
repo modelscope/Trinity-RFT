@@ -195,6 +195,30 @@ class MIXAlgorithm(AlgorithmType):
             "policy_loss_fn": "mix",
             "advantage_fn": "grpo",
             "sample_strategy": "mix",
+            "entropy_loss_fn": "mix",
+        }
+
+
+@ALGORITHM_TYPE.register_module("mix_chord")
+class MIXCHORDAlgorithm(AlgorithmType):
+    """MIX algorithm."""
+
+    use_critic: bool = False
+    use_reference: bool = True
+    compute_advantage_in_trainer: bool = False
+    use_rollout: bool = True
+    can_balance_batch: bool = True
+    schema: type = ExperienceModel
+
+    @classmethod
+    def default_config(cls) -> Dict:
+        return {
+            "repeat_times": 8,
+            "add_strategy": "grpo",
+            "policy_loss_fn": "mix_chord",
+            "advantage_fn": "grpo",
+            "sample_strategy": "mix",
+            "entropy_loss_fn": "mix",
         }
 
 

@@ -52,16 +52,22 @@ class MixSampleStrategy(SampleStrategy):
                 if exp.info is None:
                     exp.info = {}
                 exp.info["is_expert"] = False
+                exp.info["step"] = step
 
             expert_exp_list = await self.expert_exp_buffer.read_async()
             for exp in expert_exp_list:
+                # we add fake rewards and logprobs to make it compatible
                 exp.reward = 0.0
                 exp.logprobs = torch.zeros_like(
+                    exp.tokens[exp.prompt_length :], dtype=torch.float32
+                )
+                exp.advantages = torch.zeros_like(
                     exp.tokens[exp.prompt_length :], dtype=torch.float32
                 )
                 if exp.info is None:
                     exp.info = {}
                 exp.info["is_expert"] = True
+                exp.info["step"] = step
 
             exp_list = usual_exp_list + expert_exp_list
             repr_samples = representative_sample(exp_list)
@@ -75,7 +81,12 @@ class MixSampleStrategy(SampleStrategy):
                         source_field="is_expert",
                         destination_field="expert_mask",
                         data_type=torch.bool,
-                    )
+                    ),
+                    CustomField(
+                        source_field="step",
+                        destination_field="step",
+                        data_type=torch.int32,
+                    ),
                 ],
             )  # type: ignore
         return exps, metrics, repr_samples
