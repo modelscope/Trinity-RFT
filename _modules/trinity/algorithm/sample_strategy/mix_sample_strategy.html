@@ -152,16 +152,22 @@
                 <span class="k">if</span> <span class="n">exp</span><span class="o">.</span><span class="n">info</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">exp</span><span class="o">.</span><span class="n">info</span> <span class="o">=</span> <span class="p">{}</span>
                 <span class="n">exp</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;is_expert&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">exp</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;step&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">step</span>
 
             <span class="n">expert_exp_list</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">expert_exp_buffer</span><span class="o">.</span><span class="n">read_async</span><span class="p">()</span>
             <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">expert_exp_list</span><span class="p">:</span>
+                <span class="c1"># we add fake rewards and logprobs to make it compatible</span>
                 <span class="n">exp</span><span class="o">.</span><span class="n">reward</span> <span class="o">=</span> <span class="mf">0.0</span>
                 <span class="n">exp</span><span class="o">.</span><span class="n">logprobs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span>
+                    <span class="n">exp</span><span class="o">.</span><span class="n">tokens</span><span class="p">[</span><span class="n">exp</span><span class="o">.</span><span class="n">prompt_length</span> <span class="p">:],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span>
+                <span class="p">)</span>
+                <span class="n">exp</span><span class="o">.</span><span class="n">advantages</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span>
                     <span class="n">exp</span><span class="o">.</span><span class="n">tokens</span><span class="p">[</span><span class="n">exp</span><span class="o">.</span><span class="n">prompt_length</span> <span class="p">:],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span>
                 <span class="p">)</span>
                 <span class="k">if</span> <span class="n">exp</span><span class="o">.</span><span class="n">info</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">exp</span><span class="o">.</span><span class="n">info</span> <span class="o">=</span> <span class="p">{}</span>
                 <span class="n">exp</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;is_expert&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">exp</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;step&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">step</span>
 
             <span class="n">exp_list</span> <span class="o">=</span> <span class="n">usual_exp_list</span> <span class="o">+</span> <span class="n">expert_exp_list</span>
             <span class="n">repr_samples</span> <span class="o">=</span> <span class="n">representative_sample</span><span class="p">(</span><span class="n">exp_list</span><span class="p">)</span>
@@ -175,7 +181,12 @@
                         <span class="n">source_field</span><span class="o">=</span><span class="s2">&quot;is_expert&quot;</span><span class="p">,</span>
                         <span class="n">destination_field</span><span class="o">=</span><span class="s2">&quot;expert_mask&quot;</span><span class="p">,</span>
                         <span class="n">data_type</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">,</span>
-                    <span class="p">)</span>
+                    <span class="p">),</span>
+                    <span class="n">CustomField</span><span class="p">(</span>
+                        <span class="n">source_field</span><span class="o">=</span><span class="s2">&quot;step&quot;</span><span class="p">,</span>
+                        <span class="n">destination_field</span><span class="o">=</span><span class="s2">&quot;step&quot;</span><span class="p">,</span>
+                        <span class="n">data_type</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span>
+                    <span class="p">),</span>
                 <span class="p">],</span>
             <span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="k">return</span> <span class="n">exps</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">repr_samples</span></div>
