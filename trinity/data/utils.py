@@ -39,7 +39,7 @@ def stop_data_processor(base_data_processor_url: str):
     from trinity.cli.client import request
 
     logger.info(f"Stopping all pipelines in {base_data_processor_url}...")
-    res = request(url=f"{base_data_processor_url}/stop_all")
+    res = request(url=f"{base_data_processor_url}/close")
     if res["return_code"] != 0:
         logger.error(f"Failed to stop all data pipelines: {res['return_msg']}.")
         return

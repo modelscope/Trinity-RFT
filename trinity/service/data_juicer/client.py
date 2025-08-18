@@ -82,7 +82,14 @@ class DataJuicerClient:
                 f"Failed to process experiences: {response.status_code}, {response.json().get('error')}"
             )
         metrics = json.loads(response.headers.get("X-Metrics"))
-        exps = from_hf_datasets(deserialize_arrow_to_dataset(response.content))
+        dataset = deserialize_arrow_to_dataset(response.content)
+        exps = from_hf_datasets(dataset)
+        # move all computed stats into the info field of experiences
+        for exp, sample in zip(exps, dataset):
+            if "__dj__stats__" not in sample:
+                continue
+            for stats_key in sample["__dj__stats__"]:
+                exp.info[stats_key] = sample["__dj__stats__"][stats_key]
         return exps, metrics
 
     def close(self):

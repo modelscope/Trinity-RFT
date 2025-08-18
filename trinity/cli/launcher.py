@@ -156,10 +156,6 @@ def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
 
             stop_ray_cluster(namespace=config.ray_namespace)
 
-        # stop all pipelines
-        if data_processor_config.data_processor_url is not None:
-            stop_data_processor(data_processor_config.data_processor_url)
-
 
 def studio(port: int = 8501):
     from streamlit.web import cli as stcli

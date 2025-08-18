@@ -1,29 +1,31 @@
-project: "Trinity-RFT-gsm8k-experience-pipeline"
-name: "qwen2.5-1.5B-gsm8k-experience-pipeline"
+project: "Trinity-RFT-gsm8k-exp-pipe"
+name: "qwen2.5-1.5B-gsm8k-exp-pipe"
 checkpoint_root_dir: /PATH/TO/CHECKPOINT/
+
+service:
+  data_juicer:
+    server_url: 'http://127.0.0.1:5005'
+    port: 5005
+data_processor:
+  data_processor_url: 'http://127.0.0.1:5005'
+  # experience pipeline related
+  experience_pipeline:
+    operators:
+      - name: data_juicer
+        args:
+          config_path: 'examples/grpo_gsm8k_experience_pipeline/dj_scoring_exp.yaml'
+      - name: reward_shaping_mapper
+        args:
+          reward_shaping_configs:
+            - stats_key: 'llm_quality_score'
+              op_type: ADD
+              weight: 1.0
+    save_input: false
+
+
 algorithm:
   algorithm_type: grpo
   repeat_times: 8
-data_processor:
-  data_processor_url: 'http://127.0.0.1:5005/data_processor'
-  # experience pipeline related
-  # experience_pipeline:
-  #   # I/O buffers
-  #   input_buffers:
-  #     - name: gsm8k_exp_output
-  #   output_buffer:
-  #     name: reshaped_gsm8k_exp_input
-  #   # format mapping
-  #   format:
-  #     reward_key: 'reward'  # the key name of the reward in the experience
-  #   # data active iterator related
-  #   dj_config_path: 'examples/grpo_gsm8k_experience_pipeline/dj_scoring_exp.yaml'
-  #   clean_strategy: 'iterative'
-  #   # reward shaping
-  #   reward_shaping:
-  #     - stats_key: 'llm_quality_score'
-  #       op_type: ADD
-  #       weight: 1.0
 model:
   model_path: /PATH/TO/MODEL/
   max_response_tokens: 1024
@@ -58,17 +60,13 @@ buffer:
         prompt_key: 'question'
         response_key: 'answer'
     default_workflow_type: 'math_workflow'
-  explorer_output:
-    name: gsm8k_exp_output
-    storage_type: queue
-    path: 'sqlite:///gsm8k_exp_output.db'
   trainer_input:
     experience_buffer:
-      name: reshaped_gsm8k_exp_input
+      name: reshaped_gsm8k_buffer
       storage_type: queue
-      path: 'sqlite:///reshaped_gsm8k_exp_input.db'
+      path: 'sqlite:///reshaped_gsm8k.db'
 explorer:
-  eval_interval: 50
+  eval_interval: 6
   runner_num: 32
   rollout_model:
     engine_type: vllm_async
