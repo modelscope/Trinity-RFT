@@ -9,8 +9,8 @@ algorithm:
   policy_loss_fn_args:
     mu: 0.1
     clip_range: 0.2
-    use_token_level_loss_in_sft: False
-    use_dynamic_bsz: False
+    use_token_level_loss_in_sft: true
+    use_dynamic_bsz: true
     repeat_times: 8
     ppo_mini_batch_size: 256
     ppo_micro_batch_size_per_gpu: 4
