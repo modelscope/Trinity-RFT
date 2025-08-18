@@ -46,6 +46,7 @@ class RewardShapingMapper(ExperienceOperator):
             # skip experiences that don't have reward
             if exp.reward is None:
                 res_exps.append(exp)
+                reward_diff.append(0.0)
                 continue
             res_exp = exp
             previous_reward = exp.reward
@@ -53,6 +54,7 @@ class RewardShapingMapper(ExperienceOperator):
                 res_exp = self._reward_shaping_single(res_exp, reward_shaping_config)
             if res_exp.reward is None:
                 res_exps.append(exp)
+                reward_diff.append(0.0)
                 continue
             res_reward = res_exp.reward
             reward_diff.append(res_reward - previous_reward)

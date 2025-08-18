@@ -7,7 +7,6 @@ service:
     server_url: 'http://127.0.0.1:5005'
     port: 5005
 data_processor:
-  data_processor_url: 'http://127.0.0.1:5005'
   # experience pipeline related
   experience_pipeline:
     operators:

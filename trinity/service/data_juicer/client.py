@@ -43,7 +43,7 @@ class DataJuicerClient:
             f"Starting DataJuicer server at {self.config.server_url} on port {self.config.port}"
         )
         self.url = f"http://localhost:{self.config.port}"
-        set_start_method("spawn")
+        set_start_method("spawn", force=True)
         server_process = Process(
             target=main, kwargs={"host": "localhost", "port": self.config.port, "debug": False}
         )
