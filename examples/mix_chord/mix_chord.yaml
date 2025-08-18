@@ -3,7 +3,7 @@ name: "test_mix_chord"
 checkpoint_root_dir: /PATH/TO/CHECKPOINT/
 algorithm:
   algorithm_type: mix_chord
-  repeat_times: 8
+  repeat_times: 8 # or 16 for better performance in math related tasks
   kl_loss_fn_args:
     kl_coef: 0.0
   sample_strategy_args:
@@ -17,11 +17,11 @@ algorithm:
     clip_range: 0.2
     use_token_level_loss_in_sft: true
     use_dynamic_bsz: true
-    ppo_mini_batch_size: 320
+    ppo_mini_batch_size: 320 # 320 = 256 + 64; if you set repeat times = 16, then it shoudle be 32 * 16 + 64
     ppo_micro_batch_size_per_gpu: 4
     ngpus_trainer: 4
     train_batch_size_expert: 64
-    train_batch_size_usual: 256
+    train_batch_size_usual: 256 # (40 batchsize * (1 - 0.2 expert_data_ratio)) * 8 repeat times
 model:
   model_path: /PATH/TO/MODEL/
   max_response_tokens: 10240
@@ -30,7 +30,7 @@ cluster:
   node_num: 1
   gpu_per_node: 8
 buffer:
-  total_epochs: 25
+  total_epochs: 4
   batch_size: 40
   max_retry_times: 3
   max_retry_interval: 1
@@ -55,6 +55,7 @@ buffer:
       storage_type: queue
       path: 'sqlite:///test_mix_chord.db'
     sft_warmup_dataset:
+      total_epochs: 25
       name: SFT_data
       storage_type: file
       algorithm_type: sft
@@ -80,7 +81,7 @@ synchronizer:
   sync_timeout: 1200
 trainer:
   trainer_type: 'verl'
-  trainer_config_path: 'examples/mix_chord/train_chord.yaml'
+  trainer_config_path: 'examples/mix_chord/train_mix_chord.yaml'
   save_interval: 50
 monitor:
   monitor_type: wandb
