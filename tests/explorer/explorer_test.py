@@ -1,4 +1,5 @@
 """Tests for explorer."""
+import json
 import os
 from abc import abstractmethod
 from datetime import datetime
@@ -11,7 +12,7 @@ from tests.tools import (
     get_template_config,
     get_unittest_dataset_config,
 )
-from trinity.buffer import get_buffer_reader
+from trinity.buffer.utils import default_storage_path
 from trinity.cli.launcher import explore
 
 
@@ -113,16 +114,13 @@ class TestExplorerGSM8k(BaseExplorerCase):
             self.assertTrue(count <= 2 * 4)  # repeat_times * batch_size
             self.assertTrue(count % 2 == 0)  # should be multiple of repeat_times
 
-        reader = get_buffer_reader(
+        exp_save_path = default_storage_path(
             self.config.buffer.trainer_input.experience_buffer, self.config.buffer
         )
-        exps = []
-        try:
-            batch = reader.read()
-            exps.extend(batch)
-            self.assertTrue(len(batch[0].tokens) > 8192)
-        except StopIteration:
-            pass
-        self.assertTrue(len(exps) <= 4 * 2 * 4)  # step * repeat_times * batch_size
-        self.assertTrue(len(exps) % (2 * 4) == 0)  # should be multiple of repeat_times
+        with open(exp_save_path, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+            self.assertTrue(len(lines) <= 4 * 2 * 4)  # step * repeat_times * batch_size
+            self.assertTrue(len(lines) % (2 * 4) == 0)
+            exp = json.loads(lines[0])
+            self.assertEqual(exp["response_length"], 8192)
         ray.get(explorer.shutdown.remote())
