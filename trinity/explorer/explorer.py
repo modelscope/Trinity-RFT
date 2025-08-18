@@ -76,7 +76,7 @@ class Explorer:
         self.logger.info("Finished initializing Explorer.")
         self.collect_experiences = self.config.explorer.collect_experiences
         self.generated_experience_cnt = 0
-        if self.collect_experiences:
+        if self.collect_experiences and self.config.mode != "bench":
             assert (
                 self.experience_buffer is not None
             ), "Experience buffer is required when collect_experiences is True."

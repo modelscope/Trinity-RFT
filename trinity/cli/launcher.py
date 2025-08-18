@@ -18,7 +18,6 @@ from trinity.data.utils import (
 from trinity.explorer.explorer import Explorer
 from trinity.trainer.trainer import Trainer
 from trinity.utils.log import get_logger
-from trinity.utils.plugin_loader import load_plugins
 
 logger = get_logger(__name__)
 
@@ -159,7 +158,6 @@ def both(config: Config) -> None:
 
 
 def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
-    load_plugins(plugin_dir)
     config = load_config(config_path)
     config.check_and_update()
     pprint(config)
@@ -190,9 +188,9 @@ def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
         )
     envs = os.environ.copy()
     if "PLUGIN_DIRS" in envs:
-        envs["PLUGIN_DIRS"] = os.pathsep.join(plugin_dir, envs["PLUGIN_DIRS"])
+        envs["PLUGIN_DIRS"] = os.pathsep.join([plugin_dir, envs["PLUGIN_DIRS"]])
     else:
-        envs["PLUGIN_DIRS"] = plugin_dir
+        envs["PLUGIN_DIRS"] = plugin_dir or ""
     if dlc:
         from trinity.utils.dlc_utils import setup_ray_cluster
 
