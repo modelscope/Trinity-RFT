@@ -114,7 +114,7 @@ class MIXPolicyLossFn(PolicyLossFn):
 
         metrics = {f"usual/{k}": v for k, v in grpo_metrics.items()}
         metrics.update({f"expert/{k}": v for k, v in sft_metrics.items()})
-        metrics.update({"loss": loss.item()})
+        metrics["loss"] = loss.item()
 
         return loss, metrics
 

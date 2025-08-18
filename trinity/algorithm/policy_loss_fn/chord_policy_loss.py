@@ -13,9 +13,9 @@ from trinity.algorithm.utils import masked_mean
 
 def mu_schedule_function(
     global_step: int, mu_warmup_steps: int, mu_decay_steps: int, mu_peak: float, mu_valley: float
-):
+) -> float:
     """
-    Cosine decay with warmup phase
+    Computes a cosine decay schedule with a warmup phase for the mu parameter.
     """
     # Warmup
     if global_step < mu_warmup_steps:
@@ -238,8 +238,7 @@ class MIXCHORDPolicyLossFn(PolicyLossFn):
 
         metrics = {f"usual/{k}": v for k, v in grpo_metrics.items()}
         metrics.update({f"expert/{k}": v for k, v in sft_metrics.items()})
-        metrics.update({"loss": loss.item()})
-        metrics.update({"mu": mu})
+        metrics.update({"loss": loss.item(), "mu": mu})
 
         return loss, metrics
 
