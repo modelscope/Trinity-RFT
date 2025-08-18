@@ -5,6 +5,7 @@ import os
 import shutil
 import sys
 from pathlib import Path
+from typing import List, Union
 
 from trinity.utils.log import get_logger
 
@@ -13,7 +14,7 @@ logger = get_logger(__name__)
 loaded_dirs = set()
 
 
-def load_plugins(plugin_dirs: str = None) -> None:
+def load_plugins(plugin_dirs: Union[str, List[str]] = None) -> None:
     """
     Load plugin modules from a directory.
     """
@@ -24,6 +25,8 @@ def load_plugins(plugin_dirs: str = None) -> None:
             plugin_dir = plugin_dir.strip()
             if plugin_dir:
                 plugin_dirs.append(plugin_dir)
+    if not isinstance(plugin_dirs, list):
+        plugin_dirs = [plugin_dirs]
     for plugin_dir in plugin_dirs:
         if plugin_dir in loaded_dirs:
             continue

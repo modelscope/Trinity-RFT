@@ -42,6 +42,7 @@ dependencies = [
     "jsonlines",
     "sortedcontainers",
     "word2number",
+    "transformers<4.54.0",
 ]
 
 [project.scripts]
