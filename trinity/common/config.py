@@ -187,6 +187,16 @@ class TaskPipelineConfig:
     # The list of fields extracted from the input tasksets and processed into the output taskset
     target_fields: List[str] = field(default_factory=list)
 
+    # weights for priority computing. Usually including 4 types of weights:
+    # - difficulty
+    # - diversity
+    # - usage_frequency
+    # - quality
+    priority_weights: Dict[str, float] = field(default_factory=dict)
+
+    # number of samples to select after task pipeline. -1 means all
+    top_k: int = -1
+
 
 @dataclass
 class DataPipelineConfig:

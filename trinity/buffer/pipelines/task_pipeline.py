@@ -51,6 +51,8 @@ class TaskPipeline:
             "inputs": [path for path in pipeline_config.inputs],
             "target_fields": pipeline_config.target_fields,
             "output_dir": pipeline_config.output.path,
+            "priority_weights": pipeline_config.priority_weights,
+            "top_k": pipeline_config.top_k,
         }
         return converted_config
 
