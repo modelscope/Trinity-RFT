@@ -182,18 +182,10 @@ Sometimes, you might need to involve human feedbacks for some raw data. In this 
 
 Before getting started, you need to prepare the main environment of Trinity-RFT according to the installation section of the README file, and [start a label-studio server](https://github.com/modelscope/data-juicer/tree/main/tools/humanops) from Data-Juicer from source.
 
-### Data Preparation
-
-#### Prepare the Data Processor
-
-As the overall framework of Trinity-RFT shows, the data processor is one of the high-level functions. Trinity-RFT encapsulates the data processor as an independent service to avoid dependency conflict issues. Thus you need to prepare a split environment for this module and start the server.
+In this example, we start the data processor server manually. Thus, you need to install the dependencies in the `data` split.
 
 ```shell
-# prepare split environments, including the one of data processor
-python scripts/install.py
-
-# start all split servers
-python scripts/start_servers.py
+pip install -e ".[data]"
 ```
 
 ### Configure the Data Processor
@@ -204,60 +196,42 @@ In this example, assume that you need to select the chosen and rejected response
 
 ```yaml
 data_processor:
-  data_processor_url: 'http://127.0.0.1:5005/data_processor'
   # task pipeline related
   task_pipeline:
-    # I/O buffers
-    input_buffers:
-      - name: 'raw_input'
-        path: 'tests/test_data/test_human_annotator'
-        storage_type: 'file'
-        raw: true
-    output_buffer:
-      name: 'raw_output'
-      path: './outputs/task_pipeline_output/prioritized_gsm8k.jsonl'
-      storage_type: 'file'
-    format:  # set the field mappings
-      prompt_key: 'prompt'
-      chosen_key: 'chosen'
-      rejected_key: 'rejected'
-    #### new part about data active iterator
-    dj_config_path: 'tests/test_configs/human_annotator_test_dj_cfg.yaml'
+    num_process: 1
+    operators:
+      - name: "human_preference_annotation_mapper"
+        args:
+          # general annotation project settings
+          project_name_prefix: "Human_Preference_Annotation_Demo"
+          wait_for_annotations: true  # Whether to wait for annotations to complete
+          timeout: 3600  # Maximum time to wait for annotations in seconds (1 hour)
+          poll_interval: 10  # Time between annotation status checks in seconds
+          max_tasks_per_batch: 10  # Maximum number of tasks in a single batch
+          notification_config:
+            enabled: false
+    
+          # label studio connection settings
+          api_url: "http://localhost:7070"  # Default Label Studio URL
+          api_key: "05409236-67a5-4169-af96-a52a818d0e81"  # Your API key for label studuio authentication # pragma: allowlist secret
+    
+          # human preference annotation settings
+          prompt_key: "prompt"  # Prompt field
+          answer1_key: "answer1"  # First answer option
+          answer2_key: "answer2"  # Second answer option
+          chosen_key: "chosen"  # Chosen field
+          rejected_key: "rejected"  # Rejected field
+    inputs:  # the output will be set to the explorer input automatically
+      - /PATH/TO/DATA/FILE/TO/BE/ANNOTATED
+    target_fields: ["prompt"]
+service:
+  data_juicer:
+    auto_start: true
 ```
 
-Here you can set the basic information for the example dataset, database information that is used to store the result dataset, and some other items about downstream dataset loading for exploring and training, which is similar to the example above.
+Here you can set the basic information for the example dataset and some other items about the input dataset, which is similar to the example above.
 
-For this example, we assume that you are somehow familiar with the basic usage of Data-Juicer, so we need to prepare a Data-Juicer data processing recipe in [`tests/test_configs/human_annotator_test_dj_cfg.yaml`](https://github.com/modelscope/Trinity-RFT/blob/main/tests/test_configs/human_annotator_test_dj_cfg.yaml) that includes an OP of `human_preference_annotation_mapper`. For example:
-
-```yaml
-project_name: 'demo-human-annotator'
-np: 1  # set np to 1 for human annotation OPs
-
-export_path: './outputs/demo-human-annotator/annotated-data.jsonl'
-
-process:
-  - human_preference_annotation_mapper:
-      # general annotation project settings
-      project_name_prefix: "Human_Preference_Annotation_Demo"
-      wait_for_annotations: true  # Whether to wait for annotations to complete
-      timeout: 3600  # Maximum time to wait for annotations in seconds (1 hour)
-      poll_interval: 10  # Time between annotation status checks in seconds
-      max_tasks_per_batch: 10  # Maximum number of tasks in a single batch
-      notification_config:
-        enabled: false
-
-      # label studio connection settings
-      api_url: "http://localhost:7070"  # Default Label Studio URL
-      api_key: "05409236-67a5-4169-af96-a52a818d0e81"  # Your API key for label studuio authentication # pragma: allowlist secret
-
-      # human preference annotation settings
-      prompt_key: "prompt"  # Prompt field
-      answer1_key: "answer1"  # First answer option
-      answer2_key: "answer2"  # Second answer option
-      chosen_key: "chosen"  # Chosen field
-      rejected_key: "rejected"  # Rejected field
-
-```
+The difference is that we use the data-juicer OP `human_preference_annotation_mapper` here. This OP helps you to annotate the data with human preference on a UI.
 
 You can set more config items for this OP (e.g. notification when annotation is finished). For more details, please refer to this [doc](https://github.com/modelscope/data-juicer/tree/main/configs/annotation).
 
