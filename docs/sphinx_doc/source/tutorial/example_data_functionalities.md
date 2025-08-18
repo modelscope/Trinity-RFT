@@ -210,11 +210,11 @@ data_processor:
           max_tasks_per_batch: 10  # Maximum number of tasks in a single batch
           notification_config:
             enabled: false
-    
+
           # label studio connection settings
           api_url: "http://localhost:7070"  # Default Label Studio URL
           api_key: "05409236-67a5-4169-af96-a52a818d0e81"  # Your API key for label studuio authentication # pragma: allowlist secret
-    
+
           # human preference annotation settings
           prompt_key: "prompt"  # Prompt field
           answer1_key: "answer1"  # First answer option
