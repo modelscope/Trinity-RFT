@@ -19,8 +19,8 @@ model:
   max_response_tokens: 2048
   max_model_len: 4096
 cluster:  # 2 for explorer, 2 for trainer
-  node_num: 2
-  gpu_per_node: 2
+  node_num: 1
+  gpu_per_node: 4
 buffer:
   total_epochs: 1
   batch_size: 4
