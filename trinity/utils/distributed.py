@@ -48,6 +48,7 @@ def init_process_group(
     world_size: int = -1,
     rank: int = -1,
     pg_options: Optional[Any] = None,
+    device_id: Optional[torch.device] = None,
 ):
     assert backend == "nccl", "Only nccl backend is supported for now."
 
@@ -83,6 +84,7 @@ def init_process_group(
         store=prefix_store,
         group_name=group_name,
         timeout=timeout,
+        device_id=device_id,
         **{pg_options_param_name: pg_options},
     )
 

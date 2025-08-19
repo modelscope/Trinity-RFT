@@ -45,6 +45,7 @@ class WorkerExtension:
             timeout=timeout,
             world_size=world_size,
             rank=self._weight_update_rank,
+            device_id=self.device,
         )
         torch.distributed.barrier(group=self._model_update_group)
         logger.info("vLLM init_process_group finished.")

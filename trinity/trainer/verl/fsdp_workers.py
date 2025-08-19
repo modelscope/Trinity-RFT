@@ -608,6 +608,7 @@ class ActorRolloutRefWorker(Worker):
                     backend="nccl",
                     timeout=timeout,
                     world_size=world_size,
+                    device_id=get_device_id(),
                     rank=0,
                 )
                 torch.distributed.barrier(group=self._model_update_group)

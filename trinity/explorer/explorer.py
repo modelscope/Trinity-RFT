@@ -151,20 +151,19 @@ class Explorer:
 
     async def prepare(self) -> None:
         """Preparation before running."""
-        if self.experience_pipeline:
+        try:
             await self.experience_pipeline.prepare.remote()
-        futures = [
-            asyncio.create_task(self.scheduler.start()),
-        ]
-        if not self.use_nccl_sync:
-            master_address, master_port = await self.models[0].get_available_address.remote()
-            futures.append(
-                asyncio.create_task(self.setup_weight_sync_group(master_address, master_port))
-            )
-        await asyncio.gather(*futures, return_exceptions=True)
-        if self.config.explorer.eval_on_startup and self.explore_step_num == 0:
-            await self.eval()
-        await self.synchronizer.set_explorer_status.remote(RunningStatus.REQUIRE_SYNC)
+            await self.scheduler.start()
+            if not self.use_nccl_sync:
+                master_address, master_port = await self.models[0].get_available_address.remote()
+                await self.setup_weight_sync_group(master_address, master_port)
+            if self.config.explorer.eval_on_startup and self.explore_step_num == 0:
+                await self.eval()
+            await self.synchronizer.set_explorer_status.remote(RunningStatus.REQUIRE_SYNC)
+        except Exception as e:
+            self.logger.error(f"Error during explorer preparation: {traceback.format_exc()}")
+            await self.shutdown()
+            raise e
 
     async def get_weight(self, name: str) -> torch.Tensor:
         """Get the weight of the loaded model (For checkpoint weights update)."""
@@ -379,7 +378,7 @@ class Explorer:
             f"Explorer ({self.config.explorer.name}) shutdown successfully at step {self.explore_step_num}."
         )
 
-    def is_alive(self) -> bool:
+    async def is_alive(self) -> bool:
         """Check if the explorer is alive."""
         return True
 
