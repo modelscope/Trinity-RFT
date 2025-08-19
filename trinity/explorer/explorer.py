@@ -151,11 +151,11 @@ class Explorer:
 
     async def prepare(self) -> None:
         """Preparation before running."""
+        if self.experience_pipeline:
+            await self.experience_pipeline.prepare.remote()
         futures = [
             asyncio.create_task(self.scheduler.start()),
         ]
-        if self.experience_pipeline:
-            futures.append(self.experience_pipeline.prepare.remote())
         if not self.use_nccl_sync:
             master_address, master_port = await self.models[0].get_available_address.remote()
             futures.append(
