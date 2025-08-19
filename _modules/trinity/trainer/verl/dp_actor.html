@@ -128,6 +128,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.kl_fn.kl_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">DummyKLFn</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">prefix_metrics</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">AlgorithmConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.plugin_loader</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_plugins</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;DataParallelPPOActor&quot;</span><span class="p">]</span>
 
@@ -145,7 +146,7 @@
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;When optimizer is None, it is Reference Policy&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">actor_module</span><span class="p">,</span> <span class="n">actor_optimizer</span><span class="p">)</span>
-
+        <span class="n">load_plugins</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">policy_loss_fn</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kl_loss_fn</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">entropy_loss_fn</span> <span class="o">=</span> <span class="kc">None</span></div>

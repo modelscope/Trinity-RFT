@@ -100,37 +100,42 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">PLUGIN_DIRS_ENV_VAR</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
-<span class="n">loaded_dirs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-
 
 <div class="viewcode-block" id="load_plugins">
 <a class="viewcode-back" href="../../../build_api/trinity.utils.html#trinity.utils.plugin_loader.load_plugins">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">load_plugins</span><span class="p">(</span><span class="n">plugin_dirs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_plugins</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load plugin modules from the default plugin directory or directories specified in the environment variable.</span>
+<span class="sd">    If the environment variable `PLUGIN_DIRS_ENV_VAR` is not set, it defaults to `trinity/plugins`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">plugin_dirs</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">PLUGIN_DIRS_ENV_VAR</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">pathsep</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">plugin_dirs</span> <span class="ow">or</span> <span class="n">plugin_dirs</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]:</span>
+        <span class="n">plugin_dirs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;plugins&quot;</span><span class="p">)]</span>
+
+    <span class="n">load_plugin_from_dirs</span><span class="p">(</span><span class="n">plugin_dirs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="load_plugin_from_dirs">
+<a class="viewcode-back" href="../../../build_api/trinity.utils.html#trinity.utils.plugin_loader.load_plugin_from_dirs">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_plugin_from_dirs</span><span class="p">(</span><span class="n">plugin_dirs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load plugin modules from a directory.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">global</span> <span class="n">loaded_dirs</span>
-    <span class="k">if</span> <span class="n">plugin_dirs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">plugin_dirs</span> <span class="o">=</span> <span class="p">[</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;plugins&quot;</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">plugin_dir</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;PLUGIN_DIRS&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">pathsep</span><span class="p">):</span>
-            <span class="n">plugin_dir</span> <span class="o">=</span> <span class="n">plugin_dir</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">plugin_dir</span><span class="p">:</span>
-                <span class="n">plugin_dirs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">plugin_dir</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">plugin_dirs</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="n">plugin_dirs</span> <span class="o">=</span> <span class="p">[</span><span class="n">plugin_dirs</span><span class="p">]</span>
+    <span class="n">plugin_dirs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">plugin_dirs</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">plugin_dir</span> <span class="ow">in</span> <span class="n">plugin_dirs</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">plugin_dir</span> <span class="ow">in</span> <span class="n">loaded_dirs</span><span class="p">:</span>
-            <span class="k">continue</span>
-        <span class="n">loaded_dirs</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">plugin_dir</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">plugin_dir</span><span class="p">):</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;--plugin-dir [</span><span class="si">{</span><span class="n">plugin_dir</span><span class="si">}</span><span class="s2">] does not exist.&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;plugin-dir [</span><span class="si">{</span><span class="n">plugin_dir</span><span class="si">}</span><span class="s2">] does not exist.&quot;</span><span class="p">)</span>
             <span class="k">continue</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">plugin_dir</span><span class="p">):</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;--plugin-dir [</span><span class="si">{</span><span class="n">plugin_dir</span><span class="si">}</span><span class="s2">] is not a directory.&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;plugin-dir [</span><span class="si">{</span><span class="n">plugin_dir</span><span class="si">}</span><span class="s2">] is not a directory.&quot;</span><span class="p">)</span>
             <span class="k">continue</span>
 
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loading plugin modules from [</span><span class="si">{</span><span class="n">plugin_dir</span><span class="si">}</span><span class="s2">]...&quot;</span><span class="p">)</span>
