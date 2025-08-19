@@ -33,6 +33,7 @@ class WorkflowRunner:
         auxiliary_models: Optional[List[InferenceModel]] = None,
         runner_id: Optional[int] = None,
     ) -> None:
+        self.logger = get_logger(__name__)
         self.config = config
         self.experience_buffer = get_buffer_writer(
             self.config.buffer.explorer_output,  # type: ignore
@@ -52,7 +53,6 @@ class WorkflowRunner:
                     "vllm_async",
                 ).get_openai_client()
                 self.auxiliary_models.append(api_client)
-        self.logger = get_logger(__name__)
         self.workflow_instance = None
         self.runner_id = runner_id
         self.return_experiences = self.config.explorer.collect_experiences

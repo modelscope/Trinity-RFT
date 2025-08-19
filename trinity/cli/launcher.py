@@ -9,7 +9,7 @@ from pprint import pprint
 import ray
 
 from trinity.common.config import Config, load_config
-from trinity.common.constants import DataProcessorPipelineType
+from trinity.common.constants import PLUGIN_DIRS_ENV_VAR, DataProcessorPipelineType
 from trinity.data.utils import (
     activate_data_processor,
     stop_data_processor,
@@ -186,9 +186,8 @@ def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
             f"{data_processor_config.data_processor_url}/{DataProcessorPipelineType.EXPERIENCE.value}",
             config_path,
         )
-    envs = os.environ.copy()
-    all_plugin_dirs = [d for d in (plugin_dir, envs.get("PLUGIN_DIRS")) if d]
-    envs["PLUGIN_DIRS"] = os.pathsep.join(all_plugin_dirs)
+
+    envs = {PLUGIN_DIRS_ENV_VAR: plugin_dir}
     if dlc:
         from trinity.utils.dlc_utils import setup_ray_cluster
 
