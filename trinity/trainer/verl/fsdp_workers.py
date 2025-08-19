@@ -600,7 +600,6 @@ class ActorRolloutRefWorker(Worker):
                     master_address, master_port, self.state_dict_meta
                 )
                 timeout = self.config.synchronizer.sync_timeout
-
                 self._model_update_group = init_process_group(
                     host=master_address,
                     port=master_port,
@@ -608,7 +607,7 @@ class ActorRolloutRefWorker(Worker):
                     backend="nccl",
                     timeout=timeout,
                     world_size=world_size,
-                    device_id=get_device_id(),
+                    device_id=torch.device(f"cuda:{get_device_id()}"),
                     rank=0,
                 )
                 torch.distributed.barrier(group=self._model_update_group)
