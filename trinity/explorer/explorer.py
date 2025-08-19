@@ -11,8 +11,7 @@ from typing import List, Optional
 
 import ray
 import torch
-from ray.util.placement_group import placement_group
-from ray.util.scheduling_strategies import PlacementGroupSchedulingStrategy
+from ray.util.scheduling_strategies import NodeAffinitySchedulingStrategy
 
 from trinity.algorithm.algorithm_manager import AlgorithmManager
 from trinity.buffer.buffer import get_buffer_reader
@@ -45,7 +44,7 @@ class Explorer:
         self.config = config
         self.algorithm_manager = AlgorithmManager(config)
         self.models, self.auxiliary_models = create_inference_models(config)
-        self.experience_pipeline: Optional[ExperiencePipeline] = None
+        self.experience_pipeline = self._init_experience_pipeline()
         self.config.buffer.explorer_input.taskset.index = explorer_meta.get("latest_task_index", 0)
         self.taskset = get_buffer_reader(
             self.config.buffer.explorer_input.taskset, self.config.buffer
@@ -153,12 +152,19 @@ class Explorer:
         """Preparation before running."""
         try:
             await self.experience_pipeline.prepare.remote()
-            await self.scheduler.start()
+
+            # make sure all rollout models are ready
+            model_ready_ref = [model.__ray_ready__.remote() for model in self.models]
+            await asyncio.gather(*model_ready_ref)
+
             if not self.use_nccl_sync:
                 master_address, master_port = await self.models[0].get_available_address.remote()
                 await self.setup_weight_sync_group(master_address, master_port)
+
+            await self.scheduler.start()
             if self.config.explorer.eval_on_startup and self.explore_step_num == 0:
                 await self.eval()
+
             await self.synchronizer.set_explorer_status.remote(RunningStatus.REQUIRE_SYNC)
         except Exception as e:
             self.logger.error(f"Error during explorer preparation: {traceback.format_exc()}")
@@ -382,52 +388,30 @@ class Explorer:
         """Check if the explorer is alive."""
         return True
 
-    async def set_experience_pipeline(self, pipeline: ExperiencePipeline) -> None:
-        """Set the experience pipeline for the explorer.
-
-        Args:
-            pipeline: The experience pipeline actor.
-        """
-        if self.experience_pipeline is not None:
-            raise RuntimeError("Experience pipeline has already been set.")
-        self.experience_pipeline = pipeline
+    def _init_experience_pipeline(self) -> ray.actor.ActorHandle:
+        """Init experience pipeline for the explorer."""
+        node_id = ray.get_runtime_context().get_node_id()
+        return (
+            ray.remote(ExperiencePipeline)
+            .options(
+                name=f"{self.config.explorer.name}_pipeline",
+                namespace=ray.get_runtime_context().namespace,
+                scheduling_strategy=NodeAffinitySchedulingStrategy(
+                    node_id=node_id,
+                    soft=False,
+                ),
+            )
+            .remote(self.config)
+        )
 
     @classmethod
     def get_actor(cls, config: Config):
         """Get a Ray actor for the explorer."""
-        # Create a placement group for the explorer,
-        # 1 CPU for the explorer actor, 1 CPU for the experience pipeline
-        pg = placement_group(
-            [{"CPU": 1}, {"CPU": 1}],
-            strategy="PACK",
-            name=config.explorer.name,
-        )
-        ray.get(pg.ready())
-        explorer_actor = (
+        return (
             ray.remote(cls)
             .options(
                 name=config.explorer.name,
                 namespace=ray.get_runtime_context().namespace,
-                scheduling_strategy=PlacementGroupSchedulingStrategy(
-                    placement_group=pg,
-                    placement_group_capture_child_tasks=False,
-                    placement_group_bundle_index=0,
-                ),
             )
             .remote(config)
         )
-        pipeline_actor = (
-            ray.remote(ExperiencePipeline)
-            .options(
-                name=f"{config.explorer.name}_pipeline",
-                namespace=ray.get_runtime_context().namespace,
-                scheduling_strategy=PlacementGroupSchedulingStrategy(
-                    placement_group=pg,
-                    placement_group_capture_child_tasks=False,
-                    placement_group_bundle_index=1,
-                ),
-            )
-            .remote(config)
-        )
-        ray.get(explorer_actor.set_experience_pipeline.remote(pipeline_actor))
-        return explorer_actor
