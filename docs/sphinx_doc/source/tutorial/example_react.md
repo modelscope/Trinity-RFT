@@ -100,7 +100,7 @@ synchronizer:
 
 ## How to Run the Example
 
-1.  **Prerequisites**: Ensure you have Trinity installed, along with the dependencies for this example (e.g., `agentscope`). Please refer to [Agentscope Github link](https://github.com/modelscope/agentscope).
+1.  **Prerequisites**: Ensure you have Trinity installed, along with the dependencies for this example (e.g., `agentscope`). Please refer to [Agentscope Github link](https://github.com/agentscope-ai/agentscope/tree/v0).
 
 > **NOTE**: This example requires AgentScope from either:
 >  - Commit: `ad13ed5dacecb79d20abf626769f8c7d7a7d2afb`
