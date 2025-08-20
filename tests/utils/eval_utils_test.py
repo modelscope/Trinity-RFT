@@ -3,8 +3,100 @@
 
 import unittest
 
-from trinity.utils.eval_utils import is_equiv
+from trinity.utils.eval_utils import compute_score, is_equiv
 from trinity.utils.math_eval_utils import extract_answer, verify_math_answer
+
+
+class TestComputeScore(unittest.TestCase):
+    """
+    A suite of unit tests for the compute_score function.
+    """
+
+    def test_both_boxed_and_equivalent(self):
+        """
+        Tests the case where both solution and ground truth have equivalent boxed answers.
+        Expected score: 1.0
+        """
+        solution = "The final answer is \\boxed{42}"
+        truth = "The correct result is \\boxed{42}"
+        self.assertEqual(compute_score(solution, truth), 1.0)
+
+    def test_solution_raw_and_ground_truth_boxed_equivalent(self):
+        """
+        Tests the case where the solution is a raw string and the ground truth is boxed, but they are equivalent.
+        Expected score: 1.0
+        """
+        solution = "The answer is \\boxed{42}"
+        truth = "The answer is \\boxed{42}"
+        self.assertEqual(compute_score(solution, truth), 1.0)
+
+    def test_solution_boxed_truth_raw_and_equivalent(self):
+        """
+        Tests the case where the solution is boxed and the ground truth is a raw, equivalent string.
+        Expected score: 1.0
+        """
+        solution = "Let's see, the result is \\boxed{100}"
+        truth = "100"
+        self.assertEqual(compute_score(solution, truth), 1.0)
+
+    def test_both_boxed_and_not_equivalent(self):
+        """
+        Tests the case where both have boxed answers, but they are not equivalent.
+        Expected score: 0.0
+        """
+        solution = "I think the answer is \\boxed{-1}"
+        truth = "The answer is \\boxed{1}"
+        self.assertEqual(compute_score(solution, truth), 0.0)
+
+    def test_solution_boxed_truth_raw_and_not_equivalent(self):
+        """
+        Tests the case where the solution is boxed and the ground truth is a raw, non-equivalent string.
+        Expected score: 0.0
+        """
+        solution = "The answer is \\boxed{apple}"
+        truth = "orange"
+        self.assertEqual(compute_score(solution, truth), 0.0)
+
+    def test_solution_not_boxed(self):
+        """
+        Tests the case where the solution string does not contain a boxed answer.
+        Expected score: 0.0, regardless of the ground truth.
+        """
+        solution = "The answer is 42, but I'm not boxing it."
+        truth_boxed = "The answer is \\boxed{42}"
+        truth_raw = "42"
+        self.assertEqual(compute_score(solution, truth_boxed), 0.0)
+        self.assertEqual(compute_score(solution, truth_raw), 0.0)
+
+    def test_empty_solution_string(self):
+        """
+        Tests behavior with an empty solution string.
+        Expected score: 0.0
+        """
+        solution = ""
+        truth = "\\boxed{10}"
+        self.assertEqual(compute_score(solution, truth), 0.0)
+
+    def test_empty_ground_truth(self):
+        """
+        Tests behavior with an empty ground truth string.
+        Expected score: 0.0 unless the boxed answer is also empty.
+        """
+        solution_correct = "The answer is \\boxed{}"
+        solution_incorrect = "The answer is \\boxed{1}"
+        truth = ""
+        self.assertEqual(compute_score(solution_correct, truth), 1.0)
+        self.assertEqual(compute_score(solution_incorrect, truth), 0.0)
+
+    def test_multiple_boxed_answers_in_solution(self):
+        """
+        Tests that only the *last* boxed answer in the solution is used for scoring.
+        """
+        solution = "First I thought it was \\boxed{A}, but then I realized it is \\boxed{B}"
+        truth_correct = "\\boxed{B}"
+        truth_incorrect = "\\boxed{A}"
+        self.assertEqual(compute_score(solution, truth_correct), 1.0)
+        self.assertEqual(compute_score(solution, truth_incorrect), 0.0)
 
 
 class TestMathEvalUtils(unittest.TestCase):

@@ -177,6 +177,44 @@ class OPMDAddStrategy(GroupAdvantageStrategy):
         return {"opmd_baseline": "mean", "tau": 1.0}
 
 
+@ADD_STRATEGY.register_module("asymre")
+class AsymREAddStrategy(GroupAdvantageStrategy):
+    """An example AddStrategy that introduce baseline shift."""
+
+    def __init__(self, writer: BufferWriter, baseline_shift: float = -0.1, **kwargs) -> None:
+        super().__init__(writer)
+
+        assert isinstance(
+            baseline_shift, float
+        ), f"baseline_shift must be a float, got {baseline_shift}"
+        self.baseline_shift = baseline_shift
+
+    def group_experiences(self, exps):
+        return group_by(exps, id_type="task")
+
+    def calculate_group_advantage(
+        self, group_id: str, exps: List[Experience]
+    ) -> Tuple[List[Experience], Dict]:
+        with torch.no_grad():
+            if len(exps) == 1:
+                group_baseline = torch.tensor(0.0)
+            else:
+                group_rewards = torch.tensor([exp.reward for exp in exps], dtype=torch.float32)
+                group_baseline = torch.mean(group_rewards) + self.baseline_shift
+            for exp in exps:
+                score = exp.reward - group_baseline
+                exp.advantages = score * exp.action_mask
+                exp.returns = exp.advantages.clone()
+            metrics = {
+                "group_baseline": group_baseline,
+            }
+        return exps, metrics
+
+    @classmethod
+    def default_args(cls) -> dict:
+        return {"baseline_shift": -0.1}
+
+
 @ADD_STRATEGY.register_module("reward_variance")
 class RewardVarianceAddStrategy(AddStrategy):
     """An example AddStrategy that filters experiences based on a reward variance threshold."""
