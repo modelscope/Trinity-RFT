@@ -222,8 +222,17 @@ We use the <code class="docutils literal notranslate"><span class="pre">Qwen3</s
 </section>
 <section id="how-to-run-the-example">
 <h2>How to Run the Example<a class="headerlink" href="#how-to-run-the-example" title="Link to this heading"></a></h2>
-<ol class="arabic">
-<li><p><strong>Prerequisites</strong>: Ensure you have Trinity installed, along with the dependencies for this example (e.g., <code class="docutils literal notranslate"><span class="pre">agentscope</span></code>). Please refer to <a class="reference external" href="https://github.com/modelscope/agentscope">Agentscope Github link</a>.</p></li>
+<ol class="arabic simple">
+<li><p><strong>Prerequisites</strong>: Ensure you have Trinity installed, along with the dependencies for this example (e.g., <code class="docutils literal notranslate"><span class="pre">agentscope</span></code>). Please refer to <a class="reference external" href="https://github.com/agentscope-ai/agentscope/tree/v0">Agentscope Github link</a>.</p></li>
+</ol>
+<blockquote>
+<div><p><strong>NOTE</strong>: This example requires AgentScope from either:</p>
+<ul class="simple">
+<li><p>Commit: <code class="docutils literal notranslate"><span class="pre">ad13ed5dacecb79d20abf626769f8c7d7a7d2afb</span></code></p></li>
+<li><p>Branch: <a class="reference external" href="https://github.com/agentscope-ai/agentscope/tree/v0"><code class="docutils literal notranslate"><span class="pre">v0</span></code></a></p></li>
+</ul>
+</div></blockquote>
+<ol class="arabic" start="2">
 <li><p>Download the model you want to use, and fill in the configuration files in <code class="docutils literal notranslate"><span class="pre">examples/agentscope_tool_react/agentscope_tool_react_gsm8k.yaml</span></code> or <code class="docutils literal notranslate"><span class="pre">examples/agentscope_tool_react/agentscope_tool_react_dapo.yaml</span></code></p></li>
 <li><p><strong>Launch the training job</strong>: Run the following command from the root directory of the repository.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>examples/agentscope_tool_react/agentscope_tool_react_gsm8k.yaml
