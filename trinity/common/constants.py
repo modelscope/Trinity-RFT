@@ -13,6 +13,8 @@ TRAINER_NAME = "trainer"
 
 ROLLOUT_WEIGHT_SYNC_GROUP_NAME = "rollout_weight_sync"
 
+PLUGIN_DIRS_ENV_VAR = "TRINITY_PLUGIN_DIRS"
+
 
 # constants
 
