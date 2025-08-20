@@ -771,18 +771,15 @@ class Config:
 
         # check explorer
         if self.model.max_model_len is None:
-            from transformers import AutoTokenizer
+            from transformers import AutoConfig, AutoTokenizer
             from transformers.tokenization_utils_base import LARGE_INTEGER
 
-            max_model_len = LARGE_INTEGER
-
-            try:
-                max_model_len = AutoTokenizer.from_pretrained(
-                    self.model.model_path
-                ).model_max_length
-            except Exception:
-                pass
-
+            tokenizer = AutoTokenizer.from_pretrained(self.model.model_path)
+            config = AutoConfig.from_pretrained(self.model.model_path)
+            max_model_len = min(
+                getattr(tokenizer, "model_max_length", LARGE_INTEGER),
+                getattr(config, "max_position_embeddings", LARGE_INTEGER),
+            )
             if max_model_len >= LARGE_INTEGER:
                 max_model_len = MAX_MODEL_LEN
                 logger.warning(
