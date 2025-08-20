@@ -7,7 +7,6 @@ from enum import Enum
 from typing import Any, Dict, List, Optional
 
 from omegaconf import OmegaConf
-from verl.utils.tokenizer import set_pad_token_id
 
 from trinity.common.constants import (
     EXPLORER_NAME,
@@ -670,7 +669,18 @@ class Config:
 
             try:
                 tokenizer = AutoTokenizer.from_pretrained(self.model.model_path)
-                set_pad_token_id(tokenizer)
+                if tokenizer.pad_token_id is None:
+                    tokenizer.pad_token_id = tokenizer.eos_token_id
+                    logger.warning(
+                        f"tokenizer.pad_token_id is None. Now set to {tokenizer.eos_token_id}",
+                        stacklevel=1,
+                    )
+                if tokenizer.pad_token is None:
+                    tokenizer.pad_token = tokenizer.eos_token
+                    logger.warning(
+                        f"tokenizer.pad_token is None. Now set to {tokenizer.eos_token}",
+                        stacklevel=1,
+                    )
                 self.buffer.pad_token_id = tokenizer.pad_token_id
 
             except Exception:
