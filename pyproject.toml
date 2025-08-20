@@ -76,6 +76,8 @@ doc = [
     "sphinx-autobuild",
     "sphinx_rtd_theme",
     "myst-parser",
+    "sphinxcontrib-apidoc",
+    "sphinx-multiversion",
 ]
 
 flash_attn = [
