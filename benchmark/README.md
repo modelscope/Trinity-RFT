@@ -75,7 +75,7 @@ python bench.py countdown --model_path /path/to/Qwen/Qwen2.5-1.5B-Instruct --tas
 ```
 #### Countdown Results
 The chart below shows performance based on this [commit](https://github.com/modelscope/Trinity-RFT/tree/068da409d215bb2450d93b6b7a56740d4751669d).
-![View Results](../docs/sphinx_doc/assets/gsm8k-bench.png)
+![View Results](../docs/sphinx_doc/assets/countdown-bench.png)
 
 *More benchmarks will be added soon!*
 
