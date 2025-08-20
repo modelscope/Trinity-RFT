@@ -4,12 +4,12 @@ Modified from https://github.com/OpenPipe/ART/blob/art-e/examples/art-e/
 '''
 import os
 import sqlite3
-import subprocess
 import openai
 import json
+from dataclasses import asdict, dataclass
 from typing import Any, Dict, List, Optional
-from dataclasses import asdict, dataclass, field, fields
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from tenacity import retry, stop_after_attempt, wait_fixed
 
 from trinity.utils.log import get_logger
 
@@ -30,7 +30,8 @@ def get_conn():
 
 ############ Define dataclass ############
 
-class Query(BaseModel):
+
+class QueryModel(BaseModel):
     id: int
     question: str
     answer: str
@@ -38,6 +39,15 @@ class Query(BaseModel):
     how_realistic: float
     inbox_address: str
     query_date: str
+
+
+class AnswerModel(BaseModel):
+    answer: str = Field(
+        description="It should be called with the answer and the sources. If you cannot find the answer, you should return 'I don't know' with an empty list of sources."
+    )
+    sources: List[str] = Field(
+        description="a list of message ids that are relevant to the query. Usually there will be only one. If you cannot find the answer, you should return an empty list."
+    )
 
 
 class Email(BaseModel):
@@ -74,7 +84,6 @@ class FinalRubric(BaseModel):
     ever_tried_to_read_invalid_email: bool = False
     prompt_tokens: int = 0
     completion_tokens: int = 0
-    sources: List[str] = []
 
     def to_metrics(self) -> dict[str, float | int]:
         metrics: dict[str, float | int] = {k: int(v) for k, v in asdict(self).items()}
@@ -85,105 +94,6 @@ class FinalRubric(BaseModel):
 
 
 ############ Define tools for agentscope ############
-
-def search_emails(query: Any, keywords: list[str], timeout: float = 300, **kwargs: Any):
-    """
-    Search the user's email inbox for emails that match the given keywords.
-
-    Args:
-        query (Any): The query object containing the user's inbox address, query date, and message IDs.
-        keywords (list[str]): A list of keywords to search for in the user's email inbox.
-
-    Returns:
-        ServiceResponse: 
-            The status field indicates whether the tool call was successful. 
-            The content field contains a list of SearchResult objects with message_id and snippet.
-    """
-    from agentscope.service import ServiceResponse, ServiceExecStatus
-    
-    ever_found_right_email = False
-    try:
-        res = subprocess.run(
-            search_emails_tool(
-                inbox=query.inbox_address,
-                sent_before=query.query_date,
-                keywords=keywords
-                ),
-            text=True,
-            capture_output=True,
-            timeout=timeout,
-            check=False,
-        )
-        
-        for r in res:
-            if r.message_id == query.message_ids[0]:
-                ever_found_right_email = True
-
-        # save to rubric file
-        current_state = get_rubric_state()
-        new_state = current_state.copy()
-        new_state["ever_found_right_email"] = ever_found_right_email
-        save_rubric_state(new_state)
-
-        return ServiceResponse(
-                status=ServiceExecStatus.SUCCESS,
-                content=[asdict(r) for r in res],
-            )
-    except subprocess.TimeoutExpired:
-        return ServiceResponse(
-            status=ServiceExecStatus.ERROR,
-            content=None,
-        )
-
-
-def read_email(query: Any, message_id: str, timeout: float = 300, **kwargs: Any):
-    """
-    Read the content of an email from the user's email inbox. Returns the email content.
-    Args:
-        message_id (str): The unique identifier of the email to read.
-
-    Returns:
-        ServiceResponse:
-            The status field indicates whether the tool call was successful.
-            The content field contains the email content or an error message if the email is not found.
-    """
-    from agentscope.service import ServiceResponse, ServiceExecStatus
-
-    ever_found_right_email = False
-    try:
-        email_content = subprocess.run(
-            read_email_tool(message_id),
-            text=True,
-            capture_output=True,
-            timeout=timeout,
-            check=False,
-        )
-
-        if message_id == query.message_ids[0]:
-            ever_read_right_email = True
-        
-        # save to rubric file
-        current_state = get_rubric_state()
-        new_state = current_state.copy()
-        new_state["ever_read_right_email"] = ever_read_right_email
-        save_rubric_state(new_state)
-
-        if email_content is None:
-            return ServiceResponse(
-                status=ServiceExecStatus.ERROR,
-                content={"error": "Email not found"},
-            )
-        else:
-            return ServiceResponse(
-                status=ServiceExecStatus.SUCCESS,
-                content={"email_content": email_content.model_dump()},
-            )
-    except subprocess.TimeoutExpired:
-        return ServiceResponse(
-            status=ServiceExecStatus.ERROR,
-            content={"error": "Timeout", "ever_found_right_email": ever_found_right_email},
-        )
-
 
 def search_emails_tool(
     inbox: str,
@@ -382,15 +292,17 @@ def read_email_tool(message_id: str) -> Optional[Email]:
     return email_obj
 
 
-# TODO: not use this now
-async def judge_correctness(
-    answer: str, query: Query, judge_model: openai.OpenAI,
+############ LLM-as-a-judge ############
+
+
+def judge_correctness(
+    answer: str,
+    query: QueryModel,
+    judge_model: openai.OpenAI,
 ) -> dict:
     """Use an LLM to decide whether *answer* matches *query.answer*.
 
-    Returns a structured ``AnswerJudgeResponse`` with a free-form *thinking*
-    string (useful for debugging) and a boolean *accept* flag used for
-    scoring.
+    Returns a boolean *accept* flag used for scoring.
     """
 
     system_prompt = """You are given a question, the reference answer (labelled **Reference answer**), and an answer generated by an AI assistant (labelled **AI answer**).
@@ -403,71 +315,60 @@ Follow these steps to decide whether the AI answer should be accepted:
 
 Important: Do NOT penalise the **AI answer** for omitting non-essential facts that appear in the **Reference answer**. The answer should only be rejected for errors or omissions in the information explicitly requested by the question.
 
-Return your judgement as **pure JSON** (no markdown) with this exact schema:
-{
-  "thinking": string,  // Brief explanation of your reasoning.
-  "accept": boolean   // true if the AI answer should be accepted.
-}
+Return your judgement **accept** from **true** and **false**. Do not return any other text or formatting.
 """
-    messages = [
-        {"role": "system", "content": system_prompt},
-        {
-            "role": "user",
-            "content": (
-                f"Question: {query.question}\n"
-                f"Reference answer: {query.answer}\n"
-                f"AI answer: {answer}"
-            ),
-        },
-    ]
-
-    response = acompletion(
-        model=judge_model,
-        messages=messages,
-        caching=True,
-        response_format=CorrectnessJudgeResponse, # TODO
+    prompt = (
+        f"Question: {query.question}\n" f"Reference answer: {query.answer}\n" f"AI answer: {answer}"
     )
 
-    first_choice = response.choices[0]  # type: ignore[attr-defined]
-    raw_content = first_choice.message.content or "{}"  # type: ignore[attr-defined]
+    from agentscope.manager import ModelManager
+    from agentscope.message import Msg
 
-    try:
-        return CorrectnessJudgeResponse.model_validate_json(raw_content)
-    except Exception as e:
-        # If parsing fails, fall back to 'accept': False
-        return dict(
-            thinking=f"Parse error: {e}\nRaw: {raw_content}", accept=False
-        )
+    MODEL_CONFIG_NAME = "openai/gpt-4.1"
+    MODEL_CONFIGURATIONS = [
+        {
+            "model_type": "openai_chat",
+            "config_name": MODEL_CONFIG_NAME,
+            "model_name": "openai/gpt-4.1",
+            # "api_key": judge_model,  # TODO: check
+            "use_openai_formatter": True,
+        }
+    ]
+
+    model_manager = ModelManager.get_instance()
+    model_manager.load_model_configs(MODEL_CONFIGURATIONS)
+    model = model_manager.get_model_by_config_name(MODEL_CONFIG_NAME)
+
+    prompt = model.format(
+        [
+            Msg(name="system", content=system_prompt, role="system"),
+            Msg(name="user", content=prompt, role="user"),
+        ]
+    )
+    response = model_call_with_retry(
+        model,
+        prompt,
+    )
+    logger.info(f"LLM judge response: {response.text}")
+
+    # TODO: find a better way here
+    accept = False
+    if "true" in response.text.lower():
+        accept = True
+
+    return accept
 
 
-def get_rubric_state() -> dict[str, Any]:
-    """
-    从 rubric.jsonl 文件中读取最新的状态。
-    如果文件不存在或为空，则返回一个默认的初始状态。
-    """
-    # 默认状态
-    default_state = {"ever_found_right_email": False}
-    
-    if not os.path.exists(RUBRIC_FILE):
-        return default_state
-
-    try:
-        with open(RUBRIC_FILE, 'r', encoding='utf-8') as f:
-            lines = f.readlines()
-            # 过滤掉空行
-            non_empty_lines = [line for line in lines if line.strip()]
-            if not non_empty_lines:
-                return default_state
-            # 最后一行即为最新状态
-            last_line = non_empty_lines[-1]
-            return json.loads(last_line)
-    except (json.JSONDecodeError, IndexError):
-        # 如果文件损坏或格式错误，也返回默认状态
-        return default_state
-
-def save_rubric_state(state: dict[str, Any]):
-    """
-    将一个新的状态对象作为新行追加到 rubric.jsonl 文件中。
-    """
-    with open(RUBRIC_FILE, 'a', encoding='utf-8') as f:
-        f.write(json.dumps(state) + '\n')
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_fixed(5),
+    reraise=True,
+)
+def model_call_with_retry(
+    model,
+    prompt,
+    tools,
+):  # omit type to avoid import agentscope here
+    """Call the model with retry."""
+    response = model(prompt, tools=tools)
+    return response

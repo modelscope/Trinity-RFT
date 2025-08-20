@@ -9,35 +9,16 @@ from trinity.common.workflows.workflow import WORKFLOWS, Task, Workflow
 from trinity.utils.log import get_logger
 
 from .react_agent import ReActAgent
-from .utils import Query, FinalRubric, search_emails, read_email, judge_correctness
+from .utils import QueryModel, AnswerModel, FinalRubric, judge_correctness
 
 logger = get_logger(__name__)
 
 
-TOOL_REGISTRY = {
-    "search_emails": search_emails,
-    "read_email": read_email,
-}
-
-SYSTEM_PROMPT = """You are an email search agent. You are given a user query and a list of tools you can use to search the user's email. Use the tools to search the user's emails and find the answer to the user's query. You may take up to {max_turns} turns to find the answer, so if your first seach doesn't find the answer, you can try with different keywords.
+SYSTEM_PROMPT = """You are an email search agent. You are given a user query and a list of tools you can use to search the user's email. Use the tools to search the user's emails and find the answer to the user's query. You may take up to {max_turns} turns to find the answer, so if your first seach doesn't find the answer, you can try with different keywords. 
+Always describe what you see and plan your next steps clearly. When taking actions, explain what you're doing and why. When the answer to the task is found, call `generate_response` to finish the process. Only call `generate_response` when answer is found. You should not respond any next steps in `generate_response`. Complete all steps and then call `generate_response`.
 
 User's email address is {inbox_address}
 Today's date is {query_date}
-
-Here are the tools you can use:
-{tools}
-
-Respond with a valid JSON object with the following fields:
-- tool_name: (str) the name of the tool to use
-- tool_args: (JSON) the arguments to pass to the tool
-
-For example, to read a specific email, you should respond with:
-{{
-    "tool_name": "read_email",
-    "tool_args": {{
-        "message_id": "<12635597.1075855702772.JavaMail.evans@thyme>"
-    }}
-}}
 """
 
 
@@ -77,7 +58,7 @@ class EmailSearchWorkflow(Workflow):
             model_configs=[
                 {
                     "model_type": "openai_chat",
-                    "config_name": "my_model",
+                    "config_name": "react_model",
                     "model_name": self.model_name,
                     "api_key": "EMPTY",
                     "generate_args": {
@@ -91,8 +72,8 @@ class EmailSearchWorkflow(Workflow):
         )
 
         self.toolkit = ServiceToolkit()
-        self.toolkit.add(search_emails)
-        self.toolkit.add(read_email)
+        # self.toolkit.add(search_emails)
+        # self.toolkit.add(read_email)
         self.reset(task)
 
     @property
@@ -104,10 +85,10 @@ class EmailSearchWorkflow(Workflow):
         return True
 
     def reset(self, task: Task):
-        self.query = Query.model_validate(task.raw_task)
+        self.query = QueryModel.model_validate(task.raw_task)
         self.task_desc = task.task_desc  # question
         self.truth = task.truth  # ground truth answer
-        
+
         self.workflow_args = task.workflow_args
         self.max_turns = int(self.workflow_args.get("max_turns", 5))
         self.tool_obs_char_limit = int(self.workflow_args.get("tool_obs_char_limit", 2000))
@@ -115,7 +96,6 @@ class EmailSearchWorkflow(Workflow):
 
         self.system_prompt = SYSTEM_PROMPT.format(
             max_turns=self.max_turns,
-            tools=TOOL_REGISTRY.items(),
             inbox_address=self.query.inbox_address,
             query_date=self.query.query_date,
         )
@@ -123,7 +103,7 @@ class EmailSearchWorkflow(Workflow):
         self.agent = ReActAgent(
             name="react_agent",
             sys_prompt=self.system_prompt,
-            model_config_name="my_model",
+            model_config_name="react_model",
             service_toolkit=self.toolkit,
             max_iters=self.max_turns,
             verbose=False,
@@ -145,11 +125,11 @@ class EmailSearchWorkflow(Workflow):
 
         response = self.agent.reply(
             msg,
-            structured_model=FinalRubric,  # TODO: check
+            structured_model=AnswerModel,
         )
-        rubric = response.metadata
-        logger.info(f"Rubric: {rubric}") # debug
-        
+        answer_and_sources = response.metadata
+        logger.info(f"answer_and_sources: {answer_and_sources}")  # debug
+
         # content = self.agent.reply(msg).content
         # unify the response format to text
         # try:
@@ -163,7 +143,7 @@ class EmailSearchWorkflow(Workflow):
         #     response_text = str(content)
 
         reward = self.calculate_reward(
-            rubric,
+            answer_and_sources,
             judge_model=self.auxiliary_models[0] if self.auxiliary_models else None,
         )
 
@@ -182,15 +162,27 @@ class EmailSearchWorkflow(Workflow):
         return experiences
 
     def calculate_reward(
-        self, rubric, judge_model=None,
+        self,
+        answer_and_sources,
+        judge_model=None,
     ) -> float:
         """ Ref: calculate_reward in https://github.com/OpenPipe/ART/blob/main/dev/art-e/art_e/rollout.py#L64"""
-        if not self.reward_fn_args.get("llm_as_a_judge", False):
-            return float(rubric.answer_correct) # TODO
-        
-        rubric.sources_correct = self.query.message_ids[0] in rubric.sources
 
-        answer = rubric.final_answer
+        answer = answer_and_sources.answer
+        sources = answer_and_sources.sources
+
+        if not self.reward_fn_args.get("llm_as_a_judge", True):
+            return answer == self.truth
+
+        rubric = FinalRubric()
+        rubric.attempted_answer = answer is not None and answer != ""
+        rubric.returned_i_dont_know = answer == "I don't know"
+        rubric.ever_found_right_email = self.query.message_ids[0] in self.agent.message_id_list
+        rubric.ever_read_right_email = self.query.message_ids[0] in self.agent.ever_read_message_ids
+        rubric.num_sources = len(sources)
+        rubric.sources_correct = self.query.message_ids[0] in sources
+        rubric.num_turns = len(self.agent.memory.get_memory())  # TODO: make sure this is correct
+
         try:
             judge_response = judge_correctness(answer, self.query, judge_model) # TODO: implement this func
             logger.info(f"Judge response: {judge_response}")
@@ -199,23 +191,23 @@ class EmailSearchWorkflow(Workflow):
         except Exception as e:
             logger.error(f"Error judging correctness: {e}")
             rubric.answer_correct = False
-        
+
         # Note: make sure all possible partial rewards always sum to less than 0.5.
         partial_rewards = 0
         partial_rewards += 0.1 if rubric.ever_found_right_email else 0
         partial_rewards += 0.1 if rubric.ever_read_right_email else 0
-        partial_rewards += 0.1 if not rubric.ever_tried_to_read_invalid_email else 0
+        # partial_rewards += 0.1 if not rubric.ever_tried_to_read_invalid_email else 0
         partial_rewards += 0.1 if rubric.sources_correct else 0
 
         # Formatting error: reward will be -2 to -1
-        if rubric.cant_parse_tool_call:
-            return -2 + partial_rewards
+        # if rubric.cant_parse_tool_call:
+        #     return -2 + partial_rewards
 
-        if rubric.bad_tool_call_name:
-            return -1.9 + partial_rewards
+        # if rubric.bad_tool_call_name:
+        #     return -1.9 + partial_rewards
 
-        if rubric.bad_tool_call_args:
-            return -1.8 + partial_rewards
+        # if rubric.bad_tool_call_args:
+        #     return -1.8 + partial_rewards
 
         # No formatting error, but wrong answer: reward will be -1 to 0
         if rubric.attempted_answer and not rubric.answer_correct:
