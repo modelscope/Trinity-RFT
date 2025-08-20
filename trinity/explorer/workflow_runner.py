@@ -32,6 +32,7 @@ class WorkflowRunner:
         auxiliary_models: Optional[List[InferenceModel]] = None,
         runner_id: Optional[int] = None,
     ) -> None:
+        self.logger = get_logger(__name__)
         self.config = config
         self.model = model
         self.model_wrapper = ModelWrapper(
@@ -47,7 +48,6 @@ class WorkflowRunner:
                     "vllm_async",
                 ).get_openai_client()
                 self.auxiliary_models.append(api_client)
-        self.logger = get_logger(__name__)
         self.workflow_instance = None
         self.runner_id = runner_id
 

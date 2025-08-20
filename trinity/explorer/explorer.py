@@ -29,6 +29,7 @@ from trinity.manager.manager import CacheManager
 from trinity.manager.synchronizer import Synchronizer
 from trinity.utils.log import get_logger
 from trinity.utils.monitor import MONITOR, gather_metrics
+from trinity.utils.plugin_loader import load_plugins
 
 
 class Explorer:
@@ -36,6 +37,7 @@ class Explorer:
 
     def __init__(self, config: Config):
         self.logger = get_logger(__name__)
+        load_plugins()
         self.cache = CacheManager(config)
         explorer_meta = self.cache.load_explorer()
         self.explore_step_num = explorer_meta.get("latest_iteration", 0)

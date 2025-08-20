@@ -20,6 +20,7 @@ from trinity.common.experience import Experiences
 from trinity.manager.synchronizer import Synchronizer
 from trinity.utils.log import get_logger
 from trinity.utils.monitor import MONITOR
+from trinity.utils.plugin_loader import load_plugins
 
 
 class Trainer:
@@ -28,6 +29,7 @@ class Trainer:
     def __init__(self, config: Config) -> None:
         self.config = config
         self.logger = get_logger(__name__)
+        load_plugins()
         self.synchronizer = Synchronizer.get_actor(config)
         self.engine = get_trainer_wrapper(config)
         self.last_trainer_sync_step = 0

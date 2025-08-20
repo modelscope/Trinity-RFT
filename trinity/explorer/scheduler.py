@@ -1,7 +1,6 @@
 """Scheduler for rollout tasks."""
 
 import asyncio
-import os
 import re
 import time
 import traceback
@@ -50,8 +49,6 @@ class RunnerWrapper:
         self.runner = self._create_runner()
 
     def _create_runner(self):
-        envs = os.environ.copy()
-        envs.update(self.config.explorer.env_vars)
         return (
             ray.remote(WorkflowRunner)
             .options(
@@ -59,7 +56,7 @@ class RunnerWrapper:
                 namespace=self.namespace,
                 scheduling_strategy="SPREAD",
                 runtime_env={
-                    "env_vars": envs,
+                    "env_vars": self.config.explorer.env_vars,
                 },
             )
             .remote(self.config, self.rollout_model, self.auxiliary_models, self.runner_id)

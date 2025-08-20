@@ -7,35 +7,37 @@ import sys
 from pathlib import Path
 from typing import List, Union
 
+from trinity.common.constants import PLUGIN_DIRS_ENV_VAR
 from trinity.utils.log import get_logger
 
 logger = get_logger(__name__)
 
-loaded_dirs = set()
+
+def load_plugins() -> None:
+    """
+    Load plugin modules from the default plugin directory or directories specified in the environment variable.
+    If the environment variable `PLUGIN_DIRS_ENV_VAR` is not set, it defaults to `trinity/plugins`.
+    """
+    plugin_dirs = os.environ.get(PLUGIN_DIRS_ENV_VAR, "").split(os.pathsep)
+    if not plugin_dirs or plugin_dirs == [""]:
+        plugin_dirs = [str(Path(__file__).parent.parent / "plugins")]
+
+    load_plugin_from_dirs(plugin_dirs)
 
 
-def load_plugins(plugin_dirs: Union[str, List[str]] = None) -> None:
+def load_plugin_from_dirs(plugin_dirs: Union[str, List[str]]) -> None:
     """
     Load plugin modules from a directory.
     """
-    global loaded_dirs
-    if plugin_dirs is None:
-        plugin_dirs = [Path(__file__).parent.parent / "plugins"]
-        for plugin_dir in os.environ.get("PLUGIN_DIRS", "").split(os.pathsep):
-            plugin_dir = plugin_dir.strip()
-            if plugin_dir:
-                plugin_dirs.append(plugin_dir)
     if not isinstance(plugin_dirs, list):
         plugin_dirs = [plugin_dirs]
+    plugin_dirs = set(plugin_dirs)
     for plugin_dir in plugin_dirs:
-        if plugin_dir in loaded_dirs:
-            continue
-        loaded_dirs.add(plugin_dir)
         if not os.path.exists(plugin_dir):
-            logger.error(f"--plugin-dir [{plugin_dir}] does not exist.")
+            logger.error(f"plugin-dir [{plugin_dir}] does not exist.")
             continue
         if not os.path.isdir(plugin_dir):
-            logger.error(f"--plugin-dir [{plugin_dir}] is not a directory.")
+            logger.error(f"plugin-dir [{plugin_dir}] is not a directory.")
             continue
 
         logger.info(f"Loading plugin modules from [{plugin_dir}]...")
