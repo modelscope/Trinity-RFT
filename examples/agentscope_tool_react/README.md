@@ -1,6 +1,6 @@
-# ReAct on GSM8K and MATH Dataset
+# Example for Training ReAct Agent for Tool-Integrated Reasoning on GSM8k/DAPO Dataset
 
-This example shows how to train ReAct agent on GSM8K and MATH Dataset.
+This example shows how to train a ReAct agent for tool integrated reasoning on GSM8k/DAPO dataset
 
 For more detailed information, please refer to the [documentation](../../docs/sphinx_doc/source/tutorial/example_react.md).
 
