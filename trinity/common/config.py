@@ -675,12 +675,6 @@ class Config:
                         f"tokenizer.pad_token_id is None. Now set to {tokenizer.eos_token_id}",
                         stacklevel=1,
                     )
-                if tokenizer.pad_token is None:
-                    tokenizer.pad_token = tokenizer.eos_token
-                    logger.warning(
-                        f"tokenizer.pad_token is None. Now set to {tokenizer.eos_token}",
-                        stacklevel=1,
-                    )
                 self.buffer.pad_token_id = tokenizer.pad_token_id
 
             except Exception:
