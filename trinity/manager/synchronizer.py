@@ -67,7 +67,10 @@ class Synchronizer:
                 self._modules = alive_modules
             await asyncio.sleep(1)
         self.logger.info("Synchronizer stopped.")
-        ray.actor.exit_actor()
+        try:
+            ray.actor.exit_actor()
+        except Exception:
+            pass
 
     async def set_trainer_status(self, status: RunningStatus):
         """Update the status of the trainer."""
