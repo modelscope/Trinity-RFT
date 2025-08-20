@@ -51,10 +51,11 @@ class WrapPolicy:
 
 @dataclass
 class FSDPConfig:
-    wrap_policy: WrapPolicy = field(default_factory=WrapPolicy)
-    min_num_params: int = 0
     param_offload: bool = False
     optimizer_offload: bool = False
+    offload_policy: bool = False
+    reshard_after_forward: bool = True
+    wrap_policy: WrapPolicy = field(default_factory=WrapPolicy)
     fsdp_size: int = -1
     forward_prefetch: bool = False
 
