@@ -213,7 +213,6 @@ class MIXCHORDAlgorithm(AlgorithmType):
     def default_config(cls) -> Dict:
         return {
             "repeat_times": 8,
-            "add_strategy": "grpo",
             "policy_loss_fn": "mix_chord",
             "advantage_fn": "grpo",
             "sample_strategy": "mix",
