@@ -1,3 +1,4 @@
+import traceback
 from typing import Dict, List, Optional
 
 from trinity.buffer.buffer import BufferWriter, get_buffer_reader, get_buffer_writer
@@ -13,6 +14,7 @@ from trinity.common.config import (
 from trinity.common.constants import StorageType
 from trinity.common.experience import Experience
 from trinity.utils.log import get_logger
+from trinity.utils.plugin_loader import load_plugins
 
 
 def get_input_buffers(
@@ -33,10 +35,15 @@ class ExperiencePipeline:
 
     def __init__(self, config: Config):
         self.logger = get_logger(__name__)
+        load_plugins()
         pipeline_config = config.data_processor.experience_pipeline
         buffer_config = config.buffer
         self.input_store = self._init_input_storage(pipeline_config, buffer_config)  # type: ignore [arg-type]
-        self.operators = ExperienceOperator.create_operators(pipeline_config.operators)
+        try:
+            self.operators = ExperienceOperator.create_operators(pipeline_config.operators)
+        except Exception as e:
+            self.logger.error(f"Failed to create experience operators: {traceback.format_exc()}")
+            raise e
         self._set_algorithm_operators(config.algorithm)
         self.output = get_buffer_writer(
             buffer_config.trainer_input.experience_buffer,  # type: ignore [arg-type]

@@ -471,6 +471,7 @@ class TestTrainerMIX(BaseTrainerCase):
         self.config.algorithm.algorithm_type = "mix"
         self.config.algorithm.repeat_times = 4
         self.config.algorithm.sample_strategy = "mix"
+        self.config.algorithm.advantage_fn = "grpo"
         self.config.algorithm.sample_strategy_args = {"expert_data_ratio": 0.5}  # rft=4*4 : sft=16
         self.config.algorithm.policy_loss_fn = "mix"
         self.config.buffer.batch_size = 4
@@ -494,7 +495,7 @@ class TestTrainerMIX(BaseTrainerCase):
         self.assertTrue(len(rollout_metrics) > 0)
         self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 4)
         self.assertEqual(
-            parser.metric_values("rollout/experience_count")[1], 16
+            parser.metric_values("pipeline/experience_count")[1], 16
         )  # 16 rft experiences
         # test actor metrics
         actor_metrics = parser.metric_list("actor")
