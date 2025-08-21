@@ -62,9 +62,9 @@ class Email(BaseModel):
     date: str  # ISO 8601 string 'YYYY-MM-DD HH:MM:SS'
     subject: Optional[str] = None
     from_address: Optional[str] = None
-    to_addresses: List[str] = []  # Populated from recipients table
-    cc_addresses: List[str] = []  # Populated from recipients table
-    bcc_addresses: List[str] = []  # Populated from recipients table
+    to_addresses: List[str] = Field(default_factory=list)
+    cc_addresses: List[str] = Field(default_factory=list)
+    bcc_addresses: List[str] = Field(default_factory=list)
     body: Optional[str] = None
     file_name: Optional[str] = None
 
@@ -382,7 +382,7 @@ Return your judgement **accept** from **true** and **false**. Do not return any 
 def model_call_with_retry(
     model,
     prompt,
-    tools,
+    tools=None,
 ):  # omit type to avoid import agentscope here
     """Call the model with retry."""
     response = model(prompt, tools=tools)

@@ -182,10 +182,16 @@ class EmailSearchWorkflow(Workflow):
         rubric = FinalRubric()
         rubric.attempted_answer = answer is not None and answer != ""
         rubric.returned_i_dont_know = answer == "I don't know"
-        rubric.ever_found_right_email = self.query.message_ids[0] in self.agent.message_id_list
-        rubric.ever_read_right_email = self.query.message_ids[0] in self.agent.ever_read_message_ids
+        if len(self.query.message_ids) > 0:
+            rubric.ever_found_right_email = self.query.message_ids[0] in self.agent.message_id_list
+            rubric.ever_read_right_email = (
+                self.query.message_ids[0] in self.agent.ever_read_message_ids
+            )
+            rubric.sources_correct = self.query.message_ids[0] in sources
+        else:
+            # for debug
+            logger.info(f"{self.query.message_ids = }")
         rubric.num_sources = len(sources)
-        rubric.sources_correct = self.query.message_ids[0] in sources
         rubric.num_turns = len(self.agent.memory.get_memory())  # TODO: make sure this is correct
 
         logger.info(f"!!!!! Rubric: {rubric.model_dump()}")
@@ -193,7 +199,7 @@ class EmailSearchWorkflow(Workflow):
         try:
             judge_response = judge_correctness(answer, self.query, judge_model) # TODO: implement this func
             logger.info(f"Judge response: {judge_response}")
-            rubric.answer_correct = judge_response.get("accept", False)
+            rubric.answer_correct = judge_response
 
         except Exception as e:
             logger.error(f"Error judging correctness: {e}")

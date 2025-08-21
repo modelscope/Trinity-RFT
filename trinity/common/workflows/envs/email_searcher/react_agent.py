@@ -61,13 +61,7 @@ class EmailSearchAgent(ReActAgentV2):
         """
 
         try:
-            res = subprocess.run(
-                search_emails_tool(inbox=inbox_address, sent_before=query_date, keywords=keywords),
-                text=True,
-                capture_output=True,
-                timeout=300,
-                check=False,
-            )
+            res = search_emails_tool(inbox=inbox_address, sent_before=query_date, keywords=keywords)
 
             self.message_id_list.extend([r.message_id for r in res])
             logger.info(f"!!!!! Search results: {res} ")
@@ -94,13 +88,7 @@ class EmailSearchAgent(ReActAgentV2):
                 The content field contains the email content or an error message if the email is not found.
         """
         try:
-            email_content = subprocess.run(
-                read_email_tool(message_id),
-                text=True,
-                capture_output=True,
-                timeout=300,
-                check=False,
-            )
+            email_content = read_email_tool(message_id)
 
             self.ever_read_message_ids.append(message_id)
 
