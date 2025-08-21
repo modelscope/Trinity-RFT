@@ -5,12 +5,11 @@ import os
 import shutil
 import time
 import unittest
-from abc import abstractmethod
 from copy import deepcopy
 from datetime import datetime
 
 import ray
-from parameterized import parameterized
+from parameterized import parameterized, parameterized_class
 
 from tests.tools import (
     RayUnittestBase,
@@ -43,10 +42,6 @@ class BaseTrainerCase(RayUnittestBase):
         self.config.synchronizer.sync_interval = 2
         self.config.synchronizer.sync_method = SyncMethod.NCCL
         self.config.explorer.eval_interval = 4
-
-    @abstractmethod
-    def test_trainer(self):
-        """Test the trainer."""
 
 
 class TestTrainerCountdown(BaseTrainerCase):
@@ -171,6 +166,13 @@ class TestStepAheadAsyncRL(BaseTrainerCase):
         shutil.rmtree(self.config.checkpoint_job_dir)
 
 
+@parameterized_class(
+    ("fsdp_strategy",),
+    [
+        ("fsdp",),
+        ("fsdp2",),
+    ],
+)
 class TestTrainerGSM8K(BaseTrainerCase):
     def test_trainer(self):
         """Test GSM8K."""
@@ -183,6 +185,7 @@ class TestTrainerGSM8K(BaseTrainerCase):
         self.config.buffer.total_epochs = 1
         self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("gsm8k")
         self.config.check_and_update()
+        self.config.trainer.trainer_config.actor_rollout_ref.actor.strategy = self.fsdp_strategy
         self.config.trainer.trainer_config.trainer.max_actor_ckpt_to_keep = 2
         self.config.trainer.trainer_config.actor_rollout_ref.actor.optim.lr = 1e-5
         both(self.config)

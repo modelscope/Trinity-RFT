@@ -53,7 +53,7 @@ class vLLMRolloutModel(InferenceModel):
             temperature=0.0,
             max_tokens=config.max_response_tokens,
             min_tokens=1,
-            truncate_prompt_tokens=config.max_model_len - 1,  # type: ignore [operator]
+            truncate_prompt_tokens=config.max_prompt_tokens,
             skip_special_tokens=True,
             include_stop_str_in_output=False,
             output_kind=RequestOutputKind.FINAL_ONLY,
@@ -100,6 +100,10 @@ class vLLMRolloutModel(InferenceModel):
         self.api_server_host = None
         self.api_server_port = None
 
+    async def _initialize_tokenizer(self):
+        self.tokenizer = await self.async_llm.get_tokenizer()
+        self.tokenizer.truncation_side = "left"
+
     async def chat(self, messages: List[Dict], **kwargs) -> Sequence[Experience]:
         """Chat with the model with a list of messages in async.
 
@@ -111,7 +115,7 @@ class vLLMRolloutModel(InferenceModel):
             A list of experiences.
         """
         if self.tokenizer is None:
-            self.tokenizer = await self.async_llm.get_tokenizer()
+            await self._initialize_tokenizer()
         if self.chat_template is None:
             self.chat_template = self.tokenizer.get_chat_template()
         if messages[-1]["role"] == "assistant":
@@ -141,7 +145,12 @@ class vLLMRolloutModel(InferenceModel):
         Returns:
             A list of experiences.
         """
-        output = await self._generate_internal(prompt=prompt, **kwargs)
+        if self.tokenizer is None:
+            await self._initialize_tokenizer()
+        token_ids = self.tokenizer(  # type: ignore
+            prompt, truncation=True, max_length=self.config.max_prompt_tokens, return_tensors="pt"
+        )["input_ids"][0].tolist()
+        output = await self._generate_internal(prompt={"prompt_token_ids": token_ids}, **kwargs)
         experiences = [
             Experience(
                 tokens=torch.cat(
