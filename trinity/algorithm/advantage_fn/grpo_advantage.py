@@ -127,7 +127,9 @@ class GRPOGroupedAdvantage(GroupAdvantage):
         metrics = {}
         with torch.no_grad():
             if len(exps) == 1:
-                group_reward_mean = torch.tensor(0.0)
+                group_reward_mean = torch.tensor(
+                    0.0
+                )  # check this value (use exps[0].reward may be better)
                 group_reward_std = torch.tensor(1.0)  # set to 1.0 to avoid division by zero
                 if self.std_threshold is not None:
                     metrics["skipped_count"] = 1

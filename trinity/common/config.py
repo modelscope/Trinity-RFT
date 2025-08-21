@@ -320,10 +320,6 @@ class AlgorithmConfig:
     # for GRPO-like algorithms, repeat each task for `repeat_times` times
     repeat_times: int = 1
 
-    # the strategy for adding experiences to the buffer
-    add_strategy: Optional[str] = None  # deprecated
-    add_strategy_args: Optional[dict] = None  # deprecated
-
     # the strategy for sampling experiences from the buffer
     sample_strategy: Optional[str] = None
     sample_strategy_args: Optional[dict] = None
