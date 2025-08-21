@@ -1,23 +1,23 @@
-'''
+"""
 This file defines Email Dataclass and three email_search_tools.
 Modified from https://github.com/OpenPipe/ART/blob/art-e/examples/art-e/
-'''
-import os
+"""
+
 import sqlite3
 import openai
-import json
+import datetime
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, List, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from tenacity import retry, stop_after_attempt, wait_fixed
 
 from trinity.utils.log import get_logger
 
-from .prepare_data import DEFAULT_DB_PATH
+# from .prepare_data import DEFAULT_DB_PATH # TODO: pass this correctly
+DEFAULT_DB_PATH = "/mnt/yuchang/datasets/enron_emails_trinity/data/enron_emails.db"
 
 logger = get_logger(__name__)
 
-RUBRIC_FILE = "rubric_log.jsonl" # TODO: pass from outside
 
 conn = None
 def get_conn():
@@ -39,6 +39,13 @@ class QueryModel(BaseModel):
     how_realistic: float
     inbox_address: str
     query_date: str
+
+    @field_validator("query_date", mode="before")
+    @classmethod
+    def format_date(cls, v: any) -> str:
+        if isinstance(v, datetime.datetime):
+            return v.strftime("%Y-%m-%d")
+        return v
 
 
 class AnswerModel(BaseModel):
@@ -85,12 +92,13 @@ class FinalRubric(BaseModel):
     prompt_tokens: int = 0
     completion_tokens: int = 0
 
-    def to_metrics(self) -> dict[str, float | int]:
-        metrics: dict[str, float | int] = {k: int(v) for k, v in asdict(self).items()}
-        metrics["failed_format_validation"] = int(
-            self.bad_tool_call_name or self.bad_tool_call_args or self.cant_parse_tool_call
-        )
-        return metrics
+    # TODO
+    # def to_metrics(self) -> dict[str, float | int]:
+    #     metrics: dict[str, float | int] = {k: int(v) for k, v in self.items()}
+    #     metrics["failed_format_validation"] = int(
+    #         self.bad_tool_call_name or self.bad_tool_call_args or self.cant_parse_tool_call
+    #     )
+    #     return metrics
 
 
 ############ Define tools for agentscope ############
@@ -121,6 +129,12 @@ def search_emails_tool(
         A list of SearchResult objects, each containing 'message_id' and 'snippet'.
         Returns an empty list if no results are found or an error occurs.
     """
+    # logger.info(
+    #     f"Starting email search with keywords: {keywords}, inbox: {inbox}, DEFAULT_DB_PATH: {DEFAULT_DB_PATH}"
+    # )  # TODO: remove
+    # logger.info(
+    #     f"All parameters: {inbox=}\n {keywords=}\n {from_addr=}\n {to_addr=}\n {sent_after=}\n {sent_before=}\n {max_results=}"
+    # )  # TODO: remove
 
     # Initialize sql and params
     sql: Optional[str] = None
@@ -229,6 +243,7 @@ def read_email_tool(message_id: str) -> Optional[Email]:
         An Email object containing the details of the found email,
         or None if the email is not found or an error occurs.
     """
+    # logger.info(f"Reading email with message_id: {message_id}")  # TODO: remove
 
     cursor = get_conn().cursor()
 

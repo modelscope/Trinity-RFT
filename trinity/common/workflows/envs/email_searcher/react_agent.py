@@ -19,7 +19,7 @@ from agentscope.service import ServiceResponse, ServiceExecStatus
 logger = get_logger(__name__)
 
 
-class ReActAgent(ReActAgentV2):
+class EmailSearchAgent(ReActAgentV2):
     """
     A customized ReAct agent that overrides the generate_response method by return_final_answer
     Ref: https://github.com/OpenPipe/ART/blob/main/dev/art-e/art_e/rollout.py#L260
@@ -70,6 +70,7 @@ class ReActAgent(ReActAgentV2):
             )
 
             self.message_id_list.extend([r.message_id for r in res])
+            logger.info(f"!!!!! Search results: {res} ")
 
             return ServiceResponse(
                 status=ServiceExecStatus.SUCCESS,

@@ -8,7 +8,7 @@ from trinity.common.models.model import ModelWrapper
 from trinity.common.workflows.workflow import WORKFLOWS, Task, Workflow
 from trinity.utils.log import get_logger
 
-from .react_agent import ReActAgent
+from .react_agent import EmailSearchAgent
 from .utils import QueryModel, AnswerModel, FinalRubric, judge_correctness
 
 logger = get_logger(__name__)
@@ -52,7 +52,7 @@ class EmailSearchWorkflow(Workflow):
         )
 
         temperature = self.rollout_args.get("temperature", 1.0)
-        max_tokens = self.rollout_args.get("max_tokens", 4096)
+        max_tokens = 4096  # TODO
 
         agentscope.init(
             model_configs=[
@@ -90,7 +90,7 @@ class EmailSearchWorkflow(Workflow):
         self.truth = task.truth  # ground truth answer
 
         self.workflow_args = task.workflow_args
-        self.max_turns = int(self.workflow_args.get("max_turns", 5))
+        self.max_turns = int(self.workflow_args.get("max_turns", 10))
         self.tool_obs_char_limit = int(self.workflow_args.get("tool_obs_char_limit", 2000))
         self.reward_fn_args = task.reward_fn_args or {}
 
@@ -100,7 +100,7 @@ class EmailSearchWorkflow(Workflow):
             query_date=self.query.query_date,
         )
 
-        self.agent = ReActAgent(
+        self.agent = EmailSearchAgent(
             name="react_agent",
             sys_prompt=self.system_prompt,
             model_config_name="react_model",
@@ -128,23 +128,10 @@ class EmailSearchWorkflow(Workflow):
             structured_model=AnswerModel,
         )
         answer_and_sources = response.metadata
-        logger.info(f"answer_and_sources: {answer_and_sources}")  # debug
-
-        # content = self.agent.reply(msg).content
-        # unify the response format to text
-        # try:
-        #     if isinstance(content, list):
-        #         response_text = content[0]["text"]
-        #     else:
-        #         response_text = content
-        # except Exception as e:
-        #     error_message = f"Error in processing the response: {e}"
-        #     logger.error(error_message)
-        #     response_text = str(content)
 
         reward = self.calculate_reward(
             answer_and_sources,
-            judge_model=self.auxiliary_models[0] if self.auxiliary_models else None,
+            judge_model=self.auxiliary_models[0] if self.auxiliary_models else None,  # TODO: check
         )
 
         experiences = self.model.extract_experience_from_history(clear_history=True)
@@ -156,7 +143,7 @@ class EmailSearchWorkflow(Workflow):
             if experience.metrics is None:
                 experience.metrics = {}
             experience.metrics.update(turns_metrics)
-        logger.debug(
+        logger.info(
             f"return experience len: {len(experiences)}, final step reward: {experiences[-1].reward}"
         )
         return experiences
@@ -168,11 +155,29 @@ class EmailSearchWorkflow(Workflow):
     ) -> float:
         """ Ref: calculate_reward in https://github.com/OpenPipe/ART/blob/main/dev/art-e/art_e/rollout.py#L64"""
 
-        answer = answer_and_sources.answer
-        sources = answer_and_sources.sources
+        logger.info(f"{answer_and_sources = }")
+        # logger.info(f"{self.truth = }")
+        try:
+            answer = answer_and_sources.get("answer", None)
+            sources = answer_and_sources.get("sources", [])
+        except Exception as e:
+            logger.error(f"Error extracting answer and sources: {e}")
+            return -1
+
+        if answer is None:
+            return -1
 
         if not self.reward_fn_args.get("llm_as_a_judge", True):
-            return answer == self.truth
+            # import evaluate  # TODO: use blue?
+
+            # bleu_metric = evaluate.load(
+            #     "bleu"
+            # )  # repeat loading is not efficient, but it's fine for now
+            # results = bleu_metric.compute(predictions=[answer], references=[[self.truth]])
+
+            # return results["bleu"]
+
+            return float(answer == self.truth)
 
         rubric = FinalRubric()
         rubric.attempted_answer = answer is not None and answer != ""
@@ -182,6 +187,8 @@ class EmailSearchWorkflow(Workflow):
         rubric.num_sources = len(sources)
         rubric.sources_correct = self.query.message_ids[0] in sources
         rubric.num_turns = len(self.agent.memory.get_memory())  # TODO: make sure this is correct
+
+        logger.info(f"!!!!! Rubric: {rubric.model_dump()}")
 
         try:
             judge_response = judge_correctness(answer, self.query, judge_model) # TODO: implement this func
