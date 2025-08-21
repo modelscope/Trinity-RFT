@@ -312,7 +312,7 @@ class TestTrainerSFTCHATPAIR(BaseTrainerCase):
         self.config.buffer.train_batch_size = 4
         self.config.buffer.total_epochs = 2
         self.config.buffer.trainer_input.experience_buffer = get_unittest_dataset_config(
-            "sft_for_gsm8k"
+            "sft_for_gsm8k_chatpair"
         )
         self.config.check_and_update()
         train(self.config)
@@ -324,6 +324,7 @@ class TestTrainerSFTCHATPAIR(BaseTrainerCase):
     def tearDown(self):
         # remove dir only when the test passed
         shutil.rmtree(self.config.checkpoint_job_dir)
+
 
 class TestTrainerSFT(BaseTrainerCase):
     def test_trainer(self):

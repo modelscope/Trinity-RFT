@@ -90,7 +90,9 @@ def get_unittest_dataset_config(
     elif dataset_name == "sft_for_gsm8k_chatpair":
         return StorageConfig(
             name=dataset_name,
-            path=os.path.join(os.path.dirname(__file__), "template", "data", "sft_for_gsm8k_chatpair"),
+            path=os.path.join(
+                os.path.dirname(__file__), "template", "data", "sft_for_gsm8k_chatpair"
+            ),
             split="train",
             format=FormatConfig(
                 prompt_type=PromptType.CHATPAIR,
