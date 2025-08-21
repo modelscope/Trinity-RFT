@@ -22,6 +22,8 @@
 
 ## 🚀 最新动态
 
+* [2025-08] ✨ 发布 Trinity-RFT v0.2.1 版本，强化了 Agentic RL 和 异步 RL 相关功能。
+* [2025-08] 🎵 我们推出了 [CHORD](https://github.com/modelscope/Trinity-RFT/tree/main/examples/mix_chord)，一种动态整合 SFT 和 RL 来微调 LLM 的方法（[论文](https://arxiv.org/pdf/2508.11408)）。
 * [2025-08] Trinity-RFT 现在已经支持通用多轮工作流的训练了，请参考 [ALFWorld](./docs/sphinx_doc/source/tutorial/example_step_wise.md) 和 [ReAct](./docs/sphinx_doc/source/tutorial/example_react.md) 的例子！
 * [2025-07] 发布 Trinity-RFT v0.2.0 版本，新增了多项功能优化。
 * [2025-07] 更新了[技术报告](https://arxiv.org/abs/2505.17826) (arXiv v2)，增加了新功能、示例和实验。
@@ -202,7 +204,7 @@ pip install -e .\[flash_attn\]
 使用 pip 安装：
 
 ```shell
-pip install trinity-rft==0.2.0
+pip install trinity-rft==0.2.1
 # flash-attn 需要单独安装
 pip install flash-attn==2.8.0.post2
 ```

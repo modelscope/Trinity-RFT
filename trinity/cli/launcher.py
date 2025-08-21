@@ -125,8 +125,7 @@ def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
     # try to run task pipeline for raw data
     check_and_run_task_pipeline(config)
 
-    envs = {PLUGIN_DIRS_ENV_VAR: plugin_dir}
-
+    envs = {PLUGIN_DIRS_ENV_VAR: plugin_dir or ""}
     if dlc:
         from trinity.utils.dlc_utils import setup_ray_cluster
 

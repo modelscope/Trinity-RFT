@@ -21,7 +21,20 @@ jobs:
       OS: ${{ matrix.os }}
       PYTHON: '3.10'
     steps:
-    - uses: actions/checkout@master
+    - name: Checkout PR branch
+      if: github.event_name == 'pull_request'
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ github.event.pull_request.head.repo.full_name }}
+        ref: ${{ github.event.pull_request.head.ref }}
+        fetch-depth: 0
+
+    - name: Checkout main branch
+      if: github.event_name != 'pull_request'
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.ref_name }}
+        fetch-depth: 0
     - name: Setup Python ${{ matrix.python-version }}
       uses: actions/setup-python@master
       with:
@@ -33,7 +46,34 @@ jobs:
       name: Build Documentation
       run: |
         cd docs/sphinx_doc
-        ./build_doc.sh
+        if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+          ./build_doc.sh
+        else
+          BRANCH_NAME=$(git branch --show-current)
+          ./build_doc.sh --branch "$BRANCH_NAME"
+        fi
+    - name: Add redirect index.html to main version
+      run: |
+        if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+          BRANCH_NAME="main"
+        else
+          BRANCH_NAME=$(git branch --show-current)
+        fi
+        REDIRECT_PATH="docs/sphinx_doc/build/html/index.html"
+        MAIN_INDEX="${BRANCH_NAME}/index.html"
+        cat > $REDIRECT_PATH <<EOF
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta http-equiv=\"refresh\" content=\"0; url=$MAIN_INDEX\" />
+            <script>window.location.href = "$MAIN_INDEX";</script>
+            <title>Redirecting...</title>
+          </head>
+          <body>
+            <p>Redirecting to <a href="$MAIN_INDEX">$MAIN_INDEX</a></p>
+          </body>
+        </html>
+        EOF
     - name: Upload Documentation
       uses: actions/upload-artifact@v4
       with:

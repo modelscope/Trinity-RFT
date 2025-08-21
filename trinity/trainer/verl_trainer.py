@@ -84,8 +84,8 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         tokenizer = hf_tokenizer(local_path)
 
         # define worker classes
-        if config.actor_rollout_ref.actor.strategy == "fsdp":
-            assert config.actor_rollout_ref.actor.strategy == config.critic.strategy
+        if config.actor_rollout_ref.actor.strategy in ["fsdp", "fsdp2"]:
+            assert config.critic.strategy in ["fsdp", "fsdp2"]
             from trinity.trainer.verl.fsdp_workers import (
                 ActorRolloutRefWorker,
                 CriticWorker,
