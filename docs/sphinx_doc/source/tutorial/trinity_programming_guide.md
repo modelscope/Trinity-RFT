@@ -536,7 +536,7 @@ We plan to add `TaskOperator` and `TaskPipeline` for taskset processing in the f
 ```
 ---
 
-Developers can implement and use their own operators by following the steps below continuously.
+Developers can implement and use their own operators by following the steps below.
 
 ### Step 1: Implement Operator
 
