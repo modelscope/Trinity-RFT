@@ -357,7 +357,7 @@ For convenience, Trinity-RFT provides an abstract class {class}`trinity.algorith
 
 - `calculate_group_advantage`: This method calculates the advantage for each group of experiences.
 
-Here's an implementation example for the OPMD algorithm's Add Strategy:
+Here's an implementation example for the OPMD algorithm's advantage function:
 
 ```python
 from trinity.algorithm.advantage_fn import ADVANTAGE_FN, GroupAdvantage
