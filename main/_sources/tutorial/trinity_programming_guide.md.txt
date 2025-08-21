@@ -394,7 +394,7 @@ class OPMDGroupAdvantage(GroupAdvantage):
                 exp.advantages = score * exp.action_mask
                 exp.returns = exp.advantages.clone()
             metrics = {
-                "group_baseline": group_baseline,
+                "group_baseline": group_baseline.item(),
             }
         return exps, metrics
 
@@ -530,7 +530,8 @@ In Trinity-RFT, the operator module is responsible for processing experience dat
 - **ExperiencePipeline** ({class}`trinity.data.pipelines.ExperiencePipeline`): The experience data processing pipeline that manages a sequence of operators. It takes raw experiences from the `Explorer`, passes them through each operator in the pipeline, and writes the final processed experiences into the input buffer of the `Trainer`.
 
 ```{note}
-We plan to add `TaskOperator` and `TaskPipeline` for taskset processing in the future versions.
+Except for `ExperiencePipeline`, Trinity-RFT also provides `TaskPipeline` for task data processing.
+In the current version, the `TaskPipeline` only supports using Data-Juicer operators. Please see this {ref}`section <Data Processing>` for details.
 ```
 ---
 
@@ -556,7 +557,7 @@ class ExperienceOperator(ABC):
 Here is an implementation of a simple operator that filters out experiences with rewards below a certain threshold:
 
 ```python
-from trinity.data.operators import EXPERIENCE_OPERATORS, ExperienceOperator
+from trinity.buffer.operators import EXPERIENCE_OPERATORS, ExperienceOperator
 from trinity.common.experience import Experience
 
 
@@ -594,7 +595,7 @@ synchronizer:
 ```
 
 ```{tip}
-The `RewardFilter` reduces the number of experiences, which may cause the trainer can't get enough experiences to start a training step. To avoid the issue, you can use the advanced *Dynamic Synchronization* feature provided by Trinity-RFT as shown in the above configuration file.
+The `RewardFilter` reduces the number of experiences, which may cause the trainer can't get enough experiences to start a training step. To avoid the issue, you can use the advanced {ref}`Dynamic Synchronization <Synchronizer>` feature provided by Trinity-RFT as shown in the above configuration file.
 The above setting means that the `Explorer` will sync with the `Trainer` every 2 steps and will continue running regardless of how many steps the `Trainer` has completed. This ensures that the `Trainer` can always get enough experiences to start a training step as long as the `Explorer` is running.
 ```
 

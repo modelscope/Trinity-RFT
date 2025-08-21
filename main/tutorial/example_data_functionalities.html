@@ -59,12 +59,12 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#example-data-processor-for-experience-pipeline">Example: Data Processor for Experience Pipeline</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#data-processor-server-preparation">Data Processor Server Preparation</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id1">Configure the Data Processor</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id2">Exploring &amp; Training</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Configure the Data Processor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Exploring &amp; Training</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#example-human-in-the-loop">Example: Human in the Loop</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id3">Configure the Data Processor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">Configure the Data Processor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#start-running">Start Running</a></li>
 </ul>
 </li>
@@ -112,7 +112,7 @@
            <div itemprop="articleBody">
              
   <section class="tex2jax_ignore mathjax_ignore" id="data-processing">
-<h1>Data Processing<a class="headerlink" href="#data-processing" title="Link to this heading"></a></h1>
+<span id="id1"></span><h1>Data Processing<a class="headerlink" href="#data-processing" title="Link to this heading"></a></h1>
 <section id="example-data-processor-for-task-pipeline">
 <h2>Example: Data Processor for Task Pipeline<a class="headerlink" href="#example-data-processor-for-task-pipeline" title="Link to this heading"></a></h2>
 <p>In this example, you will learn how to apply the data processor of Trinity-RFT to prepare and prioritize the dataset before task exploring and training. This example takes GSM-8K dataset as the example dataset to figure out:</p>
@@ -206,8 +206,8 @@ python<span class="w"> </span>scripts/start_servers.py
 <p>These scripts will create split environments for Trinity-RFT and Data-Juicer-based data processor.
 Then it will start the data processor server automatically in the Data-Juicer environment.</p>
 </section>
-<section id="id1">
-<h3>Configure the Data Processor<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<section id="id2">
+<h3>Configure the Data Processor<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
 <p>In this example, assume that you need to add an extra reward item to the experiences outputted by the explorer, which access the quality scores of the experiences. So you can set the <code class="docutils literal notranslate"><span class="pre">experience_pipeline</span></code> config like the following example:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">service</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">data_juicer</span><span class="p">:</span>
@@ -264,8 +264,8 @@ So we don’t need to set the input and output buffers for the experience pipeli
 </div>
 <p>All config items in the <code class="docutils literal notranslate"><span class="pre">data_processor</span></code> section can be found <a class="reference internal" href="trinity_configs.html"><span class="std std-doc">here</span></a>. A prepared config file for this example of GSM-8K can be found in <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_experience_pipeline/gsm8k.yaml">the config file</a>.</p>
 </section>
-<section id="id2">
-<h3>Exploring &amp; Training<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<section id="id3">
+<h3>Exploring &amp; Training<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
 <p>After preparing the config files of Trinity-RFT, you can start your ray cluster and run the RFT process including the data active iterator part with the following commands:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># start the ray cluster</span>
 <span class="c1"># on master node</span>
@@ -289,8 +289,8 @@ It will watch the explorer output buffer. Once there is a new batch of experienc
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[data]&quot;</span>
 </pre></div>
 </div>
-<section id="id3">
-<h3>Configure the Data Processor<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<section id="id4">
+<h3>Configure the Data Processor<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
 <p>Trinity-RFT uses a unified config file to manage all config items. For the data processor, you need to focus on the <code class="docutils literal notranslate"><span class="pre">data_processor</span></code> section in the config file.</p>
 <p>In this example, assume that you need to select the chosen and rejected responses for DPO method. So you can set these config items like the following example:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">data_processor</span><span class="p">:</span>
@@ -387,7 +387,7 @@ It will watch the explorer output buffer. Once there is a new batch of experienc
     </dl>
     <dl>
       <dt>Branches</dt>
-      <dd><a href="example_data_functionalities.html">main</a></dd>
+      <dd><a href="example_data_functionalities.html">main</a> <b>(latest)</b></dd>
     </dl>
   </div>
 </div><script>

@@ -194,13 +194,16 @@ Feel free to modify this function.</p>
 <dd><p>Bases: <a class="reference internal" href="trinity.algorithm.policy_loss_fn.policy_loss_fn.html#trinity.algorithm.policy_loss_fn.policy_loss_fn.PolicyLossFn" title="trinity.algorithm.policy_loss_fn.policy_loss_fn.PolicyLossFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">PolicyLossFn</span></code></a></p>
 <p>Implements a mixed policy loss combining GRPO and SFT losses.</p>
 <p>This loss function applies different loss components to data based on whether
-it comes from an expert or not, as indicated by <cite>expert_mask</cite>. It combines:
-- GRPO loss (self.grpo_loss_fn) for non-expert data
-- SFT loss (self.sft_loss_fn) for expert data</p>
-<blockquote>
-<div><p>the weight of SFT loss is globally controled by <cite>mu_schedule</cite> function
+it comes from an expert or not, as indicated by <cite>expert_mask</cite>. It combines:</p>
+<ul class="simple">
+<li><p>GRPO loss (self.grpo_loss_fn) for non-expert data</p></li>
+<li><dl class="simple">
+<dt>SFT loss (self.sft_loss_fn) for expert data</dt><dd><p>the weight of SFT loss is globally controled by <cite>mu_schedule</cite> function
 the tokenwise weights are calculated using different SFT loss formulas</p>
-</div></blockquote>
+</dd>
+</dl>
+</li>
+</ul>
 <p>The per-sample weights are normalized using either <cite>experience_per_gpu</cite> or
 <cite>gradient_accumulation</cite>, depending on whether dynamic batch sizing is enabled,
 to ensure consistent weighting across different batches of the same type experiences.</p>
@@ -272,7 +275,7 @@ to ensure consistent weighting across different batches of the same type experie
     </dl>
     <dl>
       <dt>Branches</dt>
-      <dd><a href="../../main/index.html">main</a></dd>
+      <dd><a href="../../main/index.html">main</a> <b>(latest)</b></dd>
     </dl>
   </div>
 </div><script>

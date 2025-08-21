@@ -96,56 +96,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-trinity.algorithm.add_strategy.duplicate_add_strategy">
-<span id="trinity-algorithm-add-strategy-duplicate-add-strategy-module"></span><h1>trinity.algorithm.add_strategy.duplicate_add_strategy module<a class="headerlink" href="#module-trinity.algorithm.add_strategy.duplicate_add_strategy" title="Link to this heading"></a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="trinity.algorithm.add_strategy.duplicate_add_strategy.DuplicateInformativeAddStrategy">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.add_strategy.duplicate_add_strategy.</span></span><span class="sig-name descname"><span class="pre">DuplicateInformativeAddStrategy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">writer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.buffer.buffer_writer.html#trinity.buffer.buffer_writer.BufferWriter" title="trinity.buffer.buffer_writer.BufferWriter"><span class="pre">BufferWriter</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">variance_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/add_strategy/duplicate_add_strategy.html#DuplicateInformativeAddStrategy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.add_strategy.duplicate_add_strategy.DuplicateInformativeAddStrategy" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="trinity.algorithm.add_strategy.add_strategy.html#trinity.algorithm.add_strategy.add_strategy.AddStrategy" title="trinity.algorithm.add_strategy.add_strategy.AddStrategy"><code class="xref py py-class docutils literal notranslate"><span class="pre">AddStrategy</span></code></a></p>
-<p>An AddStrategy that filters experiences based on reward variance and duplicates them to reach the target size.
-Ref: POLARIS (<a class="reference external" href="https://hkunlp.github.io/blog/2025/Polaris">https://hkunlp.github.io/blog/2025/Polaris</a>)</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.algorithm.add_strategy.duplicate_add_strategy.DuplicateInformativeAddStrategy.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">writer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.buffer.buffer_writer.html#trinity.buffer.buffer_writer.BufferWriter" title="trinity.buffer.buffer_writer.BufferWriter"><span class="pre">BufferWriter</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">variance_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/add_strategy/duplicate_add_strategy.html#DuplicateInformativeAddStrategy.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.add_strategy.duplicate_add_strategy.DuplicateInformativeAddStrategy.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.algorithm.add_strategy.duplicate_add_strategy.DuplicateInformativeAddStrategy.add">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiences</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/add_strategy/duplicate_add_strategy.html#DuplicateInformativeAddStrategy.add"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.add_strategy.duplicate_add_strategy.DuplicateInformativeAddStrategy.add" title="Link to this definition"></a></dt>
-<dd><p>Add experiences to the buffer.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>experiences</strong> (<cite>Experience</cite>) – The experiences to be added.</p></li>
-<li><p><strong>step</strong> (<cite>int</cite>) – The current step number.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The number of experiences added to the buffer.
-<cite>Dict</cite>: Metrics for logging.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><cite>int</cite></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.algorithm.add_strategy.duplicate_add_strategy.DuplicateInformativeAddStrategy.default_args">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/add_strategy/duplicate_add_strategy.html#DuplicateInformativeAddStrategy.default_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.add_strategy.duplicate_add_strategy.DuplicateInformativeAddStrategy.default_args" title="Link to this definition"></a></dt>
-<dd><p>Get the default arguments of the add strategy.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The default arguments.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><cite>dict</cite></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
+  <section id="trinity-algorithm-add-strategy-duplicate-add-strategy-module">
+<h1>trinity.algorithm.add_strategy.duplicate_add_strategy module<a class="headerlink" href="#trinity-algorithm-add-strategy-duplicate-add-strategy-module" title="Link to this heading"></a></h1>
 </section>
 
 
@@ -189,7 +141,7 @@ Ref: POLARIS (<a class="reference external" href="https://hkunlp.github.io/blog/
     </dl>
     <dl>
       <dt>Branches</dt>
-      <dd><a href="../../main/index.html">main</a></dd>
+      <dd><a href="../../main/index.html">main</a> <b>(latest)</b></dd>
     </dl>
   </div>
 </div><script>
