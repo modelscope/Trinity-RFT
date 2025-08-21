@@ -2,7 +2,7 @@
 This file defines Email Dataclass and three email_search_tools.
 Modified from https://github.com/OpenPipe/ART/blob/art-e/examples/art-e/
 """
-
+import os
 import sqlite3
 import openai
 import datetime
@@ -311,8 +311,8 @@ def read_email_tool(message_id: str) -> Optional[Email]:
 def judge_correctness(
     answer: str,
     query: QueryModel,
-    judge_model: openai.OpenAI,
-) -> dict:
+    judger: Any,
+) -> bool:
     """Use an LLM to decide whether *answer* matches *query.answer*.
 
     Returns a boolean *accept* flag used for scoring.
@@ -334,39 +334,48 @@ Return your judgement **accept** from **true** and **false**. Do not return any 
         f"Question: {query.question}\n" f"Reference answer: {query.answer}\n" f"AI answer: {answer}"
     )
 
-    from agentscope.manager import ModelManager
-    from agentscope.message import Msg
+    # from agentscope.manager import ModelManager
+    # from agentscope.message import Msg
 
-    MODEL_CONFIG_NAME = "openai/gpt-4.1"
-    MODEL_CONFIGURATIONS = [
-        {
-            "model_type": "openai_chat",
-            "config_name": MODEL_CONFIG_NAME,
-            "model_name": "openai/gpt-4.1",
-            # "api_key": judge_model,  # TODO: check
-            "use_openai_formatter": True,
-        }
+    # MODEL_CONFIG_NAME = "Qwen/Qwen3-30B-A3B-Instruct-2507"
+    # MODEL_CONFIGURATIONS = [
+    #     {
+    #         "model_type": "openai_chat",
+    #         "config_name": MODEL_CONFIG_NAME,
+    #         "model_name": "Qwen3-32B",
+    #         "use_openai_formatter": True,
+    #     }
+    # ]
+
+    # model_manager = ModelManager.get_instance()
+    # model_manager.load_model_configs(MODEL_CONFIGURATIONS)
+    # model = model_manager.get_model_by_config_name(MODEL_CONFIG_NAME)
+
+    # prompt = judger.format(
+    #     [
+    #         Msg(name="system", content=system_prompt, role="system"),
+    #         Msg(name="user", content=prompt, role="user"),
+    #     ]
+    # )
+
+    # response = model_call_with_retry(
+    #     model,
+    #     prompt,
+    # )
+
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": prompt},
     ]
-
-    model_manager = ModelManager.get_instance()
-    model_manager.load_model_configs(MODEL_CONFIGURATIONS)
-    model = model_manager.get_model_by_config_name(MODEL_CONFIG_NAME)
-
-    prompt = model.format(
-        [
-            Msg(name="system", content=system_prompt, role="system"),
-            Msg(name="user", content=prompt, role="user"),
-        ]
+    completion = judger.chat.completions.create(
+        model=judger.model_path, messages=messages, stream=False
     )
-    response = model_call_with_retry(
-        model,
-        prompt,
-    )
-    logger.info(f"LLM judge response: {response.text}")
+    result = completion.choices[0].message.content
+    logger.info(f"LLM judge response: {result}")
 
     # TODO: find a better way here
     accept = False
-    if "true" in response.text.lower():
+    if "true" in result.lower():
         accept = True
 
     return accept

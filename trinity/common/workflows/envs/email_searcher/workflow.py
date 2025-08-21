@@ -134,10 +134,7 @@ class EmailSearchWorkflow(Workflow):
         else:
             answer_and_sources = response.metadata
 
-        reward = self.calculate_reward(
-            answer_and_sources,
-            judge_model=self.auxiliary_models[0] if self.auxiliary_models else None,  # TODO: check
-        )
+        reward = self.calculate_reward(answer_and_sources)
 
         experiences = self.model.extract_experience_from_history(clear_history=True)
         logger.debug(f"Experiences extracted len: {len(experiences)}")
@@ -153,11 +150,7 @@ class EmailSearchWorkflow(Workflow):
         )
         return experiences
 
-    def calculate_reward(
-        self,
-        answer_and_sources,
-        judge_model=None,
-    ) -> float:
+    def calculate_reward(self, answer_and_sources: dict) -> float:
         """ Ref: calculate_reward in https://github.com/OpenPipe/ART/blob/main/dev/art-e/art_e/rollout.py#L64"""
 
         logger.info(f"{answer_and_sources = }")
@@ -202,7 +195,8 @@ class EmailSearchWorkflow(Workflow):
         logger.info(f"!!!!! Rubric: {rubric.model_dump()}")
 
         try:
-            judge_response = judge_correctness(answer, self.query, judge_model) # TODO: implement this func
+            judge_model = self.auxiliary_models[0] if self.auxiliary_models else None
+            judge_response = judge_correctness(answer, self.query, judge_model)
             logger.info(f"Judge response: {judge_response}")
             rubric.answer_correct = judge_response
 
