@@ -119,8 +119,8 @@ class RunningStatus(Enum):
 class DataProcessorPipelineType(Enum):
     """Data processor pipeline type."""
 
-    EXPERIENCE = "experience_pipeline"
-    TASK = "task_pipeline"
+    EXPERIENCE = "experience"
+    TASK = "task"
 
 
 class OpType(Enum):

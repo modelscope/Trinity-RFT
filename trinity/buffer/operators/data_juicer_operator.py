@@ -5,6 +5,7 @@ from trinity.buffer.operators.experience_operator import (
     ExperienceOperator,
 )
 from trinity.common.config import DataJuicerServiceConfig
+from trinity.common.constants import DataProcessorPipelineType
 from trinity.common.experience import Experience
 from trinity.service.data_juicer.client import DataJuicerClient
 
@@ -38,7 +39,7 @@ class DataJuicerOperator(ExperienceOperator):
                 "operators": operators,
                 "config_path": config_path,
                 "np": np,
-                "pipeline_type": "experience",
+                "pipeline_type": DataProcessorPipelineType.EXPERIENCE,
             }
         )
 

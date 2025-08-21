@@ -125,15 +125,6 @@ class StorageConfig:
 
 
 @dataclass
-class RewardShapingConfig:
-    """Config for reward shaping."""
-
-    stats_key: str = ""
-    op_type: OpType = OpType.ADD
-    weight: float = 1.0
-
-
-@dataclass
 class OperatorConfig:
     name: str = ""
     args: Dict[str, Any] = field(default_factory=dict)
@@ -197,33 +188,6 @@ class TaskPipelineConfig:
 
     # number of samples to select after task pipeline. -1 means all
     top_k: int = -1
-
-
-@dataclass
-class DataPipelineConfig:
-    """Config for data pipeline."""
-
-    # I/O buffer
-    input_buffers: List[StorageConfig] = field(default_factory=list)
-    output_buffer: StorageConfig = field(default_factory=StorageConfig)
-
-    # data format
-    format: FormatConfig = field(default_factory=FormatConfig)
-
-    # data active iterator related
-    dj_config_path: Optional[str] = None  # The path to Data-Juicer config file.
-    dj_process_desc: Optional[
-        str
-    ] = None  # Describe the data processing procedure without requiring users to be aware of the specific DJ parameters
-    agent_model_name: Optional[str] = None
-    clean_strategy: str = "iterative"
-    min_size_ratio: Optional[float] = None
-    min_priority_score: Optional[float] = 0.0
-    priority_weights: Optional[Dict[str, float]] = None
-    data_dist: Optional[str] = "gaussian"  # one of ["gaussian", "uniform"]
-
-    # reward shaping related, only available for experience pipeline
-    reward_shaping: Optional[List[RewardShapingConfig]] = field(default_factory=list)
 
 
 @Experimental

@@ -8,9 +8,10 @@ from datasets import Dataset
 from jsonargparse import Namespace
 from pydantic import BaseModel, model_validator
 
+from trinity.common.constants import DataProcessorPipelineType
 
 class DJConfig(BaseModel):
-    pipeline_type: Literal["task", "experience"] = "experience"
+    pipeline_type: DataProcessorPipelineType = DataProcessorPipelineType.EXPERIENCE
 
     # For both `task` and `experience`
     operators: Optional[List[Dict[str, Dict[str, Any]]]] = None
@@ -41,9 +42,9 @@ def parse_config(config: DJConfig) -> Namespace:
         task_config = get_init_configs(task_config)
         return task_config
 
-    if config.pipeline_type == "experience":
+    if config.pipeline_type == DataProcessorPipelineType.EXPERIENCE:
         return _parse_experience_pipeline_config(config)
-    elif config.pipeline_type == "task":
+    elif config.pipeline_type == DataProcessorPipelineType.TASK:
         return _parse_task_pipeline_config(config)
     else:
         raise ValueError(f"Unknown pipeline type: {config.pipeline_type}")
