@@ -118,6 +118,7 @@ class SFTDataReader(BaseFileReader):
         subset_name = meta.subset_name
         self.prompt_type = meta.format.prompt_type
         self.messages_key = meta.format.messages_key
+        self.tools_key = meta.format.tools_key
         self.prompt_key = meta.format.prompt_key
         self.response_key = meta.format.response_key
         self.read_batch_size = config.train_batch_size
@@ -140,12 +141,22 @@ class SFTDataReader(BaseFileReader):
         if self.prompt_type == PromptType.MESSAGES:
             for sample in samples:
                 messages = sample[self.messages_key]
-                tokens = self.tokenizer.apply_chat_template(
-                    messages, add_generation_prompt=False, return_tensors="pt"
-                )[0]
-                prompt_tokens_ids = self.tokenizer.apply_chat_template(
-                    messages[:-1], add_generation_prompt=True, return_tensors="pt"
-                )[0]
+                tools = sample.get(self.tools_key, None)
+                if tools:
+                    tokens = self.tokenizer.apply_chat_template(
+                        messages, tools=tools, add_generation_prompt=False, return_tensors="pt"
+                    )[0]
+                    prompt_tokens_ids = self.tokenizer.apply_chat_template(
+                        messages[:-1], tools=tools, add_generation_prompt=True, return_tensors="pt"
+                    )[0]
+                else:
+                    tokens = self.tokenizer.apply_chat_template(
+                        messages, add_generation_prompt=False, return_tensors="pt"
+                    )[0]
+                    prompt_tokens_ids = self.tokenizer.apply_chat_template(
+                        messages[:-1], add_generation_prompt=True, return_tensors="pt"
+                    )[0]
+
                 experience = Experience(
                     tokens=tokens,
                     prompt_length=len(prompt_tokens_ids),

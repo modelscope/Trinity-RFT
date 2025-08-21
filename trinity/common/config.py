@@ -33,6 +33,7 @@ class FormatConfig:
     prompt_key: str = "prompt"
     response_key: str = "response"
     messages_key: str = "message"
+    tools_key: str = "tools"
     chat_template: str = ""  # deprecated
 
     system_prompt: Optional[str] = None

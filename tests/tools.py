@@ -87,6 +87,17 @@ def get_unittest_dataset_config(
                 response_key="response",
             ),
         )
+    elif dataset_name == "sft_with_tools":
+        return StorageConfig(
+            name=dataset_name,
+            path=os.path.join(os.path.dirname(__file__), "template", "data", "sft_with_tools"),
+            split="train",
+            format=FormatConfig(
+                prompt_type=PromptType.MESSAGES,
+                messages_key="messages",
+                tools_key="tools",
+            ),
+        )
     elif dataset_name == "dpo":
         return StorageConfig(
             name=dataset_name,

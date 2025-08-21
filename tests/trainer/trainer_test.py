@@ -318,6 +318,34 @@ class TestTrainerSFT(BaseTrainerCase):
         shutil.rmtree(self.config.checkpoint_job_dir)
 
 
+class TestTrainerToolsSFT(BaseTrainerCase):
+    def test_trainer_tools(self):
+        """Test SFT with tools."""
+        # test both mode
+        self.config.mode = "train"
+        self.config.algorithm.algorithm_type = "sft"
+        self.config.algorithm.policy_loss_fn = "sft"
+        self.config.algorithm.policy_loss_fn_args = {}
+        self.config.algorithm.kl_loss_fn = "none"
+        self.config.algorithm.entropy_loss_fn = "none"
+        self.config.synchronizer.sync_interval = 4
+        self.config.buffer.train_batch_size = 4
+        self.config.buffer.total_epochs = 4
+        self.config.buffer.trainer_input.experience_buffer = get_unittest_dataset_config(
+            "sft_with_tools"
+        )
+        self.config.check_and_update()
+        train(self.config)
+        parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
+        actor_metrics = parser.metric_list("actor")
+        self.assertTrue(len(actor_metrics) > 0)
+        self.assertEqual(parser.metric_max_step(actor_metrics[0]), 4)
+
+    def tearDown(self):
+        # remove dir only when the test passed
+        shutil.rmtree(self.config.checkpoint_job_dir)
+
+
 def run_trainer(config: Config) -> None:
     ray.init(namespace=config.ray_namespace)
     train(config)
