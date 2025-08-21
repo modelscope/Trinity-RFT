@@ -85,6 +85,7 @@ class Registry(object):
         Example:
 
             .. code-block:: python
+
                 WORKFLOWS = Registry("workflows")
 
                 # register a module using decorator

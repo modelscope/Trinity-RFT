@@ -10,6 +10,7 @@ from omegaconf import OmegaConf
 
 from trinity.common.constants import (
     EXPLORER_NAME,
+    MAX_MODEL_LEN,
     TRAINER_NAME,
     OpType,
     PromptType,
@@ -178,7 +179,7 @@ class ModelConfig:
     model_path: str = ""
     critic_model_path: str = ""
     max_model_len: Optional[int] = None
-    max_prompt_tokens: Optional[int] = None  # deprecated
+    max_prompt_tokens: Optional[int] = None
     max_response_tokens: Optional[int] = None
     custom_chat_template: Optional[str] = None
 
@@ -203,7 +204,7 @@ class InferenceModelConfig:
     # if not set, use `model.max_model_len`
     max_model_len: Optional[int] = None
     # if not set, use `model.max_prompt_tokens`
-    max_prompt_tokens: Optional[int] = None  # deprecated
+    max_prompt_tokens: Optional[int] = None
     # if not set, use `model.max_response_tokens`
     max_response_tokens: Optional[int] = None
 
@@ -668,9 +669,15 @@ class Config:
             from transformers import AutoTokenizer
 
             try:
-                self.buffer.pad_token_id = AutoTokenizer.from_pretrained(
-                    self.model.model_path
-                ).pad_token_id
+                tokenizer = AutoTokenizer.from_pretrained(self.model.model_path)
+                if tokenizer.pad_token_id is None:
+                    tokenizer.pad_token_id = tokenizer.eos_token_id
+                    logger.warning(
+                        f"tokenizer.pad_token_id is None. Now set to {tokenizer.eos_token_id}",
+                        stacklevel=1,
+                    )
+                self.buffer.pad_token_id = tokenizer.pad_token_id
+
             except Exception:
                 logger.warning(f"Failed to get pad token id from model {self.model.model_path}")
                 self.buffer.pad_token_id = 0
@@ -769,24 +776,40 @@ class Config:
             self.model.critic_model_path = self.model.model_path
 
         # check explorer
+        if self.model.max_model_len is None:
+            from transformers import AutoConfig, AutoTokenizer
+            from transformers.tokenization_utils_base import LARGE_INTEGER
+
+            tokenizer = AutoTokenizer.from_pretrained(self.model.model_path)
+            config = AutoConfig.from_pretrained(self.model.model_path)
+            max_model_len = min(
+                getattr(tokenizer, "model_max_length", LARGE_INTEGER),
+                getattr(config, "max_position_embeddings", LARGE_INTEGER),
+            )
+            if max_model_len >= LARGE_INTEGER:
+                max_model_len = MAX_MODEL_LEN
+                logger.warning(
+                    f"Failed to get `max_model_len` from model {self.model.model_path}, use {MAX_MODEL_LEN} instead."
+                )
+            self.model.max_model_len = max_model_len
+        if (
+            self.model.max_prompt_tokens is None
+            or self.model.max_prompt_tokens >= self.model.max_model_len
+        ):
+            self.model.max_prompt_tokens = self.model.max_model_len - 1
+            logger.warning(f"`max_prompt_tokens` is set to {self.model.max_prompt_tokens}.")
+        if (
+            self.model.max_response_tokens is None
+            or self.model.max_response_tokens > self.model.max_model_len
+        ):
+            self.model.max_response_tokens = self.model.max_model_len
+            logger.warning(f"`max_response_tokens` is set to {self.model.max_response_tokens}.")
+        if self.explorer.rollout_model.max_model_len is None:
+            self.explorer.rollout_model.max_model_len = self.model.max_model_len
         if self.explorer.rollout_model.max_prompt_tokens is None:
             self.explorer.rollout_model.max_prompt_tokens = self.model.max_prompt_tokens
         if self.explorer.rollout_model.max_response_tokens is None:
             self.explorer.rollout_model.max_response_tokens = self.model.max_response_tokens
-        if self.explorer.rollout_model.max_model_len is None:
-            self.explorer.rollout_model.max_model_len = self.model.max_model_len
-        if (
-            self.explorer.rollout_model.max_model_len is None
-            and self.explorer.rollout_model.max_prompt_tokens is not None
-            and self.explorer.rollout_model.max_response_tokens is not None
-        ):
-            logger.warning(
-                "`max_prompt_tokens` is deprecated, please set `max_model_len` directly."
-            )
-            self.explorer.rollout_model.max_model_len = (
-                self.explorer.rollout_model.max_prompt_tokens
-                + self.explorer.rollout_model.max_response_tokens
-            )
 
         # check synchronizer
         self.synchronizer.ray_namespace = self.ray_namespace

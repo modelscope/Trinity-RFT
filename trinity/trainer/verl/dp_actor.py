@@ -35,7 +35,6 @@ from trinity.algorithm.entropy_loss_fn.entropy_loss_fn import DummyEntropyLossFn
 from trinity.algorithm.kl_fn.kl_fn import DummyKLFn
 from trinity.algorithm.utils import prefix_metrics
 from trinity.common.config import AlgorithmConfig
-from trinity.utils.plugin_loader import load_plugins
 
 __all__ = ["DataParallelPPOActor"]
 
@@ -49,7 +48,6 @@ class DataParallelPPOActor(DPActor):
     ):
         """When optimizer is None, it is Reference Policy"""
         super().__init__(config, actor_module, actor_optimizer)
-        load_plugins()
         self.policy_loss_fn = None
         self.kl_loss_fn = None
         self.entropy_loss_fn = None

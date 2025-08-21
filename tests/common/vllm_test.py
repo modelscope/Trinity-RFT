@@ -101,13 +101,23 @@ CHAT_TEMPLATE = r"""
 
 
 @parameterized_class(
-    ("tensor_parallel_size", "engine_num", "use_v1", "repeat_times", "enable_history", "use_async"),
+    (
+        "tensor_parallel_size",
+        "engine_num",
+        "use_v1",
+        "repeat_times",
+        "enable_history",
+        "use_async",
+        "max_model_len",
+    ),
     [
-        (1, 2, False, 2, True, False),
-        (2, 2, False, 1, False, True),
-        (2, 2, True, 2, True, False),
-        (1, 2, True, 1, False, True),
-        (2, 1, True, 3, True, True),
+        (1, 2, False, 2, True, False, None),
+        (1, 2, False, 2, True, True, 20),
+        (1, 2, False, 2, True, False, 20),
+        (2, 2, False, 1, False, True, None),
+        (2, 2, True, 2, True, False, None),
+        (1, 2, True, 1, False, True, None),
+        (2, 1, True, 3, True, True, None),
     ],
 )
 class ModelWrapperTest(RayUnittestBaseAysnc):
@@ -116,6 +126,7 @@ class ModelWrapperTest(RayUnittestBaseAysnc):
         self.config = get_template_config()
         self.config.mode = "explore"
         self.config.model.model_path = get_model_path()
+        self.config.model.max_model_len = self.max_model_len
         self.config.explorer.rollout_model.engine_num = self.engine_num
         self.config.explorer.rollout_model.tensor_parallel_size = self.tensor_parallel_size
         self.config.explorer.rollout_model.use_v1 = self.use_v1
@@ -123,6 +134,9 @@ class ModelWrapperTest(RayUnittestBaseAysnc):
         self.config.algorithm.repeat_times = self.repeat_times
         self.config.explorer.rollout_model.enable_history = self.enable_history
         self.config.check_and_update()
+        from pprint import pprint
+
+        pprint(self.config)
         self.engines, self.auxiliary_engines = create_inference_models(self.config)
         self.model_wrapper = ModelWrapper(
             self.engines[0], model_type="vllm_async", enable_history=self.enable_history
@@ -191,7 +205,12 @@ class ModelWrapperTest(RayUnittestBaseAysnc):
                 "content": results[0].response_text,
             }
         )
-        exp = self.model_wrapper.convert_messages_to_experience(messages)
+        if self.max_model_len is not None:
+            with self.assertRaises(ValueError):
+                exp = self.model_wrapper.convert_messages_to_experience(messages)
+            return
+        else:
+            exp = self.model_wrapper.convert_messages_to_experience(messages)
         tokenizer = AutoTokenizer.from_pretrained(self.config.model.model_path)
         result_dict = tokenizer.apply_chat_template(
             messages,

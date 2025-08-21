@@ -16,6 +16,11 @@ ROLLOUT_WEIGHT_SYNC_GROUP_NAME = "rollout_weight_sync"
 PLUGIN_DIRS_ENV_VAR = "TRINITY_PLUGIN_DIRS"
 
 
+# constants
+
+MAX_MODEL_LEN = 4096
+
+
 # enumerate types
 
 

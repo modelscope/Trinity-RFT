@@ -13,7 +13,10 @@ pip install -e .\[doc\]
 # Step 2: build sphinx doc
 
 cd docs/sphinx_doc
+# build docs for all existing tags and main branch
 ./build_doc.sh
+# build docs for the current branch
+./build_doc.sh --branch <current_branch_name>
 ```
 
-The sphinx doc is built in `docs/sphinx_doc/build/html/index.html`.
+The sphinx doc is built in `docs/sphinx_doc/build/html`.

@@ -21,7 +21,7 @@ algorithm:
     ppo_micro_batch_size_per_gpu: 4
     ngpus_trainer: 4
     train_batch_size_expert: 64
-    train_batch_size_usual: 256 # (40 batchsize * (1 - 0.2 expert_data_ratio)) * 8 repeat times
+    train_batch_size_usual: 256 # 32 batchsize * 8 repeat times
 model:
   model_path: /PATH/TO/MODEL/
   max_response_tokens: 10240
@@ -31,7 +31,8 @@ cluster:
   gpu_per_node: 8
 buffer:
   total_epochs: 4
-  batch_size: 40
+  batch_size: 32
+  train_batch_size: 320
   max_retry_times: 3
   max_retry_interval: 1
   explorer_input:

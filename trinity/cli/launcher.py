@@ -187,7 +187,7 @@ def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
             config_path,
         )
 
-    envs = {PLUGIN_DIRS_ENV_VAR: plugin_dir}
+    envs = {PLUGIN_DIRS_ENV_VAR: plugin_dir or ""}
     if dlc:
         from trinity.utils.dlc_utils import setup_ray_cluster
 

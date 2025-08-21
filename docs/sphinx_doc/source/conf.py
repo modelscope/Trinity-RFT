@@ -16,11 +16,13 @@ release = version
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
+    "sphinxcontrib.apidoc",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
     "sphinx.ext.autosectionlabel",
+    "sphinx_multiversion",
     "myst_parser",
     "sphinx.ext.mathjax",
 ]
@@ -47,12 +49,32 @@ autodoc_default_options = {
     "special-members": "__init__",
 }
 
+# auto api configs
+apidoc_module_dir = "../../../trinity"
+apidoc_output_dir = "build_api"
+apidoc_excluded_paths = ["tests", "build"]
+apidoc_separate_modules = True
+
+# Multiversion configs
+smv_tag_whitelist = r"^v\d+\.\d+\.\d+$"  # match v1.0.0 pattern
+smv_branch_whitelist = r"^(main)$"  # included branches
+smv_remote_whitelist = None
+smv_released_pattern = r"^tags/.*$"
+
+smv_prefer_remote_refs = False
+
 # -- Options for HTML output -------------------------------------------------
 
 html_theme = "sphinx_rtd_theme"
 
 html_theme_options = {
     "navigation_depth": 3,
+}
+
+html_sidebars = {
+    "**": [
+        "versions.html",
+    ],
 }
 
 html_context = {
