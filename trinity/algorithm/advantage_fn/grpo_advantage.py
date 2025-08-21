@@ -179,11 +179,7 @@ class GRPOGroupedAdvantage(GroupAdvantage):
             duplicated_groups = [copy.deepcopy(valid_groups[i]) for i in idx]
             duplicated_exps = [exp for group in duplicated_groups for exp in group]
             exps = [exp for group in valid_groups for exp in group]
-            for exp in duplicated_exps:
-                exp.eid.task += (
-                    original_group_num  # Ensure unique task IDs for duplicated experiences
-                )
-                exps.append(exp)
+            exps.extend(duplicated_exps)
             return exps
 
     def process(self, exps):
