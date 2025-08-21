@@ -12,7 +12,6 @@ from trinity.common.constants import (
     EXPLORER_NAME,
     MAX_MODEL_LEN,
     TRAINER_NAME,
-    OpType,
     PromptType,
     StorageType,
     SyncMethod,

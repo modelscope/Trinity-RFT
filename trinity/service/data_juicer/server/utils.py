@@ -10,6 +10,7 @@ from pydantic import BaseModel, model_validator
 
 from trinity.common.constants import DataProcessorPipelineType
 
+
 class DJConfig(BaseModel):
     pipeline_type: DataProcessorPipelineType = DataProcessorPipelineType.EXPERIENCE
 
