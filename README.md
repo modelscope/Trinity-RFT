@@ -205,7 +205,7 @@ pip install -e .\[flash_attn\]
 Installation using pip:
 
 ```shell
-pip install trinity-rft==0.2.0
+pip install trinity-rft==0.2.1
 # install flash-attn separately
 pip install flash-attn==2.8.0.post2
 ```
