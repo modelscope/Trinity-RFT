@@ -110,6 +110,8 @@ class EmailSearchWorkflow(Workflow):
         )
         # we set the openai client to the agent's model
         self.agent.model.client = self.openai_client
+        self.agent.message_id_list = []
+        self.agent.ever_read_message_ids = []
 
     def run(self):
         # make sure that we have the correct import
@@ -127,7 +129,10 @@ class EmailSearchWorkflow(Workflow):
             msg,
             structured_model=AnswerModel,
         )
-        answer_and_sources = response.metadata
+        if response.metadata is None:
+            answer_and_sources = {"answer": response.content, "sources": []}
+        else:
+            answer_and_sources = response.metadata
 
         reward = self.calculate_reward(
             answer_and_sources,
@@ -177,7 +182,7 @@ class EmailSearchWorkflow(Workflow):
 
             # return results["bleu"]
 
-            return float(answer == self.truth)
+            return answer.lower() in self.truth.lower()
 
         rubric = FinalRubric()
         rubric.attempted_answer = answer is not None and answer != ""

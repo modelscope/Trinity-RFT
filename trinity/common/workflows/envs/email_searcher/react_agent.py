@@ -2,6 +2,7 @@ import subprocess
 
 from typing import Any
 from dataclasses import asdict
+from datetime import datetime, timedelta
 
 from trinity.utils.log import get_logger
 from trinity.common.workflows.envs.email_searcher.utils import search_emails_tool, read_email_tool
@@ -30,15 +31,6 @@ class EmailSearchAgent(ReActAgentV2):
         self.service_toolkit.add(self.search_emails)
         self.service_toolkit.add(self.read_email)
 
-        self.message_id_list = []
-        self.ever_read_message_ids = []
-
-        self.register_hook(
-            "post_reply",
-            "as_clear_message_ids",
-            self._clear_message_ids_hook,
-        )
-
     def search_emails(
         self,
         inbox_address: str,
@@ -61,7 +53,11 @@ class EmailSearchAgent(ReActAgentV2):
         """
 
         try:
-            res = search_emails_tool(inbox=inbox_address, sent_before=query_date, keywords=keywords)
+            # res = search_emails_tool(inbox=inbox_address, sent_before=query_date, keywords=keywords)
+            next_day = (datetime.strptime(query_date, "%Y-%m-%d") + timedelta(days=1)).strftime(
+                "%Y-%m-%d"
+            )
+            res = search_emails_tool(inbox=inbox_address, sent_before=next_day, keywords=keywords)
 
             self.message_id_list.extend([r.message_id for r in res])
             logger.info(f"!!!!! Search results: {res} ")
@@ -107,8 +103,3 @@ class EmailSearchAgent(ReActAgentV2):
                 status=ServiceExecStatus.ERROR,
                 content={"error": "Timeout"},
             )
-
-    def _clear_message_ids_hook(self, *args: Any, **kwargs: Any) -> None:
-        """Clear the message ids after each reply."""
-        self.message_ids = []
-        self.ever_read_message_ids = []

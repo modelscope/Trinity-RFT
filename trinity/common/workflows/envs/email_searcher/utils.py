@@ -154,7 +154,8 @@ def search_emails_tool(
 
     # FTS5 default is AND, so just join keywords. Escape quotes for safety.
     fts_query = " ".join(f""" "{k.replace('"', '""')}" """ for k in keywords)
-    where_clauses.append("fts.emails_fts MATCH ?")
+    # where_clauses.append("fts.emails_fts MATCH ?")
+    where_clauses.append("emails_fts MATCH ?") # FIX
     params.append(fts_query)
 
     # 2. Inbox filter (must be from OR to/cc/bcc the inbox user)
@@ -249,7 +250,7 @@ def read_email_tool(message_id: str) -> Optional[Email]:
 
     # --- Query for Email Core Details ---
     email_sql = """
-        SELECT message_id, date, subject, from_address, body, file_name
+        SELECT id, message_id, date, subject, from_address, body, file_name
         FROM emails
         WHERE message_id = ?;
     """
@@ -260,30 +261,27 @@ def read_email_tool(message_id: str) -> Optional[Email]:
         logger.warning(f"Email with message_id '{message_id}' not found.")
         return None
 
-    (
-        msg_id,
-        date,
-        subject,
-        from_addr,
-        body,
-        file_name,
-    ) = email_row
+    email_pk_id, msg_id, date, subject, from_addr, body, file_name = email_row
 
-    # --- Query for Recipients ---
+    # DEBUG
+    logger.info(f"[read_email_tool] input_message_id={message_id}")
+    logger.info(f"[read_email_tool] db: id={email_pk_id}, message_id={msg_id}")
+
+    # 2) 用 emails.id 查 recipients（而不是 message_id）
     recipients_sql = """
         SELECT recipient_address, recipient_type
         FROM recipients
         WHERE email_id = ?;
     """
-    cursor.execute(recipients_sql, (message_id,))
+    cursor.execute(recipients_sql, (email_pk_id,))  # ← 关键修正
     recipient_rows = cursor.fetchall()
 
     to_addresses: List[str] = []
     cc_addresses: List[str] = []
     bcc_addresses: List[str] = []
 
-    for addr, type in recipient_rows:
-        type_lower = type.lower()
+    for addr, rtype in recipient_rows:
+        type_lower = rtype.lower()
         if type_lower == "to":
             to_addresses.append(addr)
         elif type_lower == "cc":
