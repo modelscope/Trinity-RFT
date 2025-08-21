@@ -115,6 +115,80 @@
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.advantage_fn.advantage_fn.AdvantageFn.compute_in_trainer">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute_in_trainer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/advantage_fn.html#AdvantageFn.compute_in_trainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.advantage_fn.advantage_fn.AdvantageFn.compute_in_trainer" title="Link to this definition"></a></dt>
+<dd><p>Whether the advantage should be computed in the trainer loop.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="trinity.algorithm.advantage_fn.advantage_fn.GroupAdvantage">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.advantage_fn.advantage_fn.</span></span><span class="sig-name descname"><span class="pre">GroupAdvantage</span></span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/advantage_fn.html#GroupAdvantage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.advantage_fn.advantage_fn.GroupAdvantage" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#trinity.algorithm.advantage_fn.advantage_fn.AdvantageFn" title="trinity.algorithm.advantage_fn.advantage_fn.AdvantageFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">AdvantageFn</span></code></a>, <a class="reference internal" href="trinity.buffer.operators.experience_operator.html#trinity.buffer.operators.experience_operator.ExperienceOperator" title="trinity.buffer.operators.experience_operator.ExperienceOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExperienceOperator</span></code></a></p>
+<p>For group-based advantages calculation.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.advantage_fn.advantage_fn.GroupAdvantage.group_experiences">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">group_experiences</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/advantage_fn.html#GroupAdvantage.group_experiences"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.advantage_fn.advantage_fn.GroupAdvantage.group_experiences" title="Link to this definition"></a></dt>
+<dd><p>Group experiences by a certain criterion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>exps</strong> (<em>List</em><em>[</em><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><em>Experience</em></a><em>]</em>) – List of experiences to be grouped.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary where keys are group identifiers and values are lists of experiences.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, List[<a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience">Experience</a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.advantage_fn.advantage_fn.GroupAdvantage.calculate_group_advantage">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calculate_group_advantage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/advantage_fn.html#GroupAdvantage.calculate_group_advantage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.advantage_fn.advantage_fn.GroupAdvantage.calculate_group_advantage" title="Link to this definition"></a></dt>
+<dd><p>Calculate advantages for a group of experiences.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>group_id</strong> (<em>str</em>) – The identifier for the group of experiences.</p></li>
+<li><p><strong>exps</strong> (<em>List</em><em>[</em><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><em>Experience</em></a><em>]</em>) – List of experiences in the group.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing the modified list of experiences and a dictionary of metrics.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[<a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience">Experience</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.advantage_fn.advantage_fn.GroupAdvantage.process">
+<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/advantage_fn.html#GroupAdvantage.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.advantage_fn.advantage_fn.GroupAdvantage.process" title="Link to this definition"></a></dt>
+<dd><p>Process a list of experiences and return a transformed list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>exps</strong> (<em>List</em><em>[</em><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><em>Experience</em></a><em>]</em>) – List of experiences to process, which contains
+all experiences generated by the Explorer in one explore step.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing the processed list of experiences and a dictionary of metrics.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[List[<a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience">Experience</a>], Dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.advantage_fn.advantage_fn.GroupAdvantage.compute_in_trainer">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute_in_trainer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/advantage_fn.html#GroupAdvantage.compute_in_trainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.advantage_fn.advantage_fn.GroupAdvantage.compute_in_trainer" title="Link to this definition"></a></dt>
+<dd><p>Whether the advantage should be computed in the trainer loop.</p>
+</dd></dl>
+
 </dd></dl>
 
 </section>

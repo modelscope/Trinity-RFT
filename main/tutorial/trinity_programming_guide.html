@@ -70,13 +70,19 @@
 <li class="toctree-l3"><a class="reference internal" href="#step-3-use-your-algorithm">Step 3: Use Your Algorithm</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#operators-for-data-developers">Operators (For Data Developers)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#step-0-basic-concepts-of-operator-module">Step 0: Basic Concepts of Operator Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-1-implement-operator">Step 1: Implement Operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-2-use-your-operator">Step 2: Use Your Operator</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#adding-new-config-entries-for-the-config-generator-advanced">Adding New Config Entries for the Config Generator (Advanced)</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#step-0-understanding-streamlit">Step 0: Understanding Streamlit</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#step-1-implement-new-config-entries">Step 1: Implement New Config Entries</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#step-2-integrating-new-parameters-into-config-manager-py">Step 2: Integrating New Parameters into <code class="docutils literal notranslate"><span class="pre">config_manager.py</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#check-code-style">Check Code Style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contributing-your-code">Contributing your Code</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="trinity_configs.html">Configuration Guide</a></li>
@@ -139,13 +145,13 @@ Below is a table summarizing the modules and components that developers with dif
 </tr>
 <tr class="row-even"><td><p>Enhance the RL process from the data perspective.</p></td>
 <td><p><em>Buffer</em></p></td>
-<td><p>Data Processing Module (Coming soon)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Operator</span></code></p></td>
 </tr>
 </tbody>
 </table>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Trinity-RFT is still under development, and the following interfaces may change. Please read this section in conjunction with the latest code.</p>
+<p>Trinity-RFT is under active development, and the following interfaces may change. Please refer to the latest code when using this guide.</p>
 </div>
 <hr class="docutils" />
 <section id="workflows-for-rl-environment-developers">
@@ -335,11 +341,6 @@ Ensure the name does not conflict with existing workflows.</p>
 <span class="p">]</span>
 </pre></div>
 </div>
-<p>For workflows that are not intended to be contributed to Trinity-RFT project, you can just place the above code in <code class="docutils literal notranslate"><span class="pre">trinity/plugins</span></code>. Trinity-RFT will automatically detect and load all custom modules in this folder.</p>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>You can specify the directory where your custom modules are located by setting <code class="docutils literal notranslate"><span class="pre">--plugin-dir</span></code> when starting Trinity-RFT. If you don’t specify <code class="docutils literal notranslate"><span class="pre">--plugin-dir</span></code>, Trinity-RFT will use <code class="docutils literal notranslate"><span class="pre">&lt;Trinity_RFT_ROOT_DIR&gt;/trinity/plugins</span></code> as the default directory.</p>
-</div>
 </section>
 <section id="avoid-re-initialization">
 <h4>Avoid Re-initialization<a class="headerlink" href="#avoid-re-initialization" title="Link to this heading"></a></h4>
@@ -441,9 +442,8 @@ In this case, you can implement the <code class="docutils literal notranslate"><
 <p>In Trinity-RFT, the algorithm module is primarily responsible for extracting experience data from the Replay Buffer during the RL process and calculating the loss to update models based on this data.
 To avoid implementing a new Trainer class each time a new algorithm is added, we have decomposed the representative PPO algorithm process into multiple sub-modules to adapt to various algorithms.</p>
 <ul class="simple">
-<li><p><strong>Add Strategy</strong> (<a class="reference internal" href="../build_api/trinity.algorithm.html#trinity.algorithm.AddStrategy" title="trinity.algorithm.AddStrategy"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.AddStrategy</span></code></a>): Responsible for adding rollout experience data to the Replay Buffer. You can do some filtering or grouping of experience data before adding it to the buffer. For example, calculate the GRPO advantage in this module and filter out groups with the same reward.</p></li>
 <li><p><strong>Sample Strategy</strong> (<a class="reference internal" href="../build_api/trinity.algorithm.html#trinity.algorithm.SampleStrategy" title="trinity.algorithm.SampleStrategy"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.SampleStrategy</span></code></a>): Responsible for sampling experience data from the buffer module. By customizing this module, you can implement functionalities like filtering experience data or mixed sampling from multiple data sources.</p></li>
-<li><p><strong>Advantage Fn</strong>(<a class="reference internal" href="../build_api/trinity.algorithm.html#trinity.algorithm.AdvantageFn" title="trinity.algorithm.AdvantageFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.AdvantageFn</span></code></a>): Responsible for calculating the Advantage and Returns of experience data. Note that you might not be able to get a whole group of experiences in this module (depending on how experiences are written to and sampled from the buffer). Thus, if you need group based Advantage calculation, it is highly recommended that you implement it in the <code class="docutils literal notranslate"><span class="pre">AddStrategy</span></code> module instead. Only per-sample advantage calculation is recommended in this module, e.g., PPO.</p></li>
+<li><p><strong>Advantage Fn</strong>(<a class="reference internal" href="../build_api/trinity.algorithm.html#trinity.algorithm.AdvantageFn" title="trinity.algorithm.AdvantageFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.AdvantageFn</span></code></a>): Responsible for calculating the Advantage and Returns of experience data.</p></li>
 <li><p><strong>Policy Loss Fn</strong>(<a class="reference internal" href="../build_api/trinity.algorithm.html#trinity.algorithm.PolicyLossFn" title="trinity.algorithm.PolicyLossFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.PolicyLossFn</span></code></a>): Responsible for calculating the core training loss of the policy network.</p></li>
 <li><p><strong>KL Fn</strong>(<a class="reference internal" href="../build_api/trinity.algorithm.html#trinity.algorithm.KLFn" title="trinity.algorithm.KLFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.KLFn</span></code></a>): Responsible for calculating KL Divergence, which is generally used in two places in existing RL algorithms: Reward Penalty and Actor Loss.</p></li>
 <li><p><strong>Entropy Loss Fn</strong>(<a class="reference internal" href="../build_api/trinity.algorithm.html#trinity.algorithm.EntropyLossFn" title="trinity.algorithm.EntropyLossFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.EntropyLossFn</span></code></a>): Responsible for calculating the entropy loss of the policy network.</p></li>
@@ -456,35 +456,30 @@ To avoid implementing a new Trainer class each time a new algorithm is added, we
 <p>Trinity-RFT allows developers to customize all the above modules. Developers only need to implement specific modules according to the requirements of their new algorithm. This section will provide a simple introduction using the <a class="reference internal" href="example_reasoning_advanced.html#opmd"><span class="std std-ref">OPMD</span></a> algorithm as an example.</p>
 <p>The main difference between OPMD and PPO algorithms lies in the calculation of Advantage and Policy Loss.
 OPMD relies on a group-based advantage calculation and does not use the Critic model.
-To implement OPMD, developers need to implement advantage calculation in <code class="docutils literal notranslate"><span class="pre">AddStrategy</span></code> (or <code class="docutils literal notranslate"><span class="pre">AdvantageFn</span></code>) and policy loss calculation in <code class="docutils literal notranslate"><span class="pre">PolicyLossFn</span></code>.</p>
+To implement OPMD, developers need to implement advantage calculation in <code class="docutils literal notranslate"><span class="pre">AdvantageFn</span></code> and policy loss calculation in <code class="docutils literal notranslate"><span class="pre">PolicyLossFn</span></code>.</p>
 <hr class="docutils" />
-<section id="step-1-1-implement-addstrategy">
-<h4>Step 1.1: Implement <code class="docutils literal notranslate"><span class="pre">AddStrategy</span></code><a class="headerlink" href="#step-1-1-implement-addstrategy" title="Link to this heading"></a></h4>
-<p>The <a class="reference internal" href="../build_api/trinity.algorithm.html#trinity.algorithm.AddStrategy" title="trinity.algorithm.AddStrategy"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.AddStrategy</span></code></a> interface includes two methods:</p>
+<section id="step-1-1-implement-advantagefn">
+<h4>Step 1.1: Implement <code class="docutils literal notranslate"><span class="pre">AdvantageFn</span></code><a class="headerlink" href="#step-1-1-implement-advantagefn" title="Link to this heading"></a></h4>
+<p>The <a class="reference internal" href="../build_api/trinity.algorithm.html#trinity.algorithm.AdvantageFn" title="trinity.algorithm.AdvantageFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.AdvantageFn</span></code></a> interface includes three methods:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">add</span></code>: This method is called to add experience data to the buffer. It receives a list of experiences and returns the number of experiences added to the buffer.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">default_args</span></code>: This method returns the default initialization parameters in dictionary form, which will be used by default when users don’t specify initialization parameters in the configuration file.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">__call__</span></code>: The main entrance for advantage calculation. It receives a list of experiences (<a class="reference internal" href="../build_api/trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.experience.Experience</span></code></a>) and returns a list of experiences with calculated advantages and returns, along with a metrics dictionary for logging.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">default_args</span></code>: A class method that returns the default initialization parameters in dictionary form. It will be used by default when users don’t specify initialization parameters in the configuration file.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">compute_in_trainer</span></code>: This class method indicates whether to compute advantages in the Trainer. If it returns <code class="docutils literal notranslate"><span class="pre">False</span></code>, the <code class="docutils literal notranslate"><span class="pre">AdvantageFn</span></code> will be called in the experience data processing pipeline.</p></li>
 </ul>
-<p>For convenience, Trinity-RFT provides an abstract class <code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.GroupAdvantageStrategy</span></code> that implements the <code class="docutils literal notranslate"><span class="pre">add</span></code> method for group-based advantage calculation, you can focus on how to group the experiences and calculate advantages on grouped experiences with the following two methods:</p>
+<p>For convenience, Trinity-RFT provides an abstract class <a class="reference internal" href="../build_api/trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.GroupAdvantage" title="trinity.algorithm.advantage_fn.GroupAdvantage"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.advantage_fn.GroupAdvantage</span></code></a> that implements the <code class="docutils literal notranslate"><span class="pre">__call__</span></code> method for group-based advantage calculation, you can focus on how to group the experiences and calculate advantages on grouped experiences with the following two methods:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">group_experiences</span></code>: This method groups a experiences generated in a step into multiple sub-groups.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">calculate_group_advantage</span></code>: This method calculates the advantage for each group of experiences.</p></li>
 </ul>
-<p>Here’s an implementation example for the OPMD algorithm’s Add Strategy:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.add_strategy</span><span class="w"> </span><span class="kn">import</span> <span class="n">ADD_STRATEGY</span><span class="p">,</span> <span class="n">GroupAdvantageStrategy</span>
+<p>Here’s an implementation example for the OPMD algorithm’s advantage function:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.advantage_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">ADVANTAGE_FN</span><span class="p">,</span> <span class="n">GroupAdvantage</span>
 
-<span class="nd">@ADD_STRATEGY</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;opmd&quot;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">OPMDAddStrategy</span><span class="p">(</span><span class="n">GroupAdvantageStrategy</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;An example AddStrategy that calculates OPMD advantages.&quot;&quot;&quot;</span>
+<span class="nd">@ADVANTAGE_FN</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;opmd&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OPMDGroupAdvantage</span><span class="p">(</span><span class="n">GroupAdvantage</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;OPMD Group Advantage computation&quot;&quot;&quot;</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">writer</span><span class="p">:</span> <span class="n">BufferWriter</span><span class="p">,</span> <span class="n">opmd_baseline</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="n">tau</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">writer</span><span class="p">)</span>
-        <span class="k">assert</span> <span class="n">opmd_baseline</span> <span class="ow">in</span> <span class="p">[</span>
-            <span class="s2">&quot;mean&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;logavgexp&quot;</span><span class="p">,</span>
-        <span class="p">],</span> <span class="sa">f</span><span class="s2">&quot;opmd_baseline must be &#39;mean&#39; or &#39;logavgexp&#39;, got </span><span class="si">{</span><span class="n">opmd_baseline</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opmd_baseline</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="n">tau</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">opmd_baseline</span> <span class="o">=</span> <span class="n">opmd_baseline</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tau</span> <span class="o">=</span> <span class="n">tau</span>
 
@@ -498,7 +493,7 @@ To implement OPMD, developers need to implement advantage calculation in <code c
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">group_baseline</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">group_rewards</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="n">exp</span><span class="o">.</span><span class="n">reward</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">exps</span><span class="p">])</span>
+                <span class="n">group_rewards</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="n">exp</span><span class="o">.</span><span class="n">reward</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">exps</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">opmd_baseline</span> <span class="o">==</span> <span class="s2">&quot;mean&quot;</span><span class="p">:</span>
                     <span class="n">group_baseline</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">group_rewards</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
@@ -520,59 +515,7 @@ To implement OPMD, developers need to implement advantage calculation in <code c
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;opmd_baseline&quot;</span><span class="p">:</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;tau&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
 </pre></div>
 </div>
-<p>After implementation, you need to register this module through <code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.ADD_STRATEGY</span></code>. Once registered, the module can be configured in the configuration file using the registered name.</p>
-</section>
-<section id="step-1-2-implement-advantagefn">
-<h4>Step 1.2: Implement <code class="docutils literal notranslate"><span class="pre">AdvantageFn</span></code><a class="headerlink" href="#step-1-2-implement-advantagefn" title="Link to this heading"></a></h4>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This step can be skipped if you have implemented <code class="docutils literal notranslate"><span class="pre">AddStrategy</span></code> as shown above.
-The <code class="docutils literal notranslate"><span class="pre">AdvantageFn</span></code> is mainly used for per-sample advantage calculation, and not recommended for group-based advantage calculation.</p>
-</div>
-<p>The <a class="reference internal" href="../build_api/trinity.algorithm.html#trinity.algorithm.AdvantageFn" title="trinity.algorithm.AdvantageFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.AdvantageFn</span></code></a> interface, which mainly includes two methods:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">__call__</span></code>: Calculates advantages and returns based on input experience data, records observable metrics during the calculation process, and returns the experience data containing advantages and returns as well as a metrics dictionary. The input experience data format is <a class="reference external" href="https://github.com/volcengine/verl">verl</a>’s <code class="docutils literal notranslate"><span class="pre">DataProto</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">default_args</span></code>: Returns default initialization parameters in dictionary form, which will be used by default when users don’t specify initialization parameters in the configuration file.</p></li>
-</ul>
 <p>After implementation, you need to register this module through <code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.ADVANTAGE_FN</span></code>. Once registered, the module can be configured in the configuration file using the registered name.</p>
-<p>Here’s an implementation example for the OPMD algorithm’s Advantage Fn:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># trinity/algorithm/advantage_fn/opmd.py</span>
-<span class="c1"># import some modules</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.advantage_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">ADVANTAGE_FN</span><span class="p">,</span> <span class="n">AdvantageFn</span>
-
-
-<span class="nd">@ADVANTAGE_FN</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;opmd&quot;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">OPMDAdvantageFn</span><span class="p">(</span><span class="n">AdvantageFn</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;OPMD advantage computation&quot;&quot;&quot;</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">opmd_baseline</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span>
-        <span class="n">tau</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">opmd_baseline</span> <span class="o">=</span> <span class="n">opmd_baseline</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tau</span> <span class="o">=</span> <span class="n">tau</span>
-
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">exps</span><span class="p">:</span> <span class="n">DataProto</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">DataProto</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
-        <span class="c1"># calculate advantages and returns based on the exps</span>
-
-        <span class="c1"># record some metrics</span>
-
-        <span class="k">return</span> <span class="n">exps</span><span class="p">,</span> <span class="n">metrics</span>
-
-    <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">default_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">{</span>
-            <span class="s2">&quot;opmd_baseline&quot;</span><span class="p">:</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;tau&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
-        <span class="p">}</span>
-</pre></div>
-</div>
 </section>
 <section id="step-1-3-implement-policylossfn">
 <h4>Step 1.3: Implement <code class="docutils literal notranslate"><span class="pre">PolicyLossFn</span></code><a class="headerlink" href="#step-1-3-implement-policylossfn" title="Link to this heading"></a></h4>
@@ -639,10 +582,9 @@ The dictionary returned by the <code class="docutils literal notranslate"><span 
     <span class="k">def</span><span class="w"> </span><span class="nf">default_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s2">&quot;repeat_times&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-            <span class="s2">&quot;add_strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;opmd&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;advantage_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;opmd&quot;</span><span class="p">,</span>
             <span class="s2">&quot;sample_strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;warmup&quot;</span><span class="p">,</span>
             <span class="s2">&quot;policy_loss_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;opmd&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;advantage_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;opmd&quot;</span><span class="p">,</span>
             <span class="s2">&quot;kl_penalty_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
             <span class="s2">&quot;kl_loss_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;k2&quot;</span><span class="p">,</span>
             <span class="s2">&quot;entropy_loss_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span>
@@ -666,13 +608,89 @@ The dictionary returned by the <code class="docutils literal notranslate"><span 
 <span class="nt">algorithm</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">algorithm_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;opmd&quot;</span>
 <span class="w">  </span><span class="nt">repeat_times</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
-<span class="w">  </span><span class="nt">add_strategy_args</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">advantage_fn_args</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">opmd_baseline</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;logavgexp&quot;</span>
 <span class="w">    </span><span class="nt">tau</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.99</span>
 <span class="w">  </span><span class="nt">policy_loss_fn_args</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">tau</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.99</span>
 <span class="c1"># some other configs</span>
 </pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="operators-for-data-developers">
+<h2>Operators (For Data Developers)<a class="headerlink" href="#operators-for-data-developers" title="Link to this heading"></a></h2>
+<section id="step-0-basic-concepts-of-operator-module">
+<h3>Step 0: Basic Concepts of Operator Module<a class="headerlink" href="#step-0-basic-concepts-of-operator-module" title="Link to this heading"></a></h3>
+<p>In Trinity-RFT, the operator module is responsible for processing experience data in the buffer module. By customizing operators, developers can implement various data processing functionalities, such as data augmentation, filtering, and transformation. You can even implement advantages/returns calculation as operators, as shown in <a class="reference internal" href="#algorithms"><span class="std std-ref">Algorithms</span></a> section.</p>
+<ul class="simple">
+<li><p><strong>ExperienceOperator</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.data.operators.ExperienceOperator</span></code>): The base class for all operators used in experience data processing. It defines the interface and common functionalities that all operators should have. Each operator processes a batch of experience data and returns the processed data with metrics for logging.</p></li>
+<li><p><strong>ExperiencePipeline</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.data.pipelines.ExperiencePipeline</span></code>): The experience data processing pipeline that manages a sequence of operators. It takes raw experiences from the <code class="docutils literal notranslate"><span class="pre">Explorer</span></code>, passes them through each operator in the pipeline, and writes the final processed experiences into the input buffer of the <code class="docutils literal notranslate"><span class="pre">Trainer</span></code>.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>We plan to add <code class="docutils literal notranslate"><span class="pre">TaskOperator</span></code> and <code class="docutils literal notranslate"><span class="pre">TaskPipeline</span></code> for taskset processing in the future versions.</p>
+</div>
+</section>
+<hr class="docutils" />
+<section id="step-1-implement-operator">
+<h3>Step 1: Implement Operator<a class="headerlink" href="#step-1-implement-operator" title="Link to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">ExperienceOperator</span></code> interface includes only one <code class="docutils literal notranslate"><span class="pre">process</span></code> method. The <code class="docutils literal notranslate"><span class="pre">ExperiencePipeline</span></code> will call this method with a list of <code class="docutils literal notranslate"><span class="pre">Experience</span></code> generated by the <code class="docutils literal notranslate"><span class="pre">Explorer</span></code> in one explore step. The <code class="docutils literal notranslate"><span class="pre">process</span></code> method should return a tuple containing the processed list of <code class="docutils literal notranslate"><span class="pre">Experience</span></code> and a dictionary of metrics for logging.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ExperienceOperator</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exps</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">],</span> <span class="n">Dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process a list of experiences and return a transformed list.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            exps (List[Experience]): List of experiences to process, which contains</span>
+<span class="sd">                all experiences generated by the Explorer in one explore step.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple[List[Experience], Dict]: A tuple containing the processed list of experiences and a dictionary of metrics.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>Here is an implementation of a simple operator that filters out experiences with rewards below a certain threshold:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">trinity.data.operators</span><span class="w"> </span><span class="kn">import</span> <span class="n">EXPERIENCE_OPERATORS</span><span class="p">,</span> <span class="n">ExperienceOperator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
+
+
+<span class="nd">@EXPERIENCE_OPERATORS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;reward_filter&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RewardFilter</span><span class="p">(</span><span class="n">ExperienceOperator</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="n">threshold</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exps</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">],</span> <span class="n">Dict</span><span class="p">]:</span>
+        <span class="n">filtered_exps</span> <span class="o">=</span> <span class="p">[</span><span class="n">exp</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">exps</span> <span class="k">if</span> <span class="n">exp</span><span class="o">.</span><span class="n">reward</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span><span class="p">]</span>
+        <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;filtered_count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">filtered_exps</span><span class="p">)}</span>
+        <span class="k">return</span> <span class="n">filtered_exps</span><span class="p">,</span> <span class="n">metrics</span>
+</pre></div>
+</div>
+<p>After implementation, you need to register this module through <code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.data.operators.EXPERIENCE_OPERATORS</span></code>. Once registered, the module can be configured in the configuration file using the registered name.</p>
+</section>
+<section id="step-2-use-your-operator">
+<h3>Step 2: Use Your Operator<a class="headerlink" href="#step-2-use-your-operator" title="Link to this heading"></a></h3>
+<p>After completing the above steps, you can use the newly registered operator through a YAML configuration file.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># some other configs</span>
+<span class="nt">data_processor</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">experience_pipeline</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">operators</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;reward_filter&quot;</span>
+<span class="w">        </span><span class="nt">args</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
+<span class="nt">synchronizer</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">sync_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nccl</span>
+<span class="w">  </span><span class="nt">sync_style</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dynamic_by_explorer</span>
+<span class="w">  </span><span class="nt">sync_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="c1"># some other configs</span>
+</pre></div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">RewardFilter</span></code> reduces the number of experiences, which may cause the trainer can’t get enough experiences to start a training step. To avoid the issue, you can use the advanced <em>Dynamic Synchronization</em> feature provided by Trinity-RFT as shown in the above configuration file.
+The above setting means that the <code class="docutils literal notranslate"><span class="pre">Explorer</span></code> will sync with the <code class="docutils literal notranslate"><span class="pre">Trainer</span></code> every 2 steps and will continue running regardless of how many steps the <code class="docutils literal notranslate"><span class="pre">Trainer</span></code> has completed. This ensures that the <code class="docutils literal notranslate"><span class="pre">Trainer</span></code> can always get enough experiences to start a training step as long as the <code class="docutils literal notranslate"><span class="pre">Explorer</span></code> is running.</p>
 </div>
 </section>
 </section>
@@ -796,22 +814,19 @@ Utilize <code class="docutils literal notranslate"><span class="pre">st.session_
 </section>
 </section>
 <hr class="docutils" />
-<section id="check-code-style">
-<h2>Check Code Style<a class="headerlink" href="#check-code-style" title="Link to this heading"></a></h2>
-<p>Before submitting the code, make sure it passes the code style check. Follow these steps:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># Install code style checking tools</span>
-<span class="nb">cd</span><span class="w"> </span>&lt;path_to_trinity_rft&gt;
-<span class="c1"># bash</span>
-pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="o">[</span>dev<span class="o">]</span>
-<span class="c1"># zsh</span>
-<span class="c1"># pip install -e .\[dev\]</span>
-
-<span class="c1"># Run code style checks</span>
-pre-commit<span class="w"> </span>run<span class="w"> </span>--all-files
-
-<span class="c1"># Commit the code after all checks pass</span>
-git<span class="w"> </span>commit<span class="w"> </span>-am<span class="w"> </span><span class="s2">&quot;create example workflow&quot;</span>
-</pre></div>
+<section id="contributing-your-code">
+<h2>Contributing your Code<a class="headerlink" href="#contributing-your-code" title="Link to this heading"></a></h2>
+<p>For modules that are prepared to be contributed to the Trinity-RFT project, please follow the steps below:</p>
+<ol class="arabic simple">
+<li><p>Implement your code in the appropriate directory, such as <code class="docutils literal notranslate"><span class="pre">trinity/common/workflows</span></code> for workflows, <code class="docutils literal notranslate"><span class="pre">trinity/algorithm</span></code> for algorithms, <code class="docutils literal notranslate"><span class="pre">trinity/buffer/operators</span></code> for operators.</p></li>
+<li><p>Register your module in the corresponding <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> file of the directory.</p></li>
+<li><p>Add tests for your module in the <code class="docutils literal notranslate"><span class="pre">tests</span></code> directory, following the naming conventions and structure of existing tests.</p></li>
+<li><p>Before submitting the code, make sure it passes the code style check with <code class="docutils literal notranslate"><span class="pre">pre-commit</span> <span class="pre">run</span> <span class="pre">--all-files</span></code>.</p></li>
+<li><p>Submit a pull request to the Trinity-RFT repository, including a clear description of your changes.</p></li>
+</ol>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>For modules that only used for local testing or not intended for contribution, you can place them in the <code class="docutils literal notranslate"><span class="pre">trinity/plugins</span></code> directory. Trinity-RFT will automatically load all modules in this directory, and you can use those modules without adding them to the <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> file. You can specify another directory by setting the <code class="docutils literal notranslate"><span class="pre">--plugin-dir</span></code> option when running Trinity-RFT, e.g., <code class="docutils literal notranslate"><span class="pre">trinity</span> <span class="pre">run</span> <span class="pre">--config</span> <span class="pre">/path/to/your/config</span> <span class="pre">--plugin-dir</span> <span class="pre">/path/to/your/plugins</span></code>.</p>
 </div>
 </section>
 </section>

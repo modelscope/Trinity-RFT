@@ -170,28 +170,6 @@
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="trinity.common.experience.ExperienceType">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.common.experience.</span></span><span class="sig-name descname"><span class="pre">ExperienceType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/experience.html#ExperienceType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.experience.ExperienceType" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
-<p>Enum for experience types.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="trinity.common.experience.ExperienceType.SINGLE_TURN">
-<span class="sig-name descname"><span class="pre">SINGLE_TURN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'single_turn'</span></em><a class="headerlink" href="#trinity.common.experience.ExperienceType.SINGLE_TURN" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="trinity.common.experience.ExperienceType.MULTI_TURN">
-<span class="sig-name descname"><span class="pre">MULTI_TURN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'multi_turn'</span></em><a class="headerlink" href="#trinity.common.experience.ExperienceType.MULTI_TURN" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="trinity.common.experience.ExperienceType.DPO">
-<span class="sig-name descname"><span class="pre">DPO</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'dpo'</span></em><a class="headerlink" href="#trinity.common.experience.ExperienceType.DPO" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
 <dt class="sig sig-object py" id="trinity.common.experience.CustomField">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.common.experience.</span></span><span class="sig-name descname"><span class="pre">CustomField</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">destination_field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dtype</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/experience.html#CustomField"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.experience.CustomField" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
@@ -246,11 +224,6 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="trinity.common.experience.Experience.returns">
 <span class="sig-name descname"><span class="pre">returns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#trinity.common.experience.Experience.returns" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="trinity.common.experience.Experience.experience_type">
-<span class="sig-name descname"><span class="pre">experience_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#trinity.common.experience.ExperienceType" title="trinity.common.experience.ExperienceType"><span class="pre">ExperienceType</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'single_turn'</span></em><a class="headerlink" href="#trinity.common.experience.Experience.experience_type" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -476,6 +449,25 @@
 <dt class="sig sig-object py" id="trinity.common.experience.gather_returns">
 <span class="sig-prename descclassname"><span class="pre">trinity.common.experience.</span></span><span class="sig-name descname"><span class="pre">gather_returns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiences</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_response_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/common/experience.html#gather_returns"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.experience.gather_returns" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.common.experience.group_by">
+<span class="sig-prename descclassname"><span class="pre">trinity.common.experience.</span></span><span class="sig-name descname"><span class="pre">group_by</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiences</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'task'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'run'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'step'</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/experience.html#group_by"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.experience.group_by" title="Link to this definition"></a></dt>
+<dd><p>Group experiences by ID.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.common.experience.to_hf_datasets">
+<span class="sig-prename descclassname"><span class="pre">trinity.common.experience.</span></span><span class="sig-name descname"><span class="pre">to_hf_datasets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiences</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dataset</span></span></span><a class="reference internal" href="../_modules/trinity/common/experience.html#to_hf_datasets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.experience.to_hf_datasets" title="Link to this definition"></a></dt>
+<dd><p>Convert a list of Experience objects to a HuggingFace Dataset,
+preserving all fields.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.common.experience.from_hf_datasets">
+<span class="sig-prename descclassname"><span class="pre">trinity.common.experience.</span></span><span class="sig-name descname"><span class="pre">from_hf_datasets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dataset</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/experience.html#from_hf_datasets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.experience.from_hf_datasets" title="Link to this definition"></a></dt>
+<dd><p>Convert a HuggingFace Dataset back to a list of Experience objects.</p>
+</dd></dl>
 
 </section>
 

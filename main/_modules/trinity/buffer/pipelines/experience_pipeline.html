@@ -1,0 +1,301 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>trinity.buffer.pipelines.experience_pipeline &mdash; Trinity-RFT 0.2.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=37f418d5"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            Trinity-RFT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial/example_reasoning_basic.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial/example_reasoning_advanced.html">Off-Policy RFT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial/example_async_mode.html">Asynchronous RFT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial/example_multi_turn.html">Concatenated Multi-Turn RFT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial/example_step_wise.html">General Multi-Step RFT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial/example_react.html">Multi-Step ReAct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial/example_dpo.html">Offline DPO and SFT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial/example_data_functionalities.html">Data Processing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Guidelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial/trinity_programming_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial/trinity_configs.html">Configuration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial/example_mix_algo.html">Algorithm Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial/synchronizer.html">Synchronizer in Trinity-RFT</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">FAQ</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial/faq.html">FAQ</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api_reference.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Trinity-RFT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">trinity.buffer.pipelines.experience_pipeline</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for trinity.buffer.pipelines.experience_pipeline</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.buffer</span><span class="w"> </span><span class="kn">import</span> <span class="n">BufferWriter</span><span class="p">,</span> <span class="n">get_buffer_reader</span><span class="p">,</span> <span class="n">get_buffer_writer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.operators.experience_operator</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExperienceOperator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.ray_wrapper</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_database_url</span><span class="p">,</span> <span class="n">is_json_file</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AlgorithmConfig</span><span class="p">,</span>
+    <span class="n">BufferConfig</span><span class="p">,</span>
+    <span class="n">Config</span><span class="p">,</span>
+    <span class="n">ExperiencePipelineConfig</span><span class="p">,</span>
+    <span class="n">StorageConfig</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">StorageType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.plugin_loader</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_plugins</span>
+
+
+<div class="viewcode-block" id="get_input_buffers">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.pipelines.experience_pipeline.html#trinity.buffer.pipelines.get_input_buffers">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_input_buffers</span><span class="p">(</span>
+    <span class="n">pipeline_config</span><span class="p">:</span> <span class="n">ExperiencePipelineConfig</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">:</span> <span class="n">BufferConfig</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get input buffers for the experience pipeline.&quot;&quot;&quot;</span>
+    <span class="n">input_buffers</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">input_name</span><span class="p">,</span> <span class="n">input_config</span> <span class="ow">in</span> <span class="n">pipeline_config</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">buffer_reader</span> <span class="o">=</span> <span class="n">get_buffer_reader</span><span class="p">(</span><span class="n">input_config</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">)</span>
+        <span class="n">input_buffers</span><span class="p">[</span><span class="n">input_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">buffer_reader</span>
+    <span class="k">return</span> <span class="n">input_buffers</span></div>
+
+
+
+<div class="viewcode-block" id="ExperiencePipeline">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.pipelines.experience_pipeline.html#trinity.buffer.pipelines.ExperiencePipeline">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExperiencePipeline</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class to process experiences.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ExperiencePipeline.__init__">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.pipelines.experience_pipeline.html#trinity.buffer.pipelines.ExperiencePipeline.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="n">load_plugins</span><span class="p">()</span>
+        <span class="n">pipeline_config</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">data_processor</span><span class="o">.</span><span class="n">experience_pipeline</span>
+        <span class="n">buffer_config</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">buffer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_store</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init_input_storage</span><span class="p">(</span><span class="n">pipeline_config</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">)</span>  <span class="c1"># type: ignore [arg-type]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">operators</span> <span class="o">=</span> <span class="n">ExperienceOperator</span><span class="o">.</span><span class="n">create_operators</span><span class="p">(</span><span class="n">pipeline_config</span><span class="o">.</span><span class="n">operators</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to create experience operators: </span><span class="si">{</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">e</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_algorithm_operators</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">algorithm</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output</span> <span class="o">=</span> <span class="n">get_buffer_writer</span><span class="p">(</span>
+            <span class="n">buffer_config</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="p">,</span>  <span class="c1"># type: ignore [arg-type]</span>
+            <span class="n">buffer_config</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_input_storage</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">pipeline_config</span><span class="p">:</span> <span class="n">ExperiencePipelineConfig</span><span class="p">,</span>
+        <span class="n">buffer_config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">BufferWriter</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the input storage if it is not already set.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">pipeline_config</span><span class="o">.</span><span class="n">save_input</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pipeline_config</span><span class="o">.</span><span class="n">input_save_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;input_save_path must be set when save_input is True.&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">is_json_file</span><span class="p">(</span><span class="n">pipeline_config</span><span class="o">.</span><span class="n">input_save_path</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">get_buffer_writer</span><span class="p">(</span>
+                    <span class="n">StorageConfig</span><span class="p">(</span>
+                        <span class="n">storage_type</span><span class="o">=</span><span class="n">StorageType</span><span class="o">.</span><span class="n">FILE</span><span class="p">,</span>
+                        <span class="n">path</span><span class="o">=</span><span class="n">pipeline_config</span><span class="o">.</span><span class="n">input_save_path</span><span class="p">,</span>
+                        <span class="n">wrap_in_ray</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="p">),</span>
+                    <span class="n">buffer_config</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">is_database_url</span><span class="p">(</span><span class="n">pipeline_config</span><span class="o">.</span><span class="n">input_save_path</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">get_buffer_writer</span><span class="p">(</span>
+                    <span class="n">StorageConfig</span><span class="p">(</span>
+                        <span class="n">storage_type</span><span class="o">=</span><span class="n">StorageType</span><span class="o">.</span><span class="n">SQL</span><span class="p">,</span>
+                        <span class="n">path</span><span class="o">=</span><span class="n">pipeline_config</span><span class="o">.</span><span class="n">input_save_path</span><span class="p">,</span>
+                        <span class="n">wrap_in_ray</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="p">),</span>
+                    <span class="n">buffer_config</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Unsupported save_input format: </span><span class="si">{</span><span class="n">pipeline_config</span><span class="o">.</span><span class="n">save_input</span><span class="si">}</span><span class="s2">. &quot;</span>
+                    <span class="s2">&quot;Only JSON file path or SQLite URL is supported.&quot;</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_algorithm_operators</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">algorithm_config</span><span class="p">:</span> <span class="n">AlgorithmConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add algorithm-specific operators to the pipeline.&quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm</span><span class="w"> </span><span class="kn">import</span> <span class="n">ADVANTAGE_FN</span><span class="p">,</span> <span class="n">ALGORITHM_TYPE</span>
+
+        <span class="n">algorithm</span> <span class="o">=</span> <span class="n">ALGORITHM_TYPE</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">algorithm_config</span><span class="o">.</span><span class="n">algorithm_type</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">algorithm</span><span class="o">.</span><span class="n">compute_advantage_in_trainer</span> <span class="ow">and</span> <span class="n">algorithm_config</span><span class="o">.</span><span class="n">advantage_fn</span><span class="p">:</span>
+            <span class="n">advantage_fn_cls</span> <span class="o">=</span> <span class="n">ADVANTAGE_FN</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">algorithm_config</span><span class="o">.</span><span class="n">advantage_fn</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="n">advantage_fn_cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;AdvantageFn </span><span class="si">{</span><span class="n">algorithm_config</span><span class="o">.</span><span class="n">advantage_fn</span><span class="si">}</span><span class="s2"> not found.&quot;</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="ow">not</span> <span class="n">advantage_fn_cls</span><span class="o">.</span><span class="n">compute_in_trainer</span><span class="p">()</span>
+            <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;AdvantageFn </span><span class="si">{</span><span class="n">algorithm_config</span><span class="o">.</span><span class="n">advantage_fn</span><span class="si">}</span><span class="s2"> can only be computed in the trainer, please check your implementation.&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">operators</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">advantage_fn_cls</span><span class="p">(</span><span class="o">**</span><span class="n">algorithm_config</span><span class="o">.</span><span class="n">advantage_fn_args</span><span class="p">))</span>
+
+<div class="viewcode-block" id="ExperiencePipeline.prepare">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.pipelines.experience_pipeline.html#trinity.buffer.pipelines.ExperiencePipeline.prepare">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="ExperiencePipeline.process">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.pipelines.experience_pipeline.html#trinity.buffer.pipelines.ExperiencePipeline.process">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exps</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process a batch of experiences.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            exps (List[Experience]): List of experiences to process. These experiences are typically generated by an explorer in one step.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dict: A dictionary containing metrics collected during the processing of experiences.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_store</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_store</span><span class="o">.</span><span class="n">write_async</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span>
+        <span class="n">metrics</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Process experiences through operators</span>
+        <span class="k">for</span> <span class="n">operator</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">operators</span><span class="p">:</span>
+            <span class="n">exps</span><span class="p">,</span> <span class="n">metric</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span>
+            <span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+
+        <span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;experience_count&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span>
+
+        <span class="c1"># Write processed experiences to output buffer</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">write_async</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span>
+
+        <span class="c1"># prefix metrics keys with &#39;pipeline/&#39;</span>
+        <span class="n">result_metrics</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">metrics</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+                <span class="n">result_metrics</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;pipeline/</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result_metrics</span></div>
+
+
+<div class="viewcode-block" id="ExperiencePipeline.close">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.pipelines.experience_pipeline.html#trinity.buffer.pipelines.ExperiencePipeline.close">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">operator</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">operators</span><span class="p">:</span>
+            <span class="n">operator</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Trinity-RFT Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    v: main
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Tags</dt>
+      <dd><a href="../../../../../v0.1.0/index.html">v0.1.0</a></dd>
+      <dd><a href="../../../../../v0.1.1/index.html">v0.1.1</a></dd>
+      <dd><a href="../../../../../v0.2.0/index.html">v0.2.0</a></dd>
+      <dd><a href="../../../../../v0.2.1/index.html">v0.2.1</a></dd>
+    </dl>
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="experience_pipeline.html">main</a></dd>
+    </dl>
+  </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

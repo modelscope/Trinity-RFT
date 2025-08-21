@@ -104,6 +104,14 @@
 <li class="toctree-l1"><a class="reference internal" href="trinity.algorithm.advantage_fn.advantage_fn.html">trinity.algorithm.advantage_fn.advantage_fn module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="trinity.algorithm.advantage_fn.advantage_fn.html#trinity.algorithm.advantage_fn.advantage_fn.AdvantageFn"><code class="docutils literal notranslate"><span class="pre">AdvantageFn</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.advantage_fn.html#trinity.algorithm.advantage_fn.advantage_fn.AdvantageFn.default_args"><code class="docutils literal notranslate"><span class="pre">AdvantageFn.default_args()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.advantage_fn.html#trinity.algorithm.advantage_fn.advantage_fn.AdvantageFn.compute_in_trainer"><code class="docutils literal notranslate"><span class="pre">AdvantageFn.compute_in_trainer()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.algorithm.advantage_fn.advantage_fn.html#trinity.algorithm.advantage_fn.advantage_fn.GroupAdvantage"><code class="docutils literal notranslate"><span class="pre">GroupAdvantage</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.advantage_fn.html#trinity.algorithm.advantage_fn.advantage_fn.GroupAdvantage.group_experiences"><code class="docutils literal notranslate"><span class="pre">GroupAdvantage.group_experiences()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.advantage_fn.html#trinity.algorithm.advantage_fn.advantage_fn.GroupAdvantage.calculate_group_advantage"><code class="docutils literal notranslate"><span class="pre">GroupAdvantage.calculate_group_advantage()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.advantage_fn.html#trinity.algorithm.advantage_fn.advantage_fn.GroupAdvantage.process"><code class="docutils literal notranslate"><span class="pre">GroupAdvantage.process()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.advantage_fn.html#trinity.algorithm.advantage_fn.advantage_fn.GroupAdvantage.compute_in_trainer"><code class="docutils literal notranslate"><span class="pre">GroupAdvantage.compute_in_trainer()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -114,12 +122,39 @@
 <li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.grpo_advantage.html#trinity.algorithm.advantage_fn.grpo_advantage.GRPOAdvantageFn.default_args"><code class="docutils literal notranslate"><span class="pre">GRPOAdvantageFn.default_args()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.algorithm.advantage_fn.grpo_advantage.html#trinity.algorithm.advantage_fn.grpo_advantage.GRPOGroupedAdvantage"><code class="docutils literal notranslate"><span class="pre">GRPOGroupedAdvantage</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.grpo_advantage.html#trinity.algorithm.advantage_fn.grpo_advantage.GRPOGroupedAdvantage.__init__"><code class="docutils literal notranslate"><span class="pre">GRPOGroupedAdvantage.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.grpo_advantage.html#trinity.algorithm.advantage_fn.grpo_advantage.GRPOGroupedAdvantage.group_experiences"><code class="docutils literal notranslate"><span class="pre">GRPOGroupedAdvantage.group_experiences()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.grpo_advantage.html#trinity.algorithm.advantage_fn.grpo_advantage.GRPOGroupedAdvantage.calculate_group_advantage"><code class="docutils literal notranslate"><span class="pre">GRPOGroupedAdvantage.calculate_group_advantage()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.grpo_advantage.html#trinity.algorithm.advantage_fn.grpo_advantage.GRPOGroupedAdvantage.process"><code class="docutils literal notranslate"><span class="pre">GRPOGroupedAdvantage.process()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.grpo_advantage.html#trinity.algorithm.advantage_fn.grpo_advantage.GRPOGroupedAdvantage.default_args"><code class="docutils literal notranslate"><span class="pre">GRPOGroupedAdvantage.default_args()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="trinity.algorithm.advantage_fn.multi_step_grpo_advantage.html">trinity.algorithm.advantage_fn.multi_step_grpo_advantage module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="trinity.algorithm.advantage_fn.multi_step_grpo_advantage.html#trinity.algorithm.advantage_fn.multi_step_grpo_advantage.StepWiseGRPOAdvantageFn"><code class="docutils literal notranslate"><span class="pre">StepWiseGRPOAdvantageFn</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.multi_step_grpo_advantage.html#trinity.algorithm.advantage_fn.multi_step_grpo_advantage.StepWiseGRPOAdvantageFn.__init__"><code class="docutils literal notranslate"><span class="pre">StepWiseGRPOAdvantageFn.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.multi_step_grpo_advantage.html#trinity.algorithm.advantage_fn.multi_step_grpo_advantage.StepWiseGRPOAdvantageFn.calculate_last_step_advantage"><code class="docutils literal notranslate"><span class="pre">StepWiseGRPOAdvantageFn.calculate_last_step_advantage()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.multi_step_grpo_advantage.html#trinity.algorithm.advantage_fn.multi_step_grpo_advantage.StepWiseGRPOAdvantageFn.broadcast_advantages"><code class="docutils literal notranslate"><span class="pre">StepWiseGRPOAdvantageFn.broadcast_advantages()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.multi_step_grpo_advantage.html#trinity.algorithm.advantage_fn.multi_step_grpo_advantage.StepWiseGRPOAdvantageFn.process"><code class="docutils literal notranslate"><span class="pre">StepWiseGRPOAdvantageFn.process()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.multi_step_grpo_advantage.html#trinity.algorithm.advantage_fn.multi_step_grpo_advantage.StepWiseGRPOAdvantageFn.compute_in_trainer"><code class="docutils literal notranslate"><span class="pre">StepWiseGRPOAdvantageFn.compute_in_trainer()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.multi_step_grpo_advantage.html#trinity.algorithm.advantage_fn.multi_step_grpo_advantage.StepWiseGRPOAdvantageFn.default_args"><code class="docutils literal notranslate"><span class="pre">StepWiseGRPOAdvantageFn.default_args()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="trinity.algorithm.advantage_fn.opmd_advantage.html">trinity.algorithm.advantage_fn.opmd_advantage module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="trinity.algorithm.advantage_fn.opmd_advantage.html#trinity.algorithm.advantage_fn.opmd_advantage.OPMDAdvantageFn"><code class="docutils literal notranslate"><span class="pre">OPMDAdvantageFn</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.opmd_advantage.html#trinity.algorithm.advantage_fn.opmd_advantage.OPMDAdvantageFn.__init__"><code class="docutils literal notranslate"><span class="pre">OPMDAdvantageFn.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.opmd_advantage.html#trinity.algorithm.advantage_fn.opmd_advantage.OPMDAdvantageFn.default_args"><code class="docutils literal notranslate"><span class="pre">OPMDAdvantageFn.default_args()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.algorithm.advantage_fn.opmd_advantage.html#trinity.algorithm.advantage_fn.opmd_advantage.OPMDGroupAdvantage"><code class="docutils literal notranslate"><span class="pre">OPMDGroupAdvantage</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.opmd_advantage.html#trinity.algorithm.advantage_fn.opmd_advantage.OPMDGroupAdvantage.__init__"><code class="docutils literal notranslate"><span class="pre">OPMDGroupAdvantage.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.opmd_advantage.html#trinity.algorithm.advantage_fn.opmd_advantage.OPMDGroupAdvantage.group_experiences"><code class="docutils literal notranslate"><span class="pre">OPMDGroupAdvantage.group_experiences()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.opmd_advantage.html#trinity.algorithm.advantage_fn.opmd_advantage.OPMDGroupAdvantage.calculate_group_advantage"><code class="docutils literal notranslate"><span class="pre">OPMDGroupAdvantage.calculate_group_advantage()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.opmd_advantage.html#trinity.algorithm.advantage_fn.opmd_advantage.OPMDGroupAdvantage.default_args"><code class="docutils literal notranslate"><span class="pre">OPMDGroupAdvantage.default_args()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -178,6 +213,80 @@
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.advantage_fn.AdvantageFn.compute_in_trainer">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute_in_trainer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/advantage_fn.html#AdvantageFn.compute_in_trainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.advantage_fn.AdvantageFn.compute_in_trainer" title="Link to this definition"></a></dt>
+<dd><p>Whether the advantage should be computed in the trainer loop.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="trinity.algorithm.advantage_fn.GroupAdvantage">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.advantage_fn.</span></span><span class="sig-name descname"><span class="pre">GroupAdvantage</span></span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/advantage_fn.html#GroupAdvantage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.advantage_fn.GroupAdvantage" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="trinity.algorithm.advantage_fn.advantage_fn.html#trinity.algorithm.advantage_fn.advantage_fn.AdvantageFn" title="trinity.algorithm.advantage_fn.advantage_fn.AdvantageFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">AdvantageFn</span></code></a>, <a class="reference internal" href="trinity.buffer.operators.experience_operator.html#trinity.buffer.operators.experience_operator.ExperienceOperator" title="trinity.buffer.operators.experience_operator.ExperienceOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExperienceOperator</span></code></a></p>
+<p>For group-based advantages calculation.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.advantage_fn.GroupAdvantage.group_experiences">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">group_experiences</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/advantage_fn.html#GroupAdvantage.group_experiences"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.advantage_fn.GroupAdvantage.group_experiences" title="Link to this definition"></a></dt>
+<dd><p>Group experiences by a certain criterion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>exps</strong> (<em>List</em><em>[</em><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><em>Experience</em></a><em>]</em>) – List of experiences to be grouped.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary where keys are group identifiers and values are lists of experiences.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, List[<a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience">Experience</a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.advantage_fn.GroupAdvantage.calculate_group_advantage">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calculate_group_advantage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/advantage_fn.html#GroupAdvantage.calculate_group_advantage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.advantage_fn.GroupAdvantage.calculate_group_advantage" title="Link to this definition"></a></dt>
+<dd><p>Calculate advantages for a group of experiences.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>group_id</strong> (<em>str</em>) – The identifier for the group of experiences.</p></li>
+<li><p><strong>exps</strong> (<em>List</em><em>[</em><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><em>Experience</em></a><em>]</em>) – List of experiences in the group.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing the modified list of experiences and a dictionary of metrics.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[<a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience">Experience</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.advantage_fn.GroupAdvantage.process">
+<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/advantage_fn.html#GroupAdvantage.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.advantage_fn.GroupAdvantage.process" title="Link to this definition"></a></dt>
+<dd><p>Process a list of experiences and return a transformed list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>exps</strong> (<em>List</em><em>[</em><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><em>Experience</em></a><em>]</em>) – List of experiences to process, which contains
+all experiences generated by the Explorer in one explore step.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing the processed list of experiences and a dictionary of metrics.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[List[<a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience">Experience</a>], Dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.advantage_fn.GroupAdvantage.compute_in_trainer">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute_in_trainer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/advantage_fn.html#GroupAdvantage.compute_in_trainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.advantage_fn.GroupAdvantage.compute_in_trainer" title="Link to this definition"></a></dt>
+<dd><p>Whether the advantage should be computed in the trainer loop.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -225,6 +334,181 @@
 <dd class="field-even"><p><cite>Dict</cite></p>
 </dd>
 </dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="trinity.algorithm.advantage_fn.GRPOGroupedAdvantage">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.advantage_fn.</span></span><span class="sig-name descname"><span class="pre">GRPOGroupedAdvantage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duplicate_experiences</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rank_penalty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/grpo_advantage.html#GRPOGroupedAdvantage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.advantage_fn.GRPOGroupedAdvantage" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="trinity.algorithm.advantage_fn.advantage_fn.html#trinity.algorithm.advantage_fn.advantage_fn.GroupAdvantage" title="trinity.algorithm.advantage_fn.advantage_fn.GroupAdvantage"><code class="xref py py-class docutils literal notranslate"><span class="pre">GroupAdvantage</span></code></a></p>
+<p>An example AddStrategy that calculates GRPO advantages.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.advantage_fn.GRPOGroupedAdvantage.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duplicate_experiences</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rank_penalty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/grpo_advantage.html#GRPOGroupedAdvantage.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.advantage_fn.GRPOGroupedAdvantage.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize the GRPO advantage function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>epsilon</strong> (<em>float</em>) – A small value to avoid division by zero.</p></li>
+<li><p><strong>std_threshold</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em>) – If provided, groups with a reward standard deviation equal
+or below this threshold will be skipped.</p></li>
+<li><p><strong>duplicate_experiences</strong> (<em>bool</em>) – If True, allows duplicate experiences to keep the original experience
+count. Only used when <cite>std_threshold</cite> is not None (<a class="reference external" href="https://hkunlp.github.io/blog/2025/Polaris">https://hkunlp.github.io/blog/2025/Polaris</a>).</p></li>
+<li><p><strong>rank_penalty</strong> (<em>Optional</em><em>[</em><em>float</em><em>]</em>) – A penalty applied to the rank of rewards to correct for bias
+(<a class="reference external" href="https://arxiv.org/pdf/2506.02355">https://arxiv.org/pdf/2506.02355</a>).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.advantage_fn.GRPOGroupedAdvantage.group_experiences">
+<span class="sig-name descname"><span class="pre">group_experiences</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exps</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/grpo_advantage.html#GRPOGroupedAdvantage.group_experiences"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.advantage_fn.GRPOGroupedAdvantage.group_experiences" title="Link to this definition"></a></dt>
+<dd><p>Group experiences by a certain criterion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>exps</strong> (<em>List</em><em>[</em><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><em>Experience</em></a><em>]</em>) – List of experiences to be grouped.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary where keys are group identifiers and values are lists of experiences.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, List[<a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience">Experience</a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.advantage_fn.GRPOGroupedAdvantage.calculate_group_advantage">
+<span class="sig-name descname"><span class="pre">calculate_group_advantage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/grpo_advantage.html#GRPOGroupedAdvantage.calculate_group_advantage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.advantage_fn.GRPOGroupedAdvantage.calculate_group_advantage" title="Link to this definition"></a></dt>
+<dd><p>Calculate advantages for a group of experiences.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>group_id</strong> (<em>str</em>) – The identifier for the group of experiences.</p></li>
+<li><p><strong>exps</strong> (<em>List</em><em>[</em><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><em>Experience</em></a><em>]</em>) – List of experiences in the group.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing the modified list of experiences and a dictionary of metrics.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[<a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience">Experience</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.advantage_fn.GRPOGroupedAdvantage.process">
+<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exps</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/grpo_advantage.html#GRPOGroupedAdvantage.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.advantage_fn.GRPOGroupedAdvantage.process" title="Link to this definition"></a></dt>
+<dd><p>Process a list of experiences and return a transformed list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>exps</strong> (<em>List</em><em>[</em><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><em>Experience</em></a><em>]</em>) – List of experiences to process, which contains
+all experiences generated by the Explorer in one explore step.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing the processed list of experiences and a dictionary of metrics.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[List[<a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience">Experience</a>], Dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.advantage_fn.GRPOGroupedAdvantage.default_args">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/grpo_advantage.html#GRPOGroupedAdvantage.default_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.advantage_fn.GRPOGroupedAdvantage.default_args" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The default init arguments for the advantage function.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><cite>Dict</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="trinity.algorithm.advantage_fn.StepWiseGRPOAdvantageFn">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.advantage_fn.</span></span><span class="sig-name descname"><span class="pre">StepWiseGRPOAdvantageFn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_step_norm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/multi_step_grpo_advantage.html#StepWiseGRPOAdvantageFn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.advantage_fn.StepWiseGRPOAdvantageFn" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="trinity.algorithm.advantage_fn.advantage_fn.html#trinity.algorithm.advantage_fn.advantage_fn.AdvantageFn" title="trinity.algorithm.advantage_fn.advantage_fn.AdvantageFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">AdvantageFn</span></code></a>, <a class="reference internal" href="trinity.buffer.operators.experience_operator.html#trinity.buffer.operators.experience_operator.ExperienceOperator" title="trinity.buffer.operators.experience_operator.ExperienceOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExperienceOperator</span></code></a></p>
+<p>An advantage function that broadcasts advantages from the last step to previous steps.
+Inspired by rLLM (<a class="reference external" href="https://github.com/rllm-org/rllm">https://github.com/rllm-org/rllm</a>).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.advantage_fn.StepWiseGRPOAdvantageFn.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_step_norm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/multi_step_grpo_advantage.html#StepWiseGRPOAdvantageFn.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.advantage_fn.StepWiseGRPOAdvantageFn.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.advantage_fn.StepWiseGRPOAdvantageFn.calculate_last_step_advantage">
+<span class="sig-name descname"><span class="pre">calculate_last_step_advantage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/multi_step_grpo_advantage.html#StepWiseGRPOAdvantageFn.calculate_last_step_advantage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.advantage_fn.StepWiseGRPOAdvantageFn.calculate_last_step_advantage" title="Link to this definition"></a></dt>
+<dd><p>Calculate group advantage for a given group of experiences.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>exps</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><em>Experience</em></a><em>]</em>) – One experience per run, keyed by run ID.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing the scores for each run.
+Dict[str, float]: Metrics for logging.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.advantage_fn.StepWiseGRPOAdvantageFn.broadcast_advantages">
+<span class="sig-name descname"><span class="pre">broadcast_advantages</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_exps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scores</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/multi_step_grpo_advantage.html#StepWiseGRPOAdvantageFn.broadcast_advantages"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.advantage_fn.StepWiseGRPOAdvantageFn.broadcast_advantages" title="Link to this definition"></a></dt>
+<dd><p>Broadcast the calculated advantages to all previous steps in each run.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>run_exps</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>List</em><em>[</em><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><em>Experience</em></a><em>]</em><em>]</em>) – Experiences grouped by run ID.</p></li>
+<li><p><strong>scores</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>float</em><em>]</em>) – Calculated scores for each run.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Updated experiences with advantages broadcasted.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, List[<a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience">Experience</a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.advantage_fn.StepWiseGRPOAdvantageFn.process">
+<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/multi_step_grpo_advantage.html#StepWiseGRPOAdvantageFn.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.advantage_fn.StepWiseGRPOAdvantageFn.process" title="Link to this definition"></a></dt>
+<dd><p>Process a list of experiences and return a transformed list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>exps</strong> (<em>List</em><em>[</em><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><em>Experience</em></a><em>]</em>) – List of experiences to process, which contains
+all experiences generated by the Explorer in one explore step.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing the processed list of experiences and a dictionary of metrics.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[List[<a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience">Experience</a>], Dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.advantage_fn.StepWiseGRPOAdvantageFn.compute_in_trainer">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute_in_trainer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/multi_step_grpo_advantage.html#StepWiseGRPOAdvantageFn.compute_in_trainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.advantage_fn.StepWiseGRPOAdvantageFn.compute_in_trainer" title="Link to this definition"></a></dt>
+<dd><p>Whether the advantage should be computed in the trainer loop.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.advantage_fn.StepWiseGRPOAdvantageFn.default_args">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/multi_step_grpo_advantage.html#StepWiseGRPOAdvantageFn.default_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.advantage_fn.StepWiseGRPOAdvantageFn.default_args" title="Link to this definition"></a></dt>
+<dd><p>Return the default configuration for this strategy.</p>
 </dd></dl>
 
 </dd></dl>
@@ -314,6 +598,68 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.algorithm.advantage_fn.OPMDAdvantageFn.default_args">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/opmd_advantage.html#OPMDAdvantageFn.default_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.advantage_fn.OPMDAdvantageFn.default_args" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The default init arguments for the advantage function.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><cite>Dict</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="trinity.algorithm.advantage_fn.OPMDGroupAdvantage">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.advantage_fn.</span></span><span class="sig-name descname"><span class="pre">OPMDGroupAdvantage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opmd_baseline</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/opmd_advantage.html#OPMDGroupAdvantage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.advantage_fn.OPMDGroupAdvantage" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="trinity.algorithm.advantage_fn.advantage_fn.html#trinity.algorithm.advantage_fn.advantage_fn.GroupAdvantage" title="trinity.algorithm.advantage_fn.advantage_fn.GroupAdvantage"><code class="xref py py-class docutils literal notranslate"><span class="pre">GroupAdvantage</span></code></a></p>
+<p>OPMD Group Advantage computation</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.advantage_fn.OPMDGroupAdvantage.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opmd_baseline</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/opmd_advantage.html#OPMDGroupAdvantage.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.advantage_fn.OPMDGroupAdvantage.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.advantage_fn.OPMDGroupAdvantage.group_experiences">
+<span class="sig-name descname"><span class="pre">group_experiences</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exps</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/opmd_advantage.html#OPMDGroupAdvantage.group_experiences"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.advantage_fn.OPMDGroupAdvantage.group_experiences" title="Link to this definition"></a></dt>
+<dd><p>Group experiences by a certain criterion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>exps</strong> (<em>List</em><em>[</em><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><em>Experience</em></a><em>]</em>) – List of experiences to be grouped.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary where keys are group identifiers and values are lists of experiences.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, List[<a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience">Experience</a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.advantage_fn.OPMDGroupAdvantage.calculate_group_advantage">
+<span class="sig-name descname"><span class="pre">calculate_group_advantage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/opmd_advantage.html#OPMDGroupAdvantage.calculate_group_advantage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.advantage_fn.OPMDGroupAdvantage.calculate_group_advantage" title="Link to this definition"></a></dt>
+<dd><p>Calculate advantages for a group of experiences.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>group_id</strong> (<em>str</em>) – The identifier for the group of experiences.</p></li>
+<li><p><strong>exps</strong> (<em>List</em><em>[</em><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><em>Experience</em></a><em>]</em>) – List of experiences in the group.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing the modified list of experiences and a dictionary of metrics.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[<a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience">Experience</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.advantage_fn.OPMDGroupAdvantage.default_args">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/opmd_advantage.html#OPMDGroupAdvantage.default_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.advantage_fn.OPMDGroupAdvantage.default_args" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The default init arguments for the advantage function.</p>

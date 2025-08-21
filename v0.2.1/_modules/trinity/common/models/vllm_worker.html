@@ -143,6 +143,7 @@
             <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
             <span class="n">world_size</span><span class="o">=</span><span class="n">world_size</span><span class="p">,</span>
             <span class="n">rank</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_weight_update_rank</span><span class="p">,</span>
+            <span class="n">device_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">torch</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">barrier</span><span class="p">(</span><span class="n">group</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_model_update_group</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;vLLM init_process_group finished.&quot;</span><span class="p">)</span>

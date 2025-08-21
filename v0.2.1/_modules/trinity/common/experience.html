@@ -97,11 +97,11 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">pickle</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">uuid</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">asdict</span><span class="p">,</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">fields</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dataset</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tensor</span>
 
 
@@ -181,17 +181,6 @@
 
 
 
-<div class="viewcode-block" id="ExperienceType">
-<a class="viewcode-back" href="../../../build_api/trinity.common.experience.html#trinity.common.experience.ExperienceType">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">ExperienceType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Enum for experience types.&quot;&quot;&quot;</span>
-
-    <span class="n">SINGLE_TURN</span> <span class="o">=</span> <span class="s2">&quot;single_turn&quot;</span>  <span class="c1"># Single-turn experience, e.g., a prompt-response pair</span>
-    <span class="n">MULTI_TURN</span> <span class="o">=</span> <span class="s2">&quot;multi_turn&quot;</span>  <span class="c1"># Multi-turn experience, e.g., a conversation history</span>
-    <span class="n">DPO</span> <span class="o">=</span> <span class="s2">&quot;dpo&quot;</span>  <span class="c1"># DPO experience, e.g., a chosen and rejected response pair</span></div>
-
-
-
 <div class="viewcode-block" id="CustomField">
 <a class="viewcode-back" href="../../../build_api/trinity.common.experience.html#trinity.common.experience.CustomField">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -217,8 +206,6 @@
     <span class="n">reward</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">advantages</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># [resp_length]</span>
     <span class="n">returns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># [resp_length]</span>
-    <span class="c1"># Type of the experience, automatically set based on the presence of action_mask or chosen/rejected</span>
-    <span class="n">experience_type</span><span class="p">:</span> <span class="n">ExperienceType</span> <span class="o">=</span> <span class="n">ExperienceType</span><span class="o">.</span><span class="n">SINGLE_TURN</span>
     <span class="n">info</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
         <span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span>
     <span class="p">)</span>  <span class="c1"># Additional information about the experience, can also be used to store custom fields</span>
@@ -244,7 +231,7 @@
 
 <div class="viewcode-block" id="Experience.__init__">
 <a class="viewcode-back" href="../../../build_api/trinity.common.experience.html#trinity.common.experience.Experience.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>  <span class="c1"># noqa: C901</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">eid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -266,13 +253,13 @@
         <span class="n">rejected_text</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="k">if</span> <span class="n">action_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">experience_type</span> <span class="o">=</span> <span class="n">ExperienceType</span><span class="o">.</span><span class="n">MULTI_TURN</span>
+            <span class="n">experience_type</span> <span class="o">=</span> <span class="s2">&quot;multi_turn&quot;</span>
         <span class="k">elif</span> <span class="n">chosen</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">rejected</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">experience_type</span> <span class="o">=</span> <span class="n">ExperienceType</span><span class="o">.</span><span class="n">DPO</span>
+            <span class="n">experience_type</span> <span class="o">=</span> <span class="s2">&quot;dpo&quot;</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">experience_type</span> <span class="o">=</span> <span class="n">ExperienceType</span><span class="o">.</span><span class="n">SINGLE_TURN</span>
+            <span class="n">experience_type</span> <span class="o">=</span> <span class="s2">&quot;single_turn&quot;</span>
 
-        <span class="k">if</span> <span class="n">experience_type</span> <span class="o">==</span> <span class="n">ExperienceType</span><span class="o">.</span><span class="n">SINGLE_TURN</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">experience_type</span> <span class="o">==</span> <span class="s2">&quot;single_turn&quot;</span><span class="p">:</span>
             <span class="k">assert</span> <span class="p">(</span>
                 <span class="n">prompt_length</span> <span class="o">&gt;</span> <span class="mi">0</span>
             <span class="p">),</span> <span class="s2">&quot;Prompt length must be greater than 0 for single-turn experiences.&quot;</span>
@@ -280,14 +267,26 @@
                 <span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">prompt_length</span>
             <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Token ids must be longer than the prompt length. Got len(tokens)=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span><span class="si">}</span><span class="s2">, prompt_length=</span><span class="si">{</span><span class="n">prompt_length</span><span class="si">}</span><span class="s2">.&quot;</span>
             <span class="n">action_mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span> <span class="o">-</span> <span class="n">prompt_length</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">experience_type</span> <span class="o">==</span> <span class="n">ExperienceType</span><span class="o">.</span><span class="n">DPO</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">experience_type</span> <span class="o">==</span> <span class="s2">&quot;dpo&quot;</span><span class="p">:</span>
             <span class="n">prompt_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">eid</span> <span class="o">=</span> <span class="n">eid</span> <span class="ow">or</span> <span class="n">EID</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">eid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eid</span> <span class="o">=</span> <span class="n">EID</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">eid</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eid</span> <span class="o">=</span> <span class="n">EID</span><span class="p">(</span><span class="o">**</span><span class="n">eid</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eid</span> <span class="o">=</span> <span class="n">eid</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">tokens</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span> <span class="o">=</span> <span class="n">tokens</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">logprobs</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">logprobs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">logprobs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logprobs</span> <span class="o">=</span> <span class="n">logprobs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reward</span> <span class="o">=</span> <span class="n">reward</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">advantages</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">advantages</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">advantages</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">advantages</span> <span class="o">=</span> <span class="n">advantages</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">returns</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">returns</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">returns</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">returns</span> <span class="o">=</span> <span class="n">returns</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">experience_type</span> <span class="o">=</span> <span class="n">experience_type</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">info</span> <span class="o">=</span> <span class="n">info</span> <span class="ow">or</span> <span class="p">{}</span>
@@ -295,9 +294,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">prompt_length</span> <span class="o">=</span> <span class="n">prompt_length</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">response_text</span> <span class="o">=</span> <span class="n">response_text</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prompt_text</span> <span class="o">=</span> <span class="n">prompt_text</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">action_mask</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">action_mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">action_mask</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">action_mask</span> <span class="o">=</span> <span class="n">action_mask</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">messages</span> <span class="o">=</span> <span class="n">messages</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">chosen</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">chosen</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">chosen</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">chosen</span> <span class="o">=</span> <span class="n">chosen</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rejected</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">rejected</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">rejected</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rejected</span> <span class="o">=</span> <span class="n">rejected</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">chosen_text</span> <span class="o">=</span> <span class="n">chosen_text</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rejected_text</span> <span class="o">=</span> <span class="n">rejected_text</span>
@@ -334,7 +339,9 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert the experience to a dictionary.&quot;&quot;&quot;</span>
         <span class="n">res</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;eid&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">eid</span><span class="p">,</span>
-            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">experience_type</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">experience_type</span><span class="p">,</span>
+            <span class="s2">&quot;prompt_length&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_length</span><span class="p">,</span>
+            <span class="s2">&quot;response_length&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tokens</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_length</span><span class="p">,</span>  <span class="c1"># type: ignore [arg-type]</span>
             <span class="s2">&quot;info&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">,</span>
             <span class="s2">&quot;metrics&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">,</span>
         <span class="p">}</span>
@@ -365,7 +372,7 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">experiences</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">empty_experiences</span><span class="p">(</span><span class="n">custom_fields</span><span class="p">)</span>
         <span class="n">exp_type</span> <span class="o">=</span> <span class="n">experiences</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">experience_type</span>
-        <span class="k">if</span> <span class="n">exp_type</span> <span class="o">==</span> <span class="n">ExperienceType</span><span class="o">.</span><span class="n">DPO</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">exp_type</span> <span class="o">==</span> <span class="s2">&quot;dpo&quot;</span><span class="p">:</span>
             <span class="n">experiences</span> <span class="o">=</span> <span class="n">split_dpo_experience_to_single_turn</span><span class="p">(</span><span class="n">experiences</span><span class="p">)</span>
         <span class="n">max_prompt_length</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">exp</span><span class="o">.</span><span class="n">prompt_length</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiences</span><span class="p">])</span>  <span class="c1"># type: ignore [type-var]</span>
         <span class="n">max_response_length</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">tokens</span><span class="p">)</span> <span class="o">-</span> <span class="n">exp</span><span class="o">.</span><span class="n">prompt_length</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiences</span><span class="p">])</span>  <span class="c1"># type: ignore [arg-type]</span>
@@ -697,6 +704,59 @@
             <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiences</span>
         <span class="p">]</span>
     <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="group_by">
+<a class="viewcode-back" href="../../../build_api/trinity.common.experience.html#trinity.common.experience.group_by">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">group_by</span><span class="p">(</span>
+    <span class="n">experiences</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">],</span> <span class="n">id_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;task&quot;</span><span class="p">,</span> <span class="s2">&quot;run&quot;</span><span class="p">,</span> <span class="s2">&quot;step&quot;</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Group experiences by ID.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">id_type</span> <span class="o">==</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span>
+        <span class="n">id_type</span> <span class="o">=</span> <span class="s2">&quot;tid&quot;</span>
+    <span class="k">elif</span> <span class="n">id_type</span> <span class="o">==</span> <span class="s2">&quot;run&quot;</span><span class="p">:</span>
+        <span class="n">id_type</span> <span class="o">=</span> <span class="s2">&quot;rid&quot;</span>
+    <span class="k">elif</span> <span class="n">id_type</span> <span class="o">==</span> <span class="s2">&quot;step&quot;</span><span class="p">:</span>
+        <span class="n">id_type</span> <span class="o">=</span> <span class="s2">&quot;sid&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown id_type: </span><span class="si">{</span><span class="n">id_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">grouped</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiences</span><span class="p">:</span>
+        <span class="n">group_id</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">eid</span><span class="p">,</span> <span class="n">id_type</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">group_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">grouped</span><span class="p">:</span>
+            <span class="n">grouped</span><span class="p">[</span><span class="n">group_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">grouped</span><span class="p">[</span><span class="n">group_id</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">exp</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">grouped</span></div>
+
+
+
+<div class="viewcode-block" id="to_hf_datasets">
+<a class="viewcode-back" href="../../../build_api/trinity.common.experience.html#trinity.common.experience.to_hf_datasets">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">to_hf_datasets</span><span class="p">(</span><span class="n">experiences</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Experience</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert a list of Experience objects to a HuggingFace Dataset,</span>
+<span class="sd">    preserving all fields.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Dataset</span><span class="o">.</span><span class="n">from_list</span><span class="p">([</span><span class="n">asdict</span><span class="p">(</span><span class="n">exp</span><span class="p">)</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiences</span><span class="p">])</span></div>
+
+
+
+<div class="viewcode-block" id="from_hf_datasets">
+<a class="viewcode-back" href="../../../build_api/trinity.common.experience.html#trinity.common.experience.from_hf_datasets">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">from_hf_datasets</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert a HuggingFace Dataset back to a list of Experience objects.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">dict_to_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="n">valid_keys</span> <span class="o">=</span> <span class="p">{</span><span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">)}</span>
+        <span class="n">filtered</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">valid_keys</span><span class="p">}</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="n">filtered</span><span class="p">)</span>
+
+    <span class="n">experiences</span> <span class="o">=</span> <span class="p">[</span><span class="n">dict_to_dataclass</span><span class="p">(</span><span class="n">Experience</span><span class="p">,</span> <span class="n">row</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">to_list</span><span class="p">()]</span>
+
+    <span class="k">return</span> <span class="n">experiences</span></div>
 
 </pre></div>
 

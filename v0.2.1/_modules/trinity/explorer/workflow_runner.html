@@ -99,7 +99,6 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_buffer_writer</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">InferenceModel</span><span class="p">,</span> <span class="n">ModelWrapper</span>
@@ -135,10 +134,6 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">experience_buffer</span> <span class="o">=</span> <span class="n">get_buffer_writer</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_output</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">buffer</span><span class="p">,</span>
-        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span> <span class="o">=</span> <span class="n">ModelWrapper</span><span class="p">(</span>
             <span class="n">model</span><span class="p">,</span>
@@ -154,8 +149,7 @@
                 <span class="p">)</span><span class="o">.</span><span class="n">get_openai_client</span><span class="p">()</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">api_client</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">workflow_instance</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">runner_id</span> <span class="o">=</span> <span class="n">runner_id</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">return_experiences</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">collect_experiences</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">runner_id</span> <span class="o">=</span> <span class="n">runner_id</span></div>
 
 
 <div class="viewcode-block" id="WorkflowRunner.is_alive">
@@ -231,11 +225,8 @@
             <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">is_eval</span><span class="p">:</span>
                 <span class="c1"># If the task is an evaluation task, we do not record the experiences to the buffer</span>
                 <span class="k">return</span> <span class="n">Status</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">),</span> <span class="p">[]</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_experiences</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">Status</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">),</span> <span class="n">exps</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">experience_buffer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span>
-                <span class="k">return</span> <span class="n">Status</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">),</span> <span class="p">[]</span>
+                <span class="k">return</span> <span class="n">Status</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">),</span> <span class="n">exps</span>
 
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">error_trace_back</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>

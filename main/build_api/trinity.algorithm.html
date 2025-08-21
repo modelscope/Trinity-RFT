@@ -180,14 +180,21 @@
 <li class="toctree-l2"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#submodules">Submodules</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.advantage_fn.html">trinity.algorithm.advantage_fn.advantage_fn module</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.advantage_fn.html#trinity.algorithm.advantage_fn.advantage_fn.AdvantageFn"><code class="docutils literal notranslate"><span class="pre">AdvantageFn</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.advantage_fn.html#trinity.algorithm.advantage_fn.advantage_fn.GroupAdvantage"><code class="docutils literal notranslate"><span class="pre">GroupAdvantage</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.grpo_advantage.html">trinity.algorithm.advantage_fn.grpo_advantage module</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.grpo_advantage.html#trinity.algorithm.advantage_fn.grpo_advantage.GRPOAdvantageFn"><code class="docutils literal notranslate"><span class="pre">GRPOAdvantageFn</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.grpo_advantage.html#trinity.algorithm.advantage_fn.grpo_advantage.GRPOGroupedAdvantage"><code class="docutils literal notranslate"><span class="pre">GRPOGroupedAdvantage</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.multi_step_grpo_advantage.html">trinity.algorithm.advantage_fn.multi_step_grpo_advantage module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.multi_step_grpo_advantage.html#trinity.algorithm.advantage_fn.multi_step_grpo_advantage.StepWiseGRPOAdvantageFn"><code class="docutils literal notranslate"><span class="pre">StepWiseGRPOAdvantageFn</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.opmd_advantage.html">trinity.algorithm.advantage_fn.opmd_advantage module</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.opmd_advantage.html#trinity.algorithm.advantage_fn.opmd_advantage.OPMDAdvantageFn"><code class="docutils literal notranslate"><span class="pre">OPMDAdvantageFn</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.opmd_advantage.html#trinity.algorithm.advantage_fn.opmd_advantage.OPMDGroupAdvantage"><code class="docutils literal notranslate"><span class="pre">OPMDGroupAdvantage</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.ppo_advantage.html">trinity.algorithm.advantage_fn.ppo_advantage module</a><ul>
@@ -211,6 +218,14 @@
 <li class="toctree-l2"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#module-trinity.algorithm.advantage_fn">Module contents</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.AdvantageFn"><code class="docutils literal notranslate"><span class="pre">AdvantageFn</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.AdvantageFn.default_args"><code class="docutils literal notranslate"><span class="pre">AdvantageFn.default_args()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.AdvantageFn.compute_in_trainer"><code class="docutils literal notranslate"><span class="pre">AdvantageFn.compute_in_trainer()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.GroupAdvantage"><code class="docutils literal notranslate"><span class="pre">GroupAdvantage</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.GroupAdvantage.group_experiences"><code class="docutils literal notranslate"><span class="pre">GroupAdvantage.group_experiences()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.GroupAdvantage.calculate_group_advantage"><code class="docutils literal notranslate"><span class="pre">GroupAdvantage.calculate_group_advantage()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.GroupAdvantage.process"><code class="docutils literal notranslate"><span class="pre">GroupAdvantage.process()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.GroupAdvantage.compute_in_trainer"><code class="docutils literal notranslate"><span class="pre">GroupAdvantage.compute_in_trainer()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.PPOAdvantageFn"><code class="docutils literal notranslate"><span class="pre">PPOAdvantageFn</span></code></a><ul>
@@ -221,6 +236,23 @@
 <li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.GRPOAdvantageFn"><code class="docutils literal notranslate"><span class="pre">GRPOAdvantageFn</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.GRPOAdvantageFn.__init__"><code class="docutils literal notranslate"><span class="pre">GRPOAdvantageFn.__init__()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.GRPOAdvantageFn.default_args"><code class="docutils literal notranslate"><span class="pre">GRPOAdvantageFn.default_args()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.GRPOGroupedAdvantage"><code class="docutils literal notranslate"><span class="pre">GRPOGroupedAdvantage</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.GRPOGroupedAdvantage.__init__"><code class="docutils literal notranslate"><span class="pre">GRPOGroupedAdvantage.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.GRPOGroupedAdvantage.group_experiences"><code class="docutils literal notranslate"><span class="pre">GRPOGroupedAdvantage.group_experiences()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.GRPOGroupedAdvantage.calculate_group_advantage"><code class="docutils literal notranslate"><span class="pre">GRPOGroupedAdvantage.calculate_group_advantage()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.GRPOGroupedAdvantage.process"><code class="docutils literal notranslate"><span class="pre">GRPOGroupedAdvantage.process()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.GRPOGroupedAdvantage.default_args"><code class="docutils literal notranslate"><span class="pre">GRPOGroupedAdvantage.default_args()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.StepWiseGRPOAdvantageFn"><code class="docutils literal notranslate"><span class="pre">StepWiseGRPOAdvantageFn</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.StepWiseGRPOAdvantageFn.__init__"><code class="docutils literal notranslate"><span class="pre">StepWiseGRPOAdvantageFn.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.StepWiseGRPOAdvantageFn.calculate_last_step_advantage"><code class="docutils literal notranslate"><span class="pre">StepWiseGRPOAdvantageFn.calculate_last_step_advantage()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.StepWiseGRPOAdvantageFn.broadcast_advantages"><code class="docutils literal notranslate"><span class="pre">StepWiseGRPOAdvantageFn.broadcast_advantages()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.StepWiseGRPOAdvantageFn.process"><code class="docutils literal notranslate"><span class="pre">StepWiseGRPOAdvantageFn.process()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.StepWiseGRPOAdvantageFn.compute_in_trainer"><code class="docutils literal notranslate"><span class="pre">StepWiseGRPOAdvantageFn.compute_in_trainer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.StepWiseGRPOAdvantageFn.default_args"><code class="docutils literal notranslate"><span class="pre">StepWiseGRPOAdvantageFn.default_args()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.REINFORCEPLUSPLUSAdvantageFn"><code class="docutils literal notranslate"><span class="pre">REINFORCEPLUSPLUSAdvantageFn</span></code></a><ul>
@@ -241,6 +273,13 @@
 <li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.OPMDAdvantageFn"><code class="docutils literal notranslate"><span class="pre">OPMDAdvantageFn</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.OPMDAdvantageFn.__init__"><code class="docutils literal notranslate"><span class="pre">OPMDAdvantageFn.__init__()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.OPMDAdvantageFn.default_args"><code class="docutils literal notranslate"><span class="pre">OPMDAdvantageFn.default_args()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.OPMDGroupAdvantage"><code class="docutils literal notranslate"><span class="pre">OPMDGroupAdvantage</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.OPMDGroupAdvantage.__init__"><code class="docutils literal notranslate"><span class="pre">OPMDGroupAdvantage.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.OPMDGroupAdvantage.group_experiences"><code class="docutils literal notranslate"><span class="pre">OPMDGroupAdvantage.group_experiences()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.OPMDGroupAdvantage.calculate_group_advantage"><code class="docutils literal notranslate"><span class="pre">OPMDGroupAdvantage.calculate_group_advantage()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.OPMDGroupAdvantage.default_args"><code class="docutils literal notranslate"><span class="pre">OPMDGroupAdvantage.default_args()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -638,6 +677,12 @@
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.algorithm.AdvantageFn.compute_in_trainer">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute_in_trainer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/advantage_fn/advantage_fn.html#AdvantageFn.compute_in_trainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.AdvantageFn.compute_in_trainer" title="Link to this definition"></a></dt>
+<dd><p>Whether the advantage should be computed in the trainer loop.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -774,52 +819,6 @@ while handling parameter name mapping between different training frameworks.</p>
 <dt class="sig sig-object py" id="trinity.algorithm.SampleStrategy.default_args">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/sample_strategy/sample_strategy.html#SampleStrategy.default_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.SampleStrategy.default_args" title="Link to this definition"></a></dt>
 <dd><p>Get the default arguments of the sample strategy.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="trinity.algorithm.AddStrategy">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.algorithm.</span></span><span class="sig-name descname"><span class="pre">AddStrategy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">writer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.buffer.buffer_writer.html#trinity.buffer.buffer_writer.BufferWriter" title="trinity.buffer.buffer_writer.BufferWriter"><span class="pre">BufferWriter</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/add_strategy/add_strategy.html#AddStrategy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.AddStrategy" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.algorithm.AddStrategy.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">writer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.buffer.buffer_writer.html#trinity.buffer.buffer_writer.BufferWriter" title="trinity.buffer.buffer_writer.BufferWriter"><span class="pre">BufferWriter</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/add_strategy/add_strategy.html#AddStrategy.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.AddStrategy.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.algorithm.AddStrategy.add">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiences</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/add_strategy/add_strategy.html#AddStrategy.add"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.AddStrategy.add" title="Link to this definition"></a></dt>
-<dd><p>Add experiences to the buffer.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>experiences</strong> (<cite>Experience</cite>) – The experiences to be added.</p></li>
-<li><p><strong>step</strong> (<cite>int</cite>) – The current step number.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The number of experiences added to the buffer.
-<cite>Dict</cite>: Metrics for logging.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><cite>int</cite></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.algorithm.AddStrategy.default_args">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/trinity/algorithm/add_strategy/add_strategy.html#AddStrategy.default_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.AddStrategy.default_args" title="Link to this definition"></a></dt>
-<dd><p>Get the default arguments of the add strategy.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The default arguments.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><cite>dict</cite></p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>

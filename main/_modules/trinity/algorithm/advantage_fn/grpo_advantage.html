@@ -92,22 +92,29 @@
              
   <h1>Source code for trinity.algorithm.advantage_fn.grpo_advantage</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;GRPO advantage computation</span>
-
-<span class="sd">Ref: https://github.com/volcengine/verl/blob/main/verl/trainer/ppo/core_algos.py</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">defaultdict</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">verl</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataProto</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.advantage_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">ADVANTAGE_FN</span><span class="p">,</span> <span class="n">AdvantageFn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.advantage_fn.advantage_fn</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ADVANTAGE_FN</span><span class="p">,</span>
+    <span class="n">AdvantageFn</span><span class="p">,</span>
+    <span class="n">GroupAdvantage</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span><span class="p">,</span> <span class="n">group_by</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.annotations</span><span class="w"> </span><span class="kn">import</span> <span class="n">Deprecated</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.monitor</span><span class="w"> </span><span class="kn">import</span> <span class="n">gather_metrics</span>
 
 
 <div class="viewcode-block" id="GRPOAdvantageFn">
 <a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.grpo_advantage.html#trinity.algorithm.advantage_fn.GRPOAdvantageFn">[docs]</a>
-<span class="nd">@ADVANTAGE_FN</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;grpo&quot;</span><span class="p">)</span>
+<span class="nd">@Deprecated</span>
+<span class="nd">@ADVANTAGE_FN</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;grpo_verl&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">GRPOAdvantageFn</span><span class="p">(</span><span class="n">AdvantageFn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;GRPO advantage computation&quot;&quot;&quot;</span>
 
@@ -128,6 +135,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute advantage for GRPO, operating only on Outcome reward</span>
 <span class="sd">        (with only one scalar reward for each response).</span>
+<span class="sd">        Ref: https://github.com/volcengine/verl/blob/main/verl/trainer/ppo/core_algos.py</span>
 
 <span class="sd">            token_level_rewards: `(torch.Tensor)`</span>
 <span class="sd">                shape: (bs, response_length)</span>
@@ -181,6 +189,137 @@
         <span class="k">return</span> <span class="p">{</span>
             <span class="s2">&quot;epsilon&quot;</span><span class="p">:</span> <span class="mf">1e-6</span><span class="p">,</span>
         <span class="p">}</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="GRPOGroupedAdvantage">
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.grpo_advantage.html#trinity.algorithm.advantage_fn.GRPOGroupedAdvantage">[docs]</a>
+<span class="nd">@ADVANTAGE_FN</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;grpo&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">GRPOGroupedAdvantage</span><span class="p">(</span><span class="n">GroupAdvantage</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;An example AddStrategy that calculates GRPO advantages.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="GRPOGroupedAdvantage.__init__">
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.grpo_advantage.html#trinity.algorithm.advantage_fn.GRPOGroupedAdvantage.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">epsilon</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span>
+        <span class="n">std_threshold</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">duplicate_experiences</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">rank_penalty</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the GRPO advantage function.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            epsilon (float): A small value to avoid division by zero.</span>
+<span class="sd">            std_threshold (Optional[float]): If provided, groups with a reward standard deviation equal</span>
+<span class="sd">                or below this threshold will be skipped.</span>
+<span class="sd">            duplicate_experiences (bool): If True, allows duplicate experiences to keep the original experience</span>
+<span class="sd">                count. Only used when `std_threshold` is not None (https://hkunlp.github.io/blog/2025/Polaris).</span>
+<span class="sd">            rank_penalty (Optional[float]): A penalty applied to the rank of rewards to correct for bias</span>
+<span class="sd">                (https://arxiv.org/pdf/2506.02355).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span> <span class="o">=</span> <span class="n">epsilon</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">std_threshold</span> <span class="o">=</span> <span class="n">std_threshold</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">duplicate_experiences</span> <span class="o">=</span> <span class="n">duplicate_experiences</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rank_penalty</span> <span class="o">=</span> <span class="n">rank_penalty</span></div>
+
+
+<div class="viewcode-block" id="GRPOGroupedAdvantage.group_experiences">
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.grpo_advantage.html#trinity.algorithm.advantage_fn.GRPOGroupedAdvantage.group_experiences">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">group_experiences</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exps</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">group_by</span><span class="p">(</span><span class="n">exps</span><span class="p">,</span> <span class="n">id_type</span><span class="o">=</span><span class="s2">&quot;task&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GRPOGroupedAdvantage.calculate_group_advantage">
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.grpo_advantage.html#trinity.algorithm.advantage_fn.GRPOGroupedAdvantage.calculate_group_advantage">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_group_advantage</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">group_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">exps</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">],</span> <span class="n">Dict</span><span class="p">]:</span>
+        <span class="n">metrics</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">group_reward_mean</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+                    <span class="mf">0.0</span>
+                <span class="p">)</span>  <span class="c1"># check this value (use exps[0].reward may be better)</span>
+                <span class="n">group_reward_std</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>  <span class="c1"># set to 1.0 to avoid division by zero</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">std_threshold</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;skipped_count&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="n">exps</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>  <span class="c1"># Clear experiences if only one experience</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">rewards</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="n">exp</span><span class="o">.</span><span class="n">reward</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">exps</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rank_penalty</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="c1"># Correct bias by adjusting rewards based on their ranks</span>
+                    <span class="n">old_log_probs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+                        <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">logprobs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">exps</span><span class="p">]</span>
+                    <span class="p">)</span>
+                    <span class="n">group_ranks</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">old_log_probs</span><span class="p">))</span>
+                    <span class="n">group_ranks</span> <span class="o">=</span> <span class="n">group_ranks</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">group_ranks</span><span class="p">)</span>
+                    <span class="n">rewards</span> <span class="o">=</span> <span class="n">rewards</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">group_ranks</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">rank_penalty</span><span class="p">)</span>
+
+                <span class="n">group_reward_mean</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">rewards</span><span class="p">)</span>
+                <span class="n">group_reward_std</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">rewards</span><span class="p">)</span>
+
+                <span class="c1"># If the reward standard deviation is below a threshold, skip the group</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">std_threshold</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">group_reward_std</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">std_threshold</span><span class="p">:</span>
+                    <span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;skipped_count&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span>
+                    <span class="n">exps</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+            <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">exps</span><span class="p">:</span>
+                <span class="n">score</span> <span class="o">=</span> <span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">reward</span> <span class="o">-</span> <span class="n">group_reward_mean</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">group_reward_std</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">)</span>
+                <span class="n">exp</span><span class="o">.</span><span class="n">advantages</span> <span class="o">=</span> <span class="n">score</span> <span class="o">*</span> <span class="n">exp</span><span class="o">.</span><span class="n">action_mask</span>
+                <span class="n">exp</span><span class="o">.</span><span class="n">returns</span> <span class="o">=</span> <span class="n">exp</span><span class="o">.</span><span class="n">advantages</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+
+            <span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;reward_mean&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">group_reward_mean</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+            <span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;reward_std&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">group_reward_std</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">exps</span><span class="p">,</span> <span class="n">metrics</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_duplicate_experiences</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exp_groups</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+        <span class="n">original_group_num</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">exp_groups</span><span class="p">)</span>
+        <span class="n">valid_groups</span> <span class="o">=</span> <span class="p">[</span><span class="n">group_exps</span> <span class="k">for</span> <span class="n">group_exps</span> <span class="ow">in</span> <span class="n">exp_groups</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">group_exps</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">skipped_group_num</span> <span class="o">=</span> <span class="n">original_group_num</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">valid_groups</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">skipped_group_num</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">exp</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">valid_groups</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">group</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">skipped_group_num</span> <span class="o">==</span> <span class="n">original_group_num</span><span class="p">:</span>
+            <span class="c1"># All groups are skipped, return an empty list</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">valid_groups</span><span class="p">),</span> <span class="p">(</span><span class="n">skipped_group_num</span><span class="p">,))</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">duplicated_groups</span> <span class="o">=</span> <span class="p">[</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">valid_groups</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">idx</span><span class="p">]</span>
+            <span class="n">duplicated_exps</span> <span class="o">=</span> <span class="p">[</span><span class="n">exp</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">duplicated_groups</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">group</span><span class="p">]</span>
+            <span class="n">exps</span> <span class="o">=</span> <span class="p">[</span><span class="n">exp</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">valid_groups</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">group</span><span class="p">]</span>
+            <span class="n">exps</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">duplicated_exps</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">exps</span>
+
+<div class="viewcode-block" id="GRPOGroupedAdvantage.process">
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.grpo_advantage.html#trinity.algorithm.advantage_fn.GRPOGroupedAdvantage.process">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exps</span><span class="p">):</span>
+        <span class="n">exp_groups</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_experiences</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span>
+        <span class="n">metric_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">group_id</span><span class="p">,</span> <span class="n">group_exps</span> <span class="ow">in</span> <span class="n">exp_groups</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">group_exps</span><span class="p">,</span> <span class="n">group_metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_group_advantage</span><span class="p">(</span><span class="n">group_id</span><span class="p">,</span> <span class="n">group_exps</span><span class="p">)</span>
+            <span class="n">metric_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">group_metrics</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># TODO: sum skipped count</span>
+            <span class="n">metrics</span> <span class="o">=</span> <span class="n">gather_metrics</span><span class="p">(</span><span class="n">metric_list</span><span class="p">,</span> <span class="s2">&quot;group_advantages&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">metrics</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># empty metric list causes ValueError, ignore it</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">duplicate_experiences</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">std_threshold</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">exps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_duplicate_experiences</span><span class="p">(</span><span class="n">exp_groups</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">exps</span> <span class="o">=</span> <span class="p">[</span><span class="n">exp</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">exp_groups</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">group</span><span class="p">]</span>  <span class="c1"># Flatten the list</span>
+        <span class="k">return</span> <span class="n">exps</span><span class="p">,</span> <span class="n">metrics</span></div>
+
+
+<div class="viewcode-block" id="GRPOGroupedAdvantage.default_args">
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.grpo_advantage.html#trinity.algorithm.advantage_fn.GRPOGroupedAdvantage.default_args">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">default_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;epsilon&quot;</span><span class="p">:</span> <span class="mf">1e-6</span><span class="p">}</span></div>
 </div>
 
 </pre></div>

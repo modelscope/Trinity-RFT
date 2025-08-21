@@ -153,6 +153,7 @@
         <span class="k">return</span> <span class="p">(</span>
             <span class="n">ray</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">WorkflowRunner</span><span class="p">)</span>
             <span class="o">.</span><span class="n">options</span><span class="p">(</span>
+                <span class="n">num_cpus</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                 <span class="n">namespace</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">namespace</span><span class="p">,</span>
                 <span class="n">scheduling_strategy</span><span class="o">=</span><span class="s2">&quot;SPREAD&quot;</span><span class="p">,</span>
                 <span class="n">runtime_env</span><span class="o">=</span><span class="p">{</span>
@@ -380,8 +381,8 @@
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runner_num</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_create_runner</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scheduler_task</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_scheduler_loop</span><span class="p">())</span>
-        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">runner</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">runners</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">await</span> <span class="n">runner</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">__ray_ready__</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span>
+        <span class="n">ready_refs</span> <span class="o">=</span> <span class="p">[</span><span class="n">runner</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">__ray_ready__</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span> <span class="k">for</span> <span class="n">runner</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">runners</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">ready_refs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Starting Scheduler with </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">runner_num</span><span class="si">}</span><span class="s2"> runners&quot;</span><span class="p">)</span></div>
 
 

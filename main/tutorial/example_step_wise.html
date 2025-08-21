@@ -176,7 +176,7 @@
 <h3>Other Configuration<a class="headerlink" href="#other-configuration" title="Link to this heading"></a></h3>
 <p>In general multi-step scenarios, each run may generate various number of experiences. To accomodate this case, we provide some flexible designs.</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">algorithm.add_strategy</span> <span class="pre">=</span> <span class="pre">step_wise_grpo</span></code>: This function allows you compute the advantages for the collected experience before adding to the buffer. For this example, we use <code class="docutils literal notranslate"><span class="pre">step_wise_grpo</span></code> which broadcasts advantages from the last step to previous steps.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">algorithm.advantage_fn</span> <span class="pre">=</span> <span class="pre">step_wise_grpo</span></code>: This function allows you compute the advantages for the collected experience before adding to the buffer. For this example, we use <code class="docutils literal notranslate"><span class="pre">step_wise_grpo</span></code> which broadcasts advantages from the last step to previous steps.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">buffer.train_batch_size</span></code>: The number of experiences to be sampled from the buffer for training, which can be different from the number of generated experiences in each explore step.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">buffer.trainer_input.use_priority_queue</span> <span class="pre">=</span> <span class="pre">true</span></code>: Using <code class="docutils literal notranslate"><span class="pre">PriorityQueue</span></code> allows the model to use the experiences with higher priority.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">synchronizer.sync_style</span> <span class="pre">=</span> <span class="pre">dynamic_by_explorer</span></code>: The explorer determines when to synchronize the model weights with the trainer.</p></li>
@@ -188,7 +188,7 @@
 <span class="nt">algorithm</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">algorithm_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">grpo</span>
 <span class="w">  </span><span class="nt">repeat_times</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16</span>
-<span class="w">  </span><span class="nt">add_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">step_wise_grpo</span>
+<span class="w">  </span><span class="nt">advantage_fn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">step_wise_grpo</span>
 <span class="nt">model</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">model_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/MODEL/</span>
 <span class="w">  </span><span class="nt">max_response_tokens</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16384</span>

@@ -128,7 +128,7 @@
 <p>Modern agentic tasks often involve multiple steps of reasoning, tool use, and observation. Trinity-RFT natively supports training across these Multi-Step interactions.</p>
 <ul class="simple">
 <li><p><strong>Step-Wise Experience Generation</strong>: Instead of only learning from the final answer, Trinity can treat each step within an agent’s reasoning trajectory as a distinct learning opportunity.</p></li>
-<li><p><strong>Credit Assignment</strong>: The reward for solving a task is propagated back to all experiences within the successful trajectory, enabling the model to learn the entire reasoning chain, not just the final response. This is controlled by the <code class="docutils literal notranslate"><span class="pre">add_strategy</span></code> in the config.</p></li>
+<li><p><strong>Credit Assignment</strong>: The reward for solving a task is propagated back to all experiences within the successful trajectory, enabling the model to learn the entire reasoning chain, not just the final response. This is controlled by the <code class="docutils literal notranslate"><span class="pre">advantage_fn</span></code> in the config.</p></li>
 </ul>
 </section>
 <section id="native-tool-calling-support">
@@ -199,7 +199,7 @@ We use the <code class="docutils literal notranslate"><span class="pre">Qwen3</s
 <p>This setting in the <code class="docutils literal notranslate"><span class="pre">algorithm</span></code> section defines how experiences from a Multi-Step rollout are processed.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">algorithm</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">algorithm_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">grpo</span>
-<span class="w">  </span><span class="nt">add_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">step_wise_grpo</span><span class="w"> </span><span class="c1"># Key for Multi-Step training</span>
+<span class="w">  </span><span class="nt">advantage_fn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">step_wise_grpo</span><span class="w"> </span><span class="c1"># Key for Multi-Step training</span>
 </pre></div>
 </div>
 <ul class="simple">

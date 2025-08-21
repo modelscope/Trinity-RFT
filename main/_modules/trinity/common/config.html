@@ -107,12 +107,12 @@
     <span class="n">TRAINER_NAME</span><span class="p">,</span>
     <span class="n">OpType</span><span class="p">,</span>
     <span class="n">PromptType</span><span class="p">,</span>
-    <span class="n">ReadStrategy</span><span class="p">,</span>
     <span class="n">StorageType</span><span class="p">,</span>
     <span class="n">SyncMethod</span><span class="p">,</span>
     <span class="n">SyncStyle</span><span class="p">,</span>
     <span class="n">TaskType</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.annotations</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experimental</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
@@ -238,6 +238,81 @@
 
 
 
+<div class="viewcode-block" id="OperatorConfig">
+<a class="viewcode-back" href="../../../build_api/trinity.common.config.html#trinity.common.config.OperatorConfig">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OperatorConfig</span><span class="p">:</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">args</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="ExperiencePipelineConfig">
+<a class="viewcode-back" href="../../../build_api/trinity.common.config.html#trinity.common.config.ExperiencePipelineConfig">[docs]</a>
+<span class="nd">@Experimental</span>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExperiencePipelineConfig</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Config for experience pipeline.</span>
+
+<span class="sd">    Experience Pipeline is used to pre-process rollout experiences for better training.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># The list of experience operators to apply, operators will be applied in the order they are defined</span>
+    <span class="n">operators</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">OperatorConfig</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">save_input</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># whether to save the input experiences</span>
+    <span class="n">input_save_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span>
+        <span class="nb">str</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># the path to save the input experiences, can be a jsonl file or a sqlite database file</span>
+
+    <span class="c1"># The following fields are experimental, do not set them unless you know what you are doing</span>
+
+    <span class="c1"># A dictionary of input buffers, buffers are indexed by their names.</span>
+    <span class="c1"># users only need to set extra buffers here</span>
+    <span class="n">inputs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">StorageConfig</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="c1"># The output buffer will automatically set to the trainer input buffer, so we do not need to set it here.</span>
+    <span class="n">output</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StorageConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="TaskPipelineConfig">
+<a class="viewcode-back" href="../../../build_api/trinity.common.config.html#trinity.common.config.TaskPipelineConfig">[docs]</a>
+<span class="nd">@Experimental</span>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TaskPipelineConfig</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Config for task pipeline.</span>
+
+<span class="sd">    Task Pipeline is used to pre-process raw tasks for better exploring. Currently, we only support using</span>
+<span class="sd">    Data-Juicer operators for task pipeline.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># The list of data-juicer operators to apply, operators will be applied in the order they are defined</span>
+    <span class="n">operators</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">OperatorConfig</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="c1"># number of process</span>
+    <span class="n">num_process</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="c1"># The path to the Data-Juicer config file. If set, operators and num_process will be ignored</span>
+    <span class="n">config_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># Raw input tasksets. Currently, task pipeline only support local file as inputs,</span>
+    <span class="c1"># e.g., /path/to/file.jsonl or /path/to/file.parquet, not a directory or huggingface path</span>
+    <span class="n">inputs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="c1"># Output task buffer, if not set, use `buffer.explorer_input.taskset`. In most cases, users do not need to set this field.</span>
+    <span class="n">output</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StorageConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># The list of fields extracted from the input tasksets and processed into the output taskset</span>
+    <span class="n">target_fields</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+
+    <span class="c1"># weights for priority computing. Usually including 4 types of weights:</span>
+    <span class="c1"># - difficulty</span>
+    <span class="c1"># - diversity</span>
+    <span class="c1"># - usage_frequency</span>
+    <span class="c1"># - quality</span>
+    <span class="n">priority_weights</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+
+    <span class="c1"># number of samples to select after task pipeline. -1 means all</span>
+    <span class="n">top_k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span></div>
+
+
+
 <div class="viewcode-block" id="DataPipelineConfig">
 <a class="viewcode-back" href="../../../build_api/trinity.common.config.html#trinity.common.config.DataPipelineConfig">[docs]</a>
 <span class="nd">@dataclass</span>
@@ -270,17 +345,27 @@
 
 <div class="viewcode-block" id="DataProcessorConfig">
 <a class="viewcode-back" href="../../../build_api/trinity.common.config.html#trinity.common.config.DataProcessorConfig">[docs]</a>
+<span class="nd">@Experimental</span>
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">DataProcessorConfig</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data-Juicer config&quot;&quot;&quot;</span>
-
-    <span class="n">data_processor_url</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data Processor config&quot;&quot;&quot;</span>
 
     <span class="c1"># support two types of data pipelines for now</span>
     <span class="c1"># 1. For task. Data preprocessing from raw dataset to the task set</span>
-    <span class="n">task_pipeline</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DataPipelineConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">task_pipeline</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TaskPipelineConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="c1"># 2. For experience. Data processing for rollouts</span>
-    <span class="n">experience_pipeline</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DataPipelineConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+    <span class="n">experience_pipeline</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ExperiencePipelineConfig</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="n">ExperiencePipelineConfig</span>
+    <span class="p">)</span>
+
+    <span class="c1"># For Data-Juicer</span>
+    <span class="c1"># Whether to setup Data-Juicer server automatically. If set to True, the launcher</span>
+    <span class="c1"># will try to start a Data-Juicer server using the `data_processor_url`,</span>
+    <span class="c1"># If set to False, the user should start the Data-Juicer server manually, and set</span>
+    <span class="c1"># the `data_processor_url` to the server URL.</span>
+    <span class="n">setup_data_processor</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1"># the url of the Data-Juicer server</span>
+    <span class="n">data_processor_url</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 
 
@@ -294,6 +379,7 @@
     <span class="n">max_model_len</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">max_prompt_tokens</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">max_response_tokens</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">min_response_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">custom_chat_template</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 
@@ -323,6 +409,10 @@
     <span class="n">max_prompt_tokens</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="c1"># if not set, use `model.max_response_tokens`</span>
     <span class="n">max_response_tokens</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># if not set, use `model.min_response_tokens`</span>
+    <span class="n">min_response_tokens</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># used for testing very long response generation, do not set it unless you know what you are doing</span>
+    <span class="n">ignore_eos</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="c1"># override chat template in model</span>
     <span class="n">chat_template</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -357,10 +447,6 @@
     <span class="n">algorithm_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;ppo&quot;</span>
     <span class="c1"># for GRPO-like algorithms, repeat each task for `repeat_times` times</span>
     <span class="n">repeat_times</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
-
-    <span class="c1"># the strategy for adding experiences to the buffer</span>
-    <span class="n">add_strategy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">add_strategy_args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1"># the strategy for sampling experiences from the buffer</span>
     <span class="n">sample_strategy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -405,6 +491,7 @@
 
 <div class="viewcode-block" id="ExplorerInput">
 <a class="viewcode-back" href="../../../build_api/trinity.common.config.html#trinity.common.config.ExplorerInput">[docs]</a>
+<span class="nd">@Experimental</span>
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ExplorerInput</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Config for explorer input.&quot;&quot;&quot;</span>
@@ -422,13 +509,13 @@
 
 <div class="viewcode-block" id="TrainerInput">
 <a class="viewcode-back" href="../../../build_api/trinity.common.config.html#trinity.common.config.TrainerInput">[docs]</a>
+<span class="nd">@Experimental</span>
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">TrainerInput</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Config for trainer input.&quot;&quot;&quot;</span>
 
     <span class="n">experience_buffer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StorageConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">sft_warmup_dataset</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StorageConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">read_experience_strategy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ReadStrategy</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">sft_warmup_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span></div>
 
 
@@ -446,7 +533,6 @@
 
     <span class="c1"># for explorer</span>
     <span class="n">explorer_input</span><span class="p">:</span> <span class="n">ExplorerInput</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">ExplorerInput</span><span class="p">)</span>
-    <span class="n">explorer_output</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StorageConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># currently do not set</span>
 
     <span class="c1"># for trainer</span>
     <span class="n">trainer_input</span><span class="p">:</span> <span class="n">TrainerInput</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">TrainerInput</span><span class="p">)</span>
@@ -456,6 +542,7 @@
     <span class="n">max_retry_interval</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
 
     <span class="c1"># ! DO NOT SET FOLLOWING FIELDS</span>
+    <span class="n">explorer_output</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StorageConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># automatically set</span>
     <span class="n">tokenizer_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># automatically set</span>
     <span class="n">pad_token_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># automatically set</span>
     <span class="n">cache_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># automatically set</span></div>
@@ -492,13 +579,7 @@
     <span class="n">eval_on_startup</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># evalulate at step 0</span>
 
     <span class="c1"># for benchmark</span>
-    <span class="n">bench_on_latest_checkpoint</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># only benchmark the latest checkpoint</span>
-
-    <span class="c1"># ! DO NOT SET</span>
-    <span class="c1"># Explorer collects experiences from workflow runners</span>
-    <span class="c1"># some algorithms (e.g., DAPO) need to collect experiences generated by the same task and do some post-processing</span>
-    <span class="c1"># will automatically set to True if `algorithm.add_strategy` is not None</span>
-    <span class="n">collect_experiences</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></div>
+    <span class="n">bench_on_latest_checkpoint</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># only benchmark the latest checkpoint</span></div>
 
 
 
@@ -560,6 +641,38 @@
 
 
 
+<div class="viewcode-block" id="DataJuicerServiceConfig">
+<a class="viewcode-back" href="../../../build_api/trinity.common.config.html#trinity.common.config.DataJuicerServiceConfig">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DataJuicerServiceConfig</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Config for Data-Juicer.</span>
+
+<span class="sd">    Please update `trinity.service.data_juicer.server.server.py` correspondingly if you change the fields here.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># the url of the Data-Juicer server</span>
+    <span class="n">server_url</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># whether to start Data-Juicer server automatically</span>
+    <span class="n">auto_start</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1"># the following fields are only used when `auto_start` is True</span>
+    <span class="c1"># the port of the Data-Juicer server, if not set, a random port will be used</span>
+    <span class="n">port</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+    <span class="c1"># the hostname will be automatically set to &quot;localhost&quot; so we do not need to set it here</span>
+
+
+<div class="viewcode-block" id="ServiceConfig">
+<a class="viewcode-back" href="../../../build_api/trinity.common.config.html#trinity.common.config.ServiceConfig">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ServiceConfig</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Configs for outside services.&quot;&quot;&quot;</span>
+
+    <span class="n">data_juicer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DataJuicerServiceConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+
 <div class="viewcode-block" id="Config">
 <a class="viewcode-back" href="../../../build_api/trinity.common.config.html#trinity.common.config.Config">[docs]</a>
 <span class="nd">@dataclass</span>
@@ -588,6 +701,7 @@
     <span class="n">trainer</span><span class="p">:</span> <span class="n">TrainerConfig</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">TrainerConfig</span><span class="p">)</span>
     <span class="n">monitor</span><span class="p">:</span> <span class="n">MonitorConfig</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">MonitorConfig</span><span class="p">)</span>
     <span class="n">synchronizer</span><span class="p">:</span> <span class="n">SynchronizerConfig</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">SynchronizerConfig</span><span class="p">)</span>
+    <span class="n">service</span><span class="p">:</span> <span class="n">ServiceConfig</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">ServiceConfig</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Config.save">
 <a class="viewcode-back" href="../../../build_api/trinity.common.config.html#trinity.common.config.Config.save">[docs]</a>
@@ -692,22 +806,23 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_input</span><span class="o">.</span><span class="n">eval_tasksets</span> <span class="o">=</span> <span class="n">remained_tasksets</span>
 
         <span class="c1"># check trainer_input.experience_buffer</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;both&quot;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;explore&quot;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span> <span class="o">=</span> <span class="n">StorageConfig</span><span class="p">(</span>
-                    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;experience_buffer&quot;</span><span class="p">,</span>
-                    <span class="n">storage_type</span><span class="o">=</span><span class="n">StorageType</span><span class="o">.</span><span class="n">QUEUE</span><span class="p">,</span>
-                <span class="p">)</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Auto set `buffer.trainer_input.experience_buffer` to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="p">)</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="o">.</span><span class="n">storage_type</span> <span class="ow">is</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">FILE</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="s2">&quot;`FILE` storage is not supported to use as experience_buffer in `both` mode, use `QUEUE` instead.&quot;</span>
-                <span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="o">.</span><span class="n">storage_type</span> <span class="o">=</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">QUEUE</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;train&quot;</span><span class="p">:</span>  <span class="c1"># TODO: to be check</span>
-            <span class="k">pass</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span> <span class="o">=</span> <span class="n">StorageConfig</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;experience_buffer&quot;</span><span class="p">,</span>
+                <span class="n">storage_type</span><span class="o">=</span><span class="n">StorageType</span><span class="o">.</span><span class="n">QUEUE</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Auto set `buffer.trainer_input.experience_buffer` to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="o">.</span><span class="n">storage_type</span> <span class="ow">is</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">FILE</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;both&quot;</span>
+        <span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;`FILE` storage is not supported to use as experience_buffer in `both` mode, use `QUEUE` instead.&quot;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="o">.</span><span class="n">storage_type</span> <span class="o">=</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">QUEUE</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="o">.</span><span class="n">algorithm_type</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">algorithm_type</span>
@@ -715,13 +830,15 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="o">.</span><span class="n">ray_namespace</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="o">.</span><span class="n">ray_namespace</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ray_namespace</span>
 
-        <span class="c1"># set buffer.explorer_output</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_output</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_output</span><span class="o">.</span><span class="n">algorithm_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">algorithm_type</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_output</span><span class="o">.</span><span class="n">ray_namespace</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_output</span><span class="o">.</span><span class="n">ray_namespace</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ray_namespace</span>
+        <span class="c1"># create buffer.cache_dir at &lt;checkpoint_root_dir&gt;/&lt;project&gt;/&lt;name&gt;/buffer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">cache_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_job_dir</span><span class="p">,</span> <span class="s2">&quot;buffer&quot;</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">cache_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Failed to create buffer dir </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">cache_dir</span><span class="si">}</span><span class="s2">, please check &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;your checkpoint directory: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_job_dir</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># check trainer_input.sft_warmup_dataset</span>
         <span class="k">if</span> <span class="p">(</span>
@@ -739,67 +856,28 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">sft_warmup_dataset</span><span class="o">.</span><span class="n">ray_namespace</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">sft_warmup_dataset</span><span class="o">.</span><span class="n">ray_namespace</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ray_namespace</span>
 
-        <span class="c1"># check input/output buffers in experience pipelines</span>
+        <span class="c1"># check input/output buffers in pipelines</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_processor</span><span class="o">.</span><span class="n">experience_pipeline</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># collect existing buffers for trinity</span>
-            <span class="n">input_buffers</span> <span class="o">=</span> <span class="p">{}</span>
-            <span class="n">output_buffers</span> <span class="o">=</span> <span class="p">{}</span>
-            <span class="c1"># - taskset</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_input</span><span class="o">.</span><span class="n">taskset</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
-                <span class="n">input_buffers</span><span class="p">[</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_input</span><span class="o">.</span><span class="n">taskset</span><span class="o">.</span><span class="n">name</span>
-                <span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_input</span><span class="o">.</span><span class="n">taskset</span>
-            <span class="c1"># - explorer output</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_output</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_output</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
-                <span class="n">output_buffers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_output</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_output</span>
-            <span class="c1"># - trainer input: experience buffer</span>
             <span class="k">if</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span>
-                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="o">.</span><span class="n">name</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data_processor</span><span class="o">.</span><span class="n">experience_pipeline</span><span class="o">.</span><span class="n">save_input</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_processor</span><span class="o">.</span><span class="n">experience_pipeline</span><span class="o">.</span><span class="n">input_save_path</span> <span class="ow">is</span> <span class="kc">None</span>
             <span class="p">):</span>
-                <span class="n">input_buffers</span><span class="p">[</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="o">.</span><span class="n">name</span>
-                <span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span>
-            <span class="c1"># - trainer input: sft warmup dataset</span>
-            <span class="k">if</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">sft_warmup_dataset</span>
-                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">sft_warmup_dataset</span><span class="o">.</span><span class="n">name</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data_processor</span><span class="o">.</span><span class="n">experience_pipeline</span><span class="o">.</span><span class="n">input_save_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">cache_dir</span><span class="p">,</span> <span class="s2">&quot;explorer_output.jsonl&quot;</span>
+                <span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Auto set `data_processor.experience_pipeline.input_save_path` to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">data_processor</span><span class="o">.</span><span class="n">experience_pipeline</span><span class="o">.</span><span class="n">input_save_path</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_processor</span><span class="o">.</span><span class="n">task_pipeline</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_processor</span><span class="o">.</span><span class="n">task_pipeline</span><span class="o">.</span><span class="n">output</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data_processor</span><span class="o">.</span><span class="n">task_pipeline</span><span class="o">.</span><span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_input</span><span class="o">.</span><span class="n">taskset</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_processor</span><span class="o">.</span><span class="n">task_pipeline</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">path</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data_processor</span><span class="o">.</span><span class="n">task_pipeline</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">path</span>
             <span class="p">):</span>
-                <span class="n">input_buffers</span><span class="p">[</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">sft_warmup_dataset</span><span class="o">.</span><span class="n">name</span>
-                <span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">sft_warmup_dataset</span>
-
-            <span class="c1"># when experience pipeline is on, the explorer output and the</span>
-            <span class="c1"># experience buffer of trainer input should be different</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_output</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;The explorer output buffer should be different from the experience buffer of the trainer input &quot;</span>
-                    <span class="s2">&quot;when experience pipeline is provided.&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Task pipeline output path </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">data_processor</span><span class="o">.</span><span class="n">task_pipeline</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2"> already exists.</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;Please choose a different output path to avoid overwriting.&quot;</span>
                 <span class="p">)</span>
-
-            <span class="c1"># NOTICE: For now, input/output buffers for data processors should come from output/input buffers of trinity</span>
-            <span class="c1"># the input buffers in experience pipeline should come from the output buffers of trinity</span>
-            <span class="n">exp_pipeline_input_buffers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_processor</span><span class="o">.</span><span class="n">experience_pipeline</span><span class="o">.</span><span class="n">input_buffers</span>
-            <span class="n">synced_input_buffers</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">input_buffer</span> <span class="ow">in</span> <span class="n">exp_pipeline_input_buffers</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">input_buffer</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">output_buffers</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;The input buffer </span><span class="si">{</span><span class="n">input_buffer</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> of experience pipeline is not found in any output &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;buffers of trinity.&quot;</span>
-                    <span class="p">)</span>
-                <span class="n">synced_input_buffers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">output_buffers</span><span class="p">[</span><span class="n">input_buffer</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data_processor</span><span class="o">.</span><span class="n">experience_pipeline</span><span class="o">.</span><span class="n">input_buffers</span> <span class="o">=</span> <span class="n">synced_input_buffers</span>
-            <span class="c1"># the output buffers of trinity should come from the input buffers of trinity</span>
-            <span class="n">exp_pipeline_output_buffers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_processor</span><span class="o">.</span><span class="n">experience_pipeline</span><span class="o">.</span><span class="n">output_buffer</span>
-            <span class="k">if</span> <span class="n">exp_pipeline_output_buffers</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">input_buffers</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;The output buffer </span><span class="si">{</span><span class="n">exp_pipeline_output_buffers</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> of experience pipeline is not found in any &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;input buffers of trinity.&quot;</span>
-                <span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">data_processor</span><span class="o">.</span><span class="n">experience_pipeline</span><span class="o">.</span><span class="n">output_buffer</span> <span class="o">=</span> <span class="n">input_buffers</span><span class="p">[</span>
-                    <span class="n">exp_pipeline_output_buffers</span><span class="o">.</span><span class="n">name</span>
-                <span class="p">]</span>
 
         <span class="c1"># check train_batch_size</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">train_batch_size</span><span class="p">:</span>
@@ -831,19 +909,9 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to get pad token id from model </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">model_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">pad_token_id</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">tokenizer_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">model_path</span>
-        <span class="c1"># create buffer.cache_dir at &lt;checkpoint_root_dir&gt;/&lt;project&gt;/&lt;name&gt;/buffer</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">cache_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_job_dir</span><span class="p">,</span> <span class="s2">&quot;buffer&quot;</span><span class="p">))</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">cache_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Failed to create buffer dir </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">cache_dir</span><span class="si">}</span><span class="s2">, please check &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;your checkpoint directory: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_job_dir</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_check_algorithm</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-            <span class="n">ADD_STRATEGY</span><span class="p">,</span>
             <span class="n">ADVANTAGE_FN</span><span class="p">,</span>
             <span class="n">ENTROPY_LOSS_FN</span><span class="p">,</span>
             <span class="n">KL_FN</span><span class="p">,</span>
@@ -875,9 +943,6 @@
                 <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="p">,</span> <span class="n">args_attr</span><span class="p">,</span> <span class="n">fn_cls</span><span class="o">.</span><span class="n">default_args</span><span class="p">())</span>
             <span class="k">return</span> <span class="n">fn_cls</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">add_strategy</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">check_and_set</span><span class="p">(</span><span class="s2">&quot;add_strategy&quot;</span><span class="p">,</span> <span class="n">ADD_STRATEGY</span><span class="p">,</span> <span class="s2">&quot;add_strategy_args&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">collect_experiences</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">check_and_set</span><span class="p">(</span><span class="s2">&quot;sample_strategy&quot;</span><span class="p">,</span> <span class="n">SAMPLE_STRATEGY</span><span class="p">,</span> <span class="s2">&quot;sample_strategy_args&quot;</span><span class="p">)</span>
         <span class="n">check_and_set</span><span class="p">(</span><span class="s2">&quot;policy_loss_fn&quot;</span><span class="p">,</span> <span class="n">POLICY_LOSS_FN</span><span class="p">,</span> <span class="s2">&quot;policy_loss_fn_args&quot;</span><span class="p">)</span>
         <span class="n">check_and_set</span><span class="p">(</span><span class="s2">&quot;advantage_fn&quot;</span><span class="p">,</span> <span class="n">ADVANTAGE_FN</span><span class="p">,</span> <span class="s2">&quot;advantage_fn_args&quot;</span><span class="p">)</span>
@@ -1023,7 +1088,13 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid trainer type: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config</span><span class="o">.</span><span class="n">synchronize_config</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config</span> <span class="o">=</span> <span class="kc">None</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># check service</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">data_juicer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">operator</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_processor</span><span class="o">.</span><span class="n">experience_pipeline</span><span class="o">.</span><span class="n">operators</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">operator</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;data_juicer&quot;</span><span class="p">:</span>
+                    <span class="n">operator</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;service_config&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">data_juicer</span></div>
 
 
 <div class="viewcode-block" id="Config.flatten">

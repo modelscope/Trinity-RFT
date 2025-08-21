@@ -224,7 +224,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">default_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s2">&quot;repeat_times&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-            <span class="s2">&quot;add_strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;grpo&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;advantage_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;grpo&quot;</span><span class="p">,</span>
             <span class="s2">&quot;sample_strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;warmup&quot;</span><span class="p">,</span>
             <span class="s2">&quot;policy_loss_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;ppo&quot;</span><span class="p">,</span>
             <span class="s2">&quot;kl_penalty_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
@@ -253,7 +253,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">default_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s2">&quot;repeat_times&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-            <span class="s2">&quot;add_strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;opmd&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;advantage_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;opmd&quot;</span><span class="p">,</span>
             <span class="s2">&quot;sample_strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;warmup&quot;</span><span class="p">,</span>
             <span class="s2">&quot;policy_loss_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;opmd&quot;</span><span class="p">,</span>
             <span class="s2">&quot;kl_penalty_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
@@ -336,9 +336,8 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">default_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s2">&quot;repeat_times&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
-            <span class="s2">&quot;add_strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;grpo&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;policy_loss_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;mix&quot;</span><span class="p">,</span>
             <span class="s2">&quot;advantage_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;grpo&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;policy_loss_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;mix&quot;</span><span class="p">,</span>
             <span class="s2">&quot;sample_strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;mix&quot;</span><span class="p">,</span>
             <span class="s2">&quot;entropy_loss_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;mix&quot;</span><span class="p">,</span>
         <span class="p">}</span></div>
@@ -365,7 +364,6 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">default_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s2">&quot;repeat_times&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
-            <span class="s2">&quot;add_strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;grpo&quot;</span><span class="p">,</span>
             <span class="s2">&quot;policy_loss_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;mix_chord&quot;</span><span class="p">,</span>
             <span class="s2">&quot;advantage_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;grpo&quot;</span><span class="p">,</span>
             <span class="s2">&quot;sample_strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;mix&quot;</span><span class="p">,</span>
