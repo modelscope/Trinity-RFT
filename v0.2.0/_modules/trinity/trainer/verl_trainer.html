@@ -184,8 +184,8 @@
         <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">hf_tokenizer</span><span class="p">(</span><span class="n">local_path</span><span class="p">)</span>
 
         <span class="c1"># define worker classes</span>
-        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">strategy</span> <span class="o">==</span> <span class="s2">&quot;fsdp&quot;</span><span class="p">:</span>
-            <span class="k">assert</span> <span class="n">config</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">strategy</span> <span class="o">==</span> <span class="n">config</span><span class="o">.</span><span class="n">critic</span><span class="o">.</span><span class="n">strategy</span>
+        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">strategy</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;fsdp&quot;</span><span class="p">,</span> <span class="s2">&quot;fsdp2&quot;</span><span class="p">]:</span>
+            <span class="k">assert</span> <span class="n">config</span><span class="o">.</span><span class="n">critic</span><span class="o">.</span><span class="n">strategy</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;fsdp&quot;</span><span class="p">,</span> <span class="s2">&quot;fsdp2&quot;</span><span class="p">]</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.trainer.verl.fsdp_workers</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
                 <span class="n">ActorRolloutRefWorker</span><span class="p">,</span>
                 <span class="n">CriticWorker</span><span class="p">,</span>
@@ -585,6 +585,7 @@
       <dd><a href="../../../../v0.1.0/index.html">v0.1.0</a></dd>
       <dd><a href="../../../../v0.1.1/index.html">v0.1.1</a></dd>
       <dd><a href="verl_trainer.html">v0.2.0</a></dd>
+      <dd><a href="../../../../v0.2.1/index.html">v0.2.1</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>

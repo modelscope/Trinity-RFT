@@ -171,7 +171,10 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_modules</span> <span class="o">=</span> <span class="n">alive_modules</span>
             <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Synchronizer stopped.&quot;</span><span class="p">)</span>
-        <span class="n">ray</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">exit_actor</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ray</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">exit_actor</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">pass</span>
 
 <div class="viewcode-block" id="Synchronizer.set_trainer_status">
 <a class="viewcode-back" href="../../../build_api/trinity.manager.html#trinity.manager.Synchronizer.set_trainer_status">[docs]</a>
@@ -499,6 +502,7 @@
       <dd><a href="../../../../v0.1.0/index.html">v0.1.0</a></dd>
       <dd><a href="../../../../v0.1.1/index.html">v0.1.1</a></dd>
       <dd><a href="synchronizer.html">v0.2.0</a></dd>
+      <dd><a href="../../../../v0.2.1/index.html">v0.2.1</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>
