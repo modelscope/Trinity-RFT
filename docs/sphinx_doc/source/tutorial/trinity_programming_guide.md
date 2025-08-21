@@ -9,10 +9,10 @@ Below is a table summarizing the modules and components that developers with dif
 |--------------------|-------------|---------------|
 | Apply existing RL algorithms to new environments. | *Explorer* | `Workflow` |
 | Design new RL algorithms. | *Trainer* | `Algorithm` |
-| Enhance the RL process from the data perspective. | *Buffer* | Data Processing Module (Coming soon) |
+| Enhance the RL process from the data perspective. | *Buffer* | `Operator` |
 
 ```{note}
-Trinity-RFT is still under development, and the following interfaces may change. Please read this section in conjunction with the latest code.
+Trinity-RFT is under active development, and the following interfaces may change. Please refer to the latest code when using this guide.
 ```
 
 ---
@@ -216,12 +216,6 @@ __all__ = [
 ]
 ```
 
-For workflows that are not intended to be contributed to Trinity-RFT project, you can just place the above code in `trinity/plugins`. Trinity-RFT will automatically detect and load all custom modules in this folder.
-
-```{tip}
-You can specify the directory where your custom modules are located by setting `--plugin-dir` when starting Trinity-RFT. If you don't specify `--plugin-dir`, Trinity-RFT will use `<Trinity_RFT_ROOT_DIR>/trinity/plugins` as the default directory.
-```
-
 #### Avoid Re-initialization
 
 For heavy workflows, re-initializing every time can incurs extra computational costs.
@@ -328,9 +322,8 @@ Trinity-RFT provides a standardized process for implementing new algorithms.
 In Trinity-RFT, the algorithm module is primarily responsible for extracting experience data from the Replay Buffer during the RL process and calculating the loss to update models based on this data.
 To avoid implementing a new Trainer class each time a new algorithm is added, we have decomposed the representative PPO algorithm process into multiple sub-modules to adapt to various algorithms.
 
-- **Add Strategy** ({class}`trinity.algorithm.AddStrategy`): Responsible for adding rollout experience data to the Replay Buffer. You can do some filtering or grouping of experience data before adding it to the buffer. For example, calculate the GRPO advantage in this module and filter out groups with the same reward.
 - **Sample Strategy** ({class}`trinity.algorithm.SampleStrategy`): Responsible for sampling experience data from the buffer module. By customizing this module, you can implement functionalities like filtering experience data or mixed sampling from multiple data sources.
-- **Advantage Fn**({class}`trinity.algorithm.AdvantageFn`): Responsible for calculating the Advantage and Returns of experience data. Note that you might not be able to get a whole group of experiences in this module (depending on how experiences are written to and sampled from the buffer). Thus, if you need group based Advantage calculation, it is highly recommended that you implement it in the `AddStrategy` module instead. Only per-sample advantage calculation is recommended in this module, e.g., PPO.
+- **Advantage Fn**({class}`trinity.algorithm.AdvantageFn`): Responsible for calculating the Advantage and Returns of experience data.
 - **Policy Loss Fn**({class}`trinity.algorithm.PolicyLossFn`): Responsible for calculating the core training loss of the policy network.
 - **KL Fn**({class}`trinity.algorithm.KLFn`): Responsible for calculating KL Divergence, which is generally used in two places in existing RL algorithms: Reward Penalty and Actor Loss.
 - **Entropy Loss Fn**({class}`trinity.algorithm.EntropyLossFn`): Responsible for calculating the entropy loss of the policy network.
@@ -346,40 +339,35 @@ Trinity-RFT allows developers to customize all the above modules. Developers onl
 
 The main difference between OPMD and PPO algorithms lies in the calculation of Advantage and Policy Loss.
 OPMD relies on a group-based advantage calculation and does not use the Critic model.
-To implement OPMD, developers need to implement advantage calculation in `AddStrategy` (or `AdvantageFn`) and policy loss calculation in `PolicyLossFn`.
+To implement OPMD, developers need to implement advantage calculation in `AdvantageFn` and policy loss calculation in `PolicyLossFn`.
 
 ---
 
-#### Step 1.1: Implement `AddStrategy`
+#### Step 1.1: Implement `AdvantageFn`
 
-The {class}`trinity.algorithm.AddStrategy` interface includes two methods:
+The {class}`trinity.algorithm.AdvantageFn` interface includes three methods:
 
-- `add`: This method is called to add experience data to the buffer. It receives a list of experiences and returns the number of experiences added to the buffer.
-- `default_args`: This method returns the default initialization parameters in dictionary form, which will be used by default when users don't specify initialization parameters in the configuration file.
+- `__call__`: The main entrance for advantage calculation. It receives a list of experiences ({class}`trinity.common.experience.Experience`) and returns a list of experiences with calculated advantages and returns, along with a metrics dictionary for logging.
+- `default_args`: A class method that returns the default initialization parameters in dictionary form. It will be used by default when users don't specify initialization parameters in the configuration file.
+- `compute_in_trainer`: This class method indicates whether to compute advantages in the Trainer. If it returns `False`, the `AdvantageFn` will be called in the experience data processing pipeline.
 
-For convenience, Trinity-RFT provides an abstract class {class}`trinity.algorithm.GroupAdvantageStrategy` that implements the `add` method for group-based advantage calculation, you can focus on how to group the experiences and calculate advantages on grouped experiences with the following two methods:
+For convenience, Trinity-RFT provides an abstract class {class}`trinity.algorithm.advantage_fn.GroupAdvantage` that implements the `__call__` method for group-based advantage calculation, you can focus on how to group the experiences and calculate advantages on grouped experiences with the following two methods:
 
 - `group_experiences`: This method groups a experiences generated in a step into multiple sub-groups.
 
 - `calculate_group_advantage`: This method calculates the advantage for each group of experiences.
 
-Here's an implementation example for the OPMD algorithm's Add Strategy:
+Here's an implementation example for the OPMD algorithm's advantage function:
 
 ```python
-from trinity.algorithm.add_strategy import ADD_STRATEGY, GroupAdvantageStrategy
+from trinity.algorithm.advantage_fn import ADVANTAGE_FN, GroupAdvantage
 
-@ADD_STRATEGY.register_module("opmd")
-class OPMDAddStrategy(GroupAdvantageStrategy):
-    """An example AddStrategy that calculates OPMD advantages."""
+@ADVANTAGE_FN.register_module("opmd")
+class OPMDGroupAdvantage(GroupAdvantage):
+    """OPMD Group Advantage computation"""
 
-    def __init__(
-        self, writer: BufferWriter, opmd_baseline: str = "mean", tau: float = 1.0, **kwargs
-    ) -> None:
-        super().__init__(writer)
-        assert opmd_baseline in [
-            "mean",
-            "logavgexp",
-        ], f"opmd_baseline must be 'mean' or 'logavgexp', got {opmd_baseline}"
+    def __init__(self, opmd_baseline: str = "mean", tau: float = 1.0, **kwargs) -> None:
+        super().__init__(**kwargs)
         self.opmd_baseline = opmd_baseline
         self.tau = tau
 
@@ -393,7 +381,7 @@ class OPMDAddStrategy(GroupAdvantageStrategy):
             if len(exps) == 1:
                 group_baseline = torch.tensor(0.0)
             else:
-                group_rewards = torch.tensor([exp.reward for exp in exps])
+                group_rewards = torch.tensor([exp.reward for exp in exps], dtype=torch.float32)
                 if self.opmd_baseline == "mean":
                     group_baseline = torch.mean(group_rewards)
                 else:
@@ -415,62 +403,8 @@ class OPMDAddStrategy(GroupAdvantageStrategy):
         return {"opmd_baseline": "mean", "tau": 1.0}
 ```
 
-After implementation, you need to register this module through {class}`trinity.algorithm.ADD_STRATEGY`. Once registered, the module can be configured in the configuration file using the registered name.
-
-
-#### Step 1.2: Implement `AdvantageFn`
-
-```{note}
-This step can be skipped if you have implemented `AddStrategy` as shown above.
-The `AdvantageFn` is mainly used for per-sample advantage calculation, and not recommended for group-based advantage calculation.
-```
-
-The {class}`trinity.algorithm.AdvantageFn` interface, which mainly includes two methods:
-
-- `__call__`: Calculates advantages and returns based on input experience data, records observable metrics during the calculation process, and returns the experience data containing advantages and returns as well as a metrics dictionary. The input experience data format is [verl](https://github.com/volcengine/verl)'s `DataProto`.
-- `default_args`: Returns default initialization parameters in dictionary form, which will be used by default when users don't specify initialization parameters in the configuration file.
-
 After implementation, you need to register this module through {class}`trinity.algorithm.ADVANTAGE_FN`. Once registered, the module can be configured in the configuration file using the registered name.
 
-Here's an implementation example for the OPMD algorithm's Advantage Fn:
-
-```python
-# trinity/algorithm/advantage_fn/opmd.py
-# import some modules
-from trinity.algorithm.advantage_fn import ADVANTAGE_FN, AdvantageFn
-
-
-@ADVANTAGE_FN.register_module("opmd")
-class OPMDAdvantageFn(AdvantageFn):
-    """OPMD advantage computation"""
-
-    def __init__(
-        self,
-        opmd_baseline: str = "mean",
-        tau: float = 1.0,
-    ) -> None:
-        self.opmd_baseline = opmd_baseline
-        self.tau = tau
-
-
-    def __call__(
-        self,
-        exps: DataProto,
-        **kwargs,
-    ) -> Tuple[DataProto, Dict]:
-        # calculate advantages and returns based on the exps
-
-        # record some metrics
-
-        return exps, metrics
-
-    @classmethod
-    def default_args(cls) -> Dict:
-        return {
-            "opmd_baseline": "mean",
-            "tau": 1.0,
-        }
-```
 
 #### Step 1.3: Implement `PolicyLossFn`
 
@@ -545,10 +479,9 @@ class OPMDAlgorithm(AlgorithmType):
     def default_config(cls) -> Dict:
         return {
             "repeat_times": 2,
-            "add_strategy": "opmd",
+            "advantage_fn": "opmd",
             "sample_strategy": "warmup",
             "policy_loss_fn": "opmd",
-            "advantage_fn": "opmd",
             "kl_penalty_fn": "none",
             "kl_loss_fn": "k2",
             "entropy_loss_fn": "default",
@@ -577,12 +510,92 @@ If you need to modify certain parameters, you can simply add the corresponding p
 algorithm:
   algorithm_type: "opmd"
   repeat_times: 8
-  add_strategy_args:
+  advantage_fn_args:
     opmd_baseline: "logavgexp"
     tau: 0.99
   policy_loss_fn_args:
     tau: 0.99
 # some other configs
+```
+
+---
+
+## Operators (For Data Developers)
+
+### Step 0: Basic Concepts of Operator Module
+
+In Trinity-RFT, the operator module is responsible for processing experience data in the buffer module. By customizing operators, developers can implement various data processing functionalities, such as data augmentation, filtering, and transformation. You can even implement advantages/returns calculation as operators, as shown in {ref}`Algorithms <Algorithms>` section.
+
+- **ExperienceOperator** ({class}`trinity.data.operators.ExperienceOperator`): The base class for all operators used in experience data processing. It defines the interface and common functionalities that all operators should have. Each operator processes a batch of experience data and returns the processed data with metrics for logging.
+- **ExperiencePipeline** ({class}`trinity.data.pipelines.ExperiencePipeline`): The experience data processing pipeline that manages a sequence of operators. It takes raw experiences from the `Explorer`, passes them through each operator in the pipeline, and writes the final processed experiences into the input buffer of the `Trainer`.
+
+```{note}
+We plan to add `TaskOperator` and `TaskPipeline` for taskset processing in the future versions.
+```
+---
+
+### Step 1: Implement Operator
+
+The `ExperienceOperator` interface includes only one `process` method. The `ExperiencePipeline` will call this method with a list of `Experience` generated by the `Explorer` in one explore step. The `process` method should return a tuple containing the processed list of `Experience` and a dictionary of metrics for logging.
+
+```python
+class ExperienceOperator(ABC):
+
+    @abstractmethod
+    def process(self, exps: List[Experience]) -> Tuple[List[Experience], Dict]:
+        """Process a list of experiences and return a transformed list.
+
+        Args:
+            exps (List[Experience]): List of experiences to process, which contains
+                all experiences generated by the Explorer in one explore step.
+        Returns:
+            Tuple[List[Experience], Dict]: A tuple containing the processed list of experiences and a dictionary of metrics.
+        """
+```
+
+Here is an implementation of a simple operator that filters out experiences with rewards below a certain threshold:
+
+```python
+from trinity.data.operators import EXPERIENCE_OPERATORS, ExperienceOperator
+from trinity.common.experience import Experience
+
+
+@EXPERIENCE_OPERATORS.register_module("reward_filter")
+class RewardFilter(ExperienceOperator):
+
+    def __init__(self, threshold: float = 0.0) -> None:
+        self.threshold = threshold
+
+    def process(self, exps: List[Experience]) -> Tuple[List[Experience], Dict]:
+        filtered_exps = [exp for exp in exps if exp.reward >= self.threshold]
+        metrics = {"filtered_count": len(exps) - len(filtered_exps)}
+        return filtered_exps, metrics
+```
+
+After implementation, you need to register this module through {class}`trinity.data.operators.EXPERIENCE_OPERATORS`. Once registered, the module can be configured in the configuration file using the registered name.
+
+### Step 2: Use Your Operator
+
+After completing the above steps, you can use the newly registered operator through a YAML configuration file.
+
+```yaml
+# some other configs
+data_processor:
+  experience_pipeline:
+    operators:
+      - name: "reward_filter"
+        args:
+          threshold: 0.1
+synchronizer:
+  sync_method: nccl
+  sync_style: dynamic_by_explorer
+  sync_interval: 2
+# some other configs
+```
+
+```{tip}
+The `RewardFilter` reduces the number of experiences, which may cause the trainer can't get enough experiences to start a training step. To avoid the issue, you can use the advanced *Dynamic Synchronization* feature provided by Trinity-RFT as shown in the above configuration file.
+The above setting means that the `Explorer` will sync with the `Trainer` every 2 steps and will continue running regardless of how many steps the `Trainer` has completed. This ensures that the `Trainer` can always get enough experiences to start a training step as long as the `Explorer` is running.
 ```
 
 ---
@@ -709,21 +722,20 @@ By meticulously following these steps, you can ensure that new parameters are su
 
 ---
 
-## Check Code Style
+## Contributing your Code
 
-Before submitting the code, make sure it passes the code style check. Follow these steps:
+For modules that are prepared to be contributed to the Trinity-RFT project, please follow the steps below:
 
-```shell
-# Install code style checking tools
-cd <path_to_trinity_rft>
-# bash
-pip install -e .[dev]
-# zsh
-# pip install -e .\[dev\]
+1. Implement your code in the appropriate directory, such as `trinity/common/workflows` for workflows, `trinity/algorithm` for algorithms, `trinity/buffer/operators` for operators.
 
-# Run code style checks
-pre-commit run --all-files
+2. Register your module in the corresponding `__init__.py` file of the directory.
 
-# Commit the code after all checks pass
-git commit -am "create example workflow"
+3. Add tests for your module in the `tests` directory, following the naming conventions and structure of existing tests.
+
+4. Before submitting the code, make sure it passes the code style check with `pre-commit run --all-files`.
+
+5. Submit a pull request to the Trinity-RFT repository, including a clear description of your changes.
+
+```{tip}
+For modules that only used for local testing or not intended for contribution, you can place them in the `trinity/plugins` directory. Trinity-RFT will automatically load all modules in this directory, and you can use those modules without adding them to the `__init__.py` file. You can specify another directory by setting the `--plugin-dir` option when running Trinity-RFT, e.g., `trinity run --config /path/to/your/config --plugin-dir /path/to/your/plugins`.
 ```

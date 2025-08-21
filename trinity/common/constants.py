@@ -2,6 +2,7 @@
 """Constants."""
 from enum import Enum, EnumMeta
 
+from trinity.utils.annotations import Deprecated
 from trinity.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -56,6 +57,7 @@ class TaskType(Enum):
     EVAL = 1
 
 
+@Deprecated
 class ReadStrategy(CaseInsensitiveEnum):
     """Pop Strategy."""
 

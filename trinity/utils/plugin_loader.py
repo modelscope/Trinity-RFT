@@ -49,7 +49,7 @@ def load_plugin_from_dirs(plugin_dirs: Union[str, List[str]]) -> None:
             try:
                 load_from_file(os.path.join(plugin_dir, file))
             except Exception as e:
-                logger.error(f"Failed to load plugin from {file}: {e}")
+                logger.warning(f"Failed to load plugin module from [{file}]: {e}")
 
 
 def load_from_file(file_path: str):

@@ -58,6 +58,7 @@ class vLLMRolloutModel(InferenceModel):
             include_stop_str_in_output=False,
             output_kind=RequestOutputKind.FINAL_ONLY,
             logprobs=0,
+            ignore_eos=config.ignore_eos,
         )
         self.enable_thinking = config.enable_thinking
         self.request_id = 0

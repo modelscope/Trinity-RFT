@@ -14,12 +14,12 @@ from trinity.common.constants import (
     TRAINER_NAME,
     OpType,
     PromptType,
-    ReadStrategy,
     StorageType,
     SyncMethod,
     SyncStyle,
     TaskType,
 )
+from trinity.utils.annotations import Experimental
 from trinity.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -135,6 +135,72 @@ class RewardShapingConfig:
 
 
 @dataclass
+class OperatorConfig:
+    name: str = ""
+    args: Dict[str, Any] = field(default_factory=dict)
+
+
+@Experimental
+@dataclass
+class ExperiencePipelineConfig:
+    """Config for experience pipeline.
+
+    Experience Pipeline is used to pre-process rollout experiences for better training.
+    """
+
+    # The list of experience operators to apply, operators will be applied in the order they are defined
+    operators: List[OperatorConfig] = field(default_factory=list)
+    save_input: bool = True  # whether to save the input experiences
+    input_save_path: Optional[
+        str
+    ] = None  # the path to save the input experiences, can be a jsonl file or a sqlite database file
+
+    # The following fields are experimental, do not set them unless you know what you are doing
+
+    # A dictionary of input buffers, buffers are indexed by their names.
+    # users only need to set extra buffers here
+    inputs: Dict[str, StorageConfig] = field(default_factory=dict)
+    # The output buffer will automatically set to the trainer input buffer, so we do not need to set it here.
+    output: Optional[StorageConfig] = None
+
+
+@Experimental
+@dataclass
+class TaskPipelineConfig:
+    """Config for task pipeline.
+
+    Task Pipeline is used to pre-process raw tasks for better exploring. Currently, we only support using
+    Data-Juicer operators for task pipeline.
+    """
+
+    # The list of data-juicer operators to apply, operators will be applied in the order they are defined
+    operators: List[OperatorConfig] = field(default_factory=list)
+    # number of process
+    num_process: int = 4
+    # The path to the Data-Juicer config file. If set, operators and num_process will be ignored
+    config_path: Optional[str] = None
+
+    # Raw input tasksets. Currently, task pipeline only support local file as inputs,
+    # e.g., /path/to/file.jsonl or /path/to/file.parquet, not a directory or huggingface path
+    inputs: List[str] = field(default_factory=list)
+    # Output task buffer, if not set, use `buffer.explorer_input.taskset`. In most cases, users do not need to set this field.
+    output: Optional[StorageConfig] = None
+
+    # The list of fields extracted from the input tasksets and processed into the output taskset
+    target_fields: List[str] = field(default_factory=list)
+
+    # weights for priority computing. Usually including 4 types of weights:
+    # - difficulty
+    # - diversity
+    # - usage_frequency
+    # - quality
+    priority_weights: Dict[str, float] = field(default_factory=dict)
+
+    # number of samples to select after task pipeline. -1 means all
+    top_k: int = -1
+
+
+@dataclass
 class DataPipelineConfig:
     """Config for data pipeline."""
 
@@ -161,17 +227,27 @@ class DataPipelineConfig:
     reward_shaping: Optional[List[RewardShapingConfig]] = field(default_factory=list)
 
 
+@Experimental
 @dataclass
 class DataProcessorConfig:
-    """Data-Juicer config"""
-
-    data_processor_url: Optional[str] = None
+    """Data Processor config"""
 
     # support two types of data pipelines for now
     # 1. For task. Data preprocessing from raw dataset to the task set
-    task_pipeline: Optional[DataPipelineConfig] = None
+    task_pipeline: Optional[TaskPipelineConfig] = None
     # 2. For experience. Data processing for rollouts
-    experience_pipeline: Optional[DataPipelineConfig] = None
+    experience_pipeline: Optional[ExperiencePipelineConfig] = field(
+        default_factory=ExperiencePipelineConfig
+    )
+
+    # For Data-Juicer
+    # Whether to setup Data-Juicer server automatically. If set to True, the launcher
+    # will try to start a Data-Juicer server using the `data_processor_url`,
+    # If set to False, the user should start the Data-Juicer server manually, and set
+    # the `data_processor_url` to the server URL.
+    setup_data_processor: bool = False
+    # the url of the Data-Juicer server
+    data_processor_url: Optional[str] = None
 
 
 @dataclass
@@ -182,6 +258,7 @@ class ModelConfig:
     max_model_len: Optional[int] = None
     max_prompt_tokens: Optional[int] = None
     max_response_tokens: Optional[int] = None
+    min_response_tokens: int = 1
     custom_chat_template: Optional[str] = None
 
 
@@ -208,6 +285,10 @@ class InferenceModelConfig:
     max_prompt_tokens: Optional[int] = None
     # if not set, use `model.max_response_tokens`
     max_response_tokens: Optional[int] = None
+    # if not set, use `model.min_response_tokens`
+    min_response_tokens: Optional[int] = None
+    # used for testing very long response generation, do not set it unless you know what you are doing
+    ignore_eos: bool = False
 
     # override chat template in model
     chat_template: Optional[str] = None
@@ -239,10 +320,6 @@ class AlgorithmConfig:
     algorithm_type: str = "ppo"
     # for GRPO-like algorithms, repeat each task for `repeat_times` times
     repeat_times: int = 1
-
-    # the strategy for adding experiences to the buffer
-    add_strategy: Optional[str] = None
-    add_strategy_args: Optional[dict] = None
 
     # the strategy for sampling experiences from the buffer
     sample_strategy: Optional[str] = None
@@ -281,6 +358,7 @@ class ClusterConfig:
     gpu_per_node: int = 8
 
 
+@Experimental
 @dataclass
 class ExplorerInput:
     """Config for explorer input."""
@@ -295,13 +373,13 @@ class ExplorerInput:
     reply_prefix: Optional[str] = None
 
 
+@Experimental
 @dataclass
 class TrainerInput:
     """Config for trainer input."""
 
     experience_buffer: Optional[StorageConfig] = None
     sft_warmup_dataset: Optional[StorageConfig] = None
-    read_experience_strategy: Optional[ReadStrategy] = None
     sft_warmup_steps: int = 0
 
 
@@ -316,7 +394,6 @@ class BufferConfig:
 
     # for explorer
     explorer_input: ExplorerInput = field(default_factory=ExplorerInput)
-    explorer_output: Optional[StorageConfig] = None  # currently do not set
 
     # for trainer
     trainer_input: TrainerInput = field(default_factory=TrainerInput)
@@ -326,6 +403,7 @@ class BufferConfig:
     max_retry_interval: int = 1
 
     # ! DO NOT SET FOLLOWING FIELDS
+    explorer_output: Optional[StorageConfig] = None  # automatically set
     tokenizer_path: Optional[str] = None  # automatically set
     pad_token_id: Optional[int] = None  # automatically set
     cache_dir: Optional[str] = None  # automatically set
@@ -360,12 +438,6 @@ class ExplorerConfig:
 
     # for benchmark
     bench_on_latest_checkpoint: bool = False  # only benchmark the latest checkpoint
-
-    # ! DO NOT SET
-    # Explorer collects experiences from workflow runners
-    # some algorithms (e.g., DAPO) need to collect experiences generated by the same task and do some post-processing
-    # will automatically set to True if `algorithm.add_strategy` is not None
-    collect_experiences: bool = False
 
 
 @dataclass
@@ -418,6 +490,32 @@ class SynchronizerConfig:
 
 
 @dataclass
+class DataJuicerServiceConfig:
+    """Config for Data-Juicer.
+
+    Please update `trinity.service.data_juicer.server.server.py` correspondingly if you change the fields here.
+    """
+
+    # the url of the Data-Juicer server
+    server_url: Optional[str] = None
+
+    # whether to start Data-Juicer server automatically
+    auto_start: bool = False
+
+    # the following fields are only used when `auto_start` is True
+    # the port of the Data-Juicer server, if not set, a random port will be used
+    port: Optional[int] = None
+    # the hostname will be automatically set to "localhost" so we do not need to set it here
+
+
+@dataclass
+class ServiceConfig:
+    """Configs for outside services."""
+
+    data_juicer: Optional[DataJuicerServiceConfig] = None
+
+
+@dataclass
 class Config:
     """Global Configuration"""
 
@@ -443,6 +541,7 @@ class Config:
     trainer: TrainerConfig = field(default_factory=TrainerConfig)
     monitor: MonitorConfig = field(default_factory=MonitorConfig)
     synchronizer: SynchronizerConfig = field(default_factory=SynchronizerConfig)
+    service: ServiceConfig = field(default_factory=ServiceConfig)
 
     def save(self, config_path: str) -> None:
         """Save config to file."""
@@ -544,22 +643,23 @@ class Config:
         self.buffer.explorer_input.eval_tasksets = remained_tasksets
 
         # check trainer_input.experience_buffer
-        if self.mode == "both" or self.mode == "explore":
-            if self.buffer.trainer_input.experience_buffer is None:
-                self.buffer.trainer_input.experience_buffer = StorageConfig(
-                    name="experience_buffer",
-                    storage_type=StorageType.QUEUE,
-                )
-                logger.info(
-                    f"Auto set `buffer.trainer_input.experience_buffer` to {self.buffer.trainer_input.experience_buffer}"
-                )
-            elif self.buffer.trainer_input.experience_buffer.storage_type is StorageType.FILE:
-                logger.warning(
-                    "`FILE` storage is not supported to use as experience_buffer in `both` mode, use `QUEUE` instead."
-                )
-                self.buffer.trainer_input.experience_buffer.storage_type = StorageType.QUEUE
-        elif self.mode == "train":  # TODO: to be check
-            pass
+        if self.buffer.trainer_input.experience_buffer is None:
+            self.buffer.trainer_input.experience_buffer = StorageConfig(
+                name="experience_buffer",
+                storage_type=StorageType.QUEUE,
+            )
+            logger.info(
+                f"Auto set `buffer.trainer_input.experience_buffer` to {self.buffer.trainer_input.experience_buffer}"
+            )
+        elif (
+            self.buffer.trainer_input.experience_buffer.storage_type is StorageType.FILE
+            and self.mode == "both"
+        ):
+            logger.warning(
+                "`FILE` storage is not supported to use as experience_buffer in `both` mode, use `QUEUE` instead."
+            )
+            self.buffer.trainer_input.experience_buffer.storage_type = StorageType.QUEUE
+
         if self.buffer.trainer_input.experience_buffer is not None:
             self.buffer.trainer_input.experience_buffer.algorithm_type = (
                 self.algorithm.algorithm_type
@@ -567,13 +667,15 @@ class Config:
             if self.buffer.trainer_input.experience_buffer.ray_namespace is None:
                 self.buffer.trainer_input.experience_buffer.ray_namespace = self.ray_namespace
 
-        # set buffer.explorer_output
-        if self.buffer.explorer_output is None:
-            self.buffer.explorer_output = self.buffer.trainer_input.experience_buffer
-        else:
-            self.buffer.explorer_output.algorithm_type = self.algorithm.algorithm_type
-            if self.buffer.explorer_output.ray_namespace is None:
-                self.buffer.explorer_output.ray_namespace = self.ray_namespace
+        # create buffer.cache_dir at <checkpoint_root_dir>/<project>/<name>/buffer
+        self.buffer.cache_dir = os.path.abspath(os.path.join(self.checkpoint_job_dir, "buffer"))
+        try:
+            os.makedirs(self.buffer.cache_dir, exist_ok=True)
+        except Exception:
+            logger.warning(
+                f"Failed to create buffer dir {self.buffer.cache_dir}, please check "
+                f"your checkpoint directory: {self.checkpoint_job_dir}"
+            )
 
         # check trainer_input.sft_warmup_dataset
         if (
@@ -591,67 +693,28 @@ class Config:
             if self.buffer.trainer_input.sft_warmup_dataset.ray_namespace is None:
                 self.buffer.trainer_input.sft_warmup_dataset.ray_namespace = self.ray_namespace
 
-        # check input/output buffers in experience pipelines
+        # check input/output buffers in pipelines
         if self.data_processor.experience_pipeline is not None:
-            # collect existing buffers for trinity
-            input_buffers = {}
-            output_buffers = {}
-            # - taskset
-            if self.buffer.explorer_input.taskset.name:
-                input_buffers[
-                    self.buffer.explorer_input.taskset.name
-                ] = self.buffer.explorer_input.taskset
-            # - explorer output
-            if self.buffer.explorer_output and self.buffer.explorer_output.name:
-                output_buffers[self.buffer.explorer_output.name] = self.buffer.explorer_output
-            # - trainer input: experience buffer
             if (
-                self.buffer.trainer_input.experience_buffer
-                and self.buffer.trainer_input.experience_buffer.name
+                self.data_processor.experience_pipeline.save_input
+                and self.data_processor.experience_pipeline.input_save_path is None
             ):
-                input_buffers[
-                    self.buffer.trainer_input.experience_buffer.name
-                ] = self.buffer.trainer_input.experience_buffer
-            # - trainer input: sft warmup dataset
-            if (
-                self.buffer.trainer_input.sft_warmup_dataset
-                and self.buffer.trainer_input.sft_warmup_dataset.name
+                self.data_processor.experience_pipeline.input_save_path = os.path.join(
+                    self.buffer.cache_dir, "explorer_output.jsonl"
+                )
+                logger.info(
+                    f"Auto set `data_processor.experience_pipeline.input_save_path` to {self.data_processor.experience_pipeline.input_save_path}"
+                )
+        if self.data_processor.task_pipeline is not None:
+            if self.data_processor.task_pipeline.output is None:
+                self.data_processor.task_pipeline.output = self.buffer.explorer_input.taskset
+            if self.data_processor.task_pipeline.output.path and os.path.exists(
+                self.data_processor.task_pipeline.output.path
             ):
-                input_buffers[
-                    self.buffer.trainer_input.sft_warmup_dataset.name
-                ] = self.buffer.trainer_input.sft_warmup_dataset
-
-            # when experience pipeline is on, the explorer output and the
-            # experience buffer of trainer input should be different
-            if self.buffer.explorer_output == self.buffer.trainer_input.experience_buffer:
                 raise ValueError(
-                    "The explorer output buffer should be different from the experience buffer of the trainer input "
-                    "when experience pipeline is provided."
+                    f"Task pipeline output path {self.data_processor.task_pipeline.output.path} already exists.\n"
+                    "Please choose a different output path to avoid overwriting."
                 )
-
-            # NOTICE: For now, input/output buffers for data processors should come from output/input buffers of trinity
-            # the input buffers in experience pipeline should come from the output buffers of trinity
-            exp_pipeline_input_buffers = self.data_processor.experience_pipeline.input_buffers
-            synced_input_buffers = []
-            for input_buffer in exp_pipeline_input_buffers:
-                if input_buffer.name not in output_buffers:
-                    raise ValueError(
-                        f"The input buffer {input_buffer.name} of experience pipeline is not found in any output "
-                        f"buffers of trinity."
-                    )
-                synced_input_buffers.append(output_buffers[input_buffer.name])
-            self.data_processor.experience_pipeline.input_buffers = synced_input_buffers
-            # the output buffers of trinity should come from the input buffers of trinity
-            exp_pipeline_output_buffers = self.data_processor.experience_pipeline.output_buffer
-            if exp_pipeline_output_buffers.name not in input_buffers:
-                raise ValueError(
-                    f"The output buffer {exp_pipeline_output_buffers.name} of experience pipeline is not found in any "
-                    f"input buffers of trinity."
-                )
-            else:
-                self.data_processor.experience_pipeline.output_buffer = input_buffers[
-                    exp_pipeline_output_buffers.name
-                ]
 
         # check train_batch_size
         if not self.buffer.train_batch_size:
@@ -683,19 +746,9 @@ class Config:
                 logger.warning(f"Failed to get pad token id from model {self.model.model_path}")
                 self.buffer.pad_token_id = 0
         self.buffer.tokenizer_path = self.model.model_path
-        # create buffer.cache_dir at <checkpoint_root_dir>/<project>/<name>/buffer
-        self.buffer.cache_dir = os.path.abspath(os.path.join(self.checkpoint_job_dir, "buffer"))
-        try:
-            os.makedirs(self.buffer.cache_dir, exist_ok=True)
-        except Exception:
-            logger.warning(
-                f"Failed to create buffer dir {self.buffer.cache_dir}, please check "
-                f"your checkpoint directory: {self.checkpoint_job_dir}"
-            )
 
     def _check_algorithm(self) -> None:
         from trinity.algorithm import (
-            ADD_STRATEGY,
             ADVANTAGE_FN,
             ENTROPY_LOSS_FN,
             KL_FN,
@@ -727,9 +780,6 @@ class Config:
                 setattr(self.algorithm, args_attr, fn_cls.default_args())
             return fn_cls
 
-        if self.algorithm.add_strategy is not None:
-            check_and_set("add_strategy", ADD_STRATEGY, "add_strategy_args")
-            self.explorer.collect_experiences = True
         check_and_set("sample_strategy", SAMPLE_STRATEGY, "sample_strategy_args")
         check_and_set("policy_loss_fn", POLICY_LOSS_FN, "policy_loss_fn_args")
         check_and_set("advantage_fn", ADVANTAGE_FN, "advantage_fn_args")
@@ -874,6 +924,12 @@ class Config:
             self.trainer.trainer_config.synchronize_config(self)
         else:
             self.trainer.trainer_config = None
+
+        # check service
+        if self.service.data_juicer is not None:
+            for operator in self.data_processor.experience_pipeline.operators:
+                if operator.name == "data_juicer":
+                    operator.args["service_config"] = self.service.data_juicer
 
     def flatten(self) -> Dict[str, Any]:
         """Flatten the config into a single-level dict with dot-separated keys for nested fields."""

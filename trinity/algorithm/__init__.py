@@ -1,4 +1,3 @@
-from trinity.algorithm.add_strategy import ADD_STRATEGY, AddStrategy
 from trinity.algorithm.advantage_fn import ADVANTAGE_FN, AdvantageFn
 from trinity.algorithm.algorithm import ALGORITHM_TYPE, AlgorithmType
 from trinity.algorithm.entropy_loss_fn import ENTROPY_LOSS_FN, EntropyLossFn
@@ -19,6 +18,4 @@ __all__ = [
     "ENTROPY_LOSS_FN",
     "SampleStrategy",
     "SAMPLE_STRATEGY",
-    "AddStrategy",
-    "ADD_STRATEGY",
 ]

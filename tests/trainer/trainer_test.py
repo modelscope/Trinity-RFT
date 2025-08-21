@@ -179,7 +179,10 @@ class TestTrainerGSM8K(BaseTrainerCase):
         # test both mode
         self.config.algorithm.algorithm_type = "grpo"
         self.config.algorithm.repeat_times = 4
-        self.config.algorithm.add_strategy = "grpo"
+        self.config.algorithm.advantage_fn = "grpo"
+        self.config.algorithm.advantage_fn_args = {
+            "epsilon": 1e-6,
+        }
         # self.config.algorithm.repeat_times = 8  # TODO: used for real testing
         # self.config.buffer.batch_size = 96  # TODO: used for real testing
         self.config.buffer.total_epochs = 1
@@ -192,6 +195,8 @@ class TestTrainerGSM8K(BaseTrainerCase):
         parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
         rollout_metrics = parser.metric_list("rollout")
         self.assertTrue(len(rollout_metrics) > 0)
+        pipeline_metrics = parser.metric_list("pipeline")
+        self.assertTrue(len(pipeline_metrics) > 0)
         self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 4)
         actor_metrics = parser.metric_list("actor")
         self.assertTrue(len(actor_metrics) > 0)
@@ -409,7 +414,7 @@ class TestFullyAsyncMode(unittest.TestCase):
         config.cluster.node_num = 1
         explorer1_config.explorer.rollout_model.engine_num = 1
         explorer1_config.explorer.rollout_model.tensor_parallel_size = 1
-        explorer1_config.buffer.explorer_output = StorageConfig(
+        explorer1_config.buffer.trainer_input.experience_buffer = StorageConfig(
             name="exp_buffer",
             storage_type=StorageType.QUEUE,
             wrap_in_ray=True,
@@ -497,6 +502,7 @@ class TestTrainerMIX(BaseTrainerCase):
         self.config.algorithm.algorithm_type = "mix"
         self.config.algorithm.repeat_times = 4
         self.config.algorithm.sample_strategy = "mix"
+        self.config.algorithm.advantage_fn = "grpo"
         self.config.algorithm.sample_strategy_args = {"expert_data_ratio": 0.5}  # rft=4*4 : sft=16
         self.config.algorithm.policy_loss_fn = "mix"
         self.config.buffer.batch_size = 4
@@ -520,7 +526,7 @@ class TestTrainerMIX(BaseTrainerCase):
         self.assertTrue(len(rollout_metrics) > 0)
         self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 4)
         self.assertEqual(
-            parser.metric_values("rollout/experience_count")[1], 16
+            parser.metric_values("pipeline/experience_count")[1], 16
         )  # 16 rft experiences
         # test actor metrics
         actor_metrics = parser.metric_list("actor")

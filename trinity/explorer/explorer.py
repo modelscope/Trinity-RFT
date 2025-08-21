@@ -9,12 +9,13 @@ import traceback
 from collections import deque
 from typing import List, Optional
 
+import ray
 import torch
+from ray.util.scheduling_strategies import NodeAffinitySchedulingStrategy
 
-from trinity.algorithm import ADD_STRATEGY
 from trinity.algorithm.algorithm_manager import AlgorithmManager
-from trinity.buffer import get_buffer_writer
 from trinity.buffer.buffer import get_buffer_reader
+from trinity.buffer.pipelines.experience_pipeline import ExperiencePipeline
 from trinity.common.config import Config
 from trinity.common.constants import (
     ROLLOUT_WEIGHT_SYNC_GROUP_NAME,
@@ -45,12 +46,7 @@ class Explorer:
         self.config = config
         self.algorithm_manager = AlgorithmManager(config)
         self.models, self.auxiliary_models = create_inference_models(config)
-        self.experience_buffer = None
-        if self.config.mode != "bench":
-            self.experience_buffer = get_buffer_writer(
-                self.config.buffer.explorer_output,  # type: ignore
-                self.config.buffer,
-            )
+        self.experience_pipeline = self._init_experience_pipeline()
         self.config.buffer.explorer_input.taskset.index = explorer_meta.get("latest_task_index", 0)
         self.taskset = get_buffer_reader(
             self.config.buffer.explorer_input.taskset, self.config.buffer
@@ -76,15 +72,6 @@ class Explorer:
         self.model_version = -1
         self.last_sync_successful = True
         self.logger.info("Finished initializing Explorer.")
-        self.collect_experiences = self.config.explorer.collect_experiences
-        self.generated_experience_cnt = 0
-        if self.collect_experiences and self.config.mode != "bench":
-            assert (
-                self.experience_buffer is not None
-            ), "Experience buffer is required when collect_experiences is True."
-            self.add_strategy = ADD_STRATEGY.get(self.config.algorithm.add_strategy)(
-                self.experience_buffer, **self.config.algorithm.add_strategy_args
-            )
 
     async def setup_weight_sync_group(
         self, master_address: str, master_port: int, state_dict_meta: List = None
@@ -165,20 +152,26 @@ class Explorer:
 
     async def prepare(self) -> None:
         """Preparation before running."""
-        futures = [
-            asyncio.create_task(self.scheduler.start()),
-        ]
-        if self.experience_buffer:
-            futures.append(asyncio.create_task(self.experience_buffer.acquire()))  # type: ignore
-        if not self.use_nccl_sync:
-            master_address, master_port = await self.models[0].get_available_address.remote()
-            futures.append(
-                asyncio.create_task(self.setup_weight_sync_group(master_address, master_port))
-            )
-        await asyncio.gather(*futures, return_exceptions=True)
-        if self.config.explorer.eval_on_startup and self.explore_step_num == 0:
-            await self.eval()
-        await self.synchronizer.set_explorer_status.remote(RunningStatus.REQUIRE_SYNC)
+        try:
+            await self.experience_pipeline.prepare.remote()
+
+            # make sure all rollout models are ready
+            model_ready_ref = [model.__ray_ready__.remote() for model in self.models]
+            await asyncio.gather(*model_ready_ref)
+
+            if not self.use_nccl_sync:
+                master_address, master_port = await self.models[0].get_available_address.remote()
+                await self.setup_weight_sync_group(master_address, master_port)
+
+            await self.scheduler.start()
+            if self.config.explorer.eval_on_startup and self.explore_step_num == 0:
+                await self.eval()
+
+            await self.synchronizer.set_explorer_status.remote(RunningStatus.REQUIRE_SYNC)
+        except Exception as e:
+            self.logger.error(f"Error during explorer preparation: {traceback.format_exc()}")
+            await self.shutdown()
+            raise e
 
     async def get_weight(self, name: str) -> torch.Tensor:
         """Get the weight of the loaded model (For checkpoint weights update)."""
@@ -232,7 +225,7 @@ class Explorer:
                 if self.last_sync_successful
                 else RunningStatus.REQUIRE_SYNC,
             )
-            await self.experience_buffer.release()
+            await self.shutdown()
             return False
         self.scheduler.schedule(tasks, batch_id=self.explore_step_num + 1)
         self.explore_step_num += 1
@@ -319,11 +312,6 @@ class Explorer:
         return True
 
     async def save_checkpoint(self, sync_weight: bool = False) -> None:
-        if not self.config.explorer.collect_experiences:
-            # wait for all tasks to complete
-            self.logger.info("Waiting for all tasks to complete")
-            await self.scheduler.wait_all()
-            self.logger.info(f"All tasks before step {self.explore_step_num} have completed.")
         await self._finish_steps(self.last_sync_step + 1, self.explore_step_num, self.model_version)
 
         if sync_weight:
@@ -357,11 +345,9 @@ class Explorer:
     async def _finish_explore_step(self, step: int, model_version: int) -> None:
         statuses, exps = await self.scheduler.get_results(batch_id=step)
         metric = {"rollout/model_version": model_version}
-        if self.config.explorer.collect_experiences:
-            exp_cnt, add_strategy_metric = await self.add_strategy.add(exps, step)
-            self.generated_experience_cnt += exp_cnt
-            metric.update(add_strategy_metric)
-            metric["rollout/experience_count"] = exp_cnt
+        # TODO: avoid blocking
+        pipeline_metrics = await self.experience_pipeline.process.remote(exps)
+        metric.update(pipeline_metrics)
         if statuses:
             metric.update(gather_metrics([status.metric for status in statuses], "rollout"))
             self.monitor.log(metric, step=step)
@@ -387,9 +373,47 @@ class Explorer:
         self.monitor.log(metric, step)
 
     async def shutdown(self) -> None:
-        await self.scheduler.stop()
-        self.monitor.close()
+        if self.scheduler:
+            await self.scheduler.stop()
+            self.scheduler = None
+        if self.experience_pipeline:
+            await self.experience_pipeline.close.remote()
+            self.experience_pipeline = None
+        if self.monitor:
+            self.monitor.close()
+            self.monitor = None
+        self.logger.info(
+            f"Explorer ({self.config.explorer.name}) shutdown successfully at step {self.explore_step_num}."
+        )
 
-    def is_alive(self) -> bool:
+    async def is_alive(self) -> bool:
         """Check if the explorer is alive."""
         return True
+
+    def _init_experience_pipeline(self) -> ray.actor.ActorHandle:
+        """Init experience pipeline for the explorer."""
+        node_id = ray.get_runtime_context().get_node_id()
+        return (
+            ray.remote(ExperiencePipeline)
+            .options(
+                name=f"{self.config.explorer.name}_pipeline",
+                namespace=ray.get_runtime_context().namespace,
+                scheduling_strategy=NodeAffinitySchedulingStrategy(
+                    node_id=node_id,
+                    soft=False,
+                ),
+            )
+            .remote(self.config)
+        )
+
+    @classmethod
+    def get_actor(cls, config: Config):
+        """Get a Ray actor for the explorer."""
+        return (
+            ray.remote(cls)
+            .options(
+                name=config.explorer.name,
+                namespace=ray.get_runtime_context().namespace,
+            )
+            .remote(config)
+        )
