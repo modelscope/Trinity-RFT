@@ -105,7 +105,6 @@
     <span class="n">EXPLORER_NAME</span><span class="p">,</span>
     <span class="n">MAX_MODEL_LEN</span><span class="p">,</span>
     <span class="n">TRAINER_NAME</span><span class="p">,</span>
-    <span class="n">OpType</span><span class="p">,</span>
     <span class="n">PromptType</span><span class="p">,</span>
     <span class="n">StorageType</span><span class="p">,</span>
     <span class="n">SyncMethod</span><span class="p">,</span>
@@ -227,18 +226,6 @@
 
 
 
-<div class="viewcode-block" id="RewardShapingConfig">
-<a class="viewcode-back" href="../../../build_api/trinity.common.config.html#trinity.common.config.RewardShapingConfig">[docs]</a>
-<span class="nd">@dataclass</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">RewardShapingConfig</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Config for reward shaping.&quot;&quot;&quot;</span>
-
-    <span class="n">stats_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-    <span class="n">op_type</span><span class="p">:</span> <span class="n">OpType</span> <span class="o">=</span> <span class="n">OpType</span><span class="o">.</span><span class="n">ADD</span>
-    <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span></div>
-
-
-
 <div class="viewcode-block" id="OperatorConfig">
 <a class="viewcode-back" href="../../../build_api/trinity.common.config.html#trinity.common.config.OperatorConfig">[docs]</a>
 <span class="nd">@dataclass</span>
@@ -311,36 +298,6 @@
 
     <span class="c1"># number of samples to select after task pipeline. -1 means all</span>
     <span class="n">top_k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span></div>
-
-
-
-<div class="viewcode-block" id="DataPipelineConfig">
-<a class="viewcode-back" href="../../../build_api/trinity.common.config.html#trinity.common.config.DataPipelineConfig">[docs]</a>
-<span class="nd">@dataclass</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">DataPipelineConfig</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Config for data pipeline.&quot;&quot;&quot;</span>
-
-    <span class="c1"># I/O buffer</span>
-    <span class="n">input_buffers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">StorageConfig</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
-    <span class="n">output_buffer</span><span class="p">:</span> <span class="n">StorageConfig</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">StorageConfig</span><span class="p">)</span>
-
-    <span class="c1"># data format</span>
-    <span class="nb">format</span><span class="p">:</span> <span class="n">FormatConfig</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">FormatConfig</span><span class="p">)</span>
-
-    <span class="c1"># data active iterator related</span>
-    <span class="n">dj_config_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># The path to Data-Juicer config file.</span>
-    <span class="n">dj_process_desc</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span>
-        <span class="nb">str</span>
-    <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Describe the data processing procedure without requiring users to be aware of the specific DJ parameters</span>
-    <span class="n">agent_model_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">clean_strategy</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;iterative&quot;</span>
-    <span class="n">min_size_ratio</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">min_priority_score</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
-    <span class="n">priority_weights</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">data_dist</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;gaussian&quot;</span>  <span class="c1"># one of [&quot;gaussian&quot;, &quot;uniform&quot;]</span>
-
-    <span class="c1"># reward shaping related, only available for experience pipeline</span>
-    <span class="n">reward_shaping</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">RewardShapingConfig</span><span class="p">]]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span></div>
 
 
 

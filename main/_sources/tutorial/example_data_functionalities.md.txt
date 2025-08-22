@@ -1,6 +1,22 @@
 (Data Processing)=
 # Data Processing
 
+## Overview
+
+Trinity-RFT provides a unified data processor to process the raw dataset and experiences for the task pipeline and the experience pipeline.
+- For tasks, the data processing capabilities come from [Data-Juicer](https://github.com/modelscope/data-juicer). You can use data processing operators from Data-Juicer. The full list of Data-Juicer operators can be found [here](https://modelscope.github.io/data-juicer/en/main/docs/Operators.html)
+- For experiences, in addition to Data-Juicer operators, Trinity-RFT provides several RFT-related operators and allows developers to implement their own operators.
+
+For implementing your own data processor, you can refer to this [document](trinity_programming_guide.md#operators-for-data-developers).
+
+To support the data processing of Data-Juicer and RFT-related operators, Trinity-RFT wraps the Data-Juicer operators into a unified service, which can be started automatically. The `DataJuicerOperator` uses a client to send requests of task or experience processing to the server.
+
+An overview of the data processor is shown in the following figure.
+
+<div align="center">
+  <img src="https://img.alicdn.com/imgextra/i2/O1CN01zqPhn21zFmmjSWRJk_!!6000000006685-2-tps-1127-733.png" alt="Trinity-RFT Data Processor" style="height: 500px;">
+</div>
+
 ## Example: Data Processor for Task Pipeline
 
 In this example, you will learn how to apply the data processor of Trinity-RFT to prepare and prioritize the dataset before task exploring and training. This example takes GSM-8K dataset as the example dataset to figure out:
