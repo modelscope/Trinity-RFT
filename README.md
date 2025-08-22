@@ -23,11 +23,10 @@
 ## 🚀 News
 
 
-<!-- TODO: v0.3.0 -->
 * [2025-08] 🎵 We introduce [CHORD](https://github.com/modelscope/Trinity-RFT/tree/main/examples/mix_chord), a dynamic integration of SFT and RL for enhanced LLM fine-tuning ([paper](https://arxiv.org/pdf/2508.11408)).
 * [2025-08] ✨ Trinity-RFT v0.2.1 is released! Enhanced features include:
   * Agentic RL: support training with general multi-step agentic workflows; check out the [ALFWorld](./docs/sphinx_doc/source/tutorial/example_step_wise.md) and [ReAct](./docs/sphinx_doc/source/tutorial/example_react.md) examples.
-  * Rollout-training scheduling: introduce Scheduler, [Synchronizer](./docs/sphinx_doc/source/tutorial/synchronizer.html) and priority queue buffer, which facilitates more efficient and dynamic scheduling of the RFT process.
+  * Rollout-Training scheduling: introduce Scheduler, [Synchronizer](./docs/sphinx_doc/source/tutorial/synchronizer.html) and priority queue buffer, which facilitates more efficient and dynamic scheduling of the RFT process.
   * [A benchmark tool](./benchmark) for quick verification and experimentation.
   * RL algorithms: implement [GSPO](https://github.com/modelscope/Trinity-RFT/pull/154), [AsymRE](https://github.com/modelscope/Trinity-RFT/pull/187), [TOPR, CISPO](https://github.com/modelscope/Trinity-RFT/pull/185), [RAFT](https://github.com/modelscope/Trinity-RFT/pull/174).
 * [2025-07] Trinity-RFT v0.2.0 is released.
@@ -107,11 +106,6 @@ It is designed to support diverse application scenarios and serve as a unified p
 
 <p align="center">
   <img src="https://img.alicdn.com/imgextra/i3/O1CN01hR1LCh25kpJMKmYR4_!!6000000007565-2-tps-1474-740.png" alt="Trinity-RFT-data-pipeline-buffer">
-</p>
-
-A more technical version:
-<p align="center">
-  <img src="https://img.alicdn.com/imgextra/i2/O1CN011q7Chi1luB5tnGY6M_!!6000000004878-2-tps-1444-1002.png" alt="Trinity-RFT-data-pipeline-buffer">
 </p>
 
 </details>
