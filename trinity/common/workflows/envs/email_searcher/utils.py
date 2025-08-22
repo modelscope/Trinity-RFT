@@ -381,16 +381,16 @@ Return your judgement **accept** from **true** and **false**. Do not return any 
     return accept
 
 
-@retry(
-    stop=stop_after_attempt(3),
-    wait=wait_fixed(5),
-    reraise=True,
-)
-def model_call_with_retry(
-    model,
-    prompt,
-    tools=None,
-):  # omit type to avoid import agentscope here
-    """Call the model with retry."""
-    response = model(prompt, tools=tools)
-    return response
+# @retry(
+#     stop=stop_after_attempt(3),
+#     wait=wait_fixed(5),
+#     reraise=True,
+# )
+# def model_call_with_retry(
+#     model,
+#     prompt,
+#     tools=None,
+# ):  # omit type to avoid import agentscope here
+#     """Call the model with retry."""
+#     response = model(prompt, tools=tools)
+#     return response
