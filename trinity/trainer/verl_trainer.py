@@ -18,7 +18,6 @@ from verl.trainer.ppo.metric_utils import (
 from verl.trainer.ppo.ray_trainer import (
     RayClassWithInitArgs,
     RayPPOTrainer,
-    RayWorkerGroup,
     ResourcePoolManager,
     Role,
     create_colocated_worker_cls,
@@ -86,6 +85,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         # define worker classes
         if config.actor_rollout_ref.actor.strategy in ["fsdp", "fsdp2"]:
             assert config.critic.strategy in ["fsdp", "fsdp2"]
+            from verl.single_controller.ray import RayWorkerGroup
             from trinity.trainer.verl.fsdp_workers import (
                 ActorRolloutRefWorker,
                 CriticWorker,
@@ -94,7 +94,11 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             ray_worker_group_cls = RayWorkerGroup
 
         elif config.actor_rollout_ref.actor.strategy == "megatron":
-            raise NotImplementedError("Not support megatron for now.")
+            assert config.actor_rollout_ref.actor.strategy == config.critic.strategy
+            from verl.single_controller.ray.megatron import NVMegatronRayWorkerGroup
+            from trinity.trainer.verl.megatron_workers import ActorRolloutRefWorker, CriticWorker
+
+            ray_worker_group_cls = NVMegatronRayWorkerGroup
 
         else:
             raise NotImplementedError
@@ -265,6 +269,8 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         self.train_dataloader = _InternalDataLoader(self.config)
         # TODO: compute total training steps
         self.total_training_steps = self.config.trainer.total_training_steps or sys.maxsize
+        self.config.actor_rollout_ref.actor.optim.total_training_steps = self.total_training_steps
+        self.config.critic.optim.total_training_steps = self.total_training_steps
 
     def save_state_dict(self):  # checkpoint sync
         local_global_step_folder = os.path.join(
