@@ -1,13 +1,15 @@
-''' 
+"""
 Prepare data for training.
 Modified from https://github.com/OpenPipe/ART/blob/art-e/examples/art-e/art_e/data/local_email_db.py
-'''
-import sqlite3
-import os
+"""
+
 import logging
-from datasets import load_dataset, Dataset, Features, Value, Sequence
-from tqdm import tqdm
+import os
+import sqlite3
 from datetime import datetime
+
+from datasets import Dataset, Features, Sequence, Value, load_dataset
+from tqdm import tqdm
 
 # Resolve paths relative to this file so it works regardless of the current working directory
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -16,9 +18,7 @@ DEFAULT_DB_PATH = os.path.join(BASE_DIR, "..", "..", "data", "enron_emails.db")
 
 DEFAULT_REPO_ID = "corbt/enron-emails"
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 
 # --- Database Schema ---
@@ -101,9 +101,7 @@ def download_dataset(repo_id: str) -> Dataset:
     # Basic type check remains useful
     if not isinstance(dataset_obj, Dataset):
         raise TypeError(f"Expected Dataset, got {type(dataset_obj)}")
-    logging.info(
-        f"Successfully loaded dataset '{repo_id}' with {len(dataset_obj)} records."
-    )
+    logging.info(f"Successfully loaded dataset '{repo_id}' with {len(dataset_obj)} records.")
     return dataset_obj
 
 
@@ -155,9 +153,7 @@ def populate_database(db_path: str, dataset: Dataset):
 
         # Check body length
         if len(body) > 5000:
-            logging.debug(
-                f"Skipping email {message_id}: Body length > 5000 characters."
-            )
+            logging.debug(f"Skipping email {message_id}: Body length > 5000 characters.")
             skipped_count += 1
             continue
 
@@ -214,9 +210,7 @@ def populate_database(db_path: str, dataset: Dataset):
     conn.close()
     logging.info(f"Successfully inserted {record_count} email records.")
     if skipped_count > 0:
-        logging.info(
-            f"Skipped {skipped_count} email records due to length or recipient limits."
-        )
+        logging.info(f"Skipped {skipped_count} email records due to length or recipient limits.")
     if duplicate_count > 0:
         logging.info(
             f"Skipped {duplicate_count} duplicate email records (based on subject, body, from)."

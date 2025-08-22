@@ -9,12 +9,12 @@ from trinity.common.workflows.workflow import WORKFLOWS, Task, Workflow
 from trinity.utils.log import get_logger
 
 from .react_agent import EmailSearchAgent
-from .utils import QueryModel, AnswerModel, FinalRubric, judge_correctness
+from .utils import AnswerModel, FinalRubric, QueryModel, judge_correctness
 
 logger = get_logger(__name__)
 
 
-SYSTEM_PROMPT = """You are an email search agent. You are given a user query and a list of tools you can use to search the user's email. Use the tools to search the user's emails and find the answer to the user's query. You may take up to {max_turns} turns to find the answer, so if your first seach doesn't find the answer, you can try with different keywords. 
+SYSTEM_PROMPT = """You are an email search agent. You are given a user query and a list of tools you can use to search the user's email. Use the tools to search the user's emails and find the answer to the user's query. You may take up to {max_turns} turns to find the answer, so if your first seach doesn't find the answer, you can try with different keywords.
 Always describe what you see and plan your next steps clearly. When taking actions, explain what you're doing and why. When the answer to the task is found, call `generate_response` to finish the process. Only call `generate_response` when answer is found. You should not respond any next steps in `generate_response`. Complete all steps and then call `generate_response`.
 
 User's email address is {inbox_address}
@@ -27,6 +27,7 @@ class EmailSearchWorkflow(Workflow):
     """
     Multi-turn Email Search workflow (ReAct-style tool use).
     """
+
     def __init__(
         self,
         *,
@@ -72,8 +73,6 @@ class EmailSearchWorkflow(Workflow):
         )
 
         self.toolkit = ServiceToolkit()
-        # self.toolkit.add(search_emails)
-        # self.toolkit.add(read_email)
         self.reset(task)
 
     @property
@@ -134,10 +133,10 @@ class EmailSearchWorkflow(Workflow):
         else:
             answer_and_sources = response.metadata
 
-        reward = self.calculate_reward(answer_and_sources)
+        reward_dict = self.calculate_reward(answer_and_sources)
+        reward = sum(reward_dict.values())
 
         experiences = self.model.extract_experience_from_history(clear_history=True)
-        logger.debug(f"Experiences extracted len: {len(experiences)}")
         for i, experience in enumerate(experiences):
             experience.eid.step = i
             experience.reward = reward
@@ -145,37 +144,30 @@ class EmailSearchWorkflow(Workflow):
             if experience.metrics is None:
                 experience.metrics = {}
             experience.metrics.update(turns_metrics)
+            experience.metrics.update(reward_dict)
         logger.info(
             f"return experience len: {len(experiences)}, final step reward: {experiences[-1].reward}"
         )
         return experiences
 
-    def calculate_reward(self, answer_and_sources: dict) -> float:
-        """ Ref: calculate_reward in https://github.com/OpenPipe/ART/blob/main/dev/art-e/art_e/rollout.py#L64"""
-
-        logger.info(f"{answer_and_sources = }")
-        # logger.info(f"{self.truth = }")
+    def calculate_reward(self, answer_and_sources: dict) -> dict[str, float]:
+        """Ref: calculate_reward in https://github.com/OpenPipe/ART/blob/main/dev/art-e/art_e/rollout.py#L64"""
         try:
             answer = answer_and_sources.get("answer", None)
             sources = answer_and_sources.get("sources", [])
         except Exception as e:
             logger.error(f"Error extracting answer and sources: {e}")
-            return -1
+            result = {"accuracy": 0, "format": -1}
+            return result
 
         if answer is None:
-            return -1
+            result = {"accuracy": 0, "format": -1}
+            return result
 
         if not self.reward_fn_args.get("llm_as_a_judge", True):
-            # import evaluate  # TODO: use blue?
-
-            # bleu_metric = evaluate.load(
-            #     "bleu"
-            # )  # repeat loading is not efficient, but it's fine for now
-            # results = bleu_metric.compute(predictions=[answer], references=[[self.truth]])
-
-            # return results["bleu"]
-
-            return answer.lower() in self.truth.lower()
+            # TODO: may use bleu here
+            result = {"accuracy": float(answer.lower() in self.truth.lower()), "format": 0}
+            return result
 
         rubric = FinalRubric()
         rubric.attempted_answer = answer is not None and answer != ""
@@ -186,18 +178,14 @@ class EmailSearchWorkflow(Workflow):
                 self.query.message_ids[0] in self.agent.ever_read_message_ids
             )
             rubric.sources_correct = self.query.message_ids[0] in sources
-        else:
-            # for debug
-            logger.info(f"{self.query.message_ids = }")
         rubric.num_sources = len(sources)
         rubric.num_turns = len(self.agent.memory.get_memory())  # TODO: make sure this is correct
-
-        logger.info(f"!!!!! Rubric: {rubric.model_dump()}")
+        logger.debug(f"Rubric: {rubric.model_dump()}")
 
         try:
             judge_model = self.auxiliary_models[0] if self.auxiliary_models else None
             judge_response = judge_correctness(answer, self.query, judge_model)
-            logger.info(f"Judge response: {judge_response}")
+            # logger.debug(f"Judge response: {judge_response}")
             rubric.answer_correct = judge_response
 
         except Exception as e:
@@ -223,11 +211,13 @@ class EmailSearchWorkflow(Workflow):
 
         # No formatting error, but wrong answer: reward will be -1 to 0
         if rubric.attempted_answer and not rubric.answer_correct:
-            return -1 + partial_rewards
+            result = {"accuracy": -1, "format": partial_rewards}
+            return result
 
         # Returned no answer at all: reward will be 0 to 1
         if rubric.returned_i_dont_know or rubric.ran_out_of_turns:
-            return 0 + partial_rewards
+            result = {"accuracy": 0, "format": partial_rewards}
+            return result
 
         # Answer is correct: reward will be 1 to 2
         if rubric.answer_correct:
@@ -241,7 +231,8 @@ class EmailSearchWorkflow(Workflow):
 
             # Extra credit for being faster (taking fewer turns).
             reward += 0.1 * (1 - rubric.num_turns / self.max_turns)
-            return reward
+            result = {"accuracy": 1.0, "format": reward}
+            return result
 
         logger.error(f"Rubric {rubric} not handled properly")
         raise ValueError("Rubric is not handled properly")

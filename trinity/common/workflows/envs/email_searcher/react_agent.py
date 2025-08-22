@@ -1,11 +1,13 @@
 import subprocess
-
-from typing import Any
 from dataclasses import asdict
 from datetime import datetime, timedelta
+from typing import Any
 
+from trinity.common.workflows.envs.email_searcher.utils import (
+    read_email_tool,
+    search_emails_tool,
+)
 from trinity.utils.log import get_logger
-from trinity.common.workflows.envs.email_searcher.utils import search_emails_tool, read_email_tool
 
 try:
     import agentscope
@@ -14,8 +16,8 @@ except ImportError as e:
     print(error_message)
     agentscope = None
 
-from agentscope.agents import ReActAgentV2 
-from agentscope.service import ServiceResponse, ServiceExecStatus
+from agentscope.agents import ReActAgentV2
+from agentscope.service import ServiceExecStatus, ServiceResponse
 
 logger = get_logger(__name__)
 
@@ -25,6 +27,7 @@ class EmailSearchAgent(ReActAgentV2):
     A customized ReAct agent that overrides the generate_response method by return_final_answer
     Ref: https://github.com/OpenPipe/ART/blob/main/dev/art-e/art_e/rollout.py#L260
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -53,14 +56,12 @@ class EmailSearchAgent(ReActAgentV2):
         """
 
         try:
-            # res = search_emails_tool(inbox=inbox_address, sent_before=query_date, keywords=keywords)
             next_day = (datetime.strptime(query_date, "%Y-%m-%d") + timedelta(days=1)).strftime(
                 "%Y-%m-%d"
             )
             res = search_emails_tool(inbox=inbox_address, sent_before=next_day, keywords=keywords)
 
             self.message_id_list.extend([r.message_id for r in res])
-            logger.info(f"!!!!! Search results: {res} ")
 
             return ServiceResponse(
                 status=ServiceExecStatus.SUCCESS,

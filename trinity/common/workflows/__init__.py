@@ -6,9 +6,9 @@ from .envs.agentscope.agentscope_react_workflow import AgentScopeReactV2MathWork
 from .envs.alfworld.alfworld_workflow import AlfworldWorkflow, StepWiseAlfworldWorkflow
 from .envs.alfworld.RAFT_alfworld_workflow import RAFTAlfworldWorkflow
 from .envs.alfworld.RAFT_reflect_alfworld_workflow import RAFTReflectAlfworldWorkflow
+from .envs.email_searcher.workflow import EmailSearchWorkflow
 from .envs.sciworld.sciworld_workflow import SciWorldWorkflow
 from .envs.webshop.webshop_workflow import WebShopWorkflow
-from .envs.email_searcher.workflow import EmailSearchWorkflow
 from .eval_workflow import MathEvalWorkflow
 from .math_rm_workflow import MathRMWorkflow
 from .workflow import WORKFLOWS, MathWorkflow, SimpleWorkflow, Task, Workflow

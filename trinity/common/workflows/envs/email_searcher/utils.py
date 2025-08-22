@@ -2,31 +2,30 @@
 This file defines Email Dataclass and three email_search_tools.
 Modified from https://github.com/OpenPipe/ART/blob/art-e/examples/art-e/
 """
+import datetime
 import os
 import sqlite3
-import openai
-import datetime
-from dataclasses import asdict, dataclass
-from typing import Any, Dict, List, Optional
+from dataclasses import dataclass
+from typing import Any, List, Optional
+
 from pydantic import BaseModel, Field, field_validator
-from tenacity import retry, stop_after_attempt, wait_fixed
 
 from trinity.utils.log import get_logger
 
-# from .prepare_data import DEFAULT_DB_PATH # TODO: pass this correctly
-DEFAULT_DB_PATH = "/mnt/yuchang/datasets/enron_emails_trinity/data/enron_emails.db"
 
 logger = get_logger(__name__)
 
 
+DEFAULT_DB_PATH = os.environ.get("DEFAULT_EMAIL_DB_PATH")
 conn = None
+
+
 def get_conn():
     global conn
     if conn is None:
-        conn = sqlite3.connect(
-            f"file:{DEFAULT_DB_PATH}?mode=ro", uri=True, check_same_thread=False
-        )
+        conn = sqlite3.connect(f"file:{DEFAULT_DB_PATH}?mode=ro", uri=True, check_same_thread=False)
     return conn
+
 
 ############ Define dataclass ############
 
@@ -92,16 +91,9 @@ class FinalRubric(BaseModel):
     prompt_tokens: int = 0
     completion_tokens: int = 0
 
-    # TODO
-    # def to_metrics(self) -> dict[str, float | int]:
-    #     metrics: dict[str, float | int] = {k: int(v) for k, v in self.items()}
-    #     metrics["failed_format_validation"] = int(
-    #         self.bad_tool_call_name or self.bad_tool_call_args or self.cant_parse_tool_call
-    #     )
-    #     return metrics
-
 
 ############ Define tools for agentscope ############
+
 
 def search_emails_tool(
     inbox: str,
@@ -129,13 +121,6 @@ def search_emails_tool(
         A list of SearchResult objects, each containing 'message_id' and 'snippet'.
         Returns an empty list if no results are found or an error occurs.
     """
-    # logger.info(
-    #     f"Starting email search with keywords: {keywords}, inbox: {inbox}, DEFAULT_DB_PATH: {DEFAULT_DB_PATH}"
-    # )  # TODO: remove
-    # logger.info(
-    #     f"All parameters: {inbox=}\n {keywords=}\n {from_addr=}\n {to_addr=}\n {sent_after=}\n {sent_before=}\n {max_results=}"
-    # )  # TODO: remove
-
     # Initialize sql and params
     sql: Optional[str] = None
     params: List[str | int] = []
@@ -154,8 +139,7 @@ def search_emails_tool(
 
     # FTS5 default is AND, so just join keywords. Escape quotes for safety.
     fts_query = " ".join(f""" "{k.replace('"', '""')}" """ for k in keywords)
-    # where_clauses.append("fts.emails_fts MATCH ?")
-    where_clauses.append("emails_fts MATCH ?") # FIX
+    where_clauses.append("emails_fts MATCH ?")
     params.append(fts_query)
 
     # 2. Inbox filter (must be from OR to/cc/bcc the inbox user)
@@ -226,9 +210,7 @@ def search_emails_tool(
     results = cursor.fetchall()
 
     # Format results
-    formatted_results = [
-        SearchResult(message_id=row[0], snippet=row[1]) for row in results
-    ]
+    formatted_results = [SearchResult(message_id=row[0], snippet=row[1]) for row in results]
     logger.info(f"Search found {len(formatted_results)} results.")
     return formatted_results
 
@@ -244,8 +226,6 @@ def read_email_tool(message_id: str) -> Optional[Email]:
         An Email object containing the details of the found email,
         or None if the email is not found or an error occurs.
     """
-    # logger.info(f"Reading email with message_id: {message_id}")  # TODO: remove
-
     cursor = get_conn().cursor()
 
     # --- Query for Email Core Details ---
@@ -334,35 +314,6 @@ Return your judgement **accept** from **true** and **false**. Do not return any 
         f"Question: {query.question}\n" f"Reference answer: {query.answer}\n" f"AI answer: {answer}"
     )
 
-    # from agentscope.manager import ModelManager
-    # from agentscope.message import Msg
-
-    # MODEL_CONFIG_NAME = "Qwen/Qwen3-30B-A3B-Instruct-2507"
-    # MODEL_CONFIGURATIONS = [
-    #     {
-    #         "model_type": "openai_chat",
-    #         "config_name": MODEL_CONFIG_NAME,
-    #         "model_name": "Qwen3-32B",
-    #         "use_openai_formatter": True,
-    #     }
-    # ]
-
-    # model_manager = ModelManager.get_instance()
-    # model_manager.load_model_configs(MODEL_CONFIGURATIONS)
-    # model = model_manager.get_model_by_config_name(MODEL_CONFIG_NAME)
-
-    # prompt = judger.format(
-    #     [
-    #         Msg(name="system", content=system_prompt, role="system"),
-    #         Msg(name="user", content=prompt, role="user"),
-    #     ]
-    # )
-
-    # response = model_call_with_retry(
-    #     model,
-    #     prompt,
-    # )
-
     messages = [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": prompt},
@@ -379,18 +330,3 @@ Return your judgement **accept** from **true** and **false**. Do not return any 
         accept = True
 
     return accept
-
-
-# @retry(
-#     stop=stop_after_attempt(3),
-#     wait=wait_fixed(5),
-#     reraise=True,
-# )
-# def model_call_with_retry(
-#     model,
-#     prompt,
-#     tools=None,
-# ):  # omit type to avoid import agentscope here
-#     """Call the model with retry."""
-#     response = model(prompt, tools=tools)
-#     return response
