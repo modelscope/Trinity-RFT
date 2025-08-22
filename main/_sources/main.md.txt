@@ -8,9 +8,12 @@
 
 ## 🚀 News
 
-* [2025-08] ✨ Trinity-RFT v0.2.1 is released with enhanced features for Agentic RL and Async RL.
 * [2025-08] 🎵 We introduce [CHORD](https://github.com/modelscope/Trinity-RFT/tree/main/examples/mix_chord), a dynamic integration of SFT and RL for enhanced LLM fine-tuning ([paper](https://arxiv.org/pdf/2508.11408)).
-* [2025-08] We now support training on general multi-step workflows! Please check out examples for [ALFWorld](./docs/sphinx_doc/source/tutorial/example_step_wise.md) and [ReAct](./docs/sphinx_doc/source/tutorial/example_react.md).
+* [2025-08] ✨ Trinity-RFT v0.2.1 is released! Enhanced features include:
+  * Agentic RL: support training with general multi-step agentic workflows; check out the [ALFWorld](./docs/sphinx_doc/source/tutorial/example_step_wise.md) and [ReAct](./docs/sphinx_doc/source/tutorial/example_react.md) examples.
+  * Rollout-Training scheduling: introduce Scheduler, [Synchronizer](./docs/sphinx_doc/source/tutorial/synchronizer.html) and priority queue buffer, which facilitates more efficient and dynamic scheduling of the RFT process.
+  * [A benchmark tool](./benchmark) for quick verification and experimentation.
+  * RL algorithms: implement [GSPO](https://github.com/modelscope/Trinity-RFT/pull/154), [AsymRE](https://github.com/modelscope/Trinity-RFT/pull/187), [TOPR, CISPO](https://github.com/modelscope/Trinity-RFT/pull/185), [RAFT](https://github.com/modelscope/Trinity-RFT/pull/174).
 * [2025-07] Trinity-RFT v0.2.0 is released.
 * [2025-07] We update the [technical report](https://arxiv.org/abs/2505.17826) (arXiv v2) with new features, examples, and experiments.
 * [2025-06] Trinity-RFT v0.1.1 is released.
@@ -31,11 +34,12 @@ It is designed to support diverse application scenarios and serve as a unified p
 
 * **Unified RFT Core:**
 
-  Supports *synchronous/asynchronous*, *on-policy/off-policy*, and *online/offline* training. Rollout and training can run separately and scale independently on different devices.
+  Supports synchronous/asynchronous, on-policy/off-policy, and online/offline training. Rollout and training can run separately and scale independently on different devices.
 
 * **First-Class Agent-Environment Interaction:**
 
-  Handles lagged feedback, long-tailed latencies, and agent/env failures gracefully. Supports multi-turn agent-env interaction.
+  Handles lagged feedback, long-tailed latencies, and agent/env failures gracefully. Supports general multi-step agent-env interaction.
+
 
 * **Optimized Data Pipelines:**
 
@@ -101,12 +105,13 @@ It is designed to support diverse application scenarios and serve as a unified p
 
 * **Adaptation to New Scenarios:**
 
-  Implement agent-environment interaction logic in a single `Workflow` or `MultiTurnWorkflow` class.  ([Example](/tutorial/example_multi_turn.md))
+  Implement agent-environment interaction logic in a single workflow class ([Example](/tutorial/example_multi_turn.md)),
+  or import existing workflows from agent frameworks like AgentScope ([Example](/tutorial/example_react.md)).
 
 
 * **RL Algorithm Development:**
 
-  Develop custom RL algorithms (loss design, sampling, data processing) in compact, plug-and-play classes.  ([Example](/tutorial/example_mix_algo.md))
+  Develop custom RL algorithms (loss design, sampling strategy, data processing) in compact, plug-and-play classes ([Example](/tutorial/example_mix_algo.md)).
 
 
 * **Low-Code Usage:**
@@ -318,14 +323,11 @@ Tutorials for running different RFT modes:
 + [Offline learning by DPO or SFT](/tutorial/example_dpo.md)
 
 
-Tutorials for adapting Trinity-RFT to a new multi-turn agentic scenario:
+Tutorials for adapting Trinity-RFT to multi-step agentic scenarios:
 
-+ [Concatenated Multi-turn tasks](./docs/sphinx_doc/source/tutorial/example_multi_turn.md)
-
-Tutorials for adapting Trinity-RFT to a general multi-step agentic scenario:
-
-+ [General Multi-Step tasks](./docs/sphinx_doc/source/tutorial/example_step_wise.md)
-+ [ReAct agent tasks](./docs/sphinx_doc/source/tutorial/example_react.md)
++ [Concatenated multi-turn workflow](/tutorial/example_multi_turn.md)
++ [General multi-step workflow](/tutorial/example_step_wise.md)
++ [ReAct workflow with an agent framework](/tutorial/example_react.md)
 
 
 Tutorials for data-related functionalities:
@@ -338,13 +340,17 @@ Tutorials for RL algorithm development/research with Trinity-RFT:
 + [RL algorithm development with Trinity-RFT](/tutorial/example_mix_algo.md)
 
 
-Guidelines for full configurations: see [this document](/tutorial/trinity_configs.md)
+Guidelines for full configurations:
+
++ See [this document](/tutorial/trinity_configs.md)
 
 
 Guidelines for developers and researchers:
 
 + {ref}`Build new RL scenarios <Workflows>`
 + {ref}`Implement new RL algorithms <Algorithms>`
++ [Develop new data operators](/tutorial/trinity_programming_guide.html#operators-for-data-developers)
++ [Understand the coordination between explorer and trainer](/tutorial/synchronizer.html)
 
 
 For some frequently asked questions, see [FAQ](/tutorial/faq.md).

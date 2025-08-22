@@ -97,9 +97,15 @@
 <section id="news">
 <h2>🚀 News<a class="headerlink" href="#news" title="Link to this heading"></a></h2>
 <ul class="simple">
-<li><p>[2025-08] ✨ Trinity-RFT v0.2.1 is released with enhanced features for Agentic RL and Async RL.</p></li>
 <li><p>[2025-08] 🎵 We introduce <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/mix_chord">CHORD</a>, a dynamic integration of SFT and RL for enhanced LLM fine-tuning (<a class="reference external" href="https://arxiv.org/pdf/2508.11408">paper</a>).</p></li>
-<li><p>[2025-08] We now support training on general multi-step workflows! Please check out examples for <a class="reference internal" href="#./docs/sphinx_doc/source/tutorial/example_step_wise.md"><span class="xref myst">ALFWorld</span></a> and <a class="reference internal" href="#./docs/sphinx_doc/source/tutorial/example_react.md"><span class="xref myst">ReAct</span></a>.</p></li>
+<li><p>[2025-08] ✨ Trinity-RFT v0.2.1 is released! Enhanced features include:</p>
+<ul>
+<li><p>Agentic RL: support training with general multi-step agentic workflows; check out the <a class="reference internal" href="#./docs/sphinx_doc/source/tutorial/example_step_wise.md"><span class="xref myst">ALFWorld</span></a> and <a class="reference internal" href="#./docs/sphinx_doc/source/tutorial/example_react.md"><span class="xref myst">ReAct</span></a> examples.</p></li>
+<li><p>Rollout-Training scheduling: introduce Scheduler, <a class="reference internal" href="#./docs/sphinx_doc/source/tutorial/synchronizer.html"><span class="xref myst">Synchronizer</span></a> and priority queue buffer, which facilitates more efficient and dynamic scheduling of the RFT process.</p></li>
+<li><p><a class="reference internal" href="#./benchmark"><span class="xref myst">A benchmark tool</span></a> for quick verification and experimentation.</p></li>
+<li><p>RL algorithms: implement <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/pull/154">GSPO</a>, <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/pull/187">AsymRE</a>, <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/pull/185">TOPR, CISPO</a>, <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/pull/174">RAFT</a>.</p></li>
+</ul>
+</li>
 <li><p>[2025-07] Trinity-RFT v0.2.0 is released.</p></li>
 <li><p>[2025-07] We update the <a class="reference external" href="https://arxiv.org/abs/2505.17826">technical report</a> (arXiv v2) with new features, examples, and experiments.</p></li>
 <li><p>[2025-06] Trinity-RFT v0.1.1 is released.</p></li>
@@ -116,10 +122,10 @@ It is designed to support diverse application scenarios and serve as a unified p
 <h2>✨ Key Features<a class="headerlink" href="#key-features" title="Link to this heading"></a></h2>
 <ul>
 <li><p><strong>Unified RFT Core:</strong></p>
-<p>Supports <em>synchronous/asynchronous</em>, <em>on-policy/off-policy</em>, and <em>online/offline</em> training. Rollout and training can run separately and scale independently on different devices.</p>
+<p>Supports synchronous/asynchronous, on-policy/off-policy, and online/offline training. Rollout and training can run separately and scale independently on different devices.</p>
 </li>
 <li><p><strong>First-Class Agent-Environment Interaction:</strong></p>
-<p>Handles lagged feedback, long-tailed latencies, and agent/env failures gracefully. Supports multi-turn agent-env interaction.</p>
+<p>Handles lagged feedback, long-tailed latencies, and agent/env failures gracefully. Supports general multi-step agent-env interaction.</p>
 </li>
 <li><p><strong>Optimized Data Pipelines:</strong></p>
 <p>Treats rollout tasks and experiences as dynamic assets, enabling active management (prioritization, cleaning, augmentation) throughout the RFT lifecycle.</p>
@@ -158,10 +164,11 @@ It is designed to support diverse application scenarios and serve as a unified p
 <h2>🛠️ What can I use Trinity-RFT for?<a class="headerlink" href="#what-can-i-use-trinity-rft-for" title="Link to this heading"></a></h2>
 <ul>
 <li><p><strong>Adaptation to New Scenarios:</strong></p>
-<p>Implement agent-environment interaction logic in a single <code class="docutils literal notranslate"><span class="pre">Workflow</span></code> or <code class="docutils literal notranslate"><span class="pre">MultiTurnWorkflow</span></code> class.  (<a class="reference internal" href="tutorial/example_multi_turn.html"><span class="std std-doc">Example</span></a>)</p>
+<p>Implement agent-environment interaction logic in a single workflow class (<a class="reference internal" href="tutorial/example_multi_turn.html"><span class="std std-doc">Example</span></a>),
+or import existing workflows from agent frameworks like AgentScope (<a class="reference internal" href="tutorial/example_react.html"><span class="std std-doc">Example</span></a>).</p>
 </li>
 <li><p><strong>RL Algorithm Development:</strong></p>
-<p>Develop custom RL algorithms (loss design, sampling, data processing) in compact, plug-and-play classes.  (<a class="reference internal" href="tutorial/example_mix_algo.html"><span class="std std-doc">Example</span></a>)</p>
+<p>Develop custom RL algorithms (loss design, sampling strategy, data processing) in compact, plug-and-play classes (<a class="reference internal" href="tutorial/example_mix_algo.html"><span class="std std-doc">Example</span></a>).</p>
 </li>
 <li><p><strong>Low-Code Usage:</strong></p>
 <p>Use graphical interfaces for easy monitoring and tracking of the learning process.</p>
@@ -325,14 +332,11 @@ wandb<span class="w"> </span>login
 <li><p><a class="reference internal" href="tutorial/example_async_mode.html"><span class="std std-doc">Fully asynchronous RFT</span></a></p></li>
 <li><p><a class="reference internal" href="tutorial/example_dpo.html"><span class="std std-doc">Offline learning by DPO or SFT</span></a></p></li>
 </ul>
-<p>Tutorials for adapting Trinity-RFT to a new multi-turn agentic scenario:</p>
+<p>Tutorials for adapting Trinity-RFT to multi-step agentic scenarios:</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="#./docs/sphinx_doc/source/tutorial/example_multi_turn.md"><span class="xref myst">Concatenated Multi-turn tasks</span></a></p></li>
-</ul>
-<p>Tutorials for adapting Trinity-RFT to a general multi-step agentic scenario:</p>
-<ul class="simple">
-<li><p><a class="reference internal" href="#./docs/sphinx_doc/source/tutorial/example_step_wise.md"><span class="xref myst">General Multi-Step tasks</span></a></p></li>
-<li><p><a class="reference internal" href="#./docs/sphinx_doc/source/tutorial/example_react.md"><span class="xref myst">ReAct agent tasks</span></a></p></li>
+<li><p><a class="reference internal" href="tutorial/example_multi_turn.html"><span class="std std-doc">Concatenated multi-turn workflow</span></a></p></li>
+<li><p><a class="reference internal" href="tutorial/example_step_wise.html"><span class="std std-doc">General multi-step workflow</span></a></p></li>
+<li><p><a class="reference internal" href="tutorial/example_react.html"><span class="std std-doc">ReAct workflow with an agent framework</span></a></p></li>
 </ul>
 <p>Tutorials for data-related functionalities:</p>
 <ul class="simple">
@@ -342,11 +346,16 @@ wandb<span class="w"> </span>login
 <ul class="simple">
 <li><p><a class="reference internal" href="tutorial/example_mix_algo.html"><span class="std std-doc">RL algorithm development with Trinity-RFT</span></a></p></li>
 </ul>
-<p>Guidelines for full configurations: see <a class="reference internal" href="tutorial/trinity_configs.html"><span class="std std-doc">this document</span></a></p>
+<p>Guidelines for full configurations:</p>
+<ul class="simple">
+<li><p>See <a class="reference internal" href="tutorial/trinity_configs.html"><span class="std std-doc">this document</span></a></p></li>
+</ul>
 <p>Guidelines for developers and researchers:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="tutorial/trinity_programming_guide.html#workflows"><span class="std std-ref">Build new RL scenarios</span></a></p></li>
 <li><p><a class="reference internal" href="tutorial/trinity_programming_guide.html#algorithms"><span class="std std-ref">Implement new RL algorithms</span></a></p></li>
+<li><p><a class="reference internal" href="#/tutorial/trinity_programming_guide.html#operators-for-data-developers"><span class="xref myst">Develop new data operators</span></a></p></li>
+<li><p><a class="reference internal" href="#/tutorial/synchronizer.html"><span class="xref myst">Understand the coordination between explorer and trainer</span></a></p></li>
 </ul>
 <p>For some frequently asked questions, see <a class="reference internal" href="tutorial/faq.html"><span class="std std-doc">FAQ</span></a>.</p>
 </section>
