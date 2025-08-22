@@ -350,7 +350,7 @@ Tutorials for adapting Trinity-RFT to multi-step agentic scenarios:
 
 + [Concatenated multi-turn workflow](./docs/sphinx_doc/source/tutorial/example_multi_turn.md)
 + [General multi-step workflow](./docs/sphinx_doc/source/tutorial/example_step_wise.md)
-+ [ReAct workflow, imported directly from an agent framework](./docs/sphinx_doc/source/tutorial/example_react.md)
++ [ReAct workflow with an agent framework](./docs/sphinx_doc/source/tutorial/example_react.md)
 
 
 Tutorials for data-related functionalities:

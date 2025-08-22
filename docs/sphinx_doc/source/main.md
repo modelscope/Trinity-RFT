@@ -327,7 +327,7 @@ Tutorials for adapting Trinity-RFT to multi-step agentic scenarios:
 
 + [Concatenated multi-turn workflow](/tutorial/example_multi_turn.md)
 + [General multi-step workflow](/tutorial/example_step_wise.md)
-+ [ReAct workflow, imported directly from an agent framework](/tutorial/example_react.md)
++ [ReAct workflow with an agent framework](/tutorial/example_react.md)
 
 
 Tutorials for data-related functionalities:

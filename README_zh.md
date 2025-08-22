@@ -349,7 +349,7 @@ trinity run --config examples/grpo_gsm8k/gsm8k.yaml
 
 + [拼接多轮任务](./docs/sphinx_doc/source/tutorial/example_multi_turn.md)
 + [通用多轮任务](./docs/sphinx_doc/source/tutorial/example_step_wise.md)
-+ [直接调用智能体框架中的 ReAct 工作流](./docs/sphinx_doc/source/tutorial/example_react.md)
++ [调用智能体框架中的 ReAct 工作流](./docs/sphinx_doc/source/tutorial/example_react.md)
 
 
 数据相关功能的教程：
