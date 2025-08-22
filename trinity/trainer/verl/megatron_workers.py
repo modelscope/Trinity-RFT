@@ -22,6 +22,7 @@ import time
 from typing import Any
 
 import psutil
+import ray
 import torch
 import torch.distributed
 from codetiming import Timer
@@ -106,7 +107,6 @@ class ActorRolloutRefWorker(MegatronWorker, DistProfilerExtension):
         assert self.role in ["actor", "rollout", "ref", "actor_rollout", "actor_rollout_ref"]
 
         self._is_actor = self.role in ["actor", "actor_rollout", "actor_rollout_ref"]
-        self._is_rollout = False # self.role in ["rollout", "actor_rollout", "actor_rollout_ref"]
         self._is_ref = self.role in ["ref", "actor_rollout_ref"]
 
         profiler_config = omega_conf_to_dataclass(config.get("profiler"))
@@ -195,7 +195,7 @@ class ActorRolloutRefWorker(MegatronWorker, DistProfilerExtension):
                     override_ddp_config=override_ddp_config,
                 )
 
-        if self._is_actor or self._is_rollout:
+        if self._is_actor:
             actor_module = make_model(wrap_with_ddp=True)
             print(f"actor_module: {len(actor_module)}")
             if self.config.actor.load_weight:
@@ -252,118 +252,6 @@ class ActorRolloutRefWorker(MegatronWorker, DistProfilerExtension):
 
         return actor_module, actor_optimizer, actor_optimizer_scheduler, self.hf_config, optim_config
 
-    def _build_rollout(self, trust_remote_code=False):
-        from torch.distributed.device_mesh import init_device_mesh
-
-        layer_name_mapping = {
-            "qkv_layer_name": "self_attention.linear_qkv.",
-            "gate_proj_layer_name": "linear_fc1.",
-        }
-        if self.config.rollout.name == "vllm":
-            from torch.distributed.device_mesh import init_device_mesh
-
-            from verl.workers.rollout.vllm_rollout import vLLMRollout
-            from verl.workers.sharding_manager.megatron_vllm import MegatronVLLMShardingManager
-
-            # NOTE(sgm): If the QKV and gate_up projection layer are concate together in actor,
-            # we will reorganize their weight format when resharding from actor to rollout.
-
-            infer_tp = self.config.rollout.tensor_model_parallel_size
-            dp = self.world_size // infer_tp
-            assert self.world_size % infer_tp == 0, (
-                f"rollout world_size: {self.world_size} is not divisible by infer_tp: {infer_tp}"
-            )
-            rollout_device_mesh = init_device_mesh(
-                get_device_name(), mesh_shape=(dp, infer_tp), mesh_dim_names=["dp", "infer_tp"]
-            )
-            log_gpu_memory_usage("Before building vllm rollout", logger=None)
-
-            local_path = copy_to_local(self.config.model.path, use_shm=self.config.model.get("use_shm", False))
-            from verl.workers.rollout.vllm_rollout import vLLMAsyncRollout
-
-            vllm_rollout_cls = vLLMRollout if self.config.rollout.mode == "sync" else vLLMAsyncRollout
-            rollout = vllm_rollout_cls(
-                model_path=local_path,
-                config=self.config.rollout,
-                tokenizer=self.tokenizer,
-                model_hf_config=self.actor_model_config,
-                device_mesh=rollout_device_mesh,
-                trust_remote_code=trust_remote_code,
-            )
-            log_gpu_memory_usage("After building vllm rollout", logger=logger)
-
-            # perform weight resharding between actor and rollout
-            from verl.models.mcore import get_mcore_weight_converter
-
-            weight_converter = get_mcore_weight_converter(self.actor_model_config, self.dtype)
-            sharding_manager = MegatronVLLMShardingManager(
-                inference_engine=rollout.inference_engine,
-                model_config=self.actor_model_config,
-                transformer_config=self.tf_config,
-                rollout_config=self.config.rollout,
-                layer_name_mapping=layer_name_mapping,
-                actor_module=self.actor.actor_module,
-                weight_converter=weight_converter,
-                device_mesh=rollout_device_mesh,
-                offload_param=self._is_offload_param,
-                bridge=self.bridge,
-            )
-            log_gpu_memory_usage("After building sharding manager", logger=logger)
-
-        elif self.config.rollout.name == "sglang":
-            from verl.workers.rollout.sglang_rollout import SGLangRollout
-
-            # NOTE(linjunrong): Due to recent fp8 support in SGLang. Now importing any symbol relate to SGLang's
-            # model_runner would check CUDA device capability.
-            # However, due to verl's setting, the main process of ray can not find any CUDA device, which would
-            # potentially lead to: "RuntimeError: No CUDA GPUs are available".
-            # For this reason, sharding_manager.__init__ should not import FSDPSGLangShardingManager and we import it
-            # here use the abs path.
-            # check: https://github.com/sgl-project/sglang/blob/00f42707eaddfc2c0528e5b1e0094025c640b7a0/python/sglang/srt/layers/quantization/fp8_utils.py#L76
-            from verl.workers.sharding_manager.megatron_sglang import MegatronSGLangShardingManager
-
-            infer_tp = self.config.rollout.tensor_model_parallel_size
-            dp = self.world_size // infer_tp
-            assert self.world_size % infer_tp == 0, (
-                f"rollout world_size: {self.world_size} is not divisible by infer_tp: {infer_tp}"
-            )
-            rollout_device_mesh = init_device_mesh(
-                "cpu", mesh_shape=(dp, infer_tp, 1), mesh_dim_names=("dp", "tp", "pp")
-            )
-
-            local_path = copy_to_local(self.config.model.path)
-            log_gpu_memory_usage(f"Before building {self.config.rollout.name} rollout", logger=None)
-            rollout = SGLangRollout(
-                actor_module=local_path,
-                config=self.config.rollout,
-                processing_class=self.processor if self.processor is not None else self.tokenizer,
-                model_hf_config=self.actor_model_config,
-                trust_remote_code=trust_remote_code,
-                device_mesh=rollout_device_mesh,
-            )
-            log_gpu_memory_usage(f"After building {self.config.rollout.name} rollout", logger=None)
-
-            from verl.models.mcore import get_mcore_weight_converter
-
-            weight_converter = get_mcore_weight_converter(self.actor_model_config, self.dtype)
-            sharding_manager = MegatronSGLangShardingManager(
-                actor_module=self.actor.actor_module,
-                inference_engine=rollout._engine,
-                model_config=self.actor_model_config,
-                rollout_config=self.config.rollout,
-                transformer_config=self.tf_config,
-                layer_name_mapping=layer_name_mapping,
-                weight_converter=weight_converter,
-                bridge=self.bridge,
-                device_mesh=rollout_device_mesh,
-                offload_param=self._is_offload_param,
-            )
-            log_gpu_memory_usage("After building sharding manager", logger=logger)
-        else:
-            raise NotImplementedError("Only vllmRollout is supported with Megatron now")
-        print(f"rollout and sharding manager init done sharding_manager: {sharding_manager}")
-        return rollout, sharding_manager
-
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
     def init_model(self):
         if self.config.model.get("external_lib", None) is not None:
@@ -388,8 +276,8 @@ class ActorRolloutRefWorker(MegatronWorker, DistProfilerExtension):
         self.param_dtype = torch.bfloat16
         log_gpu_memory_usage("Before init actor model and optimizer", logger=logger)
         self.dtype = PrecisionType.to_dtype(self.param_dtype)
-        if self._is_actor or self._is_rollout:
-            # we need the model for actor and rollout
+        if self._is_actor:
+            # we need the model for actor
             optim_config = self.config.actor.optim if self._is_actor else None
             (
                 self.actor_module,
@@ -424,14 +312,6 @@ class ActorRolloutRefWorker(MegatronWorker, DistProfilerExtension):
                 actor_optimizer=self.actor_optimizer,
             )
             log_gpu_memory_usage("After MegatronPPOActor init", logger=logger)
-
-        if self._is_rollout:
-            self.rollout, self.sharding_manager = self._build_rollout(
-                trust_remote_code=self.config.model.get("trust_remote_code", False)
-            )
-            # used for sleep/wake_up
-            self.rollout.sharding_manager = self.sharding_manager
-            log_gpu_memory_usage("After rollout init", logger=logger)
 
         if self._is_ref:
             self.ref_module, self.ref_model_config = self._build_model_optimizer(
@@ -474,17 +354,44 @@ class ActorRolloutRefWorker(MegatronWorker, DistProfilerExtension):
                 bridge=self.bridge,
                 use_dist_checkpointing=self.config.actor.megatron.use_dist_checkpointing,
             )
+        self.synchronizer = Synchronizer.get_actor(namespace=self.config.synchronizer.ray_namespace)
         get_torch_device().empty_cache()
         log_gpu_memory_usage("After init_model finish", logger=logger)
 
+    def _get_tensor_generator(self):
+        """
+        This part of the code is written by referring to the initialization of the `MegatronVLLMShardingManager` class
+        in `verl.workers.megatron_workers.ActorRolloutRefWorker._build_rollout` and its `__enter__` method.
+        When the version of verl changes, please check the related code.
+        """
+        from verl.models.mcore import get_mcore_weight_converter
+        from verl.utils.megatron_utils import per_tensor_generator
+        weight_converter = get_mcore_weight_converter(self.actor_model_config, self.dtype)
+        layer_name_mapping = {
+            "qkv_layer_name": "self_attention.linear_qkv.",
+            "gate_proj_layer_name": "linear_fc1.",
+        }
+        if self.bridge is not None:
+            per_tensor_param = self.bridge.export_weights(self.actor_module)
+        else:
+            per_tensor_param = per_tensor_generator(
+                self.actor_module,
+                self.actor_model_config,
+                weight_converter,
+                self.tf_config,
+                layer_name_mapping,
+            )
+        return per_tensor_param
 
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
     def setup_weight_sync_group(self):
         if self.config.synchronizer.sync_method == SyncMethod.NCCL:
             self.state_dict_meta = []
-            if torch.distributed.get_rank() == 0:
-                import ray
+            for name, weight in self._get_tensor_generator():
+                self.state_dict_meta.append((name, str(weight.dtype), tuple(weight.shape)))
+                del weight
 
+            if torch.distributed.get_rank() == 0:
                 master_address, master_port = self.get_availale_master_addr_port()
                 world_size = self.config.synchronizer.explorer_world_size + 1
                 print(f"Trainer init_process_group {master_address}:{master_port} ({world_size}).")
@@ -510,6 +417,10 @@ class ActorRolloutRefWorker(MegatronWorker, DistProfilerExtension):
 
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
     def sync_weight(self):
+        for name, weight in self._get_tensor_generator():
+            if torch.distributed.get_rank() == 0:
+                torch.distributed.broadcast(weight, 0, group=self._model_update_group)
+            del weight
         if torch.distributed.get_rank() == 0:
             torch.distributed.barrier(group=self._model_update_group)
             torch.cuda.synchronize()
@@ -518,8 +429,13 @@ class ActorRolloutRefWorker(MegatronWorker, DistProfilerExtension):
 
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
     def upload_state_dict(self, trainer_step: int):
-        pass
-        # self.checkpoint_manager.upload_state_dict(trainer_step)
+        state_dict = {}
+        for name, weight in self._get_tensor_generator():
+            if torch.distributed.get_rank() == 0:
+                state_dict[name] = weight.cpu().detach()
+            del weight
+        if torch.distributed.get_rank() == 0:
+            ray.get(self.synchronizer.set_model_state_dict.remote(state_dict, trainer_step))
 
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
     def set_algorithm(self, algo_config: AlgorithmConfig):
@@ -567,43 +483,6 @@ class ActorRolloutRefWorker(MegatronWorker, DistProfilerExtension):
             offload_megatron_optimizer(self.actor_optimizer)
             log_gpu_memory_usage("After offload actor optimizer during update_actor", logger=logger)
 
-        get_torch_device().empty_cache()
-        return output
-
-    @register(dispatch_mode=Dispatch.DP_COMPUTE_PROTO)
-    @GPUMemoryLogger(role="generate_sequences", logger=logger)
-    @DistProfiler.annotate(color="red")
-    def generate_sequences(self, prompts: DataProto):
-        assert self._is_rollout
-        prompts.batch = prompts.batch.to(get_device_name())
-        meta_info = {
-            "eos_token_id": self.generation_config.eos_token_id
-            if self.generation_config is not None
-            else self.tokenizer.eos_token_id,
-            "pad_token_id": self.generation_config.pad_token_id
-            if self.generation_config is not None
-            else self.tokenizer.pad_token_id,
-        }
-        prompts.meta_info.update(meta_info)
-        if self._is_offload_optimizer:
-            offload_megatron_optimizer(self.actor_optimizer)
-
-        timing_generate = {}
-        with self.sharding_manager:
-            log_gpu_memory_usage("After entering sharding manager", logger=logger)
-            prompts = self.sharding_manager.preprocess_data(prompts)
-            with simple_timer("generate_sequences", timing_generate):
-                output = self.rollout.generate_sequences(prompts=prompts)
-            output = self.sharding_manager.postprocess_data(output)
-            log_gpu_memory_usage("After rollout generation", logger=logger)
-
-        timing_generate.update(self.sharding_manager.timing)
-        # We calculate the average timing across all ranks
-        # to make sure meta_info["timing"] is the same
-        timing_generate = reduce_timing(timing_generate)
-        output.meta_info["timing"] = timing_generate
-        output = output.to("cpu")
-        # clear kv cache
         get_torch_device().empty_cache()
         return output
 
@@ -687,12 +566,12 @@ class ActorRolloutRefWorker(MegatronWorker, DistProfilerExtension):
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
     def clear_optimizer_state(self):
         print("Clear actor optimizer state")
-        # if self._is_offload_optimizer:
-        #     load_fsdp_optimizer(optimizer=self.actor_optimizer, device_id=get_device_id())
-        # self.actor_optimizer.state.clear()
-        # self.actor_optimizer.zero_grad()
-        # if self._is_offload_optimizer:
-        #     offload_fsdp_optimizer(self.actor_optimizer)
+        if self._is_offload_optimizer:
+            load_megatron_optimizer(self.actor_optimizer)
+        self.actor_optimizer.state.clear()
+        self.actor_optimizer.zero_grad()
+        if self._is_offload_optimizer:
+            offload_megatron_optimizer(self.actor_optimizer)
 
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
     def wait_on_save_thread(self) -> None:
@@ -976,12 +855,12 @@ class CriticWorker(MegatronWorker, DistProfilerExtension):
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
     def clear_optimizer_state(self):
         print("Clear critic optimizer state")
-        # if self._is_offload_optimizer:
-        #     load_fsdp_optimizer(optimizer=self.critic_optimizer, device_id=get_device_id())
-        # self.critic_optimizer.state.clear()
-        # self.critic_optimizer.zero_grad()
-        # if self._is_offload_optimizer:
-        #     offload_fsdp_optimizer(self.critic_optimizer)
+        if self._is_offload_optimizer:
+            load_megatron_optimizer(self.critic_optimizer)
+        self.critic_optimizer.state.clear()
+        self.critic_optimizer.zero_grad()
+        if self._is_offload_optimizer:
+            offload_megatron_optimizer(self.critic_optimizer)
 
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
     def wait_on_save_thread(self) -> None:
