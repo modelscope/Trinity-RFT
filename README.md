@@ -133,7 +133,7 @@ A more technical version:
 
 * **Adaptation to New Scenarios:**
 
-  Implement agent-environment interaction logic in a single `Workflow`/`MultiTurnWorkflow`/`RewardPropagationWorkflow` class ([Example](./docs/sphinx_doc/source/tutorial/example_multi_turn.md)),
+  Implement agent-environment interaction logic in a single workflow class ([Example](./docs/sphinx_doc/source/tutorial/example_multi_turn.md)),
   or import existing workflows from agent frameworks like AgentScope ([Example](./docs/sphinx_doc/source/tutorial/example_react.md)).
 
 
@@ -369,7 +369,7 @@ Tutorials for RL algorithm development/research with Trinity-RFT:
 + [RL algorithm development with Trinity-RFT](./docs/sphinx_doc/source/tutorial/example_mix_algo.md)
 
 
-Guidelines for full configurations: 
+Guidelines for full configurations:
 
 + See [this document](./docs/sphinx_doc/source/tutorial/trinity_configs.md)
 
