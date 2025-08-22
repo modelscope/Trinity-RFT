@@ -116,13 +116,6 @@ class RunningStatus(Enum):
     STOPPED = "stopped"
 
 
-class DataProcessorPipelineType(Enum):
-    """Data processor pipeline type."""
-
-    EXPERIENCE = "experience"
-    TASK = "task"
-
-
 class OpType(Enum):
     """Operator type for reward shaping."""
 

@@ -1,7 +1,6 @@
 from typing import Any, Dict
 
 from trinity.common.config import Config, OperatorConfig, TaskPipelineConfig
-from trinity.common.constants import DataProcessorPipelineType
 from trinity.utils.log import get_logger
 
 
@@ -45,7 +44,7 @@ class TaskPipeline:
             raise ValueError("When using task pipeline, taskset.path must be set.")
 
         converted_config = {
-            "pipeline_type": DataProcessorPipelineType.TASK,
+            "pipeline_type": "task",
             "operators": [_convert_operator(op) for op in pipeline_config.operators],
             "np": pipeline_config.num_process,
             "config_path": pipeline_config.config_path,

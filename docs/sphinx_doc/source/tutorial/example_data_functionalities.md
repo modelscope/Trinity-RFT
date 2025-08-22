@@ -13,7 +13,7 @@ To support the data processing of Data-Juicer and RFT-related operators, Trinity
 An overview of the data processor is shown in the following figure.
 
 <div align="center">
-  <img src="https://private-user-images.githubusercontent.com/32844285/478854230-5101bb18-bc70-40d5-952b-0680a3a3be2f.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NTU3Nzg0NDUsIm5iZiI6MTc1NTc3ODE0NSwicGF0aCI6Ii8zMjg0NDI4NS80Nzg4NTQyMzAtNTEwMWJiMTgtYmM3MC00MGQ1LTk1MmItMDY4MGEzYTNiZTJmLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA4MjElMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwODIxVDEyMDkwNVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTM4YTM0NDc4N2M4NjlkMzdjMTlmZGFiYzg4ZjRmNzMyYmE5MDZlOGJkNzg0MmU1MGJlODE3Njg4NjJjNTE0NGQmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.SxKs34CxZhYXKit0zvERPCQ4dDeWQgx7Y_Cagacg8so" alt="Trinity-RFT Data Processor" style="height: 500px;">
+  <img src="https://img.alicdn.com/imgextra/i2/O1CN01zqPhn21zFmmjSWRJk_!!6000000006685-2-tps-1127-733.png" alt="Trinity-RFT Data Processor" style="height: 500px;">
 </div>
 
 ## Example: Data Processor for Task Pipeline
