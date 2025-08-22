@@ -101,20 +101,10 @@ Trinity-RFT是一个通用、灵活且易于使用的大语言模型强化微调
 
 
 <details>
-<summary>图：数据处理器的架构</summary>
+<summary>图：Trinity-RFT 中数据处理的设计</summary>
 
 <p align="center">
-  <img src="https://img.alicdn.com/imgextra/i3/O1CN01hR1LCh25kpJMKmYR4_!!6000000007565-2-tps-1474-740.png" alt="Trinity-RFT-data-pipeline-buffer">
-</p>
-
-</details>
-
-
-<details>
-<summary>图：Trinity-RFT 中数据处理的整体设计</summary>
-
-<p align="center">
-  <img src="https://img.alicdn.com/imgextra/i4/O1CN01UvyfcZ1WoTv5t3pCp_!!6000000002835-2-tps-1166-274.png" alt="Trinity-RFT-data-pipelines">
+  <img src="https://img.alicdn.com/imgextra/i2/O1CN01BfeHp61sXSlGjH7zQ_!!6000000005776-2-tps-1734-473.png" alt="Trinity-RFT-data-pipelines">
 </p>
 
 </details>

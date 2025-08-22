@@ -102,20 +102,10 @@ It is designed to support diverse application scenarios and serve as a unified p
 
 
 <details>
-<summary>Figure: The architecture of data processors</summary>
+<summary>Figure: The design of data pipelines in Trinity-RFT</summary>
 
 <p align="center">
-  <img src="https://img.alicdn.com/imgextra/i3/O1CN01hR1LCh25kpJMKmYR4_!!6000000007565-2-tps-1474-740.png" alt="Trinity-RFT-data-pipeline-buffer">
-</p>
-
-</details>
-
-
-<details>
-<summary>Figure: The high-level design of data pipelines in Trinity-RFT</summary>
-
-<p align="center">
-  <img src="https://img.alicdn.com/imgextra/i4/O1CN01UvyfcZ1WoTv5t3pCp_!!6000000002835-2-tps-1166-274.png" alt="Trinity-RFT-data-pipelines">
+  <img src="https://img.alicdn.com/imgextra/i2/O1CN01BfeHp61sXSlGjH7zQ_!!6000000005776-2-tps-1734-473.png" alt="Trinity-RFT-data-pipelines">
 </p>
 
 </details>
