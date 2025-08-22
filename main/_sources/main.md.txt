@@ -83,17 +83,9 @@ It is designed to support diverse application scenarios and serve as a unified p
 
 
 <details>
-<summary>Figure: The architecture of data processors</summary>
+<summary>Figure: The design of data pipelines in Trinity-RFT</summary>
 
-![Trinity-RFT-data-pipeline-buffer](../assets/trinity-data-pipeline-buffer.png)
-
-</details>
-
-
-<details>
-<summary>Figure: The high-level design of data pipelines in Trinity-RFT</summary>
-
-![Trinity-RFT-data-pipelines](../assets/trinity-data-pipelines.png)
+![Trinity-RFT-data-pipelines](../assets/trinity_data_process.png)
 
 </details>
 <br>
