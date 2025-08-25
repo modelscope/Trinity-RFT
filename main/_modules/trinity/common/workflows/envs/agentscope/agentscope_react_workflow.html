@@ -101,9 +101,6 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelWrapper</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.rewards.math_reward</span><span class="w"> </span><span class="kn">import</span> <span class="n">MathBoxedRewardFn</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">WORKFLOWS</span><span class="p">,</span> <span class="n">Task</span><span class="p">,</span> <span class="n">Workflow</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
-
-<span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="AgentScopeReactV2MathWorkflow">
@@ -129,7 +126,7 @@
             <span class="kn">from</span><span class="w"> </span><span class="nn">agentscope.service</span><span class="w"> </span><span class="kn">import</span> <span class="n">ServiceToolkit</span><span class="p">,</span> <span class="n">execute_python_code</span>
         <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">error_message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;AgentScope is not installed. Please install the agentscope framework first before running the workflow. Error: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
 
         <span class="c1"># get openai client from model</span>
@@ -184,7 +181,7 @@
             <span class="kn">from</span><span class="w"> </span><span class="nn">agentscope.agents</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReActAgentV2</span>
         <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">error_message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;AgentScope is not installed. Please install the agentscope framework first before running the workflow. Error: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">agent</span> <span class="o">=</span> <span class="n">ReActAgentV2</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;math_react_agent&quot;</span><span class="p">,</span>
@@ -209,7 +206,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">answer</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">truth</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error in getting answer from truth: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error in getting answer from truth: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">answer</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">truth</span><span class="p">)</span>
 
         <span class="c1"># we use the boxed format to evaluate the answer</span>
@@ -228,7 +225,7 @@
             <span class="kn">from</span><span class="w"> </span><span class="nn">agentscope.message</span><span class="w"> </span><span class="kn">import</span> <span class="n">Msg</span>
         <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">error_message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;AgentScope is not installed. Please install the agentscope framework first before running the workflow. Error: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
 
         <span class="c1"># provide the task to the react agent</span>
@@ -244,14 +241,14 @@
                 <span class="n">response_text</span> <span class="o">=</span> <span class="n">content</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">error_message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Error in processing the response: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
             <span class="n">response_text</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
 
         <span class="n">reward</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reward_fn</span><span class="p">(</span><span class="n">response_text</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">answer</span><span class="p">)</span>
         <span class="n">reward</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">reward</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reward: </span><span class="si">{</span><span class="n">reward</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reward: </span><span class="si">{</span><span class="n">reward</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">experiences</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">extract_experience_from_history</span><span class="p">(</span><span class="n">clear_history</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Experiences extracted len: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">experiences</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Experiences extracted len: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">experiences</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">experience</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">experiences</span><span class="p">):</span>
             <span class="n">experience</span><span class="o">.</span><span class="n">eid</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="n">i</span>
             <span class="n">experience</span><span class="o">.</span><span class="n">reward</span> <span class="o">=</span> <span class="n">reward</span>
@@ -259,7 +256,7 @@
             <span class="k">if</span> <span class="n">experience</span><span class="o">.</span><span class="n">metrics</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">experience</span><span class="o">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="n">experience</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">turns_metrics</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;return experience len: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">experiences</span><span class="p">)</span><span class="si">}</span><span class="s2">, run_id: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">experiences</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">eid</span><span class="o">.</span><span class="n">run</span><span class="p">)</span><span class="si">}</span><span class="s2">, final step reward: </span><span class="si">{</span><span class="n">experiences</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">reward</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">experiences</span></div>

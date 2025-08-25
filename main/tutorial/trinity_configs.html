@@ -72,7 +72,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#explorer-configuration">Explorer Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#synchronizer-configuration">Synchronizer Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#trainer-configuration">Trainer Configuration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#data-processor-configuration">Data Processor Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#service-configuration">Service Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#log-configuration">Log Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#verl-trainer-configuration-advanced">veRL Trainer Configuration (Advanced)</a></li>
 </ul>
 </li>
@@ -150,6 +151,14 @@
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="nt">data_processor</span><span class="p">:</span>
 <span class="w">  </span><span class="c1"># Preprocessing data settings</span>
+<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+
+<span class="nt">service</span><span class="p">:</span>
+<span class="w">  </span><span class="c1"># Services to use</span>
+<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+
+<span class="nt">log</span><span class="p">:</span>
+<span class="w">  </span><span class="c1"># Ray actor logging</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 </pre></div>
 </div>
@@ -521,27 +530,34 @@
 </ul>
 </section>
 <hr class="docutils" />
-<section id="data-processor-configuration">
-<h2>Data Processor Configuration<a class="headerlink" href="#data-processor-configuration" title="Link to this heading"></a></h2>
-<p>Configures preprocessing and data cleaning pipelines.</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">data_processor</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">source_data_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/DATASET</span>
-<span class="w">  </span><span class="nt">load_kwargs</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">split</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;train&#39;</span>
-<span class="w">  </span><span class="nt">format</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">prompt_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;question&#39;</span>
-<span class="w">    </span><span class="nt">response_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;answer&#39;</span>
-<span class="w">  </span><span class="nt">dj_config_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;tests/test_configs/active_iterator_test_dj_cfg.yaml&#39;</span>
-<span class="w">  </span><span class="nt">clean_strategy</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;iterative&#39;</span>
-<span class="w">  </span><span class="nt">db_url</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;postgresql://{username}@localhost:5432/{db_name}&#39;</span>
+<section id="service-configuration">
+<h2>Service Configuration<a class="headerlink" href="#service-configuration" title="Link to this heading"></a></h2>
+<p>Configures services used by Trinity-RFT. Only support Data Juicer service for now.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">service</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">data_juicer</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">server_url</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;http://127.0.0.1:5005&#39;</span>
+<span class="w">    </span><span class="nt">auto_start</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5005</span>
 </pre></div>
 </div>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">source_data_path</span></code>: Path to the task dataset.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">load_kwargs</span></code>: Arguments passed to HuggingFace’s <code class="docutils literal notranslate"><span class="pre">load_dataset()</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">dj_config_path</span></code>: Path to Data-Juicer configuration for cleaning.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">clean_strategy</span></code>: Strategy for iterative data cleaning.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">db_url</span></code>: Database URL if using SQL backend.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">server_url</span></code>: The url of data juicer server.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">auto_start</span></code>: Whether to automatically start the data juicer service.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">port</span></code>: The port for Data Juicer service when <code class="docutils literal notranslate"><span class="pre">auto_start</span></code> is true.</p></li>
+</ul>
+<p>–</p>
+</section>
+<section id="log-configuration">
+<h2>Log Configuration<a class="headerlink" href="#log-configuration" title="Link to this heading"></a></h2>
+<p>Ray actor logging configuration.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">log</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">INFO</span>
+<span class="w">  </span><span class="nt">group_by_node</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">level</span></code>: The logging level (supports <code class="docutils literal notranslate"><span class="pre">DEBUG</span></code>, <code class="docutils literal notranslate"><span class="pre">INFO</span></code>, <code class="docutils literal notranslate"><span class="pre">WARNING</span></code>, <code class="docutils literal notranslate"><span class="pre">ERROR</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">group_by_node</span></code>: Whether to group logs by node IP. If set to <code class="docutils literal notranslate"><span class="pre">True</span></code>, an actor’s logs will be save to <code class="docutils literal notranslate"><span class="pre">&lt;checkpoint_root_dir&gt;/&lt;project&gt;/&lt;name&gt;/log/&lt;node_ip&gt;/&lt;actor_name&gt;.log</span></code>, otherwise it will be saved to <code class="docutils literal notranslate"><span class="pre">&lt;checkpoint_root_dir&gt;/&lt;project&gt;/&lt;name&gt;/log/&lt;actor_name&gt;.log</span></code>.</p></li>
 </ul>
 </section>
 <hr class="docutils" />

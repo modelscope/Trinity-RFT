@@ -40,6 +40,14 @@ monitor:
 data_processor:
   # Preprocessing data settings
   ...
+
+service:
+  # Services to use
+  ...
+
+log:
+  # Ray actor logging
+  ...
 ```
 
 Each of these sections will be explained in detail below.
@@ -395,28 +403,36 @@ trainer:
 
 ---
 
-## Data Processor Configuration
+## Service Configuration
 
-Configures preprocessing and data cleaning pipelines.
+Configures services used by Trinity-RFT. Only support Data Juicer service for now.
 
 ```yaml
-data_processor:
-  source_data_path: /PATH/TO/DATASET
-  load_kwargs:
-    split: 'train'
-  format:
-    prompt_key: 'question'
-    response_key: 'answer'
-  dj_config_path: 'tests/test_configs/active_iterator_test_dj_cfg.yaml'
-  clean_strategy: 'iterative'
-  db_url: 'postgresql://{username}@localhost:5432/{db_name}'
+service:
+  data_juicer:
+    server_url: 'http://127.0.0.1:5005'
+    auto_start: true
+    port: 5005
 ```
 
-- `source_data_path`: Path to the task dataset.
-- `load_kwargs`: Arguments passed to HuggingFace’s `load_dataset()`.
-- `dj_config_path`: Path to Data-Juicer configuration for cleaning.
-- `clean_strategy`: Strategy for iterative data cleaning.
-- `db_url`: Database URL if using SQL backend.
+- `server_url`: The url of data juicer server.
+- `auto_start`: Whether to automatically start the data juicer service.
+- `port`: The port for Data Juicer service when `auto_start` is true.
+
+--
+
+## Log Configuration
+
+Ray actor logging configuration.
+
+```yaml
+log:
+  level: INFO
+  group_by_node: False
+```
+
+- `level`: The logging level (supports `DEBUG`, `INFO`, `WARNING`, `ERROR`).
+- `group_by_node`: Whether to group logs by node IP. If set to `True`, an actor's logs will be save to `<checkpoint_root_dir>/<project>/<name>/log/<node_ip>/<actor_name>.log`, otherwise it will be saved to `<checkpoint_root_dir>/<project>/<name>/log/<actor_name>.log`.
 
 ---
 

@@ -102,8 +102,6 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.distributed</span><span class="w"> </span><span class="kn">import</span> <span class="n">init_process_group</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
-<span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
-
 
 <div class="viewcode-block" id="WorkerExtension">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.vllm_worker.html#trinity.common.models.vllm_worker.WorkerExtension">[docs]</a>
@@ -124,14 +122,17 @@
         <span class="n">namespace</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Init torch process group for model weights update&quot;&quot;&quot;</span>
+        <span class="n">rank</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">get_rank</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;vllm_worker_</span><span class="si">{</span><span class="n">rank</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
         <span class="k">assert</span> <span class="n">torch</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">is_initialized</span><span class="p">(),</span> <span class="s2">&quot;default torch process group must be initialized&quot;</span>
         <span class="k">assert</span> <span class="n">group_name</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;group name must not be empty&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_state_dict_meta</span> <span class="o">=</span> <span class="n">state_dict_meta</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_weight_update_rank</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">get_rank</span><span class="p">()</span> <span class="o">+</span> <span class="n">rank_offset</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_weight_update_rank</span> <span class="o">=</span> <span class="n">rank</span> <span class="o">+</span> <span class="n">rank_offset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;vLLM starting init_process_group:</span><span class="se">\n</span><span class="s2">&quot;</span>
             <span class="sa">f</span><span class="s2">&quot;  &gt; address=</span><span class="si">{</span><span class="n">master_address</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">master_port</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;  &gt; rank=</span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">get_rank</span><span class="p">()</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;  &gt; rank=</span><span class="si">{</span><span class="n">rank</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
             <span class="sa">f</span><span class="s2">&quot;  &gt; rank_offset=</span><span class="si">{</span><span class="n">rank_offset</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
             <span class="sa">f</span><span class="s2">&quot;  &gt; world_size=</span><span class="si">{</span><span class="n">world_size</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
@@ -146,7 +147,7 @@
             <span class="n">device_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">torch</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">barrier</span><span class="p">(</span><span class="n">group</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_model_update_group</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;vLLM init_process_group finished.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;vLLM init_process_group finished.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_explorer_name</span> <span class="o">=</span> <span class="n">explorer_name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_namespace</span> <span class="o">=</span> <span class="n">namespace</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span> <span class="o">=</span> <span class="n">Synchronizer</span><span class="o">.</span><span class="n">get_actor</span><span class="p">(</span><span class="n">namespace</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_namespace</span><span class="p">)</span></div>

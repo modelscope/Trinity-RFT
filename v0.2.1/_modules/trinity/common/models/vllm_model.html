@@ -114,8 +114,6 @@
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
-<span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
-
 
 <span class="c1"># TODO: remove V0 when V1 is stable</span>
 <div class="viewcode-block" id="vLLMRolloutModel">
@@ -355,7 +353,7 @@
 <span class="sd">        and they won&#39;t be able to be tracked by Ray anymore.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="p">,</span> <span class="s2">&quot;shutdown&quot;</span><span class="p">):</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Shutting down vLLM engine&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Shutting down vLLM engine&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span></div>
 
 

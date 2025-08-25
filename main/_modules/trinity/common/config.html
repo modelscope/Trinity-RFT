@@ -631,6 +631,19 @@
 
 
 
+<div class="viewcode-block" id="LogConfig">
+<a class="viewcode-back" href="../../../build_api/trinity.common.config.html#trinity.common.config.LogConfig">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">LogConfig</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Configs for logger.&quot;&quot;&quot;</span>
+
+    <span class="n">level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;INFO&quot;</span>  <span class="c1"># default log level (DEBUG, INFO, WARNING, ERROR)</span>
+    <span class="n">group_by_node</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># whether to group logs by node IP in Ray cluster</span>
+    <span class="c1"># ! DO NOT SET, automatically generated as &lt;checkpoint_root_dir&gt;/&lt;project&gt;/&lt;name&gt;/log</span>
+    <span class="n">save_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span></div>
+
+
+
 <div class="viewcode-block" id="Config">
 <a class="viewcode-back" href="../../../build_api/trinity.common.config.html#trinity.common.config.Config">[docs]</a>
 <span class="nd">@dataclass</span>
@@ -660,6 +673,7 @@
     <span class="n">monitor</span><span class="p">:</span> <span class="n">MonitorConfig</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">MonitorConfig</span><span class="p">)</span>
     <span class="n">synchronizer</span><span class="p">:</span> <span class="n">SynchronizerConfig</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">SynchronizerConfig</span><span class="p">)</span>
     <span class="n">service</span><span class="p">:</span> <span class="n">ServiceConfig</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">ServiceConfig</span><span class="p">)</span>
+    <span class="n">log</span><span class="p">:</span> <span class="n">LogConfig</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">LogConfig</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Config.save">
 <a class="viewcode-back" href="../../../build_api/trinity.common.config.html#trinity.common.config.Config.save">[docs]</a>
@@ -1052,7 +1066,10 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">data_juicer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">operator</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_processor</span><span class="o">.</span><span class="n">experience_pipeline</span><span class="o">.</span><span class="n">operators</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">operator</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;data_juicer&quot;</span><span class="p">:</span>
-                    <span class="n">operator</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;service_config&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">data_juicer</span></div>
+                    <span class="n">operator</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="s2">&quot;service_config&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">data_juicer</span>
+
+        <span class="c1"># check log</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">save_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_job_dir</span><span class="p">,</span> <span class="s2">&quot;log&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Config.flatten">

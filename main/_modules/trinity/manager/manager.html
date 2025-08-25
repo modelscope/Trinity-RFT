@@ -99,8 +99,6 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span><span class="p">,</span> <span class="n">load_config</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
-<span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
-
 
 <div class="viewcode-block" id="CacheManager">
 <a class="viewcode-back" href="../../../build_api/trinity.manager.manager.html#trinity.manager.CacheManager">[docs]</a>
@@ -110,6 +108,7 @@
 <div class="viewcode-block" id="CacheManager.__init__">
 <a class="viewcode-back" href="../../../build_api/trinity.manager.manager.html#trinity.manager.CacheManager.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">check_config</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">in_ray_actor</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cache_dir</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">cache_dir</span>  <span class="c1"># type: ignore</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">explorer_meta_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cache_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_meta.json&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">trainer_meta_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cache_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_meta.json&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
@@ -125,7 +124,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">backup_config</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">(</span><span class="n">backup_config_path</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">backup_config</span> <span class="o">!=</span> <span class="n">config</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;The current config is inconsistent with the backup config in </span><span class="si">{</span><span class="n">backup_config_path</span><span class="si">}</span><span class="s2">.&quot;</span>
                 <span class="p">)</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -150,7 +149,7 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">explorer_meta_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                     <span class="n">explorer_meta</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                     <span class="s2">&quot;----------------------------------</span><span class="se">\n</span><span class="s2">&quot;</span>
                     <span class="s2">&quot;Found existing explorer checkpoint:</span><span class="se">\n</span><span class="s2">&quot;</span>
                     <span class="sa">f</span><span class="s2">&quot;  &gt; </span><span class="si">{</span><span class="n">explorer_meta</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
@@ -159,7 +158,7 @@
                 <span class="p">)</span>
                 <span class="k">return</span> <span class="n">explorer_meta</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to load explore meta file: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to load explore meta file: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{}</span></div>
 
 
@@ -177,7 +176,7 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer_meta_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                     <span class="n">trainer_meta</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                     <span class="s2">&quot;----------------------------------</span><span class="se">\n</span><span class="s2">&quot;</span>
                     <span class="s2">&quot;Found existing trainer checkpoint:</span><span class="se">\n</span><span class="s2">&quot;</span>
                     <span class="sa">f</span><span class="s2">&quot;  &gt; </span><span class="si">{</span><span class="n">trainer_meta</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
@@ -186,7 +185,7 @@
                 <span class="p">)</span>
                 <span class="k">return</span> <span class="n">trainer_meta</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to load trainer meta file: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to load trainer meta file: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{}</span></div>
 </div>
 

@@ -91,81 +91,116 @@
            <div itemprop="articleBody">
              
   <h1>Source code for trinity.utils.log</h1><div class="highlight"><pre>
-<span></span><span class="c1"># Adapted from</span>
-<span class="c1"># https://github.com/skypilot-org/skypilot/blob/86dc0f6283a335e4aa37b3c10716f90999f48ab6/sky/sky_logging.py</span>
-<span class="sd">&quot;&quot;&quot;Logging configuration for vLLM.&quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;A Ray compatible logging module with actor-scope logger support.&quot;&quot;&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">contextvars</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">logging.handlers</span><span class="w"> </span><span class="kn">import</span> <span class="n">RotatingFileHandler</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
 
-<span class="n">_FORMAT</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%(levelname)s</span><span class="s2"> </span><span class="si">%(asctime)s</span><span class="s2"> </span><span class="si">%(filename)s</span><span class="s2">:</span><span class="si">%(lineno)d</span><span class="s2">] </span><span class="si">%(message)s</span><span class="s2">&quot;</span>
-<span class="n">_DATE_FORMAT</span> <span class="o">=</span> <span class="s2">&quot;%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ray</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">LOG_DIR_ENV_VAR</span><span class="p">,</span>
+    <span class="n">LOG_LEVEL_ENV_VAR</span><span class="p">,</span>
+    <span class="n">LOG_NODE_IP_ENV_VAR</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">_LOG_FORMAT</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%(levelname)s</span><span class="s2"> </span><span class="si">%(asctime)s</span><span class="s2"> [</span><span class="si">%(filename)s</span><span class="s2">:</span><span class="si">%(lineno)d</span><span class="s2">] </span><span class="si">%(message)s</span><span class="s2">&quot;</span>
+<span class="n">_LOG_DATE_FORMAT</span> <span class="o">=</span> <span class="s2">&quot;%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span>
 
 
 <div class="viewcode-block" id="NewLineFormatter">
 <a class="viewcode-back" href="../../../build_api/trinity.utils.log.html#trinity.utils.log.NewLineFormatter">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">NewLineFormatter</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Adds logging prefix to newlines to align multi-line messages.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Formatter that adds logging prefix to newlines to align multi-line messages.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="NewLineFormatter.__init__">
 <a class="viewcode-back" href="../../../build_api/trinity.utils.log.html#trinity.utils.log.NewLineFormatter.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="n">datefmt</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="n">datefmt</span><span class="p">)</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">datefmt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">fmt</span><span class="p">,</span> <span class="n">datefmt</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="NewLineFormatter.format">
 <a class="viewcode-back" href="../../../build_api/trinity.utils.log.html#trinity.utils.log.NewLineFormatter.format">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">message</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-            <span class="n">parts</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">LogRecord</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">message</span><span class="p">:</span>
+            <span class="n">prefix</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">message</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\r\n</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">msg</span></div>
 </div>
 
 
 
-<span class="n">_root_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;trinity&quot;</span><span class="p">)</span>
-<span class="n">_default_handler</span> <span class="o">=</span> <span class="kc">None</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_setup_logger</span><span class="p">():</span>
-    <span class="n">_root_logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
-    <span class="k">global</span> <span class="n">_default_handler</span>
-    <span class="k">if</span> <span class="n">_default_handler</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">_default_handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
-        <span class="n">_default_handler</span><span class="o">.</span><span class="n">flush</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span>  <span class="c1"># type: ignore</span>
-        <span class="n">_default_handler</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
-        <span class="n">_root_logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">_default_handler</span><span class="p">)</span>
-    <span class="n">fmt</span> <span class="o">=</span> <span class="n">NewLineFormatter</span><span class="p">(</span><span class="n">_FORMAT</span><span class="p">,</span> <span class="n">datefmt</span><span class="o">=</span><span class="n">_DATE_FORMAT</span><span class="p">)</span>
-    <span class="n">_default_handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">fmt</span><span class="p">)</span>
-    <span class="c1"># Setting this will avoid the message</span>
-    <span class="c1"># being propagated to the parent logger.</span>
-    <span class="n">_root_logger</span><span class="o">.</span><span class="n">propagate</span> <span class="o">=</span> <span class="kc">False</span>
-
-
-<span class="c1"># The logger is initialized when the module is imported.</span>
-<span class="c1"># This is thread-safe as the module is only imported once,</span>
-<span class="c1"># guaranteed by the Python GIL.</span>
-<span class="n">_setup_logger</span><span class="p">()</span>
+<span class="n">_ray_logger_ctx</span><span class="p">:</span> <span class="n">contextvars</span><span class="o">.</span><span class="n">ContextVar</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">]]</span> <span class="o">=</span> <span class="n">contextvars</span><span class="o">.</span><span class="n">ContextVar</span><span class="p">(</span>
+    <span class="s2">&quot;ray_logger&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">)</span>
 
 
 <div class="viewcode-block" id="get_logger">
 <a class="viewcode-back" href="../../../build_api/trinity.utils.log.html#trinity.utils.log.get_logger">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_logger</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a logger with the given name and level.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_logger</span><span class="p">(</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">in_ray_actor</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get a logger instance, compatible with Ray Actor and standard usage.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        name (str): The name of the logger.</span>
-<span class="sd">        level (int, optional): The level of the logger. Defaults to logging.DEBUG.</span>
+<span class="sd">        name (Optional[str]): The name of the logger. If None, uses &#39;trinity&#39;.</span>
+<span class="sd">        level (Optional[int]): The logging level. If None, uses LOG_LEVEL_ENV_VAR or INFO.</span>
+<span class="sd">        in_ray_actor (bool): Whether the logger is used within a Ray actor.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        logging.Logger: The logger with the given name and level.</span>
+<span class="sd">        logging.Logger: Configured logger instance.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">_default_handler</span><span class="p">)</span>  <span class="c1"># type: ignore [arg-type]</span>
+    <span class="c1"># Reuse logger created by the actor if exists (Ray context)</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">_ray_logger_ctx</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">logger</span>
+
+    <span class="n">resolved_level</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">level</span>
+        <span class="k">if</span> <span class="n">level</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">else</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">logging</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">LOG_LEVEL_ENV_VAR</span><span class="p">,</span> <span class="s2">&quot;INFO&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+    <span class="p">)</span>
+    <span class="n">logger_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;trinity.</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">name</span> <span class="k">else</span> <span class="s2">&quot;trinity&quot;</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">logger_name</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">propagate</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">resolved_level</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+    <span class="c1"># Stream handler (stdout)</span>
+    <span class="n">stream_handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+    <span class="n">stream_handler</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">resolved_level</span><span class="p">)</span>
+    <span class="n">formatter</span> <span class="o">=</span> <span class="n">NewLineFormatter</span><span class="p">(</span><span class="n">_LOG_FORMAT</span><span class="p">,</span> <span class="n">datefmt</span><span class="o">=</span><span class="n">_LOG_DATE_FORMAT</span><span class="p">)</span>
+    <span class="n">stream_handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">stream_handler</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">in_ray_actor</span><span class="p">:</span>
+        <span class="c1"># File handler (rotating file log)</span>
+        <span class="n">log_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">LOG_DIR_ENV_VAR</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Logger name must be set when logging from a Ray actor&quot;</span>
+        <span class="k">if</span> <span class="n">log_dir</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">LOG_NODE_IP_ENV_VAR</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;0&quot;</span><span class="p">:</span>
+                <span class="c1"># organize logs by node IP</span>
+                <span class="n">node_ip</span> <span class="o">=</span> <span class="n">ray</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">get_node_ip_address</span><span class="p">()</span>
+                <span class="n">log_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">log_dir</span><span class="p">,</span> <span class="n">node_ip</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">log_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="c1"># save log into log_dir/{actor_name}.log</span>
+            <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">log_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">.log&quot;</span><span class="p">)</span>
+            <span class="n">file_handler</span> <span class="o">=</span> <span class="n">RotatingFileHandler</span><span class="p">(</span>
+                <span class="n">file_path</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">,</span> <span class="n">maxBytes</span><span class="o">=</span><span class="mi">64</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span>
+            <span class="p">)</span>
+            <span class="n">file_handler</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">resolved_level</span><span class="p">)</span>
+            <span class="n">file_handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">file_handler</span><span class="p">)</span>
+            <span class="n">_ray_logger_ctx</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">logger</span><span class="p">)</span>
+        <span class="c1"># If LOG_DIR_ENV_VAR is not set, file logging is disabled</span>
+
     <span class="k">return</span> <span class="n">logger</span></div>
 
 </pre></div>
