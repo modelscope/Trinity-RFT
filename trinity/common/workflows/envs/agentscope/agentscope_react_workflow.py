@@ -152,10 +152,6 @@ You are an agent specialized in solving math problems with tools. Please solve t
         for i, experience in enumerate(experiences):
             experience.eid.step = i
             experience.reward = reward
-            turns_metrics = {"agent_turns": len(self.agent.memory.get_memory())}
-            if experience.metrics is None:
-                experience.metrics = {}
-            experience.metrics.update(turns_metrics)
         logger.debug(
             f"return experience len: {len(experiences)}, run_id: {str(experiences[-1].eid.run)}, final step reward: {experiences[-1].reward}"
         )

@@ -133,17 +133,18 @@ class EmailSearchWorkflow(Workflow):
         else:
             answer_and_sources = response.metadata
 
+        experiences = self.model.extract_experience_from_history(clear_history=True)
+        self.actual_turns = len(experiences) # NOTE: this metrics works only if the agent calls model once in each turn
+
         reward_dict = self.calculate_reward(answer_and_sources)
         reward = sum(reward_dict.values())
 
-        experiences = self.model.extract_experience_from_history(clear_history=True)
         for i, experience in enumerate(experiences):
             experience.eid.step = i
             experience.reward = reward
-            turns_metrics = {"agent_turns": len(self.agent.memory.get_memory())}
             if experience.metrics is None:
                 experience.metrics = {}
-            experience.metrics.update(turns_metrics)
+            experience.metrics.update({"actual_turns": self.actual_turns})
             experience.metrics.update(reward_dict)
         logger.info(
             f"return experience len: {len(experiences)}, final step reward: {experiences[-1].reward}"
@@ -179,7 +180,7 @@ class EmailSearchWorkflow(Workflow):
             )
             rubric.sources_correct = self.query.message_ids[0] in sources
         rubric.num_sources = len(sources)
-        rubric.num_turns = len(self.agent.memory.get_memory())  # TODO: make sure this is correct
+        rubric.num_turns = self.actual_turns
         logger.debug(f"Rubric: {rubric.model_dump()}")
 
         try:
