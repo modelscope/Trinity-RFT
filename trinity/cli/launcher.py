@@ -122,7 +122,7 @@ def both(config: Config) -> None:
         logger.error(f"Explorer or Trainer failed:\n{traceback.format_exc()}")
 
 
-def run(config_path: str, log_level: str = "INFO", dlc: bool = False, plugin_dir: str = None):
+def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
     config = load_config(config_path)
     config.check_and_update()
     pprint(config)
@@ -198,12 +198,6 @@ def main() -> None:
     run_parser = subparsers.add_parser("run", help="Run RFT process.")
     run_parser.add_argument("--config", type=str, required=True, help="Path to the config file.")
     run_parser.add_argument(
-        "--log_level",
-        type=str,
-        choices=["debug", "info", "warning", "error", "critical"],
-        help="Log level.",
-    )
-    run_parser.add_argument(
         "--plugin-dir",
         type=str,
         default=None,
@@ -222,7 +216,7 @@ def main() -> None:
     args = parser.parse_args()
     if args.command == "run":
         # TODO: support parse all args from command line
-        run(args.config, args.log_level, args.dlc, args.plugin_dir)
+        run(args.config, args.dlc, args.plugin_dir)
     elif args.command == "studio":
         studio(args.port)
 
