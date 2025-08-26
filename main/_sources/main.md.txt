@@ -10,9 +10,9 @@
 
 * [2025-08] 🎵 We introduce [CHORD](https://github.com/modelscope/Trinity-RFT/tree/main/examples/mix_chord), a dynamic integration of SFT and RL for enhanced LLM fine-tuning ([paper](https://arxiv.org/pdf/2508.11408)).
 * [2025-08] ✨ Trinity-RFT v0.2.1 is released! Enhanced features include:
-  * Agentic RL: support training with general multi-step agentic workflows; check out the [ALFWorld](./docs/sphinx_doc/source/tutorial/example_step_wise.md) and [ReAct](./docs/sphinx_doc/source/tutorial/example_react.md) examples.
-  * Rollout-Training scheduling: introduce Scheduler, [Synchronizer](./docs/sphinx_doc/source/tutorial/synchronizer.html) and priority queue buffer, which facilitates more efficient and dynamic scheduling of the RFT process.
-  * [A benchmark tool](./benchmark) for quick verification and experimentation.
+  * Agentic RL: support training with general multi-step agentic workflows; check out the [ALFWorld](/tutorial/example_step_wise.md) and [ReAct](/tutorial/example_react.md) examples.
+  * Rollout-Training scheduling: introduce Scheduler, [Synchronizer](/tutorial/synchronizer.md) and priority queue buffer, which facilitates more efficient and dynamic scheduling of the RFT process.
+  * [A benchmark tool](https://github.com/modelscope/Trinity-RFT/tree/main/benchmark) for quick verification and experimentation.
   * RL algorithms: implement [GSPO](https://github.com/modelscope/Trinity-RFT/pull/154), [AsymRE](https://github.com/modelscope/Trinity-RFT/pull/187), [TOPR, CISPO](https://github.com/modelscope/Trinity-RFT/pull/185), [RAFT](https://github.com/modelscope/Trinity-RFT/pull/174).
 * [2025-07] Trinity-RFT v0.2.0 is released.
 * [2025-07] We update the [technical report](https://arxiv.org/abs/2505.17826) (arXiv v2) with new features, examples, and experiments.
@@ -341,8 +341,8 @@ Guidelines for developers and researchers:
 
 + {ref}`Build new RL scenarios <Workflows>`
 + {ref}`Implement new RL algorithms <Algorithms>`
-+ [Develop new data operators](/tutorial/trinity_programming_guide.html#operators-for-data-developers)
-+ [Understand the coordination between explorer and trainer](/tutorial/synchronizer.html)
++ [Develop new data operators](/tutorial/trinity_programming_guide.md#operators-for-data-developers)
++ [Understand the coordination between explorer and trainer](/tutorial/synchronizer.md)
 
 
 For some frequently asked questions, see [FAQ](/tutorial/faq.md).
