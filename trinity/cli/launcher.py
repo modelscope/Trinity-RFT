@@ -198,6 +198,12 @@ def main() -> None:
     run_parser = subparsers.add_parser("run", help="Run RFT process.")
     run_parser.add_argument("--config", type=str, required=True, help="Path to the config file.")
     run_parser.add_argument(
+        "--log_level",
+        type=str,
+        choices=["debug", "info", "warning", "error", "critical"],
+        help="Log level.",
+    )
+    run_parser.add_argument(
         "--plugin-dir",
         type=str,
         default=None,
