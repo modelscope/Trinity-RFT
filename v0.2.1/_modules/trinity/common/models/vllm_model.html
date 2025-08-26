@@ -274,7 +274,7 @@
                     <span class="p">)</span>
                 <span class="p">),</span>
                 <span class="n">prompt_length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">prompt_token_ids</span><span class="p">),</span>
-                <span class="n">prompt_text</span><span class="o">=</span><span class="n">output</span><span class="o">.</span><span class="n">prompt</span><span class="p">,</span>
+                <span class="n">prompt_text</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">prompt_token_ids</span><span class="p">),</span>
                 <span class="n">response_text</span><span class="o">=</span><span class="n">output</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">outputs</span><span class="p">))</span>
