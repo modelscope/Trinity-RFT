@@ -51,13 +51,24 @@ class WorkerExtension:
         self._explorer_name = explorer_name
         self._namespace = namespace
         self.synchronizer = Synchronizer.get_actor(namespace=self._namespace)
+        self._checkpoint_converter = None
 
     def update_weight(self):
         """Broadcast weight to all vllm workers from source rank 0 (actor model)"""
+        if self._weight_update_rank == 0:
+            state_dict, model_version = ray.get(self.synchronizer.get_model_state_dict.remote())
+            if isinstance(state_dict, tuple):
+                method, checkpoint_dir = state_dict
+                if method == "megatron":
+                    if self._checkpoint_converter is None:
+                        from trinity.common.models.utils import get_megatron_converter
+                        self._checkpoint_converter = get_megatron_converter(checkpoint_dir)
+                    state_dict = self._checkpoint_converter.get_state_dict(checkpoint_dir)
+                else:
+                    raise NotImplementedError(f"{method} is not supported")
+                ray.get(self.synchronizer.set_model_state_dict.remote(state_dict, model_version))
         if self._state_dict_meta is None:
             self._state_dict_meta = ray.get(self.synchronizer.get_state_dict_meta.remote())
-        if self._weight_update_rank == 0:
-            state_dict, _ = ray.get(self.synchronizer.get_model_state_dict.remote())
         for name, dtype_str, shape in self._state_dict_meta:
             if self._weight_update_rank == 0:
                 weight = state_dict[name]

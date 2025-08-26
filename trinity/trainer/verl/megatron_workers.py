@@ -353,6 +353,7 @@ class ActorRolloutRefWorker(MegatronWorker, DistProfilerExtension):
                 use_checkpoint_opt_param_scheduler=self.config.actor.optim.use_checkpoint_opt_param_scheduler,
                 bridge=self.bridge,
                 use_dist_checkpointing=self.config.actor.megatron.use_dist_checkpointing,
+                sync_config=self.config.synchronizer,
             )
         self.synchronizer = Synchronizer.get_actor(namespace=self.config.synchronizer.ray_namespace)
         get_torch_device().empty_cache()
@@ -553,11 +554,11 @@ class ActorRolloutRefWorker(MegatronWorker, DistProfilerExtension):
         pass
 
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
-    def save_checkpoint(self, checkpoint_path, hdfs_path=None, global_step=0, max_ckpt_to_keep=None, model_state_dict_only=False,):
+    def save_checkpoint(self, checkpoint_path, hdfs_path=None, global_step=0, max_ckpt_to_keep=None, model_state_dict_only=False):
         if self._is_offload_param:
             load_megatron_model_to_gpu(self.actor_module)
         self.checkpoint_mananager.save_checkpoint(
-            local_path=checkpoint_path, hdfs_path=hdfs_path, global_step=global_step, max_ckpt_to_keep=max_ckpt_to_keep
+            local_path=checkpoint_path, hdfs_path=hdfs_path, global_step=global_step, max_ckpt_to_keep=max_ckpt_to_keep, model_state_dict_only=model_state_dict_only,
         )
         torch.distributed.barrier()
         if self._is_offload_param:
@@ -575,8 +576,8 @@ class ActorRolloutRefWorker(MegatronWorker, DistProfilerExtension):
 
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
     def wait_on_save_thread(self) -> None:
+        # currently, we don't need to wait for the save thread because async saving doesn't work.
         pass
-        # self.checkpoint_manager.wait_on_save_thread()
 
 
 class CriticWorker(MegatronWorker, DistProfilerExtension):
@@ -864,5 +865,5 @@ class CriticWorker(MegatronWorker, DistProfilerExtension):
 
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
     def wait_on_save_thread(self) -> None:
+        # currently, we don't need to wait for the save thread because async saving doesn't work.
         pass
-        # self.checkpoint_manager.wait_on_save_thread()

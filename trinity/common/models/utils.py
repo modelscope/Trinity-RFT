@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import torch
 from torch.distributed._tensor import DTensor, Placement, Shard
 
+from trinity.common.config import TrainerConfig
 from trinity.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -129,17 +130,27 @@ def get_checkpoint_dir_with_step_num(
         raise NotImplementedError(f"Unsupported trainer type {trainer_type}")
 
 
-def load_state_dict(checkpoint_dir: str, trainer_type: str = "verl") -> dict:
+def load_state_dict(checkpoint_dir: str, config: TrainerConfig) -> dict:
     """Load state dict from a checkpoint dir.
 
     Args:
         checkpoint_dir (str): The checkpoint directory.
         trainer_type (str): The trainer type. Only support "verl" for now.
     """
-    if trainer_type == "verl":
-        return load_state_dict_from_verl_checkpoint(checkpoint_dir)
+    if config.trainer_type == "verl":
+        actor_config = config.trainer_config.actor_rollout_ref.actor
+        strategy = actor_config.strategy
+        if strategy in {"fsdp", "fsdp2"}:
+            return load_fsdp_state_dict_from_verl_checkpoint(checkpoint_dir)
+        elif strategy == "megatron":
+            if actor_config.megatron.use_dist_checkpointing or not actor_config.megatron.use_mbridge:
+                return "megatron", checkpoint_dir
+            else:  # hf checkpointing
+                return load_huggingface_state_dict(os.path.join(checkpoint_dir, "huggingface"))
+        else:
+            raise ValueError(f"Unsupported strategy: {strategy}")
     else:
-        raise NotImplementedError(f"Unsupported trainer type {trainer_type}")
+        raise NotImplementedError(f"Unsupported trainer type {config.trainer_type}")
 
 
 # copy from verl/scripts/model_merger.py
@@ -185,7 +196,7 @@ def get_verl_checkpoint_info(
 
 
 # copy from verl/scripts/model_merger.py
-def load_state_dict_from_verl_checkpoint(checkpoint_path: str) -> dict:  # noqa: C901
+def load_fsdp_state_dict_from_verl_checkpoint(checkpoint_path: str) -> dict:  # noqa: C901
     """Load state dict from a Verl checkpoint."""
     logger.info(f"Loading state dict from {checkpoint_path}")
     assert not checkpoint_path.endswith(
@@ -284,3 +295,116 @@ def load_state_dict_from_verl_checkpoint(checkpoint_path: str) -> dict:  # noqa:
             raise NotImplementedError("FSDP + TP is not supported yet")
 
     return state_dict
+
+
+def load_huggingface_state_dict(checkpoint_path: str):
+    import transformers
+    model = transformers.AutoModelForCausalLM.from_pretrained(checkpoint_path)
+    return model.state_dict()
+
+
+def get_megatron_converter(checkpoint_path: str):
+    from megatron.core import mpu
+    from megatron.core.tensor_parallel.random import model_parallel_cuda_manual_seed
+    from transformers import AutoConfig
+
+    from verl.utils.device import get_device_name, get_torch_device
+    from verl.model_merger.base_model_merger import ModelMergerConfig
+    from verl.model_merger.megatron_model_merger import MegatronModelMerger
+
+    class MegatronStateDictConverter(MegatronModelMerger):
+        def __init__(self, config: ModelMergerConfig):
+            self.config = config
+            self.hf_model_config_path = config.hf_model_config_path
+            self.model_config = AutoConfig.from_pretrained(
+                self.hf_model_config_path, trust_remote_code=self.config.trust_remote_code
+            )
+
+            self.rank = 0
+            self.world_size = 1
+            local_rank = 0
+            get_torch_device().set_device(f"{get_device_name()}:{local_rank}")
+
+            mpu.initialize_model_parallel(
+                tensor_model_parallel_size=1,
+                pipeline_model_parallel_size=self.world_size,
+                virtual_pipeline_model_parallel_size=None,
+                context_parallel_size=1,
+                expert_model_parallel_size=1,
+            )
+            model_parallel_cuda_manual_seed(0)
+            self.hf_config = AutoConfig.from_pretrained(
+                self.config.hf_model_config_path, trust_remote_code=self.config.trust_remote_code
+            )
+            print(self.hf_config, flush=True)
+
+            self.params_mapping = {
+                # megatron core gpt model name, huggingface model name
+                # NOTICE: It's a little bit tricky, when 2 keys have the same prefix, we need to make sure the
+                # longer key within the containing relationship is processed first.
+                "embedding.word_embeddings": "model.embed_tokens",
+                # input layer norm for dpskv3
+                "input_layernorm.weight": "input_layernorm.weight",
+                "input_layernorm.bias": "input_layernorm.bias",
+                # attn
+                "self_attention.linear_qkv.layer_norm_weight": "input_layernorm.weight",
+                "self_attention.linear_qkv.layer_norm_bias": "input_layernorm.bias",
+                "self_attention.linear_qkv": "self_attn.qkv_proj",
+                "self_attention.q_layernorm": "self_attn.q_norm",
+                "self_attention.k_layernorm": "self_attn.k_norm",
+                "self_attention.linear_proj": "self_attn.o_proj",
+                # mla
+                "self_attention.linear_q_proj": "self_attn.q_proj",
+                "self_attention.linear_q_down_proj": "self_attn.q_a_proj",
+                "self_attention.linear_q_up_proj.layer_norm_weight": "self_attn.q_a_layernorm.weight",
+                "self_attention.linear_q_up_proj": "self_attn.q_b_proj",
+                "self_attention.linear_kv_down_proj": "self_attn.kv_a_proj_with_mqa",
+                "self_attention.linear_kv_up_proj.layer_norm_weight": "self_attn.kv_a_layernorm.weight",
+                "self_attention.linear_kv_up_proj": "self_attn.kv_b_proj",
+                # mlp
+                "pre_mlp_layernorm": "post_attention_layernorm",
+                "mlp.linear_fc1.layer_norm_weight": "post_attention_layernorm.weight",
+                "mlp.linear_fc1.layer_norm_bias": "post_attention_layernorm.bias",
+                "mlp.linear_fc1": "mlp.gate_up_proj",
+                "mlp.linear_fc2": "mlp.down_proj",
+                # moe
+                "mlp.router.expert_bias": "mlp.gate.e_score_correction_bias",
+                "mlp.router": "mlp.gate",
+                "mlp.shared_experts.linear_fc1": "mlp.shared_experts.gate_up_proj",
+                "mlp.shared_experts.linear_fc2": "mlp.shared_experts.down_proj",
+                "linear_fc1": "gate_up_proj",
+                "linear_fc2": "down_proj",
+                # output
+                "final_layernorm": "norm",
+                "output_layer": "lm_head",
+            }
+
+            if "Qwen2MoeForCausalLM" in self.hf_config.architectures:
+                self.params_mapping["mlp.shared_experts.linear_fc1"] = "mlp.shared_expert.gate_up_proj"
+                self.params_mapping["mlp.shared_experts.linear_fc2"] = "mlp.shared_expert.down_proj"
+                self.params_mapping["mlp.shared_experts.gate_weight"] = "mlp.shared_expert_gate.weight"
+
+        def get_state_dict(self, checkpoint_path):
+            self.config.local_dir = checkpoint_path
+            from verl.utils.megatron_utils import get_dist_checkpoint_path
+
+            model_ckpt_path = get_dist_checkpoint_path(self.config.local_dir)
+
+            model_state_dict = self._load_state_dicts(model_ckpt_path)
+            merged_state_dict = self._merge_state_dicts(model_state_dict)
+            del model_state_dict
+            return merged_state_dict
+
+
+    config = ModelMergerConfig(
+        operation='merge',
+        backend='megatron',
+        tie_word_embedding=False,
+        trust_remote_code=False,
+        is_value_model=False,
+        local_dir=checkpoint_path,
+        hf_model_config_path=os.path.join(checkpoint_path, "huggingface"),
+        use_cpu_initialization=True,
+    )
+    converter = MegatronStateDictConverter(config)
+    return converter

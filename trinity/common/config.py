@@ -849,30 +849,27 @@ class Config:
         # check buffer
         self._check_buffer()
         # check and update trainer
-        if self.mode in {"both", "train"}:
-            if self.trainer.trainer_type == "verl":
-                if self.trainer.trainer_config:
-                    from trinity.common.verl_config import veRLConfig
+        if self.trainer.trainer_type == "verl":
+            if self.trainer.trainer_config:
+                from trinity.common.verl_config import veRLConfig
 
-                    trainer_config_schema = OmegaConf.structured(veRLConfig)
-                    trainer_config = OmegaConf.merge(
-                        trainer_config_schema, self.trainer.trainer_config
-                    )
-                    self.trainer.trainer_config = OmegaConf.to_object(trainer_config)
-                else:
-                    if os.path.isfile(self.trainer.trainer_config_path):
-                        from trinity.common.verl_config import load_config
-
-                        self.trainer.trainer_config = load_config(self.trainer.trainer_config_path)
-                    else:
-                        raise ValueError(
-                            f"Invalid trainer config path: {self.trainer.trainer_config_path}"
-                        )
+                trainer_config_schema = OmegaConf.structured(veRLConfig)
+                trainer_config = OmegaConf.merge(
+                    trainer_config_schema, self.trainer.trainer_config
+                )
+                self.trainer.trainer_config = OmegaConf.to_object(trainer_config)
             else:
-                raise ValueError(f"Invalid trainer type: {self.trainer_type}")
-            self.trainer.trainer_config.synchronize_config(self)
+                if os.path.isfile(self.trainer.trainer_config_path):
+                    from trinity.common.verl_config import load_config
+
+                    self.trainer.trainer_config = load_config(self.trainer.trainer_config_path)
+                else:
+                    raise ValueError(
+                        f"Invalid trainer config path: {self.trainer.trainer_config_path}"
+                    )
         else:
-            self.trainer.trainer_config = None
+            raise ValueError(f"Invalid trainer type: {self.trainer_type}")
+        self.trainer.trainer_config.synchronize_config(self)
 
     def flatten(self) -> Dict[str, Any]:
         """Flatten the config into a single-level dict with dot-separated keys for nested fields."""
