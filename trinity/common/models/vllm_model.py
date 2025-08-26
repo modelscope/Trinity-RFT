@@ -170,7 +170,7 @@ class vLLMRolloutModel(InferenceModel):
                     )
                 ),
                 prompt_length=len(output.prompt_token_ids),
-                prompt_text=output.prompt,
+                prompt_text=prompt,
                 response_text=output.outputs[i].text,
             )
             for i in range(len(output.outputs))
