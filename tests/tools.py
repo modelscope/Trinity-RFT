@@ -13,7 +13,10 @@ from trinity.common.constants import PromptType
 def get_template_config() -> Config:
     config_path = os.path.join(os.path.dirname(__file__), "template", "config.yaml")
     config = load_config(config_path)
-    config.ray_namespace = ray.get_runtime_context().namespace
+    if ray.is_initialized():
+        config.ray_namespace = ray.get_runtime_context().namespace
+    else:
+        config.ray_namespace = "trinity_unittest"
     return config
 
 
@@ -85,6 +88,17 @@ def get_unittest_dataset_config(
                 prompt_type=PromptType.PLAINTEXT,
                 prompt_key="prompt",
                 response_key="response",
+            ),
+        )
+    elif dataset_name == "sft_with_tools":
+        return StorageConfig(
+            name=dataset_name,
+            path=os.path.join(os.path.dirname(__file__), "template", "data", "sft_with_tools"),
+            split="train",
+            format=FormatConfig(
+                prompt_type=PromptType.MESSAGES,
+                messages_key="messages",
+                tools_key="tools",
             ),
         )
     elif dataset_name == "dpo":

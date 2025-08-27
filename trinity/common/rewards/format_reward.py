@@ -4,9 +4,6 @@ import re
 from typing import Optional
 
 from trinity.common.rewards.reward_fn import REWARD_FUNCTIONS, RewardFn
-from trinity.utils.log import get_logger
-
-logger = get_logger(__name__)
 
 
 @REWARD_FUNCTIONS.register_module("format_reward")

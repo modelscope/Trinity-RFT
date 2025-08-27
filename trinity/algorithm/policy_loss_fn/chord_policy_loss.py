@@ -115,6 +115,7 @@ class MIXCHORDPolicyLossFn(PolicyLossFn):
 
     This loss function applies different loss components to data based on whether
     it comes from an expert or not, as indicated by `expert_mask`. It combines:
+
     - GRPO loss (self.grpo_loss_fn) for non-expert data
     - SFT loss (self.sft_loss_fn) for expert data
         the weight of SFT loss is globally controled by `mu_schedule` function

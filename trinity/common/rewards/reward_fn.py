@@ -5,11 +5,7 @@ from typing import Any, Dict, List
 
 from trinity.common.experience import Experience
 from trinity.common.rewards.utils import to_rm_gallery_messages
-from trinity.utils.log import get_logger
 from trinity.utils.registry import Registry
-
-logger = get_logger(__name__)
-
 
 REWARD_FUNCTIONS = Registry("reward_functions")
 

@@ -127,7 +127,8 @@ class AsyncPriorityQueue(QueueBuffer):
         """
         if delay > 0:
             await asyncio.sleep(delay)
-
+        if len(item) == 0:
+            return
         priority = self.priority_fn(item=item)
         async with self._condition:
             if len(self.priority_groups) == self.capacity:

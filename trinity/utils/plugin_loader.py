@@ -10,8 +10,6 @@ from typing import List, Union
 from trinity.common.constants import PLUGIN_DIRS_ENV_VAR
 from trinity.utils.log import get_logger
 
-logger = get_logger(__name__)
-
 
 def load_plugins() -> None:
     """
@@ -29,6 +27,7 @@ def load_plugin_from_dirs(plugin_dirs: Union[str, List[str]]) -> None:
     """
     Load plugin modules from a directory.
     """
+    logger = get_logger(__name__, in_ray_actor=True)
     if not isinstance(plugin_dirs, list):
         plugin_dirs = [plugin_dirs]
     plugin_dirs = set(plugin_dirs)
@@ -40,7 +39,6 @@ def load_plugin_from_dirs(plugin_dirs: Union[str, List[str]]) -> None:
             logger.error(f"plugin-dir [{plugin_dir}] is not a directory.")
             continue
 
-        logger.info(f"Loading plugin modules from [{plugin_dir}]...")
         for file in Path(plugin_dir).glob("*.py"):
             if file.name.startswith("__"):
                 continue
@@ -49,7 +47,7 @@ def load_plugin_from_dirs(plugin_dirs: Union[str, List[str]]) -> None:
             try:
                 load_from_file(os.path.join(plugin_dir, file))
             except Exception as e:
-                logger.error(f"Failed to load plugin from {file}: {e}")
+                logger.warning(f"Failed to load plugin module from [{file}]: {e}")
 
 
 def load_from_file(file_path: str):
@@ -83,5 +81,4 @@ def load_from_file(file_path: str):
         shutil.copy2(file_path, Path(__file__).parent.parent / "plugins")
     except shutil.SameFileError:
         pass
-    logger.info(f"Load {file_path} as {full_module_name}")
     return module

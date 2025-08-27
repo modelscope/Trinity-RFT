@@ -1,3 +1,4 @@
+(Synchronizer)=
 # Synchronizer in Trinity-RFT
 
 The **Synchronizer** is the central coordination module in **Trinity-RFT**, designed to keep the **Trainer** and **Explorer** components in sync when training reinforcement learning models in a distributed environment. Its main purpose is to ensure that both components are always working with up-to-date model weights, enabling efficient and stable learning.

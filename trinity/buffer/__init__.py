@@ -1,5 +1,4 @@
 from trinity.buffer.buffer import (
-    Buffer,
     BufferReader,
     BufferWriter,
     get_buffer_reader,
@@ -7,7 +6,6 @@ from trinity.buffer.buffer import (
 )
 
 __all__ = [
-    "Buffer",
     "BufferReader",
     "BufferWriter",
     "get_buffer_reader",

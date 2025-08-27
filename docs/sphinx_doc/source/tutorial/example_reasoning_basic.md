@@ -182,7 +182,7 @@ buffer:
       storage_type: file
       path: <$DATASET_PATH/{sft_data}>
       format:
-        prompt_type: <prompt_type> # messages/plaintext/chatpair
+        prompt_type: <prompt_type> # messages/plaintext
         prompt_key: <prompt_key>
         response_key: <response_key>
     sft_warmup_steps: 10

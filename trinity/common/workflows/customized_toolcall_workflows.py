@@ -12,9 +12,6 @@ from typing import List
 
 from trinity.common.experience import Experience
 from trinity.common.workflows.workflow import WORKFLOWS, SimpleWorkflow, Task
-from trinity.utils.log import get_logger
-
-logger = get_logger(__name__)
 
 # Adapted from https://github.com/NVlabs/Tool-N1
 qwen_tool_prompts = """# Tool
@@ -238,7 +235,7 @@ class ToolCallWorkflow(SimpleWorkflow):
     def run(self) -> List[Experience]:
         messages = self.format_prompt()
 
-        logger.debug("start chat")
+        self.logger.debug("start chat")
         responses = self.model.chat(messages, **self.rollout_args)
 
         for i, response in enumerate(responses):
@@ -252,12 +249,12 @@ class ToolCallWorkflow(SimpleWorkflow):
                         ground_truth=ground_truth,
                     )
                 else:
-                    logger.error(
+                    self.logger.error(
                         "Key 'answer' not found in self.raw_task. Assigning default reward."
                     )
             else:
-                logger.error("self.raw_task is None. Assigning default reward.")
-            logger.debug(
+                self.logger.error("self.raw_task is None. Assigning default reward.")
+            self.logger.debug(
                 f"self.task_desc: {self.task_desc}, messages: {messages}, response: {response.response_text}, reward: {reward}"
             )
             response.reward = reward

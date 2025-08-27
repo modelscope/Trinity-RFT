@@ -10,9 +10,6 @@ from trinity.utils.eval_utils import (
     simple_answer_parser,
     validate_think_pattern,
 )
-from trinity.utils.log import get_logger
-
-logger = get_logger(__name__)
 
 
 @REWARD_FUNCTIONS.register_module("math_reward")
