@@ -8,9 +8,6 @@ from trinity.utils.eval_utils import (
     extract_solution,
     validate_equation,
 )
-from trinity.utils.log import get_logger
-
-logger = get_logger(__name__)
 
 
 @REWARD_FUNCTIONS.register_module("countdown_reward")

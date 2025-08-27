@@ -60,9 +60,8 @@ class MIXAlgorithm(AlgorithmType):
     def default_config(cls) -> Dict:
         return {
             "repeat_times": 8,
-            "add_strategy": "grpo",
-            "policy_loss_fn": "mix",
             "advantage_fn": "grpo",
+            "policy_loss_fn": "mix",
             "sample_strategy": "mix",
         }
 ```

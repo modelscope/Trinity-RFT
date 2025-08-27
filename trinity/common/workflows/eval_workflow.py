@@ -10,10 +10,7 @@ from trinity.common.config import GenerationConfig
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
 from trinity.common.workflows.workflow import WORKFLOWS, Task, Workflow
-from trinity.utils.log import get_logger
 from trinity.utils.math_eval_utils import verify_math_answer
-
-logger = get_logger(__name__)
 
 
 @WORKFLOWS.register_module("math_eval_workflow")

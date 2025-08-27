@@ -5,32 +5,49 @@ import os
 import shutil
 import sys
 from pathlib import Path
+from typing import List, Union
 
+from trinity.common.constants import PLUGIN_DIRS_ENV_VAR
 from trinity.utils.log import get_logger
 
-logger = get_logger(__name__)
+
+def load_plugins() -> None:
+    """
+    Load plugin modules from the default plugin directory or directories specified in the environment variable.
+    If the environment variable `PLUGIN_DIRS_ENV_VAR` is not set, it defaults to `trinity/plugins`.
+    """
+    plugin_dirs = os.environ.get(PLUGIN_DIRS_ENV_VAR, "").split(os.pathsep)
+    if not plugin_dirs or plugin_dirs == [""]:
+        plugin_dirs = [str(Path(__file__).parent.parent / "plugins")]
+
+    load_plugin_from_dirs(plugin_dirs)
 
 
-def load_plugins(plugin_dir: str) -> None:
+def load_plugin_from_dirs(plugin_dirs: Union[str, List[str]]) -> None:
     """
     Load plugin modules from a directory.
     """
-    if plugin_dir is None:
-        plugin_dir = Path(__file__).parent.parent / "plugins"
-    if not os.path.exists(plugin_dir):
-        logger.error(f"--plugin-dir [{plugin_dir}] does not exist.")
-        return None
-    if not os.path.isdir(plugin_dir):
-        logger.error(f"--plugin-dir [{plugin_dir}] is not a directory.")
-        return None
-
-    logger.info(f"Loading plugin modules from [{plugin_dir}]...")
-    for file in Path(plugin_dir).glob("*.py"):
-        if file.name.startswith("__"):
+    logger = get_logger(__name__, in_ray_actor=True)
+    if not isinstance(plugin_dirs, list):
+        plugin_dirs = [plugin_dirs]
+    plugin_dirs = set(plugin_dirs)
+    for plugin_dir in plugin_dirs:
+        if not os.path.exists(plugin_dir):
+            logger.error(f"plugin-dir [{plugin_dir}] does not exist.")
             continue
-        logger.info(f"Loading plugin modules from [{file}]...")
-        # load modules from file
-        load_from_file(os.path.join(plugin_dir, file))
+        if not os.path.isdir(plugin_dir):
+            logger.error(f"plugin-dir [{plugin_dir}] is not a directory.")
+            continue
+
+        for file in Path(plugin_dir).glob("*.py"):
+            if file.name.startswith("__"):
+                continue
+            logger.info(f"Loading plugin modules from [{file}]...")
+            # load modules from file
+            try:
+                load_from_file(os.path.join(plugin_dir, file))
+            except Exception as e:
+                logger.warning(f"Failed to load plugin module from [{file}]: {e}")
 
 
 def load_from_file(file_path: str):
@@ -64,5 +81,4 @@ def load_from_file(file_path: str):
         shutil.copy2(file_path, Path(__file__).parent.parent / "plugins")
     except shutil.SameFileError:
         pass
-    logger.info(f"Load {file_path} as {full_module_name}")
     return module

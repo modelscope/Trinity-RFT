@@ -22,7 +22,13 @@
 
 ## 🚀 News
 
-* [2025-08] We now support training on general multi-step workflows! Please check out examples for [ALFWorld](./docs/sphinx_doc/source/tutorial/example_step_wise.md) and [ReAct](./docs/sphinx_doc/source/tutorial/example_react.md).
+
+* [2025-08] 🎵 We introduce [CHORD](https://github.com/modelscope/Trinity-RFT/tree/main/examples/mix_chord), a dynamic integration of SFT and RL for enhanced LLM fine-tuning ([paper](https://arxiv.org/pdf/2508.11408)).
+* [2025-08] ✨ Trinity-RFT v0.2.1 is released! Enhanced features include:
+  * Agentic RL: support training with general multi-step agentic workflows; check out the [ALFWorld](./docs/sphinx_doc/source/tutorial/example_step_wise.md) and [ReAct](./docs/sphinx_doc/source/tutorial/example_react.md) examples.
+  * Rollout-Training scheduling: introduce Scheduler, [Synchronizer](./docs/sphinx_doc/source/tutorial/synchronizer.md) and priority queue buffer, which facilitates more efficient and dynamic scheduling of the RFT process.
+  * [A benchmark tool](./benchmark) for quick verification and experimentation.
+  * RL algorithms: implement [GSPO](https://github.com/modelscope/Trinity-RFT/pull/154), [AsymRE](https://github.com/modelscope/Trinity-RFT/pull/187), [TOPR, CISPO](https://github.com/modelscope/Trinity-RFT/pull/185), [RAFT](https://github.com/modelscope/Trinity-RFT/pull/174).
 * [2025-07] Trinity-RFT v0.2.0 is released.
 * [2025-07] We update the [technical report](https://arxiv.org/abs/2505.17826) (arXiv v2) with new features, examples, and experiments.
 * [2025-06] Trinity-RFT v0.1.1 is released.
@@ -43,11 +49,11 @@ It is designed to support diverse application scenarios and serve as a unified p
 
 * **Unified RFT Core:**
 
-  Supports *synchronous/asynchronous*, *on-policy/off-policy*, and *online/offline* training. Rollout and training can run separately and scale independently on different devices.
+  Supports synchronous/asynchronous, on-policy/off-policy, and online/offline training. Rollout and training can run separately and scale independently on different devices.
 
 * **First-Class Agent-Environment Interaction:**
 
-  Handles lagged feedback, long-tailed latencies, and agent/env failures gracefully. Supports multi-turn agent-env interaction.
+  Handles lagged feedback, long-tailed latencies, and agent/env failures gracefully. Supports general multi-step agent-env interaction.
 
 * **Optimized Data Pipelines:**
 
@@ -69,7 +75,7 @@ It is designed to support diverse application scenarios and serve as a unified p
 
 
 <p align="center">
-  <img src="https://img.alicdn.com/imgextra/i1/O1CN01BFCZRV1zS9T1PoH49_!!6000000006712-2-tps-922-544.png" alt="Trinity-RFT-core-architecture">
+  <img src="https://img.alicdn.com/imgextra/i1/O1CN01Ti0o4320RywoAuyhN_!!6000000006847-2-tps-3840-2134.png" alt="Trinity-RFT-core-architecture">
 </p>
 
 </details>
@@ -82,25 +88,24 @@ It is designed to support diverse application scenarios and serve as a unified p
   <img src="https://img.alicdn.com/imgextra/i3/O1CN01E7NskS1FFoTI9jlaQ_!!6000000000458-2-tps-1458-682.png" alt="Trinity-RFT-modes">
 </p>
 
-
 </details>
 
 
 <details>
-<summary>Figure: The architecture of data processors</summary>
+<summary>Figure: Concatenated and general multi-step workflows</summary>
 
 <p align="center">
-  <img src="https://img.alicdn.com/imgextra/i3/O1CN01hR1LCh25kpJMKmYR4_!!6000000007565-2-tps-1474-740.png" alt="Trinity-RFT-data-pipeline-buffer">
+  <img src="https://img.alicdn.com/imgextra/i1/O1CN01z1i7kk1jlMEVa8ZHV_!!6000000004588-2-tps-1262-695.png" alt="Trinity-RFT-multi-step">
 </p>
 
 </details>
 
 
 <details>
-<summary>Figure: The high-level design of data pipelines in Trinity-RFT</summary>
+<summary>Figure: The design of data pipelines in Trinity-RFT</summary>
 
 <p align="center">
-  <img src="https://img.alicdn.com/imgextra/i4/O1CN01UvyfcZ1WoTv5t3pCp_!!6000000002835-2-tps-1166-274.png" alt="Trinity-RFT-data-pipelines">
+  <img src="https://img.alicdn.com/imgextra/i2/O1CN01BfeHp61sXSlGjH7zQ_!!6000000005776-2-tps-1734-473.png" alt="Trinity-RFT-data-pipelines">
 </p>
 
 </details>
@@ -112,12 +117,13 @@ It is designed to support diverse application scenarios and serve as a unified p
 
 * **Adaptation to New Scenarios:**
 
-  Implement agent-environment interaction logic in a single `Workflow` or `MultiTurnWorkflow` class.  ([Example](./docs/sphinx_doc/source/tutorial/example_multi_turn.md))
+  Implement agent-environment interaction logic in a single workflow class ([Example](./docs/sphinx_doc/source/tutorial/example_multi_turn.md)),
+  or import existing workflows from agent frameworks like AgentScope ([Example](./docs/sphinx_doc/source/tutorial/example_react.md)).
 
 
 * **RL Algorithm Development:**
 
-  Develop custom RL algorithms (loss design, sampling, data processing) in compact, plug-and-play classes.  ([Example](./docs/sphinx_doc/source/tutorial/example_mix_algo.md))
+  Develop custom RL algorithms (loss design, sampling strategy, data processing) in compact, plug-and-play classes ([Example](./docs/sphinx_doc/source/tutorial/example_mix_algo.md)).
 
 
 * **Low-Code Usage:**
@@ -194,7 +200,7 @@ pip install -e .\[flash_attn\]
 Installation using pip:
 
 ```shell
-pip install trinity-rft==0.2.0
+pip install trinity-rft==0.2.1
 # install flash-attn separately
 pip install flash-attn==2.8.0.post2
 ```
@@ -330,14 +336,11 @@ Tutorials for running different RFT modes:
 + [Offline learning by DPO or SFT](./docs/sphinx_doc/source/tutorial/example_dpo.md)
 
 
-Tutorials for adapting Trinity-RFT to a new multi-turn agentic scenario:
+Tutorials for adapting Trinity-RFT to multi-step agentic scenarios:
 
-+ [Concatenated Multi-turn tasks](./docs/sphinx_doc/source/tutorial/example_multi_turn.md)
-
-Tutorials for adapting Trinity-RFT to a general multi-step agentic scenario:
-
-+ [General Multi-Step tasks](./docs/sphinx_doc/source/tutorial/example_step_wise.md)
-+ [ReAct agent tasks](./docs/sphinx_doc/source/tutorial/example_react.md)
++ [Concatenated multi-turn workflow](./docs/sphinx_doc/source/tutorial/example_multi_turn.md)
++ [General multi-step workflow](./docs/sphinx_doc/source/tutorial/example_step_wise.md)
++ [ReAct workflow with an agent framework](./docs/sphinx_doc/source/tutorial/example_react.md)
 
 
 Tutorials for data-related functionalities:
@@ -350,15 +353,17 @@ Tutorials for RL algorithm development/research with Trinity-RFT:
 + [RL algorithm development with Trinity-RFT](./docs/sphinx_doc/source/tutorial/example_mix_algo.md)
 
 
-Guidelines for full configurations: see [this document](./docs/sphinx_doc/source/tutorial/trinity_configs.md)
+Guidelines for full configurations:
+
++ See [this document](./docs/sphinx_doc/source/tutorial/trinity_configs.md)
 
 
 Guidelines for developers and researchers:
 
 + [Build new RL scenarios](./docs/sphinx_doc/source/tutorial/trinity_programming_guide.md#workflows-for-rl-environment-developers)
 + [Implement new RL algorithms](./docs/sphinx_doc/source/tutorial/trinity_programming_guide.md#algorithms-for-rl-algorithm-developers)
-
-
++ [Develop new data operators](./docs/sphinx_doc/source/tutorial/trinity_programming_guide.md#operators-for-data-developers)
++ [Understand the coordination between explorer and trainer](./docs/sphinx_doc/source/tutorial/synchronizer.md)
 
 
 

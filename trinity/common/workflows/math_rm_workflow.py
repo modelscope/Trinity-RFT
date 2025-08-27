@@ -8,9 +8,6 @@ import openai
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
 from trinity.common.workflows.workflow import WORKFLOWS, SimpleWorkflow, Task
-from trinity.utils.log import get_logger
-
-logger = get_logger(__name__)
 
 
 @WORKFLOWS.register_module("math_rm_workflow")
@@ -34,7 +31,7 @@ class MathRMWorkflow(SimpleWorkflow):
     def run(self) -> List[Experience]:
         messages = self.format_messages()
 
-        logger.debug("start chat")
+        self.logger.debug("start chat")
         responses = self.model.chat(messages, **self.rollout_args)
         for i, response in enumerate(responses):
             reward_dict = self.reward_fn(  # type: ignore
@@ -50,7 +47,7 @@ class MathRMWorkflow(SimpleWorkflow):
             response.reward = reward
             response.eid.run = i + self.run_id_base
 
-            logger.debug(
+            self.logger.debug(
                 f"self.task_desc: {self.task_desc}, messages: {messages}, response: {response.response_text}, reward: {reward}"
             )
         return responses

@@ -31,7 +31,7 @@ class Synchronizer:
     """
 
     def __init__(self, config: Config, module_ref: ray.actor.ActorHandle):
-        self.logger = get_logger(__name__)
+        self.logger = get_logger("synchronizer", in_ray_actor=True)
         self.config = config
         self.trainer_status = RunningStatus.STOPPED
         self.explorer_status_counts: Dict[RunningStatus, int] = defaultdict(lambda: 0)
@@ -67,7 +67,10 @@ class Synchronizer:
                 self._modules = alive_modules
             await asyncio.sleep(1)
         self.logger.info("Synchronizer stopped.")
-        ray.actor.exit_actor()
+        try:
+            ray.actor.exit_actor()
+        except Exception:
+            pass
 
     async def set_trainer_status(self, status: RunningStatus):
         """Update the status of the trainer."""
@@ -321,4 +324,5 @@ class Synchronizer:
                 .remote(config, module_ref=module_ref)
             )
             synchronizer.add_module.remote(module_ref)
+            return synchronizer
         return ray.get_actor("synchronizer", namespace=namespace)

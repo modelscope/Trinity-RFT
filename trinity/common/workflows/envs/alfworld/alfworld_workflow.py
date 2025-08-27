@@ -54,7 +54,7 @@ You are an agent interacting with a virtual test-based environments.
 ## Notes:
 At each step, you should first think then perform action to fulfill the instruction. You should ALWAYS wrap your thinking with the <think> </think> tag and wrap your action with the <action> </action> tag.
 You should ALWAYS take one action each step.
-DONOT try to interact with the user at anytime. Finish the task and buy the item by yourself.
+DO NOT try to interact with the user at anytime. Finish the task by yourself.
 
 ## Action Format:
 Below are the available commands you can use:

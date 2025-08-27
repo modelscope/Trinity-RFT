@@ -6,13 +6,12 @@ import os
 from trinity.common.config import Config, load_config
 from trinity.utils.log import get_logger
 
-logger = get_logger(__name__)
-
 
 class CacheManager:
     """A Manager class for managing the cache dir."""
 
     def __init__(self, config: Config, check_config: bool = False):
+        self.logger = get_logger(__name__, in_ray_actor=True)
         self.cache_dir = config.monitor.cache_dir  # type: ignore
         self.explorer_meta_path = os.path.join(self.cache_dir, f"{config.explorer.name}_meta.json")  # type: ignore
         self.trainer_meta_path = os.path.join(self.cache_dir, f"{config.trainer.name}_meta.json")  # type: ignore
@@ -27,7 +26,7 @@ class CacheManager:
         else:
             backup_config = load_config(backup_config_path)
             if backup_config != config:
-                logger.warning(
+                self.logger.warning(
                     f"The current config is inconsistent with the backup config in {backup_config_path}."
                 )
                 raise ValueError(
@@ -47,7 +46,7 @@ class CacheManager:
             try:
                 with open(self.explorer_meta_path, "r", encoding="utf-8") as f:
                     explorer_meta = json.load(f)
-                logger.info(
+                self.logger.info(
                     "----------------------------------\n"
                     "Found existing explorer checkpoint:\n"
                     f"  > {explorer_meta}\n"
@@ -56,7 +55,7 @@ class CacheManager:
                 )
                 return explorer_meta
             except Exception as e:
-                logger.error(f"Failed to load explore meta file: {e}")
+                self.logger.error(f"Failed to load explore meta file: {e}")
         return {}
 
     def save_trainer(self, current_step: int) -> None:
@@ -68,7 +67,7 @@ class CacheManager:
             try:
                 with open(self.trainer_meta_path, "r", encoding="utf-8") as f:
                     trainer_meta = json.load(f)
-                logger.info(
+                self.logger.info(
                     "----------------------------------\n"
                     "Found existing trainer checkpoint:\n"
                     f"  > {trainer_meta}\n"
@@ -77,5 +76,5 @@ class CacheManager:
                 )
                 return trainer_meta
             except Exception as e:
-                logger.warning(f"Failed to load trainer meta file: {e}")
+                self.logger.warning(f"Failed to load trainer meta file: {e}")
         return {}

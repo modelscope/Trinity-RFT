@@ -7,9 +7,6 @@ from trinity.buffer.buffer_writer import BufferWriter
 from trinity.buffer.ray_wrapper import QueueWrapper
 from trinity.common.config import BufferConfig, StorageConfig
 from trinity.common.constants import StorageType
-from trinity.utils.log import get_logger
-
-logger = get_logger(__name__)
 
 
 class QueueWriter(BufferWriter):

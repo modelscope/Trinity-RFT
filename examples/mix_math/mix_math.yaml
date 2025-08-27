@@ -1,22 +1,21 @@
 project: "mix_math"
-name: "expert0.25_mu0.1"
+name: "expert0.20_mu0.1"
 checkpoint_root_dir: /PATH/TO/CHECKPOINT/
 algorithm:
   algorithm_type: mix
   repeat_times: 8
   sample_strategy_args:
-    expert_data_ratio: 0.25
+    expert_data_ratio: 0.20
   policy_loss_fn_args:
     mu: 0.1
     clip_range: 0.2
-    use_token_level_loss_in_sft: False
-    use_dynamic_bsz: False
-    repeat_times: 8
-    ppo_mini_batch_size: 256
+    use_token_level_loss_in_sft: true
+    use_dynamic_bsz: true
+    ppo_mini_batch_size: 320
     ppo_micro_batch_size_per_gpu: 4
     ngpus_trainer: 4
     train_batch_size_expert: 64
-    train_batch_size_usual: 192
+    train_batch_size_usual: 256
 model:
   model_path: /PATH/TO/MODEL/
   max_response_tokens: 10240
@@ -25,8 +24,9 @@ cluster:
   node_num: 1
   gpu_per_node: 8
 buffer:
-  total_epochs: 1
-  batch_size: 40
+  total_epochs: 10
+  batch_size: 32
+  train_batch_size: 320
   max_retry_times: 3
   max_retry_interval: 1
   explorer_input:
@@ -56,6 +56,7 @@ buffer:
       storage_type: queue
       path: /PATH/TO/BUFFER/
     sft_warmup_dataset:
+      total_epochs: 10
       name: math_sft
       storage_type: file
       algorithm_type: sft

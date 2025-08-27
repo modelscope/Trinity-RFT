@@ -570,22 +570,28 @@ class ActorRolloutRefWorker(Worker):
             model = self.actor_module_fsdp
             self.named_modules = []
             self.state_dict_meta = []
-            for name, module in model.named_modules():
-                if isinstance(module, FSDP):
-                    self.named_modules.append((name, module))
-            for name_prefix, module in self.named_modules:
-                with FSDP.summon_full_params(module, recurse=False):
-                    for name, param in module.named_parameters():
-                        if isinstance(param, FlatParameter):
-                            continue
-                        realname = (
-                            name_prefix[len(FSDP_PREFIX) :] + "." + name if name_prefix else name
-                        )
-                        self.state_dict_meta.append(
-                            (realname, str(param.dtype), tuple(param.shape))
-                        )
-                    param = None
-                torch.cuda.empty_cache()
+            if self.config.actor.strategy == "fsdp":
+                for name, module in model.named_modules():
+                    if isinstance(module, FSDP):
+                        self.named_modules.append((name, module))
+                for name_prefix, module in self.named_modules:
+                    with FSDP.summon_full_params(module, recurse=False):
+                        for name, param in module.named_parameters():
+                            if isinstance(param, FlatParameter):
+                                continue
+                            realname = (
+                                name_prefix[len(FSDP_PREFIX) :] + "." + name
+                                if name_prefix
+                                else name
+                            )
+                            self.state_dict_meta.append(
+                                (realname, str(param.dtype), tuple(param.shape))
+                            )
+                        param = None
+                    torch.cuda.empty_cache()
+            else:  # fsdp2
+                for name, param in model.named_parameters():
+                    self.state_dict_meta.append((name, str(param.dtype), tuple(param.shape)))
 
             if torch.distributed.get_rank() == 0:
                 import ray
@@ -600,7 +606,6 @@ class ActorRolloutRefWorker(Worker):
                     master_address, master_port, self.state_dict_meta
                 )
                 timeout = self.config.synchronizer.sync_timeout
-
                 self._model_update_group = init_process_group(
                     host=master_address,
                     port=master_port,
@@ -608,6 +613,7 @@ class ActorRolloutRefWorker(Worker):
                     backend="nccl",
                     timeout=timeout,
                     world_size=world_size,
+                    device_id=torch.device(f"cuda:{get_device_id()}"),
                     rank=0,
                 )
                 torch.distributed.barrier(group=self._model_update_group)
@@ -615,14 +621,21 @@ class ActorRolloutRefWorker(Worker):
 
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
     def sync_weight(self):
-        for name_prefix, module in self.named_modules:
-            with FSDP.summon_full_params(module, recurse=False):
+        if self.config.actor.strategy == "fsdp":
+            for name_prefix, module in self.named_modules:
+                with FSDP.summon_full_params(module, recurse=False):
+                    if torch.distributed.get_rank() == 0:
+                        for name, param in module.named_parameters():
+                            if isinstance(param, FlatParameter):
+                                continue
+                            torch.distributed.broadcast(param, 0, group=self._model_update_group)
+                    param = None
+        else:  # fsdp2
+            for name, param in self.actor_module_fsdp.named_parameters():
+                full_param = param.full_tensor()
                 if torch.distributed.get_rank() == 0:
-                    for name, param in module.named_parameters():
-                        if isinstance(param, FlatParameter):
-                            continue
-                        torch.distributed.broadcast(param, 0, group=self._model_update_group)
-                param = None
+                    torch.distributed.broadcast(full_param, 0, group=self._model_update_group)
+                del full_param
         if torch.distributed.get_rank() == 0:
             torch.distributed.barrier(group=self._model_update_group)
             torch.cuda.synchronize()

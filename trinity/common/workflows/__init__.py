@@ -4,6 +4,8 @@ from .customized_math_workflows import MathBoxedWorkflow
 from .customized_toolcall_workflows import ToolCallWorkflow
 from .envs.agentscope.agentscope_react_workflow import AgentScopeReactV2MathWorkflow
 from .envs.alfworld.alfworld_workflow import AlfworldWorkflow, StepWiseAlfworldWorkflow
+from .envs.alfworld.RAFT_alfworld_workflow import RAFTAlfworldWorkflow
+from .envs.alfworld.RAFT_reflect_alfworld_workflow import RAFTReflectAlfworldWorkflow
 from .envs.sciworld.sciworld_workflow import SciWorldWorkflow
 from .envs.webshop.webshop_workflow import WebShopWorkflow
 from .eval_workflow import MathEvalWorkflow
@@ -19,6 +21,8 @@ __all__ = [
     "WebShopWorkflow",
     "AlfworldWorkflow",
     "StepWiseAlfworldWorkflow",
+    "RAFTAlfworldWorkflow",
+    "RAFTReflectAlfworldWorkflow",
     "SciWorldWorkflow",
     "MathBoxedWorkflow",
     "MathRMWorkflow",

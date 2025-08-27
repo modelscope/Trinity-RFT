@@ -1,0 +1,75 @@
+project: "Trinity-RFT-RAFT-reflect-alfworld"
+name: "qwen2.5-7B-RAFT-reflect-alfworld"
+mode: both
+checkpoint_root_dir: /PATH/TO/CHECKPOINT/RAFT_REFLECT_ALFWORLD/
+algorithm:
+  algorithm_type: raft
+  repeat_times: 1
+model:
+  model_path: /PATH/TO/MODEL/
+  max_response_tokens: 4096
+  max_model_len: 20480
+cluster:
+  node_num: 1
+  gpu_per_node: 8
+buffer:
+  total_epochs: 30
+  batch_size: 80
+  max_retry_times: 1
+  max_retry_interval: 1
+  explorer_input:
+    taskset:
+      name: alfworld-train
+      storage_type: file
+      path: '/PATH/TO/ALFWORLD_DATA/'
+      split: 'train'
+      format:
+        prompt_key: 'game_file'
+        response_key: 'task_desc'
+      rollout_args:
+        temperature: 0.85
+        top_k: 25
+        top_p: 0.95
+    eval_tasksets:
+      - name: alfworld-eval
+        storage_type: file
+        path: '/PATH/TO/ALFWORLD_DATA/'
+        split: 'test'
+        format:
+          prompt_key: 'game_file'
+          response_key: 'task_desc'
+        rollout_args:
+          temperature: 0.85
+          top_k: 25
+          top_p: 0.95
+    default_workflow_type: 'RAFT_reflect_alfworld_workflow'
+  trainer_input:
+    experience_buffer:
+      name: RAFT_buffer
+      storage_type: queue
+      path: 'sqlite:///RAFT_reflect_alfworld.db'
+explorer:
+  eval_interval: 30
+  runner_num: 100
+  max_timeout: 3000  # Increased timeout for alfworld environment interactions
+  max_retry_times: 2
+  rollout_model:
+    engine_type: vllm_async
+    engine_num: 4
+    tensor_parallel_size: 1
+    enable_prefix_caching: false
+    enforce_eager: false
+    dtype: bfloat16
+    gpu_memory_utilization: 0.86
+    seed: 42
+synchronizer:
+  sync_style: dynamic_by_explorer
+  sync_method: 'nccl'
+  sync_interval: 4
+  sync_timeout: 1200
+trainer:
+  trainer_type: 'verl'
+  trainer_config_path: 'examples/RAFT_alfworld/train_alfworld.yaml'
+  save_interval: 100000
+monitor:
+  monitor_type: wandb

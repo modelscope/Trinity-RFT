@@ -37,8 +37,14 @@ synchronizer:
 monitor:
   # Monitoring configurations (e.g., WandB or TensorBoard)
   ...
+service:
+  # Services to use
+  ...
 data_processor:
   # Preprocessing data settings
+  ...
+log:
+  # Ray actor logging
   ...
 ```
 
@@ -90,7 +96,6 @@ algorithm:
   kl_penalty_fn: "none"
   kl_loss_fn: "k2"
   entropy_loss_fn: "default"
-  add_strategy: null
 ```
 
 - `algorithm_type`: Type of reinforcement learning algorithm. Supported types: `ppo`, `grpo`, `opmd`, `dpo`, `sft`, `mix`.
@@ -100,7 +105,6 @@ algorithm:
 - `kl_penalty_fn`: The KL penalty function used for computing KL penalty applied in reward.
 - `kl_loss_fn`: The KL loss function used for computing KL loss.
 - `entropy_loss_fn`: The entropy loss function used for computing entropy loss.
-- `add_strategy`: Strategy for adding new experiences to the experience buffer. If set, explorer will collect experiences from workflow runners and pre-process them before adding to the buffer.
 
 ---
 
@@ -397,28 +401,71 @@ trainer:
 
 ---
 
-## Data Processor Configuration
+## Service Configuration
 
-Configures preprocessing and data cleaning pipelines.
+Configures services used by Trinity-RFT. Only support Data Juicer service for now.
+
+```yaml
+service:
+  data_juicer:
+    server_url: 'http://127.0.0.1:5005'
+    auto_start: true
+    port: 5005
+```
+
+- `server_url`: The url of data juicer server.
+- `auto_start`: Whether to automatically start the data juicer service.
+- `port`: The port for Data Juicer service when `auto_start` is true.
+
+---
+
+## DataProcessor Configuration
+
+Configures the task / experience pipeline, please refer to {ref}`Data Processing <Data Processing>` section for details.
 
 ```yaml
 data_processor:
-  source_data_path: /PATH/TO/DATASET
-  load_kwargs:
-    split: 'train'
-  format:
-    prompt_key: 'question'
-    response_key: 'answer'
-  dj_config_path: 'tests/test_configs/active_iterator_test_dj_cfg.yaml'
-  clean_strategy: 'iterative'
-  db_url: 'postgresql://{username}@localhost:5432/{db_name}'
+  task_pipeline:
+  # task pipeline related
+  task_pipeline:
+    num_process: 32
+    operators:
+      - name: "llm_difficulty_score_filter"
+        args:
+          api_or_hf_model: "qwen2.5-7b-instruct"
+          min_score: 0.0
+          input_keys: ["question", "answer"]
+          field_names: ["Question", "Answer"]
+    inputs:  # the output will be set to the explorer input automatically
+      - /PATH/TO/GSM8K/DATA/FILE
+    target_fields: ["question", "answer"]
+  experience_pipeline:
+    operators:
+      - name: data_juicer
+        args:
+          config_path: 'examples/grpo_gsm8k_experience_pipeline/dj_scoring_exp.yaml'
+      - name: reward_shaping_mapper
+        args:
+          reward_shaping_configs:
+            - stats_key: 'llm_quality_score'
+              op_type: ADD
+              weight: 1.0
 ```
 
-- `source_data_path`: Path to the task dataset.
-- `load_kwargs`: Arguments passed to HuggingFace’s `load_dataset()`.
-- `dj_config_path`: Path to Data-Juicer configuration for cleaning.
-- `clean_strategy`: Strategy for iterative data cleaning.
-- `db_url`: Database URL if using SQL backend.
+--
+
+## Log Configuration
+
+Ray actor logging configuration.
+
+```yaml
+log:
+  level: INFO
+  group_by_node: False
+```
+
+- `level`: The logging level (supports `DEBUG`, `INFO`, `WARNING`, `ERROR`).
+- `group_by_node`: Whether to group logs by node IP. If set to `True`, an actor's logs will be save to `<checkpoint_root_dir>/<project>/<name>/log/<node_ip>/<actor_name>.log`, otherwise it will be saved to `<checkpoint_root_dir>/<project>/<name>/log/<actor_name>.log`.
 
 ---
 

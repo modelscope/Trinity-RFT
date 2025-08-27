@@ -52,6 +52,7 @@ class RunnerWrapper:
         return (
             ray.remote(WorkflowRunner)
             .options(
+                num_cpus=1,
                 namespace=self.namespace,
                 scheduling_strategy="SPREAD",
                 runtime_env={
@@ -259,8 +260,8 @@ class Scheduler:
         for i in range(self.runner_num):
             self._create_runner(i)
         self.scheduler_task = asyncio.create_task(self._scheduler_loop())
-        for _, runner in self.runners.items():
-            await runner.runner.__ray_ready__.remote()
+        ready_refs = [runner.runner.__ray_ready__.remote() for runner in self.runners.values()]
+        await asyncio.gather(*ready_refs)
         self.logger.info(f"Starting Scheduler with {self.runner_num} runners")
 
     async def stop(self) -> None:

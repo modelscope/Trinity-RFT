@@ -7,10 +7,7 @@ import ray
 from trinity.buffer.buffer_reader import BufferReader
 from trinity.buffer.ray_wrapper import QueueWrapper
 from trinity.common.config import BufferConfig, StorageConfig
-from trinity.common.constants import ReadStrategy, StorageType
-from trinity.utils.log import get_logger
-
-logger = get_logger(__name__)
+from trinity.common.constants import StorageType
 
 
 class QueueReader(BufferReader):
@@ -22,11 +19,7 @@ class QueueReader(BufferReader):
         self.read_batch_size = config.train_batch_size
         self.queue = QueueWrapper.get_wrapper(storage_config, config)
 
-    def read(
-        self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
-    ) -> List:
-        if strategy is not None and strategy != ReadStrategy.FIFO:
-            raise NotImplementedError(f"Read strategy {strategy} not supported for Queue Reader.")
+    def read(self, batch_size: Optional[int] = None) -> List:
         try:
             batch_size = batch_size or self.read_batch_size
             exps = ray.get(self.queue.get_batch.remote(batch_size, timeout=self.timeout))
@@ -38,11 +31,7 @@ class QueueReader(BufferReader):
             raise StopIteration()
         return exps
 
-    async def read_async(
-        self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
-    ) -> List:
-        if strategy is not None and strategy != ReadStrategy.FIFO:
-            raise NotImplementedError(f"Read strategy {strategy} not supported for Queue Reader.")
+    async def read_async(self, batch_size: Optional[int] = None) -> List:
         batch_size = batch_size or self.read_batch_size
         exps = await self.queue.get_batch.remote(batch_size, timeout=self.timeout)
         if len(exps) != batch_size:

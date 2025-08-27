@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name =  "trinity-rft"
-version = "0.2.1.dev0"
+version = "0.3.0.dev0"
 authors = [
     {name="Trinity-RFT Team", email="trinity-rft@outlook.com"},
 ]
@@ -21,10 +21,10 @@ classifiers = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "verl==0.4.1",
+    "verl==0.5.0",
     "ray[default]>=2.45.0",
     "vllm>=0.9.1,<=0.10.0",
-    "tensordict==0.6.2",
+    "tensordict",
     "wandb",
     "omegaconf",
     "sqlalchemy",
@@ -42,6 +42,7 @@ dependencies = [
     "jsonlines",
     "sortedcontainers",
     "word2number",
+    "transformers<4.54.0",  # TODO: remove when https://github.com/vllm-project/vllm-ascend/issues/2046 is fixed
 ]
 
 [project.scripts]
@@ -75,6 +76,8 @@ doc = [
     "sphinx-autobuild",
     "sphinx_rtd_theme",
     "myst-parser",
+    "sphinxcontrib-apidoc",
+    "sphinx-multiversion",
 ]
 
 flash_attn = [

@@ -68,7 +68,7 @@ buffer:
       storage_type: file
       path: $DATASET_PATH/human_like_dpo_dataset
       format:
-        prompt_type: plaintext # plaintext/messages/chatpair
+        prompt_type: plaintext
         prompt_key: prompt
         chosen_key: chosen
         rejected_key: rejected

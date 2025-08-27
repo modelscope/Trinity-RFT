@@ -1,4 +1,12 @@
+<<<<<<< HEAD
 from trinity.algorithm.policy_loss_fn.cispo_policy_loss import CISPOPolicyLossFn
+=======
+from trinity.algorithm.policy_loss_fn.chord_policy_loss import (
+    MIXCHORDPolicyLossFn,
+    SFTISLossFn,
+    SFTPhiLossFn,
+)
+>>>>>>> main
 from trinity.algorithm.policy_loss_fn.dpo_loss import DPOLossFn
 from trinity.algorithm.policy_loss_fn.gspo_policy_loss import GSPOLossFn
 from trinity.algorithm.policy_loss_fn.mix_policy_loss import MIXPolicyLossFn
@@ -17,6 +25,12 @@ __all__ = [
     "SFTLossFn",
     "MIXPolicyLossFn",
     "GSPOLossFn",
+<<<<<<< HEAD
     "TOPRPolicyLossFn",
     "CISPOPolicyLossFn",
+=======
+    "MIXCHORDPolicyLossFn",
+    "SFTISLossFn",
+    "SFTPhiLossFn",
+>>>>>>> main
 ]

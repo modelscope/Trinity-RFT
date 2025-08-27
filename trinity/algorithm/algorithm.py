@@ -100,7 +100,7 @@ class GRPOAlgorithm(AlgorithmType):
     def default_config(cls) -> Dict:
         return {
             "repeat_times": 2,
-            "add_strategy": "grpo",
+            "advantage_fn": "grpo",
             "sample_strategy": "warmup",
             "policy_loss_fn": "ppo",
             "kl_penalty_fn": "none",
@@ -123,7 +123,7 @@ class OPMDAlgorithm(AlgorithmType):
     def default_config(cls) -> Dict:
         return {
             "repeat_times": 2,
-            "add_strategy": "opmd",
+            "advantage_fn": "opmd",
             "sample_strategy": "warmup",
             "policy_loss_fn": "opmd",
             "kl_penalty_fn": "none",
@@ -237,8 +237,53 @@ class MIXAlgorithm(AlgorithmType):
     def default_config(cls) -> Dict:
         return {
             "repeat_times": 8,
-            "add_strategy": "grpo",
+            "advantage_fn": "grpo",
             "policy_loss_fn": "mix",
+            "sample_strategy": "mix",
+            "entropy_loss_fn": "mix",
+        }
+
+
+@ALGORITHM_TYPE.register_module("mix_chord")
+class MIXCHORDAlgorithm(AlgorithmType):
+    """MIX algorithm."""
+
+    use_critic: bool = False
+    use_reference: bool = True
+    compute_advantage_in_trainer: bool = False
+    use_rollout: bool = True
+    can_balance_batch: bool = True
+    schema: type = ExperienceModel
+
+    @classmethod
+    def default_config(cls) -> Dict:
+        return {
+            "repeat_times": 8,
+            "policy_loss_fn": "mix_chord",
             "advantage_fn": "grpo",
             "sample_strategy": "mix",
+            "entropy_loss_fn": "mix",
+        }
+
+
+@ALGORITHM_TYPE.register_module("raft")
+class RAFTAlgorithm(AlgorithmType):
+    """RAFT Algorithm.
+    This algorithm is conceptually similar to Supervised Fine-Tuning (SFT)
+    but is designed to work with `ExperienceModel` schema from rollouts.
+    """
+
+    use_critic: bool = False
+    use_reference: bool = False
+    compute_advantage_in_trainer: bool = False
+    can_balance_batch: bool = True
+    schema: type = ExperienceModel
+
+    @classmethod
+    def default_config(cls) -> Dict:
+        return {
+            "sample_strategy": "default",
+            "policy_loss_fn": "sft",
+            "kl_loss_fn": "none",
+            "entropy_loss_fn": "none",
         }

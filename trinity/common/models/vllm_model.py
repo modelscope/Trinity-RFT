@@ -20,8 +20,6 @@ from trinity.common.models.utils import (
 )
 from trinity.utils.log import get_logger
 
-logger = get_logger(__name__)
-
 
 # TODO: remove V0 when V1 is stable
 class vLLMRolloutModel(InferenceModel):
@@ -53,10 +51,12 @@ class vLLMRolloutModel(InferenceModel):
             temperature=0.0,
             max_tokens=config.max_response_tokens,
             min_tokens=1,
+            truncate_prompt_tokens=config.max_prompt_tokens,
             skip_special_tokens=True,
             include_stop_str_in_output=False,
             output_kind=RequestOutputKind.FINAL_ONLY,
             logprobs=0,
+            ignore_eos=config.ignore_eos,
         )
         self.enable_thinking = config.enable_thinking
         self.request_id = 0
@@ -99,6 +99,10 @@ class vLLMRolloutModel(InferenceModel):
         self.api_server_host = None
         self.api_server_port = None
 
+    async def _initialize_tokenizer(self):
+        self.tokenizer = await self.async_llm.get_tokenizer()
+        self.tokenizer.truncation_side = "left"
+
     async def chat(self, messages: List[Dict], **kwargs) -> Sequence[Experience]:
         """Chat with the model with a list of messages in async.
 
@@ -110,7 +114,7 @@ class vLLMRolloutModel(InferenceModel):
             A list of experiences.
         """
         if self.tokenizer is None:
-            self.tokenizer = await self.async_llm.get_tokenizer()
+            await self._initialize_tokenizer()
         if self.chat_template is None:
             self.chat_template = self.tokenizer.get_chat_template()
         if messages[-1]["role"] == "assistant":
@@ -140,7 +144,12 @@ class vLLMRolloutModel(InferenceModel):
         Returns:
             A list of experiences.
         """
-        output = await self._generate_internal(prompt=prompt, **kwargs)
+        if self.tokenizer is None:
+            await self._initialize_tokenizer()
+        token_ids = self.tokenizer(  # type: ignore
+            prompt, truncation=True, max_length=self.config.max_prompt_tokens, return_tensors="pt"
+        )["input_ids"][0].tolist()
+        output = await self._generate_internal(prompt={"prompt_token_ids": token_ids}, **kwargs)
         experiences = [
             Experience(
                 tokens=torch.cat(
@@ -161,7 +170,7 @@ class vLLMRolloutModel(InferenceModel):
                     )
                 ),
                 prompt_length=len(output.prompt_token_ids),
-                prompt_text=output.prompt,
+                prompt_text=self.tokenizer.decode(output.prompt_token_ids),
                 response_text=output.outputs[i].text,
             )
             for i in range(len(output.outputs))
@@ -231,7 +240,7 @@ class vLLMRolloutModel(InferenceModel):
         and they won't be able to be tracked by Ray anymore.
         """
         if hasattr(self.async_llm, "shutdown"):
-            logger.info("Shutting down vLLM engine")
+            self.logger.info("Shutting down vLLM engine")
             self.async_llm.shutdown()
 
     def _create_sampling_params(self, **kwargs):
