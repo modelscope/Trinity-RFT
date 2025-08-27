@@ -37,14 +37,12 @@ synchronizer:
 monitor:
   # Monitoring configurations (e.g., WandB or TensorBoard)
   ...
-data_processor:
-  # Preprocessing data settings
-  ...
-
 service:
   # Services to use
   ...
-
+data_processor:
+  # Preprocessing data settings
+  ...
 log:
   # Ray actor logging
   ...
@@ -418,6 +416,41 @@ service:
 - `server_url`: The url of data juicer server.
 - `auto_start`: Whether to automatically start the data juicer service.
 - `port`: The port for Data Juicer service when `auto_start` is true.
+
+---
+
+## DataProcessor Configuration
+
+Configures the task / experience pipeline, please refer to {ref}`Data Processing <Data Processing>` section for details.
+
+```yaml
+data_processor:
+  task_pipeline:
+  # task pipeline related
+  task_pipeline:
+    num_process: 32
+    operators:
+      - name: "llm_difficulty_score_filter"
+        args:
+          api_or_hf_model: "qwen2.5-7b-instruct"
+          min_score: 0.0
+          input_keys: ["question", "answer"]
+          field_names: ["Question", "Answer"]
+    inputs:  # the output will be set to the explorer input automatically
+      - /PATH/TO/GSM8K/DATA/FILE
+    target_fields: ["question", "answer"]
+  experience_pipeline:
+    operators:
+      - name: data_juicer
+        args:
+          config_path: 'examples/grpo_gsm8k_experience_pipeline/dj_scoring_exp.yaml'
+      - name: reward_shaping_mapper
+        args:
+          reward_shaping_configs:
+            - stats_key: 'llm_quality_score'
+              op_type: ADD
+              weight: 1.0
+```
 
 --
 

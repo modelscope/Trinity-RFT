@@ -286,6 +286,16 @@
 </li>
         <li><a href="build_api/trinity.buffer.schema.html#trinity.buffer.schema.Base.__init__">(trinity.buffer.schema.Base method)</a>
 </li>
+        <li><a href="build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.DPOMessagesFormatter.__init__">(trinity.buffer.schema.formatter.DPOMessagesFormatter method)</a>
+</li>
+        <li><a href="build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.DPOPlaintextFormatter.__init__">(trinity.buffer.schema.formatter.DPOPlaintextFormatter method)</a>
+</li>
+        <li><a href="build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.Formatter.__init__">(trinity.buffer.schema.formatter.Formatter method)</a>
+</li>
+        <li><a href="build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.SFTMessagesFormatter.__init__">(trinity.buffer.schema.formatter.SFTMessagesFormatter method)</a>
+</li>
+        <li><a href="build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.SFTPlaintextFormatter.__init__">(trinity.buffer.schema.formatter.SFTPlaintextFormatter method)</a>
+</li>
         <li><a href="build_api/trinity.buffer.writer.file_writer.html#trinity.buffer.writer.file_writer.JSONWriter.__init__">(trinity.buffer.writer.file_writer.JSONWriter method)</a>
 </li>
         <li><a href="build_api/trinity.buffer.writer.queue_writer.html#trinity.buffer.writer.queue_writer.QueueWriter.__init__">(trinity.buffer.writer.queue_writer.QueueWriter method)</a>
@@ -843,13 +853,7 @@
       </ul></li>
       <li><a href="build_api/trinity.common.models.model.html#trinity.common.models.model.ModelWrapper.chat_async">chat_async() (trinity.common.models.model.ModelWrapper method)</a>
 </li>
-      <li><a href="build_api/trinity.common.config.html#trinity.common.config.FormatConfig.chat_template">chat_template (trinity.common.config.FormatConfig attribute)</a>
-
-      <ul>
-        <li><a href="build_api/trinity.common.config.html#trinity.common.config.InferenceModelConfig.chat_template">(trinity.common.config.InferenceModelConfig attribute)</a>
-</li>
-      </ul></li>
-      <li><a href="build_api/trinity.common.constants.html#trinity.common.constants.PromptType.CHATPAIR">CHATPAIR (trinity.common.constants.PromptType attribute)</a>
+      <li><a href="build_api/trinity.common.config.html#trinity.common.config.InferenceModelConfig.chat_template">chat_template (trinity.common.config.InferenceModelConfig attribute)</a>
 </li>
       <li><a href="build_api/trinity.buffer.pipelines.html#trinity.buffer.pipelines.check_and_run_task_pipeline">check_and_run_task_pipeline() (in module trinity.buffer.pipelines)</a>
 
@@ -1137,8 +1141,6 @@
 </li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.Config.data_processor">data_processor (trinity.common.config.Config attribute)</a>
 </li>
-      <li><a href="build_api/trinity.common.config.html#trinity.common.config.DataProcessorConfig.data_processor_url">data_processor_url (trinity.common.config.DataProcessorConfig attribute)</a>
-</li>
       <li><a href="build_api/trinity.common.experience.html#trinity.common.experience.CustomField.data_type">data_type (trinity.common.experience.CustomField attribute)</a>
 </li>
       <li><a href="build_api/trinity.service.html#trinity.service.DataJuicerClient">DataJuicerClient (class in trinity.service)</a>
@@ -1160,8 +1162,6 @@
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.DataProcessorConfig">DataProcessorConfig (class in trinity.common.config)</a>
 </li>
       <li><a href="build_api/trinity.buffer.ray_wrapper.html#trinity.buffer.ray_wrapper.DBWrapper">DBWrapper (class in trinity.buffer.ray_wrapper)</a>
-</li>
-      <li><a href="build_api/trinity.common.constants.html#trinity.common.constants.ReadStrategy.DEFAULT">DEFAULT (trinity.common.constants.ReadStrategy attribute)</a>
 </li>
       <li><a href="build_api/trinity.common.rewards.math_reward.html#trinity.common.rewards.math_reward.MathRewardFn.DEFAULT_ANSWER_PARSER">DEFAULT_ANSWER_PARSER() (trinity.common.rewards.math_reward.MathRewardFn method)</a>
 
@@ -1381,6 +1381,10 @@
         <li><a href="build_api/trinity.algorithm.policy_loss_fn.dpo_loss.html#trinity.algorithm.policy_loss_fn.dpo_loss.DPOLossFn">(class in trinity.algorithm.policy_loss_fn.dpo_loss)</a>
 </li>
       </ul></li>
+      <li><a href="build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.DPOMessagesFormatter">DPOMessagesFormatter (class in trinity.buffer.schema.formatter)</a>
+</li>
+      <li><a href="build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.DPOPlaintextFormatter">DPOPlaintextFormatter (class in trinity.buffer.schema.formatter)</a>
+</li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.InferenceModelConfig.dtype">dtype (trinity.common.config.InferenceModelConfig attribute)</a>
 </li>
       <li><a href="build_api/trinity.algorithm.entropy_loss_fn.entropy_loss_fn.html#trinity.algorithm.entropy_loss_fn.entropy_loss_fn.DummyEntropyLossFn">DummyEntropyLossFn (class in trinity.algorithm.entropy_loss_fn.entropy_loss_fn)</a>
@@ -1587,8 +1591,6 @@
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="build_api/trinity.common.constants.html#trinity.common.constants.ReadStrategy.FIFO">FIFO (trinity.common.constants.ReadStrategy attribute)</a>
-</li>
       <li><a href="build_api/trinity.common.constants.html#trinity.common.constants.StorageType.FILE">FILE (trinity.common.constants.StorageType attribute)</a>
 </li>
       <li><a href="build_api/trinity.buffer.ray_wrapper.html#trinity.buffer.ray_wrapper.FileWrapper">FileWrapper (class in trinity.buffer.ray_wrapper)</a>
@@ -1609,17 +1611,33 @@
 </li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.StorageConfig.format">format (trinity.common.config.StorageConfig attribute)</a>
 </li>
-      <li><a href="build_api/trinity.utils.log.html#trinity.utils.log.NewLineFormatter.format">format() (trinity.utils.log.NewLineFormatter method)</a>
+      <li><a href="build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.DPOMessagesFormatter.format">format() (trinity.buffer.schema.formatter.DPOMessagesFormatter method)</a>
+
+      <ul>
+        <li><a href="build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.DPOPlaintextFormatter.format">(trinity.buffer.schema.formatter.DPOPlaintextFormatter method)</a>
 </li>
+        <li><a href="build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.Formatter.format">(trinity.buffer.schema.formatter.Formatter method)</a>
+</li>
+        <li><a href="build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.SFTMessagesFormatter.format">(trinity.buffer.schema.formatter.SFTMessagesFormatter method)</a>
+</li>
+        <li><a href="build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.SFTPlaintextFormatter.format">(trinity.buffer.schema.formatter.SFTPlaintextFormatter method)</a>
+</li>
+        <li><a href="build_api/trinity.utils.log.html#trinity.utils.log.NewLineFormatter.format">(trinity.utils.log.NewLineFormatter method)</a>
+</li>
+      </ul></li>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.Task.format_args">format_args (trinity.common.workflows.Task attribute)</a>
 
       <ul>
         <li><a href="build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.workflow.Task.format_args">(trinity.common.workflows.workflow.Task attribute)</a>
 </li>
       </ul></li>
-      <li><a href="build_api/trinity.common.workflows.eval_workflow.html#trinity.common.workflows.eval_workflow.MathEvalWorkflow.format_messages">format_messages() (trinity.common.workflows.eval_workflow.MathEvalWorkflow method)</a>
+      <li><a href="build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.format_dpo_messages">format_dpo_messages() (in module trinity.buffer.schema.formatter)</a>
+</li>
+      <li><a href="build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.format_messages">format_messages() (in module trinity.buffer.schema.formatter)</a>
 
       <ul>
+        <li><a href="build_api/trinity.common.workflows.eval_workflow.html#trinity.common.workflows.eval_workflow.MathEvalWorkflow.format_messages">(trinity.common.workflows.eval_workflow.MathEvalWorkflow method)</a>
+</li>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.MathEvalWorkflow.format_messages">(trinity.common.workflows.MathEvalWorkflow method)</a>
 </li>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.SimpleWorkflow.format_messages">(trinity.common.workflows.SimpleWorkflow method)</a>
@@ -1627,6 +1645,8 @@
         <li><a href="build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.workflow.SimpleWorkflow.format_messages">(trinity.common.workflows.workflow.SimpleWorkflow method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.workflows.customized_math_workflows.html#trinity.common.workflows.customized_math_workflows.MathBoxedWorkflow.format_prompt">format_prompt() (trinity.common.workflows.customized_math_workflows.MathBoxedWorkflow method)</a>
 
       <ul>
@@ -1637,8 +1657,6 @@
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.ToolCallWorkflow.format_prompt">(trinity.common.workflows.ToolCallWorkflow method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.FormatConfig">FormatConfig (class in trinity.common.config)</a>
 </li>
       <li><a href="build_api/trinity.common.rewards.html#trinity.common.rewards.FormatReward">FormatReward (class in trinity.common.rewards)</a>
@@ -1647,6 +1665,8 @@
         <li><a href="build_api/trinity.common.rewards.format_reward.html#trinity.common.rewards.format_reward.FormatReward">(class in trinity.common.rewards.format_reward)</a>
 </li>
       </ul></li>
+      <li><a href="build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.Formatter">Formatter (class in trinity.buffer.schema.formatter)</a>
+</li>
       <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.Critic.forward_max_token_len_per_gpu">forward_max_token_len_per_gpu (trinity.common.verl_config.Critic attribute)</a>
 
       <ul>
@@ -2093,8 +2113,6 @@
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="build_api/trinity.common.config.html#trinity.common.config.FormatConfig.label_key">label_key (trinity.common.config.FormatConfig attribute)</a>
-</li>
       <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.Algorithm.lam">lam (trinity.common.verl_config.Algorithm attribute)</a>
 </li>
       <li><a href="build_api/trinity.utils.eval_utils.html#trinity.utils.eval_utils.last_boxed_only_string">last_boxed_only_string() (in module trinity.utils.eval_utils)</a>
@@ -2102,8 +2120,6 @@
       <li><a href="build_api/trinity.buffer.ray_wrapper.html#trinity.buffer.ray_wrapper.QueueWrapper.length">length() (trinity.buffer.ray_wrapper.QueueWrapper method)</a>
 </li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.LogConfig.level">level (trinity.common.config.LogConfig attribute)</a>
-</li>
-      <li><a href="build_api/trinity.common.constants.html#trinity.common.constants.ReadStrategy.LFU">LFU (trinity.common.constants.ReadStrategy attribute)</a>
 </li>
       <li><a href="build_api/trinity.buffer.queue.html#trinity.buffer.queue.linear_decay_priority">linear_decay_priority() (in module trinity.buffer.queue)</a>
 </li>
@@ -2216,8 +2232,6 @@
       <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.Optim.lr_warmup_steps">lr_warmup_steps (trinity.common.verl_config.Optim attribute)</a>
 </li>
       <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.Optim.lr_warmup_steps_ratio">lr_warmup_steps_ratio (trinity.common.verl_config.Optim attribute)</a>
-</li>
-      <li><a href="build_api/trinity.common.constants.html#trinity.common.constants.ReadStrategy.LRU">LRU (trinity.common.constants.ReadStrategy attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -2528,6 +2542,8 @@
         <li><a href="build_api/trinity.buffer.reader.sql_reader.html#module-trinity.buffer.reader.sql_reader">trinity.buffer.reader.sql_reader</a>
 </li>
         <li><a href="build_api/trinity.buffer.schema.html#module-trinity.buffer.schema">trinity.buffer.schema</a>
+</li>
+        <li><a href="build_api/trinity.buffer.schema.formatter.html#module-trinity.buffer.schema.formatter">trinity.buffer.schema.formatter</a>
 </li>
         <li><a href="build_api/trinity.buffer.schema.sql_schema.html#module-trinity.buffer.schema.sql_schema">trinity.buffer.schema.sql_schema</a>
 </li>
@@ -2940,11 +2956,9 @@
         <li><a href="build_api/trinity.trainer.verl_trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.prepare">(trinity.trainer.verl_trainer.VerlPPOTrainerWrapper method)</a>
 </li>
       </ul></li>
-      <li><a href="build_api/trinity.buffer.schema.sql_schema.html#trinity.buffer.schema.sql_schema.ExperienceModel.priority">priority (trinity.buffer.schema.sql_schema.ExperienceModel attribute)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="build_api/trinity.common.constants.html#trinity.common.constants.ReadStrategy.PRIORITY">PRIORITY (trinity.common.constants.ReadStrategy attribute)</a>
+      <li><a href="build_api/trinity.buffer.schema.sql_schema.html#trinity.buffer.schema.sql_schema.ExperienceModel.priority">priority (trinity.buffer.schema.sql_schema.ExperienceModel attribute)</a>
 </li>
       <li><a href="build_api/trinity.buffer.queue.html#trinity.buffer.queue.AsyncPriorityQueue.priority_fn">priority_fn (trinity.buffer.queue.AsyncPriorityQueue attribute)</a>
 </li>
@@ -3072,8 +3086,6 @@
 </li>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.RAFTReflectAlfworldWorkflow">RAFTReflectAlfworldWorkflow (class in trinity.common.workflows)</a>
 </li>
-      <li><a href="build_api/trinity.common.constants.html#trinity.common.constants.ReadStrategy.RANDOM">RANDOM (trinity.common.constants.ReadStrategy attribute)</a>
-</li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.StorageConfig.raw">raw (trinity.common.config.StorageConfig attribute)</a>
 </li>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.Task.raw_task">raw_task (trinity.common.workflows.Task attribute)</a>
@@ -3128,8 +3140,6 @@
         <li><a href="build_api/trinity.buffer.reader.sql_reader.html#trinity.buffer.reader.sql_reader.SQLReader.read_async">(trinity.buffer.reader.sql_reader.SQLReader method)</a>
 </li>
       </ul></li>
-      <li><a href="build_api/trinity.common.constants.html#trinity.common.constants.ReadStrategy">ReadStrategy (class in trinity.common.constants)</a>
-</li>
       <li><a href="build_api/trinity.manager.html#trinity.manager.Synchronizer.ready_to_nccl_sync">ready_to_nccl_sync() (trinity.manager.Synchronizer method)</a>
 
       <ul>
@@ -3349,8 +3359,6 @@
 </li>
       </ul></li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.FormatConfig.reward_fn_key">reward_fn_key (trinity.common.config.FormatConfig attribute)</a>
-</li>
-      <li><a href="build_api/trinity.common.config.html#trinity.common.config.FormatConfig.reward_key">reward_key (trinity.common.config.FormatConfig attribute)</a>
 </li>
       <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.RewardModel.reward_manager">reward_manager (trinity.common.verl_config.RewardModel attribute)</a>
 </li>
@@ -3978,8 +3986,6 @@
 </li>
       <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_use_v1">set_use_v1() (in module trinity.manager.config_registry.explorer_config_manager)</a>
 </li>
-      <li><a href="build_api/trinity.common.config.html#trinity.common.config.DataProcessorConfig.setup_data_processor">setup_data_processor (trinity.common.config.DataProcessorConfig attribute)</a>
-</li>
       <li><a href="build_api/trinity.utils.dlc_utils.html#trinity.utils.dlc_utils.setup_ray_cluster">setup_ray_cluster() (in module trinity.utils.dlc_utils)</a>
 </li>
       <li><a href="build_api/trinity.explorer.html#trinity.explorer.Explorer.setup_weight_sync_group">setup_weight_sync_group() (trinity.explorer.Explorer method)</a>
@@ -4022,12 +4028,16 @@
         <li><a href="build_api/trinity.algorithm.policy_loss_fn.sft_loss.html#trinity.algorithm.policy_loss_fn.sft_loss.SFTLossFn">(class in trinity.algorithm.policy_loss_fn.sft_loss)</a>
 </li>
       </ul></li>
+      <li><a href="build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.SFTMessagesFormatter">SFTMessagesFormatter (class in trinity.buffer.schema.formatter)</a>
+</li>
       <li><a href="build_api/trinity.algorithm.policy_loss_fn.html#trinity.algorithm.policy_loss_fn.SFTPhiLossFn">SFTPhiLossFn (class in trinity.algorithm.policy_loss_fn)</a>
 
       <ul>
         <li><a href="build_api/trinity.algorithm.policy_loss_fn.chord_policy_loss.html#trinity.algorithm.policy_loss_fn.chord_policy_loss.SFTPhiLossFn">(class in trinity.algorithm.policy_loss_fn.chord_policy_loss)</a>
 </li>
       </ul></li>
+      <li><a href="build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.SFTPlaintextFormatter">SFTPlaintextFormatter (class in trinity.buffer.schema.formatter)</a>
+</li>
       <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.Actor.shuffle">shuffle (trinity.common.verl_config.Actor attribute)</a>
 
       <ul>
@@ -4057,8 +4067,6 @@
 </li>
       </ul></li>
       <li><a href="build_api/trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.sleep">sleep() (trinity.common.models.vllm_model.vLLMRolloutModel method)</a>
-</li>
-      <li><a href="build_api/trinity.common.config.html#trinity.common.config.FormatConfig.solution_key">solution_key (trinity.common.config.FormatConfig attribute)</a>
 </li>
       <li><a href="build_api/trinity.explorer.scheduler.html#trinity.explorer.scheduler.sort_batch_id">sort_batch_id() (in module trinity.explorer.scheduler)</a>
 </li>
@@ -4198,6 +4206,8 @@
         <li><a href="build_api/trinity.common.config.html#trinity.common.config.FormatConfig.system_prompt">(trinity.common.config.FormatConfig attribute)</a>
 </li>
       </ul></li>
+      <li><a href="build_api/trinity.common.config.html#trinity.common.config.FormatConfig.system_prompt_key">system_prompt_key (trinity.common.config.FormatConfig attribute)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -4809,6 +4819,13 @@
 
       <ul>
         <li><a href="build_api/trinity.buffer.schema.html#module-trinity.buffer.schema">module</a>
+</li>
+      </ul></li>
+      <li>
+    trinity.buffer.schema.formatter
+
+      <ul>
+        <li><a href="build_api/trinity.buffer.schema.formatter.html#module-trinity.buffer.schema.formatter">module</a>
 </li>
       </ul></li>
       <li>

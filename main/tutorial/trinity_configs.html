@@ -73,6 +73,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#synchronizer-configuration">Synchronizer Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#trainer-configuration">Trainer Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#service-configuration">Service Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dataprocessor-configuration">DataProcessor Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#log-configuration">Log Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#verl-trainer-configuration-advanced">veRL Trainer Configuration (Advanced)</a></li>
 </ul>
@@ -149,14 +150,12 @@
 <span class="nt">monitor</span><span class="p">:</span>
 <span class="w">  </span><span class="c1"># Monitoring configurations (e.g., WandB or TensorBoard)</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
-<span class="nt">data_processor</span><span class="p">:</span>
-<span class="w">  </span><span class="c1"># Preprocessing data settings</span>
-<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
-
 <span class="nt">service</span><span class="p">:</span>
 <span class="w">  </span><span class="c1"># Services to use</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
-
+<span class="nt">data_processor</span><span class="p">:</span>
+<span class="w">  </span><span class="c1"># Preprocessing data settings</span>
+<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="nt">log</span><span class="p">:</span>
 <span class="w">  </span><span class="c1"># Ray actor logging</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
@@ -545,6 +544,39 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">auto_start</span></code>: Whether to automatically start the data juicer service.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">port</span></code>: The port for Data Juicer service when <code class="docutils literal notranslate"><span class="pre">auto_start</span></code> is true.</p></li>
 </ul>
+</section>
+<hr class="docutils" />
+<section id="dataprocessor-configuration">
+<h2>DataProcessor Configuration<a class="headerlink" href="#dataprocessor-configuration" title="Link to this heading"></a></h2>
+<p>Configures the task / experience pipeline, please refer to <a class="reference internal" href="example_data_functionalities.html#data-processing"><span class="std std-ref">Data Processing</span></a> section for details.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">data_processor</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">task_pipeline</span><span class="p">:</span>
+<span class="w">  </span><span class="c1"># task pipeline related</span>
+<span class="w">  </span><span class="nt">task_pipeline</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">num_process</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32</span>
+<span class="w">    </span><span class="nt">operators</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;llm_difficulty_score_filter&quot;</span>
+<span class="w">        </span><span class="nt">args</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">api_or_hf_model</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;qwen2.5-7b-instruct&quot;</span>
+<span class="w">          </span><span class="nt">min_score</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0</span>
+<span class="w">          </span><span class="nt">input_keys</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;question&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;answer&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">          </span><span class="nt">field_names</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;Question&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;Answer&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">inputs</span><span class="p">:</span><span class="w">  </span><span class="c1"># the output will be set to the explorer input automatically</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/GSM8K/DATA/FILE</span>
+<span class="w">    </span><span class="nt">target_fields</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;question&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;answer&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">experience_pipeline</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">operators</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data_juicer</span>
+<span class="w">        </span><span class="nt">args</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">config_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;examples/grpo_gsm8k_experience_pipeline/dj_scoring_exp.yaml&#39;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reward_shaping_mapper</span>
+<span class="w">        </span><span class="nt">args</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">reward_shaping_configs</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">stats_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;llm_quality_score&#39;</span>
+<span class="w">              </span><span class="nt">op_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ADD</span>
+<span class="w">              </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+</pre></div>
+</div>
 <p>–</p>
 </section>
 <section id="log-configuration">

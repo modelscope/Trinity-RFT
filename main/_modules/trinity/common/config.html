@@ -125,30 +125,27 @@
 
     <span class="n">prompt_type</span><span class="p">:</span> <span class="n">PromptType</span> <span class="o">=</span> <span class="n">PromptType</span><span class="o">.</span><span class="n">MESSAGES</span>
 
-    <span class="n">prompt_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;prompt&quot;</span>
-    <span class="n">response_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;response&quot;</span>
-    <span class="n">messages_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;message&quot;</span>
-    <span class="n">tools_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;tools&quot;</span>
-    <span class="n">chat_template</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>  <span class="c1"># deprecated</span>
+    <span class="c1"># for plaintext input</span>
+    <span class="n">prompt_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;prompt&quot;</span>  <span class="c1"># user prompt</span>
+    <span class="n">response_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;response&quot;</span>  <span class="c1"># assistant response</span>
+    <span class="n">system_prompt_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># If set, use the provided system prompt</span>
+    <span class="n">system_prompt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># has lower priority than system_prompt_key</span>
 
-    <span class="n">system_prompt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># for message list input</span>
+    <span class="n">messages_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;message&quot;</span>
+
+    <span class="c1"># for tools</span>
+    <span class="n">tools_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;tools&quot;</span>
+
     <span class="n">reply_prefix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1"># for sample-level task controlling</span>
-    <span class="n">reward_fn_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="n">workflow_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-    <span class="c1"># for math dataset</span>
-    <span class="n">solution_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;solution&quot;</span>
-
-    <span class="c1"># for reward dataset</span>
-    <span class="n">reward_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reward&quot;</span>
+    <span class="n">reward_fn_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
     <span class="c1"># for dpo dataset</span>
     <span class="n">chosen_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;chosen&quot;</span>
-    <span class="n">rejected_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;rejected&quot;</span>
-
-    <span class="c1"># for unpaired preference dataset</span>
-    <span class="n">label_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span></div>
+    <span class="n">rejected_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;rejected&quot;</span></div>
 
 
 
@@ -314,16 +311,7 @@
     <span class="c1"># 2. For experience. Data processing for rollouts</span>
     <span class="n">experience_pipeline</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ExperiencePipelineConfig</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
         <span class="n">default_factory</span><span class="o">=</span><span class="n">ExperiencePipelineConfig</span>
-    <span class="p">)</span>
-
-    <span class="c1"># For Data-Juicer</span>
-    <span class="c1"># Whether to setup Data-Juicer server automatically. If set to True, the launcher</span>
-    <span class="c1"># will try to start a Data-Juicer server using the `data_processor_url`,</span>
-    <span class="c1"># If set to False, the user should start the Data-Juicer server manually, and set</span>
-    <span class="c1"># the `data_processor_url` to the server URL.</span>
-    <span class="n">setup_data_processor</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="c1"># the url of the Data-Juicer server</span>
-    <span class="n">data_processor_url</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+    <span class="p">)</span></div>
 
 
 

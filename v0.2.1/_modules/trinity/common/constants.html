@@ -95,8 +95,6 @@
 <span class="sd">&quot;&quot;&quot;Constants.&quot;&quot;&quot;</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">EnumMeta</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.annotations</span><span class="w"> </span><span class="kn">import</span> <span class="n">Deprecated</span>
-
 <span class="c1"># names</span>
 
 <span class="n">EXPLORER_NAME</span> <span class="o">=</span> <span class="s2">&quot;explorer&quot;</span>
@@ -147,9 +145,8 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">PromptType</span><span class="p">(</span><span class="n">CaseInsensitiveEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Prompt Type.&quot;&quot;&quot;</span>
 
-    <span class="n">MESSAGES</span> <span class="o">=</span> <span class="s2">&quot;messages&quot;</span>  <span class="c1"># prompt+response: message list</span>
-    <span class="n">CHATPAIR</span> <span class="o">=</span> <span class="s2">&quot;chatpair&quot;</span>  <span class="c1"># prompt: message list, response: message list</span>
-    <span class="n">PLAINTEXT</span> <span class="o">=</span> <span class="s2">&quot;plaintext&quot;</span>  <span class="c1"># prompt: plaintext, response: plaintext</span></div>
+    <span class="n">MESSAGES</span> <span class="o">=</span> <span class="s2">&quot;messages&quot;</span>  <span class="c1"># a list of message dict</span>
+    <span class="n">PLAINTEXT</span> <span class="o">=</span> <span class="s2">&quot;plaintext&quot;</span>  <span class="c1"># user prompt text and assistant response text</span></div>
 
 
 
@@ -160,21 +157,6 @@
 
     <span class="n">EXPLORE</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">EVAL</span> <span class="o">=</span> <span class="mi">1</span></div>
-
-
-
-<div class="viewcode-block" id="ReadStrategy">
-<a class="viewcode-back" href="../../../build_api/trinity.common.constants.html#trinity.common.constants.ReadStrategy">[docs]</a>
-<span class="nd">@Deprecated</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">ReadStrategy</span><span class="p">(</span><span class="n">CaseInsensitiveEnum</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Pop Strategy.&quot;&quot;&quot;</span>
-
-    <span class="n">DEFAULT</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">FIFO</span> <span class="o">=</span> <span class="s2">&quot;fifo&quot;</span>
-    <span class="n">RANDOM</span> <span class="o">=</span> <span class="s2">&quot;random&quot;</span>
-    <span class="n">LRU</span> <span class="o">=</span> <span class="s2">&quot;lru&quot;</span>
-    <span class="n">LFU</span> <span class="o">=</span> <span class="s2">&quot;lfu&quot;</span>
-    <span class="n">PRIORITY</span> <span class="o">=</span> <span class="s2">&quot;priority&quot;</span></div>
 
 
 

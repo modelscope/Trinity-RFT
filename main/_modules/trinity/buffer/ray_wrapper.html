@@ -110,7 +110,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Base</span><span class="p">,</span> <span class="n">create_dynamic_table</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">default_storage_path</span><span class="p">,</span> <span class="n">retry_session</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">BufferConfig</span><span class="p">,</span> <span class="n">StorageConfig</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReadStrategy</span><span class="p">,</span> <span class="n">StorageType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">StorageType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">EID</span><span class="p">,</span> <span class="n">Experience</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows</span><span class="w"> </span><span class="kn">import</span> <span class="n">Task</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
@@ -181,26 +181,11 @@
 
 <div class="viewcode-block" id="DBWrapper.read">
 <a class="viewcode-back" href="../../../build_api/trinity.buffer.ray_wrapper.html#trinity.buffer.ray_wrapper.DBWrapper.read">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">strategy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ReadStrategy</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopped</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">StopIteration</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="n">strategy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">strategy</span> <span class="o">=</span> <span class="n">ReadStrategy</span><span class="o">.</span><span class="n">LFU</span>
-
-        <span class="k">if</span> <span class="n">strategy</span> <span class="o">==</span> <span class="n">ReadStrategy</span><span class="o">.</span><span class="n">LFU</span><span class="p">:</span>
-            <span class="n">sortOrder</span> <span class="o">=</span> <span class="p">(</span><span class="n">asc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table_model_cls</span><span class="o">.</span><span class="n">consumed</span><span class="p">),</span> <span class="n">desc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table_model_cls</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
-
-        <span class="k">elif</span> <span class="n">strategy</span> <span class="o">==</span> <span class="n">ReadStrategy</span><span class="o">.</span><span class="n">LRU</span><span class="p">:</span>
-            <span class="n">sortOrder</span> <span class="o">=</span> <span class="p">(</span><span class="n">desc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table_model_cls</span><span class="o">.</span><span class="n">id</span><span class="p">),)</span>
-
-        <span class="k">elif</span> <span class="n">strategy</span> <span class="o">==</span> <span class="n">ReadStrategy</span><span class="o">.</span><span class="n">PRIORITY</span><span class="p">:</span>
-            <span class="n">sortOrder</span> <span class="o">=</span> <span class="p">(</span><span class="n">desc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table_model_cls</span><span class="o">.</span><span class="n">priority</span><span class="p">),</span> <span class="n">desc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table_model_cls</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
-
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported strategy </span><span class="si">{</span><span class="n">strategy</span><span class="si">}</span><span class="s2"> by SQLStorage&quot;</span><span class="p">)</span>
+        <span class="n">sortOrder</span> <span class="o">=</span> <span class="p">(</span><span class="n">asc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table_model_cls</span><span class="o">.</span><span class="n">consumed</span><span class="p">),</span> <span class="n">desc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table_model_cls</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
 
         <span class="n">exp_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span>  <span class="c1"># type: ignore</span>

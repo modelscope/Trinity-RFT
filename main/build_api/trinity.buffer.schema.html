@@ -19,7 +19,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="trinity.buffer.schema.sql_schema module" href="trinity.buffer.schema.sql_schema.html" />
+    <link rel="next" title="trinity.buffer.schema.formatter module" href="trinity.buffer.schema.formatter.html" />
     <link rel="prev" title="trinity.buffer.reader.sql_reader module" href="trinity.buffer.reader.sql_reader.html" /> 
 </head>
 
@@ -101,6 +101,36 @@
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="trinity.buffer.schema.formatter.html">trinity.buffer.schema.formatter module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.Formatter"><code class="docutils literal notranslate"><span class="pre">Formatter</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.Formatter.__init__"><code class="docutils literal notranslate"><span class="pre">Formatter.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.Formatter.format"><code class="docutils literal notranslate"><span class="pre">Formatter.format()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.format_messages"><code class="docutils literal notranslate"><span class="pre">format_messages()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.SFTMessagesFormatter"><code class="docutils literal notranslate"><span class="pre">SFTMessagesFormatter</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.SFTMessagesFormatter.__init__"><code class="docutils literal notranslate"><span class="pre">SFTMessagesFormatter.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.SFTMessagesFormatter.format"><code class="docutils literal notranslate"><span class="pre">SFTMessagesFormatter.format()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.SFTPlaintextFormatter"><code class="docutils literal notranslate"><span class="pre">SFTPlaintextFormatter</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.SFTPlaintextFormatter.__init__"><code class="docutils literal notranslate"><span class="pre">SFTPlaintextFormatter.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.SFTPlaintextFormatter.format"><code class="docutils literal notranslate"><span class="pre">SFTPlaintextFormatter.format()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.format_dpo_messages"><code class="docutils literal notranslate"><span class="pre">format_dpo_messages()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.DPOPlaintextFormatter"><code class="docutils literal notranslate"><span class="pre">DPOPlaintextFormatter</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.DPOPlaintextFormatter.__init__"><code class="docutils literal notranslate"><span class="pre">DPOPlaintextFormatter.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.DPOPlaintextFormatter.format"><code class="docutils literal notranslate"><span class="pre">DPOPlaintextFormatter.format()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.DPOMessagesFormatter"><code class="docutils literal notranslate"><span class="pre">DPOMessagesFormatter</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.DPOMessagesFormatter.__init__"><code class="docutils literal notranslate"><span class="pre">DPOMessagesFormatter.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.DPOMessagesFormatter.format"><code class="docutils literal notranslate"><span class="pre">DPOMessagesFormatter.format()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="trinity.buffer.schema.sql_schema.html">trinity.buffer.schema.sql_schema module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="trinity.buffer.schema.sql_schema.html#trinity.buffer.schema.sql_schema.TaskModel"><code class="docutils literal notranslate"><span class="pre">TaskModel</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="trinity.buffer.schema.sql_schema.html#trinity.buffer.schema.sql_schema.TaskModel.id"><code class="docutils literal notranslate"><span class="pre">TaskModel.id</span></code></a></li>
@@ -191,7 +221,7 @@ for example, any mapped columns or relationships.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="trinity.buffer.reader.sql_reader.html" class="btn btn-neutral float-left" title="trinity.buffer.reader.sql_reader module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="trinity.buffer.schema.sql_schema.html" class="btn btn-neutral float-right" title="trinity.buffer.schema.sql_schema module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="trinity.buffer.schema.formatter.html" class="btn btn-neutral float-right" title="trinity.buffer.schema.formatter module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
