@@ -190,7 +190,7 @@ class TOPRAlgorithm(AlgorithmType):
     def default_config(cls) -> Dict:
         return {
             "repeat_times": 2,
-            "add_strategy": "reinforce",  # or simply use grpo
+            "advantage_fn": "reinforce",  # or simply use grpo
             "sample_strategy": "warmup",
             "policy_loss_fn": "topr",
             "kl_penalty_fn": "none",
@@ -213,7 +213,7 @@ class CISPOAlgorithm(AlgorithmType):
     def default_config(cls) -> Dict:
         return {
             "repeat_times": 2,
-            "add_strategy": "grpo",
+            "advantage_fn": "grpo",
             "sample_strategy": "warmup",
             "policy_loss_fn": "cispo",
             "kl_penalty_fn": "none",
