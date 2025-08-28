@@ -173,10 +173,12 @@ class TestStepAheadAsyncRL(BaseTrainerCase):
 
 
 @parameterized_class(
-    ("fsdp_strategy",),
+    ("fsdp_strategy", "offloading"),
     [
-        ("fsdp",),
-        ("fsdp2",),
+        ("fsdp", False),
+        ("fsdp2", False),
+        ("fsdp", True),
+        ("fsdp2", True),
     ],
 )
 class TestTrainerGSM8K(BaseTrainerCase):
@@ -194,9 +196,18 @@ class TestTrainerGSM8K(BaseTrainerCase):
         self.config.buffer.total_epochs = 1
         self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("gsm8k")
         self.config.check_and_update()
-        self.config.trainer.trainer_config.actor_rollout_ref.actor.strategy = self.fsdp_strategy
         self.config.trainer.trainer_config.trainer.max_actor_ckpt_to_keep = 2
-        self.config.trainer.trainer_config.actor_rollout_ref.actor.optim.lr = 1e-5
+        actor_rollout_ref = self.config.trainer.trainer_config.actor_rollout_ref
+        actor_rollout_ref.actor.strategy = self.fsdp_strategy
+        actor_rollout_ref.actor.optim.lr = 1e-5
+        if self.fsdp_strategy == "fsdp":
+            actor_rollout_ref.actor.fsdp_config.param_offload = self.offloading
+            actor_rollout_ref.actor.fsdp_config.optimizer_offload = self.offloading
+            actor_rollout_ref.ref.fsdp_config.param_offload = self.offloading
+            actor_rollout_ref.ref.fsdp_config.optimizer_offload = self.offloading
+        else:  # fsdp2
+            actor_rollout_ref.actor.fsdp_config.offload_policy = self.offloading
+            actor_rollout_ref.ref.fsdp_config.offload_policy = self.offloading
         both(self.config)
         parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
         rollout_metrics = parser.metric_list("rollout")
