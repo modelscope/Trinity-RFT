@@ -215,10 +215,22 @@
     <span class="n">retval</span> <span class="o">=</span> <span class="mf">0.0</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">string_in_last_boxed</span> <span class="o">=</span> <span class="n">last_boxed_only_string</span><span class="p">(</span><span class="n">solution_str</span><span class="p">)</span>
+        <span class="n">original_ground_truth</span> <span class="o">=</span> <span class="n">ground_truth</span>
+        <span class="n">boxed_ground_truth</span> <span class="o">=</span> <span class="n">last_boxed_only_string</span><span class="p">(</span><span class="n">ground_truth</span><span class="p">)</span>
+        <span class="c1"># Determine if ground_truth was raw (had boxed content) or already processed</span>
+        <span class="n">ground_truth_was_raw</span> <span class="o">=</span> <span class="n">boxed_ground_truth</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">string_in_last_boxed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">answer</span> <span class="o">=</span> <span class="n">remove_boxed</span><span class="p">(</span><span class="n">string_in_last_boxed</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ground_truth_was_raw</span><span class="p">:</span>
+                <span class="c1"># Ground truth had boxed content - remove it</span>
+                <span class="n">ground_truth</span> <span class="o">=</span> <span class="n">remove_boxed</span><span class="p">(</span><span class="n">boxed_ground_truth</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Ground truth had no boxed content - use as is</span>
+                <span class="n">ground_truth</span> <span class="o">=</span> <span class="n">original_ground_truth</span>
             <span class="k">if</span> <span class="n">is_equiv</span><span class="p">(</span><span class="n">answer</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">):</span>
                 <span class="n">retval</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="c1"># logger.warning(answer, &quot; &quot;, ground_truth, &quot; &quot;, retval)</span>
+
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
 
