@@ -20,7 +20,7 @@ except ImportError as e:
 
 class EmailSearchAgent(BaseAgentClass):
     """
-    A customized ReAct agent that overrides the generate_response method by return_final_answer
+    A customized ReAct agent with pre-defined tools for email search and reading.
     Ref: https://github.com/OpenPipe/ART/blob/main/dev/art-e/art_e/rollout.py#L260
     """
 
