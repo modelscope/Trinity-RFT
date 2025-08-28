@@ -132,6 +132,29 @@ class OPMDAlgorithm(AlgorithmType):
         }
 
 
+@ALGORITHM_TYPE.register_module("asymre")
+class AsymREAlgorithm(AlgorithmType):
+    """AsymRE algorithm."""
+
+    use_critic: bool = False
+    use_reference: bool = False
+    compute_advantage_in_trainer: bool = False
+    can_balance_batch: bool = True
+    schema: type = ExperienceModel
+
+    @classmethod
+    def default_config(cls) -> Dict:
+        return {
+            "repeat_times": 2,
+            "sample_strategy": "warmup",
+            "policy_loss_fn": "opmd",
+            "advantage_fn": "asymre",
+            "kl_penalty_fn": "none",
+            "kl_loss_fn": "none",
+            "entropy_loss_fn": "none",
+        }
+
+
 @ALGORITHM_TYPE.register_module("dpo")
 class DPOAlgorithm(AlgorithmType):
     """DPO algorithm."""

@@ -1,0 +1,66 @@
+project: sync_offset_0_sync20
+name: asymre-gsm8k_shift-0.1
+checkpoint_root_dir: /PATH/TO/CHECKPOINT/
+model:
+  model_path: /PATH/TO/MODEL/
+  max_response_tokens: 1024
+  max_model_len: 1280
+algorithm:
+  algorithm_type: asymre
+  policy_loss_fn_args:
+    tau: 0
+  advantage_fn_args:
+    baseline_shift: -0.1
+  repeat_times: 8
+cluster:
+  node_num: 1
+  gpu_per_node: 8
+buffer:
+  total_steps: 80
+  batch_size: 96
+  max_retry_times: 3
+  max_retry_interval: 1
+  explorer_input:
+    taskset:
+      name: gsm8k
+      storage_type: file
+      path: /PATH/TO/DATASET/
+      split: train
+      format:
+        prompt_key: question
+        response_key: answer
+      rollout_args:
+        temperature: 1.0
+    eval_tasksets:
+      - name: gsm8k-eval
+        storage_type: file
+        path: /PATH/TO/DATASET/
+        split: test
+        format:
+          prompt_key: question
+          response_key: answer
+    default_workflow_type: math_workflow
+  trainer_input:
+    experience_buffer:
+      name: gsm8k_buffer
+      storage_type: queue
+explorer:
+  eval_interval: 20
+  runner_num: 64
+  rollout_model:
+    engine_type: vllm_async
+    engine_num: 4
+    tensor_parallel_size: 1
+    enable_prefix_caching: false
+    enforce_eager: true
+    dtype: bfloat16
+    seed: 42
+synchronizer:
+  sync_method: nccl
+  sync_interval: 20
+  sync_timeout: 1200
+  sync_offset: 0
+trainer:
+  trainer_type: verl
+  trainer_config_path: examples/asymre_gsm8k/train_gsm8k.yaml
+  save_interval: 100

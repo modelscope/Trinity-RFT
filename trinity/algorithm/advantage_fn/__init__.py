@@ -3,6 +3,7 @@ from trinity.algorithm.advantage_fn.advantage_fn import (
     AdvantageFn,
     GroupAdvantage,
 )
+from trinity.algorithm.advantage_fn.asymre_advantage import ASYMREAdvantageFn
 from trinity.algorithm.advantage_fn.grpo_advantage import (
     GRPOAdvantageFn,
     GRPOGroupedAdvantage,
@@ -36,4 +37,5 @@ __all__ = [
     "OPMDAdvantageFn",
     "OPMDGroupAdvantage",
     "REINFORCEGroupAdvantage",
+    "ASYMREAdvantageFn",
 ]
