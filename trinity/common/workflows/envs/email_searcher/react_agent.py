@@ -12,7 +12,7 @@ BaseAgentClass = object
 try:
     from agentscope.agents import ReActAgentV2
 
-    BaseAgentClass = ReActAgentV2
+    BaseAgentClass = ReActAgentV2  # type: ignore[misc]
 except ImportError as e:
     error_message = f"AgentScope is not installed. Please install the agentscope framework first before running the workflow. Error: {str(e)}"
     pass

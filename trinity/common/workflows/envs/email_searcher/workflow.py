@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
 import openai
 
@@ -134,7 +134,9 @@ class EmailSearchWorkflow(Workflow):
             answer_and_sources = response.metadata
 
         experiences = self.model.extract_experience_from_history(clear_history=True)
-        self.actual_turns = len(experiences) # NOTE: this metrics works only if the agent calls model once in each turn
+        self.actual_turns = len(
+            experiences
+        )  # NOTE: this metrics works only if the agent calls model once in each turn
 
         reward_dict = self.calculate_reward(answer_and_sources)
         reward = sum(reward_dict.values())
@@ -151,23 +153,22 @@ class EmailSearchWorkflow(Workflow):
         )
         return experiences
 
-    def calculate_reward(self, answer_and_sources: dict) -> dict[str, float]:
+    def calculate_reward(self, answer_and_sources: Dict) -> Dict[str, float]:
         """Ref: calculate_reward in https://github.com/OpenPipe/ART/blob/main/dev/art-e/art_e/rollout.py#L64"""
         try:
             answer = answer_and_sources.get("answer", None)
             sources = answer_and_sources.get("sources", [])
         except Exception as e:
             logger.error(f"Error extracting answer and sources: {e}")
-            result = {"accuracy": 0, "format": -1}
+            result = {"accuracy": 0.0, "format": -1.0}
             return result
 
         if answer is None:
-            result = {"accuracy": 0, "format": -1}
+            result = {"accuracy": 0.0, "format": -1.0}
             return result
 
         if not self.reward_fn_args.get("llm_as_a_judge", True):
-            # TODO: may use bleu here
-            result = {"accuracy": float(answer.lower() in self.truth.lower()), "format": 0}
+            result = {"accuracy": float(answer.lower() in self.truth.lower()), "format": 0.0}
             return result
 
         rubric = FinalRubric()
@@ -186,7 +187,6 @@ class EmailSearchWorkflow(Workflow):
         try:
             judge_model = self.auxiliary_models[0] if self.auxiliary_models else None
             judge_response = judge_correctness(answer, self.query, judge_model)
-            # logger.debug(f"Judge response: {judge_response}")
             rubric.answer_correct = judge_response
 
         except Exception as e:
@@ -197,27 +197,16 @@ class EmailSearchWorkflow(Workflow):
         partial_rewards = 0
         partial_rewards += 0.1 if rubric.ever_found_right_email else 0
         partial_rewards += 0.1 if rubric.ever_read_right_email else 0
-        # partial_rewards += 0.1 if not rubric.ever_tried_to_read_invalid_email else 0
         partial_rewards += 0.1 if rubric.sources_correct else 0
-
-        # Formatting error: reward will be -2 to -1
-        # if rubric.cant_parse_tool_call:
-        #     return -2 + partial_rewards
-
-        # if rubric.bad_tool_call_name:
-        #     return -1.9 + partial_rewards
-
-        # if rubric.bad_tool_call_args:
-        #     return -1.8 + partial_rewards
 
         # No formatting error, but wrong answer: reward will be -1 to 0
         if rubric.attempted_answer and not rubric.answer_correct:
-            result = {"accuracy": -1, "format": partial_rewards}
+            result = {"accuracy": -1.0, "format": partial_rewards}
             return result
 
         # Returned no answer at all: reward will be 0 to 1
         if rubric.returned_i_dont_know or rubric.ran_out_of_turns:
-            result = {"accuracy": 0, "format": partial_rewards}
+            result = {"accuracy": 0.0, "format": partial_rewards}
             return result
 
         # Answer is correct: reward will be 1 to 2

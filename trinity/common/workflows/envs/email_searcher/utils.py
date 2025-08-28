@@ -12,7 +12,6 @@ from pydantic import BaseModel, Field, field_validator
 
 from trinity.utils.log import get_logger
 
-
 logger = get_logger(__name__)
 
 
@@ -41,7 +40,7 @@ class QueryModel(BaseModel):
 
     @field_validator("query_date", mode="before")
     @classmethod
-    def format_date(cls, v: any) -> str:
+    def format_date(cls, v: Any) -> str:
         if isinstance(v, datetime.datetime):
             return v.strftime("%Y-%m-%d")
         return v
@@ -324,7 +323,7 @@ Return your judgement **accept** from **true** and **false**. Do not return any 
     result = completion.choices[0].message.content
     logger.info(f"LLM judge response: {result}")
 
-    # TODO: find a better way here
+    # TODO: more robust judge
     accept = False
     if "true" in result.lower():
         accept = True
