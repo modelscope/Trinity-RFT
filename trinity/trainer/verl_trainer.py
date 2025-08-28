@@ -10,6 +10,7 @@ from typing import Dict, Tuple
 import ray
 import torch
 from omegaconf import OmegaConf
+from verl import DataProto
 from verl.trainer.ppo.metric_utils import (
     compute_throughout_metrics,
     compute_timing_metrics,
@@ -24,7 +25,7 @@ from verl.trainer.ppo.ray_trainer import (
     create_colocated_worker_cls,
     find_latest_ckpt_path,
 )
-from verl.utils import hf_tokenizer
+from verl.utils import hf_processor, hf_tokenizer
 from verl.utils.debug import marked_timer
 from verl.utils.fs import copy_local_path_from_hdfs
 
@@ -80,8 +81,9 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         local_path = copy_local_path_from_hdfs(config.actor_rollout_ref.model.path)
 
         # instantiate tokenizer
-
         tokenizer = hf_tokenizer(local_path)
+        # processor for multimodal LLM, could be None
+        processor = hf_processor(local_path, use_fast=True)
 
         # define worker classes
         if config.actor_rollout_ref.actor.strategy in ["fsdp", "fsdp2"]:
@@ -142,6 +144,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             role_worker_mapping,
             resource_pool_manager,
             ray_worker_group_cls,
+            processor=processor,
         )
         self.init_workers()
         self.logger = get_logger(__name__, in_ray_actor=True)
@@ -286,6 +289,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
 
     def train_step(self, batch: Experiences) -> Tuple[bool, Dict]:  # noqa C901
         batch = to_data_proto(batch)
+        batch = self.post_process_batch(batch)
         metrics = {}
         self.global_steps += 1
         timing_raw = {}
@@ -424,3 +428,35 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         if self.use_critic:
             self.critic_wg.clear_optimizer_state()
         self.logger.info("sft to rft finished")
+
+    def post_process_batch(self, batch: DataProto) -> DataProto:
+        """Adapted from verl/utils/dataset/rl_dataset.py"""
+        if (
+            self.processor is not None
+            and "Qwen2VLImageProcessor" in self.processor.image_processor.__class__.__name__
+        ):
+            from verl.models.transformers.qwen2_vl import get_rope_index
+
+            position_ids = []
+            multi_modal_inputs = batch.non_tensor_batch["multi_modal_inputs"]
+            for idx, mm_inputs in enumerate(multi_modal_inputs):
+                # self.logger.info(f"{key = }, {value.shape =}")
+                input_ids = batch.batch["input_ids"][idx]
+                attention_mask = batch.batch["attention_mask"][idx]
+
+                position_ids.append(
+                    get_rope_index(
+                        self.processor,
+                        input_ids=input_ids,
+                        image_grid_thw=mm_inputs.get("image_grid_thw"),
+                        video_grid_thw=mm_inputs.get("video_grid_thw"),
+                        second_per_grid_ts=mm_inputs.get("second_per_grid_ts"),
+                        attention_mask=attention_mask,
+                    )  # (3, seq_len)
+                )
+                mm_inputs.pop("second_per_grid_ts", None)
+
+            batch.batch["position_ids"] = torch.stack(position_ids, dim=0).long()
+        else:
+            pass
+        return batch

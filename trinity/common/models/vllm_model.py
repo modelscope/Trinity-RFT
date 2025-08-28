@@ -9,10 +9,15 @@ import aiohttp
 import ray
 import torch
 import vllm
+from transformers import AutoProcessor
 from vllm.sampling_params import RequestOutputKind
 
 from trinity.common.config import InferenceModelConfig
 from trinity.common.experience import Experience
+from trinity.common.models.mm_utils import (
+    attach_images_to_messages,
+    build_multi_modal_inputs,
+)
 from trinity.common.models.model import InferenceModel
 from trinity.common.models.utils import (
     tokenize_and_mask_messages_default,
@@ -79,6 +84,7 @@ class vLLMRolloutModel(InferenceModel):
             # max_num_batched_tokens=256, # you can further set this parameter to reduce the vllm peak memory usage
         )
         self.async_llm = vllm.AsyncLLMEngine.from_engine_args(engine_args)
+        self.processor = None
         self.tokenizer = None
         self.chat_template = None
         if self.config.chat_template:
@@ -100,8 +106,18 @@ class vLLMRolloutModel(InferenceModel):
         self.api_server_port = None
 
     async def _initialize_tokenizer(self):
-        self.tokenizer = await self.async_llm.get_tokenizer()
+        if self.tokenizer is None:
+            if self.processor and hasattr(self.processor, "tokenizer"):
+                self.tokenizer = self.processor.tokenizer
+            else:
+                self.tokenizer = await self.async_llm.get_tokenizer()
         self.tokenizer.truncation_side = "left"
+
+    def _initialize_processor(self):
+        self.processor = AutoProcessor.from_pretrained(
+            self.config.model_path, trust_remote_code=True
+        )
+        self.tokenizer = self.processor.tokenizer
 
     async def chat(self, messages: List[Dict], **kwargs) -> Sequence[Experience]:
         """Chat with the model with a list of messages in async.
@@ -172,6 +188,110 @@ class vLLMRolloutModel(InferenceModel):
                 prompt_length=len(output.prompt_token_ids),
                 prompt_text=self.tokenizer.decode(output.prompt_token_ids),
                 response_text=output.outputs[i].text,
+            )
+            for i in range(len(output.outputs))
+        ]
+        return experiences
+
+    async def chat_mm(
+        self, messages: List[Dict], raw_mm_data: Dict, **kwargs
+    ) -> Sequence[Experience]:
+        """Chat with the model with a list of messages in async.
+
+        Args:
+            messages (List[dict]): The input history messages.
+            raw_mm_data (dict): The raw multi-modal data.
+            kwargs (dict): A dictionary of sampling parameters.
+
+        Returns:
+            A list of experiences.
+        """
+        # if self.tokenizer is None:
+        #     await self._initialize_tokenizer()
+        if self.processor is None:
+            self._initialize_processor()
+        if self.chat_template is None:
+            self.chat_template = self.tokenizer.get_chat_template()
+        messages = attach_images_to_messages(messages, raw_mm_data)
+        if messages[-1]["role"] == "assistant":
+            prompt = self.processor.apply_chat_template(
+                messages,
+                tokenize=False,
+                continue_final_message=True,
+                chat_template=self.chat_template,
+            )
+        else:
+            prompt = self.processor.apply_chat_template(
+                messages,
+                tokenize=False,
+                add_generation_prompt=True,
+                chat_template=self.chat_template,
+                enable_thinking=self.enable_thinking,
+            )
+
+        mm_inputs = build_multi_modal_inputs(
+            prompt=prompt,
+            raw_mm_data=raw_mm_data,
+            config=self.config,
+            **kwargs,
+        )
+        return await self.generate_mm(mm_inputs=mm_inputs, **kwargs)
+
+    async def generate_mm(
+        self, prompt: str = None, raw_mm_data: Dict = None, mm_inputs: Dict = None, **kwargs
+    ) -> Sequence[Experience]:
+        """Generate a response from the provided prompt in async.
+
+        Args:
+            prompt (str): The input prompt.
+            raw_mm_data (dict): The raw multi-modal data.
+            mm_inputs (dict): The multi-modal inputs, already processed.
+                - keys: "prompt", "multi_modal_data", "multi_modal_inputs".
+            kwargs (dict): A dictionary of sampling parameters.
+
+            Either (`prompt`, rwar_mm_data) or (mm_inputs) should be provided.
+
+        Returns:
+            A list of experiences.
+        """
+        if mm_inputs is None:
+            mm_inputs = build_multi_modal_inputs(
+                prompt=prompt,
+                raw_mm_data=raw_mm_data,
+                config=self.config,
+                **kwargs,
+            )
+
+        vllm_inputs = {
+            "prompt": mm_inputs["prompt"],
+            "multi_modal_data": mm_inputs["multi_modal_data"],
+        }
+
+        output = await self._generate_internal(prompt=vllm_inputs, **kwargs)
+        experiences = [
+            Experience(
+                tokens=torch.cat(
+                    (
+                        torch.tensor(output.prompt_token_ids, dtype=torch.int32),
+                        torch.tensor(output.outputs[i].token_ids, dtype=torch.int32),
+                    )
+                ),
+                logprobs=torch.cat(
+                    (
+                        torch.tensor(
+                            [
+                                list(logprob_dict.values())[0].logprob
+                                for logprob_dict in output.outputs[i].logprobs
+                            ],
+                            dtype=torch.float32,
+                        ),
+                    )
+                ),
+                prompt_length=len(output.prompt_token_ids),
+                prompt_text=output.prompt,
+                response_text=output.outputs[i].text,
+                multi_modal_data=mm_inputs["multi_modal_data"],
+                multi_modal_inputs=mm_inputs["multi_modal_inputs"],
             )
             for i in range(len(output.outputs))
         ]
