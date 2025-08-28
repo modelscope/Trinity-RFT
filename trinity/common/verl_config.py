@@ -207,10 +207,6 @@ class CriticModel:
     enable_gradient_checkpointing: bool = True
     use_remove_padding: bool = False
     fsdp_config: FSDPConfig = field(default_factory=FSDPConfig)
-    megatron: MegatronConfig = field(default_factory=MegatronConfig)
-    profile: ProfileConfig = field(default_factory=ProfileConfig)
-    data_loader_seed: Optional[int] = None
-    load_weight: bool = True
 
 
 @dataclass
@@ -234,6 +230,10 @@ class Critic:
     checkpoint: Checkpoint = field(default_factory=Checkpoint)
     rollout_n: int = 1
     loss_agg_mode: str = "token-mean"
+    megatron: MegatronConfig = field(default_factory=MegatronConfig)
+    profile: ProfileConfig = field(default_factory=ProfileConfig)
+    data_loader_seed: Optional[int] = None
+    load_weight: bool = True
 
 
 @dataclass

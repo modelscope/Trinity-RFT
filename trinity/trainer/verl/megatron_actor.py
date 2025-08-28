@@ -19,303 +19,52 @@ In megatron actor, the differences are:
 Note that our model doesn't have to be `MegatronModule` because we don't share embedding in the last layer
 """
 
-import itertools
-import logging
-import os
 from functools import partial
 from typing import Iterable, Tuple
 
 import torch
-import torch.distributed
 from megatron.core import parallel_state as mpu
-from megatron.core.distributed import finalize_model_grads
 
-# from megatron.core.optimizer import DistributedOptimizer
-from megatron.core.optimizer import DistributedOptimizer
 from megatron.core.pipeline_parallel import get_forward_backward_func
-from omegaconf import OmegaConf
-from torch import nn
 
 from verl import DataProto
-from verl.trainer.ppo.core_algos import agg_loss, compute_policy_loss, get_policy_loss_fn, kl_penalty
 from verl.utils.device import get_device_id, get_torch_device
 from verl.utils.megatron.pipeline_parallel import make_batch_generator
 from verl.utils.megatron.tensor_parallel import vocab_parallel_entropy, vocab_parallel_log_probs_from_logits
-from verl.utils.megatron_utils import get_model_config
 from verl.utils.profiler import GPUMemoryLogger
-from verl.utils.profiler.profile import Profiler
 from verl.utils.py_functional import append_to_dict
-from verl.utils.seqlen_balancing import get_reverse_idx, rearrange_micro_batches
+from verl.utils.seqlen_balancing import rearrange_micro_batches
 from verl.utils.torch_functional import broadcast_dict_tensor
-from verl.workers.actor import BasePPOActor
+from verl.workers.megatron_workers import (
+    MegatronPPOActor as OldMegatronPPOActor,
+    logger,
+)
 
-__all__ = ["MegatronPPOActor"]
+from trinity.algorithm.entropy_loss_fn.entropy_loss_fn import ENTROPY_LOSS_FN, DummyEntropyLossFn
+from trinity.algorithm.kl_fn.kl_fn import KL_FN
+from trinity.algorithm.policy_loss_fn.policy_loss_fn import POLICY_LOSS_FN
+from trinity.algorithm.utils import prefix_metrics
+from trinity.common.config import AlgorithmConfig
 
-logger = logging.getLogger(__file__)
-logger.setLevel(os.getenv("VERL_LOGGING_LEVEL", "WARN"))
 
-
-class MegatronPPOActor(BasePPOActor):
+class MegatronPPOActor(OldMegatronPPOActor):
     def __init__(
         self,
-        config,
-        model_config,
-        hf_config,
-        tf_config,
-        actor_module: nn.ModuleList,
-        actor_optimizer: DistributedOptimizer,
+        *args,
+        **kwargs,
     ):
-        """MeagtronPPOActor class. This class implements the simple PPO logics when the model is built with Megatron.
+        super().__init__(*args, **kwargs)
+        self.policy_loss_fn = None
+        self.kl_loss_fn = None
+        self.entropy_loss_fn = None
 
-        Args:
-            config (OmegaConf): the basic config that contains the hyper-parameters of PPO Actor. It must contain
-
-                ``ppo_micro_batch_size_per_gpu``: micro batch size when updating ppo.
-
-                ``ppo_mini_batch_size``: minibatch size when updating ppo using the batch data.
-
-                ``ppo_epochs``: number of epochs to update the actor using the batch data.
-
-                ``shuffle``: whether to shuffle the data after each ppo epoch.
-
-                ``clip_ratio``: clip ratio of the ppo algorithm. See https://arxiv.org/abs/1707.06347.
-
-                ``entropy_coeff``: entropy coefficient of the PPO loss. See https://arxiv.org/abs/1707.06347.
-            model_config (OmegaConf): model configuration. It must contains ``model_config.vocab_size`` and
-                ``model_config.hidden_size``
-            hf_config (PretrainedConfig): huggingface config
-            tf_config (TransformerConfig): mcore transformer config
-            actor_module (nn.ModuleList): actor module is a ModuleList that contains a list of nn.Module in this
-                pp stage.
-                each nn.Module in this rank holds a vpp module chunk. See https://arxiv.org/pdf/2104.04473.pdf for
-                more details.
-                The actor module has some constraints to follow in order to use the updating logics implemented here
-
-                1. It must implement unpad_input before any computation and pad_input after all the computation.
-                Remove padding is an
-                optimization that removes the padding tokens. See unpad_input and pad_input function in flash-attn
-                (https://github.com/Dao-AILab/flash-attention/blob/main/flash_attn/bert_padding.py).
-
-                2. Each pp stage must return the hidden state with the same shape [total_nnz, 1, hidden_size],
-                where total_nnz is the number of valid tokens in this batch. If sequence parallel is enabled, the size
-                of the hidden state is [total_nnz // tp, 1, hidden_size].
-            actor_optimizer (DistributedOptimizer): currently, we only support DistributedOptimizer in Megatron.
-                It implements
-                zero1 optimizer that shards the optimizer state across dp ranks.
-
-        >>> from megatron.training import get_model
-        >>> from megatron.optimizer import get_megatron_optimizer
-        >>> actor_module = get_model(megatron_actor_model_provider, wrap_with_ddp=True)
-        >>> actor_module = nn.ModuleList(actor_module)
-        >>> actor_optimizer = get_megatron_optimizer(actor_module)
-        >>> actor = MegatronPPOActor(config=config,
-        >>>                          model_config=actor_model_config,
-        >>>                          hf_config=hf_config,
-        >>>                          tf_config=tf_config,
-        >>>                          actor_module=actor_module,
-        >>>                          actor_optimizer=actor_optimizer)
-        """
-        super().__init__(config)
-        self._validate_config(config)
-        self.model_config = model_config
-        self.hf_config = hf_config
-        self.tf_config = tf_config
-        self.actor_module = actor_module
-        self.actor_optimizer: DistributedOptimizer = actor_optimizer
-        self.prof = Profiler(self.config.profile)
-        self.use_fused_kernels = self.config.get("use_fused_kernels", False)
-        if self.use_fused_kernels:
-            from verl.models.mcore.model_forward_fused import patch_fused_forward
-
-            for model in self.actor_module:
-                patch_fused_forward(model)
-
-        self.optimizer_step_args = OmegaConf.create(
-            {
-                "skip_grad": None,
-                "overlap_dp_param_comm": False,
-                "overlap_dp_grad_comm": False,
-                "gradient_accumulation_steps": 1,
-                "sequence_parallel": self.tf_config.sequence_parallel,
-                "DDP_impl": "local",
-                "layernorm_allreduce_bucket_threshold": 0,
-                "pipeline_model_parallel_split_rank": None,
-                "reduce_grads_use_alltoall": False,
-            }
+    def set_algorithm(self, algorithm_config: AlgorithmConfig):
+        self.policy_loss_fn = POLICY_LOSS_FN.get(algorithm_config.policy_loss_fn)(
+            backend="verl", **algorithm_config.policy_loss_fn_args
         )
-
-        config = get_model_config(self.actor_module[0])
-        print(config)
-        config.finalize_model_grads_func = finalize_model_grads
-
-    def _validate_config(self, config) -> None:
-        """Validate config options not implemented for Megatron backend"""
-        assert config.get("ulysses_sequence_parallel_size", 1) == 1
-        if config.get("shuffle", False):
-            assert config.data_loader_seed is not None, "If shuffle dataloader, seed must be manually set"
-        if config.megatron.tensor_model_parallel_size == 1:
-            print("[Warining] Because actor tp size == 1, set sp to False")
-            config.megatron.sequence_parallel = False
-        self.config = config
-
-    @GPUMemoryLogger(role="megatron actor", logger=logger)
-    def compute_log_prob(self, data: DataProto, calculate_entropy=False) -> torch.Tensor:
-        """Compute the log probability of the responses given input_ids, attention_mask and position_ids
-
-        Args:
-            data (DataProto): a DataProto containing keys
-
-                ``input_ids``: tensor of shape [batch_size, sequence_length]. torch.int64. Note that input_ids is the
-                concatenation of prompt and response. Note that ``sequence_length = prompt_length + response_length``.
-
-                ``attention_mask``: tensor of shape [batch_size, sequence_length]. torch.int64.
-
-                ``position_ids``: tensor of shape [batch_size, sequence_length]. torch.int64.
-
-                ``responses``:  tensor of shape [batch_size, response_length]. torch.int64.
-
-        Returns:
-            DataProto: torch.Tensor: the log_prob tensor
-        """
-        data.to(get_device_id())
-        data.batch = data.batch.contiguous()
-        use_dynamic_bsz = data.meta_info.get("use_dynamic_bsz", False)
-        micro_batch_size = data.meta_info.get("micro_batch_size", None)
-        max_token_len = data.meta_info.get("max_token_len", None)
-        assert micro_batch_size is not None, "micro batch size is needed for forward compute"
-        if use_dynamic_bsz:
-            assert max_token_len is not None, "max_token_len must be set when use_dynamic_bsz is True"
-            max_token_len = max_token_len * self.config.megatron.context_parallel_size
-
-        def compute_logprobs_fn(output, data, use_dynamic_bsz=False, indices=None):
-            response = data["responses"]
-            response_length = response.size(1)
-            log_probs = output["log_probs"][:, -response_length - 1 : -1].contiguous()
-            return {"log_probs": log_probs}
-
-        # We make recompute_old_log_prob by default here.
-        # TODO (zhangchi.usc1992): actually, this function should only return log_prob and this logic should be
-        # handled by user outside
-        recompute_old_log_prob = self.config.get("recompute_old_log_prob", True)
-
-        entropys = torch.Tensor()
-        if recompute_old_log_prob:
-            select_keys = ["responses", "input_ids", "attention_mask", "position_ids"]
-            batch = data.select(batch_keys=select_keys).batch
-            input_ids = batch["input_ids"]
-            batch_size = input_ids.size(0)
-            response = batch["responses"]
-            response_length = response.size(1)
-            with torch.no_grad():
-                output = self.forward_backward_batch(
-                    data,
-                    forward_only=True,
-                    post_process_fn=compute_logprobs_fn,
-                    calculate_entropy=calculate_entropy,
-                    use_dynamic_bsz=use_dynamic_bsz,
-                    micro_batch_size=micro_batch_size,
-                    max_token_len=max_token_len,
-                )
-                if mpu.is_pipeline_last_stage(ignore_virtual=True):
-                    # only on last rank. It should be on every tp rank
-                    if calculate_entropy:
-                        log_probs = [o[0]["log_probs"] for o in output["output"]]  # (bs, seq_size)
-                    else:
-                        log_probs = [o["log_probs"] for o in output["output"]]  # (bs, seq_size)
-                    log_probs = torch.cat(log_probs, dim=0).to(torch.float32)
-                    if use_dynamic_bsz:
-                        indices = output["indices"]
-                        indices = list(itertools.chain.from_iterable(indices))
-                        assert len(indices) == log_probs.size(0), f"{len(indices)} vs. {log_probs.size()}"
-                        revert_indices = torch.tensor(get_reverse_idx(indices), dtype=torch.long)
-                        log_probs = log_probs[revert_indices]
-                else:
-                    log_probs = torch.empty(
-                        size=(batch_size, response_length), dtype=torch.float32, device=input_ids.device
-                    )
-
-                # broadcast across pp ranks
-                torch.distributed.broadcast(
-                    tensor=log_probs,
-                    src=mpu.get_pipeline_model_parallel_last_rank(),
-                    group=mpu.get_pipeline_model_parallel_group(),
-                    async_op=False,
-                )
-                if calculate_entropy:
-                    # Note that o[0] is metrics, o[1] is entropy
-                    if mpu.is_pipeline_last_stage(ignore_virtual=True):
-                        entropys = torch.cat([o[1] for o in output["output"]], dim=0)
-                        entropys = entropys.to(torch.float32)
-                        if use_dynamic_bsz:
-                            indices = output["indices"]
-                            indices = list(itertools.chain.from_iterable(indices))
-                            assert len(indices) == entropys.size(0), f"{len(indices)} vs. {entropys.size()}"
-                            revert_indices = torch.tensor(get_reverse_idx(indices), dtype=torch.long)
-                            entropys = entropys[revert_indices]
-                    else:
-                        entropys = torch.empty(
-                            size=(batch_size, response_length), dtype=torch.float32, device=input_ids.device
-                        )
-                    # broadcast across pp ranks
-                    torch.distributed.broadcast(
-                        tensor=entropys,
-                        src=mpu.get_pipeline_model_parallel_last_rank(),
-                        group=mpu.get_pipeline_model_parallel_group(),
-                        async_op=False,
-                    )
-
-        # add empty cache after each compute
-        get_torch_device().empty_cache()
-
-        return log_probs, entropys
-
-    def make_minibatch_iterator(self, data: DataProto) -> Iterable[DataProto]:
-        """Make minibatch iterator for updating the actor
-
-        Args:
-            data (DataProto): a DataProto containing keys
-
-                ``input_ids``: tensor of shape [batch_size, sequence_length]. torch.int64, where
-                ``sequence_length = prompt_length + response_length``
-
-                ``attention_mask``: tensor of shape [batch_size, sequence_length]. torch.int64
-
-                ``position_ids``: tensor of shape [batch_size, sequence_length]. torch.int64
-
-                ``responses``: tensor of shape [batch_size, response_length]. torch.int64. Note that
-                responses = input_ids[:, -response_length:]
-
-                ``old_log_probs``: tensor of shape [batch_size, response_length]. torch.float32. The log probability
-                of responses.
-
-                ``advantages``: tensor of shape [batch_size, response_length]. torch.float32. The advantages of
-                responses.
-                See PPO paper for details. https://arxiv.org/abs/1707.06347
-
-        Returns:
-
-        """
-        select_keys = [
-            "responses",
-            "input_ids",
-            "attention_mask",
-            "response_mask",
-            "position_ids",
-            "old_log_probs",
-            "advantages",
-        ]
-        if self.config.use_kl_loss:
-            select_keys.append("ref_log_prob")
-        self.has_multi_modal_inputs = "multi_modal_inputs" in data.non_tensor_batch.keys()
-        if self.has_multi_modal_inputs:
-            data = data.select(select_keys, ["multi_modal_inputs"])
-        else:
-            data = data.select(batch_keys=select_keys)
-        return data.make_iterator(
-            mini_batch_size=self.config.ppo_mini_batch_size,
-            epochs=self.config.ppo_epochs,
-            seed=self.config.data_loader_seed,
-            dataloader_kwargs={"shuffle": self.config.shuffle},
+        self.kl_loss_fn = KL_FN.get(algorithm_config.kl_loss_fn)(**algorithm_config.kl_loss_fn_args)
+        self.entropy_loss_fn = ENTROPY_LOSS_FN.get(algorithm_config.entropy_loss_fn)(
+            **algorithm_config.entropy_loss_fn_args
         )
 
     def forward_backward_batch(
@@ -404,81 +153,54 @@ class MegatronPPOActor(BasePPOActor):
             responses = data["responses"]
             response_length = responses.size(1)
             response_mask = data["response_mask"].to(bool)
-            loss_agg_mode = self.config.loss_agg_mode
 
             # compute policy loss
             log_prob = output["log_probs"][:, -response_length - 1 : -1].contiguous()
             ret_entropy = None
             stats = {}
             if not forward_only:
-                old_log_prob = data["old_log_probs"]
-                advantages = data["advantages"]
-
-                clip_ratio = self.config.clip_ratio
-                clip_ratio_low = self.config.clip_ratio_low if self.config.clip_ratio_low is not None else clip_ratio
-                clip_ratio_high = self.config.clip_ratio_high if self.config.clip_ratio_high is not None else clip_ratio
-
-                clip_ratio_c = self.config.get("clip_ratio_c", 3.0)
-                entropy_coeff = self.config.entropy_coeff
-                loss_agg_mode = self.config.loss_agg_mode
-
-                loss_mode = "vanilla" # self.config.policy_loss.get("loss_mode", "vanilla")
-
-                if loss_mode == "vanilla":
-                    pg_loss, pg_clipfrac, ppo_kl, pg_clipfrac_lower = compute_policy_loss(
-                        old_log_prob=old_log_prob,
-                        log_prob=log_prob,
-                        advantages=advantages,
-                        response_mask=response_mask,
-                        cliprange=clip_ratio,
-                        cliprange_low=clip_ratio_low,
-                        cliprange_high=clip_ratio_high,
-                        clip_ratio_c=clip_ratio_c,
-                        loss_agg_mode=loss_agg_mode,
-                    )
-
-                else:
-                    policy_loss_fn = get_policy_loss_fn(loss_mode)
-                    pg_loss, pg_clipfrac, ppo_kl, pg_clipfrac_lower = policy_loss_fn(
-                        old_log_prob=old_log_prob,
-                        log_prob=log_prob,
-                        advantages=advantages,
-                        response_mask=response_mask,
-                        loss_agg_mode=loss_agg_mode,
-                        config=self.config,
-                    )
-
-                stats.update(
-                    {
-                        "actor/pg_loss": pg_loss.detach().item(),
-                        "actor/pg_clipfrac": pg_clipfrac.detach().item(),
-                        "actor/ppo_kl": ppo_kl.detach().item(),
-                        "actor/pg_clipfrac_lower": pg_clipfrac_lower.detach().item(),
-                    }
+                pg_loss, pg_loss_metrics = self.policy_loss_fn(  # type: ignore
+                    logprob=log_prob, **data
+                )
+                prefix_metrics(
+                    src_metrics=pg_loss_metrics, prefix="actor", dst_metrics=stats
                 )
                 policy_loss = pg_loss
 
             if calculate_entropy:
                 entropy = output["entropy"][:, -response_length - 1 : -1].contiguous()
                 if not forward_only:
-                    entropy_loss = agg_loss(loss_mat=entropy, loss_mask=response_mask, loss_agg_mode=loss_agg_mode)
-                    entropy_coeff = meta_info["entropy_coeff"]
-                    policy_loss = pg_loss - entropy_coeff * entropy_loss
+                    # compute entropy loss from entropy
+                    entropy_loss, entropy_loss_metrics = self.entropy_loss_fn(  # type: ignore
+                        entropy=entropy,
+                        action_mask=response_mask,
+                        **data,
+                    )
+                    prefix_metrics(
+                        src_metrics=entropy_loss_metrics,
+                        prefix="actor",
+                        dst_metrics=stats,
+                    )
+
+                    # compute policy loss
+                    policy_loss = pg_loss - entropy_loss
                 else:
                     ret_entropy = entropy
 
             if forward_only:
                 policy_loss = torch.tensor(1.0, device=device)
             else:
-                if self.config.use_kl_loss:
-                    ref_log_prob = data["ref_log_prob"]
-                    # compute kl loss
-                    kld = kl_penalty(logprob=log_prob, ref_logprob=ref_log_prob, kl_penalty=self.config.kl_loss_type)
-                    kl_loss = agg_loss(loss_mat=kld, loss_mask=response_mask, loss_agg_mode=self.config.loss_agg_mode)
-
-                    policy_loss = policy_loss + kl_loss * self.config.kl_loss_coef
-                    metrics["actor/kl_loss"] = kl_loss.detach().item()
-                    metrics["actor/kl_coef"] = self.config.kl_loss_coef
+                kl_loss, kl_loss_metrics = self.kl_loss_fn.calculate_kl_loss(
+                    logprob=log_prob,
+                    ref_logprob=data.get("ref_log_prob", None),
+                    response_mask=response_mask,
+                )
+                prefix_metrics(
+                    src_metrics=kl_loss_metrics,
+                    prefix="actor",
+                    dst_metrics=stats,
+                )
+                policy_loss = policy_loss + kl_loss
 
                 # return loss and stats
 
@@ -623,7 +345,7 @@ class MegatronPPOActor(BasePPOActor):
                 # if use distributed optimizer, zero grad buffer will be handled by optimizer
                 chunk.zero_grad_buffer()
 
-            calculate_entropy = self.config.entropy_coeff != 0
+            calculate_entropy = self.entropy_loss_fn != DummyEntropyLossFn
             if data.meta_info.get("micro_batch_size", None) is not None:
                 micro_batch_size = data.meta_info["micro_batch_size"]
             else:

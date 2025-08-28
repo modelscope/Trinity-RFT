@@ -367,6 +367,7 @@ class ActorRolloutRefWorker(MegatronWorker, DistProfilerExtension):
         """
         from verl.models.mcore import get_mcore_weight_converter
         from verl.utils.megatron_utils import per_tensor_generator
+
         weight_converter = get_mcore_weight_converter(self.actor_model_config, self.dtype)
         layer_name_mapping = {
             "qkv_layer_name": "self_attention.linear_qkv.",
@@ -388,9 +389,16 @@ class ActorRolloutRefWorker(MegatronWorker, DistProfilerExtension):
     def setup_weight_sync_group(self):
         if self.config.synchronizer.sync_method == SyncMethod.NCCL:
             self.state_dict_meta = []
+
+            if self._is_offload_param:
+                load_megatron_model_to_gpu(self.actor_module)
             for name, weight in self._get_tensor_generator():
                 self.state_dict_meta.append((name, str(weight.dtype), tuple(weight.shape)))
                 del weight
+            if self._is_offload_param:
+                offload_megatron_model_to_cpu(self.actor_module)
+            torch.distributed.barrier()
+            torch.cuda.empty_cache()
 
             if torch.distributed.get_rank() == 0:
                 master_address, master_port = self.get_availale_master_addr_port()
@@ -418,6 +426,8 @@ class ActorRolloutRefWorker(MegatronWorker, DistProfilerExtension):
 
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
     def sync_weight(self):
+        if self._is_offload_param:
+            load_megatron_model_to_gpu(self.actor_module)
         for name, weight in self._get_tensor_generator():
             if torch.distributed.get_rank() == 0:
                 torch.distributed.broadcast(weight, 0, group=self._model_update_group)
@@ -425,11 +435,15 @@ class ActorRolloutRefWorker(MegatronWorker, DistProfilerExtension):
         if torch.distributed.get_rank() == 0:
             torch.distributed.barrier(group=self._model_update_group)
             torch.cuda.synchronize()
+        if self._is_offload_param:
+            offload_megatron_model_to_cpu(self.actor_module)
         torch.distributed.barrier()
         torch.cuda.empty_cache()
 
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
     def upload_state_dict(self, trainer_step: int):
+        if self._is_offload_param:
+            load_megatron_model_to_gpu(self.actor_module)
         state_dict = {}
         for name, weight in self._get_tensor_generator():
             if torch.distributed.get_rank() == 0:
@@ -437,11 +451,14 @@ class ActorRolloutRefWorker(MegatronWorker, DistProfilerExtension):
             del weight
         if torch.distributed.get_rank() == 0:
             ray.get(self.synchronizer.set_model_state_dict.remote(state_dict, trainer_step))
+        if self._is_offload_param:
+            offload_megatron_model_to_cpu(self.actor_module)
+        torch.distributed.barrier()
+        torch.cuda.empty_cache()
 
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
     def set_algorithm(self, algo_config: AlgorithmConfig):
-        pass
-        # self.actor.set_algorithm(algo_config)
+        self.actor.set_algorithm(algo_config)
 
     @register(dispatch_mode=Dispatch.MEGATRON_COMPUTE_PROTO)
     @GPUMemoryLogger(role="update_actor", logger=logger)

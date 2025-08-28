@@ -570,6 +570,8 @@ class ActorRolloutRefWorker(Worker):
             model = self.actor_module_fsdp
             self.named_modules = []
             self.state_dict_meta = []
+            if self._is_offload_param:
+                load_fsdp_model_to_gpu(self.actor_module_fsdp)
             if self.config.actor.strategy == "fsdp":
                 for name, module in model.named_modules():
                     if isinstance(module, FSDP):
@@ -592,6 +594,10 @@ class ActorRolloutRefWorker(Worker):
             else:  # fsdp2
                 for name, param in model.named_parameters():
                     self.state_dict_meta.append((name, str(param.dtype), tuple(param.shape)))
+            if self._is_actor and self._is_offload_param:
+                offload_fsdp_model_to_cpu(self.actor_module_fsdp)
+            torch.distributed.barrier()
+            torch.cuda.empty_cache()
 
             if torch.distributed.get_rank() == 0:
                 import ray
@@ -621,6 +627,8 @@ class ActorRolloutRefWorker(Worker):
 
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
     def sync_weight(self):
+        if self._is_offload_param:
+            load_fsdp_model_to_gpu(self.actor_module_fsdp)
         if self.config.actor.strategy == "fsdp":
             for name_prefix, module in self.named_modules:
                 with FSDP.summon_full_params(module, recurse=False):
@@ -639,12 +647,20 @@ class ActorRolloutRefWorker(Worker):
         if torch.distributed.get_rank() == 0:
             torch.distributed.barrier(group=self._model_update_group)
             torch.cuda.synchronize()
+        if self._is_actor and self._is_offload_param:
+            offload_fsdp_model_to_cpu(self.actor_module_fsdp)
         torch.distributed.barrier()
         torch.cuda.empty_cache()
 
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
     def upload_state_dict(self, trainer_step: int):
+        if self._is_offload_param:
+            load_fsdp_model_to_gpu(self.actor_module_fsdp)
         self.checkpoint_manager.upload_state_dict(trainer_step)
+        if self._is_actor and self._is_offload_param:
+            offload_fsdp_model_to_cpu(self.actor_module_fsdp)
+        torch.distributed.barrier()
+        torch.cuda.empty_cache()
 
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
     def set_algorithm(self, algo_config: AlgorithmConfig):
