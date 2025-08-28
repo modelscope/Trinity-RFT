@@ -1,6 +1,6 @@
 # GRPO with VLM
 
-This example shows the usage of GRPO with Qwen2.5-VL-3B-Instruct on yhe [geometry3k](https://huggingface.co/datasets/hiyouga/geometry3k) dataset.
+This example shows the usage of GRPO with Qwen2.5-VL-3B-Instruct on the [geometry3k](https://huggingface.co/datasets/hiyouga/geometry3k) dataset.
 The specific requirements are:
 
 ```yaml

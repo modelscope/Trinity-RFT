@@ -210,12 +210,14 @@ class Experience:
         self.chosen_text = chosen_text
         self.rejected_text = rejected_text
         self.multi_modal_data = multi_modal_data
-        self.multi_modal_inputs = {}
-        for key, value in multi_modal_inputs.items():
-            if not isinstance(value, Tensor):
-                self.multi_modal_inputs[key] = torch.tensor(value)
-            else:
-                self.multi_modal_inputs[key] = value
+        self.multi_modal_inputs = multi_modal_inputs
+        if multi_modal_inputs is not None:
+            self.multi_modal_inputs = {}
+            for key, value in multi_modal_inputs.items():
+                if not isinstance(value, Tensor):
+                    self.multi_modal_inputs[key] = torch.tensor(value)
+                else:
+                    self.multi_modal_inputs[key] = value
 
         if not isinstance(self.tokens, Tensor):
             self.tokens = torch.tensor(self.tokens)
@@ -571,7 +573,7 @@ def gather_advantages(experiences, max_response_length: int) -> Optional[Tensor]
     )
 
 
-def gather_returns(experiences, max_response_length: int) -> Optional[Tensor]:
+def gather_returns(experiences, max_response_length: int) -> Optional[dict[str, List[Tensor]]]:
     if experiences[0].returns is None:
         return None
     returns_dtype = experiences[0].returns.dtype

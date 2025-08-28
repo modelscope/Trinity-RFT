@@ -457,6 +457,4 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                 mm_inputs.pop("second_per_grid_ts", None)
 
             batch.batch["position_ids"] = torch.stack(position_ids, dim=0).long()
-        else:
-            pass
         return batch

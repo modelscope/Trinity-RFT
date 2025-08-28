@@ -1,22 +1,18 @@
 from typing import Any, Dict
 
-from verl.utils import hf_processor
 from verl.utils.dataset.vision_utils import process_image, process_video
-from verl.utils.fs import copy_local_path_from_hdfs
 
 
 def build_multi_modal_inputs(
     prompt: str,
     raw_mm_data: Dict[str, Any],
-    config: Any,
+    processor: Any,
     **kwargs,
 ) -> Dict[str, Any]:
     """
     Preprocess multi-modal data and build multi-modal inputs
     Adapted from: verl/utils/dataset/rl_dataset.py
     """
-    local_path = copy_local_path_from_hdfs(config.model_path)
-    processor = hf_processor(local_path, use_fast=True)
 
     if prompt is None:
         raise ValueError("Prompt is required for build multi-modal inputs")

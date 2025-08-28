@@ -232,7 +232,7 @@ class vLLMRolloutModel(InferenceModel):
         mm_inputs = build_multi_modal_inputs(
             prompt=prompt,
             raw_mm_data=raw_mm_data,
-            config=self.config,
+            processor=self.processor,
             **kwargs,
         )
         return await self.generate_mm(mm_inputs=mm_inputs, **kwargs)
@@ -249,7 +249,7 @@ class vLLMRolloutModel(InferenceModel):
                 - keys: "prompt", "multi_modal_data", "multi_modal_inputs".
             kwargs (dict): A dictionary of sampling parameters.
 
-            Either (`prompt`, rwar_mm_data) or (mm_inputs) should be provided.
+            Either (`prompt`, raw_mm_data) or (mm_inputs) should be provided.
 
         Returns:
             A list of experiences.
@@ -258,7 +258,7 @@ class vLLMRolloutModel(InferenceModel):
             mm_inputs = build_multi_modal_inputs(
                 prompt=prompt,
                 raw_mm_data=raw_mm_data,
-                config=self.config,
+                processor=self.processor,
                 **kwargs,
             )
 
@@ -288,7 +288,7 @@ class vLLMRolloutModel(InferenceModel):
                     )
                 ),
                 prompt_length=len(output.prompt_token_ids),
-                prompt_text=output.prompt,
+                prompt_text=mm_inputs["prompt"],
                 response_text=output.outputs[i].text,
                 multi_modal_data=mm_inputs["multi_modal_data"],
                 multi_modal_inputs=mm_inputs["multi_modal_inputs"],

@@ -51,7 +51,7 @@ class SimpleMMWorkflow(SimpleWorkflow):
 
         # TODO: test generate_mm
         self.logger.debug("start chat")
-        if self.raw_mm_data is not None:
+        if self.raw_mm_data:
             responses = self.model.chat_mm(messages, self.raw_mm_data, **self.rollout_args)
         else:
             responses = self.model.chat(messages, **self.rollout_args)

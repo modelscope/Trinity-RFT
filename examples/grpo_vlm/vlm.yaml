@@ -19,7 +19,7 @@ buffer:
   max_retry_interval: 1
   explorer_input:
     taskset:
-      name: gsm8k
+      name: geometry3k
       storage_type: file
       path: hiyouga/geometry3k
       subset_name: 'default'
