@@ -41,6 +41,8 @@ class FormatConfig:
 
     # for tools
     tools_key: str = "tools"
+    image_key: Optional[str] = None  # used for multi-modal data
+    video_key: Optional[str] = None  # used for multi-modal data
 
     reply_prefix: Optional[str] = None
 
@@ -73,6 +75,8 @@ class StorageConfig:
     path: Optional[str] = None
     repeat_times: Optional[int] = None
 
+    # used for multi-modal data
+    media_io_kwargs: dict = field(default_factory=dict)
     # only available for StorageType.FILE. When requiring data processing on raw data, set the raw to True.
     raw: bool = False
 

@@ -211,6 +211,8 @@ class RolloutDataReader(BaseFileReader):
         )
         self.prompt_key = meta.format.prompt_key
         self.response_key = meta.format.response_key
+        self.image_key = meta.format.image_key
+        self.video_key = meta.format.video_key
         self.workflow_key = meta.format.workflow_key
         self.reward_fn_key = meta.format.reward_fn_key
 
