@@ -7,22 +7,18 @@ from trinity.common.workflows.envs.email_searcher.utils import (
     read_email_tool,
     search_emails_tool,
 )
-from trinity.utils.log import get_logger
 
+BaseAgentClass = object
 try:
-    import agentscope
+    from agentscope.agents import ReActAgentV2
+
+    BaseAgentClass = ReActAgentV2
 except ImportError as e:
     error_message = f"AgentScope is not installed. Please install the agentscope framework first before running the workflow. Error: {str(e)}"
-    print(error_message)
-    agentscope = None
-
-from agentscope.agents import ReActAgentV2
-from agentscope.service import ServiceExecStatus, ServiceResponse
-
-logger = get_logger(__name__)
+    pass
 
 
-class EmailSearchAgent(ReActAgentV2):
+class EmailSearchAgent(BaseAgentClass):
     """
     A customized ReAct agent that overrides the generate_response method by return_final_answer
     Ref: https://github.com/OpenPipe/ART/blob/main/dev/art-e/art_e/rollout.py#L260
@@ -54,6 +50,7 @@ class EmailSearchAgent(ReActAgentV2):
                 The status field indicates whether the tool call was successful.
                 The content field contains a list of SearchResult objects with message_id and snippet. If no emails are found, it returns an empty list.
         """
+        from agentscope.service import ServiceExecStatus, ServiceResponse
 
         try:
             next_day = (datetime.strptime(query_date, "%Y-%m-%d") + timedelta(days=1)).strftime(
@@ -84,6 +81,8 @@ class EmailSearchAgent(ReActAgentV2):
                 The status field indicates whether the tool call was successful.
                 The content field contains the email content or an error message if the email is not found.
         """
+        from agentscope.service import ServiceExecStatus, ServiceResponse
+
         try:
             email_content = read_email_tool(message_id)
 

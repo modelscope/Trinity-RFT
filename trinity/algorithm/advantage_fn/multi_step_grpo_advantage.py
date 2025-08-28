@@ -95,13 +95,6 @@ class StepWiseGRPOAdvantageFn(AdvantageFn, ExperienceOperator):
             scores, metrics = self.calculate_last_step_advantage(last_step_exps)
             metric_list.append(metrics)
 
-            import numpy as np
-
-            if len(scores) > 1:
-                score_variance = np.var(list(scores.values()))
-                if score_variance <= 0.0:
-                    continue
-
             # Step 4: broadcast the advantages to all previous steps
             run_exps = self.broadcast_advantages(run_exps, scores)
             for exps in run_exps.values():
