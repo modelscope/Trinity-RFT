@@ -5,6 +5,9 @@ import openai
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
 from trinity.common.workflows.workflow import WORKFLOWS, SimpleWorkflow, Task
+from trinity.common.rewards.reward_fn import RewardFn
+
+# from trinity.utils.eval_utils import find_boxed_answer
 
 
 @WORKFLOWS.register_module("simple_mm_workflow")
@@ -36,7 +39,11 @@ class SimpleMMWorkflow(SimpleWorkflow):
         self.truth = task.raw_task[task.format_args.response_key] or task.truth
 
         # TODO
-        self.reward_fn = self.compute_reward
+        reward_fn = task.reward_fn
+        if isinstance(reward_fn, type) and issubclass(reward_fn, RewardFn):
+            self.reward_fn: RewardFn = reward_fn(**self.reward_fn_args)
+        else:
+            raise ValueError("`reward_fn` must be a subclass of `RewardFn`")
 
         self.image_key = task.format_args.image_key
         self.video_key = task.format_args.video_key
@@ -71,10 +78,10 @@ class SimpleMMWorkflow(SimpleWorkflow):
         self.logger.debug(f"Generated {len(responses)} responses")
         return responses
 
-    def compute_reward(self, response, truth) -> dict[str, float]:
-        from mathruler.grader import extract_boxed_content, grade_answer
+    # def compute_reward(self, response, truth) -> dict[str, float]:
+    #     from mathruler.grader import extract_boxed_content, grade_answer
 
-        answer = extract_boxed_content(response)
-        if grade_answer(answer, truth):
-            return {"accuracy": 1.0}  # correct answer
-        return {"accuracy": 0.0}  # wrong answer
+    #     answer = find_boxed_answer(response)
+    #     if grade_answer(answer, truth):
+    #         return {"accuracy": 1.0}  # correct answer
+    #     return {"accuracy": 0.0}  # wrong answer
