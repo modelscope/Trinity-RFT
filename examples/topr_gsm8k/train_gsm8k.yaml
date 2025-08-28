@@ -1,0 +1,49 @@
+actor_rollout_ref:
+  hybrid_engine: True
+  model:
+    external_lib: null
+    override_config: { }
+    enable_gradient_checkpointing: True
+    use_remove_padding: True  # False
+  actor:
+    strategy: fsdp  # This is for backward-compatibility
+    ppo_micro_batch_size_per_gpu: 4
+    use_dynamic_bsz: True # False
+    ppo_max_token_len_per_gpu: 16384
+    grad_clip: 1.0
+    ppo_epochs: 1
+    shuffle: False
+    ulysses_sequence_parallel_size: 1 # sp size
+    optim:
+      lr: 2e-6
+      lr_warmup_steps_ratio: 0.  # the total steps will be injected during runtime
+      # min_lr_ratio: null   # only useful for warmup with cosine
+      warmup_style: constant  # select from constant/cosine
+      total_training_steps: -1  # must be override by program
+    fsdp_config:
+      wrap_policy:
+        # transformer_layer_cls_to_wrap: None
+        min_num_params: 0
+      param_offload: False
+      optimizer_offload: False
+      fsdp_size: -1
+  ref:
+    fsdp_config:
+      param_offload: False
+      wrap_policy:
+        # transformer_layer_cls_to_wrap: None
+        min_num_params: 0
+    log_prob_micro_batch_size_per_gpu: 4
+    log_prob_use_dynamic_bsz: ${actor_rollout_ref.actor.use_dynamic_bsz}
+    log_prob_max_token_len_per_gpu: ${actor_rollout_ref.actor.ppo_max_token_len_per_gpu}
+    ulysses_sequence_parallel_size: ${actor_rollout_ref.actor.ulysses_sequence_parallel_size} # sp size
+
+trainer:
+  balance_batch: True
+  # total_training_steps: null
+  # auto: find the last ckpt to resume. If can't find, start from scratch
+  resume_mode: auto # or auto or resume_path if
+  default_hdfs_dir: null
+  remove_previous_ckpt_in_save: False
+  del_local_ckpt_after_load: False
+  val_before_train: False
