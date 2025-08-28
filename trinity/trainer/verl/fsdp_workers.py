@@ -594,7 +594,7 @@ class ActorRolloutRefWorker(Worker):
             else:  # fsdp2
                 for name, param in model.named_parameters():
                     self.state_dict_meta.append((name, str(param.dtype), tuple(param.shape)))
-            if self._is_actor and self._is_offload_param:
+            if self._is_offload_param:
                 offload_fsdp_model_to_cpu(self.actor_module_fsdp)
             torch.distributed.barrier()
             torch.cuda.empty_cache()
@@ -641,14 +641,14 @@ class ActorRolloutRefWorker(Worker):
                     param = None
         else:  # fsdp2
             for name, param in self.actor_module_fsdp.named_parameters():
-                full_param = param.full_tensor()
+                full_param = param.full_tensor().detach().to(device=get_device_id())
                 if torch.distributed.get_rank() == 0:
                     torch.distributed.broadcast(full_param, 0, group=self._model_update_group)
                 del full_param
         if torch.distributed.get_rank() == 0:
             torch.distributed.barrier(group=self._model_update_group)
             torch.cuda.synchronize()
-        if self._is_actor and self._is_offload_param:
+        if self._is_offload_param:
             offload_fsdp_model_to_cpu(self.actor_module_fsdp)
         torch.distributed.barrier()
         torch.cuda.empty_cache()
@@ -658,7 +658,7 @@ class ActorRolloutRefWorker(Worker):
         if self._is_offload_param:
             load_fsdp_model_to_gpu(self.actor_module_fsdp)
         self.checkpoint_manager.upload_state_dict(trainer_step)
-        if self._is_actor and self._is_offload_param:
+        if self._is_offload_param:
             offload_fsdp_model_to_cpu(self.actor_module_fsdp)
         torch.distributed.barrier()
         torch.cuda.empty_cache()
