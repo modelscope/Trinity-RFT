@@ -15,7 +15,7 @@ actor_rollout_ref:
     shuffle: False
     ulysses_sequence_parallel_size: 1 # sp size
     optim:
-      lr: 2e-6
+      lr: 1e-5
       lr_warmup_steps_ratio: 0.  # the total steps will be injected during runtime
       # min_lr_ratio: null   # only useful for warmup with cosine
       warmup_style: constant  # select from constant/cosine
