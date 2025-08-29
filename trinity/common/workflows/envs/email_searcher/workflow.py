@@ -53,7 +53,7 @@ class EmailSearchWorkflow(Workflow):
         )
 
         temperature = self.rollout_args.get("temperature", 1.0)
-        max_tokens = 4096  # TODO
+        max_tokens = 4096
 
         agentscope.init(
             model_configs=[

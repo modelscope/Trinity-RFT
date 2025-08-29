@@ -1,4 +1,3 @@
-import subprocess
 from dataclasses import asdict
 from datetime import datetime, timedelta
 from typing import Any
@@ -64,7 +63,7 @@ class EmailSearchAgent(BaseAgentClass):
                 status=ServiceExecStatus.SUCCESS,
                 content=[asdict(r) for r in res],
             )
-        except subprocess.TimeoutExpired:
+        except Exception:
             return ServiceResponse(
                 status=ServiceExecStatus.ERROR,
                 content=[],
@@ -98,7 +97,7 @@ class EmailSearchAgent(BaseAgentClass):
                     status=ServiceExecStatus.SUCCESS,
                     content=email_content.model_dump(),
                 )
-        except subprocess.TimeoutExpired:
+        except Exception:
             return ServiceResponse(
                 status=ServiceExecStatus.ERROR,
                 content={"error": "Timeout"},

@@ -228,7 +228,9 @@ def create_indexes_and_triggers(db_path: str):
     logging.info("Indexes and triggers created successfully.")
 
 
-def generate_database(overwrite: bool = False):
+def generate_database(
+    repo_id: str = DEFAULT_REPO_ID, db_path: str = DEFAULT_DB_PATH, overwrite: bool = False
+):
     """
     Generates the SQLite database from the specified Hugging Face dataset.
     Simplified version without extensive error handling.
@@ -238,41 +240,39 @@ def generate_database(overwrite: bool = False):
         db_path: The path where the SQLite database file should be created.
         overwrite: If True, any existing database file at db_path will be removed.
     """
-    logging.info(
-        f"Starting database generation for repo '{DEFAULT_REPO_ID}' at '{DEFAULT_DB_PATH}'"
-    )
+    logging.info(f"Starting database generation for repo '{repo_id}' at '{db_path}'")
     logging.info(f"Overwrite existing database: {overwrite}")
 
-    db_dir = os.path.dirname(DEFAULT_DB_PATH)
+    db_dir = os.path.dirname(db_path)
     if db_dir and not os.path.exists(db_dir):
         logging.info(f"Creating data directory: {db_dir}")
         os.makedirs(db_dir)
 
-    if overwrite and os.path.exists(DEFAULT_DB_PATH):
-        logging.warning(f"Removing existing database file: {DEFAULT_DB_PATH}")
-        os.remove(DEFAULT_DB_PATH)
-    elif not overwrite and os.path.exists(DEFAULT_DB_PATH):
+    if overwrite and os.path.exists(db_path):
+        logging.warning(f"Removing existing database file: {db_path}")
+        os.remove(db_path)
+    elif not overwrite and os.path.exists(db_path):
         # If not overwriting and file exists, subsequent steps might fail or behave unexpectedly.
         # We are removing the explicit error here as requested.
         logging.warning(
-            f"Database file {DEFAULT_DB_PATH} exists and overwrite is False. Assuming file is already generated."
+            f"Database file {db_path} exists and overwrite is False. Assuming file is already generated."
         )
         return
 
     # 1. Download dataset
-    dataset = download_dataset(DEFAULT_REPO_ID)
+    dataset = download_dataset(repo_id)
 
     # 2. Create database schema (Tables only)
     # Note: This will fail if overwrite=False and the file exists with incompatible schema/data.
-    create_database(DEFAULT_DB_PATH)
+    create_database(db_path)
 
     # 3. Populate database
-    populate_database(DEFAULT_DB_PATH, dataset)
+    populate_database(db_path, dataset)
 
     # 4. Create Indexes and Triggers
-    create_indexes_and_triggers(DEFAULT_DB_PATH)
+    create_indexes_and_triggers(db_path)
 
-    logging.info(f"Database generation process completed for {DEFAULT_DB_PATH}.")
+    logging.info(f"Database generation process completed for {db_path}.")
 
 
 if __name__ == "__main__":

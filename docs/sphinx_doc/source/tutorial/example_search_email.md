@@ -1,7 +1,7 @@
 # Email Search Workflow
 
 
-This example shows a multi-turn email search workflow. We implement a ReAct Agent and define tools for email search. Note that this example rewquires installing `AgentScope==0.1.6`.
+This example shows a multi-turn email search workflow, inspired by [ART](https://openpipe.ai/blog/art-e-mail-agent?refresh=1756431423904). We implement a ReAct Agent and define tools for email search. Note that this example rewquires installing `AgentScope==0.1.6`.
 
 ## Core Components
 
@@ -20,6 +20,19 @@ We need to define some components:
 
 
 ## Run the Experiments
+
+### Step 1: Prepare the Database
+
+We prepare the data by running the following command:
+
+```bash
+python trinity/common/workflows/envs/email_searcher/prepare_data.py
+```
+
+If you want to choose a new database path, you can modify the `DEFAULT_DB_PATH` in [`prepare_data.py`]. Also, remember to set an environment variable `DEFAULT_EMAIL_DB_PATH` to point to the database path before moving to the next step.
+
+
+### Step 2: Run the Workflow
 
 The config files are located in [`email_search.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_email_search/email_search.yaml) and [`train_email_search.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_email_search/train_email_search.yaml).
 To run this example, you can run the following command:

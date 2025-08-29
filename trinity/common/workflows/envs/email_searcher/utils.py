@@ -246,13 +246,13 @@ def read_email_tool(message_id: str) -> Optional[Email]:
     logger.info(f"[read_email_tool] input_message_id={message_id}")
     logger.info(f"[read_email_tool] db: id={email_pk_id}, message_id={msg_id}")
 
-    # 2) 用 emails.id 查 recipients（而不是 message_id）
+    # search for recipients by emails.id (rather than message_id)
     recipients_sql = """
         SELECT recipient_address, recipient_type
         FROM recipients
         WHERE email_id = ?;
     """
-    cursor.execute(recipients_sql, (email_pk_id,))  # ← 关键修正
+    cursor.execute(recipients_sql, (email_pk_id,))
     recipient_rows = cursor.fetchall()
 
     to_addresses: List[str] = []
