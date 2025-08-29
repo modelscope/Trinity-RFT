@@ -86,7 +86,7 @@ class RunnerWrapper:
                     else:
                         self.logger.error(status.message)
                 except asyncio.TimeoutError:
-                    last_exception_msg = f"Timeout when running task of batch {task.batch_id} at runner {self.runner_id}: {task.task}"
+                    last_exception_msg = f"Timeout when running task of batch {task.batch_id} at runner {self.runner_id} at attempt {attempt + 1}: {task.task}"
                     self.logger.error(last_exception_msg)
                     status = Status(ok=False, metric=dict(), message=last_exception_msg)
                 except Exception:
