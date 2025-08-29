@@ -136,6 +136,7 @@ class OPMDGroupAdvantage(GroupAdvantage):
                 exp.returns = exp.advantages.clone()
             metrics = {
                 "group_baseline": group_baseline.item(),
+                "reward_mean": torch.mean(group_rewards).item(),
             }
         return exps, metrics
 
