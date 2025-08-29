@@ -1,7 +1,0 @@
-project_name: 'demo-process'
-
-export_path: './outputs/demo-process/demo-processed.jsonl'
-
-process:
-  - alphanumeric_filter:
-  - clean_email_mapper:

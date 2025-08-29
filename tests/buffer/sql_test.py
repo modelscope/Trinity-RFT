@@ -14,20 +14,17 @@ db_path = os.path.join(os.path.dirname(__file__), "test.db")
 
 
 class TestSQLBuffer(RayUnittestBaseAysnc):
-    async def test_create_sql_buffer(self) -> None:
+    async def test_sql_buffer_read_write(self) -> None:
         total_num = 8
         put_batch_size = 2
         read_batch_size = 4
         meta = StorageConfig(
             name="test_buffer",
-            algorithm_type="ppo",
+            schema_type="experience",
             path=f"sqlite:///{db_path}",
             storage_type=StorageType.SQL,
-            wrap_in_ray=True,
         )
         config = BufferConfig(
-            max_retry_times=3,
-            max_retry_interval=1,
             train_batch_size=read_batch_size,
         )
         sql_writer = SQLWriter(meta, config)
@@ -66,3 +63,7 @@ class TestSQLBuffer(RayUnittestBaseAysnc):
         self.assertIsNotNone(db_wrapper)
         self.assertEqual(await sql_writer.release(), 0)
         self.assertRaises(StopIteration, sql_reader.read)
+
+    def setUp(self) -> None:
+        if os.path.exists(db_path):
+            os.remove(db_path)

@@ -1,142 +1,135 @@
-"""Schema for SQLAlchemy models."""
+"""SQLAlchemy models for different data."""
 
-from typing import Any, Optional, Union
+from typing import Dict, Optional, Tuple
 
-from sqlalchemy import Column, Float, Integer, LargeBinary, String
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import JSON, Column, Float, Integer, LargeBinary, Text, create_engine
+from sqlalchemy.exc import OperationalError
+from sqlalchemy.orm import declarative_base
+from sqlalchemy.pool import NullPool
 
 from trinity.common.experience import Experience
+from trinity.utils.log import get_logger
+from trinity.utils.registry import Registry
+
+SQL_SCHEMA = Registry("sql_schema")
 
 Base = declarative_base()
 
 
+@SQL_SCHEMA.register_module("task")
 class TaskModel(Base):  # type: ignore
     """Model for storing tasks in SQLAlchemy."""
 
     __abstract__ = True
 
-    __table_args__ = {
-        "keep_existing": True,
-    }
-
     id = Column(Integer, primary_key=True, autoincrement=True)
-    task_desc = Column(String, nullable=True)
-    workflow_type = Column(String, nullable=True)
-    reward_type = Column(String, nullable=True)
+    raw_task = Column(JSON, nullable=False)
+
+    @classmethod
+    def from_dict(cls, dict: Dict):
+        return cls(raw_task=dict)
 
 
+@SQL_SCHEMA.register_module("experience")
 class ExperienceModel(Base):  # type: ignore
     """SQLAlchemy model for Experience."""
 
     __abstract__ = True
 
-    __table_args__ = {
-        "keep_existing": True,
-    }
-
     id = Column(Integer, primary_key=True, autoincrement=True)
-    serialized_exp = Column(LargeBinary, nullable=True)
-    prompt = Column(String, nullable=True)
-    response = Column(String, nullable=True)
+    # for single turn
+    prompt = Column(Text, nullable=True)
+    response = Column(Text, nullable=True)
+    # for multi turn
+    message_list = Column(JSON, nullable=True)
     reward = Column(Float, nullable=True)
-    consumed = Column(Integer, default=0)
-    priority = Column(Float, default=0.0)
+    # serialized experience object
+    experience_bytes = Column(LargeBinary, nullable=True)
 
     def to_experience(self) -> Experience:
         """Load the experience from the database."""
-        return Experience.deserialize(self.serialized_exp)
+        return Experience.deserialize(self.experience_bytes)
 
     @classmethod
     def from_experience(cls, experience: Experience):
         """Save the experience to database."""
         return cls(
-            serialized_exp=experience.serialize(),
+            experience_bytes=experience.serialize(),
             reward=experience.reward,
             prompt=experience.prompt_text,
             response=experience.response_text,
+            message_list=experience.messages,
         )
 
 
+@SQL_SCHEMA.register_module("sft")
 class SFTDataModel(Base):  # type: ignore
     """SQLAlchemy model for SFT data."""
 
     __abstract__ = True
 
-    __table_args__ = {
-        "keep_existing": True,
-    }
-
     id = Column(Integer, primary_key=True, autoincrement=True)
-    serialized_exp = Column(LargeBinary, nullable=True)
-    messages = Column(String, nullable=True)
-    consumed = Column(Integer, default=0)
+    message_list = Column(JSON, nullable=True)
+    experience_bytes = Column(LargeBinary, nullable=True)
 
     def to_experience(self) -> Experience:
         """Load the experience from the database."""
-        return Experience.deserialize(self.serialized_exp)
+        return Experience.deserialize(self.experience_bytes)
 
     @classmethod
-    def from_messages(
-        cls,
-        messages: list[dict],
-        tokenizer: Any,
-        chat_template: Optional[str] = None,
-    ) -> "SFTDataModel":
-        """Convert a list of messages into a single instance of SFT data."""
-        from trinity.common.models.utils import tokenize_and_mask_messages_hf
-
-        tokens, action_mask, prompt_length = tokenize_and_mask_messages_hf(
-            tokenizer=tokenizer,
-            messages=messages,
-            chat_template=chat_template,
-        )
-        exp = Experience(
-            tokens=tokens,
-            action_mask=action_mask,
-            prompt_length=prompt_length,
-            info={"response_num": sum([1 if m["role"] == "assistant" else 0 for m in messages])},
-        )
+    def from_experience(cls, experience: Experience):
+        """Save the experience to database."""
         return cls(
-            serialized_exp=exp.serialize(),
-            messages=messages,
+            experience_bytes=experience.serialize(),
+            message_list=experience.messages,
         )
 
 
+@SQL_SCHEMA.register_module("dpo")
 class DPODataModel(Base):  # type: ignore
     """SQLAlchemy model for DPO data."""
 
     __abstract__ = True
 
-    __table_args__ = {
-        "keep_existing": True,
-    }
-
     id = Column(Integer, primary_key=True, autoincrement=True)
-    serialized_exp = Column(LargeBinary, nullable=True)
-    chosen = Column(LargeBinary, nullable=True)
-    rejected = Column(LargeBinary, nullable=True)
-    consumed = Column(Integer, default=0)
+    chosen_message_list = Column(JSON, nullable=True)
+    rejected_message_list = Column(JSON, nullable=True)
+    experience_bytes = Column(LargeBinary, nullable=True)
 
     def to_experience(self) -> Experience:
         """Load the experience from the database."""
-        exp = Experience.deserialize(self.serialized_exp)
-        exp.chosen = Experience.deserialize(self.chosen)
-        exp.rejected = Experience.deserialize(self.rejected)
-        return exp
+        return Experience.deserialize(self.experience_bytes)
+
+    @classmethod
+    def from_experience(cls, experience: Experience):
+        """Save the experience to database."""
+        return cls(
+            experience_bytes=experience.serialize(),
+            chosen_message_list=experience.chosen_messages,
+            rejected_message_list=experience.rejected_messages,
+        )
 
 
-def create_dynamic_table(algorithm_type: Union[str | None], table_name: str) -> Any:
-    """Create a dynamic table based on the provided algorithm type and table name."""
-    if algorithm_type is None:
-        base_class = TaskModel
-    else:
-        from trinity.algorithm.algorithm import ALGORITHM_TYPE
+def init_engine(db_url: str, table_name, schema_type: Optional[str]) -> Tuple:
+    """Get the sqlalchemy engine."""
+    logger = get_logger(__name__)
+    engine = create_engine(db_url, poolclass=NullPool)
 
-        algorithm = ALGORITHM_TYPE.get(algorithm_type)
-        base_class = algorithm.schema
+    if schema_type is None:
+        schema_type = "task"
+
+    base_class = SQL_SCHEMA.get(schema_type)
 
     table_attrs = {
         "__tablename__": table_name,
+        "__abstract__": False,
+        "__table_args__": {"keep_existing": True},
     }
+    table_cls = type(table_name, (base_class,), table_attrs)
 
-    return type(table_name, (base_class,), table_attrs)
+    try:
+        Base.metadata.create_all(engine, checkfirst=True)
+    except OperationalError:
+        logger.warning(f"Failed to create table {table_name}, assuming it already exists.")
+
+    return engine, table_cls

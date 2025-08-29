@@ -3,7 +3,7 @@ from typing import Dict, List, Optional
 
 from trinity.buffer.buffer import BufferWriter, get_buffer_reader, get_buffer_writer
 from trinity.buffer.operators.experience_operator import ExperienceOperator
-from trinity.buffer.ray_wrapper import is_database_url, is_json_file
+from trinity.buffer.storage.queue import is_database_url, is_json_file
 from trinity.common.config import (
     AlgorithmConfig,
     BufferConfig,

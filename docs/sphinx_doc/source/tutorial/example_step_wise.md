@@ -107,8 +107,6 @@ buffer:
   total_epochs: 20
   batch_size: 16
   train_batch_size: 7680  # here: batch_size * repeat_times * max_env_steps
-  max_retry_times: 3
-  max_retry_interval: 1
   explorer_input:
     taskset:
       name: alfworld

@@ -27,8 +27,6 @@ buffer:
   total_epochs: 10
   batch_size: 32
   train_batch_size: 320
-  max_retry_times: 3
-  max_retry_interval: 1
   explorer_input:
     taskset:
       name: math_train
@@ -59,7 +57,6 @@ buffer:
       total_epochs: 10
       name: math_sft
       storage_type: file
-      algorithm_type: sft
       path: /PATH/TO/EXPERT_DATA/
       split: 'train'
       format:
