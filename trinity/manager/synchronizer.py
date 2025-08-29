@@ -31,7 +31,7 @@ class Synchronizer:
     """
 
     def __init__(self, config: Config, module_ref: ray.actor.ActorHandle):
-        self.logger = get_logger(__name__)
+        self.logger = get_logger("synchronizer", in_ray_actor=True)
         self.config = config
         self.trainer_status = RunningStatus.STOPPED
         self.explorer_status_counts: Dict[RunningStatus, int] = defaultdict(lambda: 0)

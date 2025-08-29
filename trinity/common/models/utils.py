@@ -10,8 +10,6 @@ from torch.distributed._tensor import DTensor, Placement, Shard
 from trinity.common.config import TrainerConfig
 from trinity.utils.log import get_logger
 
-logger = get_logger(__name__)
-
 
 def tokenize_and_mask_messages_hf(
     tokenizer: Any,
@@ -198,6 +196,7 @@ def get_verl_checkpoint_info(
 # copy from verl/scripts/model_merger.py
 def load_fsdp_state_dict_from_verl_checkpoint(checkpoint_path: str) -> dict:  # noqa: C901
     """Load state dict from a Verl checkpoint."""
+    logger = get_logger(__name__)
     logger.info(f"Loading state dict from {checkpoint_path}")
     assert not checkpoint_path.endswith(
         "huggingface"

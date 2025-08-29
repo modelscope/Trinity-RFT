@@ -9,9 +9,14 @@ from datasets import Dataset, load_dataset
 
 from trinity.algorithm.algorithm import DPOAlgorithm, SFTAlgorithm
 from trinity.buffer.buffer_reader import BufferReader
+from trinity.buffer.schema.formatter import (
+    DPOMessagesFormatter,
+    DPOPlaintextFormatter,
+    SFTMessagesFormatter,
+    SFTPlaintextFormatter,
+)
 from trinity.common.config import BufferConfig, StorageConfig
-from trinity.common.constants import PromptType, ReadStrategy, TaskType
-from trinity.common.experience import Experience
+from trinity.common.constants import PromptType, TaskType
 from trinity.common.rewards import REWARD_FUNCTIONS
 from trinity.common.workflows import WORKFLOWS, Task
 from trinity.utils.registry import Registry
@@ -100,11 +105,9 @@ class _HFBatchReader:
 
 
 class BaseFileReader(BufferReader):
-    async def read_async(
-        self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
-    ):
+    async def read_async(self, batch_size: Optional[int] = None):
         try:
-            return self.read(batch_size, strategy)
+            return self.read(batch_size)
         except StopIteration as e:
             raise StopAsyncIteration from e
 
@@ -114,15 +117,20 @@ class SFTDataReader(BaseFileReader):
     """Reader for SFT file data."""
 
     def __init__(self, meta: StorageConfig, config: BufferConfig):
-        self.split = meta.split
-        subset_name = meta.subset_name
-        self.prompt_type = meta.format.prompt_type
-        self.messages_key = meta.format.messages_key
-        self.prompt_key = meta.format.prompt_key
-        self.response_key = meta.format.response_key
+        self.tokenizer = transformers.AutoTokenizer.from_pretrained(config.tokenizer_path)
+        if meta.format.prompt_type == PromptType.MESSAGES:
+            self.formatter = SFTMessagesFormatter(
+                tokenizer=self.tokenizer, format_config=meta.format
+            )
+        elif meta.format.prompt_type == PromptType.PLAINTEXT:
+            self.formatter = SFTPlaintextFormatter(
+                tokenizer=self.tokenizer, format_config=meta.format
+            )
+        else:
+            raise ValueError(f"Unknown prompt type: {self.prompt_type}")
         self.read_batch_size = config.train_batch_size
         self.dataset = _HFBatchReader(
-            load_dataset(meta.path, name=subset_name, split=self.split),
+            load_dataset(meta.path, name=meta.subset_name, split=meta.split),
             name=meta.name,
             default_batch_size=self.read_batch_size,
             total_epochs=meta.total_epochs,
@@ -130,81 +138,31 @@ class SFTDataReader(BaseFileReader):
             total_steps=meta.total_steps,
             enable_progress_bar=meta.enable_progress_bar,
         )
-        self.tokenizer = transformers.AutoTokenizer.from_pretrained(config.tokenizer_path)
 
-    def read(
-        self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
-    ) -> List:
+    def read(self, batch_size: Optional[int] = None) -> List:
         samples = self.dataset.read_batch(batch_size or self.read_batch_size)
         exp_list = []
-        if self.prompt_type == PromptType.MESSAGES:
-            for sample in samples:
-                messages = sample[self.messages_key]
-                tokens = self.tokenizer.apply_chat_template(
-                    messages, add_generation_prompt=False, return_tensors="pt"
-                )[0]
-                prompt_tokens_ids = self.tokenizer.apply_chat_template(
-                    messages[:-1], add_generation_prompt=True, return_tensors="pt"
-                )[0]
-                experience = Experience(
-                    tokens=tokens,
-                    prompt_length=len(prompt_tokens_ids),
-                )
-                exp_list.append(experience)
-
-        elif self.prompt_type == PromptType.CHATPAIR:
-            for sample in samples:
-                prompt_messages = sample[self.prompt_key]
-                response_messages = sample[self.response_key]
-                if not isinstance(prompt_messages, list):
-                    prompt_messages = [prompt_messages]
-                if not isinstance(response_messages, list):
-                    response_messages = [response_messages]
-                full_messages = prompt_messages + response_messages
-
-                tokens = self.tokenizer.apply_chat_template(
-                    full_messages, add_generation_prompt=False, return_tensors="pt"
-                )[0]
-
-                prompt_tokens_ids = self.tokenizer.apply_chat_template(
-                    prompt_messages, add_generation_prompt=True, return_tensors="pt"
-                )[0]
-
-                experience = Experience(
-                    tokens=tokens,
-                    prompt_length=len(prompt_tokens_ids),
-                )
-                exp_list.append(experience)
-
-        elif self.prompt_type == PromptType.PLAINTEXT:
-            # TODO: support HF format without chat template
-            for sample in samples:
-                prompt = sample[self.prompt_key]
-                response = sample[self.response_key]
-                tokens = self.tokenizer(prompt + response, return_tensors="pt")["input_ids"][0]
-                prompt_tokens_ids = self.tokenizer(prompt, return_tensors="pt")["input_ids"][0]
-                experience = Experience(
-                    tokens=tokens,
-                    prompt_length=len(prompt_tokens_ids),
-                )
-                exp_list.append(experience)
-        else:
-            raise ValueError(f"Unknown data format: {self.prompt_type}")
+        for sample in samples:
+            experience = self.formatter.format(sample)
+            exp_list.append(experience)
         return exp_list
 
 
 @FILE_READERS.register_module(DPOAlgorithm.name())
 class DPODataReader(BaseFileReader):
     def __init__(self, meta: StorageConfig, config: BufferConfig):
-        self.split = meta.split
-        subset_name = meta.subset_name
-        self.prompt_type = meta.format.prompt_type
-        self.prompt_key = meta.format.prompt_key
-        self.chosen_key = meta.format.chosen_key
-        self.rejected_key = meta.format.rejected_key
+        self.tokenizer = transformers.AutoTokenizer.from_pretrained(config.tokenizer_path)
+        if meta.format.prompt_type == PromptType.MESSAGES:
+            self.formatter = DPOMessagesFormatter(
+                tokenizer=self.tokenizer, format_config=meta.format
+            )
+        elif meta.format.prompt_type == PromptType.PLAINTEXT:
+            self.formatter = DPOPlaintextFormatter(
+                tokenizer=self.tokenizer, format_config=meta.format
+            )
         self.read_batch_size = config.train_batch_size
         self.dataset = _HFBatchReader(
-            load_dataset(meta.path, name=subset_name, split=self.split),
+            load_dataset(meta.path, name=meta.subset_name, split=meta.split),
             name=meta.name,
             default_batch_size=self.read_batch_size,
             total_epochs=meta.total_epochs,
@@ -212,7 +170,6 @@ class DPODataReader(BaseFileReader):
             total_steps=meta.total_steps,
             enable_progress_bar=meta.enable_progress_bar,
         )  # TODO: support resume
-        self.tokenizer = transformers.AutoTokenizer.from_pretrained(config.tokenizer_path)
 
     def _get_assistant_message(self, item) -> dict:
         if isinstance(item, List):
@@ -222,50 +179,11 @@ class DPODataReader(BaseFileReader):
         else:
             return item
 
-    def read(
-        self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
-    ) -> List:
+    def read(self, batch_size: Optional[int] = None) -> List:
         batch_data = self.dataset.read_batch(batch_size or self.read_batch_size)
-        print(f"Read {len(batch_data)} item from dpo dataset.")
         exp_list = []
         for sample in batch_data:
-            prompt = sample[self.prompt_key]
-            chosen = sample[self.chosen_key]
-            rejected = sample[self.rejected_key]
-
-            if self.prompt_type == PromptType.MESSAGES:
-                prompt_messages = prompt
-
-            elif self.prompt_type == PromptType.PLAINTEXT:
-                prompt_messages = [
-                    {
-                        "role": "user",
-                        "content": prompt,
-                    }
-                ]
-            else:
-                raise ValueError(f"Unknown prompt type: {self.prompt_type}")
-            prompt_tokens = self.tokenizer.apply_chat_template(
-                prompt_messages, add_generation_prompt=True, return_tensors="pt"
-            )[0]
-            prompt_length = len(prompt_tokens)
-            messages_with_chosen = prompt_messages + [self._get_assistant_message(chosen)]
-            chosen_tokens = self.tokenizer.apply_chat_template(
-                messages_with_chosen,
-                add_generation_prompt=False,
-                return_tensors="pt",
-            )[0][prompt_length:]
-            messages_with_rejected = prompt_messages + [self._get_assistant_message(rejected)]
-            rejected_tokens = self.tokenizer.apply_chat_template(
-                messages_with_rejected,
-                add_generation_prompt=False,
-                return_tensors="pt",
-            )[0][prompt_length:]
-            experience = Experience(
-                tokens=prompt_tokens,
-                chosen=chosen_tokens,
-                rejected=rejected_tokens,
-            )
+            experience = self.formatter.format(sample)
             exp_list.append(experience)
         return exp_list
 
@@ -303,9 +221,7 @@ class RolloutDataReader(BaseFileReader):
             self.default_eval_workflow_cls = WORKFLOWS.get(meta.default_eval_workflow_type)
         self.default_reward_fn_cls = REWARD_FUNCTIONS.get(meta.default_reward_fn_type)  # type: ignore
 
-    def read(
-        self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
-    ) -> List:
+    def read(self, batch_size: Optional[int] = None) -> List:
         batch_size = batch_size or self.read_batch_size
         tasks = []
         samples = self.dataset.read_batch(batch_size)
@@ -350,9 +266,7 @@ class RawDataReader(BaseFileReader):
     def __len__(self):
         return len(self.dataset)
 
-    def read(
-        self, batch_size: Optional[int] = None, strategy: Optional[ReadStrategy] = None
-    ) -> List:
+    def read(self, batch_size: Optional[int] = None) -> List:
         if self.returned:
             raise StopIteration
         self.returned = True

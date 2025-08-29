@@ -22,9 +22,12 @@
 
 ## 🚀 最新动态
 
-* [2025-08] ✨ 发布 Trinity-RFT v0.2.1 版本，强化了 Agentic RL 和 异步 RL 相关功能。
 * [2025-08] 🎵 我们推出了 [CHORD](https://github.com/modelscope/Trinity-RFT/tree/main/examples/mix_chord)，一种动态整合 SFT 和 RL 来微调 LLM 的方法（[论文](https://arxiv.org/pdf/2508.11408)）。
-* [2025-08] Trinity-RFT 现在已经支持通用多轮工作流的训练了，请参考 [ALFWorld](./docs/sphinx_doc/source/tutorial/example_step_wise.md) 和 [ReAct](./docs/sphinx_doc/source/tutorial/example_react.md) 的例子！
+* [2025-08] ✨ 发布 Trinity-RFT v0.2.1 版本！新增功能包括：
+  * 智能体 RL：支持通用多轮工作流的训练；请参考 [ALFWorld](./docs/sphinx_doc/source/tutorial/example_step_wise.md) 和 [ReAct](./docs/sphinx_doc/source/tutorial/example_react.md) 例子。
+  * Rollout-Training 调度: 通过引入 Scheduler, [Synchronizer](./docs/sphinx_doc/source/tutorial/synchronizer.md) 以及优先队列类型 Buffer, 支持 RFT 流程中更高效与灵活的调度。
+  * [Benchmark 工具](./benchmark)，用于快速验证与实验。
+  * RL 算法：实现 [GSPO](https://github.com/modelscope/Trinity-RFT/pull/154), [AsymRE](https://github.com/modelscope/Trinity-RFT/pull/187), [TOPR, CISPO](https://github.com/modelscope/Trinity-RFT/pull/185), [RAFT](https://github.com/modelscope/Trinity-RFT/pull/174) 等算法。
 * [2025-07] 发布 Trinity-RFT v0.2.0 版本，新增了多项功能优化。
 * [2025-07] 更新了[技术报告](https://arxiv.org/abs/2505.17826) (arXiv v2)，增加了新功能、示例和实验。
 * [2025-06] 发布 Trinity-RFT v0.1.1 版本，修复了已知问题并提升系统稳定性。
@@ -45,7 +48,7 @@ Trinity-RFT是一个通用、灵活且易于使用的大语言模型强化微调
 
 * **统一的 RFT 内核：**
 
-  灵活应对*同步/异步*（synchronous/asynchronous）、*同策略/异策略*（on-policy/off-policy）和*在线/离线*（online/offline）等多样化训练模式，经验数据的产生（rollout）和训练（training）可独立部署在不同设备并实现分布式扩展。
+  灵活应对同步/异步（synchronous/asynchronous）、同策略/异策略（on-policy/off-policy）和在线/离线（online/offline）等多样化训练模式，经验数据的产生（rollout）和训练（training）可独立部署在不同设备并实现分布式扩展。
 
 * **一流的智能体-环境交互：**
 
@@ -71,7 +74,7 @@ Trinity-RFT是一个通用、灵活且易于使用的大语言模型强化微调
 
 
 <p align="center">
-  <img src="https://img.alicdn.com/imgextra/i1/O1CN01BFCZRV1zS9T1PoH49_!!6000000006712-2-tps-922-544.png" alt="Trinity-RFT-core-architecture">
+  <img src="https://img.alicdn.com/imgextra/i1/O1CN01Ti0o4320RywoAuyhN_!!6000000006847-2-tps-3840-2134.png" alt="Trinity-RFT-core-architecture">
 </p>
 
 </details>
@@ -98,20 +101,10 @@ Trinity-RFT是一个通用、灵活且易于使用的大语言模型强化微调
 
 
 <details>
-<summary>图：数据处理器的架构</summary>
+<summary>图：Trinity-RFT 中数据处理的设计</summary>
 
 <p align="center">
-  <img src="https://img.alicdn.com/imgextra/i3/O1CN01hR1LCh25kpJMKmYR4_!!6000000007565-2-tps-1474-740.png" alt="Trinity-RFT-data-pipeline-buffer">
-</p>
-
-</details>
-
-
-<details>
-<summary>图：Trinity-RFT 中数据处理的整体设计</summary>
-
-<p align="center">
-  <img src="https://img.alicdn.com/imgextra/i4/O1CN01UvyfcZ1WoTv5t3pCp_!!6000000002835-2-tps-1166-274.png" alt="Trinity-RFT-data-pipelines">
+  <img src="https://img.alicdn.com/imgextra/i2/O1CN01BfeHp61sXSlGjH7zQ_!!6000000005776-2-tps-1734-473.png" alt="Trinity-RFT-data-pipelines">
 </p>
 
 </details>
@@ -123,12 +116,13 @@ Trinity-RFT是一个通用、灵活且易于使用的大语言模型强化微调
 
 * **快速构建新场景：**
 
-  通过编写基础交互逻辑配置即可构建新场景，只需在 `Workflow` 或 `MultiTurnWorkflow` 类中定义智能体与环境的互动规则。([查看示例](./docs/sphinx_doc/source/tutorial/example_multi_turn.md))
+  通过编写基础交互逻辑配置即可构建新场景，只需在 workflow 类中定义智能体与环境的互动规则 ([查看示例](./docs/sphinx_doc/source/tutorial/example_multi_turn.md))，
+  或者直接调用智能体框架（比如 AgentScope）中已有的智能体工作流 ([查看示例](./docs/sphinx_doc/source/tutorial/example_react.md))。
 
 
 * **灵活开发算法模块：**
 
-  在轻量级算法模块中开发强化学习算法，包括了损失函数设计、数据采样与数据处理等核心环节，模块支持自由组合，便于快速迭代实验。([查看示例](./docs/sphinx_doc/source/tutorial/example_mix_algo.md))
+  在轻量级算法模块中开发强化学习算法，包括损失函数设计、数据采样与数据处理等核心环节，模块支持自由组合，便于快速迭代实验。([查看示例](./docs/sphinx_doc/source/tutorial/example_mix_algo.md))
 
 
 * **可视化操作体验：**
@@ -343,18 +337,14 @@ trinity run --config examples/grpo_gsm8k/gsm8k.yaml
 
 将 Trinity-RFT 适配到新的多轮智能体场景的教程：
 
-+ [多轮任务](./docs/sphinx_doc/source/tutorial/example_multi_turn.md)
-
-
-将 Trinity-RFT 适配到通用多轮智能体场景的教程：
-
++ [拼接多轮任务](./docs/sphinx_doc/source/tutorial/example_multi_turn.md)
 + [通用多轮任务](./docs/sphinx_doc/source/tutorial/example_step_wise.md)
-+ [ReAct智能体任务](./docs/sphinx_doc/source/tutorial/example_react.md)
++ [调用智能体框架中的 ReAct 工作流](./docs/sphinx_doc/source/tutorial/example_react.md)
 
 
 数据相关功能的教程：
 
-+ [高级数据处理及Human-in-the-loop](./docs/sphinx_doc/source/tutorial/example_data_functionalities.md)
++ [高级数据处理及 Human-in-the-loop](./docs/sphinx_doc/source/tutorial/example_data_functionalities.md)
 
 
 使用 Trinity-RFT 进行 RL 算法开发/研究的教程：
@@ -362,14 +352,17 @@ trinity run --config examples/grpo_gsm8k/gsm8k.yaml
 + [使用 Trinity-RFT 进行 RL 算法开发](./docs/sphinx_doc/source/tutorial/example_mix_algo.md)
 
 
-完整配置指南：请参阅[此文档](./docs/sphinx_doc/source/tutorial/trinity_configs.md)
+完整配置指南：
+
++ 请参阅[此文档](./docs/sphinx_doc/source/tutorial/trinity_configs.md)
 
 
 面向开发者和研究人员的指南：
 
 + [构建新的 RL 场景](./docs/sphinx_doc/source/tutorial/trinity_programming_guide.md#workflows-for-rl-environment-developers)
 + [实现新的 RL 算法](./docs/sphinx_doc/source/tutorial/trinity_programming_guide.md#algorithms-for-rl-algorithm-developers)
-
++ [开发新的数据处理操作](./docs/sphinx_doc/source/tutorial/trinity_programming_guide.md#operators-for-data-developers)
++ [理解 explorer-trainer 调度逻辑](./docs/sphinx_doc/source/tutorial/synchronizer.md)
 
 
 

@@ -1,31 +1,9 @@
 # -*- coding: utf-8 -*-
 """The buffer module"""
-import ray
-
 from trinity.buffer.buffer_reader import BufferReader
 from trinity.buffer.buffer_writer import BufferWriter
-from trinity.common.config import BufferConfig, Config, StorageConfig
+from trinity.common.config import BufferConfig, StorageConfig
 from trinity.common.constants import StorageType
-
-
-@ray.remote(name="buffer")
-class Buffer:
-    """Responsible for storing experiences."""
-
-    def __init__(self, config: Config):
-        self.buffer_mapping: dict[str, StorageConfig] = {}
-        self._register_from_config(config)
-
-    def get_dataset_info(self, dataset_name: str) -> StorageConfig:
-        storage_config = self.buffer_mapping.get(dataset_name, None)
-        if storage_config is None:
-            raise ValueError(f"{dataset_name} not found.")
-        return storage_config
-
-    def register_dataset(self, storage_config: StorageConfig) -> None:
-        if storage_config.name in self.buffer_mapping:
-            raise ValueError(f"{storage_config.name} already exists.")
-        self.buffer_mapping[storage_config.name] = storage_config
 
 
 def get_buffer_reader(storage_config: StorageConfig, buffer_config: BufferConfig) -> BufferReader:

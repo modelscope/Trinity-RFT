@@ -19,7 +19,7 @@ Trinity-RFT is designed to be highly modular. You can easily embed complex, pre-
 Modern agentic tasks often involve multiple steps of reasoning, tool use, and observation. Trinity-RFT natively supports training across these Multi-Step interactions.
 
 - **Step-Wise Experience Generation**: Instead of only learning from the final answer, Trinity can treat each step within an agent's reasoning trajectory as a distinct learning opportunity.
-- **Credit Assignment**: The reward for solving a task is propagated back to all experiences within the successful trajectory, enabling the model to learn the entire reasoning chain, not just the final response. This is controlled by the `add_strategy` in the config.
+- **Credit Assignment**: The reward for solving a task is propagated back to all experiences within the successful trajectory, enabling the model to learn the entire reasoning chain, not just the final response. This is controlled by the `advantage_fn` in the config.
 
 ### Native Tool Calling Support
 Trinity-RFT's inference engine and training pipeline are built to support the native OpenAI `tool_calls` format.
@@ -83,7 +83,7 @@ This setting in the `algorithm` section defines how experiences from a Multi-Ste
 ```yaml
 algorithm:
   algorithm_type: grpo
-  add_strategy: step_wise_grpo # Key for Multi-Step training
+  advantage_fn: step_wise_grpo # Key for Multi-Step training
 ```
 -   `step_wise_grpo`: This strategy tells Trinity to create a distinct training sample for each step in the agent's execution path. The `grpo` algorithm then uses these samples to update the model.
 

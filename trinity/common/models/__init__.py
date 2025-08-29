@@ -10,7 +10,7 @@ class _BundleAllocator:
     """An allocator for bundles."""
 
     def __init__(self, node_bundle_map: dict[str, list]) -> None:
-        self.logger = get_logger(__name__)
+        self.logger = get_logger(__name__, in_ray_actor=True)
         self.node_bundle_list = [value for value in node_bundle_map.values()]
         self.node_list = [key for key in node_bundle_map.keys()]
         self.nid = 0

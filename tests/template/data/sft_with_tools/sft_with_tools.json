@@ -1,0 +1,371 @@
+[
+  {
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a helpful assistant with access to various tools. Use them when needed to help users."
+      },
+      {
+        "role": "user",
+        "content": "What's the weather like in Beijing today?"
+      },
+      {
+        "role": "assistant",
+        "content": "Let me get the weather for you.",
+        "tool_calls": [
+          {
+            "id": "call_abc123",
+            "type": "function",
+            "function": {
+              "name": "get_weather",
+              "arguments": "{\"location\": \"Beijing\", \"unit\": \"celsius\"}"
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool",
+        "content": "{\"temperature\": 22, \"condition\": \"sunny\", \"humidity\": 45}",
+        "tool_call_id": "call_abc123"
+      },
+      {
+        "role": "assistant",
+        "content": "The weather in Beijing today is sunny with a temperature of 22°C and humidity at 45%. It's a pleasant day!"
+      }
+    ],
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "get_weather",
+          "description": "Get the current weather in a given location",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "location": {
+                "type": "string",
+                "description": "The city and state, e.g. San Francisco, CA"
+              },
+              "unit": {
+                "type": "string",
+                "enum": ["celsius", "fahrenheit"],
+                "description": "The temperature unit"
+              }
+            },
+            "required": ["location"]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a helpful math assistant. Use the calculator tool when needed."
+      },
+      {
+        "role": "user",
+        "content": "Can you help me calculate 1584 * 327?"
+      },
+      {
+        "role": "assistant",
+        "content": "let me calculate 1584 * 327 using the tools provided.",
+        "tool_calls": [
+          {
+            "id": "call_def456",
+            "type": "function",
+            "function": {
+              "name": "calculator",
+              "arguments": "{\"operation\": \"multiply\", \"a\": 1584, \"b\": 327}"
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool",
+        "content": "{\"result\": 517968}",
+        "tool_call_id": "call_def456"
+      },
+      {
+        "role": "assistant",
+        "content": "The result of 1584 × 327 is 517,968."
+      }
+    ],
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "calculator",
+          "description": "Perform basic mathematical operations",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "type": "string",
+                "enum": ["add", "subtract", "multiply", "divide"],
+                "description": "The mathematical operation to perform"
+              },
+              "a": {
+                "type": "number",
+                "description": "First operand"
+              },
+              "b": {
+                "type": "number",
+                "description": "Second operand"
+              }
+            },
+            "required": ["operation", "a", "b"]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a helpful assistant that can search for information and send emails."
+      },
+      {
+        "role": "user",
+        "content": "Search for the latest news about AI and then send a summary to john@example.com"
+      },
+      {
+        "role": "assistant",
+        "tool_calls": [
+          {
+            "id": "call_ghi789",
+            "type": "function",
+            "function": {
+              "name": "web_search",
+              "arguments": "{\"query\": \"latest AI news 2024\", \"num_results\": 5}"
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool",
+        "content": "{\"results\": [{\"title\": \"GPT-5 Announced\", \"snippet\": \"OpenAI announces next generation model...\"}, {\"title\": \"AI Regulation Updates\", \"snippet\": \"EU passes new AI act...\"}]}",
+        "tool_call_id": "call_ghi789"
+      },
+      {
+        "role": "assistant",
+        "tool_calls": [
+          {
+            "id": "call_jkl012",
+            "type": "function",
+            "function": {
+              "name": "send_email",
+              "arguments": "{\"to\": \"john@example.com\", \"subject\": \"Latest AI News Summary\", \"body\": \"Here are the latest AI developments:\\n1. GPT-5 Announced - OpenAI announces next generation model\\n2. AI Regulation Updates - EU passes new AI act\"}"
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool",
+        "content": "{\"status\": \"sent\", \"message_id\": \"msg_12345\"}",
+        "tool_call_id": "call_jkl012"
+      },
+      {
+        "role": "assistant",
+        "content": "I've found the latest AI news and sent a summary to john@example.com. The email includes information about GPT-5 announcement and EU AI regulation updates."
+      }
+    ],
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "web_search",
+          "description": "Search the web for information",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "query": {
+                "type": "string",
+                "description": "The search query"
+              },
+              "num_results": {
+                "type": "integer",
+                "description": "Number of results to return",
+                "default": 10
+              }
+            },
+            "required": ["query"]
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "send_email",
+          "description": "Send an email to a recipient",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "to": {
+                "type": "string",
+                "description": "Email address of the recipient"
+              },
+              "subject": {
+                "type": "string",
+                "description": "Email subject"
+              },
+              "body": {
+                "type": "string",
+                "description": "Email body content"
+              }
+            },
+            "required": ["to", "subject", "body"]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "messages": [
+        {
+        "role": "system",
+        "content": "You are a helpful assistant with access to multiple tools."
+        },
+        {
+        "role": "user",
+        "content": "I need to convert 1000 USD to EUR, then calculate 15% tax on that amount, and finally send the result to my email alice@example.com"
+        },
+        {
+        "role": "assistant",
+        "content": null,
+        "tool_calls": [
+            {
+            "id": "call_001",
+            "type": "function",
+            "function": {
+                "name": "currency_converter",
+                "arguments": "{\"amount\": 1000, \"from_currency\": \"USD\", \"to_currency\": \"EUR\"}"
+            }
+            }
+        ]
+        },
+        {
+        "role": "tool",
+        "content": "{\"converted_amount\": 920.50, \"exchange_rate\": 0.9205}",
+        "tool_call_id": "call_001"
+        },
+        {
+        "role": "assistant",
+        "content": null,
+        "tool_calls": [
+            {
+            "id": "call_002",
+            "type": "function",
+            "function": {
+                "name": "calculate_percentage",
+                "arguments": "{\"base_amount\": 920.50, \"percentage\": 15}"
+            }
+            }
+        ]
+        },
+        {
+        "role": "tool",
+        "content": "{\"result\": 138.075, \"total_with_percentage\": 1058.575}",
+        "tool_call_id": "call_002"
+        },
+        {
+        "role": "assistant",
+        "content": null,
+        "tool_calls": [
+            {
+            "id": "call_003",
+            "type": "function",
+            "function": {
+                "name": "send_email",
+                "arguments": "{\"to\": \"alice@example.com\", \"subject\": \"Currency Conversion and Tax Calculation\", \"body\": \"Here are your requested calculations:\\n\\n1. Currency Conversion: 1000 USD = 920.50 EUR (rate: 0.9205)\\n2. 15% tax on 920.50 EUR = 138.08 EUR\\n3. Total amount with tax: 1058.58 EUR\"}"
+            }
+            }
+        ]
+        },
+        {
+        "role": "tool",
+        "content": "{\"status\": \"sent\", \"message_id\": \"msg_789xyz\"}",
+        "tool_call_id": "call_003"
+        },
+        {
+        "role": "assistant",
+        "content": "I've completed all the calculations and sent the results to alice@example.com:\n\n1. Converted 1000 USD to 920.50 EUR (exchange rate: 0.9205)\n2. Calculated 15% tax: 138.08 EUR\n3. Total with tax: 1058.58 EUR\n\nThe email has been successfully sent (message ID: msg_789xyz)."
+        }
+    ],
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+            "name": "currency_converter",
+            "description": "Convert amount from one currency to another",
+            "parameters": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                "type": "number",
+                "description": "The amount to convert"
+                },
+                "from_currency": {
+                "type": "string",
+                "description": "Source currency code"
+                },
+                "to_currency": {
+                "type": "string",
+                "description": "Target currency code"
+                }
+            },
+            "required": ["amount", "from_currency", "to_currency"]
+            }
+        }
+        },
+        {
+        "type": "function",
+        "function": {
+            "name": "calculate_percentage",
+            "description": "Calculate percentage of a given amount",
+            "parameters": {
+            "type": "object",
+            "properties": {
+                "base_amount": {
+                "type": "number",
+                "description": "The base amount"
+                },
+                "percentage": {
+                "type": "number",
+                "description": "The percentage to calculate"
+                }
+            },
+            "required": ["base_amount", "percentage"]
+            }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+            "name": "send_email",
+            "description": "Send an email to a recipient",
+            "parameters": {
+            "type": "object",
+            "properties": {
+                "to": {
+                "type": "string",
+                "description": "Email address of the recipient"
+                },
+                "subject": {
+                "type": "string",
+                "description": "Email subject"
+                },
+                "body": {
+                "type": "string",
+                "description": "Email body content"
+                }
+            },
+            "required": ["to", "subject", "body"]
+            }
+        }
+      }
+    ]
+  }
+]

@@ -21,7 +21,13 @@ from tests.tools import (
 )
 from trinity.cli.launcher import bench, both, explore, train
 from trinity.common.config import Config, StorageConfig
-from trinity.common.constants import StorageType, SyncMethod, SyncStyle
+from trinity.common.constants import (
+    LOG_DIR_ENV_VAR,
+    LOG_LEVEL_ENV_VAR,
+    StorageType,
+    SyncMethod,
+    SyncStyle,
+)
 from trinity.common.models.utils import get_checkpoint_dir_with_step_num
 from trinity.manager.manager import CacheManager
 
@@ -167,10 +173,12 @@ class TestStepAheadAsyncRL(BaseTrainerCase):
 
 
 @parameterized_class(
-    ("fsdp_strategy",),
+    ("fsdp_strategy", "offloading"),
     [
-        ("fsdp",),
-        ("fsdp2",),
+        ("fsdp", False),
+        ("fsdp2", False),
+        ("fsdp", True),
+        ("fsdp2", True),
     ],
 )
 class TestTrainerGSM8K(BaseTrainerCase):
@@ -179,19 +187,33 @@ class TestTrainerGSM8K(BaseTrainerCase):
         # test both mode
         self.config.algorithm.algorithm_type = "grpo"
         self.config.algorithm.repeat_times = 4
-        self.config.algorithm.add_strategy = "grpo"
+        self.config.algorithm.advantage_fn = "grpo"
+        self.config.algorithm.advantage_fn_args = {
+            "epsilon": 1e-6,
+        }
         # self.config.algorithm.repeat_times = 8  # TODO: used for real testing
         # self.config.buffer.batch_size = 96  # TODO: used for real testing
         self.config.buffer.total_epochs = 1
         self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("gsm8k")
         self.config.check_and_update()
-        self.config.trainer.trainer_config.actor_rollout_ref.actor.strategy = self.fsdp_strategy
         self.config.trainer.trainer_config.trainer.max_actor_ckpt_to_keep = 2
-        self.config.trainer.trainer_config.actor_rollout_ref.actor.optim.lr = 1e-5
+        actor_rollout_ref = self.config.trainer.trainer_config.actor_rollout_ref
+        actor_rollout_ref.actor.strategy = self.fsdp_strategy
+        actor_rollout_ref.actor.optim.lr = 1e-5
+        if self.fsdp_strategy == "fsdp":
+            actor_rollout_ref.actor.fsdp_config.param_offload = self.offloading
+            actor_rollout_ref.actor.fsdp_config.optimizer_offload = self.offloading
+            actor_rollout_ref.ref.fsdp_config.param_offload = self.offloading
+            actor_rollout_ref.ref.fsdp_config.optimizer_offload = self.offloading
+        else:  # fsdp2
+            actor_rollout_ref.actor.fsdp_config.offload_policy = self.offloading
+            actor_rollout_ref.ref.fsdp_config.offload_policy = self.offloading
         both(self.config)
         parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
         rollout_metrics = parser.metric_list("rollout")
         self.assertTrue(len(rollout_metrics) > 0)
+        pipeline_metrics = parser.metric_list("pipeline")
+        self.assertTrue(len(pipeline_metrics) > 0)
         self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 4)
         actor_metrics = parser.metric_list("actor")
         self.assertTrue(len(actor_metrics) > 0)
@@ -321,13 +343,57 @@ class TestTrainerSFT(BaseTrainerCase):
         shutil.rmtree(self.config.checkpoint_job_dir)
 
 
+class TestTrainerToolsSFT(BaseTrainerCase):
+    def test_trainer_tools(self):
+        """Test SFT with tools."""
+        # test both mode
+        self.config.mode = "train"
+        self.config.algorithm.algorithm_type = "sft"
+        self.config.algorithm.policy_loss_fn = "sft"
+        self.config.algorithm.policy_loss_fn_args = {}
+        self.config.algorithm.kl_loss_fn = "none"
+        self.config.algorithm.entropy_loss_fn = "none"
+        self.config.synchronizer.sync_interval = 4
+        self.config.buffer.train_batch_size = 4
+        self.config.buffer.total_epochs = 4
+        self.config.buffer.trainer_input.experience_buffer = get_unittest_dataset_config(
+            "sft_with_tools"
+        )
+        self.config.check_and_update()
+        train(self.config)
+        parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
+        actor_metrics = parser.metric_list("actor")
+        self.assertTrue(len(actor_metrics) > 0)
+        self.assertEqual(parser.metric_max_step(actor_metrics[0]), 4)
+
+    def tearDown(self):
+        # remove dir only when the test passed
+        shutil.rmtree(self.config.checkpoint_job_dir)
+
+
 def run_trainer(config: Config) -> None:
-    ray.init(namespace=config.ray_namespace)
+    ray.init(
+        namespace=config.ray_namespace,
+        runtime_env={
+            "env_vars": {
+                LOG_DIR_ENV_VAR: config.log.save_dir,
+                LOG_LEVEL_ENV_VAR: "INFO",
+            }
+        },
+    )
     train(config)
 
 
 def run_explorer(config: Config) -> None:
-    ray.init(namespace=config.ray_namespace)
+    ray.init(
+        namespace=config.ray_namespace,
+        runtime_env={
+            "env_vars": {
+                LOG_DIR_ENV_VAR: config.log.save_dir,
+                LOG_LEVEL_ENV_VAR: "INFO",
+            }
+        },
+    )
     explore(config)
 
 
@@ -381,7 +447,7 @@ class TestFullyAsyncMode(unittest.TestCase):
         config.cluster.node_num = 1
         explorer1_config.explorer.rollout_model.engine_num = 1
         explorer1_config.explorer.rollout_model.tensor_parallel_size = 1
-        explorer1_config.buffer.explorer_output = StorageConfig(
+        explorer1_config.buffer.trainer_input.experience_buffer = StorageConfig(
             name="exp_buffer",
             storage_type=StorageType.QUEUE,
             wrap_in_ray=True,
@@ -454,6 +520,22 @@ class TestFullyAsyncMode(unittest.TestCase):
             )[1],
             8,
         )
+        log_files = os.listdir(os.path.join(explorer1_config.checkpoint_job_dir, "log"))
+        self.assertTrue("trainer.log" in log_files)
+        self.assertTrue("synchronizer.log" in log_files)
+        self.assertTrue("explorer1.log" in log_files)
+        self.assertTrue("explorer2.log" in log_files)
+        self.assertTrue("explorer1_runner_0.log" in log_files)
+        self.assertTrue("explorer1_runner_7.log" in log_files)
+        self.assertTrue("explorer2_runner_0.log" in log_files)
+        self.assertTrue("explorer2_runner_7.log" in log_files)
+        self.assertTrue("explorer1_experience_pipeline.log" in log_files)
+        self.assertTrue("explorer2_experience_pipeline.log" in log_files)
+        files_to_check = ["trainer.log", "synchronizer.log", "explorer1.log", "explorer2.log"]
+        for file_name in files_to_check:
+            with open(os.path.join(explorer1_config.checkpoint_job_dir, "log", file_name)) as f:
+                lines = f.readlines()
+                self.assertTrue(len(lines) > 0)
         ray.shutdown()
 
     def tearDown(self):
@@ -469,6 +551,7 @@ class TestTrainerMIX(BaseTrainerCase):
         self.config.algorithm.algorithm_type = "mix"
         self.config.algorithm.repeat_times = 4
         self.config.algorithm.sample_strategy = "mix"
+        self.config.algorithm.advantage_fn = "grpo"
         self.config.algorithm.sample_strategy_args = {"expert_data_ratio": 0.5}  # rft=4*4 : sft=16
         self.config.algorithm.policy_loss_fn = "mix"
         self.config.buffer.batch_size = 4
@@ -492,7 +575,7 @@ class TestTrainerMIX(BaseTrainerCase):
         self.assertTrue(len(rollout_metrics) > 0)
         self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 4)
         self.assertEqual(
-            parser.metric_values("rollout/experience_count")[1], 16
+            parser.metric_values("pipeline/experience_count")[1], 16
         )  # 16 rft experiences
         # test actor metrics
         actor_metrics = parser.metric_list("actor")

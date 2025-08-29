@@ -26,7 +26,7 @@ buffer:
       enable_progress_bar: True
       path: /PATH/TO/DATASET/
       format:
-        prompt_type: plaintext # plaintext/messages/chatpair
+        prompt_type: plaintext # plaintext/messages
         prompt_key: prompt
         chosen_key: chosen
         rejected_key: rejected

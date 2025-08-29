@@ -148,7 +148,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             ray_worker_group_cls,
         )
         self.init_workers()
-        self.logger = get_logger(__name__)
+        self.logger = get_logger(__name__, in_ray_actor=True)
         self.last_full_save_step = None
 
     def _validate_config(self):  # TODO

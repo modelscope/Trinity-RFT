@@ -1,4 +1,5 @@
 """Tests for explorer."""
+import json
 import os
 from abc import abstractmethod
 from datetime import datetime
@@ -11,7 +12,7 @@ from tests.tools import (
     get_template_config,
     get_unittest_dataset_config,
 )
-from trinity.buffer import get_buffer_reader
+from trinity.buffer.utils import default_storage_path
 from trinity.cli.launcher import explore
 
 
@@ -74,7 +75,7 @@ class TestExplorerCountdownNoEval(BaseExplorerCase):
         self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 8)
 
 
-class TestExplorerWithAddStrategy(BaseExplorerCase):
+class TestExplorerGSM8k(BaseExplorerCase):
     def test_explorer(self):
         import ray
 
@@ -82,20 +83,20 @@ class TestExplorerWithAddStrategy(BaseExplorerCase):
 
         self.config.algorithm.repeat_times = 2
         self.config.buffer.total_epochs = 1
-        self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("countdown")
-        self.config.buffer.explorer_input.add_strategy = "random"
-        self.config.name = f"explore-add-strategy-{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("gsm8k")
+        self.config.name = f"explore-{datetime.now().strftime('%Y%m%d%H%M%S')}"
         # some step may be skipped due to same reward
-        self.config.algorithm.add_strategy = "reward_variance"
+        self.config.algorithm.algorithm_type = "grpo"
+        self.config.algorithm.advantage_fn = "grpo"
+        self.config.algorithm.advantage_fn_args = {
+            "epsilon": 1e-6,
+        }
+        self.config.model.max_model_len = 10240
+        self.config.model.max_response_tokens = 8192
+        self.config.model.min_response_tokens = 8192
+        self.config.explorer.rollout_model.ignore_eos = True
         self.config.check_and_update()
-        explorer = (
-            ray.remote(Explorer)
-            .options(
-                name=self.config.explorer.name,
-                namespace=ray.get_runtime_context().namespace,
-            )
-            .remote(self.config)
-        )
+        explorer = Explorer.get_actor(self.config)
         ray.get(explorer.prepare.remote())
         ray.get(explorer.sync_weight.remote())
         ray.get(explorer.explore.remote())
@@ -105,23 +106,21 @@ class TestExplorerWithAddStrategy(BaseExplorerCase):
         eval_metrics = parser.metric_list("eval")
         self.assertTrue(len(eval_metrics) == 0)
         self.assertEqual(parser.metric_max_step(rollout_metrics[0]), 4)
-        self.assertTrue(parser.metric_exist("rollout/experience_count"))
-        experience_counts = parser.metric_values("rollout/experience_count")
+        self.assertTrue(parser.metric_exist("pipeline/experience_count"))
+        experience_counts = parser.metric_values("pipeline/experience_count")
         self.assertTrue(len(experience_counts) == 4)
         for count in experience_counts:
             self.assertTrue(count >= 0)
             self.assertTrue(count <= 2 * 4)  # repeat_times * batch_size
             self.assertTrue(count % 2 == 0)  # should be multiple of repeat_times
 
-        reader = get_buffer_reader(
+        exp_save_path = default_storage_path(
             self.config.buffer.trainer_input.experience_buffer, self.config.buffer
         )
-        exps = []
-        try:
-            batch = reader.read()
-            exps.extend(batch)
-        except StopIteration:
-            pass
-        self.assertTrue(len(exps) <= 4 * 2 * 4)  # step * repeat_times * batch_size
-        self.assertTrue(len(exps) % (2 * 4) == 0)  # should be multiple of repeat_times
+        with open(exp_save_path, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+            self.assertTrue(len(lines) <= 4 * 2 * 4)  # step * repeat_times * batch_size
+            self.assertTrue(len(lines) % (2 * 4) == 0)
+            exp = json.loads(lines[0])
+            self.assertEqual(exp["response_length"], 8192)
         ray.get(explorer.shutdown.remote())

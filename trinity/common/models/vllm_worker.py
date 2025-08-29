@@ -10,8 +10,6 @@ from trinity.manager.synchronizer import Synchronizer
 from trinity.utils.distributed import init_process_group
 from trinity.utils.log import get_logger
 
-logger = get_logger(__name__)
-
 
 class WorkerExtension:
     def init_process_group(
@@ -28,14 +26,17 @@ class WorkerExtension:
         namespace: str = None,
     ):
         """Init torch process group for model weights update"""
+        rank = torch.distributed.get_rank()
+        self.logger = get_logger(f"vllm_worker_{rank}")
+
         assert torch.distributed.is_initialized(), "default torch process group must be initialized"
         assert group_name != "", "group name must not be empty"
         self._state_dict_meta = state_dict_meta
-        self._weight_update_rank = torch.distributed.get_rank() + rank_offset
-        logger.info(
+        self._weight_update_rank = rank + rank_offset
+        self.logger.info(
             f"vLLM starting init_process_group:\n"
             f"  > address={master_address}:{master_port}\n"
-            f"  > rank={torch.distributed.get_rank()}\n"
+            f"  > rank={rank}\n"
             f"  > rank_offset={rank_offset}\n"
             f"  > world_size={world_size}"
         )
@@ -47,9 +48,10 @@ class WorkerExtension:
             timeout=timeout,
             world_size=world_size,
             rank=self._weight_update_rank,
+            device_id=self.device,
         )
         torch.distributed.barrier(group=self._model_update_group)
-        logger.info("vLLM init_process_group finished.")
+        self.logger.info("vLLM init_process_group finished.")
         self._explorer_name = explorer_name
         self._namespace = namespace
         self.synchronizer = Synchronizer.get_actor(namespace=self._namespace)
