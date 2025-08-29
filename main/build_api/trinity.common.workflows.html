@@ -50,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_multi_turn.html">Concatenated Multi-Turn RFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_step_wise.html">General Multi-Step RFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_react.html">Multi-Step ReAct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/example_search_email.html">Email Search Workflow</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_dpo.html">Offline DPO and SFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_data_functionalities.html">Data Processing</a></li>
 </ul>
@@ -842,6 +843,47 @@ model’s evaluation methodology. For more details on their approach, see:
 <dt class="sig sig-object py" id="trinity.common.workflows.AgentScopeReactV2MathWorkflow.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/agentscope/agentscope_react_workflow.html#AgentScopeReactV2MathWorkflow.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.AgentScopeReactV2MathWorkflow.run" title="Link to this definition"></a></dt>
 <dd><p>Run workflow and return a list of experiences.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="trinity.common.workflows.EmailSearchWorkflow">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.common.workflows.</span></span><span class="sig-name descname"><span class="pre">EmailSearchWorkflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.workflows.workflow.html#trinity.common.workflows.workflow.Task" title="trinity.common.workflows.workflow.Task"><span class="pre">Task</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.ModelWrapper" title="trinity.common.models.model.ModelWrapper"><span class="pre">ModelWrapper</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">OpenAI</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/email_searcher/workflow.html#EmailSearchWorkflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.EmailSearchWorkflow" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="trinity.common.workflows.workflow.html#trinity.common.workflows.workflow.Workflow" title="trinity.common.workflows.workflow.Workflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">Workflow</span></code></a></p>
+<p>Multi-turn Email Search workflow (ReAct-style tool use).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.workflows.EmailSearchWorkflow.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.workflows.workflow.html#trinity.common.workflows.workflow.Task" title="trinity.common.workflows.workflow.Task"><span class="pre">Task</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.ModelWrapper" title="trinity.common.models.model.ModelWrapper"><span class="pre">ModelWrapper</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">OpenAI</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/email_searcher/workflow.html#EmailSearchWorkflow.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.EmailSearchWorkflow.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="trinity.common.workflows.EmailSearchWorkflow.repeatable">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">repeatable</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#trinity.common.workflows.EmailSearchWorkflow.repeatable" title="Link to this definition"></a></dt>
+<dd><p>A workflow is repeatable if it can be run multiple times within the run() method.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="trinity.common.workflows.EmailSearchWorkflow.resettable">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">resettable</span></span><a class="headerlink" href="#trinity.common.workflows.EmailSearchWorkflow.resettable" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.workflows.EmailSearchWorkflow.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.workflows.workflow.html#trinity.common.workflows.workflow.Task" title="trinity.common.workflows.workflow.Task"><span class="pre">Task</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/email_searcher/workflow.html#EmailSearchWorkflow.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.EmailSearchWorkflow.reset" title="Link to this definition"></a></dt>
+<dd><p>Reset the workflow.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.workflows.EmailSearchWorkflow.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/email_searcher/workflow.html#EmailSearchWorkflow.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.EmailSearchWorkflow.run" title="Link to this definition"></a></dt>
+<dd><p>Run workflow and return a list of experiences.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.workflows.EmailSearchWorkflow.calculate_reward">
+<span class="sig-name descname"><span class="pre">calculate_reward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">answer_and_sources</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/email_searcher/workflow.html#EmailSearchWorkflow.calculate_reward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.EmailSearchWorkflow.calculate_reward" title="Link to this definition"></a></dt>
+<dd><p>Ref: calculate_reward in <a class="reference external" href="https://github.com/OpenPipe/ART/blob/main/dev/art-e/art_e/rollout.py#L64">https://github.com/OpenPipe/ART/blob/main/dev/art-e/art_e/rollout.py#L64</a></p>
 </dd></dl>
 
 </dd></dl>
