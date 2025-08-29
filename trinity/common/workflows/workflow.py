@@ -10,6 +10,7 @@ from typing import Any, List, Optional, Type, Union
 import openai
 
 from trinity.common.config import FormatConfig, GenerationConfig
+from trinity.common.constants import PromptType
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
 from trinity.common.rewards.math_reward import MathRewardFn
@@ -229,7 +230,11 @@ class SimpleWorkflow(Workflow):
         messages = []
         if self.system_prompt:
             messages.append({"role": "system", "content": self.system_prompt})
-        messages.append({"role": "user", "content": self.task_desc})
+        if self.format_args.prompt_type == PromptType.MESSAGES:
+            messages.extend(self.task_desc)
+        else:
+            messages.append({"role": "user", "content": self.task_desc})
+
         if self.reply_prefix:
             messages.append({"role": "assistant", "content": self.reply_prefix})
         return messages
