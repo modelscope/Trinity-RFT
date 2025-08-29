@@ -16,11 +16,11 @@ The main entry point to run the PPO algorithm.
 Modified from https://github.com/volcengine/verl/blob/v0.4.1/verl/workers/fsdp_workers.py
 """
 
-from contextlib import contextmanager
 import json
 import logging
 import os
 import warnings
+from contextlib import contextmanager
 from dataclasses import asdict
 from datetime import timedelta
 
@@ -645,7 +645,9 @@ class ActorRolloutRefWorker(Worker):
                             for name, param in module.named_parameters():
                                 if isinstance(param, FlatParameter):
                                     continue
-                                torch.distributed.broadcast(param, 0, group=self._model_update_group)
+                                torch.distributed.broadcast(
+                                    param, 0, group=self._model_update_group
+                                )
                         param = None
             else:  # fsdp2
                 for name, param in self.actor_module_fsdp.named_parameters():
