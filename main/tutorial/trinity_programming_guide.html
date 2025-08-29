@@ -555,7 +555,7 @@ To implement OPMD, developers need to implement advantage calculation in <code c
 <section id="step-2-register-your-algorithm">
 <h3>Step 2: Register Your Algorithm<a class="headerlink" href="#step-2-register-your-algorithm" title="Link to this heading"></a></h3>
 <p>The above steps implement the components needed for the algorithm, but these components are scattered and need to be configured in multiple places to take effect.</p>
-<p>To simplify configuration, Trinity-RFT provides <a class="reference internal" href="../build_api/trinity.algorithm.html#trinity.algorithm.AlgorithmType" title="trinity.algorithm.AlgorithmType"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.AlgorithmType</span></code></a> to describe a complete algorithm and registers it in , enabling one-click configuration.</p>
+<p>To simplify configuration, Trinity-RFT provides <a class="reference internal" href="../build_api/trinity.algorithm.html#trinity.algorithm.AlgorithmType" title="trinity.algorithm.AlgorithmType"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.AlgorithmType</span></code></a> to describe a complete algorithm and registers it in <code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.ALGORITHM_TYPE</span></code>, enabling one-click configuration.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">AlgorithmType</span></code> class includes the following attributes and methods:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">use_critic</span></code>: Whether to use the Critic model</p></li>
@@ -577,7 +577,7 @@ The dictionary returned by the <code class="docutils literal notranslate"><span 
     <span class="n">use_reference</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">compute_advantage_in_trainer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">can_balance_batch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">schema</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">ExperienceModel</span>
+    <span class="n">schema</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;experience&quot;</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">default_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
@@ -864,7 +864,7 @@ Utilize <code class="docutils literal notranslate"><span class="pre">st.session_
 <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
   <span class="rst-current-version" data-toggle="rst-current-version">
     <span class="fa fa-book"> Other Versions</span>
-    v: main
+    <b>main</b>
     <span class="fa fa-caret-down"></span>
   </span>
   <div class="rst-other-versions">
@@ -877,7 +877,7 @@ Utilize <code class="docutils literal notranslate"><span class="pre">st.session_
     </dl>
     <dl>
       <dt>Branches</dt>
-      <dd><a href="trinity_programming_guide.html">main</a> <b>(latest)</b></dd>
+      <dd><b><a href="trinity_programming_guide.html">main</a> (latest)</b></dd>
     </dl>
   </div>
 </div><script>

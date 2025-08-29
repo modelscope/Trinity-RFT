@@ -95,22 +95,21 @@
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">FormatConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">FormatConfig</span><span class="p">,</span> <span class="n">StorageConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">PromptType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.rewards</span><span class="w"> </span><span class="kn">import</span> <span class="n">REWARD_FUNCTIONS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows</span><span class="w"> </span><span class="kn">import</span> <span class="n">WORKFLOWS</span><span class="p">,</span> <span class="n">Task</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Registry</span>
+
+<span class="n">FORMATTER</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span><span class="s2">&quot;formatter&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="Formatter">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.Formatter">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">Formatter</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
-<div class="viewcode-block" id="Formatter.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.Formatter.__init__">[docs]</a>
-    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">format_config</span><span class="p">:</span> <span class="n">FormatConfig</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the formatter with the given configuration.&quot;&quot;&quot;</span></div>
-
-
-<div class="viewcode-block" id="Formatter.format">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.Formatter.format">[docs]</a>
+<div class="viewcode-block" id="ExperienceFormatter">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.ExperienceFormatter">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExperienceFormatter</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="ExperienceFormatter.format">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.ExperienceFormatter.format">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Experience</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Format a raw sample dict into an experience.&quot;&quot;&quot;</span></div>
@@ -118,30 +117,74 @@
 
 
 
-<div class="viewcode-block" id="format_messages">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.format_messages">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">format_messages</span><span class="p">(</span>
-    <span class="n">tokenizer</span><span class="p">,</span> <span class="n">messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">],</span> <span class="n">tools</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Experience</span><span class="p">:</span>
-    <span class="n">tokens</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">apply_chat_template</span><span class="p">(</span>
-        <span class="n">messages</span><span class="p">,</span> <span class="n">tools</span><span class="o">=</span><span class="n">tools</span><span class="p">,</span> <span class="n">add_generation_prompt</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s2">&quot;pt&quot;</span>
-    <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">prompt_tokens_ids</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">apply_chat_template</span><span class="p">(</span>
-        <span class="n">messages</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">tools</span><span class="o">=</span><span class="n">tools</span><span class="p">,</span> <span class="n">add_generation_prompt</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s2">&quot;pt&quot;</span>
-    <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">Experience</span><span class="p">(</span>
-        <span class="n">tokens</span><span class="o">=</span><span class="n">tokens</span><span class="p">,</span>
-        <span class="n">prompt_length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">prompt_tokens_ids</span><span class="p">),</span>
-    <span class="p">)</span></div>
-
-
-
-<div class="viewcode-block" id="SFTMessagesFormatter">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.SFTMessagesFormatter">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">SFTMessagesFormatter</span><span class="p">(</span><span class="n">Formatter</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Formatter for SFT message list data.</span>
+<div class="viewcode-block" id="TaskFormatter">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.TaskFormatter">[docs]</a>
+<span class="nd">@FORMATTER</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;task&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TaskFormatter</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Formatter for task data.</span>
 
 <span class="sd">    Example Input:</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        {</span>
+<span class="sd">            &quot;input&quot;: &quot;Hello&quot;,</span>
+<span class="sd">            &quot;output&quot;: &quot;Hi&quot;</span>
+<span class="sd">        }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TaskFormatter.__init__">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.TaskFormatter.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_eval</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">is_eval</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_workflow_cls</span> <span class="o">=</span> <span class="n">WORKFLOWS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">default_workflow_type</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_eval</span> <span class="ow">and</span> <span class="n">config</span><span class="o">.</span><span class="n">default_eval_workflow_type</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">default_workflow_cls</span> <span class="o">=</span> <span class="n">WORKFLOWS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">default_eval_workflow_type</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_reward_fn_cls</span> <span class="o">=</span> <span class="n">REWARD_FUNCTIONS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">default_reward_fn_type</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workflow_key</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">format</span><span class="o">.</span><span class="n">workflow_key</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reward_fn_key</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">format</span><span class="o">.</span><span class="n">reward_fn_key</span></div>
+
+
+<div class="viewcode-block" id="TaskFormatter.format">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.TaskFormatter.format">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Task</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Format a raw sample dict into a Task.&quot;&quot;&quot;</span>
+
+        <span class="n">workflow_name</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workflow_key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflow_key</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">reward_fn_name</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reward_fn_key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reward_fn_key</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="n">workflow_cls</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">WORKFLOWS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">workflow_name</span><span class="p">)</span> <span class="k">if</span> <span class="n">workflow_name</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_workflow_cls</span>
+        <span class="n">reward_fn_cls</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">REWARD_FUNCTIONS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">reward_fn_name</span><span class="p">)</span> <span class="k">if</span> <span class="n">reward_fn_name</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_reward_fn_cls</span>
+        <span class="k">assert</span> <span class="n">workflow_cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;`default_workflow_type` or `workflow_key` is required&quot;</span>
+        <span class="k">return</span> <span class="n">Task</span><span class="p">(</span>
+            <span class="n">workflow</span><span class="o">=</span><span class="n">workflow_cls</span><span class="p">,</span>
+            <span class="n">reward_fn</span><span class="o">=</span><span class="n">reward_fn_cls</span><span class="p">,</span>
+            <span class="n">format_args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">format</span><span class="p">,</span>
+            <span class="n">repeat_times</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">repeat_times</span><span class="p">,</span>
+            <span class="n">rollout_args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">rollout_args</span><span class="p">,</span>
+            <span class="n">workflow_args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">workflow_args</span><span class="p">,</span>
+            <span class="n">reward_fn_args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">reward_fn_args</span><span class="p">,</span>
+            <span class="n">is_eval</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">is_eval</span><span class="p">,</span>
+            <span class="n">raw_task</span><span class="o">=</span><span class="n">sample</span><span class="p">,</span>
+        <span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="SFTFormatter">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.SFTFormatter">[docs]</a>
+<span class="nd">@FORMATTER</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;sft&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SFTFormatter</span><span class="p">(</span><span class="n">ExperienceFormatter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Formatter for SFT data, supporting both message list and plaintext formats.</span>
+
+<span class="sd">    Uses format_config.prompt_type to distinguish between &#39;messages&#39; and &#39;plaintext&#39;.</span>
+
+<span class="sd">    Example input of MESSAGES:</span>
 
 <span class="sd">    .. code-block:: python</span>
 
@@ -151,34 +194,9 @@
 <span class="sd">               {&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: &quot;I&#39;m fine, thank you!&quot;}</span>
 <span class="sd">           ]</span>
 <span class="sd">       }</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-<div class="viewcode-block" id="SFTMessagesFormatter.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.SFTMessagesFormatter.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">format_config</span><span class="p">:</span> <span class="n">FormatConfig</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">tokenizer</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">messages_key</span> <span class="o">=</span> <span class="n">format_config</span><span class="o">.</span><span class="n">messages_key</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tools_key</span> <span class="o">=</span> <span class="n">format_config</span><span class="o">.</span><span class="n">tools_key</span></div>
 
 
-<div class="viewcode-block" id="SFTMessagesFormatter.format">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.SFTMessagesFormatter.format">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Experience</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Format a raw sample dict into an experience.&quot;&quot;&quot;</span>
-        <span class="n">messages</span> <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">messages_key</span><span class="p">]</span>
-        <span class="n">tools</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tools_key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">format_messages</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">messages</span><span class="p">,</span> <span class="n">tools</span><span class="p">)</span></div>
-</div>
-
-
-
-<div class="viewcode-block" id="SFTPlaintextFormatter">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.SFTPlaintextFormatter">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">SFTPlaintextFormatter</span><span class="p">(</span><span class="n">Formatter</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Formatter for SFT plaintext data.</span>
-
-<span class="sd">    Example Input:</span>
+<span class="sd">    Example input of PLAINTEXT:</span>
 
 <span class="sd">    .. code-block:: python</span>
 
@@ -189,68 +207,71 @@
 <span class="sd">        }</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="SFTPlaintextFormatter.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.SFTPlaintextFormatter.__init__">[docs]</a>
+<div class="viewcode-block" id="SFTFormatter.__init__">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.SFTFormatter.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">format_config</span><span class="p">:</span> <span class="n">FormatConfig</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">tokenizer</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">prompt_key</span> <span class="o">=</span> <span class="n">format_config</span><span class="o">.</span><span class="n">prompt_key</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">response_key</span> <span class="o">=</span> <span class="n">format_config</span><span class="o">.</span><span class="n">response_key</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt_key</span> <span class="o">=</span> <span class="n">format_config</span><span class="o">.</span><span class="n">system_prompt_key</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt</span> <span class="o">=</span> <span class="n">format_config</span><span class="o">.</span><span class="n">system_prompt</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tools_key</span> <span class="o">=</span> <span class="n">format_config</span><span class="o">.</span><span class="n">tools_key</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prompt_type</span> <span class="o">=</span> <span class="n">format_config</span><span class="o">.</span><span class="n">prompt_type</span>
+        <span class="c1"># For messages type</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_type</span> <span class="o">==</span> <span class="n">PromptType</span><span class="o">.</span><span class="n">MESSAGES</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">messages_key</span> <span class="o">=</span> <span class="n">format_config</span><span class="o">.</span><span class="n">messages_key</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tools_key</span> <span class="o">=</span> <span class="n">format_config</span><span class="o">.</span><span class="n">tools_key</span>
+        <span class="c1"># For plaintext type</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_type</span> <span class="o">==</span> <span class="n">PromptType</span><span class="o">.</span><span class="n">PLAINTEXT</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">prompt_key</span> <span class="o">=</span> <span class="n">format_config</span><span class="o">.</span><span class="n">prompt_key</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">response_key</span> <span class="o">=</span> <span class="n">format_config</span><span class="o">.</span><span class="n">response_key</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt_key</span> <span class="o">=</span> <span class="n">format_config</span><span class="o">.</span><span class="n">system_prompt_key</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt</span> <span class="o">=</span> <span class="n">format_config</span><span class="o">.</span><span class="n">system_prompt</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tools_key</span> <span class="o">=</span> <span class="n">format_config</span><span class="o">.</span><span class="n">tools_key</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported prompt_type: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="SFTPlaintextFormatter.format">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.SFTPlaintextFormatter.format">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_messages_to_experience</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">],</span> <span class="n">tools</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Experience</span><span class="p">:</span>
+        <span class="n">tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">apply_chat_template</span><span class="p">(</span>
+            <span class="n">messages</span><span class="p">,</span> <span class="n">tools</span><span class="o">=</span><span class="n">tools</span><span class="p">,</span> <span class="n">add_generation_prompt</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s2">&quot;pt&quot;</span>
+        <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">prompt_tokens_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">apply_chat_template</span><span class="p">(</span>
+            <span class="n">messages</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">tools</span><span class="o">=</span><span class="n">tools</span><span class="p">,</span> <span class="n">add_generation_prompt</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s2">&quot;pt&quot;</span>
+        <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">Experience</span><span class="p">(</span>
+            <span class="n">tokens</span><span class="o">=</span><span class="n">tokens</span><span class="p">,</span>
+            <span class="n">prompt_length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">prompt_tokens_ids</span><span class="p">),</span>
+            <span class="n">messages</span><span class="o">=</span><span class="n">messages</span><span class="p">,</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="SFTFormatter.format">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.SFTFormatter.format">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Experience</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Format a raw sample dict into an experience.&quot;&quot;&quot;</span>
-        <span class="n">messages</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">system_message</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">system_prompt_key</span><span class="p">]}</span>
-            <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">system_message</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">system_message</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt</span><span class="p">}</span>
-            <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">system_message</span><span class="p">)</span>
-        <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt_key</span><span class="p">]})</span>
-        <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;assistant&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">response_key</span><span class="p">]})</span>
-
-        <span class="k">return</span> <span class="n">format_messages</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">messages</span><span class="p">,</span> <span class="n">sample</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tools_key</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span></div>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_type</span> <span class="o">==</span> <span class="n">PromptType</span><span class="o">.</span><span class="n">MESSAGES</span><span class="p">:</span>
+            <span class="n">messages</span> <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">messages_key</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_type</span> <span class="o">==</span> <span class="n">PromptType</span><span class="o">.</span><span class="n">PLAINTEXT</span><span class="p">:</span>
+            <span class="n">messages</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">system_message</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">system_prompt_key</span><span class="p">]}</span>
+                <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">system_message</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">system_message</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt</span><span class="p">}</span>
+                <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">system_message</span><span class="p">)</span>
+            <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt_key</span><span class="p">]})</span>
+            <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;assistant&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">response_key</span><span class="p">]})</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported prompt_type: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">tools</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tools_key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_messages_to_experience</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span> <span class="n">tools</span><span class="p">)</span></div>
 </div>
 
 
 
-<div class="viewcode-block" id="format_dpo_messages">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.format_dpo_messages">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">format_dpo_messages</span><span class="p">(</span>
-    <span class="n">tokenizer</span><span class="p">,</span>
-    <span class="n">prompt_messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">],</span>
-    <span class="n">chosen_messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">],</span>
-    <span class="n">reject_messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">],</span>
-<span class="p">):</span>
-    <span class="n">prompt_tokens</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">apply_chat_template</span><span class="p">(</span>
-        <span class="n">prompt_messages</span><span class="p">,</span> <span class="n">add_generation_prompt</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s2">&quot;pt&quot;</span>
-    <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">chosen_tokens</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">apply_chat_template</span><span class="p">(</span>
-        <span class="n">prompt_messages</span> <span class="o">+</span> <span class="n">chosen_messages</span><span class="p">,</span> <span class="n">add_generation_prompt</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s2">&quot;pt&quot;</span>
-    <span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="nb">len</span><span class="p">(</span><span class="n">prompt_tokens</span><span class="p">)</span> <span class="p">:]</span>
-    <span class="n">reject_tokens</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">apply_chat_template</span><span class="p">(</span>
-        <span class="n">prompt_messages</span> <span class="o">+</span> <span class="n">reject_messages</span><span class="p">,</span> <span class="n">add_generation_prompt</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s2">&quot;pt&quot;</span>
-    <span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="nb">len</span><span class="p">(</span><span class="n">prompt_tokens</span><span class="p">)</span> <span class="p">:]</span>
-    <span class="k">return</span> <span class="n">Experience</span><span class="p">(</span>
-        <span class="n">tokens</span><span class="o">=</span><span class="n">prompt_tokens</span><span class="p">,</span>
-        <span class="n">prompt_length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">prompt_tokens</span><span class="p">),</span>
-        <span class="n">chosen</span><span class="o">=</span><span class="n">chosen_tokens</span><span class="p">,</span>
-        <span class="n">rejected</span><span class="o">=</span><span class="n">reject_tokens</span><span class="p">,</span>
-    <span class="p">)</span></div>
-
-
-
-<div class="viewcode-block" id="DPOPlaintextFormatter">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.DPOPlaintextFormatter">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">DPOPlaintextFormatter</span><span class="p">(</span><span class="n">Formatter</span><span class="p">):</span>
+<div class="viewcode-block" id="DPOFormatter">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.DPOFormatter">[docs]</a>
+<span class="nd">@FORMATTER</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;dpo&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DPOFormatter</span><span class="p">(</span><span class="n">ExperienceFormatter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Formatter for DPO plaintext data.</span>
 
-<span class="sd">    Example Input:</span>
+<span class="sd">    Example Input for PLAINTEXT:</span>
 
 <span class="sd">    .. code-block:: python</span>
 
@@ -259,47 +280,8 @@
 <span class="sd">           &quot;chosen&quot;: &quot;My name is Assistant.&quot;,</span>
 <span class="sd">           &quot;rejected&quot;: &quot;I don&#39;t have a name.&quot;</span>
 <span class="sd">       }</span>
-<span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="DPOPlaintextFormatter.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.DPOPlaintextFormatter.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">format_config</span><span class="p">:</span> <span class="n">FormatConfig</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">tokenizer</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">prompt_key</span> <span class="o">=</span> <span class="n">format_config</span><span class="o">.</span><span class="n">prompt_key</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">chosen_key</span> <span class="o">=</span> <span class="n">format_config</span><span class="o">.</span><span class="n">chosen_key</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rejected_key</span> <span class="o">=</span> <span class="n">format_config</span><span class="o">.</span><span class="n">rejected_key</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt_key</span> <span class="o">=</span> <span class="n">format_config</span><span class="o">.</span><span class="n">system_prompt_key</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt</span> <span class="o">=</span> <span class="n">format_config</span><span class="o">.</span><span class="n">system_prompt</span></div>
-
-        <span class="c1"># currently DPO not support tools</span>
-
-<div class="viewcode-block" id="DPOPlaintextFormatter.format">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.DPOPlaintextFormatter.format">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Experience</span><span class="p">:</span>
-        <span class="n">messages</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">system_message</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">system_prompt_key</span><span class="p">]}</span>
-            <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">system_message</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">system_message</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt</span><span class="p">}</span>
-            <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">system_message</span><span class="p">)</span>
-        <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt_key</span><span class="p">]})</span>
-        <span class="k">return</span> <span class="n">format_dpo_messages</span><span class="p">(</span>
-            <span class="n">tokenizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">,</span>
-            <span class="n">prompt_messages</span><span class="o">=</span><span class="n">messages</span><span class="p">,</span>
-            <span class="n">chosen_messages</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;assistant&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">chosen_key</span><span class="p">]}],</span>
-            <span class="n">reject_messages</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;assistant&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">rejected_key</span><span class="p">]}],</span>
-        <span class="p">)</span></div>
-</div>
-
-
-
-<div class="viewcode-block" id="DPOMessagesFormatter">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.DPOMessagesFormatter">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">DPOMessagesFormatter</span><span class="p">(</span><span class="n">Formatter</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Formatter for DPO message list data.</span>
-
-<span class="sd">    Example Input:</span>
+<span class="sd">    Example Input for MESSAGES:</span>
 
 <span class="sd">    .. code-block:: python</span>
 
@@ -316,22 +298,72 @@
 <span class="sd">        }</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="DPOMessagesFormatter.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.DPOMessagesFormatter.__init__">[docs]</a>
+<div class="viewcode-block" id="DPOFormatter.__init__">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.DPOFormatter.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">format_config</span><span class="p">:</span> <span class="n">FormatConfig</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">tokenizer</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">messages_key</span> <span class="o">=</span> <span class="n">format_config</span><span class="o">.</span><span class="n">messages_key</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">chosen_key</span> <span class="o">=</span> <span class="n">format_config</span><span class="o">.</span><span class="n">chosen_key</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rejected_key</span> <span class="o">=</span> <span class="n">format_config</span><span class="o">.</span><span class="n">rejected_key</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prompt_type</span> <span class="o">=</span> <span class="n">format_config</span><span class="o">.</span><span class="n">prompt_type</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_type</span> <span class="o">==</span> <span class="n">PromptType</span><span class="o">.</span><span class="n">PLAINTEXT</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">prompt_key</span> <span class="o">=</span> <span class="n">format_config</span><span class="o">.</span><span class="n">prompt_key</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">chosen_key</span> <span class="o">=</span> <span class="n">format_config</span><span class="o">.</span><span class="n">chosen_key</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rejected_key</span> <span class="o">=</span> <span class="n">format_config</span><span class="o">.</span><span class="n">rejected_key</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt_key</span> <span class="o">=</span> <span class="n">format_config</span><span class="o">.</span><span class="n">system_prompt_key</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt</span> <span class="o">=</span> <span class="n">format_config</span><span class="o">.</span><span class="n">system_prompt</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_type</span> <span class="o">==</span> <span class="n">PromptType</span><span class="o">.</span><span class="n">MESSAGES</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">messages_key</span> <span class="o">=</span> <span class="n">format_config</span><span class="o">.</span><span class="n">messages_key</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">chosen_key</span> <span class="o">=</span> <span class="n">format_config</span><span class="o">.</span><span class="n">chosen_key</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rejected_key</span> <span class="o">=</span> <span class="n">format_config</span><span class="o">.</span><span class="n">rejected_key</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported prompt_type: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
+        <span class="c1"># currently DPO not support tools</span>
 
-<div class="viewcode-block" id="DPOMessagesFormatter.format">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.DPOMessagesFormatter.format">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_messages_to_experience</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">prompt_messages</span><span class="p">,</span> <span class="n">chosen_messages</span><span class="p">,</span> <span class="n">rejected_messages</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Experience</span><span class="p">:</span>
+        <span class="n">prompt_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">apply_chat_template</span><span class="p">(</span>
+            <span class="n">prompt_messages</span><span class="p">,</span> <span class="n">add_generation_prompt</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s2">&quot;pt&quot;</span>
+        <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">chosen_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">apply_chat_template</span><span class="p">(</span>
+            <span class="n">prompt_messages</span> <span class="o">+</span> <span class="n">chosen_messages</span><span class="p">,</span> <span class="n">add_generation_prompt</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s2">&quot;pt&quot;</span>
+        <span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="nb">len</span><span class="p">(</span><span class="n">prompt_tokens</span><span class="p">)</span> <span class="p">:]</span>
+        <span class="n">rejected_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">apply_chat_template</span><span class="p">(</span>
+            <span class="n">prompt_messages</span> <span class="o">+</span> <span class="n">rejected_messages</span><span class="p">,</span> <span class="n">add_generation_prompt</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s2">&quot;pt&quot;</span>
+        <span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="nb">len</span><span class="p">(</span><span class="n">prompt_tokens</span><span class="p">)</span> <span class="p">:]</span>
+        <span class="k">return</span> <span class="n">Experience</span><span class="p">(</span>
+            <span class="n">tokens</span><span class="o">=</span><span class="n">prompt_tokens</span><span class="p">,</span>
+            <span class="n">prompt_length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">prompt_tokens</span><span class="p">),</span>
+            <span class="n">chosen</span><span class="o">=</span><span class="n">chosen_tokens</span><span class="p">,</span>
+            <span class="n">rejected</span><span class="o">=</span><span class="n">rejected_tokens</span><span class="p">,</span>
+            <span class="n">chosen_messages</span><span class="o">=</span><span class="n">prompt_messages</span> <span class="o">+</span> <span class="n">chosen_messages</span><span class="p">,</span>
+            <span class="n">rejected_messages</span><span class="o">=</span><span class="n">prompt_messages</span> <span class="o">+</span> <span class="n">rejected_messages</span><span class="p">,</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="DPOFormatter.format">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.formatter.html#trinity.buffer.schema.formatter.DPOFormatter.format">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Experience</span><span class="p">:</span>
-        <span class="n">messages</span> <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">messages_key</span><span class="p">]</span>
-        <span class="n">chosen</span> <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">chosen_key</span><span class="p">]</span>
-        <span class="n">rejected</span> <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">rejected_key</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">format_dpo_messages</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">messages</span><span class="p">,</span> <span class="n">chosen</span><span class="p">,</span> <span class="n">rejected</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_type</span> <span class="o">==</span> <span class="n">PromptType</span><span class="o">.</span><span class="n">PLAINTEXT</span><span class="p">:</span>
+            <span class="n">messages</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">system_message</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">system_prompt_key</span><span class="p">]}</span>
+                <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">system_message</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">system_message</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt</span><span class="p">}</span>
+                <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">system_message</span><span class="p">)</span>
+            <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt_key</span><span class="p">]})</span>
+            <span class="n">chosen</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;assistant&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">chosen_key</span><span class="p">]}]</span>
+            <span class="n">rejected</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;assistant&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">rejected_key</span><span class="p">]}]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">prompt_type</span> <span class="o">==</span> <span class="n">PromptType</span><span class="o">.</span><span class="n">MESSAGES</span><span class="p">:</span>
+            <span class="n">messages</span> <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">messages_key</span><span class="p">]</span>
+            <span class="n">chosen</span> <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">chosen_key</span><span class="p">]</span>
+            <span class="n">rejected</span> <span class="o">=</span> <span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">rejected_key</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported prompt_type: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_messages_to_experience</span><span class="p">(</span>
+            <span class="n">prompt_messages</span><span class="o">=</span><span class="n">messages</span><span class="p">,</span>
+            <span class="n">chosen_messages</span><span class="o">=</span><span class="n">chosen</span><span class="p">,</span>
+            <span class="n">rejected_messages</span><span class="o">=</span><span class="n">rejected</span><span class="p">,</span>
+        <span class="p">)</span></div>
 </div>
 
 </pre></div>
@@ -360,7 +392,7 @@
 <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
   <span class="rst-current-version" data-toggle="rst-current-version">
     <span class="fa fa-book"> Other Versions</span>
-    v: main
+    <b>main</b>
     <span class="fa fa-caret-down"></span>
   </span>
   <div class="rst-other-versions">
@@ -373,7 +405,7 @@
     </dl>
     <dl>
       <dt>Branches</dt>
-      <dd><a href="formatter.html">main</a> <b>(latest)</b></dd>
+      <dd><b><a href="formatter.html">main</a> (latest)</b></dd>
     </dl>
   </div>
 </div><script>

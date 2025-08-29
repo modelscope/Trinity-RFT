@@ -94,28 +94,15 @@
   <h1>Source code for trinity.buffer.reader.file_reader</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Filed based buffer reader.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">datasets</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">transformers</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">load_dataset</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.algorithm</span><span class="w"> </span><span class="kn">import</span> <span class="n">DPOAlgorithm</span><span class="p">,</span> <span class="n">SFTAlgorithm</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.buffer_reader</span><span class="w"> </span><span class="kn">import</span> <span class="n">BufferReader</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.schema.formatter</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">DPOMessagesFormatter</span><span class="p">,</span>
-    <span class="n">DPOPlaintextFormatter</span><span class="p">,</span>
-    <span class="n">SFTMessagesFormatter</span><span class="p">,</span>
-    <span class="n">SFTPlaintextFormatter</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.schema.formatter</span><span class="w"> </span><span class="kn">import</span> <span class="n">FORMATTER</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">BufferConfig</span><span class="p">,</span> <span class="n">StorageConfig</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">PromptType</span><span class="p">,</span> <span class="n">TaskType</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.rewards</span><span class="w"> </span><span class="kn">import</span> <span class="n">REWARD_FUNCTIONS</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows</span><span class="w"> </span><span class="kn">import</span> <span class="n">WORKFLOWS</span><span class="p">,</span> <span class="n">Task</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Registry</span>
-
-<span class="n">FILE_READERS</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">(</span><span class="s2">&quot;file_readers&quot;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="DummyProgressBar">
@@ -224,26 +211,18 @@
 
 
 
-<div class="viewcode-block" id="SFTDataReader">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.SFTDataReader">[docs]</a>
-<span class="nd">@FILE_READERS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="n">SFTAlgorithm</span><span class="o">.</span><span class="n">name</span><span class="p">())</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">SFTDataReader</span><span class="p">(</span><span class="n">BaseFileReader</span><span class="p">):</span>
+<div class="viewcode-block" id="ExperienceFileReader">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.ExperienceFileReader">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExperienceFileReader</span><span class="p">(</span><span class="n">BaseFileReader</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Reader for SFT file data.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="SFTDataReader.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.SFTDataReader.__init__">[docs]</a>
+<div class="viewcode-block" id="ExperienceFileReader.__init__">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.ExperienceFileReader.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meta</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">transformers</span><span class="o">.</span><span class="n">AutoTokenizer</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">tokenizer_path</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">meta</span><span class="o">.</span><span class="n">format</span><span class="o">.</span><span class="n">prompt_type</span> <span class="o">==</span> <span class="n">PromptType</span><span class="o">.</span><span class="n">MESSAGES</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span> <span class="o">=</span> <span class="n">SFTMessagesFormatter</span><span class="p">(</span>
-                <span class="n">tokenizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">format_config</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">format</span>
-            <span class="p">)</span>
-        <span class="k">elif</span> <span class="n">meta</span><span class="o">.</span><span class="n">format</span><span class="o">.</span><span class="n">prompt_type</span> <span class="o">==</span> <span class="n">PromptType</span><span class="o">.</span><span class="n">PLAINTEXT</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span> <span class="o">=</span> <span class="n">SFTPlaintextFormatter</span><span class="p">(</span>
-                <span class="n">tokenizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">format_config</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">format</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown prompt type: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span> <span class="o">=</span> <span class="n">FORMATTER</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">schema_type</span><span class="p">)(</span>
+            <span class="n">tokenizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">format_config</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">format</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">train_batch_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">_HFBatchReader</span><span class="p">(</span>
             <span class="n">load_dataset</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">subset_name</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">split</span><span class="p">),</span>
@@ -256,8 +235,8 @@
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="SFTDataReader.read">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.SFTDataReader.read">[docs]</a>
+<div class="viewcode-block" id="ExperienceFileReader.read">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.ExperienceFileReader.read">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
         <span class="n">samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">read_batch</span><span class="p">(</span><span class="n">batch_size</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size</span><span class="p">)</span>
         <span class="n">exp_list</span> <span class="o">=</span> <span class="p">[]</span>
@@ -269,61 +248,11 @@
 
 
 
-<div class="viewcode-block" id="DPODataReader">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.DPODataReader">[docs]</a>
-<span class="nd">@FILE_READERS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="n">DPOAlgorithm</span><span class="o">.</span><span class="n">name</span><span class="p">())</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">DPODataReader</span><span class="p">(</span><span class="n">BaseFileReader</span><span class="p">):</span>
-<div class="viewcode-block" id="DPODataReader.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.DPODataReader.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meta</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">transformers</span><span class="o">.</span><span class="n">AutoTokenizer</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">tokenizer_path</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">meta</span><span class="o">.</span><span class="n">format</span><span class="o">.</span><span class="n">prompt_type</span> <span class="o">==</span> <span class="n">PromptType</span><span class="o">.</span><span class="n">MESSAGES</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span> <span class="o">=</span> <span class="n">DPOMessagesFormatter</span><span class="p">(</span>
-                <span class="n">tokenizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">format_config</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">format</span>
-            <span class="p">)</span>
-        <span class="k">elif</span> <span class="n">meta</span><span class="o">.</span><span class="n">format</span><span class="o">.</span><span class="n">prompt_type</span> <span class="o">==</span> <span class="n">PromptType</span><span class="o">.</span><span class="n">PLAINTEXT</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span> <span class="o">=</span> <span class="n">DPOPlaintextFormatter</span><span class="p">(</span>
-                <span class="n">tokenizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">format_config</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">format</span>
-            <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">train_batch_size</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">_HFBatchReader</span><span class="p">(</span>
-            <span class="n">load_dataset</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">subset_name</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">split</span><span class="p">),</span>
-            <span class="n">name</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-            <span class="n">default_batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size</span><span class="p">,</span>
-            <span class="n">total_epochs</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">total_epochs</span><span class="p">,</span>
-            <span class="n">drop_last</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">total_steps</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">total_steps</span><span class="p">,</span>
-            <span class="n">enable_progress_bar</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">enable_progress_bar</span><span class="p">,</span>
-        <span class="p">)</span>  <span class="c1"># TODO: support resume</span></div>
-
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_get_assistant_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">List</span><span class="p">):</span>
-            <span class="n">item</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;assistant&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">item</span><span class="p">}</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">item</span>
-
-<div class="viewcode-block" id="DPODataReader.read">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.DPODataReader.read">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
-        <span class="n">batch_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">read_batch</span><span class="p">(</span><span class="n">batch_size</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size</span><span class="p">)</span>
-        <span class="n">exp_list</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">batch_data</span><span class="p">:</span>
-            <span class="n">experience</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
-            <span class="n">exp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">experience</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">exp_list</span></div>
-</div>
-
-
-
-<div class="viewcode-block" id="RolloutDataReader">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.RolloutDataReader">[docs]</a>
-<span class="nd">@FILE_READERS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;rollout&quot;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">RolloutDataReader</span><span class="p">(</span><span class="n">BaseFileReader</span><span class="p">):</span>
-<div class="viewcode-block" id="RolloutDataReader.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.RolloutDataReader.__init__">[docs]</a>
+<div class="viewcode-block" id="TaskFileReader">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.TaskFileReader">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TaskFileReader</span><span class="p">(</span><span class="n">BaseFileReader</span><span class="p">):</span>
+<div class="viewcode-block" id="TaskFileReader.__init__">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.TaskFileReader.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meta</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="n">meta</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">name</span>
@@ -337,59 +266,23 @@
             <span class="n">load_dataset</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">subset_name</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">split</span><span class="p">),</span>
             <span class="n">name</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="n">default_batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size</span><span class="p">,</span>
-            <span class="n">total_epochs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">total_epochs</span> <span class="k">if</span> <span class="n">meta</span><span class="o">.</span><span class="n">task_type</span> <span class="o">==</span> <span class="n">TaskType</span><span class="o">.</span><span class="n">EXPLORE</span> <span class="k">else</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">total_epochs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">total_epochs</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">is_eval</span> <span class="k">else</span> <span class="mi">1</span><span class="p">,</span>
             <span class="n">offset</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
-            <span class="n">drop_last</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">task_type</span> <span class="o">==</span> <span class="n">TaskType</span><span class="o">.</span><span class="n">EXPLORE</span><span class="p">,</span>
+            <span class="n">drop_last</span><span class="o">=</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">is_eval</span><span class="p">,</span>
             <span class="n">total_steps</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">total_steps</span><span class="p">,</span>
             <span class="n">enable_progress_bar</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">enable_progress_bar</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">prompt_key</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">format</span><span class="o">.</span><span class="n">prompt_key</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">response_key</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">format</span><span class="o">.</span><span class="n">response_key</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">workflow_key</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">format</span><span class="o">.</span><span class="n">workflow_key</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">reward_fn_key</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">format</span><span class="o">.</span><span class="n">reward_fn_key</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">task_type</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">task_type</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">default_workflow_cls</span> <span class="o">=</span> <span class="n">WORKFLOWS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">default_workflow_type</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">default_eval_workflow_cls</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="s2">&quot;default_eval_workflow_type&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">default_eval_workflow_cls</span> <span class="o">=</span> <span class="n">WORKFLOWS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">default_eval_workflow_type</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">default_reward_fn_cls</span> <span class="o">=</span> <span class="n">REWARD_FUNCTIONS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">default_reward_fn_type</span><span class="p">)</span>  <span class="c1"># type: ignore</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span> <span class="o">=</span> <span class="n">FORMATTER</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;task&quot;</span><span class="p">)(</span><span class="n">meta</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="RolloutDataReader.read">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.RolloutDataReader.read">[docs]</a>
+<div class="viewcode-block" id="TaskFileReader.read">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.TaskFileReader.read">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
         <span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size</span>
         <span class="n">tasks</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">read_batch</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">samples</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task_type</span> <span class="o">==</span> <span class="n">TaskType</span><span class="o">.</span><span class="n">EVAL</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_eval_workflow_cls</span><span class="p">:</span>
-                <span class="n">workflow_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_eval_workflow_cls</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">workflow_class</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="n">WORKFLOWS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">workflow_key</span><span class="p">])</span>
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflow_key</span> <span class="ow">in</span> <span class="n">sample</span>
-                    <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_workflow_cls</span>
-                <span class="p">)</span>
-            <span class="n">reward_fn</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">REWARD_FUNCTIONS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sample</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">reward_fn_key</span><span class="p">])</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reward_fn_key</span> <span class="ow">in</span> <span class="n">sample</span>
-                <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_reward_fn_cls</span>
-            <span class="p">)</span>
-            <span class="k">assert</span> <span class="p">(</span>
-                <span class="n">workflow_class</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-            <span class="p">),</span> <span class="s2">&quot;`default_workflow_type` or `workflow_key` is required&quot;</span>
-            <span class="n">task</span> <span class="o">=</span> <span class="n">Task</span><span class="p">(</span>
-                <span class="n">workflow</span><span class="o">=</span><span class="n">workflow_class</span><span class="p">,</span>
-                <span class="n">repeat_times</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">repeat_times</span><span class="p">,</span>
-                <span class="n">format_args</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">format</span><span class="p">),</span>
-                <span class="n">rollout_args</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">rollout_args</span><span class="p">),</span>
-                <span class="n">workflow_args</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">workflow_args</span><span class="p">),</span>
-                <span class="n">reward_fn_args</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">reward_fn_args</span><span class="p">),</span>
-                <span class="n">is_eval</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">task_type</span> <span class="o">==</span> <span class="n">TaskType</span><span class="o">.</span><span class="n">EVAL</span><span class="p">,</span>
-                <span class="n">reward_fn</span><span class="o">=</span><span class="n">reward_fn</span><span class="p">,</span>
-                <span class="n">raw_task</span><span class="o">=</span><span class="n">sample</span><span class="p">,</span>
-            <span class="p">)</span>
+            <span class="n">task</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
             <span class="n">tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">tasks</span></div>
 </div>
@@ -398,7 +291,6 @@
 
 <div class="viewcode-block" id="RawDataReader">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.RawDataReader">[docs]</a>
-<span class="nd">@FILE_READERS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;raw&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">RawDataReader</span><span class="p">(</span><span class="n">BaseFileReader</span><span class="p">):</span>
 <div class="viewcode-block" id="RawDataReader.__init__">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.RawDataReader.__init__">[docs]</a>
@@ -445,7 +337,7 @@
 <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
   <span class="rst-current-version" data-toggle="rst-current-version">
     <span class="fa fa-book"> Other Versions</span>
-    v: main
+    <b>main</b>
     <span class="fa fa-caret-down"></span>
   </span>
   <div class="rst-other-versions">
@@ -458,7 +350,7 @@
     </dl>
     <dl>
       <dt>Branches</dt>
-      <dd><a href="file_reader.html">main</a> <b>(latest)</b></dd>
+      <dd><b><a href="file_reader.html">main</a> (latest)</b></dd>
     </dl>
   </div>
 </div><script>

@@ -112,7 +112,6 @@
     <span class="n">StorageType</span><span class="p">,</span>
     <span class="n">SyncMethod</span><span class="p">,</span>
     <span class="n">SyncStyle</span><span class="p">,</span>
-    <span class="n">TaskType</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.annotations</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experimental</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
@@ -126,6 +125,7 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">FormatConfig</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Configuration for data formatting&quot;&quot;&quot;</span>
 
+    <span class="c1"># for sft / dpo</span>
     <span class="n">prompt_type</span><span class="p">:</span> <span class="n">PromptType</span> <span class="o">=</span> <span class="n">PromptType</span><span class="o">.</span><span class="n">MESSAGES</span>
 
     <span class="c1"># for plaintext input</span>
@@ -177,17 +177,11 @@
     <span class="n">path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">repeat_times</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="c1"># only available for StorageType.FILE. When requiring data processing on raw data, set the raw to True.</span>
-    <span class="n">raw</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-
     <span class="c1"># used for StorageType.FILE</span>
     <span class="n">split</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;train&quot;</span>
     <span class="n">subset_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="nb">format</span><span class="p">:</span> <span class="n">FormatConfig</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">FormatConfig</span><span class="p">)</span>
     <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
-
-    <span class="c1"># used for StorageType.SQL/FILE</span>
-    <span class="n">wrap_in_ray</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="c1"># used for StorageType.QUEUE</span>
     <span class="n">capacity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10000</span>
@@ -197,6 +191,10 @@
     <span class="n">replay_buffer_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
         <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;priority_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;linear_decay&quot;</span><span class="p">,</span> <span class="s2">&quot;decay&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">}</span>
     <span class="p">)</span>
+
+    <span class="c1"># used for StorageType.SQL</span>
+    <span class="n">max_retry_times</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">max_retry_interval</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
 
     <span class="c1"># used for rollout tasks</span>
     <span class="n">default_workflow_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -212,8 +210,11 @@
     <span class="c1"># get storage from existing experiment</span>
     <span class="n">ray_namespace</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="c1"># ! DO NOT SET, automatically set from algorithm.algorithm_type</span>
-    <span class="n">algorithm_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># ! DO NOT SET except you know what you are doing</span>
+    <span class="n">wrap_in_ray</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1"># ! DO NOT SET, automatically set</span>
+    <span class="n">schema_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1"># ! DO NOT SET, automatically set from buffer.total_epochs</span>
     <span class="n">total_epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># automatically set</span>
@@ -222,7 +223,7 @@
     <span class="n">total_steps</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># automatically set</span>
 
     <span class="c1"># ! DO NOT SET,  automatically set corresponding to train/eval</span>
-    <span class="n">task_type</span><span class="p">:</span> <span class="n">TaskType</span> <span class="o">=</span> <span class="n">TaskType</span><span class="o">.</span><span class="n">EXPLORE</span></div>
+    <span class="n">is_eval</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></div>
 
 
 
@@ -486,10 +487,6 @@
     <span class="c1"># for trainer</span>
     <span class="n">trainer_input</span><span class="p">:</span> <span class="n">TrainerInput</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">TrainerInput</span><span class="p">)</span>
 
-    <span class="c1"># for storage connection</span>
-    <span class="n">max_retry_times</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span>
-    <span class="n">max_retry_interval</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
-
     <span class="c1"># ! DO NOT SET FOLLOWING FIELDS</span>
     <span class="n">explorer_output</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StorageConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># automatically set</span>
     <span class="n">tokenizer_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># automatically set</span>
@@ -715,7 +712,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="o">.</span><span class="n">total_epochs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">total_epochs</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="o">.</span><span class="n">total_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">total_steps</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_input</span><span class="o">.</span><span class="n">taskset</span><span class="o">.</span><span class="n">task_type</span> <span class="o">=</span> <span class="n">TaskType</span><span class="o">.</span><span class="n">EXPLORE</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_input</span><span class="o">.</span><span class="n">taskset</span><span class="o">.</span><span class="n">is_eval</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_input</span><span class="o">.</span><span class="n">taskset</span><span class="o">.</span><span class="n">total_epochs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">total_epochs</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_input</span><span class="o">.</span><span class="n">taskset</span><span class="o">.</span><span class="n">total_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">total_steps</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">explorer_input</span><span class="o">.</span><span class="n">taskset</span><span class="o">.</span><span class="n">default_workflow_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -746,7 +743,7 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">dataset</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Eval dataset [</span><span class="si">{</span><span class="n">dataset</span><span class="si">}</span><span class="s2">]&#39;s path is not configured. Skip.&quot;</span><span class="p">)</span>
                 <span class="k">continue</span>
-            <span class="n">dataset</span><span class="o">.</span><span class="n">task_type</span> <span class="o">=</span> <span class="n">TaskType</span><span class="o">.</span><span class="n">EVAL</span>
+            <span class="n">dataset</span><span class="o">.</span><span class="n">is_eval</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">dataset</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
                 <span class="n">dataset</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="k">if</span> <span class="n">dataset</span><span class="o">.</span><span class="n">repeat_times</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -787,9 +784,11 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="o">.</span><span class="n">storage_type</span> <span class="o">=</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">QUEUE</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="o">.</span><span class="n">algorithm_type</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.algorithm</span><span class="w"> </span><span class="kn">import</span> <span class="n">ALGORITHM_TYPE</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="o">.</span><span class="n">schema_type</span> <span class="o">=</span> <span class="n">ALGORITHM_TYPE</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">algorithm_type</span>
-            <span class="p">)</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">schema</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="o">.</span><span class="n">ray_namespace</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="o">.</span><span class="n">ray_namespace</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ray_namespace</span>
 
@@ -812,7 +811,7 @@
                 <span class="s2">&quot;`buffer.trainer_input.sft_warmup_dataset` is required when `buffer.trainer_input.sft_warmup_steps` &gt; 0&quot;</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">sft_warmup_dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">sft_warmup_dataset</span><span class="o">.</span><span class="n">algorithm_type</span> <span class="o">=</span> <span class="s2">&quot;sft&quot;</span>  <span class="c1"># TODO</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">sft_warmup_dataset</span><span class="o">.</span><span class="n">schema_type</span> <span class="o">=</span> <span class="s2">&quot;sft&quot;</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">sft_warmup_dataset</span><span class="o">.</span><span class="n">total_steps</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">sft_warmup_steps</span>
             <span class="p">)</span>
@@ -1130,7 +1129,7 @@
 <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
   <span class="rst-current-version" data-toggle="rst-current-version">
     <span class="fa fa-book"> Other Versions</span>
-    v: v0.2.0
+    <b>v0.2.0</b>
     <span class="fa fa-caret-down"></span>
   </span>
   <div class="rst-other-versions">
@@ -1143,7 +1142,7 @@
     </dl>
     <dl>
       <dt>Branches</dt>
-      <dd><a href="../../../../main/index.html">main</a> <b>(latest)</b></dd>
+      <dd><b><a href="../../../../main/index.html">main</a> (latest)</b></dd>
     </dl>
   </div>
 </div><script>

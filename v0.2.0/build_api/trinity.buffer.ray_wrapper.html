@@ -111,148 +111,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-trinity.buffer.ray_wrapper">
-<span id="trinity-buffer-ray-wrapper-module"></span><h1>trinity.buffer.ray_wrapper module<a class="headerlink" href="#module-trinity.buffer.ray_wrapper" title="Link to this heading"></a></h1>
-<p>Ray actor wrapper for different buffers.</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="trinity.buffer.ray_wrapper.DBWrapper">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.buffer.ray_wrapper.</span></span><span class="sig-name descname"><span class="pre">DBWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">storage_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.StorageConfig" title="trinity.common.config.StorageConfig"><span class="pre">StorageConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.BufferConfig" title="trinity.common.config.BufferConfig"><span class="pre">BufferConfig</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/ray_wrapper.html#DBWrapper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.ray_wrapper.DBWrapper" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>A wrapper of a SQL database.</p>
-<p>If <cite>wrap_in_ray</cite> in <cite>StorageConfig</cite> is <cite>True</cite>, this class will be run as a Ray Actor,
-and provide a remote interface to the local database.</p>
-<p>For databases that do not support multi-processing read/write (e.g. sqlite, duckdb), we
-recommend setting <cite>wrap_in_ray</cite> to <cite>True</cite></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.buffer.ray_wrapper.DBWrapper.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">storage_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.StorageConfig" title="trinity.common.config.StorageConfig"><span class="pre">StorageConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.BufferConfig" title="trinity.common.config.BufferConfig"><span class="pre">BufferConfig</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/ray_wrapper.html#DBWrapper.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.ray_wrapper.DBWrapper.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.buffer.ray_wrapper.DBWrapper.get_wrapper">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_wrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">storage_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.StorageConfig" title="trinity.common.config.StorageConfig"><span class="pre">StorageConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.BufferConfig" title="trinity.common.config.BufferConfig"><span class="pre">BufferConfig</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/ray_wrapper.html#DBWrapper.get_wrapper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.ray_wrapper.DBWrapper.get_wrapper" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.buffer.ray_wrapper.DBWrapper.write">
-<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/ray_wrapper.html#DBWrapper.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.ray_wrapper.DBWrapper.write" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.buffer.ray_wrapper.DBWrapper.read">
-<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/ray_wrapper.html#DBWrapper.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.ray_wrapper.DBWrapper.read" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.buffer.ray_wrapper.DBWrapper.acquire">
-<span class="sig-name descname"><span class="pre">acquire</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/ray_wrapper.html#DBWrapper.acquire"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.ray_wrapper.DBWrapper.acquire" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.buffer.ray_wrapper.DBWrapper.release">
-<span class="sig-name descname"><span class="pre">release</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/ray_wrapper.html#DBWrapper.release"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.ray_wrapper.DBWrapper.release" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="trinity.buffer.ray_wrapper.FileWrapper">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.buffer.ray_wrapper.</span></span><span class="sig-name descname"><span class="pre">FileWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">storage_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.StorageConfig" title="trinity.common.config.StorageConfig"><span class="pre">StorageConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.BufferConfig" title="trinity.common.config.BufferConfig"><span class="pre">BufferConfig</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/ray_wrapper.html#FileWrapper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.ray_wrapper.FileWrapper" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>A wrapper of a local jsonl file.</p>
-<p>If <cite>wrap_in_ray</cite> in <cite>StorageConfig</cite> is <cite>True</cite>, this class will be run as
-a Ray Actor, and provide a remote interface to the local file.</p>
-<p>This wrapper is only for writing, if you want to read from the file, use
-StorageType.QUEUE instead.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.buffer.ray_wrapper.FileWrapper.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">storage_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.StorageConfig" title="trinity.common.config.StorageConfig"><span class="pre">StorageConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.BufferConfig" title="trinity.common.config.BufferConfig"><span class="pre">BufferConfig</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/ray_wrapper.html#FileWrapper.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.ray_wrapper.FileWrapper.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.buffer.ray_wrapper.FileWrapper.get_wrapper">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_wrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">storage_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.StorageConfig" title="trinity.common.config.StorageConfig"><span class="pre">StorageConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.BufferConfig" title="trinity.common.config.BufferConfig"><span class="pre">BufferConfig</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/ray_wrapper.html#FileWrapper.get_wrapper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.ray_wrapper.FileWrapper.get_wrapper" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.buffer.ray_wrapper.FileWrapper.write">
-<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/ray_wrapper.html#FileWrapper.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.ray_wrapper.FileWrapper.write" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.buffer.ray_wrapper.FileWrapper.read">
-<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/ray_wrapper.html#FileWrapper.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.ray_wrapper.FileWrapper.read" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.buffer.ray_wrapper.FileWrapper.acquire">
-<span class="sig-name descname"><span class="pre">acquire</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/ray_wrapper.html#FileWrapper.acquire"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.ray_wrapper.FileWrapper.acquire" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.buffer.ray_wrapper.FileWrapper.release">
-<span class="sig-name descname"><span class="pre">release</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/ray_wrapper.html#FileWrapper.release"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.ray_wrapper.FileWrapper.release" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.buffer.ray_wrapper.is_database_url">
-<span class="sig-prename descclassname"><span class="pre">trinity.buffer.ray_wrapper.</span></span><span class="sig-name descname"><span class="pre">is_database_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/ray_wrapper.html#is_database_url"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.ray_wrapper.is_database_url" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.buffer.ray_wrapper.is_json_file">
-<span class="sig-prename descclassname"><span class="pre">trinity.buffer.ray_wrapper.</span></span><span class="sig-name descname"><span class="pre">is_json_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/ray_wrapper.html#is_json_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.ray_wrapper.is_json_file" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="trinity.buffer.ray_wrapper.QueueWrapper">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.buffer.ray_wrapper.</span></span><span class="sig-name descname"><span class="pre">QueueWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">storage_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.StorageConfig" title="trinity.common.config.StorageConfig"><span class="pre">StorageConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.BufferConfig" title="trinity.common.config.BufferConfig"><span class="pre">BufferConfig</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/ray_wrapper.html#QueueWrapper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.ray_wrapper.QueueWrapper" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>An wrapper of a async queue.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.buffer.ray_wrapper.QueueWrapper.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">storage_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.StorageConfig" title="trinity.common.config.StorageConfig"><span class="pre">StorageConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.BufferConfig" title="trinity.common.config.BufferConfig"><span class="pre">BufferConfig</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/ray_wrapper.html#QueueWrapper.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.ray_wrapper.QueueWrapper.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.buffer.ray_wrapper.QueueWrapper.acquire">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">acquire</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/ray_wrapper.html#QueueWrapper.acquire"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.ray_wrapper.QueueWrapper.acquire" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.buffer.ray_wrapper.QueueWrapper.release">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">release</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/ray_wrapper.html#QueueWrapper.release"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.ray_wrapper.QueueWrapper.release" title="Link to this definition"></a></dt>
-<dd><p>Release the queue.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.buffer.ray_wrapper.QueueWrapper.length">
-<span class="sig-name descname"><span class="pre">length</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/ray_wrapper.html#QueueWrapper.length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.ray_wrapper.QueueWrapper.length" title="Link to this definition"></a></dt>
-<dd><p>The length of the queue.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.buffer.ray_wrapper.QueueWrapper.put_batch">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">put_batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exp_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/ray_wrapper.html#QueueWrapper.put_batch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.ray_wrapper.QueueWrapper.put_batch" title="Link to this definition"></a></dt>
-<dd><p>Put batch of experience.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.buffer.ray_wrapper.QueueWrapper.get_batch">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span></span></span><a class="reference internal" href="../_modules/trinity/buffer/ray_wrapper.html#QueueWrapper.get_batch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.ray_wrapper.QueueWrapper.get_batch" title="Link to this definition"></a></dt>
-<dd><p>Get batch of experience.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.buffer.ray_wrapper.QueueWrapper.get_wrapper">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_wrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">storage_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.StorageConfig" title="trinity.common.config.StorageConfig"><span class="pre">StorageConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.BufferConfig" title="trinity.common.config.BufferConfig"><span class="pre">BufferConfig</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/buffer/ray_wrapper.html#QueueWrapper.get_wrapper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.buffer.ray_wrapper.QueueWrapper.get_wrapper" title="Link to this definition"></a></dt>
-<dd><p>Get the queue actor.</p>
-</dd></dl>
-
-</dd></dl>
-
+  <section id="trinity-buffer-ray-wrapper-module">
+<h1>trinity.buffer.ray_wrapper module<a class="headerlink" href="#trinity-buffer-ray-wrapper-module" title="Link to this heading"></a></h1>
 </section>
 
 
@@ -283,7 +143,7 @@ StorageType.QUEUE instead.</p>
 <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
   <span class="rst-current-version" data-toggle="rst-current-version">
     <span class="fa fa-book"> Other Versions</span>
-    v: v0.2.0
+    <b>v0.2.0</b>
     <span class="fa fa-caret-down"></span>
   </span>
   <div class="rst-other-versions">
@@ -296,7 +156,7 @@ StorageType.QUEUE instead.</p>
     </dl>
     <dl>
       <dt>Branches</dt>
-      <dd><a href="../../main/index.html">main</a> <b>(latest)</b></dd>
+      <dd><b><a href="../../main/index.html">main</a> (latest)</b></dd>
     </dl>
   </div>
 </div><script>

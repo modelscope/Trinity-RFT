@@ -100,7 +100,6 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.schema.sql_schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">DPODataModel</span><span class="p">,</span> <span class="n">ExperienceModel</span><span class="p">,</span> <span class="n">SFTDataModel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">SyncMethod</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
@@ -124,11 +123,17 @@
 <div class="viewcode-block" id="AlgorithmType">
 <a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.AlgorithmType">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">AlgorithmType</span><span class="p">(</span><span class="n">ABC</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ConstantMeta</span><span class="p">):</span>
-    <span class="n">use_critic</span><span class="p">:</span> <span class="nb">bool</span>
-    <span class="n">use_reference</span><span class="p">:</span> <span class="nb">bool</span>
-    <span class="n">compute_advantage_in_trainer</span><span class="p">:</span> <span class="nb">bool</span>
-    <span class="n">can_balance_batch</span><span class="p">:</span> <span class="nb">bool</span>
-    <span class="n">schema</span><span class="p">:</span> <span class="nb">type</span>
+    <span class="n">use_critic</span><span class="p">:</span> <span class="nb">bool</span>  <span class="c1"># whether to use critic model</span>
+
+    <span class="n">use_reference</span><span class="p">:</span> <span class="nb">bool</span>  <span class="c1"># whether to use reference model</span>
+
+    <span class="n">compute_advantage_in_trainer</span><span class="p">:</span> <span class="nb">bool</span>  <span class="c1"># whether to compute advantage in trainer</span>
+    <span class="c1"># For algorithms that rely on experience grouping,</span>
+    <span class="c1"># we recommend set this value to False</span>
+
+    <span class="n">can_balance_batch</span><span class="p">:</span> <span class="nb">bool</span>  <span class="c1"># balance batch in trainer</span>
+
+    <span class="n">schema</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># schema of training data</span>
 
 <div class="viewcode-block" id="AlgorithmType.default_config">
 <a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.AlgorithmType.default_config">[docs]</a>
@@ -164,7 +169,7 @@
     <span class="n">use_reference</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">compute_advantage_in_trainer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">can_balance_batch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">schema</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">SFTDataModel</span>
+    <span class="n">schema</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;sft&quot;</span>
 
 <div class="viewcode-block" id="SFTAlgorithm.default_config">
 <a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.SFTAlgorithm.default_config">[docs]</a>
@@ -190,7 +195,7 @@
     <span class="n">use_reference</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">compute_advantage_in_trainer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">can_balance_batch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">schema</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">ExperienceModel</span>
+    <span class="n">schema</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;experience&quot;</span>
 
 <div class="viewcode-block" id="PPOAlgorithm.default_config">
 <a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.PPOAlgorithm.default_config">[docs]</a>
@@ -219,7 +224,7 @@
     <span class="n">use_reference</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">compute_advantage_in_trainer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">can_balance_batch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">schema</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">ExperienceModel</span>
+    <span class="n">schema</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;experience&quot;</span>
 
 <div class="viewcode-block" id="GRPOAlgorithm.default_config">
 <a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.GRPOAlgorithm.default_config">[docs]</a>
@@ -248,7 +253,7 @@
     <span class="n">use_reference</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">compute_advantage_in_trainer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">can_balance_batch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">schema</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">ExperienceModel</span>
+    <span class="n">schema</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;experience&quot;</span>
 
 <div class="viewcode-block" id="OPMDAlgorithm.default_config">
 <a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.OPMDAlgorithm.default_config">[docs]</a>
@@ -277,7 +282,7 @@
     <span class="n">use_reference</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">compute_advantage_in_trainer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">can_balance_batch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">schema</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">ExperienceModel</span>
+    <span class="n">schema</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;experience&quot;</span>
 
 <div class="viewcode-block" id="AsymREAlgorithm.default_config">
 <a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.AsymREAlgorithm.default_config">[docs]</a>
@@ -306,7 +311,7 @@
     <span class="n">use_reference</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">compute_advantage_in_trainer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">can_balance_batch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="n">schema</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">DPODataModel</span>
+    <span class="n">schema</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;dpo&quot;</span>
 
 <div class="viewcode-block" id="DPOAlgorithm.default_config">
 <a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.DPOAlgorithm.default_config">[docs]</a>
@@ -360,7 +365,7 @@
     <span class="n">compute_advantage_in_trainer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">use_rollout</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">can_balance_batch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">schema</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">ExperienceModel</span>
+    <span class="n">schema</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;experience&quot;</span>
 
 <div class="viewcode-block" id="MIXAlgorithm.default_config">
 <a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.MIXAlgorithm.default_config">[docs]</a>
@@ -388,7 +393,7 @@
     <span class="n">compute_advantage_in_trainer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">use_rollout</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">can_balance_batch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">schema</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">ExperienceModel</span>
+    <span class="n">schema</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;experience&quot;</span>
 
 <div class="viewcode-block" id="MIXCHORDAlgorithm.default_config">
 <a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.MIXCHORDAlgorithm.default_config">[docs]</a>
@@ -411,14 +416,14 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">RAFTAlgorithm</span><span class="p">(</span><span class="n">AlgorithmType</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;RAFT Algorithm.</span>
 <span class="sd">    This algorithm is conceptually similar to Supervised Fine-Tuning (SFT)</span>
-<span class="sd">    but is designed to work with `ExperienceModel` schema from rollouts.</span>
+<span class="sd">    but is designed to work with `experience` schema from rollouts.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">use_critic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">use_reference</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">compute_advantage_in_trainer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">can_balance_batch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">schema</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">ExperienceModel</span>
+    <span class="n">schema</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;experience&quot;</span>
 
 <div class="viewcode-block" id="RAFTAlgorithm.default_config">
 <a class="viewcode-back" href="../../../build_api/trinity.algorithm.algorithm.html#trinity.algorithm.RAFTAlgorithm.default_config">[docs]</a>
@@ -458,7 +463,7 @@
 <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
   <span class="rst-current-version" data-toggle="rst-current-version">
     <span class="fa fa-book"> Other Versions</span>
-    v: v0.2.0
+    <b>v0.2.0</b>
     <span class="fa fa-caret-down"></span>
   </span>
   <div class="rst-other-versions">
@@ -471,7 +476,7 @@
     </dl>
     <dl>
       <dt>Branches</dt>
-      <dd><a href="../../../../main/index.html">main</a> <b>(latest)</b></dd>
+      <dd><b><a href="../../../../main/index.html">main</a> (latest)</b></dd>
     </dl>
   </div>
 </div><script>

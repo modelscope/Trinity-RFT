@@ -98,7 +98,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">ray</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.buffer_reader</span><span class="w"> </span><span class="kn">import</span> <span class="n">BufferReader</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.ray_wrapper</span><span class="w"> </span><span class="kn">import</span> <span class="n">QueueWrapper</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.storage.queue</span><span class="w"> </span><span class="kn">import</span> <span class="n">QueueStorage</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">BufferConfig</span><span class="p">,</span> <span class="n">StorageConfig</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">StorageType</span>
 
@@ -114,7 +114,7 @@
         <span class="k">assert</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">storage_type</span> <span class="o">==</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">QUEUE</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">max_read_timeout</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">read_batch_size</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">train_batch_size</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="o">=</span> <span class="n">QueueWrapper</span><span class="o">.</span><span class="n">get_wrapper</span><span class="p">(</span><span class="n">storage_config</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="o">=</span> <span class="n">QueueStorage</span><span class="o">.</span><span class="n">get_wrapper</span><span class="p">(</span><span class="n">storage_config</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="QueueReader.read">
@@ -170,7 +170,7 @@
 <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
   <span class="rst-current-version" data-toggle="rst-current-version">
     <span class="fa fa-book"> Other Versions</span>
-    v: v0.2.1
+    <b>v0.2.1</b>
     <span class="fa fa-caret-down"></span>
   </span>
   <div class="rst-other-versions">
@@ -183,7 +183,7 @@
     </dl>
     <dl>
       <dt>Branches</dt>
-      <dd><a href="../../../../../main/index.html">main</a> <b>(latest)</b></dd>
+      <dd><b><a href="../../../../../main/index.html">main</a> (latest)</b></dd>
     </dl>
   </div>
 </div><script>

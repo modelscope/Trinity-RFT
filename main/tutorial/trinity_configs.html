@@ -66,7 +66,6 @@
 <li class="toctree-l2"><a class="reference internal" href="#cluster-configuration">Cluster Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#buffer-configuration">Buffer Configuration</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#explorer-input">Explorer Input</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#explorer-output">Explorer Output</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#trainer-input">Trainer Input</a></li>
 </ul>
 </li>
@@ -149,7 +148,7 @@
 <span class="w">  </span><span class="c1"># Model weight synchronization settings</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="nt">monitor</span><span class="p">:</span>
-<span class="w">  </span><span class="c1"># Monitoring configurations (e.g., WandB or TensorBoard)</span>
+<span class="w">  </span><span class="c1"># Monitoring configurations (e.g., WandB, TensorBoard or MLFlow)</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="nt">service</span><span class="p">:</span>
 <span class="w">  </span><span class="c1"># Services to use</span>
@@ -162,10 +161,12 @@
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 </pre></div>
 </div>
-<p>Each of these sections will be explained in detail below.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>For additional details about specific parameters not covered here, please refer to the <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/blob/main/trinity/common/config.py">source code</a>.</p>
+<p>Each of these sections will be explained in detail below. For additional details about specific parameters not covered here, please refer to the <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/blob/main/trinity/common/config.py">source code</a>.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Trinity-RFT uses <a class="reference external" href="https://omegaconf.readthedocs.io/en/latest/">OmegaConf</a> to load YAML configuration files.
+It supports some advanced features like <a class="reference external" href="https://omegaconf.readthedocs.io/en/latest/usage.html#variable-interpolation">variable interpolation</a> and  <a class="reference external" href="https://omegaconf.readthedocs.io/en/latest/custom_resolvers.html#oc-env">environment variable substitution</a>.
+Users can use these features to simplify configuration.</p>
 </div>
 </section>
 <hr class="docutils" />
@@ -175,7 +176,7 @@
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Trinity-RFT</span>
 <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example</span>
 <span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">both</span>
-<span class="nt">checkpoint_root_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/CHECKPOINT</span>
+<span class="nt">checkpoint_root_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${oc.env:CHECKPOINT_ROOT_DIR}</span><span class="w">   </span><span class="c1"># CHECKPOINT_ROOT_DIR is an environment variable set in advance</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -227,6 +228,9 @@
 <p>Used to log training metrics during execution.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">monitor</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">monitor_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">wandb</span>
+<span class="w">  </span><span class="nt">monitor_args</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">base_url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://localhost:8080</span>
+<span class="w">    </span><span class="nt">api_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">your_api_key</span>
 <span class="w">  </span><span class="nt">enable_ray_timeline</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
 </pre></div>
 </div>
@@ -235,9 +239,27 @@
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">wandb</span></code>: Logs to <a class="reference external" href="https://docs.wandb.ai/quickstart/">Weights &amp; Biases</a>. Requires logging in and setting <code class="docutils literal notranslate"><span class="pre">WANDB_API_KEY</span></code>. Project and run names match the <code class="docutils literal notranslate"><span class="pre">project</span></code> and <code class="docutils literal notranslate"><span class="pre">name</span></code> fields in global configs.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">tensorboard</span></code>: Logs to <a class="reference external" href="https://www.tensorflow.org/tensorboard">TensorBoard</a>. Files are saved under <code class="docutils literal notranslate"><span class="pre">&lt;checkpoint_root_dir&gt;/&lt;project&gt;/&lt;name&gt;/monitor/tensorboard</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mlflow</span></code>: Logs to <a class="reference external" href="https://mlflow.org/">MLFlow</a>. If <a class="reference external" href="https://mlflow.org/docs/latest/ml/auth/">MLFlow authentication</a> is setup, set <code class="docutils literal notranslate"><span class="pre">MLFLOW_TRACKING_USERNAME</span></code> and <code class="docutils literal notranslate"><span class="pre">MLFLOW_TRACKING_PASSWORD</span></code> as environment variables before running.</p></li>
 </ul>
 </li>
-<li><p><code class="docutils literal notranslate"><span class="pre">enable_ray_timeline</span></code>: Whether to export the ray timeline. If set to <code class="docutils literal notranslate"><span class="pre">True</span></code>, a <code class="docutils literal notranslate"><span class="pre">timeline.json</span></code> file will be exported to <code class="docutils literal notranslate"><span class="pre">&lt;checkpoint_root_dir&gt;/&lt;project&gt;/&lt;name&gt;/monitor</span></code>. You can view the timeline file in Chrome at <a class="reference internal" href="#chrome://tracing"><span class="xref myst">chrome://tracing</span></a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">monitor_args</span></code>: Dictionary of arguments for monitor initialization.</p>
+<ul>
+<li><p>For <code class="docutils literal notranslate"><span class="pre">wandb</span></code>:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">base_url</span></code>: Overrides <code class="docutils literal notranslate"><span class="pre">WANDB_BASE_URL</span></code> if set.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">api_key</span></code>: Overrides <code class="docutils literal notranslate"><span class="pre">WANDB_API_KEY</span></code> if set.</p></li>
+</ul>
+</li>
+<li><p>For <code class="docutils literal notranslate"><span class="pre">mlflow</span></code>:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">uri</span></code>: The URI of your MLFlow instance. Strongly recommended to set; defaults to <code class="docutils literal notranslate"><span class="pre">http://localhost:5000</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">username</span></code>: Overrides <code class="docutils literal notranslate"><span class="pre">MLFLOW_TRACKING_USERNAME</span></code> if set.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">password</span></code>: Overrides <code class="docutils literal notranslate"><span class="pre">MLFLOW_TRACKING_PASSWORD</span></code> if set.</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">enable_ray_timeline</span></code>: If <code class="docutils literal notranslate"><span class="pre">True</span></code>, exports a <code class="docutils literal notranslate"><span class="pre">timeline.json</span></code> file to <code class="docutils literal notranslate"><span class="pre">&lt;checkpoint_root_dir&gt;/&lt;project&gt;/&lt;name&gt;/monitor</span></code>. Viewable in Chrome at <a class="reference internal" href="#chrome://tracing"><span class="xref myst">chrome://tracing</span></a>.</p></li>
 </ul>
 </section>
 <hr class="docutils" />
@@ -245,8 +267,8 @@
 <h2>Model Configuration<a class="headerlink" href="#model-configuration" title="Link to this heading"></a></h2>
 <p>Defines the model paths and token limits.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">model_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/MODEL/</span>
-<span class="w">  </span><span class="nt">critic_model_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;&#39;</span>
+<span class="w">  </span><span class="nt">model_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${oc.env:MODEL_PATH}</span><span class="w">  </span><span class="c1"># MODEL_PATH is an environment variable set in advance</span>
+<span class="w">  </span><span class="nt">critic_model_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${model.model_path}</span><span class="w">  </span><span class="c1"># use the value of model.model_path</span>
 <span class="w">  </span><span class="nt">max_response_tokens</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16384</span>
 <span class="w">  </span><span class="nt">max_model_len</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20480</span>
 </pre></div>
@@ -286,10 +308,6 @@
 <span class="w">      </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">eval_tasksets</span><span class="p">:</span>
 <span class="w">      </span><span class="l l-Scalar l-Scalar-Plain">...</span>
-
-<span class="w">  </span><span class="nt">explorer_output</span><span class="p">:</span>
-<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span>
-
 <span class="w">  </span><span class="nt">trainer_input</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">experience_buffer</span><span class="p">:</span>
 <span class="w">      </span><span class="l l-Scalar l-Scalar-Plain">...</span>
@@ -380,45 +398,6 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">workflow_args</span></code>: A dictionary of arguments used to supplement dataset-level parameters.</p></li>
 </ul>
 </section>
-<section id="explorer-output">
-<h3>Explorer Output<a class="headerlink" href="#explorer-output" title="Link to this heading"></a></h3>
-<p>In <a class="reference internal" href="#global-configuration"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">explore</span></code> mode</span></a>, since there is no trainer, users can configure an experience buffer via <code class="docutils literal notranslate"><span class="pre">buffer.explorer_output</span></code>, rather than using <code class="docutils literal notranslate"><span class="pre">buffer.trainer_input</span></code>, which will be introduced in the next section.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>For <code class="docutils literal notranslate"><span class="pre">both</span></code> and <code class="docutils literal notranslate"><span class="pre">train</span></code> modes, users should use <code class="docutils literal notranslate"><span class="pre">buffer.trainer_input.experience_buffer</span></code> instead of <code class="docutils literal notranslate"><span class="pre">buffer.explorer_output</span></code>.</p>
-</div>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">buffer</span><span class="p">:</span>
-<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
-<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">explorer_output</span><span class="p p-Indicator">:</span>
-<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">countdown_buffer</span>
-<span class="w">    </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">queue</span>
-<span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sqlite:///countdown_buffer.db</span>
-<span class="w">    </span><span class="nt">wrap_in_ray</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
-<span class="w">    </span><span class="nt">max_read_timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1800</span>
-</pre></div>
-</div>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">name</span></code>: The name of the experience buffer. This name will be used as the Ray actor’s name, so it must be unique.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">storage_type</span></code>: The storage type for the experience buffer.</p>
-<ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">queue</span></code>: Experience data is stored in a queue. This storage type is recommended for most use cases.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">sql</span></code>: Experience data is stored in a SQL database. If your database only supports local access (e.g., SQLite), set <code class="docutils literal notranslate"><span class="pre">wrap_in_ray</span></code> to <code class="docutils literal notranslate"><span class="pre">True</span></code> to wrap the database in a Ray actor, enabling remote access from other nodes.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">file</span></code>: Experience data is stored in a JSON file. This storage type should be used only for debugging purposes in <code class="docutils literal notranslate"><span class="pre">explore</span></code> mode.</p></li>
-</ul>
-</li>
-<li><p><code class="docutils literal notranslate"><span class="pre">path</span></code>: The path to the experience buffer.</p>
-<ul>
-<li><p>For <code class="docutils literal notranslate"><span class="pre">queue</span></code> storage type, this field is optional. You can specify a SQLite database or JSON file path here to back up the queue data.</p></li>
-<li><p>For <code class="docutils literal notranslate"><span class="pre">file</span></code> storage type, the path points to the directory containing the dataset files.</p></li>
-<li><p>For <code class="docutils literal notranslate"><span class="pre">sql</span></code> storage type, the path points to the SQLite database file.</p></li>
-</ul>
-</li>
-<li><p><code class="docutils literal notranslate"><span class="pre">wrap_in_ray</span></code>: Whether to wrap the experience buffer in a Ray actor. Only take effect when <code class="docutils literal notranslate"><span class="pre">storage_type</span></code> is <code class="docutils literal notranslate"><span class="pre">sql</span></code> or <code class="docutils literal notranslate"><span class="pre">file</span></code>. The <code class="docutils literal notranslate"><span class="pre">queue</span></code> storage always uses a Ray actor.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">max_read_timeout</span></code>: The maximum waiting time (in seconds) to read new experience data. If exceeded, an incomplete batch will be returned directly. Only take effect when <code class="docutils literal notranslate"><span class="pre">storage_type</span></code> is <code class="docutils literal notranslate"><span class="pre">queue</span></code>. Default is 1800 seconds (30 minutes).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">use_priority_queue</span></code>: Only take effect when <code class="docutils literal notranslate"><span class="pre">storage_type</span></code> is <code class="docutils literal notranslate"><span class="pre">queue</span></code>. If set to <code class="docutils literal notranslate"><span class="pre">True</span></code>, the queue will be a priority queue, which allows for prioritizing certain experiences over others. Default is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">reuse_cooldown_time</span></code>: Only take effect when <code class="docutils literal notranslate"><span class="pre">storage_type</span></code> is <code class="docutils literal notranslate"><span class="pre">queue</span></code> and <code class="docutils literal notranslate"><span class="pre">use_priority_queue</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>. If set, it specifies the cooldown time (in seconds) for reusing experiences. If not specified, the default value is <code class="docutils literal notranslate"><span class="pre">None</span></code>, meaning experiences can not be reused.</p></li>
-</ul>
-</section>
 <section id="trainer-input">
 <h3>Trainer Input<a class="headerlink" href="#trainer-input" title="Link to this heading"></a></h3>
 <p>Defines the experience buffer and optional SFT warm-up dataset.</p>
@@ -442,7 +421,28 @@
 </pre></div>
 </div>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">experience_buffer</span></code>: Experience buffer used by the trainer, which is logically equivalent to <code class="docutils literal notranslate"><span class="pre">buffer.explorer_output</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">experience_buffer</span></code>: It is the input of Trainer and also the output of Explorer. This field is required even in explore mode.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">name</span></code>: The name of the experience buffer. This name will be used as the Ray actor’s name, so it must be unique.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">storage_type</span></code>: The storage type for the experience buffer.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">queue</span></code>: Experience data is stored in a queue. This storage type is recommended for most use cases.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sql</span></code>: Experience data is stored in a SQL database.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">file</span></code>: Experience data is stored in a JSON file. This storage type should be used only for debugging purposes in <code class="docutils literal notranslate"><span class="pre">explore</span></code> mode.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">path</span></code>: The path to the experience buffer.</p>
+<ul>
+<li><p>For <code class="docutils literal notranslate"><span class="pre">queue</span></code> storage type, this field is optional. You can specify a SQLite database or JSON file path here to back up the queue data.</p></li>
+<li><p>For <code class="docutils literal notranslate"><span class="pre">file</span></code> storage type, the path points to the directory containing the dataset files.</p></li>
+<li><p>For <code class="docutils literal notranslate"><span class="pre">sql</span></code> storage type, the path points to the SQLite database file.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_read_timeout</span></code>: The maximum waiting time (in seconds) to read new experience data. If exceeded, an incomplete batch will be returned directly. Only take effect when <code class="docutils literal notranslate"><span class="pre">storage_type</span></code> is <code class="docutils literal notranslate"><span class="pre">queue</span></code>. Default is 1800 seconds (30 minutes).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">use_priority_queue</span></code>: Only take effect when <code class="docutils literal notranslate"><span class="pre">storage_type</span></code> is <code class="docutils literal notranslate"><span class="pre">queue</span></code>. If set to <code class="docutils literal notranslate"><span class="pre">True</span></code>, the queue will be a priority queue, which allows for prioritizing certain experiences over others. Default is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">reuse_cooldown_time</span></code>: Only take effect when <code class="docutils literal notranslate"><span class="pre">storage_type</span></code> is <code class="docutils literal notranslate"><span class="pre">queue</span></code> and <code class="docutils literal notranslate"><span class="pre">use_priority_queue</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>. If set, it specifies the cooldown time (in seconds) for reusing experiences. If not specified, the default value is <code class="docutils literal notranslate"><span class="pre">None</span></code>, meaning experiences can not be reused.</p></li>
+</ul>
+</li>
 <li><p><code class="docutils literal notranslate"><span class="pre">sft_warmup_dataset</span></code>: Optional dataset used for pre-training (SFT warmup).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">sft_warmup_steps</span></code>: Number of steps to use SFT warm-up before RL begins.</p></li>
 </ul>
@@ -769,7 +769,7 @@
 <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
   <span class="rst-current-version" data-toggle="rst-current-version">
     <span class="fa fa-book"> Other Versions</span>
-    v: main
+    <b>main</b>
     <span class="fa fa-caret-down"></span>
   </span>
   <div class="rst-other-versions">
@@ -782,7 +782,7 @@
     </dl>
     <dl>
       <dt>Branches</dt>
-      <dd><a href="trinity_configs.html">main</a> <b>(latest)</b></dd>
+      <dd><b><a href="trinity_configs.html">main</a> (latest)</b></dd>
     </dl>
   </div>
 </div><script>

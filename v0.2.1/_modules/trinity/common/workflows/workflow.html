@@ -119,7 +119,7 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">Task</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A Task class that defines a task and its associated reward function / workflow.&quot;&quot;&quot;</span>
 
-    <span class="n">workflow</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Workflow</span><span class="p">]</span>
+    <span class="n">workflow</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Workflow</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">repeat_times</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">format_args</span><span class="p">:</span> <span class="n">FormatConfig</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">FormatConfig</span><span class="p">)</span>
     <span class="n">rollout_args</span><span class="p">:</span> <span class="n">GenerationConfig</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">GenerationConfig</span><span class="p">)</span>
@@ -472,7 +472,7 @@
 <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
   <span class="rst-current-version" data-toggle="rst-current-version">
     <span class="fa fa-book"> Other Versions</span>
-    v: v0.2.1
+    <b>v0.2.1</b>
     <span class="fa fa-caret-down"></span>
   </span>
   <div class="rst-other-versions">
@@ -485,7 +485,7 @@
     </dl>
     <dl>
       <dt>Branches</dt>
-      <dd><a href="../../../../../main/index.html">main</a> <b>(latest)</b></dd>
+      <dd><b><a href="../../../../../main/index.html">main</a> (latest)</b></dd>
     </dl>
   </div>
 </div><script>

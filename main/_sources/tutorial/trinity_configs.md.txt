@@ -35,7 +35,7 @@ synchronizer:
   # Model weight synchronization settings
   ...
 monitor:
-  # Monitoring configurations (e.g., WandB or TensorBoard)
+  # Monitoring configurations (e.g., WandB, TensorBoard or MLFlow)
   ...
 service:
   # Services to use
@@ -48,10 +48,12 @@ log:
   ...
 ```
 
-Each of these sections will be explained in detail below.
+Each of these sections will be explained in detail below. For additional details about specific parameters not covered here, please refer to the [source code](https://github.com/modelscope/Trinity-RFT/blob/main/trinity/common/config.py).
 
-```{note}
-For additional details about specific parameters not covered here, please refer to the [source code](https://github.com/modelscope/Trinity-RFT/blob/main/trinity/common/config.py).
+```{tip}
+Trinity-RFT uses [OmegaConf](https://omegaconf.readthedocs.io/en/latest/) to load YAML configuration files.
+It supports some advanced features like [variable interpolation](https://omegaconf.readthedocs.io/en/latest/usage.html#variable-interpolation) and  [environment variable substitution](https://omegaconf.readthedocs.io/en/latest/custom_resolvers.html#oc-env).
+Users can use these features to simplify configuration.
 ```
 
 ---
@@ -64,7 +66,7 @@ These are general settings that apply to the entire experiment.
 project: Trinity-RFT
 name: example
 mode: both
-checkpoint_root_dir: /PATH/TO/CHECKPOINT
+checkpoint_root_dir: ${oc.env:CHECKPOINT_ROOT_DIR}   # CHECKPOINT_ROOT_DIR is an environment variable set in advance
 ```
 
 - `project`: The name of the project.
@@ -115,13 +117,25 @@ Used to log training metrics during execution.
 ```yaml
 monitor:
   monitor_type: wandb
+  monitor_args:
+    base_url: http://localhost:8080
+    api_key: your_api_key
   enable_ray_timeline: False
 ```
 
 - `monitor_type`: Type of monitoring system. Options:
   - `wandb`: Logs to [Weights & Biases](https://docs.wandb.ai/quickstart/). Requires logging in and setting `WANDB_API_KEY`. Project and run names match the `project` and `name` fields in global configs.
   - `tensorboard`: Logs to [TensorBoard](https://www.tensorflow.org/tensorboard). Files are saved under `<checkpoint_root_dir>/<project>/<name>/monitor/tensorboard`.
-- `enable_ray_timeline`: Whether to export the ray timeline. If set to `True`, a `timeline.json` file will be exported to `<checkpoint_root_dir>/<project>/<name>/monitor`. You can view the timeline file in Chrome at [chrome://tracing](chrome://tracing).
+  - `mlflow`: Logs to [MLFlow](https://mlflow.org/). If [MLFlow authentication](https://mlflow.org/docs/latest/ml/auth/) is setup, set `MLFLOW_TRACKING_USERNAME` and `MLFLOW_TRACKING_PASSWORD` as environment variables before running.
+- `monitor_args`: Dictionary of arguments for monitor initialization.
+  - For `wandb`:
+    - `base_url`: Overrides `WANDB_BASE_URL` if set.
+    - `api_key`: Overrides `WANDB_API_KEY` if set.
+  - For `mlflow`:
+    - `uri`: The URI of your MLFlow instance. Strongly recommended to set; defaults to `http://localhost:5000`.
+    - `username`: Overrides `MLFLOW_TRACKING_USERNAME` if set.
+    - `password`: Overrides `MLFLOW_TRACKING_PASSWORD` if set.
+- `enable_ray_timeline`: If `True`, exports a `timeline.json` file to `<checkpoint_root_dir>/<project>/<name>/monitor`. Viewable in Chrome at [chrome://tracing](chrome://tracing).
 
 ---
 
@@ -131,8 +145,8 @@ Defines the model paths and token limits.
 
 ```yaml
 model:
-  model_path: /PATH/TO/MODEL/
-  critic_model_path: ''
+  model_path: ${oc.env:MODEL_PATH}  # MODEL_PATH is an environment variable set in advance
+  critic_model_path: ${model.model_path}  # use the value of model.model_path
   max_response_tokens: 16384
   max_model_len: 20480
 ```
@@ -174,10 +188,6 @@ buffer:
       ...
     eval_tasksets:
       ...
-
-  explorer_output:
-    ...
-
   trainer_input:
     experience_buffer:
       ...
@@ -255,41 +265,6 @@ The configuration for each task dataset is defined as follows:
 - `default_reward_fn_type`: Reward function used during exploration. If not specified, the `buffer.default_reward_fn_type` is used.
 - `workflow_args`: A dictionary of arguments used to supplement dataset-level parameters.
 
-
-### Explorer Output
-
-In [`explore` mode](#global-configuration), since there is no trainer, users can configure an experience buffer via `buffer.explorer_output`, rather than using `buffer.trainer_input`, which will be introduced in the next section.
-
-```{note}
-For `both` and `train` modes, users should use `buffer.trainer_input.experience_buffer` instead of `buffer.explorer_output`.
-```
-
-```yaml
-buffer:
-  ...
-  explorer_output:
-    name: countdown_buffer
-    storage_type: queue
-    path: sqlite:///countdown_buffer.db
-    wrap_in_ray: True
-    max_read_timeout: 1800
-```
-
-- `name`: The name of the experience buffer. This name will be used as the Ray actor's name, so it must be unique.
-- `storage_type`: The storage type for the experience buffer.
-  - `queue`: Experience data is stored in a queue. This storage type is recommended for most use cases.
-  - `sql`: Experience data is stored in a SQL database. If your database only supports local access (e.g., SQLite), set `wrap_in_ray` to `True` to wrap the database in a Ray actor, enabling remote access from other nodes.
-  - `file`: Experience data is stored in a JSON file. This storage type should be used only for debugging purposes in `explore` mode.
-- `path`: The path to the experience buffer.
-  - For `queue` storage type, this field is optional. You can specify a SQLite database or JSON file path here to back up the queue data.
-  - For `file` storage type, the path points to the directory containing the dataset files.
-  - For `sql` storage type, the path points to the SQLite database file.
-- `wrap_in_ray`: Whether to wrap the experience buffer in a Ray actor. Only take effect when `storage_type` is `sql` or `file`. The `queue` storage always uses a Ray actor.
-- `max_read_timeout`: The maximum waiting time (in seconds) to read new experience data. If exceeded, an incomplete batch will be returned directly. Only take effect when `storage_type` is `queue`. Default is 1800 seconds (30 minutes).
-- `use_priority_queue`: Only take effect when `storage_type` is `queue`. If set to `True`, the queue will be a priority queue, which allows for prioritizing certain experiences over others. Default is `False`.
-- `reuse_cooldown_time`: Only take effect when `storage_type` is `queue` and `use_priority_queue` is `True`. If set, it specifies the cooldown time (in seconds) for reusing experiences. If not specified, the default value is `None`, meaning experiences can not be reused.
-
-
 ### Trainer Input
 
 Defines the experience buffer and optional SFT warm-up dataset.
@@ -314,7 +289,19 @@ buffer:
     sft_warmup_steps: 0
 ```
 
-- `experience_buffer`: Experience buffer used by the trainer, which is logically equivalent to `buffer.explorer_output`.
+- `experience_buffer`: It is the input of Trainer and also the output of Explorer. This field is required even in explore mode.
+  - `name`: The name of the experience buffer. This name will be used as the Ray actor's name, so it must be unique.
+  - `storage_type`: The storage type for the experience buffer.
+    - `queue`: Experience data is stored in a queue. This storage type is recommended for most use cases.
+    - `sql`: Experience data is stored in a SQL database.
+    - `file`: Experience data is stored in a JSON file. This storage type should be used only for debugging purposes in `explore` mode.
+  - `path`: The path to the experience buffer.
+    - For `queue` storage type, this field is optional. You can specify a SQLite database or JSON file path here to back up the queue data.
+    - For `file` storage type, the path points to the directory containing the dataset files.
+    - For `sql` storage type, the path points to the SQLite database file.
+  - `max_read_timeout`: The maximum waiting time (in seconds) to read new experience data. If exceeded, an incomplete batch will be returned directly. Only take effect when `storage_type` is `queue`. Default is 1800 seconds (30 minutes).
+  - `use_priority_queue`: Only take effect when `storage_type` is `queue`. If set to `True`, the queue will be a priority queue, which allows for prioritizing certain experiences over others. Default is `False`.
+  - `reuse_cooldown_time`: Only take effect when `storage_type` is `queue` and `use_priority_queue` is `True`. If set, it specifies the cooldown time (in seconds) for reusing experiences. If not specified, the default value is `None`, meaning experiences can not be reused.
 - `sft_warmup_dataset`: Optional dataset used for pre-training (SFT warmup).
 - `sft_warmup_steps`: Number of steps to use SFT warm-up before RL begins.
 

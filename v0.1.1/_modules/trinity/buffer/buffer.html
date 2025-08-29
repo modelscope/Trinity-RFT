@@ -106,16 +106,17 @@
 
         <span class="k">return</span> <span class="n">QueueReader</span><span class="p">(</span><span class="n">storage_config</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">storage_type</span> <span class="o">==</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">FILE</span><span class="p">:</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.reader.file_reader</span><span class="w"> </span><span class="kn">import</span> <span class="n">FILE_READERS</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.reader.file_reader</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+            <span class="n">ExperienceFileReader</span><span class="p">,</span>
+            <span class="n">TaskFileReader</span><span class="p">,</span>
+        <span class="p">)</span>
 
-        <span class="n">algorithm_type</span> <span class="o">=</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">algorithm_type</span>
-        <span class="k">if</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">raw</span><span class="p">:</span>
-            <span class="n">file_read_type</span> <span class="o">=</span> <span class="s2">&quot;raw&quot;</span>
-        <span class="k">elif</span> <span class="n">algorithm_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">file_read_type</span> <span class="o">=</span> <span class="n">algorithm_type</span>
+        <span class="n">schema_type</span> <span class="o">=</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">schema_type</span>
+        <span class="k">if</span> <span class="n">schema_type</span><span class="p">:</span>
+            <span class="c1"># only trainer input has schema type</span>
+            <span class="k">return</span> <span class="n">ExperienceFileReader</span><span class="p">(</span><span class="n">storage_config</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">file_read_type</span> <span class="o">=</span> <span class="s2">&quot;rollout&quot;</span>
-        <span class="k">return</span> <span class="n">FILE_READERS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">file_read_type</span><span class="p">)(</span><span class="n">storage_config</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+            <span class="k">return</span> <span class="n">TaskFileReader</span><span class="p">(</span><span class="n">storage_config</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">storage_config</span><span class="o">.</span><span class="n">storage_type</span><span class="si">}</span><span class="s2"> not supported.&quot;</span><span class="p">)</span></div>
 
@@ -166,7 +167,7 @@
 <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
   <span class="rst-current-version" data-toggle="rst-current-version">
     <span class="fa fa-book"> Other Versions</span>
-    v: v0.1.1
+    <b>v0.1.1</b>
     <span class="fa fa-caret-down"></span>
   </span>
   <div class="rst-other-versions">
@@ -179,7 +180,7 @@
     </dl>
     <dl>
       <dt>Branches</dt>
-      <dd><a href="../../../../main/index.html">main</a> <b>(latest)</b></dd>
+      <dd><b><a href="../../../../main/index.html">main</a> (latest)</b></dd>
     </dl>
   </div>
 </div><script>

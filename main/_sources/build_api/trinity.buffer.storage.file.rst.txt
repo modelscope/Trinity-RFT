@@ -1,7 +1,7 @@
-trinity.buffer.ray\_wrapper module
+trinity.buffer.storage.file module
 ==================================
 
-.. automodule:: trinity.buffer.ray_wrapper
+.. automodule:: trinity.buffer.storage.file
    :members:
    :undoc-members:
    :show-inheritance:
