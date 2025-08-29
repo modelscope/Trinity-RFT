@@ -86,6 +86,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         if config.actor_rollout_ref.actor.strategy in ["fsdp", "fsdp2"]:
             assert config.critic.strategy in ["fsdp", "fsdp2"]
             from verl.single_controller.ray import RayWorkerGroup
+
             from trinity.trainer.verl.fsdp_workers import (
                 ActorRolloutRefWorker,
                 CriticWorker,
@@ -96,7 +97,11 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         elif config.actor_rollout_ref.actor.strategy == "megatron":
             assert config.actor_rollout_ref.actor.strategy == config.critic.strategy
             from verl.single_controller.ray.megatron import NVMegatronRayWorkerGroup
-            from trinity.trainer.verl.megatron_workers import ActorRolloutRefWorker, CriticWorker
+
+            from trinity.trainer.verl.megatron_workers import (
+                ActorRolloutRefWorker,
+                CriticWorker,
+            )
 
             ray_worker_group_cls = NVMegatronRayWorkerGroup
 

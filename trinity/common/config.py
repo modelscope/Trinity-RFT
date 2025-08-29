@@ -867,9 +867,7 @@ class Config:
                 from trinity.common.verl_config import veRLConfig
 
                 trainer_config_schema = OmegaConf.structured(veRLConfig)
-                trainer_config = OmegaConf.merge(
-                    trainer_config_schema, self.trainer.trainer_config
-                )
+                trainer_config = OmegaConf.merge(trainer_config_schema, self.trainer.trainer_config)
                 self.trainer.trainer_config = OmegaConf.to_object(trainer_config)
             else:
                 if os.path.isfile(self.trainer.trainer_config_path):

@@ -103,7 +103,9 @@ class MegatronConfig:
     dist_checkpointing_path: Optional[str] = None
     seed: int = 42
     override_ddp_config: dict = field(default_factory=dict)
-    override_transformer_config: OverrideTransformerConfig = field(default_factory=OverrideTransformerConfig)
+    override_transformer_config: OverrideTransformerConfig = field(
+        default_factory=OverrideTransformerConfig
+    )
     use_mbridge: bool = False
 
 

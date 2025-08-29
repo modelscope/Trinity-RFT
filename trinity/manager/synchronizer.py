@@ -3,7 +3,7 @@
 import asyncio
 import os
 from collections import defaultdict
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import ray
 
@@ -146,7 +146,9 @@ class Synchronizer:
             await self.set_model_state_dict(model_state_dict, checkpoint_step_num)
         return checkpoint_step_num
 
-    async def set_model_state_dict(self, model_state_dict: Union[dict, None], trainer_step: int):
+    async def set_model_state_dict(
+        self, model_state_dict: Union[dict, None, Tuple[str, str]], trainer_step: int
+    ):
         """
         Set the new model state and update the version.
 
@@ -175,7 +177,9 @@ class Synchronizer:
             return None
         if isinstance(self.model_state_dict, tuple):
             async with self._ready_condition:
-                await self._ready_condition.wait_for(lambda: not isinstance(self.model_state_dict, tuple))
+                await self._ready_condition.wait_for(
+                    lambda: not isinstance(self.model_state_dict, tuple)
+                )
         update_weight_args_list = []
         for name, param in self.model_state_dict.items():
             update_weight_args_list.append((name, str(param.dtype), tuple(param.shape)))

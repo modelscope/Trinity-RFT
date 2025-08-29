@@ -3,7 +3,6 @@
 import ray
 import torch
 import torch.distributed
-
 from verl.utils.vllm_utils import patch_vllm_moe_model_weight_loader
 
 from trinity.manager.synchronizer import Synchronizer
@@ -67,6 +66,7 @@ class WorkerExtension:
                 if method == "megatron":
                     if self._checkpoint_converter is None:
                         from trinity.common.models.utils import get_megatron_converter
+
                         self._checkpoint_converter = get_megatron_converter(checkpoint_dir)
                     state_dict = self._checkpoint_converter.get_state_dict(checkpoint_dir)
                 else:

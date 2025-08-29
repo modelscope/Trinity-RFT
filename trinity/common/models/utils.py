@@ -2,7 +2,7 @@
 import os
 import re
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import torch
 from torch.distributed._tensor import DTensor, Placement, Shard
@@ -128,7 +128,7 @@ def get_checkpoint_dir_with_step_num(
         raise NotImplementedError(f"Unsupported trainer type {trainer_type}")
 
 
-def load_state_dict(checkpoint_dir: str, config: TrainerConfig) -> dict:
+def load_state_dict(checkpoint_dir: str, config: TrainerConfig) -> Union[dict, Tuple[str, str]]:
     """Load state dict from a checkpoint dir.
 
     Args:
@@ -141,7 +141,10 @@ def load_state_dict(checkpoint_dir: str, config: TrainerConfig) -> dict:
         if strategy in {"fsdp", "fsdp2"}:
             return load_fsdp_state_dict_from_verl_checkpoint(checkpoint_dir)
         elif strategy == "megatron":
-            if actor_config.megatron.use_dist_checkpointing or not actor_config.megatron.use_mbridge:
+            if (
+                actor_config.megatron.use_dist_checkpointing
+                or not actor_config.megatron.use_mbridge
+            ):
                 return "megatron", checkpoint_dir
             else:  # hf checkpointing
                 return load_huggingface_state_dict(os.path.join(checkpoint_dir, "huggingface"))
@@ -298,6 +301,7 @@ def load_fsdp_state_dict_from_verl_checkpoint(checkpoint_path: str) -> dict:  # 
 
 def load_huggingface_state_dict(checkpoint_path: str):
     import transformers
+
     model = transformers.AutoModelForCausalLM.from_pretrained(checkpoint_path)
     return model.state_dict()
 
@@ -306,10 +310,9 @@ def get_megatron_converter(checkpoint_path: str):
     from megatron.core import mpu
     from megatron.core.tensor_parallel.random import model_parallel_cuda_manual_seed
     from transformers import AutoConfig
-
-    from verl.utils.device import get_device_name, get_torch_device
     from verl.model_merger.base_model_merger import ModelMergerConfig
     from verl.model_merger.megatron_model_merger import MegatronModelMerger
+    from verl.utils.device import get_device_name, get_torch_device
 
     class MegatronStateDictConverter(MegatronModelMerger):
         def __init__(self, config: ModelMergerConfig):
@@ -379,9 +382,13 @@ def get_megatron_converter(checkpoint_path: str):
             }
 
             if "Qwen2MoeForCausalLM" in self.hf_config.architectures:
-                self.params_mapping["mlp.shared_experts.linear_fc1"] = "mlp.shared_expert.gate_up_proj"
+                self.params_mapping[
+                    "mlp.shared_experts.linear_fc1"
+                ] = "mlp.shared_expert.gate_up_proj"
                 self.params_mapping["mlp.shared_experts.linear_fc2"] = "mlp.shared_expert.down_proj"
-                self.params_mapping["mlp.shared_experts.gate_weight"] = "mlp.shared_expert_gate.weight"
+                self.params_mapping[
+                    "mlp.shared_experts.gate_weight"
+                ] = "mlp.shared_expert_gate.weight"
 
         def get_state_dict(self, checkpoint_path):
             self.config.local_dir = checkpoint_path
@@ -394,10 +401,9 @@ def get_megatron_converter(checkpoint_path: str):
             del model_state_dict
             return merged_state_dict
 
-
     config = ModelMergerConfig(
-        operation='merge',
-        backend='megatron',
+        operation="merge",
+        backend="megatron",
         tie_word_embedding=False,
         trust_remote_code=False,
         is_value_model=False,

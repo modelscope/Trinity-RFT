@@ -13,39 +13,30 @@
 # limitations under the License.
 
 import json
-import logging
-import os
-import random
 from collections.abc import Callable
 from dataclasses import asdict
 
-import numpy as np
 import ray
 import torch
 import torch.distributed
-from megatron.core import mpu, tensor_parallel
-from megatron.core.dist_checkpointing.mapping import ShardedObject
 from megatron.core.transformer.enums import AttnBackend
 from transformers import GenerationConfig
-
-from trinity.common.config import SynchronizerConfig
-from trinity.common.constants import SyncMethod
-from trinity.manager.synchronizer import Synchronizer
-from verl.models.weight_loader_registry import get_weight_saver
-from verl.utils.device import get_device_name, get_torch_device
-from verl.utils.fs import is_non_local, local_mkdir_safe
+from verl.utils.checkpoint.megatron_checkpoint_manager import (
+    MegatronCheckpointManager as OldMegatronCheckpointManager,
+)
+from verl.utils.checkpoint.megatron_checkpoint_manager import logger
+from verl.utils.fs import local_mkdir_safe
 from verl.utils.logger import log_with_rank
-from verl.utils.megatron.dist_checkpointing import load_dist_checkpointing, save_dist_checkpointing
+from verl.utils.megatron.dist_checkpointing import save_dist_checkpointing
 from verl.utils.megatron_utils import (
     get_dist_checkpoint_path,
     get_hf_model_checkpoint_path,
     get_transformer_config_checkpoint_path,
 )
 
-from verl.utils.checkpoint.megatron_checkpoint_manager import (
-    MegatronCheckpointManager as OldMegatronCheckpointManager,
-    logger
-)
+from trinity.common.config import SynchronizerConfig
+from trinity.common.constants import SyncMethod
+from trinity.manager.synchronizer import Synchronizer
 
 
 class MegatronCheckpointManager(OldMegatronCheckpointManager):
@@ -134,7 +125,14 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
                 )
             )
 
-    def save_checkpoint(self, local_path: str, hdfs_path: str = None, global_step: int = 0, max_ckpt_to_keep=None, model_state_dict_only: bool = False):
+    def save_checkpoint(  # noqa: C901
+        self,
+        local_path: str,
+        hdfs_path: str = None,
+        global_step: int = 0,
+        max_ckpt_to_keep=None,
+        model_state_dict_only: bool = False,
+    ):
         # TODO: if resume from checkpoint, synchronization will save model again, which is unnecessary.
         if global_step == 0 and model_state_dict_only:
             if self.rank == 0:
@@ -149,11 +147,11 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
             max_ckpt_to_keep
             and isinstance(max_ckpt_to_keep, int)
             and max_ckpt_to_keep > 0
-            and len(self.previous_saved_paths) >= max_ckpt_to_keep
+            and len(self.previous_saved_paths) >= max_ckpt_to_keep  # type: ignore
         ):
-            keep_start = len(self.previous_saved_paths) - max_ckpt_to_keep + 1
-            self.remove_previous_save_local_path(self.previous_saved_paths[:keep_start])
-            self.previous_saved_paths = self.previous_saved_paths[keep_start:]
+            keep_start = len(self.previous_saved_paths) - max_ckpt_to_keep + 1  # type: ignore
+            self.remove_previous_save_local_path(self.previous_saved_paths[:keep_start])  # type: ignore
+            self.previous_saved_paths = self.previous_saved_paths[keep_start:]  # type: ignore
 
         local_path = local_mkdir_safe(local_path)
         dist_checkpoint_path = get_dist_checkpoint_path(local_path)
@@ -179,14 +177,24 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
 
             # Synchronize all async save requests
             if not self.checkpoint_config.async_save:
-                assert async_save_request is None, "Async save request should be None when not using async save."
+                assert (
+                    async_save_request is None
+                ), "Async save request should be None when not using async save."
                 torch.distributed.barrier()
         else:
-            assert self.use_hf_checkpoint, "use_hf_checkpoint should be True when not using dist checkpointing"
-            log_with_rank(f"Saving HF model checkpoint to {local_path} with bridge", rank=self.rank, logger=logger)
+            assert (
+                self.use_hf_checkpoint
+            ), "use_hf_checkpoint should be True when not using dist checkpointing"
+            log_with_rank(
+                f"Saving HF model checkpoint to {local_path} with bridge",
+                rank=self.rank,
+                logger=logger,
+            )
             hf_ckpt_path = get_hf_model_checkpoint_path(local_path)
             self.bridge.save_weights(self.model, hf_ckpt_path)
-            log_with_rank(f"Saved bridge checkpoint to {hf_ckpt_path}", rank=self.rank, logger=logger)
+            log_with_rank(
+                f"Saved bridge checkpoint to {hf_ckpt_path}", rank=self.rank, logger=logger
+            )
 
         if self.should_save_model:
             # Only rank 0 saves the hf config and tokenizer to huggingface path
@@ -199,7 +207,9 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
                 self.hf_config.save_pretrained(hf_config_tokenizer_path)
                 if hasattr(self.hf_config, "name_or_path") and self.hf_config.name_or_path:
                     try:
-                        generation_config = GenerationConfig.from_pretrained(self.hf_config.name_or_path)
+                        generation_config = GenerationConfig.from_pretrained(
+                            self.hf_config.name_or_path
+                        )
                         generation_config.save_pretrained(hf_config_tokenizer_path)
                     except Exception:
                         # if the generation config isn't available, we don't save it
@@ -261,7 +271,9 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
                     else:
                         from transformers import AutoModelForCausalLM
 
-                        model = AutoModelForCausalLM.from_pretrained(self.config.model.path, torch_dtype="auto")
+                        model = AutoModelForCausalLM.from_pretrained(
+                            self.config.model.path, torch_dtype="auto"
+                        )
                 model.save_pretrained(hf_model_ckpt_path, state_dict=state_dict)
                 log_with_rank(
                     f"Saved Huggingface config and tokenizer to {hf_model_ckpt_path}",
@@ -272,25 +284,35 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
 
                 if hdfs_path is not None:
                     log_with_rank(
-                        f"Uploading checkpoint to {hdfs_path}", rank=self.rank, logger=logger, log_only_rank_0=True
+                        f"Uploading checkpoint to {hdfs_path}",
+                        rank=self.rank,
+                        logger=logger,
+                        log_only_rank_0=True,
                     )
                     from verl.utils import hdfs_io
 
                     hdfs_io.makedirs(hdfs_path, exist_ok=True)
                     hdfs_io.copy(src=hf_model_ckpt_path, dst=hdfs_path, dirs_exist_ok=True)
                     log_with_rank(
-                        f"HDFS checkpoint uploaded to {hdfs_path}", rank=self.rank, logger=logger, log_only_rank_0=True
+                        f"HDFS checkpoint uploaded to {hdfs_path}",
+                        rank=self.rank,
+                        logger=logger,
+                        log_only_rank_0=True,
                     )
 
         def finalize_save_fn():
             # Rank 0 uploads checkpoint to HDFS if hdfs_path is provided
             log_with_rank(
-                f"Dist checkpointing save completed for {dist_checkpoint_path}", rank=self.rank, logger=logger
+                f"Dist checkpointing save completed for {dist_checkpoint_path}",
+                rank=self.rank,
+                logger=logger,
             )
             self._notify_synchronizer_with_step_num(global_step)
             if self.rank == 0:
                 if hdfs_path is not None:
-                    log_with_rank(f"Uploading checkpoint to {hdfs_path}", rank=self.rank, logger=logger)
+                    log_with_rank(
+                        f"Uploading checkpoint to {hdfs_path}", rank=self.rank, logger=logger
+                    )
                     from verl.utils import hdfs_io
 
                     hdfs_io.makedirs(hdfs_path, exist_ok=True)
@@ -298,7 +320,9 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
                     hdfs_io.copy(src=hf_config_tokenizer_path, dst=hdfs_path, dirs_exist_ok=True)
 
         if self.checkpoint_config.async_save:
-            assert async_save_request is not None, "Async save request should not be None when using async save."
+            assert (
+                async_save_request is not None
+            ), "Async save request should not be None when using async save."
             async_save_request.add_finalize_fn(finalize_save_fn)
         else:
             finalize_save_fn()
