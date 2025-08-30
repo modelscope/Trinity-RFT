@@ -230,7 +230,7 @@ class SimpleWorkflow(Workflow):
         messages = []
         if self.system_prompt:
             messages.append({"role": "system", "content": self.system_prompt})
-        if self.format_args.prompt_type == PromptType.MESSAGES:
+        if self.format_args.prompt_type == PromptType.MESSAGES and isinstance(self.task_desc, list):
             messages.extend(self.task_desc)
         else:
             messages.append({"role": "user", "content": self.task_desc})
