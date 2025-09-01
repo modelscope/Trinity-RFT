@@ -6,18 +6,19 @@ from trinity.common.config import BufferConfig, StorageConfig
 from trinity.common.constants import StorageType
 from trinity.utils.log import get_logger
 
-logger = get_logger(__name__)
-
 
 @contextmanager
 def retry_session(session_maker, max_retry_times: int, max_retry_interval: float):
     """A Context manager for retrying session."""
+    logger = get_logger(__name__)
     for attempt in range(max_retry_times):
         try:
             session = session_maker()
             yield session
             session.commit()
             break
+        except StopIteration as e:
+            raise e
         except Exception as e:
             import traceback
 

@@ -33,8 +33,6 @@ buffer:
   total_epochs: 4
   batch_size: 32
   train_batch_size: 320
-  max_retry_times: 3
-  max_retry_interval: 1
   explorer_input:
     taskset:
       name: openr1_data_filtered_int
@@ -59,7 +57,6 @@ buffer:
       total_epochs: 25
       name: SFT_data
       storage_type: file
-      algorithm_type: sft
       path: /PATH/TO/SFT_DATASET
       split: 'train'
       format:

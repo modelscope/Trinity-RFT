@@ -9,9 +9,7 @@ from tests.tools import (
     get_unittest_dataset_config,
 )
 from trinity.buffer.buffer import get_buffer_reader, get_buffer_writer
-from trinity.buffer.reader.file_reader import RawDataReader
 from trinity.buffer.utils import default_storage_path
-from trinity.buffer.writer.file_writer import JSONWriter
 from trinity.common.config import StorageConfig
 from trinity.common.constants import StorageType
 
@@ -29,34 +27,6 @@ class TestFileBuffer(unittest.IsolatedAsyncioTestCase):
         super().tearDownClass()
         if os.path.exists(cls.temp_output_path):
             os.system(f"rm -rf {cls.temp_output_path}")
-
-    async def test_file_buffer(self):
-        meta = StorageConfig(
-            name="test_buffer",
-            path=os.path.join(self.temp_output_path, "buffer.jsonl"),
-            storage_type=StorageType.FILE,
-            raw=True,
-        )
-        data = [
-            {"key1": 1, "key2": 2},
-            {"key1": 3, "key2": 4},
-            {"key1": 5, "key2": 6},
-            {"key1": 7, "key2": 8},
-        ]
-
-        # test writer
-        writer = JSONWriter(meta, None)
-        await writer.acquire()
-        writer.write(data)
-        await writer.release()
-
-        # test reader
-        meta.path = self.temp_output_path
-        reader = RawDataReader(meta, None)
-        loaded_data = reader.read()
-        self.assertEqual(len(loaded_data), 4)
-        self.assertEqual(loaded_data, data)
-        self.assertRaises(StopIteration, reader.read)
 
     def test_file_reader(self):  # noqa: C901
         """Test file reader."""
@@ -90,7 +60,6 @@ class TestFileBuffer(unittest.IsolatedAsyncioTestCase):
         while True:
             try:
                 tasks.extend(reader.read())
-                print(f"read from buffer, current len {len(tasks)}.")
             except StopIteration:
                 break
         self.assertEqual(len(tasks), 20 - 8)

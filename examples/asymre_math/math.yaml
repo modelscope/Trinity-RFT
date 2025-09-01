@@ -22,8 +22,6 @@ cluster:
 buffer:
   total_steps: 2000    # Exactly 2000 training steps as desired
   batch_size: 16       # 128 trajectories per gradient step, batch_size is the number of tasks per batch
-  max_retry_times: 3
-  max_retry_interval: 1
   explorer_input:
     taskset:
       name: math

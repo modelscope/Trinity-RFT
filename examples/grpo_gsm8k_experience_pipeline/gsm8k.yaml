@@ -35,8 +35,6 @@ cluster:
 buffer:
   total_epochs: 1
   batch_size: 96
-  max_retry_times: 3
-  max_retry_interval: 1
   explorer_input:
     taskset:
       name: gsm8k

@@ -4,7 +4,6 @@
 from abc import ABC, ABCMeta, abstractmethod
 from typing import Dict
 
-from trinity.buffer.schema.sql_schema import DPODataModel, ExperienceModel, SFTDataModel
 from trinity.common.config import Config
 from trinity.common.constants import SyncMethod
 from trinity.utils.log import get_logger
@@ -23,11 +22,17 @@ class ConstantMeta(ABCMeta):
 
 
 class AlgorithmType(ABC, metaclass=ConstantMeta):
-    use_critic: bool
-    use_reference: bool
-    compute_advantage_in_trainer: bool
-    can_balance_batch: bool
-    schema: type
+    use_critic: bool  # whether to use critic model
+
+    use_reference: bool  # whether to use reference model
+
+    compute_advantage_in_trainer: bool  # whether to compute advantage in trainer
+    # For algorithms that rely on experience grouping,
+    # we recommend set this value to False
+
+    can_balance_batch: bool  # balance batch in trainer
+
+    schema: str  # schema of training data
 
     @classmethod
     @abstractmethod
@@ -51,7 +56,7 @@ class SFTAlgorithm(AlgorithmType):
     use_reference: bool = False
     compute_advantage_in_trainer: bool = False
     can_balance_batch: bool = True
-    schema: type = SFTDataModel
+    schema: str = "sft"
 
     @classmethod
     def default_config(cls) -> Dict:
@@ -71,7 +76,7 @@ class PPOAlgorithm(AlgorithmType):
     use_reference: bool = True
     compute_advantage_in_trainer: bool = True
     can_balance_batch: bool = True
-    schema: type = ExperienceModel
+    schema: str = "experience"
 
     @classmethod
     def default_config(cls) -> Dict:
@@ -94,7 +99,7 @@ class GRPOAlgorithm(AlgorithmType):
     use_reference: bool = True
     compute_advantage_in_trainer: bool = False
     can_balance_batch: bool = True
-    schema: type = ExperienceModel
+    schema: str = "experience"
 
     @classmethod
     def default_config(cls) -> Dict:
@@ -117,7 +122,7 @@ class OPMDAlgorithm(AlgorithmType):
     use_reference: bool = True
     compute_advantage_in_trainer: bool = False
     can_balance_batch: bool = True
-    schema: type = ExperienceModel
+    schema: str = "experience"
 
     @classmethod
     def default_config(cls) -> Dict:
@@ -140,7 +145,7 @@ class AsymREAlgorithm(AlgorithmType):
     use_reference: bool = False
     compute_advantage_in_trainer: bool = False
     can_balance_batch: bool = True
-    schema: type = ExperienceModel
+    schema: str = "experience"
 
     @classmethod
     def default_config(cls) -> Dict:
@@ -163,7 +168,7 @@ class DPOAlgorithm(AlgorithmType):
     use_reference: bool = True
     compute_advantage_in_trainer: bool = False
     can_balance_batch: bool = False
-    schema: type = DPODataModel
+    schema: str = "dpo"
 
     @classmethod
     def default_config(cls) -> Dict:
@@ -254,7 +259,7 @@ class MIXAlgorithm(AlgorithmType):
     compute_advantage_in_trainer: bool = False
     use_rollout: bool = True
     can_balance_batch: bool = True
-    schema: type = ExperienceModel
+    schema: str = "experience"
 
     @classmethod
     def default_config(cls) -> Dict:
@@ -276,7 +281,7 @@ class MIXCHORDAlgorithm(AlgorithmType):
     compute_advantage_in_trainer: bool = False
     use_rollout: bool = True
     can_balance_batch: bool = True
-    schema: type = ExperienceModel
+    schema: str = "experience"
 
     @classmethod
     def default_config(cls) -> Dict:
@@ -293,14 +298,14 @@ class MIXCHORDAlgorithm(AlgorithmType):
 class RAFTAlgorithm(AlgorithmType):
     """RAFT Algorithm.
     This algorithm is conceptually similar to Supervised Fine-Tuning (SFT)
-    but is designed to work with `ExperienceModel` schema from rollouts.
+    but is designed to work with `experience` schema from rollouts.
     """
 
     use_critic: bool = False
     use_reference: bool = False
     compute_advantage_in_trainer: bool = False
     can_balance_batch: bool = True
-    schema: type = ExperienceModel
+    schema: str = "experience"
 
     @classmethod
     def default_config(cls) -> Dict:
