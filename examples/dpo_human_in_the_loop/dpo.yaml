@@ -1,0 +1,73 @@
+project: "dpo_example"
+name: "trinity_dpo"
+mode: train
+
+# using task pipeline to decide the chosen and rejected from human preference
+data_processor:
+  # task pipeline related
+  task_pipeline:
+    num_process: 1
+    operators:
+      - name: "human_preference_annotation_mapper"
+        args:
+          # general annotation project settings
+          project_name_prefix: "Human_Preference_Annotation_Demo"
+          wait_for_annotations: true  # Whether to wait for annotations to complete
+          timeout: 3600  # Maximum time to wait for annotations in seconds (1 hour)
+          poll_interval: 10  # Time between annotation status checks in seconds
+          max_tasks_per_batch: 10  # Maximum number of tasks in a single batch
+          notification_config:
+            enabled: false
+
+          # label studio connection settings
+          api_url: "http://localhost:7070"  # Default Label Studio URL
+          api_key: "YOUR_API_KEY"  # Your API key for label studuio authentication, which can be set when starting the label-studio service
+
+          # human preference annotation settings
+          prompt_key: "prompt"  # Prompt field
+          answer1_key: "answer1"  # First answer option
+          answer2_key: "answer2"  # Second answer option
+          chosen_key: "chosen"  # Chosen field
+          rejected_key: "rejected"  # Rejected field
+    inputs:  # the output will be set to the explorer input automatically
+      - 'examples/dpo_human_in_the_loop/demo-data.jsonl'
+    target_fields: ["prompt"]
+service:
+  data_juicer:
+    auto_start: true
+
+algorithm:
+  algorithm_type: dpo
+  kl_loss_fn: k1
+  kl_loss_fn_args:
+    kl_coef: 0.1
+checkpoint_root_dir: /PATH/TO/CHECKPOINT/
+model:
+  model_path: /PATH/TO/MODEL
+  max_response_tokens: 1024
+  max_model_len: 1536
+cluster:
+  node_num: 1
+  gpu_per_node: 8
+buffer:
+  total_epochs: 2
+  train_batch_size: 64
+  trainer_input:
+    experience_buffer:
+      name: dpo_buffer
+      storage_type: file
+      enable_progress_bar: True
+      path: ./outputs/human_annotation_output/  # the result data after human preference annotation are stored here
+      format:
+        prompt_type: plaintext # plaintext/messages
+        prompt_key: prompt
+        chosen_key: chosen
+        rejected_key: rejected
+synchronizer:
+  sync_method: 'checkpoint'
+  sync_interval: 30
+  sync_timeout: 1200
+trainer:
+  trainer_type: 'verl'
+  trainer_config_path: 'examples/dpo_humanlike/train_dpo.yaml'
+  save_interval: 30

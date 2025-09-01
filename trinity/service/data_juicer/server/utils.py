@@ -114,6 +114,8 @@ DIMENSION_STATS_KEYS = {
 
 
 def group_scores(dataset: Dataset) -> Dataset:
+    if Fields.stats not in dataset.features:
+        return dataset
     # for perplexity, normalize them with the max value.
     stats_min_max = {}
     for stats in dataset.features[Fields.stats]:
@@ -164,7 +166,8 @@ def compute_priority_scores(
         return sample
 
     from data_juicer.utils.constant import Fields
-
+    if Fields.stats not in sample:
+        return sample
     stats = sample[Fields.stats]
     if isinstance(stats, list):
         stats = stats[0]

@@ -212,6 +212,7 @@ Trinity-RFT uses a unified config file to manage all config items. For the data 
 In this example, assume that you need to select the chosen and rejected responses for DPO method. So you can set these config items like the following example:
 
 ```yaml
+# using task pipeline to decide the chosen and rejected from human preference
 data_processor:
   # task pipeline related
   task_pipeline:
@@ -239,7 +240,7 @@ data_processor:
           chosen_key: "chosen"  # Chosen field
           rejected_key: "rejected"  # Rejected field
     inputs:  # the output will be set to the explorer input automatically
-      - /PATH/TO/DATA/FILE/TO/BE/ANNOTATED
+      - 'examples/dpo_human_in_the_loop/demo-data.jsonl'
     target_fields: ["prompt"]
 service:
   data_juicer:
@@ -251,6 +252,8 @@ Here you can set the basic information for the example dataset and some other it
 The difference is that we use the data-juicer OP `human_preference_annotation_mapper` here. This OP helps you to annotate the data with human preference on a UI.
 
 You can set more config items for this OP (e.g. notification when annotation is finished). For more details, please refer to this [doc](https://github.com/modelscope/data-juicer/tree/main/configs/annotation).
+
+All config items in the `data_processor` section can be found [here](trinity_configs.md). A prepared config file for this example can be found in [the config file](https://github.com/modelscope/Trinity-RFT/tree/main/examples/dpo_human_in_the_loop/dpo.yaml).
 
 ### Start Running
 
