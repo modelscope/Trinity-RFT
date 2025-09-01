@@ -166,6 +166,7 @@ def compute_priority_scores(
         return sample
 
     from data_juicer.utils.constant import Fields
+
     if Fields.stats not in sample:
         return sample
     stats = sample[Fields.stats]

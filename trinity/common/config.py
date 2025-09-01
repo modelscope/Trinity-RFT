@@ -671,7 +671,9 @@ class Config:
                 if self.buffer.explorer_input.taskset.path is not None:
                     self.data_processor.task_pipeline.output = self.buffer.explorer_input.taskset
                 elif self.buffer.trainer_input.experience_buffer.path is not None:
-                    self.data_processor.task_pipeline.output = self.buffer.trainer_input.experience_buffer
+                    self.data_processor.task_pipeline.output = (
+                        self.buffer.trainer_input.experience_buffer
+                    )
                 else:
                     raise ValueError(
                         "`data_processor.task_pipeline.output` is required when both "
