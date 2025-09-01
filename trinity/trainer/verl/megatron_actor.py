@@ -25,6 +25,7 @@ from typing import Iterable, Tuple
 import torch
 from megatron.core import parallel_state as mpu
 from megatron.core.pipeline_parallel import get_forward_backward_func
+from megatron.core.tensor_parallel.cross_entropy import VocabParallelCrossEntropy
 from verl import DataProto
 from verl.utils.device import get_device_id, get_torch_device
 from verl.utils.megatron.pipeline_parallel import make_batch_generator
@@ -267,12 +268,6 @@ class MegatronPPOActor(OldMegatronPPOActor):
                     if calculate_entropy:
                         entropy = vocab_parallel_entropy(logits)
                         ret["entropy"] = entropy
-                    # bug fix for https://github.com/volcengine/verl/issues/1970
-                    from megatron.core.tensor_parallel import cross_entropy
-
-                    cross_entropy.VocabParallelCrossEntropy.calculate_predicted_logits = (
-                        calculate_predicted_logits
-                    )
                     log_probs = vocab_parallel_log_probs_from_logits(logits, label)
                     log_probs = log_probs.masked_fill(~label_mask, 0.0)
                     ret["log_probs"] = log_probs
@@ -441,3 +436,7 @@ def calculate_predicted_logits(
     sum_exp_logits = exp_logits.sum(dim=-1)
 
     return target_mask, masked_target_1d, predicted_logits, sum_exp_logits, exp_logits
+
+
+# bug fix for https://github.com/volcengine/verl/issues/1970
+VocabParallelCrossEntropy.calculate_predicted_logits = calculate_predicted_logits

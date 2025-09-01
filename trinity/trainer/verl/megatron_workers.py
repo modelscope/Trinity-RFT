@@ -214,7 +214,6 @@ class ActorRolloutRefWorker(MegatronWorker, DistProfilerExtension):
 
         if self._is_actor:
             actor_module = make_model(wrap_with_ddp=True)
-            print(f"actor_module: {len(actor_module)}")
             if self.config.actor.load_weight:
                 if self.config.actor.megatron.use_dist_checkpointing:
                     load_mcore_dist_weights(

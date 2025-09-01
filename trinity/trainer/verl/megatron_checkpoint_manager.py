@@ -224,7 +224,9 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
         if self.should_save_extra:
             if self.rank == 0:
                 # Save transformer config
-                print(self.transformer_config)
+                log_with_rank(
+                    f"Transformer config: {self.transformer_config}", rank=self.rank, logger=logger
+                )
                 transformer_config_dict = asdict(self.transformer_config)
                 to_convert_types = {torch.dtype: str, AttnBackend: str}
                 ignore_types = [Callable]
