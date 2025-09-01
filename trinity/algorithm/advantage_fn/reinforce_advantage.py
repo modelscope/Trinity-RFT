@@ -4,10 +4,7 @@ from typing import Dict, List, Tuple
 
 import torch
 
-from trinity.algorithm.advantage_fn.advantage_fn import (
-    ADVANTAGE_FN,
-    GroupAdvantage,
-)
+from trinity.algorithm.advantage_fn.advantage_fn import ADVANTAGE_FN, GroupAdvantage
 from trinity.common.experience import Experience, group_by
 
 
