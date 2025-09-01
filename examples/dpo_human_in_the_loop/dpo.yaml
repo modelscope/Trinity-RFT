@@ -69,5 +69,5 @@ synchronizer:
   sync_timeout: 1200
 trainer:
   trainer_type: 'verl'
-  trainer_config_path: 'examples/dpo_humanlike/train_dpo.yaml'
+  trainer_config_path: 'examples/dpo_human_in_the_loop/train_dpo.yaml'
   save_interval: 30

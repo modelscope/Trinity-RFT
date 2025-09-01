@@ -7,7 +7,7 @@ actor_rollout_ref:
     use_remove_padding: False
   actor:
     strategy: fsdp  # This is for backward-compatibility
-    ppo_micro_batch_size_per_gpu: 2 # NOTE
+    ppo_micro_batch_size_per_gpu: 2
     use_dynamic_bsz: False
     ppo_max_token_len_per_gpu: 16384
     grad_clip: 1.0
@@ -19,7 +19,7 @@ actor_rollout_ref:
       lr_warmup_steps_ratio: 0.03  # the total steps will be injected during runtime
       min_lr_ratio: 0.1   # only useful for warmup with cosine
       warmup_style: cosine  # select from constant/cosine
-      total_training_steps: 783  #
+      total_training_steps: 783
       betas: [0.9, 0.95]
     fsdp_config:
       wrap_policy:
@@ -35,14 +35,14 @@ actor_rollout_ref:
         # transformer_layer_cls_to_wrap: None
         min_num_params: 0
     # log_prob_micro_batch_size: 4 # will be deprecated, use log_prob_micro_batch_size_per_gpu
-    log_prob_micro_batch_size_per_gpu: 2 # NOTE
+    log_prob_micro_batch_size_per_gpu: 2
     log_prob_use_dynamic_bsz: ${actor_rollout_ref.actor.use_dynamic_bsz}
     log_prob_max_token_len_per_gpu: ${actor_rollout_ref.actor.ppo_max_token_len_per_gpu}
     ulysses_sequence_parallel_size: ${actor_rollout_ref.actor.ulysses_sequence_parallel_size} # sp size
 
 trainer:
   balance_batch: False
-  total_training_steps: 783 #
+  total_training_steps: 783
   # auto: find the last ckpt to resume. If can't find, start from scratch
   resume_mode: auto # or auto or resume_path if
   default_hdfs_dir: null
