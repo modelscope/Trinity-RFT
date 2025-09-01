@@ -315,3 +315,26 @@ class RAFTAlgorithm(AlgorithmType):
             "kl_loss_fn": "none",
             "entropy_loss_fn": "none",
         }
+
+
+@ALGORITHM_TYPE.register_module("sppo")
+class sPPOAlgorithm(AlgorithmType):
+    """sPPO Algorithm."""
+
+    use_critic: bool = False
+    use_reference: bool = False
+    compute_advantage_in_trainer: bool = False
+    can_balance_batch: bool = True
+    schema: str = "experience"
+
+    @classmethod
+    def default_config(cls) -> Dict:
+        return {
+            "repeat_times": 2,
+            "sample_strategy": "warmup",
+            "policy_loss_fn": "sppo",
+            "advantage_fn": "opmd",
+            "kl_penalty_fn": "none",
+            "kl_loss_fn": "none",
+            "entropy_loss_fn": "none",
+        }

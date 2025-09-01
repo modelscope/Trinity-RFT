@@ -1,27 +1,27 @@
-# Configuration file for the AsymRE GSM8k project.
-# REINFORCE for off-Policy Reinforcement Learning: Balancing positive and negative rewards
-# https://arxiv.org/abs/2506.20520.
+# Configuration file for the sPPO GSM8k project.
+# A general class of surrogate functions for stable and efficient reinforcement learning
+# https://arxiv.org/abs/2108.05828.
 
 project: "Trinity-RFT-GSM8K"
-name: asymre_gsm8k
+name: sppo_gsm8k
 checkpoint_root_dir:  /PATH/TO/CHECKPOINT/
 model:
   model_path: /PATH/TO/MODEL/
   max_response_tokens: 1024
   max_model_len: 1280
 algorithm:
-  algorithm_type: asymre
+  algorithm_type: sppo
   policy_loss_fn_args:
-    tau: 0
-  advantage_fn_args:
-    baseline_shift: -0.1
+    epsilon: 0.1
   repeat_times: 8
 cluster:
   node_num: 1
   gpu_per_node: 8
 buffer:
-  total_steps: 80
+  total_steps: 100
   batch_size: 96
+  max_retry_times: 3
+  max_retry_interval: 1
   explorer_input:
     taskset:
       name: gsm8k
@@ -64,5 +64,5 @@ synchronizer:
   sync_offset: 0
 trainer:
   trainer_type: verl
-  trainer_config_path: examples/asymre_gsm8k/train_gsm8k.yaml
+  trainer_config_path: examples/sppo_gsm8k/train_gsm8k.yaml
   save_interval: 100
