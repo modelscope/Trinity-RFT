@@ -70,6 +70,12 @@ dev = [
     "parameterized",
     "matplotlib",
 ]
+megatron = [
+    "megatron-core[mlm]",
+    "transformer_engine[pytorch]",
+    "mbridge",
+    # megatron-core[mlm] need "flash-attn==2.8.1",
+]
 
 doc = [
     "sphinx",
