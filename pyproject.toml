@@ -71,8 +71,8 @@ dev = [
     "matplotlib",
 ]
 megatron = [
-    "megatron-core[mlm]>=0.13.1",
-    "transformer_engine[pytorch]>=2.6.0.post1",
+    "megatron-core[mlm]==0.13.1",
+    "transformer_engine[pytorch]==2.6.0.post1",
     "mbridge>=0.13.0",
 ]
 
