@@ -11,6 +11,7 @@ Submodules
    trinity.common.workflows.customized_toolcall_workflows
    trinity.common.workflows.eval_workflow
    trinity.common.workflows.math_rm_workflow
+   trinity.common.workflows.math_ruler_workflow
    trinity.common.workflows.step_wise_workflow
    trinity.common.workflows.workflow
 
