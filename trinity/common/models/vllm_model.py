@@ -275,7 +275,6 @@ class vLLMRolloutModel(InferenceModel):
                 prompt_length=len(output.prompt_token_ids),
                 prompt_text=mm_inputs["prompt"],
                 response_text=output.outputs[i].text,
-                multi_modal_data=mm_inputs["multi_modal_data"],
                 multi_modal_inputs=mm_inputs["multi_modal_inputs"],
             )
             for i in range(len(output.outputs))
