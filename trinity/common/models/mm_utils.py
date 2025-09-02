@@ -1,7 +1,5 @@
 from typing import Any, Dict
 
-from verl.utils.dataset.vision_utils import process_image, process_video
-
 
 def build_multi_modal_inputs(
     prompt: str,
@@ -13,6 +11,7 @@ def build_multi_modal_inputs(
     Preprocess multi-modal data and build multi-modal inputs
     Adapted from: verl/utils/dataset/rl_dataset.py
     """
+    from verl.utils.dataset.vision_utils import process_image, process_video
 
     if prompt is None:
         raise ValueError("Prompt is required for build multi-modal inputs")
