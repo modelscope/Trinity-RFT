@@ -10,6 +10,7 @@ services:
       - DATA_ROOT_DIR=/mnt/data
       - MODEL_PATH=/mnt/models/Qwen3-0.6B
       - API_MODEL_PATH=/mnt/models/Qwen3-1.7B
+      - VLM_MODEL_PATH=/mnt/models/Qwen2.5-VL-3B
       - CHECKPOINT_PATH=/mnt/checkpoints
     working_dir: /workspace
     networks:
