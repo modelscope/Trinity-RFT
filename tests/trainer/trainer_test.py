@@ -603,6 +603,7 @@ class TestTrainerMIX(BaseTrainerCase):
 
 
 class TestTrainerMultiModal(BaseTrainerCase):
+    @unittest.skip("Require specific vllm/transformers version")
     def test_trainer(self):
         """Test both mode with multi-modal data."""
         self.config.buffer.explorer_input.taskset = get_unittest_dataset_config(
