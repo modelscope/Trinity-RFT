@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-The main entry point to run the PPO algorithm
+The main entry point to run the PPO algorithm.
+Modified from https://github.com/volcengine/verl/blob/v0.5.0/verl/workers/megatron_workers.py
 """
 
 import datetime
@@ -86,7 +87,11 @@ class ActorRolloutRefWorker(MegatronWorker, DistProfilerExtension):
             rank = int(os.environ["LOCAL_RANK"])
             torch.distributed.init_process_group(
                 backend=get_nccl_backend(),
-                timeout=datetime.timedelta(seconds=self.config.get("nccl_timeout", 600)),
+                timeout=datetime.timedelta(
+                    seconds=self.config.get(
+                        "nccl_timeout", seconds=self.config.synchronizer.sync_timeout
+                    )
+                ),
                 init_method=os.environ.get("DIST_INIT_METHOD", None),
             )
             get_torch_device().set_device(rank)

@@ -75,7 +75,7 @@ class FSDPConfig:
 class Checkpoint:
     load_contents: List[str] = field(default_factory=lambda: ["model", "optimizer", "extra"])
     save_contents: List[str] = field(default_factory=lambda: ["model", "optimizer", "extra"])
-    async_save: bool = False
+    async_save: bool = False  # do not set, async save has bug in verl megatron training
 
 
 @dataclass

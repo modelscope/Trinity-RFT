@@ -13,7 +13,7 @@
 # limitations under the License.
 """
 The main entry point to run the PPO algorithm.
-Modified from https://github.com/volcengine/verl/blob/v0.4.1/verl/workers/fsdp_workers.py
+Modified from https://github.com/volcengine/verl/blob/v0.5.0/verl/workers/fsdp_workers.py
 """
 
 import json

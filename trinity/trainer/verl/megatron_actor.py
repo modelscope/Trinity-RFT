@@ -17,6 +17,8 @@ In megatron actor, the differences are:
 1. We only make minibatch
 
 Note that our model doesn't have to be `MegatronModule` because we don't share embedding in the last layer
+
+Modified from https://github.com/volcengine/verl/blob/v0.5.0/verl/workers/actor/megatron_actor.py
 """
 
 from functools import partial
