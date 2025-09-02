@@ -1,3 +1,4 @@
+(Configuration Guide)=
 # Configuration Guide
 
 This section provides a detailed description of the configuration files used in **Trinity-RFT**.
@@ -231,6 +232,7 @@ buffer:
       split: test
       repeat_times: 1
       format:
+        prompt_type: `plaintext`
         prompt_key: 'question'
         response_key: 'answer'
       rollout_args:
@@ -256,9 +258,6 @@ The configuration for each task dataset is defined as follows:
 - `subset_name`: The subset name of the task dataset. Default is `None`.
 - `split`: The split of the task dataset. Default is `train`.
 - `repeat_times`: The number of rollouts generated for a task. If not set, it will be automatically set to `algorithm.repeat_times` for `taskset`, and `1` for `eval_tasksets`.
-- `format`: Defines keys for prompts and responses in the dataset.
-  - `prompt_key`: Specifies which column in the dataset contains the prompt data.
-  - `response_key`: Specifies which column in the dataset contains the response data.
 - `rollout_args`: The parameters for rollout.
   - `temperature`: The temperature for sampling.
 - `default_workflow_type`: Type of workflow logic applied to this dataset. If not specified, the `buffer.default_workflow_type` is used.
@@ -277,6 +276,7 @@ buffer:
       name: countdown_buffer
       storage_type: queue
       path: sqlite:///countdown_buffer.db
+      max_read_timeout: 1800
 
     sft_warmup_dataset:
       name: warmup_data
@@ -299,10 +299,24 @@ buffer:
     - For `queue` storage type, this field is optional. You can specify a SQLite database or JSON file path here to back up the queue data.
     - For `file` storage type, the path points to the directory containing the dataset files.
     - For `sql` storage type, the path points to the SQLite database file.
+  - `format`: Defines keys for prompts and responses in the dataset.
+    - `prompt_type`: Specifies the type of prompts in the dataset. We support `plaintext`, `messages` for now.
+      - `plaintext`: The prompt is in string format.
+      - `messages`: The prompt is organized as a message list.
+    - `prompt_key`: Specifies which column in the dataset contains the user prompt data. Only for `plaintext`.
+    - `response_key`: Specifies which column in the dataset contains the response data. Only for `plaintext`.
+    - `system_prompt_key`: Specifies which column in the dataset contains the system prompt data. Only for `plaintext`.
+    - `system_prompt`: Specifies the system prompt in string format. It has lower priority than `system_prompt_key`. Only for `plaintext`.
+    - `messages_key`: Specifies which column in the dataset contains the messages data. Only for `messages`.
+    - `tools_key`: Specifies which column in the dataset contains the tools data. Support both `plaintext` and `messages`, but the tool data should be organized as a list of dict.
+    - `chosen_key`: Specifies which column in the dataset contains the DPO chosen data. Support both `plaintext` and `messages`, and the data type should be consistent with the prompt type.
+    - `rejected_key`: Similar to `chosen_key`, but it specifies which column in the dataset contains the DPO rejected data.
+    - `enable_concatenated_multi_turn`: Enable concatenated multi-turn SFT data preprocess. Only for `messages` and only take effect with SFT algorithm.
+    - `chat_template`: Specifies the chat template in string format. If not provided, use `model.custom_chat_template`.
   - `max_read_timeout`: The maximum waiting time (in seconds) to read new experience data. If exceeded, an incomplete batch will be returned directly. Only take effect when `storage_type` is `queue`. Default is 1800 seconds (30 minutes).
   - `use_priority_queue`: Only take effect when `storage_type` is `queue`. If set to `True`, the queue will be a priority queue, which allows for prioritizing certain experiences over others. Default is `False`.
   - `reuse_cooldown_time`: Only take effect when `storage_type` is `queue` and `use_priority_queue` is `True`. If set, it specifies the cooldown time (in seconds) for reusing experiences. If not specified, the default value is `None`, meaning experiences can not be reused.
-- `sft_warmup_dataset`: Optional dataset used for pre-training (SFT warmup).
+- `sft_warmup_dataset`: Optional dataset used for pre-training (SFT warmup). Its configuration is similar to the `experience_buffer`, but only for SFT usage.
 - `sft_warmup_steps`: Number of steps to use SFT warm-up before RL begins.
 
 ---

@@ -97,7 +97,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">concurrent.futures</span><span class="w"> </span><span class="kn">import</span> <span class="n">ThreadPoolExecutor</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">torch.distributed._tensor</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTensor</span><span class="p">,</span> <span class="n">Placement</span><span class="p">,</span> <span class="n">Shard</span>
@@ -110,14 +110,16 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">tokenize_and_mask_messages_hf</span><span class="p">(</span>
     <span class="n">tokenizer</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="n">messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span>
+    <span class="n">tools</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">chat_template</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the assistant token mask with `chat_template`.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        tokenizer (Any): The tokenizer.</span>
-<span class="sd">        chat_template (str): The chat template with `{% generation %}` symbol.</span>
 <span class="sd">        messages (List[dict]): Messages with `role` and `content` fields.</span>
+<span class="sd">        tools (Optional[List[dict]]): The list of tool dictionaries.</span>
+<span class="sd">        chat_template (str): The chat template with `{% generation %}` symbol.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        `torch.Tensor`: The token_ids (sequence_length)</span>
@@ -126,6 +128,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">token_dict</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">apply_chat_template</span><span class="p">(</span>
         <span class="n">messages</span><span class="p">,</span>
+        <span class="n">tools</span><span class="o">=</span><span class="n">tools</span><span class="p">,</span>
         <span class="n">chat_template</span><span class="o">=</span><span class="n">chat_template</span><span class="p">,</span>
         <span class="n">add_generation_prompt</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">padding</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -146,14 +149,16 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">tokenize_and_mask_messages_default</span><span class="p">(</span>
     <span class="n">tokenizer</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="n">messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span>
+    <span class="n">tools</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">chat_template</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the assistant token mask.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        tokenizer (Any): The tokenizer.</span>
-<span class="sd">        chat_template (str): The chat template with `{% generation %}` symbol.</span>
 <span class="sd">        messages (List[dict]): Messages with `role` and `content` fields.</span>
+<span class="sd">        tools (Optional[List[dict]]): The list of tool dictionaries.</span>
+<span class="sd">        chat_template (str): The chat template with `{% generation %}` symbol.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        `torch.Tensor`: The token_ids (sequence_length)</span>
@@ -169,6 +174,7 @@
 
     <span class="n">tokens</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">apply_chat_template</span><span class="p">(</span>
         <span class="n">messages</span><span class="p">,</span>
+        <span class="n">tools</span><span class="o">=</span><span class="n">tools</span><span class="p">,</span>
         <span class="n">chat_template</span><span class="o">=</span><span class="n">chat_template</span><span class="p">,</span>
         <span class="n">add_generation_prompt</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">padding</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -181,6 +187,7 @@
         <span class="k">if</span> <span class="n">message</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;assistant&quot;</span><span class="p">:</span>
             <span class="n">prompt_token_ids</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">apply_chat_template</span><span class="p">(</span>
                 <span class="n">messages</span><span class="p">[:</span><span class="n">idx</span><span class="p">],</span>
+                <span class="n">tools</span><span class="o">=</span><span class="n">tools</span><span class="p">,</span>
                 <span class="n">chat_template</span><span class="o">=</span><span class="n">chat_template</span><span class="p">,</span>
                 <span class="n">add_generation_prompt</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="n">padding</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -191,6 +198,7 @@
             <span class="n">prompt_length</span> <span class="o">=</span> <span class="n">prompt_token_ids</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">prompt_response_token_ids</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">apply_chat_template</span><span class="p">(</span>
                 <span class="n">messages</span><span class="p">[:</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
+                <span class="n">tools</span><span class="o">=</span><span class="n">tools</span><span class="p">,</span>
                 <span class="n">chat_template</span><span class="o">=</span><span class="n">chat_template</span><span class="p">,</span>
                 <span class="n">add_generation_prompt</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                 <span class="n">padding</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -202,6 +210,27 @@
             <span class="n">assistant_token_mask</span><span class="p">[</span><span class="n">prompt_length</span><span class="p">:</span><span class="n">prompt_response_length</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">prompt_length</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">assistant_token_mask</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">tokens</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">assistant_token_mask</span><span class="p">,</span> <span class="n">prompt_length</span></div>
+
+
+
+<div class="viewcode-block" id="get_action_mask_method">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.models.utils.html#trinity.common.models.utils.get_action_mask_method">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_action_mask_method</span><span class="p">(</span><span class="n">chat_template</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the action mask method according to the chat template.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        chat_template (str): The chat template. If { % generation % } is present, use HF tokenizer&#39;s `return_assistant_tokens_mask`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The action mask method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">chat_template</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">tokenize_and_mask_messages_default</span>
+    <span class="c1"># check if the chat template contains `{% generation %}` symbol</span>
+    <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\{\%-?\s*generation\s*-?\%\}&quot;</span><span class="p">,</span> <span class="n">chat_template</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">tokenize_and_mask_messages_hf</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">tokenize_and_mask_messages_default</span></div>
 
 
 

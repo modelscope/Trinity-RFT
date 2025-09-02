@@ -65,7 +65,7 @@ To handle differences in `Task` contents, Trinity-RFT provides a unified `Task` 
 
 In the math problem scenario, the `Task` dataset can be a `jsonl` file, where each line contains JSON with `question` and `answer` fields representing the problem description and standard answer, respectively. For example:
 
-```
+```json
 {"question": "1+1=", "answer": "2"}
 {"question": "2+2=", "answer": "4"}
 ...

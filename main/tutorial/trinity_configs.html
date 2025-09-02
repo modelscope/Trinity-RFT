@@ -115,7 +115,7 @@
            <div itemprop="articleBody">
              
   <section class="tex2jax_ignore mathjax_ignore" id="configuration-guide">
-<h1>Configuration Guide<a class="headerlink" href="#configuration-guide" title="Link to this heading"></a></h1>
+<span id="id1"></span><h1>Configuration Guide<a class="headerlink" href="#configuration-guide" title="Link to this heading"></a></h1>
 <p>This section provides a detailed description of the configuration files used in <strong>Trinity-RFT</strong>.</p>
 <section id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
@@ -350,6 +350,7 @@ Users can use these features to simplify configuration.</p>
 <span class="w">      </span><span class="nt">split</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test</span>
 <span class="w">      </span><span class="nt">repeat_times</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="w">      </span><span class="nt">format</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">prompt_type</span><span class="p">:</span><span class="w"> </span><span class="err">`</span><span class="l l-Scalar l-Scalar-Plain">plaintext`</span>
 <span class="w">        </span><span class="nt">prompt_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;question&#39;</span>
 <span class="w">        </span><span class="nt">response_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;answer&#39;</span>
 <span class="w">      </span><span class="nt">rollout_args</span><span class="p">:</span>
@@ -382,12 +383,6 @@ Users can use these features to simplify configuration.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">subset_name</span></code>: The subset name of the task dataset. Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">split</span></code>: The split of the task dataset. Default is <code class="docutils literal notranslate"><span class="pre">train</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">repeat_times</span></code>: The number of rollouts generated for a task. If not set, it will be automatically set to <code class="docutils literal notranslate"><span class="pre">algorithm.repeat_times</span></code> for <code class="docutils literal notranslate"><span class="pre">taskset</span></code>, and <code class="docutils literal notranslate"><span class="pre">1</span></code> for <code class="docutils literal notranslate"><span class="pre">eval_tasksets</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">format</span></code>: Defines keys for prompts and responses in the dataset.</p>
-<ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">prompt_key</span></code>: Specifies which column in the dataset contains the prompt data.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">response_key</span></code>: Specifies which column in the dataset contains the response data.</p></li>
-</ul>
-</li>
 <li><p><code class="docutils literal notranslate"><span class="pre">rollout_args</span></code>: The parameters for rollout.</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">temperature</span></code>: The temperature for sampling.</p></li>
@@ -408,6 +403,7 @@ Users can use these features to simplify configuration.</p>
 <span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">countdown_buffer</span>
 <span class="w">      </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">queue</span>
 <span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sqlite:///countdown_buffer.db</span>
+<span class="w">      </span><span class="nt">max_read_timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1800</span>
 
 <span class="w">    </span><span class="nt">sft_warmup_dataset</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">warmup_data</span>
@@ -438,12 +434,32 @@ Users can use these features to simplify configuration.</p>
 <li><p>For <code class="docutils literal notranslate"><span class="pre">sql</span></code> storage type, the path points to the SQLite database file.</p></li>
 </ul>
 </li>
+<li><p><code class="docutils literal notranslate"><span class="pre">format</span></code>: Defines keys for prompts and responses in the dataset.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">prompt_type</span></code>: Specifies the type of prompts in the dataset. We support <code class="docutils literal notranslate"><span class="pre">plaintext</span></code>, <code class="docutils literal notranslate"><span class="pre">messages</span></code> for now.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">plaintext</span></code>: The prompt is in string format.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">messages</span></code>: The prompt is organized as a message list.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">prompt_key</span></code>: Specifies which column in the dataset contains the user prompt data. Only for <code class="docutils literal notranslate"><span class="pre">plaintext</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">response_key</span></code>: Specifies which column in the dataset contains the response data. Only for <code class="docutils literal notranslate"><span class="pre">plaintext</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">system_prompt_key</span></code>: Specifies which column in the dataset contains the system prompt data. Only for <code class="docutils literal notranslate"><span class="pre">plaintext</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">system_prompt</span></code>: Specifies the system prompt in string format. It has lower priority than <code class="docutils literal notranslate"><span class="pre">system_prompt_key</span></code>. Only for <code class="docutils literal notranslate"><span class="pre">plaintext</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">messages_key</span></code>: Specifies which column in the dataset contains the messages data. Only for <code class="docutils literal notranslate"><span class="pre">messages</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tools_key</span></code>: Specifies which column in the dataset contains the tools data. Support both <code class="docutils literal notranslate"><span class="pre">plaintext</span></code> and <code class="docutils literal notranslate"><span class="pre">messages</span></code>, but the tool data should be organized as a list of dict.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">chosen_key</span></code>: Specifies which column in the dataset contains the DPO chosen data. Support both <code class="docutils literal notranslate"><span class="pre">plaintext</span></code> and <code class="docutils literal notranslate"><span class="pre">messages</span></code>, and the data type should be consistent with the prompt type.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rejected_key</span></code>: Similar to <code class="docutils literal notranslate"><span class="pre">chosen_key</span></code>, but it specifies which column in the dataset contains the DPO rejected data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">enable_concatenated_multi_turn</span></code>: Enable concatenated multi-turn SFT data preprocess. Only for <code class="docutils literal notranslate"><span class="pre">messages</span></code> and only take effect with SFT algorithm.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">chat_template</span></code>: Specifies the chat template in string format. If not provided, use <code class="docutils literal notranslate"><span class="pre">model.custom_chat_template</span></code>.</p></li>
+</ul>
+</li>
 <li><p><code class="docutils literal notranslate"><span class="pre">max_read_timeout</span></code>: The maximum waiting time (in seconds) to read new experience data. If exceeded, an incomplete batch will be returned directly. Only take effect when <code class="docutils literal notranslate"><span class="pre">storage_type</span></code> is <code class="docutils literal notranslate"><span class="pre">queue</span></code>. Default is 1800 seconds (30 minutes).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">use_priority_queue</span></code>: Only take effect when <code class="docutils literal notranslate"><span class="pre">storage_type</span></code> is <code class="docutils literal notranslate"><span class="pre">queue</span></code>. If set to <code class="docutils literal notranslate"><span class="pre">True</span></code>, the queue will be a priority queue, which allows for prioritizing certain experiences over others. Default is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">reuse_cooldown_time</span></code>: Only take effect when <code class="docutils literal notranslate"><span class="pre">storage_type</span></code> is <code class="docutils literal notranslate"><span class="pre">queue</span></code> and <code class="docutils literal notranslate"><span class="pre">use_priority_queue</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>. If set, it specifies the cooldown time (in seconds) for reusing experiences. If not specified, the default value is <code class="docutils literal notranslate"><span class="pre">None</span></code>, meaning experiences can not be reused.</p></li>
 </ul>
 </li>
-<li><p><code class="docutils literal notranslate"><span class="pre">sft_warmup_dataset</span></code>: Optional dataset used for pre-training (SFT warmup).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sft_warmup_dataset</span></code>: Optional dataset used for pre-training (SFT warmup). Its configuration is similar to the <code class="docutils literal notranslate"><span class="pre">experience_buffer</span></code>, but only for SFT usage.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">sft_warmup_steps</span></code>: Number of steps to use SFT warm-up before RL begins.</p></li>
 </ul>
 </section>
