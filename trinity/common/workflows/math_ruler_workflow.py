@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Math workflow with RULER."""
-
+import ast
 from typing import Any, List, Optional, Tuple
 
 import openai
@@ -29,7 +29,6 @@ class MathRULERWorkflow(SimpleWorkflow):
         model: ModelWrapper,
         auxiliary_models: Optional[List[openai.OpenAI]] = None,
     ):
-        self.reset(task)
         super().__init__(
             task=task,
             model=model,
@@ -91,7 +90,9 @@ class MathRULERWorkflow(SimpleWorkflow):
 
         return responses
 
-    def get_ruler_scores(self, responses: List, judger: Any) -> Tuple[bool, List[float]]:
+    def get_ruler_scores(
+        self, responses: List[Experience], judger: Any
+    ) -> Tuple[bool, List[float]]:
         """Get RULER scores"""
 
         num_responses = len(responses)
@@ -143,7 +144,7 @@ Conclude your response with a list of scores, in the following format: [score fo
             return False, [0.0 for _ in range(num_responses)]
         lst_as_str = judger_response[idx1 : (idx2 + 1)]
         try:
-            scores = eval(lst_as_str)
+            scores = ast.literal_eval(lst_as_str)
             scores = [max(0.0, min(1.0, score)) for score in scores]  # clip to range [0, 1]
             return True, scores
         except Exception:

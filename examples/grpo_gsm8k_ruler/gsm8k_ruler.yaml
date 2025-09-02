@@ -68,5 +68,5 @@ synchronizer:
   sync_timeout: 3600
 trainer:
   trainer_type: 'verl'
-  trainer_config_path: 'examples/grpo_gsm8k_ruler/train_gsm8k.yaml'
+  trainer_config_path: 'examples/grpo_gsm8k_ruler/train_gsm8k_ruler.yaml'
   save_interval: 100
