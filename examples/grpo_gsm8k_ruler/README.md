@@ -29,9 +29,34 @@ Some important metrics to pay attention to are:
 ## Results
 We show the results below:
 
-<!-- ![](../../assets/gsm8k_ruler_reward.png) -->
+
+![reward](../../docs/sphinx_doc/assets/gsm8k_ruler_reward.png)
+
+![gold_reward](../../docs/sphinx_doc/assets/gsm8k_ruler_gold_reward.png)
+
+![eval_accuracy](../../docs/sphinx_doc/assets/gsm8k_ruler_eval_accuracy.png)
+
+![judge_success](../../docs/sphinx_doc/assets/gsm8k_ruler_judge_success.png)
+
 
 Also, an example response from the judge LLM is shown below:
-```text
-TODO
+```
+Let's evaluate each solution based on its accuracy, logical consistency, and adherence to the format:
+1. **Candidate Solution 1**: This solution incorrectly calculates the number of blue candles. It attempts to find the difference between the ratio components rather than using the correct proportional method. The rounding down to a whole number is unnecessary and incorrect.
+   - Score: 0.1
+2. **Candidate Solution 2**: This solution correctly identifies the steps needed to find the number of blue candles, but the calculation at the end is incorrect. It mistakenly multiplies the number of sets by 3 instead of using the correct method to derive the number of blue candles.
+   - Score: 0.4
+3. **Candidate Solution 3**: This solution correctly breaks down the problem, calculates the number of groups of 5 red candles, and then uses the ratio to find the number of blue candles. The final answer is correct.
+   - Score: 0.9
+4. **Candidate Solution 4**: Similar to Solution 3, this solution correctly identifies the steps and performs the calculations accurately, leading to the right answer.
+   - Score: 0.9
+5. **Candidate Solution 5**: This solution correctly follows the logical steps to find the number of blue candles and arrives at the correct answer. It repeats the answer tag, which isn't ideal but the reasoning and final result are accurate.
+   - Score: 0.9
+6. **Candidate Solution 6**: This solution provides a clear and accurate explanation of the steps to find the number of blue candles and arrives at the correct answer. It explains the division and multiplication steps well.
+   - Score: 1.0
+7. **Candidate Solution 7**: This solution misunderstands the ratio application, calculating only 3 groups of 5 red candles, which is incorrect. It results in an incorrect number of blue candles.
+   - Score: 0.1
+8. **Candidate Solution 8**: This solution correctly applies the ratio and arrives at the right number of blue candles. It succinctly explains the calculation process.
+   - Score: 0.9
+[0.1, 0.4, 0.9, 0.9, 0.9, 1.0, 0.1, 0.9]
 ```
