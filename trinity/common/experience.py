@@ -127,8 +127,8 @@ class Experience:
     rejected_messages: Optional[List[dict]] = None  # Rejected message list (Include prompt message)
 
     # for multi-modal data
-    multi_modal_data: Optional[Dict[str, Any]] = None
-    multi_modal_inputs: Optional[Dict[str, Tensor]] = None
+    multi_modal_data: Optional[Dict[str, Any]] = None  # Multi-modal data used as vllm inputs
+    multi_modal_inputs: Optional[Dict[str, Tensor]] = None  # Multi-modal inputs for verl trainer
 
     def __init__(  # noqa: C901
         self,
@@ -594,10 +594,7 @@ def gather_returns(experiences, max_response_length: int) -> Optional[dict[str, 
     )
 
 
-# def gather_multi_modal_data(experiences) -> Optional[dict[str, Any]]:
-
-
-def gather_multi_modal_inputs(experiences) -> Optional[dict[str, Tensor]]:
+def gather_multi_modal_inputs(experiences) -> Dict[str, Tensor]:
     keys = experiences[0].multi_modal_inputs.keys()
     return {key: [exp.multi_modal_inputs[key] for exp in experiences] for key in keys}
 

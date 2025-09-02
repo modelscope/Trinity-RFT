@@ -4,10 +4,8 @@ import openai
 
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
-from trinity.common.workflows.workflow import WORKFLOWS, SimpleWorkflow, Task
 from trinity.common.rewards.reward_fn import RewardFn
-
-# from trinity.utils.eval_utils import find_boxed_answer
+from trinity.common.workflows.workflow import WORKFLOWS, SimpleWorkflow, Task
 
 
 @WORKFLOWS.register_module("simple_mm_workflow")
@@ -38,7 +36,6 @@ class SimpleMMWorkflow(SimpleWorkflow):
         assert task.raw_task is not None
         self.truth = task.raw_task[task.format_args.response_key] or task.truth
 
-        # TODO
         reward_fn = task.reward_fn
         if isinstance(reward_fn, type) and issubclass(reward_fn, RewardFn):
             self.reward_fn: RewardFn = reward_fn(**self.reward_fn_args)
@@ -77,11 +74,3 @@ class SimpleMMWorkflow(SimpleWorkflow):
 
         self.logger.debug(f"Generated {len(responses)} responses")
         return responses
-
-    # def compute_reward(self, response, truth) -> dict[str, float]:
-    #     from mathruler.grader import extract_boxed_content, grade_answer
-
-    #     answer = find_boxed_answer(response)
-    #     if grade_answer(answer, truth):
-    #         return {"accuracy": 1.0}  # correct answer
-    #     return {"accuracy": 0.0}  # wrong answer
