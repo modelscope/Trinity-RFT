@@ -1,0 +1,75 @@
+# Configuration file for the AsymRE Math project.
+# REINFORCE for off-Policy Reinforcement Learning: Balancing positive and negative rewards
+# https://arxiv.org/abs/2506.20520.
+project: "Trinity-RFT-MATH"
+name: asymre_math
+checkpoint_root_dir:  /PATH/TO/CHECKPOINT/
+model:
+  model_path: /PATH/TO/MODEL/ # the path to your model
+  max_response_tokens: 1024
+  max_model_len: 1280
+algorithm:
+  algorithm_type: asymre
+  policy_loss_fn_args:
+    tau: 0
+  advantage_fn_args:
+    baseline_shift: -0.1  # Baseline shift for the AsymRE
+  repeat_times: 8
+cluster:
+  node_num: 1
+  gpu_per_node: 8
+
+buffer:
+  total_steps: 2000    # Exactly 2000 training steps as desired
+  batch_size: 16       # 128 trajectories per gradient step, batch_size is the number of tasks per batch
+  explorer_input:
+    taskset:
+      name: math
+      storage_type: file
+      path: /PATH/TO/DATASET/
+      format:
+        prompt_key: 'problem'
+        response_key: 'solution'
+      rollout_args:
+        temperature: 1.0
+        top_p: 1.0
+        logprobs: 0
+    eval_tasksets:
+      - name: math
+        storage_type: file
+        path: /PATH/TO/DATASET/
+        split: 'test'
+        format:
+          prompt_key: 'problem'
+          response_key: 'solution'
+        rollout_args:
+          temperature: 0.1
+          top_p: 0.95
+    default_workflow_type: math_boxed_workflow
+    default_reward_fn_type: math_boxed_reward
+  trainer_input:
+    experience_buffer:
+      name: math_buffer
+      storage_type: queue
+      # path: 'sqlite:///math.db'
+explorer:
+  eval_interval: 250
+  runner_num: 32
+  rollout_model:
+    engine_type: vllm_async
+    engine_num: 4
+    tensor_parallel_size: 1  # Each engine uses 1 GPU
+    enable_prefix_caching: false
+    enforce_eager: true
+    dtype: bfloat16
+    max_prompt_tokens: 1024
+    max_response_tokens: 2048
+    seed: 42
+synchronizer:
+  sync_method: 'nccl'
+  sync_interval: 250
+  sync_timeout: 3600  # Increased from 2000 to 3600 seconds (1 hour)
+trainer:
+  trainer_type: 'verl'
+  trainer_config_path: 'examples/asymre_math/train_math.yaml'
+  save_interval: 500

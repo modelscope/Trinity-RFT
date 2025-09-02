@@ -519,11 +519,11 @@ class ConfigManager:
                     "name": "experience_buffer",
                     "storage_type": st.session_state["storage_type"],
                     "path": experience_buffer_path,
+                    "max_retry_interval": st.session_state["max_retry_interval"],
+                    "max_retry_times": st.session_state["buffer_max_retry_times"],
                 },
                 "sft_warmup_steps": st.session_state["sft_warmup_steps"],
             },
-            "max_retry_times": st.session_state["buffer_max_retry_times"],
-            "max_retry_interval": st.session_state["max_retry_interval"],
         }
         if st.session_state["algorithm_type"] != "dpo":
             experience_buffer = buffer_config["trainer_input"]["experience_buffer"]

@@ -93,7 +93,7 @@ class GRPOAdvantageFn(AdvantageFn):
 
 @ADVANTAGE_FN.register_module("grpo")
 class GRPOGroupedAdvantage(GroupAdvantage):
-    """An example AddStrategy that calculates GRPO advantages."""
+    """An advantage class that calculates GRPO advantages."""
 
     def __init__(
         self,

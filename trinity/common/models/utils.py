@@ -2,7 +2,7 @@
 import os
 import re
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import torch
 from torch.distributed._tensor import DTensor, Placement, Shard
@@ -13,14 +13,16 @@ from trinity.utils.log import get_logger
 def tokenize_and_mask_messages_hf(
     tokenizer: Any,
     messages: List[dict],
+    tools: Optional[List[dict]] = None,
     chat_template: Optional[str] = None,
 ) -> Tuple[torch.Tensor, torch.Tensor, int]:
     """Calculate the assistant token mask with `chat_template`.
 
     Args:
         tokenizer (Any): The tokenizer.
-        chat_template (str): The chat template with `{% generation %}` symbol.
         messages (List[dict]): Messages with `role` and `content` fields.
+        tools (Optional[List[dict]]): The list of tool dictionaries.
+        chat_template (str): The chat template with `{% generation %}` symbol.
 
     Returns:
         `torch.Tensor`: The token_ids (sequence_length)
@@ -29,6 +31,7 @@ def tokenize_and_mask_messages_hf(
     """
     token_dict = tokenizer.apply_chat_template(
         messages,
+        tools=tools,
         chat_template=chat_template,
         add_generation_prompt=False,
         padding=False,
@@ -46,14 +49,16 @@ def tokenize_and_mask_messages_hf(
 def tokenize_and_mask_messages_default(
     tokenizer: Any,
     messages: List[dict],
+    tools: Optional[List[dict]] = None,
     chat_template: Optional[str] = None,
 ) -> Tuple[torch.Tensor, torch.Tensor, int]:
     """Calculate the assistant token mask.
 
     Args:
         tokenizer (Any): The tokenizer.
-        chat_template (str): The chat template with `{% generation %}` symbol.
         messages (List[dict]): Messages with `role` and `content` fields.
+        tools (Optional[List[dict]]): The list of tool dictionaries.
+        chat_template (str): The chat template with `{% generation %}` symbol.
 
     Returns:
         `torch.Tensor`: The token_ids (sequence_length)
@@ -69,6 +74,7 @@ def tokenize_and_mask_messages_default(
 
     tokens = tokenizer.apply_chat_template(
         messages,
+        tools=tools,
         chat_template=chat_template,
         add_generation_prompt=False,
         padding=False,
@@ -81,6 +87,7 @@ def tokenize_and_mask_messages_default(
         if message["role"] == "assistant":
             prompt_token_ids = tokenizer.apply_chat_template(
                 messages[:idx],
+                tools=tools,
                 chat_template=chat_template,
                 add_generation_prompt=True,
                 padding=False,
@@ -91,6 +98,7 @@ def tokenize_and_mask_messages_default(
             prompt_length = prompt_token_ids.shape[1]
             prompt_response_token_ids = tokenizer.apply_chat_template(
                 messages[: idx + 1],
+                tools=tools,
                 chat_template=chat_template,
                 add_generation_prompt=False,
                 padding=False,
@@ -102,6 +110,24 @@ def tokenize_and_mask_messages_default(
             assistant_token_mask[prompt_length:prompt_response_length] = 1
     prompt_length = torch.argmax(assistant_token_mask).item()
     return tokens[0], assistant_token_mask, prompt_length
+
+
+def get_action_mask_method(chat_template: Optional[str] = None) -> Callable:
+    """Get the action mask method according to the chat template.
+
+    Args:
+        chat_template (str): The chat template. If { % generation % } is present, use HF tokenizer's `return_assistant_tokens_mask`.
+
+    Returns:
+        The action mask method.
+    """
+    if chat_template is None:
+        return tokenize_and_mask_messages_default
+    # check if the chat template contains `{% generation %}` symbol
+    elif re.search(r"\{\%-?\s*generation\s*-?\%\}", chat_template):
+        return tokenize_and_mask_messages_hf
+    else:
+        return tokenize_and_mask_messages_default
 
 
 def get_checkpoint_dir_with_step_num(

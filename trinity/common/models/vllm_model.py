@@ -1,8 +1,6 @@
-"""A wrapper around the vllm.AsyncEngine to handle async requests.
-"""
+"""A wrapper around the vllm.AsyncEngine to handle async requests."""
 
 import os
-import re
 from typing import Any, Dict, List, Optional, Sequence, Union
 
 import aiohttp
@@ -19,10 +17,7 @@ from trinity.common.models.mm_utils import (
     build_multi_modal_inputs,
 )
 from trinity.common.models.model import InferenceModel
-from trinity.common.models.utils import (
-    tokenize_and_mask_messages_default,
-    tokenize_and_mask_messages_hf,
-)
+from trinity.common.models.utils import get_action_mask_method
 from trinity.utils.log import get_logger
 
 
@@ -89,17 +84,7 @@ class vLLMRolloutModel(InferenceModel):
         self.chat_template = None
         if self.config.chat_template:
             self.chat_template = self.config.chat_template
-        if self.chat_template is None or not re.search(
-            r"\{\%-?\s*generation\s*-?\%\}", self.chat_template
-        ):
-            self.logger.warning(
-                "The provided chat template does not support `return_assitant_tokens_mask`. "
-                "The default assistant mask method will be used, which may cause performance "
-                "degradation and lead to incorrect results."
-            )
-            self.action_mask_method = tokenize_and_mask_messages_default
-        else:
-            self.action_mask_method = tokenize_and_mask_messages_hf
+        self.action_mask_method = get_action_mask_method(self.chat_template)
         self.state_dict_meta = None
         self.model_version = 0  # TODO: resume the value from the checkpoint
         self.api_server_host = None
@@ -336,14 +321,21 @@ class vLLMRolloutModel(InferenceModel):
 
         raise RuntimeError("[vLLM] The request is not finished. This should not happen.")
 
-    async def convert_messages_to_experience(self, messages: List[dict]) -> Experience:
+    async def convert_messages_to_experience(
+        self,
+        messages: List[dict],
+        tools: Optional[List[dict]] = None,
+    ) -> Experience:
         """Convert a list of messages into an experience."""
         if self.tokenizer is None:
             self.tokenizer = await self.async_llm.get_tokenizer()
         if self.chat_template is None:
             self.chat_template = self.tokenizer.get_chat_template()
         token_ids, action_mask, prompt_length = self.action_mask_method(
-            self.tokenizer, messages, self.chat_template
+            tokenizer=self.tokenizer,
+            messages=messages,
+            tools=tools,
+            chat_template=self.chat_template,
         )  # (seq_length, ), (seq_length, )
         logprobs = await self.logprobs(token_ids=token_ids.tolist())  # (seq_length - 1,)
         return Experience(

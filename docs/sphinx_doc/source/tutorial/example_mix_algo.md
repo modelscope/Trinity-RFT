@@ -32,7 +32,7 @@ We prompt a powerful LLM to generate responses with the CoT process for some pre
 ```json
 {
     "messages": [
-    { "role": "system", "content": <system_prompt> },
+    { "role": "system", "content": "<system_prompt>" },
     { "role": "user", "content": "What is the sum of 4 and 12?" },
     { "role": "assistant", "content": "<think>thinking process...</think>\n<answer>16</answer>" } ]
 },
@@ -54,7 +54,7 @@ class MIXAlgorithm(AlgorithmType):
     use_reference: bool = True
     compute_advantage_in_trainer: bool = False
     can_balance_batch: bool = True
-    schema: type = ExperienceModel
+    schema: str = "experience"
 
     @classmethod
     def default_config(cls) -> Dict:

@@ -16,7 +16,6 @@ from trinity.common.constants import (
     StorageType,
     SyncMethod,
     SyncStyle,
-    TaskType,
 )
 from trinity.utils.annotations import Experimental
 from trinity.utils.log import get_logger
@@ -28,6 +27,7 @@ logger = get_logger(__name__)
 class FormatConfig:
     """Configuration for data formatting"""
 
+    # for sft / dpo
     prompt_type: PromptType = PromptType.MESSAGES
 
     # for plaintext input
@@ -54,6 +54,12 @@ class FormatConfig:
     chosen_key: str = "chosen"
     rejected_key: str = "rejected"
 
+    # for multi-turn sft
+    enable_concatenated_multi_turn: bool = False
+
+    # for sft / dpo, if None, use model.custom_chat_template
+    chat_template: Optional[str] = None
+
 
 @dataclass
 class GenerationConfig:
@@ -77,17 +83,12 @@ class StorageConfig:
 
     # used for multi-modal data
     media_io_kwargs: dict = field(default_factory=dict)
-    # only available for StorageType.FILE. When requiring data processing on raw data, set the raw to True.
-    raw: bool = False
 
     # used for StorageType.FILE
     split: str = "train"
     subset_name: Optional[str] = None
     format: FormatConfig = field(default_factory=FormatConfig)
     index: int = 0
-
-    # used for StorageType.SQL/FILE
-    wrap_in_ray: bool = True
 
     # used for StorageType.QUEUE
     capacity: int = 10000
@@ -97,6 +98,10 @@ class StorageConfig:
     replay_buffer_kwargs: dict = field(
         default_factory=lambda: {"priority_fn": "linear_decay", "decay": 0.1}
     )
+
+    # used for StorageType.SQL
+    max_retry_times: int = 3
+    max_retry_interval: int = 1
 
     # used for rollout tasks
     default_workflow_type: Optional[str] = None
@@ -112,8 +117,11 @@ class StorageConfig:
     # get storage from existing experiment
     ray_namespace: Optional[str] = None
 
-    # ! DO NOT SET, automatically set from algorithm.algorithm_type
-    algorithm_type: Optional[str] = None
+    # ! DO NOT SET except you know what you are doing
+    wrap_in_ray: bool = True
+
+    # ! DO NOT SET, automatically set
+    schema_type: Optional[str] = None
 
     # ! DO NOT SET, automatically set from buffer.total_epochs
     total_epochs: int = 1  # automatically set
@@ -122,7 +130,7 @@ class StorageConfig:
     total_steps: Optional[int] = None  # automatically set
 
     # ! DO NOT SET,  automatically set corresponding to train/eval
-    task_type: TaskType = TaskType.EXPLORE
+    is_eval: bool = False
 
 
 @dataclass
@@ -353,10 +361,6 @@ class BufferConfig:
     # for trainer
     trainer_input: TrainerInput = field(default_factory=TrainerInput)
 
-    # for storage connection
-    max_retry_times: int = 3
-    max_retry_interval: int = 1
-
     # ! DO NOT SET FOLLOWING FIELDS
     explorer_output: Optional[StorageConfig] = None  # automatically set
     tokenizer_path: Optional[str] = None  # automatically set
@@ -555,7 +559,7 @@ class Config:
             self.buffer.trainer_input.experience_buffer.total_epochs = self.buffer.total_epochs
             self.buffer.trainer_input.experience_buffer.total_steps = self.buffer.total_steps
         else:
-            self.buffer.explorer_input.taskset.task_type = TaskType.EXPLORE
+            self.buffer.explorer_input.taskset.is_eval = False
             self.buffer.explorer_input.taskset.total_epochs = self.buffer.total_epochs
             self.buffer.explorer_input.taskset.total_steps = self.buffer.total_steps
         if self.buffer.explorer_input.taskset.default_workflow_type is None:
@@ -586,7 +590,7 @@ class Config:
             if not dataset.path:
                 logger.warning(f"Eval dataset [{dataset}]'s path is not configured. Skip.")
                 continue
-            dataset.task_type = TaskType.EVAL
+            dataset.is_eval = True
             if not dataset.name:
                 dataset.name = f"eval_taskset_{idx}"
             if dataset.repeat_times is None:
@@ -626,12 +630,19 @@ class Config:
             )
             self.buffer.trainer_input.experience_buffer.storage_type = StorageType.QUEUE
 
-        if self.buffer.trainer_input.experience_buffer is not None:
-            self.buffer.trainer_input.experience_buffer.algorithm_type = (
-                self.algorithm.algorithm_type
+        from trinity.algorithm.algorithm import ALGORITHM_TYPE
+
+        self.buffer.trainer_input.experience_buffer.schema_type = ALGORITHM_TYPE.get(
+            self.algorithm.algorithm_type
+        ).schema
+
+        if self.buffer.trainer_input.experience_buffer.ray_namespace is None:
+            self.buffer.trainer_input.experience_buffer.ray_namespace = self.ray_namespace
+
+        if self.buffer.trainer_input.experience_buffer.format.chat_template is None:
+            self.buffer.trainer_input.experience_buffer.format.chat_template = (
+                self.model.custom_chat_template
             )
-            if self.buffer.trainer_input.experience_buffer.ray_namespace is None:
-                self.buffer.trainer_input.experience_buffer.ray_namespace = self.ray_namespace
 
         # create buffer.cache_dir at <checkpoint_root_dir>/<project>/<name>/buffer
         self.buffer.cache_dir = os.path.abspath(os.path.join(self.checkpoint_job_dir, "buffer"))
@@ -652,12 +663,16 @@ class Config:
                 "`buffer.trainer_input.sft_warmup_dataset` is required when `buffer.trainer_input.sft_warmup_steps` > 0"
             )
         if self.buffer.trainer_input.sft_warmup_dataset is not None:
-            self.buffer.trainer_input.sft_warmup_dataset.algorithm_type = "sft"  # TODO
+            self.buffer.trainer_input.sft_warmup_dataset.schema_type = "sft"
             self.buffer.trainer_input.sft_warmup_dataset.total_steps = (
                 self.buffer.trainer_input.sft_warmup_steps
             )
             if self.buffer.trainer_input.sft_warmup_dataset.ray_namespace is None:
                 self.buffer.trainer_input.sft_warmup_dataset.ray_namespace = self.ray_namespace
+            if self.buffer.trainer_input.sft_warmup_dataset.format.chat_template is None:
+                self.buffer.trainer_input.sft_warmup_dataset.format.chat_template = (
+                    self.model.custom_chat_template
+                )
 
         # check input/output buffers in pipelines
         if self.data_processor.experience_pipeline is not None:

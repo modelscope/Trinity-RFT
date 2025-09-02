@@ -65,7 +65,7 @@ To handle differences in `Task` contents, Trinity-RFT provides a unified `Task` 
 
 In the math problem scenario, the `Task` dataset can be a `jsonl` file, where each line contains JSON with `question` and `answer` fields representing the problem description and standard answer, respectively. For example:
 
-```
+```json
 {"question": "1+1=", "answer": "2"}
 {"question": "2+2=", "answer": "4"}
 ...
@@ -447,7 +447,7 @@ class OPMDPolicyLossFn(PolicyLossFn):
 
 The above steps implement the components needed for the algorithm, but these components are scattered and need to be configured in multiple places to take effect.
 
-To simplify configuration, Trinity-RFT provides {class}`trinity.algorithm.AlgorithmType` to describe a complete algorithm and registers it in {object}`trinity.algorithm.ALGORITHM_TYPE`, enabling one-click configuration.
+To simplify configuration, Trinity-RFT provides {class}`trinity.algorithm.AlgorithmType` to describe a complete algorithm and registers it in {class}`trinity.algorithm.ALGORITHM_TYPE`, enabling one-click configuration.
 
 The `AlgorithmType` class includes the following attributes and methods:
 
@@ -473,7 +473,7 @@ class OPMDAlgorithm(AlgorithmType):
     use_reference: bool = True
     compute_advantage_in_trainer: bool = False
     can_balance_batch: bool = True
-    schema: type = ExperienceModel
+    schema: str = "experience"
 
     @classmethod
     def default_config(cls) -> Dict:

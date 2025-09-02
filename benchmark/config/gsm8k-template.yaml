@@ -51,8 +51,6 @@ buffer:
         priority_fn: linear_decay
         decay: 0.1
     sft_warmup_steps: 0
-  max_retry_times: 3
-  max_retry_interval: 1
 explorer:
   runner_per_model: 8
   max_timeout: 900

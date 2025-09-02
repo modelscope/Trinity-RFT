@@ -4,7 +4,7 @@ from typing import List
 import ray
 
 from trinity.buffer.buffer_writer import BufferWriter
-from trinity.buffer.ray_wrapper import QueueWrapper
+from trinity.buffer.storage.queue import QueueStorage
 from trinity.common.config import BufferConfig, StorageConfig
 from trinity.common.constants import StorageType
 
@@ -15,7 +15,7 @@ class QueueWriter(BufferWriter):
     def __init__(self, meta: StorageConfig, config: BufferConfig):
         assert meta.storage_type == StorageType.QUEUE
         self.config = config
-        self.queue = QueueWrapper.get_wrapper(meta, config)
+        self.queue = QueueStorage.get_wrapper(meta, config)
 
     def write(self, data: List) -> None:
         ray.get(self.queue.put_batch.remote(data))
