@@ -113,6 +113,7 @@ class ASYMREGroupAdvantage(GroupAdvantage):
                 exp.returns = exp.advantages.clone()
             metrics = {
                 "group_baseline": group_baseline.item(),
+                "reward_mean": group_baseline.item() - self.baseline_shift,
             }
         return exps, metrics
 

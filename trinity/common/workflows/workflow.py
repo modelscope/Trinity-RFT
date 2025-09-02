@@ -24,7 +24,7 @@ WORKFLOWS = Registry("workflows")
 class Task(dict):
     """A Task class that defines a task and its associated reward function / workflow."""
 
-    workflow: Type[Workflow]
+    workflow: Type[Workflow] = None
     repeat_times: Optional[int] = None
     format_args: FormatConfig = field(default_factory=FormatConfig)
     rollout_args: GenerationConfig = field(default_factory=GenerationConfig)

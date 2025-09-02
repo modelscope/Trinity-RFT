@@ -48,13 +48,6 @@ class PromptType(CaseInsensitiveEnum):
     PLAINTEXT = "plaintext"  # user prompt text and assistant response text
 
 
-class TaskType(Enum):
-    """Task Type."""
-
-    EXPLORE = 0
-    EVAL = 1
-
-
 class StorageType(CaseInsensitiveEnum):
     """Storage Type."""
 
@@ -68,6 +61,7 @@ class MonitorType(CaseInsensitiveEnum):
 
     WANDB = "wandb"
     TENSORBOARD = "tensorboard"
+    MLFLOW = "mlflow"
 
 
 class SyncMethodEnumMeta(CaseInsensitiveEnumMeta):

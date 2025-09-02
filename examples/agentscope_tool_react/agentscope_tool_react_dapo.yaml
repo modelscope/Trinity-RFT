@@ -16,8 +16,6 @@ buffer:
   total_epochs: 1
   batch_size: 32
   train_batch_size: 512
-  max_retry_times: 3
-  max_retry_interval: 1
   explorer_input:
     taskset:
       name: dapo

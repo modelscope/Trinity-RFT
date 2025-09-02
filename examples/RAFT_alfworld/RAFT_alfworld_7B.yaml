@@ -15,8 +15,6 @@ cluster:
 buffer:
   total_epochs: 30
   batch_size: 80
-  max_retry_times: 1
-  max_retry_interval: 1
   explorer_input:
     taskset:
       name: alfworld-train

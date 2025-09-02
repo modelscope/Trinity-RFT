@@ -213,7 +213,7 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
         ) = StorageConfig(
             name="test",
             storage_type=StorageType.QUEUE,
-            algorithm_type="ppo",
+            schema_type="experience",
             path="",
         )
         self.config.buffer.trainer_input.experience_buffer.max_read_timeout = 1

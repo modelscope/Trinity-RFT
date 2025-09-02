@@ -14,8 +14,6 @@ cluster:
 buffer:
   total_epochs: 20
   batch_size: 288
-  max_retry_times: 3
-  max_retry_interval: 1
   explorer_input:
     taskset:
       name: math

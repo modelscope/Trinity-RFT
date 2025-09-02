@@ -3,13 +3,8 @@ import unittest
 from transformers import AutoTokenizer
 
 from tests.tools import get_model_path
-from trinity.buffer.schema.formatter import (
-    DPOMessagesFormatter,
-    DPOPlaintextFormatter,
-    SFTMessagesFormatter,
-    SFTPlaintextFormatter,
-)
-from trinity.common.config import FormatConfig
+from trinity.buffer.schema.formatter import FORMATTER
+from trinity.common.config import FormatConfig, StorageConfig
 from trinity.common.constants import PromptType
 from trinity.common.experience import Experience
 
@@ -23,7 +18,7 @@ class TestFormatter(unittest.TestCase):
             prompt_type=PromptType.MESSAGES,
             messages_key="message_list",
         )
-        formatter = SFTMessagesFormatter(tokenizer=self.tokenizer, format_config=config)
+        formatter = FORMATTER.get("sft")(tokenizer=self.tokenizer, format_config=config)
         sample = {
             "message_list": [
                 {"role": "user", "content": "Hi"},
@@ -47,7 +42,7 @@ class TestFormatter(unittest.TestCase):
             messages_key="messages",
             tools_key="tools",
         )
-        formatter = SFTMessagesFormatter(tokenizer=self.tokenizer, format_config=config)
+        formatter = FORMATTER.get("sft")(tokenizer=self.tokenizer, format_config=config)
         sample = {
             "messages": [
                 {
@@ -126,7 +121,7 @@ class TestFormatter(unittest.TestCase):
             prompt_key="prompt",
             response_key="response",
         )
-        formatter = SFTPlaintextFormatter(tokenizer=self.tokenizer, format_config=config)
+        formatter = FORMATTER.get("sft")(tokenizer=self.tokenizer, format_config=config)
         sample = {
             "system": "You are a helpful assistant.",
             "prompt": "What is 2+2?",
@@ -150,7 +145,7 @@ class TestFormatter(unittest.TestCase):
             prompt_key="prompt",
             response_key="response",
         )
-        formatter = SFTPlaintextFormatter(tokenizer=self.tokenizer, format_config=config)
+        formatter = FORMATTER.get("sft")(tokenizer=self.tokenizer, format_config=config)
 
         exp = formatter.format(sample)
         self.assertIsInstance(exp, Experience)
@@ -170,7 +165,7 @@ class TestFormatter(unittest.TestCase):
             chosen_key="chosen",
             rejected_key="rejected",
         )
-        formatter = DPOPlaintextFormatter(tokenizer=self.tokenizer, format_config=config)
+        formatter = FORMATTER.get("dpo")(tokenizer=self.tokenizer, format_config=config)
         sample = {"prompt": "What is 2+2?", "chosen": "2+2=4", "rejected": "2+2=5"}
         exp = formatter.format(sample)
         self.assertIsInstance(exp, Experience)
@@ -196,7 +191,7 @@ class TestFormatter(unittest.TestCase):
             chosen_key="chosen",
             rejected_key="rejected",
         )
-        formatter = DPOMessagesFormatter(tokenizer=self.tokenizer, format_config=config)
+        formatter = FORMATTER.get("dpo")(tokenizer=self.tokenizer, format_config=config)
         sample = {
             "messages": [
                 {"role": "user", "content": "What is your name?"},
@@ -217,3 +212,63 @@ class TestFormatter(unittest.TestCase):
         self.assertIn("What is your name?", prompt)
         self.assertIn("My name is Assistant.", chosen)
         self.assertIn("I don't have a favorite color.", rejected)
+
+    def test_task_formatter(self):
+        sample = {
+            "question": "1+1=",
+            "answer": "2",
+            "workflow": "math_rm_workflow",
+            "reward": "math_boxed_reward",
+        }
+        config = StorageConfig(
+            is_eval=True,
+            default_workflow_type="math_workflow",
+            default_eval_workflow_type="math_boxed_workflow",
+            workflow_args={"use_base": True, "with_think": True},
+        )
+        formatter = FORMATTER.get("task")(config=config)
+        task = formatter.format(sample)
+        from trinity.common.workflows.customized_math_workflows import MathBoxedWorkflow
+
+        self.assertEqual(task.workflow, MathBoxedWorkflow)
+        self.assertTrue(task.workflow_args.get("use_base"))
+        self.assertTrue(task.workflow_args.get("with_think"))
+        self.assertEqual(task.raw_task, sample)
+
+        config = StorageConfig(
+            is_eval=False,
+            default_workflow_type="math_workflow",
+            default_eval_workflow_type="math_boxed_workflow",
+            default_reward_fn_type="math_reward",
+            workflow_args={"use_base": False, "with_think": True},
+        )
+        formatter = FORMATTER.get("task")(config=config)
+        task = formatter.format(sample)
+        from trinity.common.rewards.math_reward import MathRewardFn
+        from trinity.common.workflows.workflow import MathWorkflow
+
+        self.assertEqual(task.workflow, MathWorkflow)
+        self.assertEqual(task.reward_fn, MathRewardFn)
+        self.assertFalse(task.workflow_args.get("use_base"))
+        self.assertTrue(task.workflow_args.get("with_think"))
+        self.assertEqual(task.raw_task, sample)
+
+        config = StorageConfig(
+            is_eval=False,
+            default_eval_workflow_type="math_workflow",
+            workflow_args={"use_base": True, "with_think": False},
+            format=FormatConfig(
+                workflow_key="workflow",
+                reward_fn_key="reward",
+            ),
+        )
+        formatter = FORMATTER.get("task")(config=config)
+        task = formatter.format(sample)
+        from trinity.common.rewards.math_reward import MathBoxedRewardFn
+        from trinity.common.workflows.math_rm_workflow import MathRMWorkflow
+
+        self.assertEqual(task.workflow, MathRMWorkflow)
+        self.assertEqual(task.reward_fn, MathBoxedRewardFn)
+        self.assertTrue(task.workflow_args.get("use_base"))
+        self.assertFalse(task.workflow_args.get("with_think"))
+        self.assertEqual(task.raw_task, sample)

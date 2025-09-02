@@ -120,7 +120,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import NullPool
-from trinity.common.schema import ExperienceModel
+from trinity.common.schema.sql_schema import ExperienceModel
 
 engine = create_engine(buffer.trainer_input.experience_buffer.path)
 session = sessionmaker(bind=engine)
@@ -129,7 +129,6 @@ sess = session()
 MAX_EXPERIENCES = 4
 experiences = (
     sess.query(ExperienceModel)
-    .with_for_update()
     .limit(MAX_EXPERIENCES)
     .all()
 )

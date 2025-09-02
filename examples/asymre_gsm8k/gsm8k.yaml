@@ -1,6 +1,10 @@
-project: sync_offset_0_sync20
-name: asymre-gsm8k_shift-0.1
-checkpoint_root_dir: /PATH/TO/CHECKPOINT/
+# Configuration file for the AsymRE GSM8k project.
+# REINFORCE for off-Policy Reinforcement Learning: Balancing positive and negative rewards
+# https://arxiv.org/abs/2506.20520.
+
+project: "Trinity-RFT-GSM8K"
+name: asymre_gsm8k
+checkpoint_root_dir:  /PATH/TO/CHECKPOINT/
 model:
   model_path: /PATH/TO/MODEL/
   max_response_tokens: 1024
@@ -18,8 +22,6 @@ cluster:
 buffer:
   total_steps: 80
   batch_size: 96
-  max_retry_times: 3
-  max_retry_interval: 1
   explorer_input:
     taskset:
       name: gsm8k

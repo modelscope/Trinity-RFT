@@ -33,7 +33,7 @@ class TestQueueBuffer(RayUnittestBaseAysnc):
     async def test_queue_buffer(self, name, use_priority_queue):
         meta = StorageConfig(
             name=name,
-            algorithm_type="ppo",
+            schema_type="experience",
             storage_type=StorageType.QUEUE,
             max_read_timeout=3,
             path=BUFFER_FILE_PATH,
@@ -97,7 +97,7 @@ class TestQueueBuffer(RayUnittestBaseAysnc):
         self.config.train_batch_size = 4
         meta = StorageConfig(
             name="test_buffer_small",
-            algorithm_type="ppo",
+            schema_type="experience",
             storage_type=StorageType.QUEUE,
             max_read_timeout=1,
             capacity=100,  # priority will use 2 * train_batch_size as capacity (8)
@@ -151,7 +151,7 @@ class TestQueueBuffer(RayUnittestBaseAysnc):
         # test queue capacity
         meta = StorageConfig(
             name="test_buffer_small",
-            algorithm_type="ppo",
+            schema_type="experience",
             storage_type=StorageType.QUEUE,
             max_read_timeout=3,
             capacity=4,
@@ -180,7 +180,7 @@ class TestQueueBuffer(RayUnittestBaseAysnc):
         # test queue reuse
         meta = StorageConfig(
             name="test_buffer_small",
-            algorithm_type="ppo",
+            schema_type="experience",
             storage_type=StorageType.QUEUE,
             max_read_timeout=3,
             capacity=4,
@@ -306,8 +306,6 @@ class TestQueueBuffer(RayUnittestBaseAysnc):
         self.train_batch_size = 4
 
         self.config = BufferConfig(
-            max_retry_times=3,
-            max_retry_interval=1,
             train_batch_size=self.train_batch_size,
         )
         if os.path.exists(BUFFER_FILE_PATH):
