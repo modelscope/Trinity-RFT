@@ -1,0 +1,53 @@
+project: "Trinity-RFT-countdown"
+name: "qwen2.5-1.5B-countdown"
+checkpoint_root_dir: /PATH/TO/CHECKPOINT/
+algorithm:
+  algorithm_type: ppo
+  repeat_times: 5
+model:
+  model_path: '/PATH/TO/MODEL/CHECKPOINT/'
+  max_response_tokens: 1024
+  max_model_len: 1280
+cluster:
+  node_num: 1
+  gpu_per_node: 8
+buffer:
+  total_epochs: 20
+  batch_size: 96
+  explorer_input:
+    taskset:
+      name: countdown
+      storage_type: file
+      path: 'countdown_dataset/oneshot-split'
+      format:
+        prompt_key: 'question'
+        response_key: 'answer'
+      rollout_args:
+        temperature: 1.0
+        logprobs: 0
+    default_workflow_type: 'math_workflow'
+    default_reward_fn_type: 'countdown_reward'
+  trainer_input:
+    experience_buffer:
+      name: countdown_buffer
+      storage_type: queue
+      path: 'sqlite:///countdown.db'
+explorer:
+  eval_interval: 100
+  runner_num: 32
+  rollout_model:
+    engine_type: vllm_async
+    engine_num: 2
+    tensor_parallel_size: 1
+    enable_prefix_caching: false
+    enforce_eager: true
+    dtype: bfloat16
+    seed: 42
+synchronizer:
+  sync_method: 'nccl'
+  sync_interval: 10
+  sync_timeout: 1200
+trainer:
+  trainer_type: 'verl'
+  trainer_config_path: 'examples/ppo_countdown_megatron/train_countdown.yaml'
+  save_interval: 100

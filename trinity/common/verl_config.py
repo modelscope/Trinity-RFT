@@ -334,7 +334,7 @@ class veRLConfig:
 
     def synchronize_config(self, config: Config) -> None:  # noqa: C901
         """Synchronize config."""
-        if config.mode != "train":
+        if config.mode == "both":
             rollout_gpu_num = (
                 config.explorer.rollout_model.tensor_parallel_size
                 * config.explorer.rollout_model.engine_num
@@ -356,7 +356,7 @@ class veRLConfig:
             # for multi-node scenarios, some nodes for rollout, others for training
             assert (
                 rollout_gpu_num % config.cluster.gpu_per_node == 0
-            ), "rollout_gpu_num must be divisible by `gpu_per_node`"
+            ), f"rollout_gpu_num ({rollout_gpu_num}) must be divisible by `gpu_per_node` ({config.cluster.gpu_per_node})"
             rollout_node_num = math.ceil(rollout_gpu_num / config.cluster.gpu_per_node)
             self.trainer.nnodes = config.cluster.node_num - rollout_node_num
             if self.trainer.nnodes < 1:
@@ -364,6 +364,10 @@ class veRLConfig:
             self.trainer.n_gpus_per_node = config.cluster.gpu_per_node
 
         world_size = self.trainer.nnodes * self.trainer.n_gpus_per_node
+        if world_size <= 0:
+            raise ValueError(
+                "The number of training gpus must be greater than 0, please check `engine_num` in explorer configs"
+            )
         if config.buffer.train_batch_size % world_size != 0:
             raise ValueError(
                 f"batch_size ({config.buffer.train_batch_size}) must be divisible by ({world_size})"
