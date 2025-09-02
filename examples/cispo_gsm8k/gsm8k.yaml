@@ -1,0 +1,67 @@
+project: "Trinity-RFT-gsm8k"
+name: "qwen2.5-1.5B-gsm8k-cispo"
+checkpoint_root_dir: /PATH/TO/CHECKPOINT/
+algorithm:
+  algorithm_type: cispo
+  repeat_times: 8
+model:
+  model_path: /PATH/TO/MODEL/
+  max_response_tokens: 1024
+  max_model_len: 1280
+cluster:
+  node_num: 1
+  gpu_per_node: 8
+buffer:
+  total_epochs: 1
+  batch_size: 96
+  explorer_input:
+    taskset:
+      name: gsm8k
+      storage_type: file
+      path: 'openai/gsm8k'
+      subset_name: 'main'
+      split: 'train'
+      format:
+        prompt_key: 'question'
+        response_key: 'answer'
+      rollout_args:
+        temperature: 1.0
+    eval_tasksets:
+    - name: gsm8k-eval
+      storage_type: file
+      path: 'openai/gsm8k'
+      subset_name: 'main'
+      split: 'test'
+      format:
+        prompt_key: 'question'
+        response_key: 'answer'
+    default_workflow_type: 'math_workflow'
+  trainer_input:
+    experience_buffer:
+      name: gsm8k_buffer
+      storage_type: queue
+      path: 'sqlite:///gsm8k.db'
+    # sft_warmup_steps: 0
+    # sft_warmup_dataset: # Uncomment these to enable sft warmup
+    #   name: warmup_data
+    #   storage_type: file
+    #   path: '/PATH/TO/WARMUP_DATA/'
+explorer:
+  eval_interval: 50
+  runner_num: 32
+  rollout_model:
+    engine_type: vllm_async
+    engine_num: 2
+    tensor_parallel_size: 1
+    enable_prefix_caching: false
+    enforce_eager: true
+    dtype: bfloat16
+    seed: 42
+synchronizer:
+  sync_method: 'nccl'
+  sync_interval: 4
+  sync_timeout: 1200
+trainer:
+  trainer_type: 'verl'
+  trainer_config_path: 'examples/cispo_gsm8k/train_gsm8k.yaml'
+  save_interval: 100

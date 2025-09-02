@@ -99,6 +99,7 @@ def get_unittest_dataset_config(
                 prompt_type=PromptType.MESSAGES,
                 messages_key="messages",
                 tools_key="tools",
+                enable_concatenated_multi_turn=True,
             ),
         )
     elif dataset_name == "dpo":

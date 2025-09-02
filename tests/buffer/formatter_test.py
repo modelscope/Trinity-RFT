@@ -37,12 +37,7 @@ class TestFormatter(unittest.TestCase):
         self.assertIn("Hello", sequence)
 
         # test tool
-        config = FormatConfig(
-            prompt_type=PromptType.MESSAGES,
-            messages_key="messages",
-            tools_key="tools",
-        )
-        formatter = FORMATTER.get("sft")(tokenizer=self.tokenizer, format_config=config)
+
         sample = {
             "messages": [
                 {
@@ -99,18 +94,59 @@ class TestFormatter(unittest.TestCase):
                 }
             ],
         }
+        config = FormatConfig(
+            prompt_type=PromptType.MESSAGES,
+            messages_key="messages",
+            tools_key="tools",
+            enable_concatenated_multi_turn=False,
+        )
+        formatter = FORMATTER.get("sft")(tokenizer=self.tokenizer, format_config=config)
         exp = formatter.format(sample)
         self.assertIsInstance(exp, Experience)
         self.assertIsNotNone(exp.tokens)
         self.assertIsNotNone(exp.prompt_length)
         self.assertTrue(exp.prompt_length < len(exp.tokens))
+        self.assertIsNotNone(exp.action_mask)
+        self.assertEqual(len(exp.action_mask) + exp.prompt_length, len(exp.tokens))
+        # assert action mask is all true
+        self.assertTrue(all(exp.action_mask.tolist()))
         sequence = self.tokenizer.decode(exp.tokens)
         self.assertIn("What's the weather like in Beijing today?", sequence)
+        self.assertIn("Let me get the weather for you.", sequence)
         self.assertIn(
             "The weather in Beijing today is sunny with a temperature of 22°C and humidity at 45%. It's a pleasant day!",
             sequence,
         )
         self.assertIn("get_weather", sequence)
+
+        config = FormatConfig(
+            prompt_type=PromptType.MESSAGES,
+            messages_key="messages",
+            tools_key="tools",
+            enable_concatenated_multi_turn=True,
+        )
+        formatter = FORMATTER.get("sft")(tokenizer=self.tokenizer, format_config=config)
+        exp = formatter.format(sample)
+        self.assertIsInstance(exp, Experience)
+        self.assertIsNotNone(exp.tokens)
+        self.assertIsNotNone(exp.prompt_length)
+        self.assertTrue(exp.prompt_length < len(exp.tokens))
+        self.assertIsNotNone(exp.action_mask)
+        self.assertEqual(len(exp.action_mask) + exp.prompt_length, len(exp.tokens))
+        self.assertTrue(any(exp.action_mask.tolist()) and not all(exp.action_mask.tolist()))
+        prompt = self.tokenizer.decode(exp.tokens[: exp.prompt_length])
+        response = self.tokenizer.decode(exp.tokens[exp.prompt_length :])
+        self.assertIn("What's the weather like in Beijing today?", prompt)
+        self.assertNotIn("Let me get the weather for you.", prompt)
+        self.assertIn("Let me get the weather for you.", response)
+        self.assertNotIn(
+            "The weather in Beijing today is sunny with a temperature of 22°C and humidity at 45%. It's a pleasant day!",
+            prompt,
+        )
+        self.assertIn(
+            "The weather in Beijing today is sunny with a temperature of 22°C and humidity at 45%. It's a pleasant day!",
+            response,
+        )
 
     def test_sft_plaintext_formatter(self):
         # with system prompt key

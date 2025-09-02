@@ -40,6 +40,7 @@ def print_debug(*args):
         print(*args)
 
 
+# Qwen2.5 chat template with {% generation %} mark
 CHAT_TEMPLATE = r"""
 {%- if tools %}
     {{- '<|im_start|>system\n' }}
@@ -67,19 +68,19 @@ CHAT_TEMPLATE = r"""
     {%- elif (message.role == "assistant" and not message.tool_calls) %}
         {{- '<|im_start|>' + message.role + '\n'}}{% generation %}{{- message.content + '<|im_end|>' + '\n' }}{% endgeneration %}
     {%- elif message.role == "assistant" %}
-        {{- '<|im_start|>' + message.role }}{% generation %}
+        {{- '<|im_start|>' + message.role + '\n'}}{% generation %}
         {%- if message.content %}
-            {{- '\n' + message.content }}
+            {{- message.content }}
         {%- endif %}
         {%- for tool_call in message.tool_calls %}
             {%- if tool_call.function is defined %}
                 {%- set tool_call = tool_call.function %}
             {%- endif %}
-            {{- '\n<tool_call>\n{"name": "' }}
+            {{- '<tool_call>\n{"name": "' }}
             {{- tool_call.name }}
             {{- '", "arguments": ' }}
             {{- tool_call.arguments | tojson }}
-            {{- '}\n</tool_call>' }}
+            {{- '}\n</tool_call>\n' }}
         {%- endfor %}
         {{- '<|im_end|>\n' }}{% endgeneration %}
     {%- elif message.role == "tool" %}
@@ -307,7 +308,7 @@ class TestAPIServer(RayUnittestBase):
 
 
 class TestTokenizer(unittest.TestCase):
-    def test_assistant_token_mask(self):
+    def test_action_mask(self):
         messages = [
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": "What's the weather like today?"},
@@ -330,6 +331,80 @@ class TestTokenizer(unittest.TestCase):
         token_ids_hf, action_mask_hf, prompt_length_hf = tokenize_and_mask_messages_hf(
             tokenizer=tokenizer,
             messages=messages,
+            chat_template=CHAT_TEMPLATE,
+        )
+        self.assertEqual(token_ids.shape, token_ids_hf.shape)
+        self.assertEqual(action_mask.shape, action_mask_hf.shape)
+        self.assertTrue(torch.equal(token_ids, token_ids_hf))
+        self.assertTrue(torch.equal(action_mask, action_mask_hf))
+        self.assertEqual(prompt_length, prompt_length_hf)
+
+    def test_action_mask_with_tools(self):
+        messages = [
+            {
+                "role": "system",
+                "content": "You are a helpful assistant with access to various tools. Use them when needed to help users.",
+            },
+            {"role": "user", "content": "What's the weather like in Beijing today?"},
+            {
+                "role": "assistant",
+                "content": "Let me get the weather for you.",
+                "tool_calls": [
+                    {
+                        "id": "call_abc123",
+                        "type": "function",
+                        "function": {
+                            "name": "get_weather",
+                            "arguments": '{"location": "Beijing", "unit": "celsius"}',
+                        },
+                    }
+                ],
+            },
+            {
+                "role": "tool",
+                "content": '{"temperature": 22, "condition": "sunny", "humidity": 45}',
+                "tool_call_id": "call_abc123",
+            },
+            {
+                "role": "assistant",
+                "content": "The weather in Beijing today is sunny with a temperature of 22°C and humidity at 45%. It's a pleasant day!",
+            },
+        ]
+        tools = [
+            {
+                "type": "function",
+                "function": {
+                    "name": "get_weather",
+                    "description": "Get the current weather in a given location",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "location": {
+                                "type": "string",
+                                "description": "The city and state, e.g. San Francisco, CA",
+                            },
+                            "unit": {
+                                "type": "string",
+                                "enum": ["celsius", "fahrenheit"],
+                                "description": "The temperature unit",
+                            },
+                        },
+                        "required": ["location"],
+                    },
+                },
+            }
+        ]
+        tokenizer = AutoTokenizer.from_pretrained(get_model_path())
+        token_ids, action_mask, prompt_length = tokenize_and_mask_messages_default(
+            tokenizer=tokenizer,
+            messages=messages,
+            tools=tools,
+            chat_template=CHAT_TEMPLATE,
+        )
+        token_ids_hf, action_mask_hf, prompt_length_hf = tokenize_and_mask_messages_hf(
+            tokenizer=tokenizer,
+            messages=messages,
+            tools=tools,
             chat_template=CHAT_TEMPLATE,
         )
         self.assertEqual(token_ids.shape, token_ids_hf.shape)

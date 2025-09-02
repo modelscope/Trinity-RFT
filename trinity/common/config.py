@@ -52,6 +52,12 @@ class FormatConfig:
     chosen_key: str = "chosen"
     rejected_key: str = "rejected"
 
+    # for multi-turn sft
+    enable_concatenated_multi_turn: bool = False
+
+    # for sft / dpo, if None, use model.custom_chat_template
+    chat_template: Optional[str] = None
+
 
 @dataclass
 class GenerationConfig:
@@ -619,14 +625,19 @@ class Config:
             )
             self.buffer.trainer_input.experience_buffer.storage_type = StorageType.QUEUE
 
-        if self.buffer.trainer_input.experience_buffer is not None:
-            from trinity.algorithm.algorithm import ALGORITHM_TYPE
+        from trinity.algorithm.algorithm import ALGORITHM_TYPE
 
-            self.buffer.trainer_input.experience_buffer.schema_type = ALGORITHM_TYPE.get(
-                self.algorithm.algorithm_type
-            ).schema
-            if self.buffer.trainer_input.experience_buffer.ray_namespace is None:
-                self.buffer.trainer_input.experience_buffer.ray_namespace = self.ray_namespace
+        self.buffer.trainer_input.experience_buffer.schema_type = ALGORITHM_TYPE.get(
+            self.algorithm.algorithm_type
+        ).schema
+
+        if self.buffer.trainer_input.experience_buffer.ray_namespace is None:
+            self.buffer.trainer_input.experience_buffer.ray_namespace = self.ray_namespace
+
+        if self.buffer.trainer_input.experience_buffer.format.chat_template is None:
+            self.buffer.trainer_input.experience_buffer.format.chat_template = (
+                self.model.custom_chat_template
+            )
 
         # create buffer.cache_dir at <checkpoint_root_dir>/<project>/<name>/buffer
         self.buffer.cache_dir = os.path.abspath(os.path.join(self.checkpoint_job_dir, "buffer"))
@@ -653,6 +664,10 @@ class Config:
             )
             if self.buffer.trainer_input.sft_warmup_dataset.ray_namespace is None:
                 self.buffer.trainer_input.sft_warmup_dataset.ray_namespace = self.ray_namespace
+            if self.buffer.trainer_input.sft_warmup_dataset.format.chat_template is None:
+                self.buffer.trainer_input.sft_warmup_dataset.format.chat_template = (
+                    self.model.custom_chat_template
+                )
 
         # check input/output buffers in pipelines
         if self.data_processor.experience_pipeline is not None:
