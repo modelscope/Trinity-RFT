@@ -18,10 +18,14 @@ RUN apt update && apt install -y \
     python3 python3-pip python3-dev python3-packaging \
     libomp-dev infiniband-diags libibverbs-dev librdmacm-dev rdma-core perftest \
     && rm -rf /var/lib/apt/lists/* \
-    && ln -sf /usr/bin/python3 /usr/bin/python \
-    && pip config set global.index-url http://mirrors.cloud.aliyuncs.com/pypi/simple/ \
-    && pip config set install.trusted-host mirrors.cloud.aliyuncs.com \
-    && pip install --upgrade pip \
+    && ln -sf /usr/bin/python3 /usr/bin/python
+
+# For Aliyun users: update pip mirror to aliyun to speed up pip install
+RUN pip config set global.index-url http://mirrors.cloud.aliyuncs.com/pypi/simple/ \
+   && pip config set install.trusted-host mirrors.cloud.aliyuncs.com
+
+# Install Trinity-RFT with Megatron
+RUN pip install --upgrade pip \
     && pip install -e .[megatron] \
     && pip install flash-attn==2.8.1 \
     && pip install -v --disable-pip-version-check --no-cache-dir --no-build-isolation \

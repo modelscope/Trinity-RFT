@@ -9,7 +9,7 @@ from copy import deepcopy
 from datetime import datetime
 
 import ray
-from parameterized import parameterized, parameterized_class
+from parameterized import parameterized_class
 
 from tests.tools import (
     RayUnittestBase,
@@ -50,6 +50,13 @@ class BaseTrainerCase(RayUnittestBase):
         self.config.explorer.eval_interval = 4
 
 
+@parameterized_class(
+    ("strategy",),
+    [
+        ("fsdp",),
+        ("megatron",),
+    ],
+)
 class TestTrainerCountdown(BaseTrainerCase):
     def test_trainer(self):
         """Test the both and bench mode."""
@@ -64,8 +71,15 @@ class TestTrainerCountdown(BaseTrainerCase):
         )
         self.config.trainer.save_interval = 4
         self.config.check_and_update()
-        self.config.trainer.trainer_config.trainer.max_actor_ckpt_to_keep = 2
-        self.config.trainer.trainer_config.trainer.max_critic_ckpt_to_keep = 2
+        _trainer_config = self.config.trainer.trainer_config
+        if self.strategy == "megatron":
+            _trainer_config.actor_rollout_ref.actor.strategy = "megatron"
+            _trainer_config.actor_rollout_ref.actor.megatron.tensor_model_parallel_size = 2
+            _trainer_config.actor_rollout_ref.ref.megatron.tensor_model_parallel_size = 2
+            _trainer_config.critic.strategy = "megatron"
+            _trainer_config.critic.megatron.tensor_model_parallel_size = 2
+        _trainer_config.trainer.max_actor_ckpt_to_keep = 2
+        _trainer_config.trainer.max_critic_ckpt_to_keep = 2
         both(self.config)
         parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
         rollout_metrics = parser.metric_list("rollout")
@@ -397,24 +411,16 @@ def run_explorer(config: Config) -> None:
     explore(config)
 
 
+@parameterized_class(
+    ("use_priority_queue", "strategy"),
+    [(False, "fsdp"), (True, "fsdp"), (True, "megatron")],
+)
 class TestFullyAsyncMode(unittest.TestCase):
     def setUp(self):
         if multiprocessing.get_start_method(allow_none=True) != "spawn":
             multiprocessing.set_start_method("spawn", force=True)
 
-    @parameterized.expand(
-        [
-            (
-                "queue",
-                False,
-            ),
-            (
-                "priority_queue",
-                True,
-            ),
-        ]
-    )
-    def test_fully_async_mode(self, name, use_priority_queue):
+    def test_fully_async_mode(self):
         config = get_template_config()
         config.project = "unittest"
         config.name = f"fully_async_{datetime.now().strftime('%Y%m%d%H%M%S')}"
@@ -429,7 +435,7 @@ class TestFullyAsyncMode(unittest.TestCase):
             name="exp_buffer",
             storage_type=StorageType.QUEUE,
             wrap_in_ray=True,
-            use_priority_queue=use_priority_queue,
+            use_priority_queue=self.use_priority_queue,
         )
         config.synchronizer.sync_method = SyncMethod.CHECKPOINT
         config.synchronizer.sync_style = SyncStyle.DYNAMIC_BY_EXPLORER
@@ -439,8 +445,16 @@ class TestFullyAsyncMode(unittest.TestCase):
         trainer_config.mode = "train"
         trainer_config.buffer.train_batch_size = 4
         trainer_config.check_and_update()
+        if self.strategy == "megatron":
+            _trainer_config = trainer_config.trainer.trainer_config
+            _trainer_config.actor_rollout_ref.actor.strategy = "megatron"
+            _trainer_config.actor_rollout_ref.actor.megatron.tensor_model_parallel_size = 2
+            _trainer_config.actor_rollout_ref.ref.megatron.tensor_model_parallel_size = 2
+            _trainer_config.critic.strategy = "megatron"
+            _trainer_config.critic.megatron.tensor_model_parallel_size = 2
 
         explorer1_config = deepcopy(config)
+        explorer1_config.trainer = deepcopy(trainer_config.trainer)
         explorer1_config.mode = "explore"
         explorer1_config.explorer.name = "explorer1"
         config.cluster.gpu_per_node = 1
@@ -453,6 +467,7 @@ class TestFullyAsyncMode(unittest.TestCase):
             wrap_in_ray=True,
         )
         explorer2_config = deepcopy(explorer1_config)
+        explorer2_config.trainer = deepcopy(trainer_config.trainer)
         explorer1_config.check_and_update()
 
         trainer_process = multiprocessing.Process(target=run_trainer, args=(trainer_config,))

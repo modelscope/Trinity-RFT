@@ -715,7 +715,7 @@ class CriticWorker(MegatronWorker, DistProfilerExtension):
         self._is_offload_optimizer = self.config.megatron.optimizer_offload
 
         # normalize config
-        self.config.ppo_mini_batch_size *= self.config.rollout_n
+        # note: no need to conduct `ppo_mini_batch_size *= rollout_n` anymore
         self.config.ppo_mini_batch_size //= mpu.get_data_parallel_world_size()
         if self.config.get("ppo_micro_batch_size", None):
             self.config.ppo_micro_batch_size //= mpu.get_data_parallel_world_size()
