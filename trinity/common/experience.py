@@ -127,7 +127,6 @@ class Experience:
     rejected_messages: Optional[List[dict]] = None  # Rejected message list (Include prompt message)
 
     # for multi-modal data
-    multi_modal_data: Optional[Dict[str, Any]] = None  # Multi-modal data used as vllm inputs
     multi_modal_inputs: Optional[Dict[str, Tensor]] = None  # Multi-modal inputs for verl trainer
 
     def __init__(  # noqa: C901
@@ -151,7 +150,6 @@ class Experience:
         rejected=None,
         chosen_messages=None,
         rejected_messages=None,
-        multi_modal_data=None,
         multi_modal_inputs=None,
     ):
         if action_mask is not None:
@@ -209,7 +207,6 @@ class Experience:
         self.rejected = rejected
         self.chosen_messages = chosen_messages
         self.rejected_messages = rejected_messages
-        self.multi_modal_data = multi_modal_data
         self.multi_modal_inputs = multi_modal_inputs
         if multi_modal_inputs is not None:
             self.multi_modal_inputs = {}
@@ -316,12 +313,6 @@ class Experience:
         else:
             returns = None
 
-        # # gather multi_modal_data
-        # if all(exp.multi_modal_data is not None for exp in experiences):
-        #     multi_modal_data = gather_multi_modal_data(experiences, max_response_length)
-        # else:
-        #     multi_modal_data = None
-
         # gather multi_modal_inputs
         if all(exp.multi_modal_inputs is not None for exp in experiences):
             multi_modal_inputs = gather_multi_modal_inputs(experiences)
@@ -338,7 +329,6 @@ class Experience:
             action_masks=action_masks,
             prompt_length=max_prompt_length,
             logprobs=logprobs,
-            # multi_modal_data=multi_modal_data,
             multi_modal_inputs=multi_modal_inputs,
         )
         if custom_fields is not None:
@@ -420,7 +410,6 @@ class Experiences:
     action_masks: Optional[Tensor]  # [batch_size, response_length]
     prompt_length: int
     logprobs: Optional[Tensor]  # [batch_size, response_length]
-    # multi_modal_data: Optional[Any]
     multi_modal_inputs: Optional[Any]
     custom_fields: List[str] = field(
         default_factory=list
