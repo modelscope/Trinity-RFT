@@ -46,6 +46,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_reasoning_basic.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_reasoning_advanced.html">Off-Policy RFT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/example_megatron.html">Megatron-LM Backend</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_async_mode.html">Asynchronous RFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_multi_turn.html">Concatenated Multi-Turn RFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_step_wise.html">General Multi-Step RFT</a></li>
@@ -118,7 +119,9 @@
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.models.utils.html#trinity.common.models.utils.load_state_dict"><code class="docutils literal notranslate"><span class="pre">load_state_dict()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.models.utils.html#trinity.common.models.utils.merge_by_placement"><code class="docutils literal notranslate"><span class="pre">merge_by_placement()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.models.utils.html#trinity.common.models.utils.get_verl_checkpoint_info"><code class="docutils literal notranslate"><span class="pre">get_verl_checkpoint_info()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="trinity.common.models.utils.html#trinity.common.models.utils.load_state_dict_from_verl_checkpoint"><code class="docutils literal notranslate"><span class="pre">load_state_dict_from_verl_checkpoint()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.models.utils.html#trinity.common.models.utils.load_fsdp_state_dict_from_verl_checkpoint"><code class="docutils literal notranslate"><span class="pre">load_fsdp_state_dict_from_verl_checkpoint()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.models.utils.html#trinity.common.models.utils.load_huggingface_state_dict"><code class="docutils literal notranslate"><span class="pre">load_huggingface_state_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.models.utils.html#trinity.common.models.utils.get_megatron_converter"><code class="docutils literal notranslate"><span class="pre">get_megatron_converter()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_model.html">trinity.common.models.vllm_model module</a><ul>
@@ -854,6 +857,17 @@
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Optim.warmup_style"><code class="docutils literal notranslate"><span class="pre">Optim.warmup_style</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Optim.total_training_steps"><code class="docutils literal notranslate"><span class="pre">Optim.total_training_steps</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Optim.betas"><code class="docutils literal notranslate"><span class="pre">Optim.betas</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Optim.optimizer"><code class="docutils literal notranslate"><span class="pre">Optim.optimizer</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Optim.clip_grad"><code class="docutils literal notranslate"><span class="pre">Optim.clip_grad</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Optim.lr_warmup_init"><code class="docutils literal notranslate"><span class="pre">Optim.lr_warmup_init</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Optim.lr_decay_steps"><code class="docutils literal notranslate"><span class="pre">Optim.lr_decay_steps</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Optim.lr_decay_style"><code class="docutils literal notranslate"><span class="pre">Optim.lr_decay_style</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Optim.min_lr"><code class="docutils literal notranslate"><span class="pre">Optim.min_lr</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Optim.weight_decay"><code class="docutils literal notranslate"><span class="pre">Optim.weight_decay</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Optim.weight_decay_incr_style"><code class="docutils literal notranslate"><span class="pre">Optim.weight_decay_incr_style</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Optim.lr_wsd_decay_style"><code class="docutils literal notranslate"><span class="pre">Optim.lr_wsd_decay_style</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Optim.lr_wsd_decay_steps"><code class="docutils literal notranslate"><span class="pre">Optim.lr_wsd_decay_steps</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Optim.use_checkpoint_opt_param_scheduler"><code class="docutils literal notranslate"><span class="pre">Optim.use_checkpoint_opt_param_scheduler</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Optim.__init__"><code class="docutils literal notranslate"><span class="pre">Optim.__init__()</span></code></a></li>
 </ul>
 </li>
@@ -876,7 +890,46 @@
 <li class="toctree-l2"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Checkpoint"><code class="docutils literal notranslate"><span class="pre">Checkpoint</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Checkpoint.load_contents"><code class="docutils literal notranslate"><span class="pre">Checkpoint.load_contents</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Checkpoint.save_contents"><code class="docutils literal notranslate"><span class="pre">Checkpoint.save_contents</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Checkpoint.async_save"><code class="docutils literal notranslate"><span class="pre">Checkpoint.async_save</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Checkpoint.__init__"><code class="docutils literal notranslate"><span class="pre">Checkpoint.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.OverrideTransformerConfig"><code class="docutils literal notranslate"><span class="pre">OverrideTransformerConfig</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.OverrideTransformerConfig.recompute_granularity"><code class="docutils literal notranslate"><span class="pre">OverrideTransformerConfig.recompute_granularity</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.OverrideTransformerConfig.recompute_modules"><code class="docutils literal notranslate"><span class="pre">OverrideTransformerConfig.recompute_modules</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.OverrideTransformerConfig.recompute_method"><code class="docutils literal notranslate"><span class="pre">OverrideTransformerConfig.recompute_method</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.OverrideTransformerConfig.recompute_num_layers"><code class="docutils literal notranslate"><span class="pre">OverrideTransformerConfig.recompute_num_layers</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.OverrideTransformerConfig.__init__"><code class="docutils literal notranslate"><span class="pre">OverrideTransformerConfig.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.MegatronConfig"><code class="docutils literal notranslate"><span class="pre">MegatronConfig</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.MegatronConfig.param_offload"><code class="docutils literal notranslate"><span class="pre">MegatronConfig.param_offload</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.MegatronConfig.grad_offload"><code class="docutils literal notranslate"><span class="pre">MegatronConfig.grad_offload</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.MegatronConfig.optimizer_offload"><code class="docutils literal notranslate"><span class="pre">MegatronConfig.optimizer_offload</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.MegatronConfig.tensor_model_parallel_size"><code class="docutils literal notranslate"><span class="pre">MegatronConfig.tensor_model_parallel_size</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.MegatronConfig.expert_model_parallel_size"><code class="docutils literal notranslate"><span class="pre">MegatronConfig.expert_model_parallel_size</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.MegatronConfig.expert_tensor_parallel_size"><code class="docutils literal notranslate"><span class="pre">MegatronConfig.expert_tensor_parallel_size</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.MegatronConfig.pipeline_model_parallel_size"><code class="docutils literal notranslate"><span class="pre">MegatronConfig.pipeline_model_parallel_size</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.MegatronConfig.virtual_pipeline_model_parallel_size"><code class="docutils literal notranslate"><span class="pre">MegatronConfig.virtual_pipeline_model_parallel_size</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.MegatronConfig.context_parallel_size"><code class="docutils literal notranslate"><span class="pre">MegatronConfig.context_parallel_size</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.MegatronConfig.sequence_parallel"><code class="docutils literal notranslate"><span class="pre">MegatronConfig.sequence_parallel</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.MegatronConfig.use_distributed_optimizer"><code class="docutils literal notranslate"><span class="pre">MegatronConfig.use_distributed_optimizer</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.MegatronConfig.use_dist_checkpointing"><code class="docutils literal notranslate"><span class="pre">MegatronConfig.use_dist_checkpointing</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.MegatronConfig.dist_checkpointing_path"><code class="docutils literal notranslate"><span class="pre">MegatronConfig.dist_checkpointing_path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.MegatronConfig.seed"><code class="docutils literal notranslate"><span class="pre">MegatronConfig.seed</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.MegatronConfig.override_ddp_config"><code class="docutils literal notranslate"><span class="pre">MegatronConfig.override_ddp_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.MegatronConfig.override_transformer_config"><code class="docutils literal notranslate"><span class="pre">MegatronConfig.override_transformer_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.MegatronConfig.use_mbridge"><code class="docutils literal notranslate"><span class="pre">MegatronConfig.use_mbridge</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.MegatronConfig.__init__"><code class="docutils literal notranslate"><span class="pre">MegatronConfig.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.ProfileConfig"><code class="docutils literal notranslate"><span class="pre">ProfileConfig</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.ProfileConfig.use_profile"><code class="docutils literal notranslate"><span class="pre">ProfileConfig.use_profile</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.ProfileConfig.profile_ranks"><code class="docutils literal notranslate"><span class="pre">ProfileConfig.profile_ranks</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.ProfileConfig.step_start"><code class="docutils literal notranslate"><span class="pre">ProfileConfig.step_start</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.ProfileConfig.step_end"><code class="docutils literal notranslate"><span class="pre">ProfileConfig.step_end</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.ProfileConfig.save_path"><code class="docutils literal notranslate"><span class="pre">ProfileConfig.save_path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.ProfileConfig.__init__"><code class="docutils literal notranslate"><span class="pre">ProfileConfig.__init__()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Actor"><code class="docutils literal notranslate"><span class="pre">Actor</span></code></a><ul>
@@ -895,8 +948,14 @@
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Actor.checkpoint"><code class="docutils literal notranslate"><span class="pre">Actor.checkpoint</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Actor.optim"><code class="docutils literal notranslate"><span class="pre">Actor.optim</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Actor.fsdp_config"><code class="docutils literal notranslate"><span class="pre">Actor.fsdp_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Actor.megatron"><code class="docutils literal notranslate"><span class="pre">Actor.megatron</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Actor.profile"><code class="docutils literal notranslate"><span class="pre">Actor.profile</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Actor.data_loader_seed"><code class="docutils literal notranslate"><span class="pre">Actor.data_loader_seed</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Actor.load_weight"><code class="docutils literal notranslate"><span class="pre">Actor.load_weight</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Actor.loss_agg_mode"><code class="docutils literal notranslate"><span class="pre">Actor.loss_agg_mode</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Actor.clip_ratio"><code class="docutils literal notranslate"><span class="pre">Actor.clip_ratio</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Actor.clip_ratio_low"><code class="docutils literal notranslate"><span class="pre">Actor.clip_ratio_low</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Actor.clip_ratio_high"><code class="docutils literal notranslate"><span class="pre">Actor.clip_ratio_high</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Actor.entropy_coeff"><code class="docutils literal notranslate"><span class="pre">Actor.entropy_coeff</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Actor.use_kl_loss"><code class="docutils literal notranslate"><span class="pre">Actor.use_kl_loss</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Actor.kl_loss_coef"><code class="docutils literal notranslate"><span class="pre">Actor.kl_loss_coef</span></code></a></li>
@@ -914,6 +973,9 @@
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Ref.entropy_from_logits_with_chunking"><code class="docutils literal notranslate"><span class="pre">Ref.entropy_from_logits_with_chunking</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Ref.entropy_checkpointing"><code class="docutils literal notranslate"><span class="pre">Ref.entropy_checkpointing</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Ref.checkpoint"><code class="docutils literal notranslate"><span class="pre">Ref.checkpoint</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Ref.megatron"><code class="docutils literal notranslate"><span class="pre">Ref.megatron</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Ref.profile"><code class="docutils literal notranslate"><span class="pre">Ref.profile</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Ref.load_weight"><code class="docutils literal notranslate"><span class="pre">Ref.load_weight</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Ref.__init__"><code class="docutils literal notranslate"><span class="pre">Ref.__init__()</span></code></a></li>
 </ul>
 </li>
@@ -969,6 +1031,10 @@
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Critic.checkpoint"><code class="docutils literal notranslate"><span class="pre">Critic.checkpoint</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Critic.rollout_n"><code class="docutils literal notranslate"><span class="pre">Critic.rollout_n</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Critic.loss_agg_mode"><code class="docutils literal notranslate"><span class="pre">Critic.loss_agg_mode</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Critic.megatron"><code class="docutils literal notranslate"><span class="pre">Critic.megatron</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Critic.profile"><code class="docutils literal notranslate"><span class="pre">Critic.profile</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Critic.data_loader_seed"><code class="docutils literal notranslate"><span class="pre">Critic.data_loader_seed</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Critic.load_weight"><code class="docutils literal notranslate"><span class="pre">Critic.load_weight</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Critic.__init__"><code class="docutils literal notranslate"><span class="pre">Critic.__init__()</span></code></a></li>
 </ul>
 </li>

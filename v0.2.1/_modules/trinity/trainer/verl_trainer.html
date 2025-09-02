@@ -111,7 +111,6 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">verl.trainer.ppo.ray_trainer</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">RayClassWithInitArgs</span><span class="p">,</span>
     <span class="n">RayPPOTrainer</span><span class="p">,</span>
-    <span class="n">RayWorkerGroup</span><span class="p">,</span>
     <span class="n">ResourcePoolManager</span><span class="p">,</span>
     <span class="n">Role</span><span class="p">,</span>
     <span class="n">create_colocated_worker_cls</span><span class="p">,</span>
@@ -183,6 +182,8 @@
         <span class="c1"># define worker classes</span>
         <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">strategy</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;fsdp&quot;</span><span class="p">,</span> <span class="s2">&quot;fsdp2&quot;</span><span class="p">]:</span>
             <span class="k">assert</span> <span class="n">config</span><span class="o">.</span><span class="n">critic</span><span class="o">.</span><span class="n">strategy</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;fsdp&quot;</span><span class="p">,</span> <span class="s2">&quot;fsdp2&quot;</span><span class="p">]</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">verl.single_controller.ray</span><span class="w"> </span><span class="kn">import</span> <span class="n">RayWorkerGroup</span>
+
             <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.trainer.verl.fsdp_workers</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
                 <span class="n">ActorRolloutRefWorker</span><span class="p">,</span>
                 <span class="n">CriticWorker</span><span class="p">,</span>
@@ -191,7 +192,15 @@
             <span class="n">ray_worker_group_cls</span> <span class="o">=</span> <span class="n">RayWorkerGroup</span>
 
         <span class="k">elif</span> <span class="n">config</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">strategy</span> <span class="o">==</span> <span class="s2">&quot;megatron&quot;</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Not support megatron for now.&quot;</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">config</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">strategy</span> <span class="o">==</span> <span class="n">config</span><span class="o">.</span><span class="n">critic</span><span class="o">.</span><span class="n">strategy</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">verl.single_controller.ray.megatron</span><span class="w"> </span><span class="kn">import</span> <span class="n">NVMegatronRayWorkerGroup</span>
+
+            <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.trainer.verl.megatron_workers</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+                <span class="n">ActorRolloutRefWorker</span><span class="p">,</span>
+                <span class="n">CriticWorker</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">ray_worker_group_cls</span> <span class="o">=</span> <span class="n">NVMegatronRayWorkerGroup</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span>
@@ -369,6 +378,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">train_dataloader</span> <span class="o">=</span> <span class="n">_InternalDataLoader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
         <span class="c1"># TODO: compute total training steps</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">total_training_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">total_training_steps</span> <span class="ow">or</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">total_training_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_training_steps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">critic</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">total_training_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_training_steps</span>
 
 <div class="viewcode-block" id="VerlPPOTrainerWrapper.save_state_dict">
 <a class="viewcode-back" href="../../../build_api/trinity.trainer.verl_trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.save_state_dict">[docs]</a>

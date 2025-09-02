@@ -46,6 +46,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_reasoning_basic.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_reasoning_advanced.html">Off-Policy RFT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/example_megatron.html">Megatron-LM Backend</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_async_mode.html">Asynchronous RFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_multi_turn.html">Concatenated Multi-Turn RFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_step_wise.html">General Multi-Step RFT</a></li>
@@ -399,7 +400,7 @@ the trainer and one or more explorers in a distributed training setup.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.manager.Synchronizer.set_model_state_dict">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_model_state_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_state_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trainer_step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/manager/synchronizer.html#Synchronizer.set_model_state_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.manager.Synchronizer.set_model_state_dict" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_model_state_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_state_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trainer_step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/manager/synchronizer.html#Synchronizer.set_model_state_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.manager.Synchronizer.set_model_state_dict" title="Link to this definition"></a></dt>
 <dd><p>Set the new model state and update the version.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -419,7 +420,7 @@ the trainer and one or more explorers in a distributed training setup.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.manager.Synchronizer.get_state_dict_meta">
-<span class="sig-name descname"><span class="pre">get_state_dict_meta</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/manager/synchronizer.html#Synchronizer.get_state_dict_meta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.manager.Synchronizer.get_state_dict_meta" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_state_dict_meta</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/manager/synchronizer.html#Synchronizer.get_state_dict_meta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.manager.Synchronizer.get_state_dict_meta" title="Link to this definition"></a></dt>
 <dd><p>Return metadata about the model state (names, data types, shapes).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
