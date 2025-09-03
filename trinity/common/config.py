@@ -670,7 +670,10 @@ class Config:
             if self.data_processor.task_pipeline.output is None:
                 if self.buffer.explorer_input.taskset.path is not None:
                     self.data_processor.task_pipeline.output = self.buffer.explorer_input.taskset
-                elif self.buffer.trainer_input.experience_buffer.path is not None:
+                elif (
+                    self.buffer.trainer_input.experience_buffer.schema_type in {"dpo", "sft"}
+                    and self.buffer.trainer_input.experience_buffer.path is not None
+                ):
                     self.data_processor.task_pipeline.output = (
                         self.buffer.trainer_input.experience_buffer
                     )
