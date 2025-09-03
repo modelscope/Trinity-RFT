@@ -310,7 +310,8 @@ It will watch the explorer output buffer. Once there is a new batch of experienc
 <h3>Configure the Data Processor<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
 <p>Trinity-RFT uses a unified config file to manage all config items. For the data processor, you need to focus on the <code class="docutils literal notranslate"><span class="pre">data_processor</span></code> section in the config file.</p>
 <p>In this example, assume that you need to select the chosen and rejected responses for DPO method. So you can set these config items like the following example:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">data_processor</span><span class="p">:</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># using task pipeline to decide the chosen and rejected from human preference</span>
+<span class="nt">data_processor</span><span class="p">:</span>
 <span class="w">  </span><span class="c1"># task pipeline related</span>
 <span class="w">  </span><span class="nt">task_pipeline</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">num_process</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
@@ -337,7 +338,7 @@ It will watch the explorer output buffer. Once there is a new batch of experienc
 <span class="w">          </span><span class="nt">chosen_key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;chosen&quot;</span><span class="w">  </span><span class="c1"># Chosen field</span>
 <span class="w">          </span><span class="nt">rejected_key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;rejected&quot;</span><span class="w">  </span><span class="c1"># Rejected field</span>
 <span class="w">    </span><span class="nt">inputs</span><span class="p">:</span><span class="w">  </span><span class="c1"># the output will be set to the explorer input automatically</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/DATA/FILE/TO/BE/ANNOTATED</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&#39;examples/dpo_human_in_the_loop/demo-data.jsonl&#39;</span>
 <span class="w">    </span><span class="nt">target_fields</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;prompt&quot;</span><span class="p p-Indicator">]</span>
 <span class="nt">service</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">data_juicer</span><span class="p">:</span>
@@ -347,6 +348,7 @@ It will watch the explorer output buffer. Once there is a new batch of experienc
 <p>Here you can set the basic information for the example dataset and some other items about the input dataset, which is similar to the example above.</p>
 <p>The difference is that we use the data-juicer OP <code class="docutils literal notranslate"><span class="pre">human_preference_annotation_mapper</span></code> here. This OP helps you to annotate the data with human preference on a UI.</p>
 <p>You can set more config items for this OP (e.g. notification when annotation is finished). For more details, please refer to this <a class="reference external" href="https://github.com/modelscope/data-juicer/tree/main/configs/annotation">doc</a>.</p>
+<p>All config items in the <code class="docutils literal notranslate"><span class="pre">data_processor</span></code> section can be found <a class="reference internal" href="trinity_configs.html"><span class="std std-doc">here</span></a>. A prepared config file for this example can be found in <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/dpo_human_in_the_loop/dpo.yaml">the config file</a>.</p>
 </section>
 <section id="start-running">
 <h3>Start Running<a class="headerlink" href="#start-running" title="Link to this heading"></a></h3>

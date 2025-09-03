@@ -102,9 +102,6 @@
 <div class="viewcode-block" id="check_and_run_task_pipeline">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.pipelines.task_pipeline.html#trinity.buffer.pipelines.check_and_run_task_pipeline">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">check_and_run_task_pipeline</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;explore&quot;</span> <span class="ow">or</span> <span class="n">config</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;both&quot;</span><span class="p">):</span>
-        <span class="c1"># task pipeline is only available when using Explorer</span>
-        <span class="k">return</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">data_processor</span><span class="o">.</span><span class="n">task_pipeline</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">{}</span>
 
