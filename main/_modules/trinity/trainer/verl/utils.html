@@ -105,7 +105,7 @@
 
 <div class="viewcode-block" id="to_data_proto">
 <a class="viewcode-back" href="../../../../build_api/trinity.trainer.verl.utils.html#trinity.trainer.verl.utils.to_data_proto">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">to_data_proto</span><span class="p">(</span><span class="n">experiences</span><span class="p">:</span> <span class="n">Experiences</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataProto</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">to_data_proto</span><span class="p">(</span><span class="n">experiences</span><span class="p">:</span> <span class="n">Experiences</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataProto</span><span class="p">:</span>  <span class="c1"># noqa: C901</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert Experiences to verl DataProto.&quot;&quot;&quot;</span>
     <span class="n">attention_mask</span> <span class="o">=</span> <span class="n">experiences</span><span class="o">.</span><span class="n">attention_masks</span>
     <span class="n">cumsum</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">attention_mask</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
@@ -123,6 +123,7 @@
             <span class="k">else</span> <span class="n">attention_mask</span><span class="p">[:,</span> <span class="n">experiences</span><span class="o">.</span><span class="n">prompt_length</span> <span class="p">:]</span><span class="o">.</span><span class="n">long</span><span class="p">()</span>
         <span class="p">),</span>
     <span class="p">}</span>
+
     <span class="k">if</span> <span class="n">experiences</span><span class="o">.</span><span class="n">rewards</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">token_level_rewards</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">attention_mask</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">experiences</span><span class="o">.</span><span class="n">rewards</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
         <span class="n">eos_mask_idx</span> <span class="o">=</span> <span class="n">cumsum</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
@@ -140,6 +141,17 @@
         <span class="n">batch_dict</span><span class="p">[</span><span class="s2">&quot;advantages&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">experiences</span><span class="o">.</span><span class="n">advantages</span>
     <span class="k">if</span> <span class="n">experiences</span><span class="o">.</span><span class="n">returns</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">batch_dict</span><span class="p">[</span><span class="s2">&quot;returns&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">experiences</span><span class="o">.</span><span class="n">returns</span>
+
+    <span class="k">if</span> <span class="n">experiences</span><span class="o">.</span><span class="n">multi_modal_inputs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">batch_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch_dict</span><span class="p">[</span><span class="s2">&quot;unique_ids&quot;</span><span class="p">])</span>
+        <span class="n">batch_dict</span><span class="p">[</span><span class="s2">&quot;multi_modal_inputs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">experiences</span><span class="o">.</span><span class="n">multi_modal_inputs</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span>
+            <span class="p">],</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">,</span>
+        <span class="p">)</span>
+
     <span class="k">if</span> <span class="n">experiences</span><span class="o">.</span><span class="n">custom_fields</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">experiences</span><span class="o">.</span><span class="n">custom_fields</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">experiences</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
