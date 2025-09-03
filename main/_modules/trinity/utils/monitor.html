@@ -359,7 +359,8 @@
 <div class="viewcode-block" id="MlflowMonitor.log_table">
 <a class="viewcode-back" href="../../../build_api/trinity.utils.monitor.html#trinity.utils.monitor.MlflowMonitor.log_table">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">log_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">experiences_table</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
-        <span class="k">pass</span></div>
+        <span class="n">experiences_table</span><span class="p">[</span><span class="s2">&quot;step&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">step</span>
+        <span class="n">mlflow</span><span class="o">.</span><span class="n">log_table</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">experiences_table</span><span class="p">,</span> <span class="n">artifact_file</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">table_name</span><span class="si">}</span><span class="s2">.json&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="MlflowMonitor.log">
