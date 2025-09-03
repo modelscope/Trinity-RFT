@@ -200,7 +200,8 @@ class MlflowMonitor(Monitor):
         self.console_logger = get_logger(__name__, in_ray_actor=True)
 
     def log_table(self, table_name: str, experiences_table: pd.DataFrame, step: int):
-        pass
+        experiences_table["step"] = step
+        mlflow.log_table(data=experiences_table, artifact_file=f"{table_name}.json")
 
     def log(self, data: dict, step: int, commit: bool = False) -> None:
         """Log metrics."""

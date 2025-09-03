@@ -15,7 +15,7 @@
 # limitations under the License.
 """
 Single Process Actor.
-Modified from https://github.com/volcengine/verl/blob/v0.4.1/verl/workers/actor/dp_actor.py
+Modified from https://github.com/volcengine/verl/blob/v0.5.0/verl/workers/actor/dp_actor.py
 """
 
 import logging

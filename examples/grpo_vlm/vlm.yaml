@@ -1,0 +1,53 @@
+project: "Trinity-RFT"
+name: "grpo_vlm"
+checkpoint_root_dir: /PATH/TO/CHECKPOINT/
+algorithm:
+  algorithm_type: grpo
+  repeat_times: 8
+model:
+  model_path: /PATH/TO/Qwen2.5-VL-3B-Instruct
+  max_response_tokens: 1024
+  max_model_len: 20480
+cluster:
+  node_num: 1
+  gpu_per_node: 8
+buffer:
+  total_epochs: 1
+  batch_size: 32
+  train_batch_size: 256
+  explorer_input:
+    taskset:
+      name: geometry3k
+      storage_type: file
+      path: hiyouga/geometry3k
+      subset_name: 'default'
+      split: 'train'
+      format:
+        prompt_key: 'problem'
+        response_key: 'answer'
+        image_key: 'images'
+      rollout_args:
+        temperature: 1.0
+    default_workflow_type: 'simple_mm_workflow'
+    default_reward_fn_type: 'math_boxed_reward'
+  trainer_input:
+    experience_buffer:
+      name: experience_buffer
+      storage_type: queue
+explorer:
+  eval_interval: 50
+  rollout_model:
+    engine_num: 4
+    tensor_parallel_size: 1
+    enable_prefix_caching: false
+    enforce_eager: true
+    dtype: bfloat16
+    seed: 42
+synchronizer:
+  sync_method: 'nccl'
+  sync_interval: 1
+  sync_timeout: 1200
+trainer:
+  trainer_type: 'verl'
+  trainer_config_path: 'examples/grpo_vlm/train_vlm.yaml'
+  save_interval: 100

@@ -42,6 +42,17 @@ class Optim:
     warmup_style: str = "constant"
     total_training_steps: int = -1
     betas: List[float] = field(default_factory=lambda: [0.9, 0.999])
+    optimizer: str = "adam"
+    clip_grad: float = 1.0
+    lr_warmup_init: float = 0.0
+    lr_decay_steps: Optional[int] = None
+    lr_decay_style: str = "constant"
+    min_lr: float = 0.0
+    weight_decay: float = 0.01
+    weight_decay_incr_style: str = "constant"
+    lr_wsd_decay_style: str = "exponential"
+    lr_wsd_decay_steps: Optional[int] = None
+    use_checkpoint_opt_param_scheduler: bool = False
 
 
 @dataclass
@@ -64,6 +75,47 @@ class FSDPConfig:
 class Checkpoint:
     load_contents: List[str] = field(default_factory=lambda: ["model", "optimizer", "extra"])
     save_contents: List[str] = field(default_factory=lambda: ["model", "optimizer", "extra"])
+    async_save: bool = False  # do not set, async save has bug in verl megatron training
+
+
+@dataclass
+class OverrideTransformerConfig:
+    recompute_granularity: Optional[str] = None
+    recompute_modules: List[str] = field(default_factory=lambda: ["core_attn"])
+    recompute_method: Optional[str] = None
+    recompute_num_layers: Optional[int] = None
+
+
+@dataclass
+class MegatronConfig:
+    param_offload: bool = False
+    grad_offload: bool = False
+    optimizer_offload: bool = False
+    tensor_model_parallel_size: int = 1
+    expert_model_parallel_size: int = 1
+    expert_tensor_parallel_size: Optional[int] = None
+    pipeline_model_parallel_size: int = 1
+    virtual_pipeline_model_parallel_size: Optional[int] = None
+    context_parallel_size: int = 1
+    sequence_parallel: bool = True
+    use_distributed_optimizer: bool = True
+    use_dist_checkpointing: bool = False
+    dist_checkpointing_path: Optional[str] = None
+    seed: int = 42
+    override_ddp_config: dict = field(default_factory=dict)
+    override_transformer_config: OverrideTransformerConfig = field(
+        default_factory=OverrideTransformerConfig
+    )
+    use_mbridge: bool = False
+
+
+@dataclass
+class ProfileConfig:
+    use_profile: bool = False
+    profile_ranks: Optional[List[int]] = None
+    step_start: int = -1
+    step_end: int = -1
+    save_path: Optional[str] = None
 
 
 @dataclass
@@ -83,9 +135,15 @@ class Actor:
     checkpoint: Checkpoint = field(default_factory=Checkpoint)
     optim: Optim = field(default_factory=Optim)
     fsdp_config: FSDPConfig = field(default_factory=FSDPConfig)
+    megatron: MegatronConfig = field(default_factory=MegatronConfig)
+    profile: ProfileConfig = field(default_factory=ProfileConfig)
+    data_loader_seed: Optional[int] = None
+    load_weight: bool = True
     # do not set
     loss_agg_mode: str = "token-mean"
     clip_ratio: float = 0.2
+    clip_ratio_low: Optional[float] = None
+    clip_ratio_high: Optional[float] = None
     entropy_coeff: float = 0.001
     use_kl_loss: bool = False
     kl_loss_coef: float = 0.001
@@ -105,6 +163,9 @@ class Ref:
     checkpoint: Checkpoint = field(
         default_factory=lambda: Checkpoint(load_contents=["model"], save_contents=["model"])
     )
+    megatron: MegatronConfig = field(default_factory=MegatronConfig)
+    profile: ProfileConfig = field(default_factory=ProfileConfig)
+    load_weight: bool = True
 
 
 @dataclass
@@ -171,6 +232,10 @@ class Critic:
     checkpoint: Checkpoint = field(default_factory=Checkpoint)
     rollout_n: int = 1
     loss_agg_mode: str = "token-mean"
+    megatron: MegatronConfig = field(default_factory=MegatronConfig)
+    profile: ProfileConfig = field(default_factory=ProfileConfig)
+    data_loader_seed: Optional[int] = None
+    load_weight: bool = True
 
 
 @dataclass
@@ -269,7 +334,7 @@ class veRLConfig:
 
     def synchronize_config(self, config: Config) -> None:  # noqa: C901
         """Synchronize config."""
-        if config.mode != "train":
+        if config.mode == "both":
             rollout_gpu_num = (
                 config.explorer.rollout_model.tensor_parallel_size
                 * config.explorer.rollout_model.engine_num
@@ -291,7 +356,7 @@ class veRLConfig:
             # for multi-node scenarios, some nodes for rollout, others for training
             assert (
                 rollout_gpu_num % config.cluster.gpu_per_node == 0
-            ), "rollout_gpu_num must be divisible by `gpu_per_node`"
+            ), f"rollout_gpu_num ({rollout_gpu_num}) must be divisible by `gpu_per_node` ({config.cluster.gpu_per_node})"
             rollout_node_num = math.ceil(rollout_gpu_num / config.cluster.gpu_per_node)
             self.trainer.nnodes = config.cluster.node_num - rollout_node_num
             if self.trainer.nnodes < 1:
@@ -299,6 +364,10 @@ class veRLConfig:
             self.trainer.n_gpus_per_node = config.cluster.gpu_per_node
 
         world_size = self.trainer.nnodes * self.trainer.n_gpus_per_node
+        if world_size <= 0:
+            raise ValueError(
+                "The number of training gpus must be greater than 0, please check `engine_num` in explorer configs"
+            )
         if config.buffer.train_batch_size % world_size != 0:
             raise ValueError(
                 f"batch_size ({config.buffer.train_batch_size}) must be divisible by ({world_size})"
@@ -328,6 +397,7 @@ class veRLConfig:
         # Actor / Critic config
         self.actor_rollout_ref.model.path = config.model.model_path
         self.actor_rollout_ref.model.custom_chat_template = config.model.custom_chat_template
+        self.critic.strategy = self.actor_rollout_ref.actor.strategy
         self.critic.model.path = config.model.critic_model_path
         self.critic.model.tokenizer_path = config.model.critic_model_path
         self.actor_rollout_ref.actor.ppo_mini_batch_size = config.buffer.train_batch_size

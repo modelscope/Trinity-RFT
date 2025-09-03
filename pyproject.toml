@@ -50,7 +50,7 @@ trinity = "trinity.cli.launcher:main"
 
 [project.optional-dependencies]
 data = [
-    "py-data-juicer"
+    "py-data-juicer>=1.4"
 ]
 agent = [
     "agentscope"
@@ -70,6 +70,11 @@ dev = [
     "parameterized",
     "matplotlib",
 ]
+megatron = [
+    "megatron-core[mlm]==0.13.1",
+    "transformer_engine[pytorch]==2.6.0.post1",
+    "mbridge>=0.13.0",
+]
 
 doc = [
     "sphinx",
@@ -81,7 +86,7 @@ doc = [
 ]
 
 flash_attn = [
-    "flash-attn==2.8.0.post2"
+    "flash-attn==2.8.1"
 ]
 
 [tool.setuptools.packages.find]

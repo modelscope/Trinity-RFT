@@ -221,6 +221,8 @@ docker build -f scripts/docker/Dockerfile -t trinity-rft:latest .
 docker run -it --gpus all --shm-size="64g" --rm -v $PWD:/workspace -v <root_path_of_data_and_checkpoints>:/data trinity-rft:latest
 ```
 
+If you want to use Megatron-LM, you can refer to this [example](./docs/sphinx_doc/source/tutorial/example_megatron.md) to setup the environment.
+
 ### Step 2: prepare dataset and model
 
 

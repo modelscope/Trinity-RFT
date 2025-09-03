@@ -41,6 +41,8 @@ class FormatConfig:
 
     # for tools
     tools_key: str = "tools"
+    image_key: Optional[str] = None  # used for multi-modal data
+    video_key: Optional[str] = None  # used for multi-modal data
 
     reply_prefix: Optional[str] = None
 
@@ -51,6 +53,12 @@ class FormatConfig:
     # for dpo dataset
     chosen_key: str = "chosen"
     rejected_key: str = "rejected"
+
+    # for multi-turn sft
+    enable_concatenated_multi_turn: bool = False
+
+    # for sft / dpo, if None, use model.custom_chat_template
+    chat_template: Optional[str] = None
 
 
 @dataclass
@@ -72,6 +80,9 @@ class StorageConfig:
     storage_type: StorageType = StorageType.FILE
     path: Optional[str] = None
     repeat_times: Optional[int] = None
+
+    # used for multi-modal data
+    mm_data_kwargs: dict = field(default_factory=dict)
 
     # used for StorageType.FILE
     split: str = "train"
@@ -619,14 +630,19 @@ class Config:
             )
             self.buffer.trainer_input.experience_buffer.storage_type = StorageType.QUEUE
 
-        if self.buffer.trainer_input.experience_buffer is not None:
-            from trinity.algorithm.algorithm import ALGORITHM_TYPE
+        from trinity.algorithm.algorithm import ALGORITHM_TYPE
 
-            self.buffer.trainer_input.experience_buffer.schema_type = ALGORITHM_TYPE.get(
-                self.algorithm.algorithm_type
-            ).schema
-            if self.buffer.trainer_input.experience_buffer.ray_namespace is None:
-                self.buffer.trainer_input.experience_buffer.ray_namespace = self.ray_namespace
+        self.buffer.trainer_input.experience_buffer.schema_type = ALGORITHM_TYPE.get(
+            self.algorithm.algorithm_type
+        ).schema
+
+        if self.buffer.trainer_input.experience_buffer.ray_namespace is None:
+            self.buffer.trainer_input.experience_buffer.ray_namespace = self.ray_namespace
+
+        if self.buffer.trainer_input.experience_buffer.format.chat_template is None:
+            self.buffer.trainer_input.experience_buffer.format.chat_template = (
+                self.model.custom_chat_template
+            )
 
         # create buffer.cache_dir at <checkpoint_root_dir>/<project>/<name>/buffer
         self.buffer.cache_dir = os.path.abspath(os.path.join(self.checkpoint_job_dir, "buffer"))
@@ -653,6 +669,10 @@ class Config:
             )
             if self.buffer.trainer_input.sft_warmup_dataset.ray_namespace is None:
                 self.buffer.trainer_input.sft_warmup_dataset.ray_namespace = self.ray_namespace
+            if self.buffer.trainer_input.sft_warmup_dataset.format.chat_template is None:
+                self.buffer.trainer_input.sft_warmup_dataset.format.chat_template = (
+                    self.model.custom_chat_template
+                )
 
         # check input/output buffers in pipelines
         if self.data_processor.experience_pipeline is not None:
@@ -875,30 +895,25 @@ class Config:
         # check buffer
         self._check_buffer()
         # check and update trainer
-        if self.mode in {"both", "train"}:
-            if self.trainer.trainer_type == "verl":
-                if self.trainer.trainer_config:
-                    from trinity.common.verl_config import veRLConfig
+        if self.trainer.trainer_type == "verl":
+            if self.trainer.trainer_config:
+                from trinity.common.verl_config import veRLConfig
 
-                    trainer_config_schema = OmegaConf.structured(veRLConfig)
-                    trainer_config = OmegaConf.merge(
-                        trainer_config_schema, self.trainer.trainer_config
-                    )
-                    self.trainer.trainer_config = OmegaConf.to_object(trainer_config)
-                else:
-                    if os.path.isfile(self.trainer.trainer_config_path):
-                        from trinity.common.verl_config import load_config
-
-                        self.trainer.trainer_config = load_config(self.trainer.trainer_config_path)
-                    else:
-                        raise ValueError(
-                            f"Invalid trainer config path: {self.trainer.trainer_config_path}"
-                        )
+                trainer_config_schema = OmegaConf.structured(veRLConfig)
+                trainer_config = OmegaConf.merge(trainer_config_schema, self.trainer.trainer_config)
+                self.trainer.trainer_config = OmegaConf.to_object(trainer_config)
             else:
-                raise ValueError(f"Invalid trainer type: {self.trainer_type}")
-            self.trainer.trainer_config.synchronize_config(self)
+                if os.path.isfile(self.trainer.trainer_config_path):
+                    from trinity.common.verl_config import load_config
+
+                    self.trainer.trainer_config = load_config(self.trainer.trainer_config_path)
+                else:
+                    raise ValueError(
+                        f"Invalid trainer config path: {self.trainer.trainer_config_path}"
+                    )
         else:
-            self.trainer.trainer_config = None
+            raise ValueError(f"Invalid trainer type: {self.trainer_type}")
+        self.trainer.trainer_config.synchronize_config(self)
 
         # check service
         if self.service.data_juicer is not None:

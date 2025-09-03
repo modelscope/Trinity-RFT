@@ -157,18 +157,3 @@ class TaskFileReader(BaseFileReader):
             task = self.formatter.format(sample)
             tasks.append(task)
         return tasks
-
-
-class RawDataReader(BaseFileReader):
-    def __init__(self, meta: StorageConfig, config: Optional[BufferConfig]):
-        self.returned = False
-        self.dataset = load_dataset(meta.path, name=meta.subset_name, split=meta.split)
-
-    def __len__(self):
-        return len(self.dataset)
-
-    def read(self, batch_size: Optional[int] = None) -> List:
-        if self.returned:
-            raise StopIteration
-        self.returned = True
-        return self.dataset.to_list()

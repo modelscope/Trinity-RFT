@@ -219,6 +219,8 @@ docker build -f scripts/docker/Dockerfile -t trinity-rft:latest .
 docker run -it --gpus all --shm-size="64g" --rm -v $PWD:/workspace -v <root_path_of_data_and_checkpoints>:/data trinity-rft:latest
 ```
 
+如果您想使用 Megatron-LM 进行训练，请参考这个[示例](./docs/sphinx.doc/source/tutorial/example.metatron.md)来设置环境。
+
 
 ### 第二步：准备数据集和模型
 

@@ -5,7 +5,7 @@ from __future__ import annotations
 import pickle
 import uuid
 from dataclasses import asdict, dataclass, field, fields
-from typing import Dict, List, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 import torch
 from datasets import Dataset
@@ -126,6 +126,9 @@ class Experience:
     chosen_messages: Optional[List[dict]] = None  # Chosen message list (Include prompt message)
     rejected_messages: Optional[List[dict]] = None  # Rejected message list (Include prompt message)
 
+    # for multi-modal data
+    multi_modal_inputs: Optional[Dict[str, Tensor]] = None  # Multi-modal inputs for verl trainer
+
     def __init__(  # noqa: C901
         self,
         *,
@@ -147,6 +150,7 @@ class Experience:
         rejected=None,
         chosen_messages=None,
         rejected_messages=None,
+        multi_modal_inputs=None,
     ):
         if action_mask is not None:
             experience_type = "multi_turn"
@@ -203,6 +207,14 @@ class Experience:
         self.rejected = rejected
         self.chosen_messages = chosen_messages
         self.rejected_messages = rejected_messages
+        self.multi_modal_inputs = multi_modal_inputs
+        if multi_modal_inputs is not None:
+            self.multi_modal_inputs = {}
+            for key, value in multi_modal_inputs.items():
+                if not isinstance(value, Tensor):
+                    self.multi_modal_inputs[key] = torch.tensor(value)
+                else:
+                    self.multi_modal_inputs[key] = value
 
         if not isinstance(self.tokens, Tensor):
             self.tokens = torch.tensor(self.tokens)
@@ -301,6 +313,12 @@ class Experience:
         else:
             returns = None
 
+        # gather multi_modal_inputs
+        if all(exp.multi_modal_inputs is not None for exp in experiences):
+            multi_modal_inputs = gather_multi_modal_inputs(experiences)
+        else:
+            multi_modal_inputs = None
+
         exps = Experiences(
             eids=eids,
             tokens=tokens,
@@ -311,6 +329,7 @@ class Experience:
             action_masks=action_masks,
             prompt_length=max_prompt_length,
             logprobs=logprobs,
+            multi_modal_inputs=multi_modal_inputs,
         )
         if custom_fields is not None:
             for custom_field in custom_fields:
@@ -391,6 +410,7 @@ class Experiences:
     action_masks: Optional[Tensor]  # [batch_size, response_length]
     prompt_length: int
     logprobs: Optional[Tensor]  # [batch_size, response_length]
+    multi_modal_inputs: Optional[Any]
     custom_fields: List[str] = field(
         default_factory=list
     )  # Custom fields to include in the gathered experiences
@@ -434,6 +454,7 @@ def empty_experiences(custom_fields: Optional[List[CustomField]]) -> Experiences
         logprobs=torch.empty(0, dtype=torch.float32),
         prompt_length=torch.empty(0, dtype=torch.int32),
         eids=[],
+        multi_modal_inputs=torch.empty(0, dtype=torch.float32),
     )
     if custom_fields is not None:
         for custom_field in custom_fields:
@@ -541,7 +562,7 @@ def gather_advantages(experiences, max_response_length: int) -> Optional[Tensor]
     )
 
 
-def gather_returns(experiences, max_response_length: int) -> Optional[Tensor]:
+def gather_returns(experiences, max_response_length: int) -> Optional[dict[str, List[Tensor]]]:
     if experiences[0].returns is None:
         return None
     returns_dtype = experiences[0].returns.dtype
@@ -560,6 +581,11 @@ def gather_returns(experiences, max_response_length: int) -> Optional[Tensor]:
             for exp in experiences
         ]
     )
+
+
+def gather_multi_modal_inputs(experiences) -> Dict[str, Tensor]:
+    keys = experiences[0].multi_modal_inputs.keys()
+    return {key: [exp.multi_modal_inputs[key] for exp in experiences] for key in keys}
 
 
 def group_by(

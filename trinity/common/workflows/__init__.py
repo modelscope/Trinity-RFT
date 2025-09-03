@@ -11,6 +11,8 @@ from .envs.sciworld.sciworld_workflow import SciWorldWorkflow
 from .envs.webshop.webshop_workflow import WebShopWorkflow
 from .eval_workflow import MathEvalWorkflow
 from .math_rm_workflow import MathRMWorkflow
+from .math_ruler_workflow import MathRULERWorkflow
+from .simple_mm_workflow import SimpleMMWorkflow
 from .workflow import WORKFLOWS, MathWorkflow, SimpleWorkflow, Task, Workflow
 
 __all__ = [
@@ -31,4 +33,6 @@ __all__ = [
     "MathEvalWorkflow",
     "AgentScopeReactV2MathWorkflow",
     "EmailSearchWorkflow",
+    "MathRULERWorkflow",
+    "SimpleMMWorkflow",
 ]

@@ -38,6 +38,15 @@ def get_checkpoint_path() -> str:
     return path
 
 
+def get_vision_languge_model_path() -> str:
+    path = os.environ.get("VLM_MODEL_PATH")
+    if not path:
+        raise EnvironmentError(
+            "Please set `export VLM_MODEL_PATH=<your_model_dir>` before running this test."
+        )
+    return path
+
+
 def get_unittest_dataset_config(
     dataset_name: str = "countdown", split: str = "train"
 ) -> StorageConfig:
@@ -99,6 +108,7 @@ def get_unittest_dataset_config(
                 prompt_type=PromptType.MESSAGES,
                 messages_key="messages",
                 tools_key="tools",
+                enable_concatenated_multi_turn=True,
             ),
         )
     elif dataset_name == "dpo":
@@ -112,6 +122,19 @@ def get_unittest_dataset_config(
                 chosen_key="chosen",
                 rejected_key="rejected",
             ),
+        )
+    elif dataset_name == "geometry":
+        return StorageConfig(
+            name=dataset_name,
+            path=os.path.join(os.path.dirname(__file__), "template", "data", "geometry"),
+            split="train",
+            format=FormatConfig(
+                prompt_key="problem",
+                response_key="answer",
+                image_key="images",
+            ),
+            default_workflow_type="simple_mm_workflow",
+            default_reward_fn_type="math_boxed_reward",
         )
     else:
         raise ValueError(f"Unknown dataset name: {dataset_name}")
