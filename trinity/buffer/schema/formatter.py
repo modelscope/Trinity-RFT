@@ -137,7 +137,10 @@ class SFTFormatter(ExperienceFormatter):
             Experience: The resulting Experience object.
         """
         if isinstance(messages, str):
-            messages = json.loads(messages)
+            try:
+                messages = json.loads(messages)
+            except json.JSONDecodeError:
+                logger.error("[SFT Data Error] Failed to decode 'messages' JSON. please check your data format.")
         # Warning if tools is accidentally provided as list of dicts (with Huggingface datasets this may cause schema issues)
         if tools is not None and isinstance(tools, list):
             logger.warning(
@@ -147,8 +150,11 @@ class SFTFormatter(ExperienceFormatter):
                 "It is recommended to pre-process 'tools' objects with json.dumps before saving/loading, "
                 "and to restore them with json.loads in this function."
             )
-            if isinstance(tools, str):
+        if isinstance(tools, str):
+            try:
                 tools = json.loads(tools)
+            except json.JSONDecodeError:
+                logger.error("[SFT Data Error] Failed to decode 'tools' JSON. Please check your data format.")
         tokens = self.tokenizer.apply_chat_template(
             messages,
             tools=tools,
