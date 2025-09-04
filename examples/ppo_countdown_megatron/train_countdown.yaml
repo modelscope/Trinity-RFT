@@ -18,6 +18,9 @@ actor_rollout_ref:
       optimizer_offload: false
       # whether to use mbridge to import/export parameters
       use_mbridge: false
+      # Use Megatron checkpoint
+      use_dist_checkpointing: false
+      dist_checkpointing_path: null
       # recompute settings
       override_transformer_config:
         recompute_granularity: full
@@ -48,6 +51,8 @@ actor_rollout_ref:
       grad_offload: false
       optimizer_offload: false
       use_mbridge: false
+      use_dist_checkpointing: false
+      dist_checkpointing_path: null
       override_transformer_config:
         recompute_granularity: full
         recompute_method: uniform
@@ -67,6 +72,8 @@ critic:
     grad_offload: false
     optimizer_offload: false
     use_mbridge: false
+    use_dist_checkpointing: false
+    dist_checkpointing_path: null
     override_transformer_config:
       recompute_granularity: full
       recompute_method: uniform
