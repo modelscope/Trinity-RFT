@@ -112,6 +112,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunningStatus</span><span class="p">,</span> <span class="n">SyncMethod</span><span class="p">,</span> <span class="n">SyncStyle</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experiences</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.manager.state_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">StateManager</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.manager.synchronizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Synchronizer</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.monitor</span><span class="w"> </span><span class="kn">import</span> <span class="n">MONITOR</span>
@@ -131,6 +132,11 @@
         <span class="n">load_plugins</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span> <span class="o">=</span> <span class="n">Synchronizer</span><span class="o">.</span><span class="n">get_actor</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">engine</span> <span class="o">=</span> <span class="n">get_trainer_wrapper</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">StateManager</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="n">trainer_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">load_trainer</span><span class="p">()</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">trainer_state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="s2">&quot;latest_exp_index&quot;</span><span class="p">,</span> <span class="mi">0</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">last_trainer_sync_step</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span> <span class="o">=</span> <span class="n">MONITOR</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">monitor_type</span><span class="p">)(</span>
             <span class="n">project</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">project</span><span class="p">,</span>
@@ -175,7 +181,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error in Trainer:</span><span class="se">\n</span><span class="si">{</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">train_continue</span> <span class="o">=</span> <span class="kc">False</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">save_checkpoint</span><span class="p">(</span><span class="n">block_until_saved</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_checkpoint</span><span class="p">(</span><span class="n">block_until_saved</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">set_trainer_status</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">RunningStatus</span><span class="o">.</span><span class="n">STOPPED</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;--------------------</span><span class="se">\n</span><span class="s2">&gt; Trainer finished.</span><span class="se">\n</span><span class="s2">--------------------&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">name</span></div>
@@ -201,7 +207,7 @@
                 <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_step_num</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">save_interval</span> <span class="o">!=</span> <span class="mi">0</span>
             <span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Saving at step </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">train_step_num</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">save_checkpoint</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">save_checkpoint</span><span class="p">()</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Saved at step </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">train_step_num</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sampling at step </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">train_step_num</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2"> done.&quot;</span><span class="p">)</span>
@@ -265,6 +271,16 @@
                 <span class="s2">&quot;rollout_examples&quot;</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sample_exps_to_log</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_step_num</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_sample_exps_to_log</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Trainer.save_checkpoint">
+<a class="viewcode-back" href="../../../build_api/trinity.trainer.trainer.html#trinity.trainer.Trainer.save_checkpoint">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_checkpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">block_until_saved</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">save_checkpoint</span><span class="p">(</span><span class="n">block_until_saved</span><span class="o">=</span><span class="n">block_until_saved</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">save_trainer</span><span class="p">(</span>
+            <span class="n">current_exp_index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">train_step_num</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">train_batch_size</span><span class="p">,</span>
+            <span class="n">current_step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">train_step_num</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="Trainer.shutdown">
 <a class="viewcode-back" href="../../../build_api/trinity.trainer.trainer.html#trinity.trainer.Trainer.shutdown">[docs]</a>

@@ -130,7 +130,7 @@
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.writer.sql_writer.html#trinity.buffer.writer.sql_writer.SQLWriter.write_async">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">write_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_in_ray</span><span class="p">:</span>
-            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_wrapper</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db_wrapper</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">db_wrapper</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
 
@@ -139,7 +139,7 @@
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.writer.sql_writer.html#trinity.buffer.writer.sql_writer.SQLWriter.acquire">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">acquire</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_in_ray</span><span class="p">:</span>
-            <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_wrapper</span><span class="o">.</span><span class="n">acquire</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db_wrapper</span><span class="o">.</span><span class="n">acquire</span><span class="o">.</span><span class="n">remote</span><span class="p">())</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="mi">0</span></div>
 
@@ -148,7 +148,7 @@
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.writer.sql_writer.html#trinity.buffer.writer.sql_writer.SQLWriter.release">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">release</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_in_ray</span><span class="p">:</span>
-            <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_wrapper</span><span class="o">.</span><span class="n">release</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db_wrapper</span><span class="o">.</span><span class="n">release</span><span class="o">.</span><span class="n">remote</span><span class="p">())</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">db_wrapper</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
             <span class="k">return</span> <span class="mi">0</span></div>

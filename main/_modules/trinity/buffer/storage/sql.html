@@ -101,7 +101,7 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">ray</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dataset</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">asc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">asc</span><span class="p">,</span> <span class="n">desc</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy.orm</span><span class="w"> </span><span class="kn">import</span> <span class="n">sessionmaker</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">init_engine</span>
@@ -206,12 +206,21 @@
 <div class="viewcode-block" id="SQLExperienceStorage">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.sql.html#trinity.buffer.storage.sql.SQLExperienceStorage">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SQLExperienceStorage</span><span class="p">(</span><span class="n">SQLStorage</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Used as trainer input.&quot;&quot;&quot;</span>
+
 <div class="viewcode-block" id="SQLExperienceStorage.__init__">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.sql.html#trinity.buffer.storage.sql.SQLExperienceStorage.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">storage_config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">storage_config</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">train_batch_size</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">max_timeout</span> <span class="o">=</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">max_read_timeout</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_timeout</span> <span class="o">=</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">max_read_timeout</span>
+        <span class="c1"># TODO: optimize the following logic</span>
+        <span class="k">if</span> <span class="n">storage_config</span><span class="o">.</span><span class="n">schema_type</span> <span class="o">==</span> <span class="s2">&quot;experience&quot;</span><span class="p">:</span>
+            <span class="c1"># NOTE: consistent with the old version of experience buffer</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_read_method</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_priority</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># SFT / DPO uses FIFO style</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_read_method</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fifo</span></div>
 
 
 <div class="viewcode-block" id="SQLExperienceStorage.write">
@@ -219,24 +228,17 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">with</span> <span class="n">retry_session</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_retry_times</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_retry_interval</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
             <span class="n">experience_models</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">table_model_cls</span><span class="o">.</span><span class="n">from_experience</span><span class="p">(</span><span class="n">exp</span><span class="p">)</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
-            <span class="n">session</span><span class="o">.</span><span class="n">add_all</span><span class="p">(</span><span class="n">experience_models</span><span class="p">)</span></div>
+            <span class="n">session</span><span class="o">.</span><span class="n">add_all</span><span class="p">(</span><span class="n">experience_models</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Write </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">experience_models</span><span class="p">)</span><span class="si">}</span><span class="s2"> experiences to SQL storage.&quot;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="SQLExperienceStorage.read">
-<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.sql.html#trinity.buffer.storage.sql.SQLExperienceStorage.read">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopped</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">StopIteration</span><span class="p">()</span>
-
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_fifo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read experiences in FIFO order.&quot;&quot;&quot;</span>
         <span class="n">exp_list</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span>  <span class="c1"># type: ignore</span>
         <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
         <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">exp_list</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">batch_size</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopped</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">StopIteration</span><span class="p">()</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">exp_list</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Waiting for </span><span class="si">{</span><span class="n">batch_size</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">exp_list</span><span class="p">)</span><span class="si">}</span><span class="s2"> more experiences...&quot;</span><span class="p">)</span>
-                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_timeout</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;Max read timeout reached (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">max_timeout</span><span class="si">}</span><span class="s2"> s), only get </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">exp_list</span><span class="p">)</span><span class="si">}</span><span class="s2"> experiences, stopping...&quot;</span>
@@ -257,7 +259,62 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="n">experiences</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">id</span>
                     <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
                 <span class="n">exp_list</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">table_model_cls</span><span class="o">.</span><span class="n">to_experience</span><span class="p">(</span><span class="n">exp</span><span class="p">)</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiences</span><span class="p">])</span>
-        <span class="k">return</span> <span class="n">exp_list</span></div>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">exp_list</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">batch_size</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Waiting for </span><span class="si">{</span><span class="n">batch_size</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">exp_list</span><span class="p">)</span><span class="si">}</span><span class="s2"> more experiences...&quot;</span><span class="p">)</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">exp_list</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_read_priority</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+        <span class="n">exp_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">latest_size</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">latest_size</span> <span class="o">&lt;</span> <span class="n">batch_size</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopped</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">StopIteration</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_timeout</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Max read timeout reached (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">max_timeout</span><span class="si">}</span><span class="s2"> s), only get </span><span class="si">{</span><span class="n">latest_size</span><span class="si">}</span><span class="s2"> experiences, stopping...&quot;</span>
+                <span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">StopIteration</span><span class="p">()</span>
+            <span class="k">with</span> <span class="n">retry_session</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_retry_times</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_retry_interval</span>
+            <span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+                <span class="n">experiences</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table_model_cls</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">asc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table_model_cls</span><span class="o">.</span><span class="n">consumed</span><span class="p">),</span> <span class="n">desc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table_model_cls</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
+                    <span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">with_for_update</span><span class="p">()</span>
+                    <span class="o">.</span><span class="n">all</span><span class="p">()</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">experiences</span><span class="p">)</span> <span class="o">!=</span> <span class="n">batch_size</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">latest_size</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">experiences</span><span class="p">):</span>
+                        <span class="n">latest_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">experiences</span><span class="p">)</span>
+                        <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">exp</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiences</span><span class="p">]</span>
+                    <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table_model_cls</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">table_model_cls</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">in_</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
+                    <span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                        <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">table_model_cls</span><span class="o">.</span><span class="n">consumed</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_model_cls</span><span class="o">.</span><span class="n">consumed</span> <span class="o">+</span> <span class="mi">1</span><span class="p">},</span>
+                        <span class="n">synchronize_session</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="n">exp_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                        <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">table_model_cls</span><span class="o">.</span><span class="n">to_experience</span><span class="p">(</span><span class="n">exp</span><span class="p">)</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiences</span><span class="p">]</span>
+                    <span class="p">)</span>
+                    <span class="k">break</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Waiting for </span><span class="si">{</span><span class="n">batch_size</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">exp_list</span><span class="p">)</span><span class="si">}</span><span class="s2"> more experiences...&quot;</span><span class="p">)</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">exp_list</span>
+
+<div class="viewcode-block" id="SQLExperienceStorage.read">
+<a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.sql.html#trinity.buffer.storage.sql.SQLExperienceStorage.read">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopped</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">StopIteration</span><span class="p">()</span>
+
+        <span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_method</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SQLExperienceStorage.load_from_dataset">
@@ -291,6 +348,8 @@
 <div class="viewcode-block" id="SQLTaskStorage">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.sql.html#trinity.buffer.storage.sql.SQLTaskStorage">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SQLTaskStorage</span><span class="p">(</span><span class="n">SQLStorage</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Used as explorer input.&quot;&quot;&quot;</span>
+
 <div class="viewcode-block" id="SQLTaskStorage.__init__">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.storage.sql.html#trinity.buffer.storage.sql.SQLTaskStorage.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">storage_config</span><span class="p">:</span> <span class="n">StorageConfig</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>

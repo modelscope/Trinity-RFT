@@ -16,7 +16,7 @@ Submodules
    :maxdepth: 4
 
    trinity.manager.config_manager
-   trinity.manager.manager
+   trinity.manager.state_manager
    trinity.manager.synchronizer
 
 Module contents

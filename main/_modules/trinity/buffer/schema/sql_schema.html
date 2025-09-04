@@ -148,6 +148,7 @@
     <span class="n">reward</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="c1"># serialized experience object</span>
     <span class="n">experience_bytes</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">LargeBinary</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">consumed</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ExperienceModel.to_experience">
 <a class="viewcode-back" href="../../../../build_api/trinity.buffer.schema.sql_schema.html#trinity.buffer.schema.ExperienceModel.to_experience">[docs]</a>
