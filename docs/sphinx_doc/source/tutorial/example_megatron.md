@@ -192,11 +192,11 @@ critic:
 
 If you're training an MoE model like **Qwen/Qwen3-30B-A3B**, you’ll need to take one of the following two approaches to ensure it works properly:
 
-1. **Use mBridge (Recommended)**:
+1. **Use MBridge (Recommended)**:
    Simply set `use_mbridge: true` in your configuration file. This enables the necessary support for MoE models directly.
 
 2. **Convert the model manually**:
-   If you prefer not to use mBridge, set `use_mbridge: false`. Before training, you must first convert your Hugging Face model to the MCore format using the [Hugging Face to MCore converter](https://github.com/volcengine/verl/blob/main/scripts/converter_hf_to_mcore.py) from the **verl** repository. After conversion, update your config with:
+   If you prefer not to use MBridge, set `use_mbridge: false`. Before training, you must first convert your Hugging Face model to the MCore format using the [Hugging Face to MCore converter](https://github.com/volcengine/verl/blob/main/scripts/converter_hf_to_mcore.py) from the **verl** repository. After conversion, update your config with:
    - `use_dist_checkpointing: true`
    - `dist_checkpointing_path: /PATH/TO/CONVERTED/MODEL/`
 
