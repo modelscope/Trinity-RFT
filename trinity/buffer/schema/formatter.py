@@ -143,6 +143,7 @@ class SFTFormatter(ExperienceFormatter):
                 logger.error(
                     "[SFT Data Error] Failed to decode 'messages' JSON. please check your data format."
                 )
+                raise ValueError("Invalid JSON format for messages")
         # Warning if tools is accidentally provided as list of dicts (with Huggingface datasets this may cause schema issues)
         if tools is not None and isinstance(tools, list):
             logger.warning(
@@ -159,6 +160,7 @@ class SFTFormatter(ExperienceFormatter):
                 logger.error(
                     "[SFT Data Error] Failed to decode 'tools' JSON. Please check your data format."
                 )
+                raise ValueError("Invalid JSON format for tools")
         tokens = self.tokenizer.apply_chat_template(
             messages,
             tools=tools,
