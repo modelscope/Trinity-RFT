@@ -140,6 +140,10 @@ actor_rollout_ref:
       # Use mBridge for parameter import/export (optional)
       use_mbridge: false
 
+      # Use Megatron checkpoint
+      use_dist_checkpointing: false
+      dist_checkpointing_path: null
+
       # Recomputation settings (helps save memory during training)
       override_transformer_config:
         recompute_granularity: full
@@ -155,6 +159,8 @@ actor_rollout_ref:
       grad_offload: false
       optimizer_offload: false
       use_mbridge: false
+      use_dist_checkpointing: false
+      dist_checkpointing_path: null
       override_transformer_config:
         recompute_granularity: full
         recompute_method: uniform
@@ -171,6 +177,8 @@ critic:
     grad_offload: false
     optimizer_offload: false
     use_mbridge: false
+    use_dist_checkpointing: false
+    dist_checkpointing_path: null
     override_transformer_config:
       recompute_granularity: full
       recompute_method: uniform
@@ -182,9 +190,14 @@ critic:
 
 ### Training Mixture-of-Experts (MoE) Models
 
-If you're training an MoE model like **Qwen/Qwen3-30B-A3B**, you have two options:
+If you're training an MoE model like **Qwen/Qwen3-30B-A3B**, you’ll need to take one of the following two approaches to ensure it works properly:
 
-1. **Enable mBridge**: Set `use_mbridge: true` in the config.
-2. **Convert the model first**: Use the [Hugging Face to MCore converter](https://github.com/volcengine/verl/blob/main/scripts/converter_hf_to_mcore.py) from the **verl** to convert your model before training.
+1. **Use MBridge (Recommended)**:
+   Simply set `use_mbridge: true` in your configuration file. This enables the necessary support for MoE models directly.
 
-> ⚠️ Without one of these steps, MoE models may not load or train correctly.
+2. **Convert the model manually**:
+   If you prefer not to use MBridge, set `use_mbridge: false`. Before training, you must first convert your Hugging Face model to the MCore format using the [Hugging Face to MCore converter](https://github.com/volcengine/verl/blob/main/scripts/converter_hf_to_mcore.py) from the **verl** repository. After conversion, update your config with:
+   - `use_dist_checkpointing: true`
+   - `dist_checkpointing_path: /PATH/TO/CONVERTED/MODEL/`
+
+> ⚠️ Important: If you skip both steps, the MoE model may fail to load or train correctly. Make sure to follow one of the two options above.

@@ -238,6 +238,10 @@ docker<span class="w"> </span>build<span class="w"> </span>-f<span class="w"> </
 <span class="w">      </span><span class="c1"># Use mBridge for parameter import/export (optional)</span>
 <span class="w">      </span><span class="nt">use_mbridge</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 
+<span class="w">      </span><span class="c1"># Use Megatron checkpoint</span>
+<span class="w">      </span><span class="nt">use_dist_checkpointing</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">      </span><span class="nt">dist_checkpointing_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+
 <span class="w">      </span><span class="c1"># Recomputation settings (helps save memory during training)</span>
 <span class="w">      </span><span class="nt">override_transformer_config</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">recompute_granularity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">full</span>
@@ -253,6 +257,8 @@ docker<span class="w"> </span>build<span class="w"> </span>-f<span class="w"> </
 <span class="w">      </span><span class="nt">grad_offload</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 <span class="w">      </span><span class="nt">optimizer_offload</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 <span class="w">      </span><span class="nt">use_mbridge</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">      </span><span class="nt">use_dist_checkpointing</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">      </span><span class="nt">dist_checkpointing_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
 <span class="w">      </span><span class="nt">override_transformer_config</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">recompute_granularity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">full</span>
 <span class="w">        </span><span class="nt">recompute_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">uniform</span>
@@ -269,6 +275,8 @@ docker<span class="w"> </span>build<span class="w"> </span>-f<span class="w"> </
 <span class="w">    </span><span class="nt">grad_offload</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 <span class="w">    </span><span class="nt">optimizer_offload</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 <span class="w">    </span><span class="nt">use_mbridge</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="nt">use_dist_checkpointing</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="nt">dist_checkpointing_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
 <span class="w">    </span><span class="nt">override_transformer_config</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">recompute_granularity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">full</span>
 <span class="w">      </span><span class="nt">recompute_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">uniform</span>
@@ -280,13 +288,20 @@ docker<span class="w"> </span>build<span class="w"> </span>-f<span class="w"> </
 <hr class="docutils" />
 <section id="training-mixture-of-experts-moe-models">
 <h3>Training Mixture-of-Experts (MoE) Models<a class="headerlink" href="#training-mixture-of-experts-moe-models" title="Link to this heading"></a></h3>
-<p>If you’re training an MoE model like <strong>Qwen/Qwen3-30B-A3B</strong>, you have two options:</p>
+<p>If you’re training an MoE model like <strong>Qwen/Qwen3-30B-A3B</strong>, you’ll need to take one of the following two approaches to ensure it works properly:</p>
 <ol class="arabic simple">
-<li><p><strong>Enable mBridge</strong>: Set <code class="docutils literal notranslate"><span class="pre">use_mbridge:</span> <span class="pre">true</span></code> in the config.</p></li>
-<li><p><strong>Convert the model first</strong>: Use the <a class="reference external" href="https://github.com/volcengine/verl/blob/main/scripts/converter_hf_to_mcore.py">Hugging Face to MCore converter</a> from the <strong>verl</strong> to convert your model before training.</p></li>
+<li><p><strong>Use MBridge (Recommended)</strong>:
+Simply set <code class="docutils literal notranslate"><span class="pre">use_mbridge:</span> <span class="pre">true</span></code> in your configuration file. This enables the necessary support for MoE models directly.</p></li>
+<li><p><strong>Convert the model manually</strong>:
+If you prefer not to use MBridge, set <code class="docutils literal notranslate"><span class="pre">use_mbridge:</span> <span class="pre">false</span></code>. Before training, you must first convert your Hugging Face model to the MCore format using the <a class="reference external" href="https://github.com/volcengine/verl/blob/main/scripts/converter_hf_to_mcore.py">Hugging Face to MCore converter</a> from the <strong>verl</strong> repository. After conversion, update your config with:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">use_dist_checkpointing:</span> <span class="pre">true</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dist_checkpointing_path:</span> <span class="pre">/PATH/TO/CONVERTED/MODEL/</span></code></p></li>
+</ul>
+</li>
 </ol>
 <blockquote>
-<div><p>⚠️ Without one of these steps, MoE models may not load or train correctly.</p>
+<div><p>⚠️ Important: If you skip both steps, the MoE model may fail to load or train correctly. Make sure to follow one of the two options above.</p>
 </div></blockquote>
 </section>
 </section>
