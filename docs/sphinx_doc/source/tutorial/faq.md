@@ -148,14 +148,16 @@ for exp in exp_list:
 
 **A:** You need to specify model path and checkpoint path. The following code snippet gives an example with transformers.
 
+Here is an example of loading from fsdp trainer checkpoints:
+
 ```python
 import os
 from transformers import AutoTokenizer, AutoModelForCausalLM
-from trinity.common.models.utils import load_state_dict_from_verl_checkpoint
+from trinity.common.models.utils import load_fsdp_state_dict_from_verl_checkpoint
 
 # Assume we need the checkpoint at step 780;
 # model_path, checkpoint_root_dir, project, and name are already defined
 model = AutoModelForCausalLM.from_pretrained(model_path)
 ckp_path = os.path.join(checkpoint_root_dir, project, name, "global_step_780", "actor")
-model.load_state_dict(load_state_dict_from_verl_checkpoint(ckp_path))
+model.load_state_dict(load_fsdp_state_dict_from_verl_checkpoint(ckp_path))
 ```
