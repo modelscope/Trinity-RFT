@@ -11,8 +11,6 @@ from trinity.common.workflows import WORKFLOWS, Task
 from trinity.utils.log import get_logger
 from trinity.utils.registry import Registry
 
-logger = get_logger(__name__)
-
 FORMATTER = Registry("formatter")
 
 
@@ -102,6 +100,7 @@ class SFTFormatter(ExperienceFormatter):
     """
 
     def __init__(self, tokenizer, format_config: FormatConfig):
+        self.logger = get_logger("sft_dataset_formatter", in_ray_actor=True)
         self.tokenizer = tokenizer
         self.prompt_type = format_config.prompt_type
         self.enable_concatenated_multi_turn = format_config.enable_concatenated_multi_turn
@@ -140,13 +139,13 @@ class SFTFormatter(ExperienceFormatter):
             try:
                 messages = json.loads(messages)
             except json.JSONDecodeError:
-                logger.error(
+                self.logger.error(
                     "[SFT Data Error] Failed to decode 'messages' JSON. please check your data format."
                 )
                 raise ValueError("Invalid JSON format for messages")
         # Warning if tools is accidentally provided as list of dicts (with Huggingface datasets this may cause schema issues)
         if tools is not None and isinstance(tools, list):
-            logger.warning(
+            self.logger.warning(
                 "[SFT Data Warning] 'tools' is provided as a list of dictionaries. "
                 "When loading with Huggingface Datasets, schema auto-alignment may set unmatched fields to null, "
                 "potentially causing undesired behavior. "
@@ -157,7 +156,7 @@ class SFTFormatter(ExperienceFormatter):
             try:
                 tools = json.loads(tools)
             except json.JSONDecodeError:
-                logger.error(
+                self.logger.error(
                     "[SFT Data Error] Failed to decode 'tools' JSON. Please check your data format."
                 )
                 raise ValueError("Invalid JSON format for tools")
