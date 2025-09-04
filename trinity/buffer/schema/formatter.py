@@ -1,3 +1,4 @@
+import json
 from abc import ABC, abstractmethod
 from typing import Dict, List, Optional
 
@@ -7,7 +8,10 @@ from trinity.common.experience import Experience
 from trinity.common.models.utils import get_action_mask_method
 from trinity.common.rewards import REWARD_FUNCTIONS
 from trinity.common.workflows import WORKFLOWS, Task
+from trinity.utils.log import get_logger
 from trinity.utils.registry import Registry
+
+logger = get_logger(__name__)
 
 FORMATTER = Registry("formatter")
 
@@ -120,18 +124,31 @@ class SFTFormatter(ExperienceFormatter):
 
     def _messages_to_experience(
         self,
-        messages: List[Dict],
-        tools: Optional[List[Dict]] = None,
+        messages: List[Dict] | str,  # or could be str from json dumps
+        tools: Optional[List[Dict] | str] = None,  # or could also be str from json dumps
     ) -> Experience:
         """Convert messages and tools into an Experience object.
 
         Args:
-            messages (List[Dict]): The list of message dictionaries.
-            tools (Optional[List[Dict]], optional): The list of tool dictionaries. Defaults to None.
+            messages (List[Dict]|str): The list of message dictionaries or a JSON string.
+            tools (Optional[List[Dict]|str], optional): The list of tool dictionaries or a JSON string. Defaults to None.
 
         Returns:
             Experience: The resulting Experience object.
         """
+        if isinstance(messages, str):
+            messages = json.loads(messages)
+        # Warning if tools is accidentally provided as list of dicts (with Huggingface datasets this may cause schema issues)
+        if tools is not None and isinstance(tools, list):
+            logger.warning(
+                "[SFT Data Warning] 'tools' is provided as a list of dictionaries. "
+                "When loading with Huggingface Datasets, schema auto-alignment may set unmatched fields to null, "
+                "potentially causing undesired behavior. "
+                "It is recommended to pre-process 'tools' objects with json.dumps before saving/loading, "
+                "and to restore them with json.loads in this function."
+            )
+            if isinstance(tools, str):
+                tools = json.loads(tools)
         tokens = self.tokenizer.apply_chat_template(
             messages,
             tools=tools,
