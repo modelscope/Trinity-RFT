@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name =  "trinity-rft"
-version = "0.3.0.dev0"
+version = "0.3.0"
 authors = [
     {name="Trinity-RFT Team", email="trinity-rft@outlook.com"},
 ]
@@ -79,7 +79,7 @@ megatron = [
 doc = [
     "sphinx",
     "sphinx-autobuild",
-    "sphinx_rtd_theme",
+    "sphinx-book-theme",
     "myst-parser",
     "sphinxcontrib-apidoc",
     "sphinx-multiversion",

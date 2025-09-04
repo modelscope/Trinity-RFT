@@ -65,7 +65,7 @@ smv_prefer_remote_refs = False
 
 # -- Options for HTML output -------------------------------------------------
 
-html_theme = "sphinx_rtd_theme"
+html_theme = "sphinx_book_theme"
 
 html_theme_options = {
     "navigation_depth": 3,
@@ -73,8 +73,12 @@ html_theme_options = {
 
 html_sidebars = {
     "**": [
+        "navbar-logo.html",
+        "icon-links.html",
         "versions.html",
-    ],
+        "search-button-field.html",
+        "sbt-sidebar-nav.html",
+    ]
 }
 
 html_context = {
