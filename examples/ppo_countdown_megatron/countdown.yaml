@@ -24,7 +24,6 @@ buffer:
         response_key: 'answer'
       rollout_args:
         temperature: 1.0
-        logprobs: 0
     default_workflow_type: 'math_workflow'
     default_reward_fn_type: 'countdown_reward'
   trainer_input:
@@ -123,8 +122,6 @@ trainer:
       ppo_max_token_len_per_gpu: 32768 # (${actor_rollout_ref.actor.ppo_max_token_len_per_gpu}) * 2
       forward_max_token_len_per_gpu: ${trainer.trainer_config.critic.ppo_max_token_len_per_gpu}
       ulysses_sequence_parallel_size: 1 # sp size
-      ppo_epochs: ${trainer.trainer_config.actor_rollout_ref.actor.ppo_epochs}
-      shuffle: ${trainer.trainer_config.actor_rollout_ref.actor.shuffle}
       grad_clip: 1.0
       cliprange_value: 0.5
     trainer:
