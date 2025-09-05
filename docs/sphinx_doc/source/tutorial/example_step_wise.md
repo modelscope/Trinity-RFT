@@ -148,9 +148,21 @@ synchronizer:
   sync_interval: 2
   sync_timeout: 3600
 trainer:
-  trainer_type: 'verl'
-  trainer_config_path: 'examples/grpo_alfworld_general_multi_step/train_alfworld.yaml'
   save_interval: 50
+  trainer_config:
+    actor_rollout_ref:
+      model:
+        use_remove_padding: true
+      actor:
+        use_dynamic_bsz: true
+        ppo_max_token_len_per_gpu: 16384
+        ulysses_sequence_parallel_size: 1
+        optim:
+          lr: 5e-6
+      ref:
+        log_prob_use_dynamic_bsz: ${trainer.trainer_config.actor_rollout_ref.actor.use_dynamic_bsz}
+        log_prob_max_token_len_per_gpu: ${trainer.trainer_config.actor_rollout_ref.actor.ppo_max_token_len_per_gpu}
+        ulysses_sequence_parallel_size: ${trainer.trainer_config.actor_rollout_ref.actor.ulysses_sequence_parallel_size} # sp size
 ```
 
 

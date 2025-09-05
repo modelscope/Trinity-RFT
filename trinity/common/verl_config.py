@@ -27,7 +27,7 @@ class ActorModel:
     external_lib: Optional[str] = None
     override_config: Dict[str, Any] = field(default_factory=dict)
     enable_gradient_checkpointing: bool = True
-    use_remove_padding: bool = False
+    use_remove_padding: bool = True
     use_fused_kernels: bool = False
     fused_kernel_options: FusedKernelOptions = field(default_factory=FusedKernelOptions)
     custom_chat_template: Optional[str] = None
@@ -155,7 +155,7 @@ class Ref:
     fsdp_config: FSDPConfig = field(default_factory=FSDPConfig)
     log_prob_micro_batch_size: Optional[int] = None
     log_prob_micro_batch_size_per_gpu: int = 1
-    log_prob_use_dynamic_bsz: bool = False
+    log_prob_use_dynamic_bsz: bool = True
     log_prob_max_token_len_per_gpu: int = 0
     ulysses_sequence_parallel_size: int = 1
     entropy_from_logits_with_chunking: bool = False
@@ -207,7 +207,7 @@ class CriticModel:
     override_config: Dict[str, str] = field(default_factory=dict)
     external_lib: Optional[str] = None
     enable_gradient_checkpointing: bool = True
-    use_remove_padding: bool = False
+    use_remove_padding: bool = True
     fsdp_config: FSDPConfig = field(default_factory=FSDPConfig)
 
 
@@ -221,7 +221,7 @@ class Critic:
     ppo_micro_batch_size_per_gpu: int = 1
     forward_micro_batch_size: Optional[int] = None
     forward_micro_batch_size_per_gpu: Optional[int] = None
-    use_dynamic_bsz: bool = False
+    use_dynamic_bsz: bool = True
     ppo_max_token_len_per_gpu: int = 0
     forward_max_token_len_per_gpu: int = 0
     ulysses_sequence_parallel_size: int = 1

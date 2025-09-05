@@ -34,9 +34,8 @@ buffer:
       path: 'sqlite:///countdown.db'
 explorer:
   eval_interval: 100
-  runner_num: 32
+  runner_per_model: 8
   rollout_model:
-    engine_type: vllm_async
     engine_num: 2
     tensor_parallel_size: 1
     enable_prefix_caching: false
@@ -48,6 +47,33 @@ synchronizer:
   sync_interval: 10
   sync_timeout: 1200
 trainer:
-  trainer_type: 'verl'
-  trainer_config_path: 'examples/ppo_countdown/train_countdown.yaml'
   save_interval: 100
+  trainer_config:
+    actor_rollout_ref:
+      model:
+        use_remove_padding: true
+      actor:
+        use_dynamic_bsz: true
+        ppo_max_token_len_per_gpu: 16384
+        ulysses_sequence_parallel_size: 1
+        optim:
+          lr: 1e-6
+        checkpoint:
+          load_contents: ['model', 'hf_model', 'optimizer', 'extra']  # with 'hf_model' you can save whole model as hf format, now only use sharded model checkpoint to save space
+          save_contents: ['model', 'hf_model', 'optimizer', 'extra']
+      ref:
+        log_prob_use_dynamic_bsz: ${trainer.trainer_config.actor_rollout_ref.actor.use_dynamic_bsz}
+        log_prob_max_token_len_per_gpu: ${trainer.trainer_config.actor_rollout_ref.actor.ppo_max_token_len_per_gpu}
+        ulysses_sequence_parallel_size: ${trainer.trainer_config.actor_rollout_ref.actor.ulysses_sequence_parallel_size}
+    critic:
+      optim:
+        lr: 1e-5
+      use_dynamic_bsz: ${trainer.trainer_config.actor_rollout_ref.actor.use_dynamic_bsz}
+      ppo_max_token_len_per_gpu: 32768  # (${actor_rollout_ref.actor.ppo_max_token_len_per_gpu}) * 2
+      forward_max_token_len_per_gpu: ${trainer.trainer_config.critic.ppo_max_token_len_per_gpu}
+      ulysses_sequence_parallel_size: 1
+      grad_clip: 1.0
+      cliprange_value: 0.5
+    trainer:
+      max_actor_ckpt_to_keep: 5
+      max_critic_ckpt_to_keep: 5

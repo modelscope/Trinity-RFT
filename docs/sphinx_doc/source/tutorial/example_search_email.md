@@ -34,7 +34,7 @@ If you want to choose a new database path, you can modify the `DEFAULT_DB_PATH` 
 
 ### Step 2: Run the Workflow
 
-The config files are located in [`email_search.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_email_search/email_search.yaml) and [`train_email_search.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_email_search/train_email_search.yaml).
+The config file is located in [`email_search.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_email_search/email_search.yaml).
 To run this example, you can run the following command:
 
 ```bash

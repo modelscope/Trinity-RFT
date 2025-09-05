@@ -15,4 +15,4 @@ qwen_vl_utils
 
 For other detailed information, please refer to the [documentation](../../docs/sphinx_doc/source/tutorial/example_reasoning_basic.md).
 
-The config files are located in [`vlm.yaml`](vlm.yaml) and [`train_vlm.yaml`](train_vlm.yaml).
+The config file is located in [`vlm.yaml`](vlm.yaml).

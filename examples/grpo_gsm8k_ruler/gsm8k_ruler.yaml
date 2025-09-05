@@ -44,9 +44,8 @@ buffer:
       storage_type: queue
 explorer:
   eval_interval: 10
-  runner_num: 32
+  runner_per_model: 8
   rollout_model:
-    engine_type: vllm_async
     engine_num: 2
     tensor_parallel_size: 1
     enable_prefix_caching: false
@@ -67,6 +66,18 @@ synchronizer:
   sync_interval: 5
   sync_timeout: 3600
 trainer:
-  trainer_type: 'verl'
-  trainer_config_path: 'examples/grpo_gsm8k_ruler/train_gsm8k_ruler.yaml'
   save_interval: 100
+  trainer_config:
+    actor_rollout_ref:
+      model:
+        use_remove_padding: true
+      actor:
+        use_dynamic_bsz: true
+        ppo_max_token_len_per_gpu: 16384
+        ulysses_sequence_parallel_size: 1
+        optim:
+          lr: 2e-6
+      ref:
+        log_prob_use_dynamic_bsz: ${trainer.trainer_config.actor_rollout_ref.actor.use_dynamic_bsz}
+        log_prob_max_token_len_per_gpu: ${trainer.trainer_config.actor_rollout_ref.actor.ppo_max_token_len_per_gpu}
+        ulysses_sequence_parallel_size: ${trainer.trainer_config.actor_rollout_ref.actor.ulysses_sequence_parallel_size} # sp size

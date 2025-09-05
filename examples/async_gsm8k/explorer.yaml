@@ -35,9 +35,8 @@ buffer:
       path: 'sqlite:///gsm8k.db'
 explorer:
   eval_interval: 10
-  runner_num: 32
+  runner_per_model: 8
   rollout_model:
-    engine_type: vllm_async
     engine_num: 4
     tensor_parallel_size: 1
     enable_prefix_caching: false
@@ -47,6 +46,3 @@ explorer:
 synchronizer:
   sync_method: 'checkpoint'
   sync_interval: 10
-trainer:
-  trainer_type: 'verl'
-  trainer_config_path: examples/async_gsm8k/verl_config.yaml

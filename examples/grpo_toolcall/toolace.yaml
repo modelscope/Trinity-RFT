@@ -32,9 +32,8 @@ buffer:
       path: 'sqlite:///toolace.db'
 explorer:
   eval_interval: 50
-  runner_num: 32
+  runner_per_model: 8
   rollout_model:
-    engine_type: vllm_async
     engine_num: 4
     tensor_parallel_size: 1
     enable_prefix_caching: false
@@ -46,6 +45,18 @@ synchronizer:
   sync_interval: 1
   sync_timeout: 3600
 trainer:
-  trainer_type: 'verl'
-  trainer_config_path: 'examples/grpo_toolcall/train_toolace.yaml'
   save_interval: 100
+  trainer_config:
+    actor_rollout_ref:
+      model:
+        use_remove_padding: true
+      actor:
+        use_dynamic_bsz: true
+        ppo_max_token_len_per_gpu: 16384
+        ulysses_sequence_parallel_size: 2
+        optim:
+          lr: 1e-6
+      ref:
+        log_prob_use_dynamic_bsz: ${trainer.trainer_config.actor_rollout_ref.actor.use_dynamic_bsz}
+        log_prob_max_token_len_per_gpu: ${trainer.trainer_config.actor_rollout_ref.actor.ppo_max_token_len_per_gpu}
+        ulysses_sequence_parallel_size: ${trainer.trainer_config.actor_rollout_ref.actor.ulysses_sequence_parallel_size} # sp size

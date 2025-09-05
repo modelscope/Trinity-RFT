@@ -50,7 +50,7 @@ For SFT, we download the `open-r1/Mixture-of-Thoughts` dataset to the local dire
 
 ### Configuration for DPO
 
-We use the configurations in [`dpo.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/dpo_humanlike/dpo.yaml) and [`train_dpo.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/dpo_humanlike/train_dpo.yaml) for this experiment. Some important setups are listed in the following:
+We use the configurations in [`dpo.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/dpo_humanlike/dpo.yaml) for this experiment. Some important setups are listed in the following:
 
 We run the experiment in a train mode, as there is no Explorer. To enable this mode, we config `mode` to `train` and pass the data path to the trainer.
 
@@ -83,8 +83,9 @@ buffer:
         chosen_key: chosen
         rejected_key: rejected
 trainer:
-  trainer_config_path: 'examples/dpo_humanlike/train_dpo.yaml'
   save_interval: 30
+  trainer_config:
+    ... # omitted here for simplicity
 ```
 
 `buffer.trainer_input.experience_buffer` specifies the dataset to be used for training, including its name, storage type, path, and format.
@@ -129,8 +130,9 @@ buffer:
         prompt_type: messages
         messages_key: messages
 trainer:
-  trainer_config_path: /PATH/TO/TRAIN_CONFIG_YAML/
   save_interval: 50
+  trainer_config:
+    ... # omitted here for simplicity
 ```
 
 Here we set `buffer.trainer_input.experience_buffer.format.prompt_type` to `messages` because the source data is in message format. We also set `buffer.trainer_input.experience_buffer.format.messages_key` to `messages` to specify the key in the dataset that contains the messages.

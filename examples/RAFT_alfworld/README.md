@@ -7,10 +7,10 @@ This example shows the usage of RAFT on the ALFWorld dataset, with both standard
 ## Variants
 
 ### Standard RAFT
-The config files are located in [`RAFT_alfworld_7B.yaml`](RAFT_alfworld_7B.yaml) and [`train_alfworld.yaml`](train_alfworld.yaml).
+The config file is located in [`RAFT_alfworld_7B.yaml`](RAFT_alfworld_7B.yaml).
 
 ### RAFT with Reflection
-The config files are located in [`RAFT_reflect_alfworld_7B.yaml`](RAFT_reflect_alfworld_7B.yaml) and [`train_alfworld.yaml`](train_alfworld.yaml).
+The config file is located in [`RAFT_reflect_alfworld_7B.yaml`](RAFT_reflect_alfworld_7B.yaml).
 
 ## Setup
 

@@ -24,7 +24,6 @@ buffer:
         response_key: 'answer'
       rollout_args:
         temperature: 1.0
-        logprobs: 0
     default_workflow_type: 'math_workflow'
     default_reward_fn_type: 'countdown_reward'
   trainer_input:
@@ -34,9 +33,8 @@ buffer:
       path: 'sqlite:///countdown.db'
 explorer:
   eval_interval: 100
-  runner_num: 32
+  runner_per_model: 8
   rollout_model:
-    engine_type: vllm_async
     engine_num: 2
     tensor_parallel_size: 1
     enable_prefix_caching: false
@@ -48,6 +46,84 @@ synchronizer:
   sync_interval: 10
   sync_timeout: 1200
 trainer:
-  trainer_type: 'verl'
-  trainer_config_path: 'examples/ppo_countdown_megatron/train_countdown.yaml'
   save_interval: 100
+  trainer_config:
+    actor_rollout_ref:
+      model:
+        use_remove_padding: true
+      actor:
+        strategy: megatron  # This is for backward-compatibility
+        megatron:
+          # parallelism settings
+          tensor_model_parallel_size: 2
+          pipeline_model_parallel_size: 1
+          expert_model_parallel_size: 1
+          # offload settings
+          param_offload: false
+          grad_offload: false
+          optimizer_offload: false
+          # whether to use mbridge to import/export parameters
+          use_mbridge: false
+          # Use Megatron checkpoint
+          use_dist_checkpointing: false
+          dist_checkpointing_path: null
+          # recompute settings
+          override_transformer_config:
+            recompute_granularity: full
+            recompute_method: uniform
+            recompute_num_layers: 1
+        use_dynamic_bsz: true
+        ppo_max_token_len_per_gpu: 16384
+        ulysses_sequence_parallel_size: 1 # sp size
+        checkpoint:
+          load_contents: ['model', 'hf_model', 'optimizer', 'extra']
+          save_contents: ['model', 'hf_model', 'optimizer', 'extra']
+        optim:
+          lr: 1e-6
+      ref:
+        megatron:
+          tensor_model_parallel_size: 2
+          pipeline_model_parallel_size: 1
+          expert_model_parallel_size: 1
+          param_offload: false
+          grad_offload: false
+          optimizer_offload: false
+          use_mbridge: false
+          use_dist_checkpointing: false
+          dist_checkpointing_path: null
+          override_transformer_config:
+            recompute_granularity: full
+            recompute_method: uniform
+            recompute_num_layers: 1
+        log_prob_use_dynamic_bsz: ${trainer.trainer_config.actor_rollout_ref.actor.use_dynamic_bsz}
+        log_prob_max_token_len_per_gpu: ${trainer.trainer_config.actor_rollout_ref.actor.ppo_max_token_len_per_gpu}
+        ulysses_sequence_parallel_size: ${trainer.trainer_config.actor_rollout_ref.actor.ulysses_sequence_parallel_size}
+    critic:
+      strategy: megatron
+      megatron:
+        tensor_model_parallel_size: 2
+        pipeline_model_parallel_size: 1
+        expert_model_parallel_size: 1
+        param_offload: false
+        grad_offload: false
+        optimizer_offload: false
+        use_mbridge: false
+        use_dist_checkpointing: false
+        dist_checkpointing_path: null
+        override_transformer_config:
+          recompute_granularity: full
+          recompute_method: uniform
+          recompute_num_layers: 1
+      optim:
+        lr: 1e-5
+      ppo_micro_batch_size_per_gpu: 8
+      forward_micro_batch_size_per_gpu: ${trainer.trainer_config.critic.ppo_micro_batch_size_per_gpu}
+      use_dynamic_bsz: ${trainer.trainer_config.actor_rollout_ref.actor.use_dynamic_bsz}
+      ppo_max_token_len_per_gpu: 32768 # (${actor_rollout_ref.actor.ppo_max_token_len_per_gpu}) * 2
+      forward_max_token_len_per_gpu: ${trainer.trainer_config.critic.ppo_max_token_len_per_gpu}
+      ulysses_sequence_parallel_size: 1 # sp size
+      grad_clip: 1.0
+      cliprange_value: 0.5
+    trainer:
+      max_actor_ckpt_to_keep: 5
+      max_critic_ckpt_to_keep: 5

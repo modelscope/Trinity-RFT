@@ -9,7 +9,7 @@ https://github.com/OpenPipe/ART/blob/main/src/art/rewards/ruler.py
 
 ## Configurations and Metrics
 
-The config files are located in [`gsm8k_ruler.yaml`](gsm8k_ruler.yaml) and [`train_gsm8k_ruler.yaml`](train_gsm8k_ruler.yaml).
+The config file is located in [`gsm8k_ruler.yaml`](gsm8k_ruler.yaml).
 
 Some key configs in this example are:
 * `default_workflow_type`: set to `math_ruler_workflow`

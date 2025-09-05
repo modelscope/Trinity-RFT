@@ -4,4 +4,4 @@ This example shows a multi-turn email search workflow, inspired by [ART](https:/
 
 For more detailed information, please refer to the [documentation](../../docs/sphinx_doc/source/tutorial/example_search_email.md).
 
-The config files are located in [`email_search.yaml`](email_search.yaml) and [`train_email_search.yaml`](train_email_search.yaml).
+The config file is located in [`email_search.yaml`](email_search.yaml).
