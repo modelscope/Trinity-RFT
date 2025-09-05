@@ -68,7 +68,7 @@ trainer:
     critic:
       optim:
         lr: 1e-5
-      use_dynamic_bsz: ${actor_rollout_ref.actor.use_dynamic_bsz}
+      use_dynamic_bsz: ${trainer.trainer_config.actor_rollout_ref.actor.use_dynamic_bsz}
       ppo_max_token_len_per_gpu: 32768  # (${actor_rollout_ref.actor.ppo_max_token_len_per_gpu}) * 2
       forward_max_token_len_per_gpu: ${trainer.trainer_config.critic.ppo_max_token_len_per_gpu}
       ulysses_sequence_parallel_size: 1
