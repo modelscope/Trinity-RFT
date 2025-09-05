@@ -4,4 +4,4 @@ This example shows how to train a ReAct agent for tool integrated reasoning on G
 
 For more detailed information, please refer to the [documentation](../../docs/sphinx_doc/source/tutorial/example_react.md).
 
-The config files are located in [`agentscope_tool_react_dapo.yaml`](agentscope_tool_react_dapo.yaml) and [`train_react.yaml`](train_react.yaml).
+The config file is located in [`agentscope_tool_react_dapo.yaml`](agentscope_tool_react_dapo.yaml).

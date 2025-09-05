@@ -68,6 +68,27 @@ synchronizer:
   sync_interval: 30
   sync_timeout: 1200
 trainer:
-  trainer_type: 'verl'
-  trainer_config_path: 'examples/dpo_human_in_the_loop/train_dpo.yaml'
   save_interval: 30
+  trainer_config:
+    actor_rollout_ref:
+      model:
+        use_remove_padding: false
+      actor:
+        use_dynamic_bsz: false
+        ppo_micro_batch_size_per_gpu: 2
+        ppo_max_token_len_per_gpu: 16384
+        ulysses_sequence_parallel_size: 1
+        optim:
+          lr: 5e-7
+          lr_warmup_steps_ratio: 0.03  # the total steps will be injected during runtime
+          min_lr_ratio: 0.1   # only useful for warmup with cosine
+          warmup_style: cosine  # select from constant/cosine
+          total_training_steps: 200
+          betas: [0.9, 0.95]
+      ref:
+        log_prob_micro_batch_size_per_gpu: 2
+        log_prob_use_dynamic_bsz: ${trainer.trainer_config.actor_rollout_ref.actor.use_dynamic_bsz}
+        log_prob_max_token_len_per_gpu: ${trainer.trainer_config.actor_rollout_ref.actor.ppo_max_token_len_per_gpu}
+        ulysses_sequence_parallel_size: ${trainer.trainer_config.actor_rollout_ref.actor.ulysses_sequence_parallel_size} # sp size
+      trainer:
+        balance_batch: false

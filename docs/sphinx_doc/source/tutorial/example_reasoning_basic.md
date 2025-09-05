@@ -100,7 +100,7 @@ We run the experiment in a synchronous mode where the Explorer and Trainer opera
 
 ### Use GRPO Algorithm
 
-We use the configurations in [`gsm8k.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k/gsm8k.yaml) and [`train_gsm8k.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k/train_gsm8k.yaml) for this experiment. Some important setups of `gsm8k.yaml` are listed in the following:
+We use the configurations in [`gsm8k.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k/gsm8k.yaml) for this experiment. Some important setups of `gsm8k.yaml` are listed in the following:
 
 
 ```yaml
@@ -155,9 +155,12 @@ synchronizer:
   sync_method: 'nccl'
   sync_interval: 1
 trainer:
-  trainer_config_path: 'examples/grpo_gsm8k/train_gsm8k.yaml'
   save_interval: 100
-
+  trainer_config:
+    actor_rollout_ref:
+      actor:
+        optim:
+          lr: 1e-5
 ```
 
 

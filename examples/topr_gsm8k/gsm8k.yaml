@@ -41,16 +41,10 @@ buffer:
       name: gsm8k_buffer
       storage_type: queue
       path: 'sqlite:///gsm8k.db'
-    # sft_warmup_steps: 0
-    # sft_warmup_dataset: # Uncomment these to enable sft warmup
-    #   name: warmup_data
-    #   storage_type: file
-    #   path: '/PATH/TO/WARMUP_DATA/'
 explorer:
   eval_interval: 50
-  runner_num: 32
+  runner_per_model: 8
   rollout_model:
-    engine_type: vllm_async
     engine_num: 2
     tensor_parallel_size: 1
     enable_prefix_caching: false
@@ -62,6 +56,18 @@ synchronizer:
   sync_interval: 8
   sync_timeout: 1200
 trainer:
-  trainer_type: 'verl'
-  trainer_config_path: 'examples/topr_gsm8k/train_gsm8k.yaml'
   save_interval: 100
+  trainer_config:
+    actor_rollout_ref:
+      model:
+        use_remove_padding: true
+      actor:
+        use_dynamic_bsz: true
+        ppo_max_token_len_per_gpu: 16384
+        ulysses_sequence_parallel_size: 1
+        optim:
+          lr: 1e-5
+      ref:
+        log_prob_use_dynamic_bsz: ${trainer.trainer_config.actor_rollout_ref.actor.use_dynamic_bsz}
+        log_prob_max_token_len_per_gpu: ${trainer.trainer_config.actor_rollout_ref.actor.ppo_max_token_len_per_gpu}
+        ulysses_sequence_parallel_size: ${trainer.trainer_config.actor_rollout_ref.actor.ulysses_sequence_parallel_size}

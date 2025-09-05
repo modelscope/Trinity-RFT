@@ -4,7 +4,7 @@ This example shows the usage of GRPO on the [ToolAce](https://huggingface.co/dat
 
 We reference code from [Tool-N1](https://github.com/NVlabs/Tool-N1) for the data preprocessing script and the workflow construction.
 
-The config files are located in [`toolace.yaml`](toolace.yaml) and [`train_toolace.yaml`](train_toolace.yaml).
+The config file is located in [`toolace.yaml`](toolace.yaml).
 
 
 ## How to run

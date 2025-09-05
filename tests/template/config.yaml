@@ -35,7 +35,6 @@ explorer:
   eval_interval: 100
   runner_per_model: 8
   rollout_model:
-    engine_type: vllm_async
     engine_num: 2
     tensor_parallel_size: 1
     enable_prefix_caching: false
