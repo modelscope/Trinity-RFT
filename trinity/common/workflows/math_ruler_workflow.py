@@ -119,7 +119,7 @@ Below is a question and several candidate solutions.
 Please assign a score within the range [0, 1] for each of them, reflecting how well they solve the question.
 You may compare them against each other and think step by step before returning your final scores, but keep your reasoning process brief and concise when possible.
 
-Conclude your response with a list of scores, in the following format: [score for solution 1, score for solution 2, ..., score for solution {num_responses + 1}]
+Conclude your response with a list of scores, in the following format: [score for solution 1, score for solution 2, ..., score for solution {num_responses}]
 """
 
         # Step 2: invoke judger LLM

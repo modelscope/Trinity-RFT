@@ -102,11 +102,6 @@ class MathTrainableRULERWorkflow(SimpleWorkflow):
                 response.metrics.update({"judge_success": judge_success_rate})
 
             for i, ruler_response in enumerate(ruler_responses):
-                # if ruler_response.metrics is None:
-                # ruler_response.metrics = {}
-                # ruler_response.metrics.update({"judge_success": judge_success_rate})
-                # ruler_response.metrics.update({"reward_for_judger": ruler_response.reward})
-
                 # set task_id explicitly, to distinguish two types of experiences!
                 ruler_response.eid.task = str(self.task.task_id) + "-ruler"
                 ruler_response.eid.run = i + self.run_id_base
@@ -119,7 +114,7 @@ class MathTrainableRULERWorkflow(SimpleWorkflow):
             # - set exp's reward to RULER score
             # - return responses
 
-            ruler_rollout_args.n = 1
+            ruler_rollout_args["n"] = 1
             judge_success_rate, ruler_responses, ruler_scores = self.get_ruler_responses(
                 responses=responses,
                 judger=self.model,  # use the policy model itself as judger!
@@ -171,7 +166,7 @@ Below is a question and several candidate solutions.
 {solutions_prompt}
 Please assign a score within the range [0, 1] for each of them, reflecting how well they solve the question.
 You may compare them against each other and think step by step before returning your final scores, but keep your reasoning process brief and concise when possible.
-Conclude your response with a list of scores, in the following format: [score for solution 1, score for solution 2, ..., score for solution {num_responses + 1}]
+Conclude your response with a list of scores, in the following format: [score for solution 1, score for solution 2, ..., score for solution {num_responses}]
 """
 
         # Step 2: invoke judger LLM (actually self.model), get ruler_responses: List[Experience]
@@ -202,7 +197,7 @@ Conclude your response with a list of scores, in the following format: [score fo
                     judge_success_count += 1
                     ruler_scores = [ruler_scores[i] + scores[i] for i in range(len(ruler_scores))]
                     if gold_scores:
-                        mae_error = (np.array(scores) - np.array(gold_scores)).abs().mean()
+                        mae_error = np.abs(np.array(scores) - np.array(gold_scores)).mean()
                         ruler_response.reward = 1.0 - mae_error
                 else:
                     logger.warning(
@@ -213,7 +208,10 @@ Conclude your response with a list of scores, in the following format: [score fo
 
         if judge_success_count > 0:
             ruler_scores = [score / judge_success_count for score in ruler_scores]
-        judge_success_rate = 1.0 * judge_success_count / len(ruler_responses)
+        if len(ruler_responses) > 0:
+            judge_success_rate = 1.0 * judge_success_count / len(ruler_responses)
+        else:
+            judge_success_rate = 0.0
 
         for ruler_response in ruler_responses:
             if ruler_response.metrics is None:
