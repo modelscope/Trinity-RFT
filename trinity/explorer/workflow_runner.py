@@ -99,7 +99,9 @@ class WorkflowRunner:
             # set eid for each experience
             for i, exp in enumerate(exps):
                 exp.eid.batch = task.batch_id
-                exp.eid.task = task.task_id
+                # keep exp.eid.task if it has been set before (e.g., in workflow)
+                if exp.eid.task == 0:  # 0 is the default value
+                    exp.eid.task = task.task_id
                 if not hasattr(exp, "info") or exp.info is None:
                     exp.info = {}
                 exp.info["model_version"] = self.model_wrapper.model_version

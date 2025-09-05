@@ -1,0 +1,78 @@
+project: "Trinity-RFT-gsm8k-trainable-ruler"
+name: "qwen2.5-1.5B-gsm8k-trainable-ruler"
+checkpoint_root_dir: /PATH/TO/CHECKPOINT/
+algorithm:
+  algorithm_type: grpo
+  advantage_fn_args:
+    std_threshold: 0.0001  # effectively zero
+  repeat_times: 8
+model:
+  model_path: /PATH/TO/MODEL/
+  max_prompt_tokens: 12288
+  max_response_tokens: 12288
+  max_model_len: 16000  # slightly smaller than ppo_max_token_len_per_gpu (16384)
+cluster:
+  node_num: 1
+  gpu_per_node: 8
+buffer:
+  total_epochs: 1
+  batch_size: 96
+  train_batch_size: 960
+  explorer_input:
+    taskset:
+      name: gsm8k
+      storage_type: file
+      path: 'openai/gsm8k'
+      subset_name: 'main'
+      split: 'train'
+      format:
+        prompt_key: 'question'
+        response_key: 'answer'
+      rollout_args:
+        temperature: 1.0
+    eval_tasksets:
+    - name: gsm8k-eval
+      storage_type: file
+      path: 'openai/gsm8k'
+      subset_name: 'main'
+      split: 'test'
+      format:
+        prompt_key: 'question'
+        response_key: 'answer'
+    default_workflow_type: 'math_trainable_ruler_workflow'
+  trainer_input:
+    experience_buffer:
+      name: gsm8k_buffer
+      storage_type: queue
+explorer:
+  eval_interval: 10
+  runner_num: 32
+  rollout_model:
+    engine_type: vllm_async
+    engine_num: 4
+    tensor_parallel_size: 1
+    enable_prefix_caching: false
+    enforce_eager: true
+    dtype: bfloat16
+    seed: 42
+synchronizer:
+  sync_style: dynamic_by_explorer
+  sync_method: 'nccl'
+  sync_interval: 5
+  sync_timeout: 3600
+trainer:
+  save_interval: 100
+  trainer_config:
+    actor_rollout_ref:
+      model:
+        use_remove_padding: true
+      actor:
+        use_dynamic_bsz: true
+        ppo_max_token_len_per_gpu: 16384
+        ulysses_sequence_parallel_size: 1
+        optim:
+          lr: 2e-6
+      ref:
+        log_prob_use_dynamic_bsz: ${trainer.trainer_config.actor_rollout_ref.actor.use_dynamic_bsz}
+        log_prob_max_token_len_per_gpu: ${trainer.trainer_config.actor_rollout_ref.actor.ppo_max_token_len_per_gpu}
+        ulysses_sequence_parallel_size: ${trainer.trainer_config.actor_rollout_ref.actor.ulysses_sequence_parallel_size} # sp size
