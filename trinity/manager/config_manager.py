@@ -16,6 +16,7 @@ from trinity.algorithm.sample_strategy.sample_strategy import SAMPLE_STRATEGY
 from trinity.common.constants import StorageType
 from trinity.manager.config_registry.config_registry import CONFIG_GENERATORS
 from trinity.manager.config_registry.trainer_config_manager import use_critic
+from trinity.utils.plugin_loader import load_plugins
 
 register_map = {
     "sample_strategy": SAMPLE_STRATEGY,
@@ -29,6 +30,7 @@ register_map = {
 
 class ConfigManager:
     def __init__(self):
+        load_plugins()
         self.unfinished_fields = set()
         CONFIG_GENERATORS.set_unfinished_fields(self.unfinished_fields)
         st.set_page_config(page_title="Trinity-RFT Config Generator", page_icon=":robot:")
@@ -380,7 +382,10 @@ class ConfigManager:
                         "actor_entropy_from_logits_with_chunking"
                     ],
                     "entropy_checkpointing": st.session_state["actor_entropy_checkpointing"],
-                    "checkpoint": {"contents": st.session_state["actor_checkpoint"]},
+                    "checkpoint": {
+                        "load_contents": st.session_state["actor_checkpoint"],
+                        "save_contents": st.session_state["actor_checkpoint"],
+                    },
                     "optim": {
                         "lr": st.session_state["actor_lr"],
                         "lr_warmup_steps_ratio": st.session_state["actor_lr_warmup_steps_ratio"],
@@ -466,7 +471,10 @@ class ConfigManager:
                 "shuffle": False,
                 "grad_clip": st.session_state["critic_grad_clip"],
                 "cliprange_value": st.session_state["critic_cliprange_value"],
-                "checkpoint": {"contents": st.session_state["critic_checkpoint"]},
+                "checkpoint": {
+                    "load_contents": st.session_state["critic_checkpoint"],
+                    "save_contents": st.session_state["critic_checkpoint"],
+                },
             }
         else:
             del trainer_config["critic"]

@@ -56,14 +56,6 @@ class StorageType(CaseInsensitiveEnum):
     FILE = "file"
 
 
-class MonitorType(CaseInsensitiveEnum):
-    """Monitor Type."""
-
-    WANDB = "wandb"
-    TENSORBOARD = "tensorboard"
-    MLFLOW = "mlflow"
-
-
 class SyncMethodEnumMeta(CaseInsensitiveEnumMeta):
     def __call__(cls, value, *args, **kwargs):
         if value == "online":

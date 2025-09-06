@@ -20,6 +20,7 @@ from trinity.explorer.explorer import Explorer
 from trinity.trainer.trainer import Trainer
 from trinity.utils.dlc_utils import setup_ray_cluster
 from trinity.utils.log import get_logger
+from trinity.utils.plugin_loader import load_plugins
 
 logger = get_logger(__name__)
 
@@ -124,6 +125,7 @@ def both(config: Config) -> None:
 
 
 def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
+    load_plugins()
     config = load_config(config_path)
     config.check_and_update()
     pprint(config)

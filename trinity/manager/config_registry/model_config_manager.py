@@ -2,9 +2,9 @@ import os
 
 import streamlit as st
 
-from trinity.common.constants import MonitorType
 from trinity.manager.config_registry.config_registry import CONFIG_GENERATORS
 from trinity.manager.config_registry.trainer_config_manager import use_critic
+from trinity.utils.monitor import MONITOR
 
 
 def set_total_gpu_num():
@@ -54,11 +54,11 @@ def check_checkpoint_root_dir(unfinished_fields: set, key: str):
         st.warning("Please input an absolute path.")
 
 
-@CONFIG_GENERATORS.register_config(default_value=MonitorType.TENSORBOARD.value)
+@CONFIG_GENERATORS.register_config(default_value="tensorboard")
 def set_monitor_type(**kwargs):
     st.selectbox(
         "Monitor Type",
-        options=[monitor_type.value for monitor_type in MonitorType],
+        options=MONITOR.modules.keys(),
         **kwargs,
     )
 
@@ -96,7 +96,7 @@ def set_max_response_tokens(**kwargs):
 
 @CONFIG_GENERATORS.register_config(default_value=2048)
 def set_max_model_len(**kwargs):
-    st.number_input("Max Token Length", min_value=1, **kwargs)
+    st.number_input("Max Model Length", min_value=1, **kwargs)
 
 
 # Cluster Config
