@@ -89,6 +89,16 @@ def set_critic_model_path(**kwargs):
     )
 
 
+@CONFIG_GENERATORS.register_config(default_value=None)
+def set_max_prompt_tokens(**kwargs):
+    st.number_input("Max Prompt Length", min_value=1, **kwargs)
+
+
+@CONFIG_GENERATORS.register_config(default_value=1)
+def set_min_response_tokens(**kwargs):
+    st.number_input("Min Response Length", min_value=1, **kwargs)
+
+
 @CONFIG_GENERATORS.register_config(default_value=1024)
 def set_max_response_tokens(**kwargs):
     st.number_input("Max Response Length", min_value=1, **kwargs)
