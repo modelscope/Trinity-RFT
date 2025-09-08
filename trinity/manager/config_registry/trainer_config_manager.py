@@ -82,19 +82,7 @@ def set_training_strategy(**kwargs):
     )
 
 
-def use_fsdp():
-    return st.session_state["training_strategy"] in {"fsdp", "fsdp2"}
-
-
-def use_fsdp1():
-    return st.session_state["training_strategy"] == "fsdp"
-
-
-def use_fsdp2():
-    return st.session_state["training_strategy"] == "fsdp2"
-
-
-@CONFIG_GENERATORS.register_config(default_value=False)  # , visible=use_fsdp1)
+@CONFIG_GENERATORS.register_config(default_value=False)
 def set_param_offload(**kwargs):
     st.checkbox("Param Offload", **kwargs)
 
@@ -104,22 +92,22 @@ def set_grad_offload(**kwargs):
     st.checkbox("Grad Offload", **kwargs)
 
 
-@CONFIG_GENERATORS.register_config(default_value=False)  # , visible=use_fsdp1)
+@CONFIG_GENERATORS.register_config(default_value=False)
 def set_optimizer_offload(**kwargs):
     st.checkbox("Optimizer Offload", **kwargs)
 
 
-@CONFIG_GENERATORS.register_config(default_value=False)  # , visible=use_fsdp1)
+@CONFIG_GENERATORS.register_config(default_value=False)
 def set_forward_prefetch(**kwargs):
     st.checkbox("FSDP Forward Prefetch", **kwargs)
 
 
-@CONFIG_GENERATORS.register_config(default_value=False)  # , visible=use_fsdp2)
+@CONFIG_GENERATORS.register_config(default_value=False)
 def set_offload_policy(**kwargs):
     st.checkbox("Enable FSDP2 offload_policy", **kwargs)
 
 
-@CONFIG_GENERATORS.register_config(default_value=True)  # , visible=use_fsdp2)
+@CONFIG_GENERATORS.register_config(default_value=True)
 def set_reshard_after_forward(**kwargs):
     st.checkbox("FSDP2 Reshard After Forward", **kwargs)
 

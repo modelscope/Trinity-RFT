@@ -14,6 +14,7 @@ from trinity.algorithm.kl_fn.kl_fn import KL_FN
 from trinity.algorithm.policy_loss_fn.policy_loss_fn import POLICY_LOSS_FN
 from trinity.algorithm.sample_strategy.sample_strategy import SAMPLE_STRATEGY
 from trinity.common.constants import StorageType
+from trinity.manager.config_registry.buffer_config_manager import get_train_batch_size
 from trinity.manager.config_registry.config_registry import CONFIG_GENERATORS
 from trinity.manager.config_registry.trainer_config_manager import use_critic
 from trinity.utils.plugin_loader import load_plugins
@@ -371,16 +372,20 @@ class ConfigManager:
         use_dynamic_bsz = "dynamic_bsz" in st.session_state["training_args"]
         use_fused_kernels = "use_fused_kernels" in st.session_state["training_args"]
 
-        if st.session_state["training_strategy"] in {"fsdp", "fsdp2"}:
+        if st.session_state["training_strategy"] == "fsdp":
             distribution_config = {
                 "fsdp_config": {
                     "fsdp_size": -1,
-                    # for fsdp
                     "wrap_policy": {"min_num_params": 0},
                     "param_offload": st.session_state["param_offload"],
                     "optimizer_offload": st.session_state["optimizer_offload"],
                     "forward_prefetch": st.session_state["forward_prefetch"],
-                    # for fsdp2
+                }
+            }
+        elif st.session_state["training_strategy"] == "fsdp2":
+            distribution_config = {
+                "fsdp_config": {
+                    "fsdp_size": -1,
                     "offload_policy": st.session_state["offload_policy"],
                     "reshard_after_forward": st.session_state["reshard_after_forward"],
                 }
@@ -509,7 +514,7 @@ class ConfigManager:
                     "enable_gradient_checkpointing": enable_gradient_checkpointing,
                     "use_remove_padding": use_remove_padding,
                 },
-                "ppo_mini_batch_size": st.session_state["train_batch_size"],
+                "ppo_mini_batch_size": get_train_batch_size(),
                 "ppo_micro_batch_size_per_gpu": st.session_state[
                     "critic_ppo_micro_batch_size_per_gpu"
                 ],

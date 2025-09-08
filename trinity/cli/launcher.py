@@ -125,13 +125,17 @@ def both(config: Config) -> None:
 
 
 def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
+    if plugin_dir:
+        os.environ[PLUGIN_DIRS_ENV_VAR] = os.pathsep.join(
+            [os.environ.get(PLUGIN_DIRS_ENV_VAR, ""), plugin_dir]
+        )
     load_plugins()
     config = load_config(config_path)
     config.check_and_update()
     pprint(config)
 
     envs = {
-        PLUGIN_DIRS_ENV_VAR: plugin_dir or "",
+        PLUGIN_DIRS_ENV_VAR: os.environ.get(PLUGIN_DIRS_ENV_VAR, ""),
         LOG_DIR_ENV_VAR: config.log.save_dir,
         LOG_LEVEL_ENV_VAR: config.log.level,
         LOG_NODE_IP_ENV_VAR: "1" if config.log.group_by_node else "0",

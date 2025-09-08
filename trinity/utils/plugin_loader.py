@@ -32,6 +32,8 @@ def load_plugin_from_dirs(plugin_dirs: Union[str, List[str]]) -> None:
         plugin_dirs = [plugin_dirs]
     plugin_dirs = set(plugin_dirs)
     for plugin_dir in plugin_dirs:
+        if plugin_dir == "":
+            continue
         if not os.path.exists(plugin_dir):
             logger.error(f"plugin-dir [{plugin_dir}] does not exist.")
             continue
