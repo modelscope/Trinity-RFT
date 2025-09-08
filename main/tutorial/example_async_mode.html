@@ -144,8 +144,6 @@ The model weights of the explorer and trainer are synchronized once every <code 
 <span class="nt">synchronizer</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">sync_method</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;checkpoint&#39;</span>
 <span class="w">  </span><span class="nt">sync_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
-<span class="nt">trainer</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">trainer_config_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">examples/async_gsm8k/verl_config.yaml</span>
 </pre></div>
 </div>
 <p>Key configurations in <code class="docutils literal notranslate"><span class="pre">trainer.yaml</span></code> are as follows:</p>
@@ -185,7 +183,20 @@ The model weights of the explorer and trainer are synchronized once every <code 
 <span class="w">  </span><span class="nt">sync_method</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;checkpoint&#39;</span>
 <span class="w">  </span><span class="nt">sync_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
 <span class="nt">trainer</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">trainer_config_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">examples/async_gsm8k/verl_config.yaml</span>
+<span class="w">  </span><span class="nt">trainer_config</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">actor_rollout_ref</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">model</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">use_remove_padding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">actor</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">use_dynamic_bsz</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">ppo_max_token_len_per_gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16384</span>
+<span class="w">        </span><span class="nt">ulysses_sequence_parallel_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">        </span><span class="nt">optim</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">lr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1e-6</span>
+<span class="w">      </span><span class="nt">ref</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">log_prob_use_dynamic_bsz</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${trainer.trainer_config.actor_rollout_ref.actor.use_dynamic_bsz}</span>
+<span class="w">        </span><span class="nt">log_prob_max_token_len_per_gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${trainer.trainer_config.actor_rollout_ref.actor.ppo_max_token_len_per_gpu}</span>
+<span class="w">        </span><span class="nt">ulysses_sequence_parallel_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${trainer.trainer_config.actor_rollout_ref.actor.ulysses_sequence_parallel_size}</span><span class="w"> </span><span class="c1"># sp size</span>
 </pre></div>
 </div>
 <p>You can run this example with the following command:</p>

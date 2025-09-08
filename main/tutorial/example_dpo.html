@@ -152,7 +152,7 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>HumanLLMs
 <h2>Step 2: Setup Configuration<a class="headerlink" href="#step-2-setup-configuration" title="Link to this heading"></a></h2>
 <section id="configuration-for-dpo">
 <h3>Configuration for DPO<a class="headerlink" href="#configuration-for-dpo" title="Link to this heading"></a></h3>
-<p>We use the configurations in <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/dpo_humanlike/dpo.yaml"><code class="docutils literal notranslate"><span class="pre">dpo.yaml</span></code></a> and <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/dpo_humanlike/train_dpo.yaml"><code class="docutils literal notranslate"><span class="pre">train_dpo.yaml</span></code></a> for this experiment. Some important setups are listed in the following:</p>
+<p>We use the configurations in <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/dpo_humanlike/dpo.yaml"><code class="docutils literal notranslate"><span class="pre">dpo.yaml</span></code></a> for this experiment. Some important setups are listed in the following:</p>
 <p>We run the experiment in a train mode, as there is no Explorer. To enable this mode, we config <code class="docutils literal notranslate"><span class="pre">mode</span></code> to <code class="docutils literal notranslate"><span class="pre">train</span></code> and pass the data path to the trainer.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;project_name&gt;</span>
 <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;experiment_name&gt;</span>
@@ -182,8 +182,9 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>HumanLLMs
 <span class="w">        </span><span class="nt">chosen_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">chosen</span>
 <span class="w">        </span><span class="nt">rejected_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rejected</span>
 <span class="nt">trainer</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">trainer_config_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;examples/dpo_humanlike/train_dpo.yaml&#39;</span>
 <span class="w">  </span><span class="nt">save_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
+<span class="w">  </span><span class="nt">trainer_config</span><span class="p">:</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"> </span><span class="c1"># omitted here for simplicity</span>
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">buffer.trainer_input.experience_buffer</span></code> specifies the dataset to be used for training, including its name, storage type, path, and format.</p>
@@ -228,8 +229,9 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>HumanLLMs
 <span class="w">        </span><span class="nt">prompt_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">messages</span>
 <span class="w">        </span><span class="nt">messages_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">messages</span>
 <span class="nt">trainer</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">trainer_config_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/TRAIN_CONFIG_YAML/</span>
 <span class="w">  </span><span class="nt">save_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span>
+<span class="w">  </span><span class="nt">trainer_config</span><span class="p">:</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"> </span><span class="c1"># omitted here for simplicity</span>
 </pre></div>
 </div>
 <p>Here we set <code class="docutils literal notranslate"><span class="pre">buffer.trainer_input.experience_buffer.format.prompt_type</span></code> to <code class="docutils literal notranslate"><span class="pre">messages</span></code> because the source data is in message format. We also set <code class="docutils literal notranslate"><span class="pre">buffer.trainer_input.experience_buffer.format.messages_key</span></code> to <code class="docutils literal notranslate"><span class="pre">messages</span></code> to specify the key in the dataset that contains the messages.</p>

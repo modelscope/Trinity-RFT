@@ -1062,25 +1062,30 @@
         <span class="c1"># check buffer</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_buffer</span><span class="p">()</span>
         <span class="c1"># check and update trainer</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_type</span> <span class="o">==</span> <span class="s2">&quot;verl&quot;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config</span><span class="p">:</span>
-                <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.verl_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">veRLConfig</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="s2">&quot;both&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_type</span> <span class="o">==</span> <span class="s2">&quot;verl&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config</span><span class="p">:</span>
+                    <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.verl_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">veRLConfig</span>
 
-                <span class="n">trainer_config_schema</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">structured</span><span class="p">(</span><span class="n">veRLConfig</span><span class="p">)</span>
-                <span class="n">trainer_config</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">trainer_config_schema</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">to_object</span><span class="p">(</span><span class="n">trainer_config</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config_path</span><span class="p">):</span>
-                    <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.verl_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_config</span>
-
-                    <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config_path</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;Invalid trainer config path: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config_path</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="n">trainer_config_schema</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">structured</span><span class="p">(</span><span class="n">veRLConfig</span><span class="p">)</span>
+                    <span class="n">trainer_config</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+                        <span class="n">trainer_config_schema</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config</span>
                     <span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">to_object</span><span class="p">(</span><span class="n">trainer_config</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config_path</span><span class="p">):</span>
+                        <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.verl_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_config</span>
+
+                        <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config_path</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;Invalid trainer config path: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config_path</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid trainer type: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config</span><span class="o">.</span><span class="n">synchronize_config</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid trainer type: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config</span><span class="o">.</span><span class="n">synchronize_config</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="c1"># check service</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">data_juicer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>

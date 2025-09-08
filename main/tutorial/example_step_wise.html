@@ -243,9 +243,21 @@
 <span class="w">  </span><span class="nt">sync_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
 <span class="w">  </span><span class="nt">sync_timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3600</span>
 <span class="nt">trainer</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">trainer_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;verl&#39;</span>
-<span class="w">  </span><span class="nt">trainer_config_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;examples/grpo_alfworld_general_multi_step/train_alfworld.yaml&#39;</span>
 <span class="w">  </span><span class="nt">save_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span>
+<span class="w">  </span><span class="nt">trainer_config</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">actor_rollout_ref</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">model</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">use_remove_padding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">actor</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">use_dynamic_bsz</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">ppo_max_token_len_per_gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16384</span>
+<span class="w">        </span><span class="nt">ulysses_sequence_parallel_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">        </span><span class="nt">optim</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">lr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5e-6</span>
+<span class="w">      </span><span class="nt">ref</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">log_prob_use_dynamic_bsz</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${trainer.trainer_config.actor_rollout_ref.actor.use_dynamic_bsz}</span>
+<span class="w">        </span><span class="nt">log_prob_max_token_len_per_gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${trainer.trainer_config.actor_rollout_ref.actor.ppo_max_token_len_per_gpu}</span>
+<span class="w">        </span><span class="nt">ulysses_sequence_parallel_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${trainer.trainer_config.actor_rollout_ref.actor.ulysses_sequence_parallel_size}</span><span class="w"> </span><span class="c1"># sp size</span>
 </pre></div>
 </div>
 <p>Below, we provide the commands for running the ALFWorld task.</p>

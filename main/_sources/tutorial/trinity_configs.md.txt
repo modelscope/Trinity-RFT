@@ -390,7 +390,7 @@ trainer:
   name: trainer
   trainer_type: 'verl'
   save_interval: 100
-  trainer_config_path: 'examples/ppo_countdown/train_countdown.yaml'
+  trainer_config_path: ''
   trainer_config: null
 ```
 

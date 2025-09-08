@@ -193,7 +193,7 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>openai/gs
 </section>
 <section id="use-grpo-algorithm">
 <h3>Use GRPO Algorithm<a class="headerlink" href="#use-grpo-algorithm" title="Link to this heading"></a></h3>
-<p>We use the configurations in <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k/gsm8k.yaml"><code class="docutils literal notranslate"><span class="pre">gsm8k.yaml</span></code></a> and <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k/train_gsm8k.yaml"><code class="docutils literal notranslate"><span class="pre">train_gsm8k.yaml</span></code></a> for this experiment. Some important setups of <code class="docutils literal notranslate"><span class="pre">gsm8k.yaml</span></code> are listed in the following:</p>
+<p>We use the configurations in <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k/gsm8k.yaml"><code class="docutils literal notranslate"><span class="pre">gsm8k.yaml</span></code></a> for this experiment. Some important setups of <code class="docutils literal notranslate"><span class="pre">gsm8k.yaml</span></code> are listed in the following:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;project_name&gt;</span>
 <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;experiment_name&gt;</span>
 <span class="nt">checkpoint_root_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/CHECKPOINT/</span>
@@ -245,8 +245,12 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>openai/gs
 <span class="w">  </span><span class="nt">sync_method</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;nccl&#39;</span>
 <span class="w">  </span><span class="nt">sync_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="nt">trainer</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">trainer_config_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;examples/grpo_gsm8k/train_gsm8k.yaml&#39;</span>
 <span class="w">  </span><span class="nt">save_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">  </span><span class="nt">trainer_config</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">actor_rollout_ref</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">actor</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">optim</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">lr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1e-5</span>
 </pre></div>
 </div>
 </section>
