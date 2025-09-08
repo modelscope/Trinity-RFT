@@ -141,13 +141,13 @@
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.use_fsdp">
-<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">use_fsdp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/manager/config_registry/trainer_config_manager.html#use_fsdp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.use_fsdp" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_param_offload">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_param_offload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_param_offload" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_param_offload">
-<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_param_offload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_param_offload" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_grad_offload">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_grad_offload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_grad_offload" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -158,6 +158,91 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_forward_prefetch">
 <span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_forward_prefetch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_forward_prefetch" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_offload_policy">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_offload_policy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_offload_policy" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_reshard_after_forward">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_reshard_after_forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_reshard_after_forward" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_tensor_model_parallel_size">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_tensor_model_parallel_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_tensor_model_parallel_size" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_pipeline_model_parallel_size">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_pipeline_model_parallel_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_pipeline_model_parallel_size" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_virtual_pipeline_model_parallel_size">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_virtual_pipeline_model_parallel_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_virtual_pipeline_model_parallel_size" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_expert_model_parallel_size">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_expert_model_parallel_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_expert_model_parallel_size" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_expert_tensor_parallel_size">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_expert_tensor_parallel_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_expert_tensor_parallel_size" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_context_parallel_size">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_context_parallel_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_context_parallel_size" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_sequence_parallel">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_sequence_parallel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_sequence_parallel" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_use_distributed_optimizer">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_use_distributed_optimizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_use_distributed_optimizer" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_use_dist_checkpointing">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_use_dist_checkpointing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_use_dist_checkpointing" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_dist_checkpointing_path">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_dist_checkpointing_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_dist_checkpointing_path" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_use_mbridge">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_use_mbridge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_use_mbridge" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_recompute_granularity">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_recompute_granularity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_recompute_granularity" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_recompute_modules">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_recompute_modules</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_recompute_modules" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_recompute_method">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_recompute_method</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_recompute_method" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_recompute_num_layers">
+<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_recompute_num_layers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_recompute_num_layers" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -193,11 +278,6 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_default_hdfs_dir">
 <span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_default_hdfs_dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_default_hdfs_dir" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="trinity.manager.config_registry.trainer_config_manager.set_remove_previous_ckpt_in_save">
-<span class="sig-prename descclassname"><span class="pre">trinity.manager.config_registry.trainer_config_manager.</span></span><span class="sig-name descname"><span class="pre">set_remove_previous_ckpt_in_save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trinity.manager.config_registry.trainer_config_manager.set_remove_previous_ckpt_in_save" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">

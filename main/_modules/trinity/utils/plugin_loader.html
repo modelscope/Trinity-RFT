@@ -132,6 +132,8 @@
         <span class="n">plugin_dirs</span> <span class="o">=</span> <span class="p">[</span><span class="n">plugin_dirs</span><span class="p">]</span>
     <span class="n">plugin_dirs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">plugin_dirs</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">plugin_dir</span> <span class="ow">in</span> <span class="n">plugin_dirs</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">plugin_dir</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="k">continue</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">plugin_dir</span><span class="p">):</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;plugin-dir [</span><span class="si">{</span><span class="n">plugin_dir</span><span class="si">}</span><span class="s2">] does not exist.&quot;</span><span class="p">)</span>
             <span class="k">continue</span>
