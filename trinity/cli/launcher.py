@@ -126,9 +126,7 @@ def both(config: Config) -> None:
 
 def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
     if plugin_dir:
-        os.environ[PLUGIN_DIRS_ENV_VAR] = os.pathsep.join(
-            [os.environ.get(PLUGIN_DIRS_ENV_VAR, ""), plugin_dir]
-        )
+        os.environ[PLUGIN_DIRS_ENV_VAR] = plugin_dir
     load_plugins()
     config = load_config(config_path)
     config.check_and_update()

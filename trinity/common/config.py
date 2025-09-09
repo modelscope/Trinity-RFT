@@ -919,8 +919,6 @@ class Config:
             else:
                 raise ValueError(f"Invalid trainer type: {self.trainer_type}")
             self.trainer.trainer_config.synchronize_config(self)
-        else:
-            self.trainer.trainer_config = None
 
         # check service
         if self.service.data_juicer is not None:

@@ -6,13 +6,9 @@ import openai
 
 from trinity.common.models.model import ModelWrapper
 from trinity.common.workflows.workflow import WORKFLOWS, Task, Workflow
-from trinity.utils.log import get_logger
 
 from .react_agent import EmailSearchAgent
 from .utils import AnswerModel, FinalRubric, QueryModel, judge_correctness
-
-logger = get_logger(__name__)
-
 
 SYSTEM_PROMPT = """You are an email search agent. You are given a user query and a list of tools you can use to search the user's email. Use the tools to search the user's emails and find the answer to the user's query. You may take up to {max_turns} turns to find the answer, so if your first seach doesn't find the answer, you can try with different keywords.
 Always describe what you see and plan your next steps clearly. When taking actions, explain what you're doing and why. When the answer to the task is found, call `generate_response` to finish the process. Only call `generate_response` when answer is found. You should not respond any next steps in `generate_response`. Complete all steps and then call `generate_response`.
@@ -40,7 +36,7 @@ class EmailSearchWorkflow(Workflow):
             from agentscope.service import ServiceToolkit
         except ImportError as e:
             error_message = f"AgentScope is not installed. Please install the agentscope framework first before running the workflow. Error: {str(e)}"
-            logger.error(error_message)
+            self.logger.error(error_message)
             raise ImportError(error_message)
 
         # get openai client from model
@@ -118,7 +114,7 @@ class EmailSearchWorkflow(Workflow):
             from agentscope.message import Msg
         except ImportError as e:
             error_message = f"AgentScope is not installed. Please install the agentscope framework first before running the workflow. Error: {str(e)}"
-            logger.error(error_message)
+            self.logger.error(error_message)
             raise ImportError(error_message)
 
         # provide the task to the react agent
@@ -148,7 +144,7 @@ class EmailSearchWorkflow(Workflow):
                 experience.metrics = {}
             experience.metrics.update({"actual_turns": self.actual_turns})
             experience.metrics.update(reward_dict)
-        logger.info(
+        self.logger.info(
             f"return experience len: {len(experiences)}, final step reward: {experiences[-1].reward}"
         )
         return experiences
@@ -159,7 +155,7 @@ class EmailSearchWorkflow(Workflow):
             answer = answer_and_sources.get("answer", None)
             sources = answer_and_sources.get("sources", [])
         except Exception as e:
-            logger.error(f"Error extracting answer and sources: {e}")
+            self.logger.error(f"Error extracting answer and sources: {e}")
             result = {"accuracy": 0.0, "format": -1.0}
             return result
 
@@ -182,7 +178,7 @@ class EmailSearchWorkflow(Workflow):
             rubric.sources_correct = self.query.message_ids[0] in sources
         rubric.num_sources = len(sources)
         rubric.num_turns = self.actual_turns
-        logger.debug(f"Rubric: {rubric.model_dump()}")
+        self.logger.debug(f"Rubric: {rubric.model_dump()}")
 
         try:
             judge_model = self.auxiliary_models[0] if self.auxiliary_models else None
@@ -190,7 +186,7 @@ class EmailSearchWorkflow(Workflow):
             rubric.answer_correct = judge_response
 
         except Exception as e:
-            logger.error(f"Error judging correctness: {e}")
+            self.logger.error(f"Error judging correctness: {e}")
             rubric.answer_correct = False
 
         # Note: make sure all possible partial rewards always sum to less than 0.5.
@@ -224,5 +220,5 @@ class EmailSearchWorkflow(Workflow):
             result = {"accuracy": 1.0, "format": reward}
             return result
 
-        logger.error(f"Rubric {rubric} not handled properly")
+        self.logger.error(f"Rubric {rubric} not handled properly")
         raise ValueError("Rubric is not handled properly")

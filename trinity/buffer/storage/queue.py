@@ -252,7 +252,8 @@ class QueueStorage:
         self.ref_count -= 1
         if self.ref_count <= 0:
             await self.queue.close()
-            await self.writer.release()
+            if self.writer is not None:
+                await self.writer.release()
         return self.ref_count
 
     def length(self) -> int:

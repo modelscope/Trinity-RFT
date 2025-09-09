@@ -307,6 +307,81 @@ class TestAPIServer(RayUnittestBase):
         self.assertEqual(len(self.model_wrapper_no_history.history), 0)
 
 
+class TestAsyncAPIServer(RayUnittestBaseAysnc):
+    def setUp(self):
+        self.config = get_template_config()
+        self.config.mode = "explore"
+        self.config.model.model_path = get_model_path()
+        self.config.explorer.rollout_model.engine_type = "vllm_async"
+        self.config.explorer.rollout_model.engine_num = 1
+        self.config.explorer.rollout_model.tensor_parallel_size = 1
+        self.config.explorer.rollout_model.use_v1 = True
+        self.config.explorer.rollout_model.chat_template = CHAT_TEMPLATE
+        self.config.explorer.rollout_model.enable_openai_api = True
+
+        self.config.check_and_update()
+        self.engines, self.auxiliary_engines = create_inference_models(self.config)
+        self.model_wrapper = ModelWrapper(
+            self.engines[0], model_type="vllm_async", enable_history=True
+        )
+        self.model_wrapper_no_history = ModelWrapper(
+            self.engines[0], model_type="vllm_async", enable_history=False
+        )
+
+    async def test_api_async(self):
+        openai_client = self.model_wrapper.get_openai_async_client()
+        messages = [
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": "What is your name?"},
+        ]
+        model_id = (await openai_client.models.list()).data[0].id
+        response = await openai_client.chat.completions.create(
+            model=model_id, messages=messages, n=1
+        )
+        self.assertEqual(1, len(response.choices))
+        self.assertTrue(len(response.choices[0].message.content) > 0)
+        response = await openai_client.chat.completions.create(
+            model=model_id,
+            messages=messages,
+            n=2,
+            temperature=0.5,
+            logprobs=True,
+            top_logprobs=0,
+        )
+        self.assertEqual(2, len(response.choices))
+        self.assertTrue(response.choices[0].logprobs is not None)
+        self.assertEqual(0, len(response.choices[0].logprobs.content[0].top_logprobs))
+        self.assertTrue(response.choices[0].logprobs.content[0].logprob < 0)
+        self.assertTrue(hasattr(response, "prompt_token_ids"))
+        self.assertTrue(len(response.prompt_token_ids) > 0)
+        self.assertTrue(hasattr(response.choices[0], "token_ids"))
+        self.assertTrue(len(response.choices[0].token_ids) > 0)
+        exps = self.model_wrapper.extract_experience_from_history()
+        self.assertEqual(len(exps), 3)
+        response = await openai_client.chat.completions.create(
+            model=model_id,
+            messages=messages,
+            n=4,
+            temperature=0.5,
+            logprobs=True,
+            top_logprobs=0,
+        )
+        exps = self.model_wrapper.extract_experience_from_history()
+        self.assertEqual(len(exps), 4)
+        self.assertEqual(len(self.model_wrapper.extract_experience_from_history()), 0)
+        response = (
+            await self.model_wrapper_no_history.get_openai_async_client().chat.completions.create(
+                model=model_id, messages=messages, n=2
+            )
+        )
+        self.assertEqual(2, len(response.choices))
+        self.assertTrue(hasattr(response.choices[0], "token_ids"))
+        self.assertTrue(len(response.choices[0].token_ids) > 0)
+        with self.assertRaises(ValueError):
+            self.model_wrapper_no_history.extract_experience_from_history()
+        self.assertEqual(len(self.model_wrapper_no_history.history), 0)
+
+
 class TestTokenizer(unittest.TestCase):
     def test_action_mask(self):
         messages = [

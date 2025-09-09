@@ -363,9 +363,18 @@ def set_actor_lr_warmup_steps_ratio(**kwargs):
 
 
 @CONFIG_GENERATORS.register_config(default_value=["model", "hf_model", "optimizer", "extra"])
-def set_actor_checkpoint(**kwargs):
+def set_actor_save_checkpoint(**kwargs):
     st.multiselect(
-        "Checkpoint",
+        "Checkpoint to Save",
+        ["model", "hf_model", "optimizer", "extra"],
+        **kwargs,
+    )
+
+
+@CONFIG_GENERATORS.register_config(default_value=["model", "hf_model", "optimizer", "extra"])
+def set_actor_load_checkpoint(**kwargs):
+    st.multiselect(
+        "Checkpoint to Load",
         ["model", "hf_model", "optimizer", "extra"],
         **kwargs,
     )
@@ -448,9 +457,20 @@ def set_critic_ulysses_sequence_parallel_size(**kwargs):
 @CONFIG_GENERATORS.register_config(
     default_value=["model", "optimizer", "extra"], visible=use_critic
 )
-def set_critic_checkpoint(**kwargs):
+def set_critic_save_checkpoint(**kwargs):
     st.multiselect(
-        "Checkpoint",
-        ["model", "hf_model", "optimizer", "extra"],
+        "Checkpoint to Save",
+        ["model", "optimizer", "extra"],
+        **kwargs,
+    )
+
+
+@CONFIG_GENERATORS.register_config(
+    default_value=["model", "optimizer", "extra"], visible=use_critic
+)
+def set_critic_load_checkpoint(**kwargs):
+    st.multiselect(
+        "Checkpoint to Load",
+        ["model", "optimizer", "extra"],
         **kwargs,
     )

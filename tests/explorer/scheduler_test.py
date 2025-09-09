@@ -93,6 +93,40 @@ class DummyNonRepeatWorkflow(Workflow):
         ]
 
 
+@WORKFLOWS.register_module("dummy_async_workflow")
+class DummyAsyncWorkflow(Workflow):
+    def __init__(self, *, task, model, auxiliary_models):
+        super().__init__(task=task, model=model, auxiliary_models=auxiliary_models)
+        self.step_num = task.workflow_args.get("step_num", 1)
+
+    @property
+    def asynchronous(self):
+        return True
+
+    @property
+    def repeatable(self):
+        return True
+
+    def set_repeat_times(self, repeat_times, run_id_base):
+        self.repeat_times = repeat_times
+        self.run_id_base = run_id_base
+
+    async def run_async(self):
+        return [
+            Experience(
+                eid=EID(run=i + self.run_id_base, step=step),
+                tokens=torch.zeros(5),
+                prompt_length=2,
+                prompt_text="success",
+            )
+            for step in range(self.step_num)
+            for i in range(self.repeat_times)
+        ]
+
+    def run(self):
+        raise RuntimeError("This method should not be called")
+
+
 @ray.remote
 class DummyModel(InferenceModel):
     def sync_model(self, model_version, update_weight_args_list):
@@ -551,6 +585,39 @@ class SchedulerTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(
             sum([exp.info["reset_flag"] for exp in exp_list]), len(exp_list) - runner_num
         )
+
+    async def test_async_workflow(self):
+        self.config.explorer.max_repeat_times_per_runner = 2
+        self.config.check_and_update()
+        scheduler = Scheduler(self.config, [DummyModel.remote(), DummyModel.remote()])
+        await scheduler.start()
+        task_num, repeat_times, step_num = 5, 4, 3
+        tasks = [
+            Task(
+                workflow=DummyAsyncWorkflow,  # type: ignore[type-abstract]
+                workflow_args={"step_num": step_num},
+                repeat_times=repeat_times,
+                raw_task={},
+            )
+            for _ in range(task_num)
+        ]
+
+        batch_num = 2
+        exp_list = []
+        for i in range(1, batch_num + 1):
+            scheduler.schedule(tasks, batch_id=i)
+            statuses, exps = await scheduler.get_results(batch_id=i)
+            self.assertEqual(len(statuses), task_num * repeat_times / 2)
+            self.assertEqual(len(exps), task_num * repeat_times * step_num)
+            exp_list.extend(exps)
+
+        # test task_id, run_id and unique_id
+        group_ids = [exp.eid.tid for exp in exp_list]
+        self.assertEqual(len(set(group_ids)), batch_num * task_num)
+        run_ids = [exp.eid.rid for exp in exp_list]
+        self.assertEqual(len(set(run_ids)), batch_num * task_num * repeat_times)
+        unique_ids = [exp.eid.uid for exp in exp_list]
+        self.assertEqual(len(unique_ids), len(set(unique_ids)))
 
     async def test_stepwise_experience_eid(self):
         task_num, repeat_times, step_num = 2, 4, 3
