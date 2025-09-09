@@ -123,3 +123,6 @@ known_third_party = ["wandb"]
 [project.urls]
 "Homepage" = "https://github.com/modelscope/Trinity-RFT"
 "Documentation" = "https://modelscope.github.io/Trinity-RFT/"
+
+[tool.uv]
+override-dependencies=["spacy>=3.8.2"]  # data-juicer requires spacy==3.8.0 which is yanked
