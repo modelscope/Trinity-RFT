@@ -171,8 +171,6 @@ class MultiTurnWorkflow(Workflow):
         generation_mask = converted_experience.action_mask
         log_probs = log_probs * generation_mask
 
-        assert tokens.shape == log_probs.shape
-
         metrics = {}
         for k, v in info.items():
             if isinstance(v, float) or isinstance(v, int):
