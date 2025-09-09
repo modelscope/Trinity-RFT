@@ -1,0 +1,1438 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Developer Guide &#8212; Trinity-RFT 0.3.1.dev0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=3106ee94"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorial/trinity_programming_guide';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Configuration Guide" href="trinity_configs.html" />
+    <link rel="prev" title="Data Processing" href="example_data_functionalities.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.3.1.dev0 documentation - Home"/>
+    <script>document.write(`<img src="../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.3.1.dev0 documentation - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+<nav class="bd-links bd-docs-nav">
+    <div class="bd-toc-item navbar-nav">
+        <ul class="nav bd-sidenav">
+      <li class="toctree-l1 has-children">
+        <details>
+          <summary>
+            <p class="caption" aria-level="2" role="heading" style="text-align: center;">
+              <span class="fa fa-book"></span>
+             <b>v0.3.0</b>
+            </p>
+          </summary>
+          <ul>
+            <li class="toctree-l2  "><a class="reference" href="../../main/tutorial/trinity_programming_guide.html">latest</a></li>
+            <li class="toctree-l2 current "><a class="reference" href="trinity_programming_guide.html">v0.3.0</a></li>
+            <li class="toctree-l2  "><a class="reference" href="../../v0.2.1/tutorial/trinity_programming_guide.html">v0.2.1</a></li>
+            <li class="toctree-l2  "><a class="reference" href="../../v0.2.0/tutorial/trinity_programming_guide.html">v0.2.0</a></li>
+            <li class="toctree-l2  "><a class="reference" href="../../v0.1.1/tutorial/trinity_programming_guide.html">v0.1.1</a></li>
+            <li class="toctree-l2  "><a class="reference" href="../../v0.1.0/tutorial/trinity_programming_guide.html">v0.1.0</a></li>
+          </ul>
+        </details>
+      </li>
+    </ul>
+    </div>
+</nav>
+</div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="example_reasoning_basic.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_reasoning_advanced.html">Off-Policy RFT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_async_mode.html">Asynchronous RFT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_multi_turn.html">Concatenated Multi-Turn RFT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_step_wise.html">General Multi-Step RFT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_react.html">Multi-Step ReAct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_search_email.html">Email Search Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_dpo.html">Offline DPO and SFT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_megatron.html">Megatron-LM Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_data_functionalities.html">Data Processing</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Guidelines</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trinity_configs.html">Configuration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_mix_algo.html">Algorithm Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="synchronizer.html">Synchronizer in Trinity-RFT</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">FAQ</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../api_reference.html">API Reference</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../build_api/trinity.buffer.html">trinity.buffer package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../build_api/trinity.buffer.operators.html">trinity.buffer.operators package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.operators.filters.html">trinity.buffer.operators.filters package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.operators.mappers.html">trinity.buffer.operators.mappers package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.operators.data_juicer_operator.html">trinity.buffer.operators.data_juicer_operator module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.operators.experience_operator.html">trinity.buffer.operators.experience_operator module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../build_api/trinity.buffer.pipelines.html">trinity.buffer.pipelines package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.pipelines.experience_pipeline.html">trinity.buffer.pipelines.experience_pipeline module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.pipelines.task_pipeline.html">trinity.buffer.pipelines.task_pipeline module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../build_api/trinity.buffer.reader.html">trinity.buffer.reader package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.reader.file_reader.html">trinity.buffer.reader.file_reader module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.reader.queue_reader.html">trinity.buffer.reader.queue_reader module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.reader.sql_reader.html">trinity.buffer.reader.sql_reader module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../build_api/trinity.buffer.schema.html">trinity.buffer.schema package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.schema.formatter.html">trinity.buffer.schema.formatter module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.schema.sql_schema.html">trinity.buffer.schema.sql_schema module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../build_api/trinity.buffer.storage.html">trinity.buffer.storage package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.storage.file.html">trinity.buffer.storage.file module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.storage.queue.html">trinity.buffer.storage.queue module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.storage.sql.html">trinity.buffer.storage.sql module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../build_api/trinity.buffer.writer.html">trinity.buffer.writer package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.writer.file_writer.html">trinity.buffer.writer.file_writer module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.writer.queue_writer.html">trinity.buffer.writer.queue_writer module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.buffer.writer.sql_writer.html">trinity.buffer.writer.sql_writer module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.buffer.buffer.html">trinity.buffer.buffer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.buffer.buffer_reader.html">trinity.buffer.buffer_reader module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.buffer.buffer_writer.html">trinity.buffer.buffer_writer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.buffer.utils.html">trinity.buffer.utils module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../build_api/trinity.explorer.html">trinity.explorer package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.explorer.explorer.html">trinity.explorer.explorer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.explorer.scheduler.html">trinity.explorer.scheduler module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.explorer.workflow_runner.html">trinity.explorer.workflow_runner module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../build_api/trinity.trainer.html">trinity.trainer package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../build_api/trinity.trainer.verl.html">trinity.trainer.verl package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.trainer.verl.dp_actor.html">trinity.trainer.verl.dp_actor module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.trainer.verl.fsdp_checkpoint_manager.html">trinity.trainer.verl.fsdp_checkpoint_manager module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.trainer.verl.fsdp_workers.html">trinity.trainer.verl.fsdp_workers module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.trainer.verl.megatron_actor.html">trinity.trainer.verl.megatron_actor module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.trainer.verl.megatron_checkpoint_manager.html">trinity.trainer.verl.megatron_checkpoint_manager module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.trainer.verl.megatron_workers.html">trinity.trainer.verl.megatron_workers module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.trainer.verl.utils.html">trinity.trainer.verl.utils module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.trainer.trainer.html">trinity.trainer.trainer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.trainer.verl_trainer.html">trinity.trainer.verl_trainer module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../build_api/trinity.algorithm.html">trinity.algorithm package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../build_api/trinity.algorithm.advantage_fn.html">trinity.algorithm.advantage_fn package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.advantage_fn.advantage_fn.html">trinity.algorithm.advantage_fn.advantage_fn module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.advantage_fn.asymre_advantage.html">trinity.algorithm.advantage_fn.asymre_advantage module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.advantage_fn.grpo_advantage.html">trinity.algorithm.advantage_fn.grpo_advantage module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.advantage_fn.multi_step_grpo_advantage.html">trinity.algorithm.advantage_fn.multi_step_grpo_advantage module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.advantage_fn.opmd_advantage.html">trinity.algorithm.advantage_fn.opmd_advantage module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.advantage_fn.ppo_advantage.html">trinity.algorithm.advantage_fn.ppo_advantage module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.advantage_fn.reinforce_advantage.html">trinity.algorithm.advantage_fn.reinforce_advantage module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.advantage_fn.reinforce_plus_plus_advantage.html">trinity.algorithm.advantage_fn.reinforce_plus_plus_advantage module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.advantage_fn.remax_advantage.html">trinity.algorithm.advantage_fn.remax_advantage module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.advantage_fn.rloo_advantage.html">trinity.algorithm.advantage_fn.rloo_advantage module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../build_api/trinity.algorithm.entropy_loss_fn.html">trinity.algorithm.entropy_loss_fn package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.entropy_loss_fn.entropy_loss_fn.html">trinity.algorithm.entropy_loss_fn.entropy_loss_fn module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../build_api/trinity.algorithm.kl_fn.html">trinity.algorithm.kl_fn package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.kl_fn.kl_fn.html">trinity.algorithm.kl_fn.kl_fn module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../build_api/trinity.algorithm.policy_loss_fn.html">trinity.algorithm.policy_loss_fn package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.policy_loss_fn.chord_policy_loss.html">trinity.algorithm.policy_loss_fn.chord_policy_loss module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.policy_loss_fn.cispo_policy_loss.html">trinity.algorithm.policy_loss_fn.cispo_policy_loss module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.policy_loss_fn.dpo_loss.html">trinity.algorithm.policy_loss_fn.dpo_loss module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.policy_loss_fn.gspo_policy_loss.html">trinity.algorithm.policy_loss_fn.gspo_policy_loss module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.policy_loss_fn.mix_policy_loss.html">trinity.algorithm.policy_loss_fn.mix_policy_loss module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.policy_loss_fn.opmd_policy_loss.html">trinity.algorithm.policy_loss_fn.opmd_policy_loss module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.policy_loss_fn.policy_loss_fn.html">trinity.algorithm.policy_loss_fn.policy_loss_fn module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.policy_loss_fn.ppo_policy_loss.html">trinity.algorithm.policy_loss_fn.ppo_policy_loss module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.policy_loss_fn.sft_loss.html">trinity.algorithm.policy_loss_fn.sft_loss module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.policy_loss_fn.sppo_loss_fn.html">trinity.algorithm.policy_loss_fn.sppo_loss_fn module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.policy_loss_fn.topr_policy_loss.html">trinity.algorithm.policy_loss_fn.topr_policy_loss module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../build_api/trinity.algorithm.sample_strategy.html">trinity.algorithm.sample_strategy package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.sample_strategy.mix_sample_strategy.html">trinity.algorithm.sample_strategy.mix_sample_strategy module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.sample_strategy.sample_strategy.html">trinity.algorithm.sample_strategy.sample_strategy module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.algorithm.sample_strategy.utils.html">trinity.algorithm.sample_strategy.utils module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.algorithm.algorithm.html">trinity.algorithm.algorithm module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.algorithm.algorithm_manager.html">trinity.algorithm.algorithm_manager module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.algorithm.key_mapper.html">trinity.algorithm.key_mapper module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.algorithm.utils.html">trinity.algorithm.utils module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../build_api/trinity.manager.html">trinity.manager package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../build_api/trinity.manager.config_registry.html">trinity.manager.config_registry package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.manager.config_registry.algorithm_config_manager.html">trinity.manager.config_registry.algorithm_config_manager module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.manager.config_registry.buffer_config_manager.html">trinity.manager.config_registry.buffer_config_manager module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.manager.config_registry.config_registry.html">trinity.manager.config_registry.config_registry module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.manager.config_registry.explorer_config_manager.html">trinity.manager.config_registry.explorer_config_manager module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.manager.config_registry.model_config_manager.html">trinity.manager.config_registry.model_config_manager module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.manager.config_registry.trainer_config_manager.html">trinity.manager.config_registry.trainer_config_manager module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.manager.config_manager.html">trinity.manager.config_manager module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.manager.state_manager.html">trinity.manager.state_manager module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.manager.synchronizer.html">trinity.manager.synchronizer module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../build_api/trinity.common.html">trinity.common package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../build_api/trinity.common.models.html">trinity.common.models package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.models.mm_utils.html">trinity.common.models.mm_utils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.models.model.html">trinity.common.models.model module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.models.utils.html">trinity.common.models.utils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.models.vllm_model.html">trinity.common.models.vllm_model module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.models.vllm_worker.html">trinity.common.models.vllm_worker module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../build_api/trinity.common.rewards.html">trinity.common.rewards package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.rewards.accuracy_reward.html">trinity.common.rewards.accuracy_reward module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.rewards.agents_reward.html">trinity.common.rewards.agents_reward module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.rewards.countdown_reward.html">trinity.common.rewards.countdown_reward module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.rewards.dapo_reward.html">trinity.common.rewards.dapo_reward module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.rewards.format_reward.html">trinity.common.rewards.format_reward module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.rewards.human_reward.html">trinity.common.rewards.human_reward module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.rewards.math_reward.html">trinity.common.rewards.math_reward module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.rewards.reward_fn.html">trinity.common.rewards.reward_fn module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.rewards.tool_reward.html">trinity.common.rewards.tool_reward module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.rewards.utils.html">trinity.common.rewards.utils module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../build_api/trinity.common.workflows.html">trinity.common.workflows package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.workflows.customized_math_workflows.html">trinity.common.workflows.customized_math_workflows module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.workflows.customized_toolcall_workflows.html">trinity.common.workflows.customized_toolcall_workflows module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.workflows.eval_workflow.html">trinity.common.workflows.eval_workflow module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.workflows.math_rm_workflow.html">trinity.common.workflows.math_rm_workflow module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.workflows.math_ruler_workflow.html">trinity.common.workflows.math_ruler_workflow module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.workflows.simple_mm_workflow.html">trinity.common.workflows.simple_mm_workflow module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.workflows.step_wise_workflow.html">trinity.common.workflows.step_wise_workflow module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.workflows.workflow.html">trinity.common.workflows.workflow module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.common.config.html">trinity.common.config module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.common.constants.html">trinity.common.constants module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.common.experience.html">trinity.common.experience module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.common.verl_config.html">trinity.common.verl_config module</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../build_api/trinity.utils.html">trinity.utils package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.utils.annotations.html">trinity.utils.annotations module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.utils.distributed.html">trinity.utils.distributed module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.utils.dlc_utils.html">trinity.utils.dlc_utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.utils.eval_utils.html">trinity.utils.eval_utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.utils.log.html">trinity.utils.log module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.utils.math_eval_utils.html">trinity.utils.math_eval_utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.utils.monitor.html">trinity.utils.monitor module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.utils.plugin_loader.html">trinity.utils.plugin_loader module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.utils.registry.html">trinity.utils.registry module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.utils.timer.html">trinity.utils.timer module</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/tutorial/trinity_programming_guide.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Developer Guide</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#workflows-for-rl-environment-developers">Workflows (For RL Environment Developers)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-0-basic-concepts">Step 0: Basic Concepts</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-prepare-task-dataset">Step 1: Prepare Task Dataset</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-implement-a-new-workflow">Step 2: Implement a New Workflow</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#initialize-your-workflow">Initialize Your Workflow</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#implementing-the-run-method">Implementing the <code class="docutils literal notranslate"><span class="pre">run</span></code> method</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#registering-your-workflow">Registering Your Workflow</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#avoid-re-initialization">Avoid Re-initialization</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#full-code-example">Full Code Example</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-use-your-workflow">Step 3: Use Your Workflow</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#algorithms-for-rl-algorithm-developers">Algorithms (For RL Algorithm Developers)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-0-basic-concepts-of-algorithm-module">Step 0: Basic Concepts of Algorithm Module</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-implement-algorithm-components">Step 1: Implement Algorithm Components</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-1-implement-advantagefn">Step 1.1: Implement <code class="docutils literal notranslate"><span class="pre">AdvantageFn</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-3-implement-policylossfn">Step 1.3: Implement <code class="docutils literal notranslate"><span class="pre">PolicyLossFn</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-register-your-algorithm">Step 2: Register Your Algorithm</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-use-your-algorithm">Step 3: Use Your Algorithm</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#operators-for-data-developers">Operators (For Data Developers)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-0-basic-concepts-of-operator-module">Step 0: Basic Concepts of Operator Module</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-implement-operator">Step 1: Implement Operator</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-use-your-operator">Step 2: Use Your Operator</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adding-new-config-entries-for-the-config-generator-advanced">Adding New Config Entries for the Config Generator (Advanced)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-0-understanding-streamlit">Step 0: Understanding Streamlit</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-implement-new-config-entries">Step 1: Implement New Config Entries</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-integrating-new-parameters-into-config-manager-py">Step 2: Integrating New Parameters into <code class="docutils literal notranslate"><span class="pre">config_manager.py</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#contributing-your-code">Contributing your Code</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="developer-guide">
+<h1>Developer Guide<a class="headerlink" href="#developer-guide" title="Link to this heading">#</a></h1>
+<p>This guide introduces how to develop new modules in Trinity-RFT and provides relevant development guidelines.</p>
+<p>In Trinity-RFT, we decompose the RL pipeline into three main modules (<strong>Explorer</strong>, <strong>Trainer</strong> and <strong>Buffer</strong>) to facilitate customization and extension.
+Below is a table summarizing the modules and components that developers with different targets need to focus on.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Development Target</p></th>
+<th class="head"><p>Core Module</p></th>
+<th class="head"><p>Key Component</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Apply existing RL algorithms to new environments.</p></td>
+<td><p><em>Explorer</em></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Workflow</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Design new RL algorithms.</p></td>
+<td><p><em>Trainer</em></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Algorithm</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Enhance the RL process from the data perspective.</p></td>
+<td><p><em>Buffer</em></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Operator</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Trinity-RFT is under active development, and the following interfaces may change. Please refer to the latest code when using this guide.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>For modules that only used for local testing or not intended for contribution, you can place them in the <code class="docutils literal notranslate"><span class="pre">trinity/plugins</span></code> directory. Trinity-RFT will automatically load all modules in this directory, and you can use those modules without adding them to the <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> file. You can specify another directory by setting the <code class="docutils literal notranslate"><span class="pre">--plugin-dir</span></code> option when running Trinity-RFT, e.g., <code class="docutils literal notranslate"><span class="pre">trinity</span> <span class="pre">run</span> <span class="pre">--config</span> <span class="pre">/path/to/your/config</span> <span class="pre">--plugin-dir</span> <span class="pre">/path/to/your/plugins</span></code>.</p>
+</div>
+<hr class="docutils" />
+<section id="workflows-for-rl-environment-developers">
+<span id="workflows"></span><h2>Workflows (For RL Environment Developers)<a class="headerlink" href="#workflows-for-rl-environment-developers" title="Link to this heading">#</a></h2>
+<p>In Trinity-RFT, workflows are the core components that define the interaction between Agents and Environments.
+A qualified workflow needs to use the trained model to complete the specified task and obtain feedback information (reward) from the environment. Below are the steps to create a new workflow:</p>
+<hr class="docutils" />
+<section id="step-0-basic-concepts">
+<h3>Step 0: Basic Concepts<a class="headerlink" href="#step-0-basic-concepts" title="Link to this heading">#</a></h3>
+<p>Before starting development, it’s important to understand several core concepts:</p>
+<ul class="simple">
+<li><p><strong>Task</strong> (<a class="reference internal" href="../build_api/trinity.common.workflows.html#trinity.common.workflows.Task" title="trinity.common.workflows.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.workflows.Task</span></code></a>): Represents a data structure that can be converted into a <code class="docutils literal notranslate"><span class="pre">Workflow</span></code>. The content of the <code class="docutils literal notranslate"><span class="pre">Task</span></code> varies depending on the task type:</p>
+<ul>
+<li><p><strong>Math problems</strong>: A <code class="docutils literal notranslate"><span class="pre">Task</span></code> contains the problem description and the golden answer.</p></li>
+<li><p><strong>Programming scenarios</strong>: A <code class="docutils literal notranslate"><span class="pre">Task</span></code> includes the problem description, test cases, runtime environment, and other complex information.</p></li>
+</ul>
+</li>
+<li><p><strong>Workflow</strong> (<a class="reference internal" href="../build_api/trinity.common.workflows.html#trinity.common.workflows.Workflow" title="trinity.common.workflows.Workflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.workflows.Workflow</span></code></a>): Describes how a <code class="docutils literal notranslate"><span class="pre">Task</span></code> is executed. It defines the interaction flow between Agents and Environments, including logic similar to <em>Rollout</em> and <em>Reward</em> calculations in other frameworks. After execution, it generates a list of <code class="docutils literal notranslate"><span class="pre">Experience</span></code>. Trinity-RFT includes several built-in workflows:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">MathWorkflow</span></code> (<a class="reference internal" href="../build_api/trinity.common.workflows.html#trinity.common.workflows.MathWorkflow" title="trinity.common.workflows.MathWorkflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.workflows.MathWorkflow</span></code></a>): For math scenarios, submits problems to LLM, parses LLM responses, and calculates scores (rewards).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">WebShopWorkflow</span></code> (<a class="reference internal" href="../build_api/trinity.common.workflows.html#trinity.common.workflows.WebShopWorkflow" title="trinity.common.workflows.WebShopWorkflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.workflows.WebShopWorkflow</span></code></a>): For webshop scenarios, it contains multi-turn interaction with environment.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CodeWorkflow</span></code> (Coming soon): For coding scenarios, executes returned code, runs tests, and calculates rewards based on test results.</p></li>
+<li><p>…</p></li>
+</ul>
+</li>
+<li><p><strong>Experience</strong> (<a class="reference internal" href="../build_api/trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.experience.Experience</span></code></a>): The output of running a <code class="docutils literal notranslate"><span class="pre">Workflow</span></code>.  The internal data format depends on the training algorithm used. For example, for common PPO/GRPO algorithms, <code class="docutils literal notranslate"><span class="pre">Experience</span></code> includes lists of token IDs, action masks (identifying which tokens were generated by the LLM), log probabilities, rewards, etc.</p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="step-1-prepare-task-dataset">
+<h3>Step 1: Prepare Task Dataset<a class="headerlink" href="#step-1-prepare-task-dataset" title="Link to this heading">#</a></h3>
+<p>The task dataset is loaded via the <code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.taskset</span></code> configuration entry in your YAML config file.
+To handle differences in <code class="docutils literal notranslate"><span class="pre">Task</span></code> contents, Trinity-RFT provides a unified <code class="docutils literal notranslate"><span class="pre">Task</span></code> interface containing the following fields.</p>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">workflow</span></code></strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>): The registered name of your workflow class. You can specify it in <code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.taskset.default_workflow_type</span></code> of your YAML config file.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">reward_fn</span></code></strong> (<code class="docutils literal notranslate"><span class="pre">Optional[str]</span></code>): The registered name of your reward function. You can specify it in <code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.taskset.default_reward_fn_type</span></code>. Note that some workflows already include built-in reward calculation; in such cases, you can omit this field.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">raw_task</span></code></strong> (<code class="docutils literal notranslate"><span class="pre">Dict</span></code>): A record of raw data in <code class="docutils literal notranslate"><span class="pre">Dict</span></code> format. For highly customized workflow, you can directly use <code class="docutils literal notranslate"><span class="pre">raw_task</span></code> to initialize your <code class="docutils literal notranslate"><span class="pre">Workflow</span></code> instance without relying on the following fields.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">format_args</span></code></strong> (<a class="reference internal" href="../build_api/trinity.common.config.html#trinity.common.config.FormatConfig" title="trinity.common.config.FormatConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.config.FormatConfig</span></code></a>): Parameters to facilitate the construction of <code class="docutils literal notranslate"><span class="pre">Workflow</span></code> instances. For example, the <code class="docutils literal notranslate"><span class="pre">prompt_key</span></code> and <code class="docutils literal notranslate"><span class="pre">response_key</span></code> can be used to get the prompt and response from <code class="docutils literal notranslate"><span class="pre">raw_task</span></code>. These settings come from the YAML configuration file and can be set in <code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.task_set.format</span></code>.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">rollout_args</span></code></strong> (<a class="reference internal" href="../build_api/trinity.common.config.html#trinity.common.config.GenerationConfig" title="trinity.common.config.GenerationConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.config.GenerationConfig</span></code></a>): Parameters that control the rollout process, such as <code class="docutils literal notranslate"><span class="pre">temperature</span></code>. This field also comes from the YAML configuration file and can be set in <code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.task_set.rollout_args</span></code>.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">workflow_args</span></code></strong> (<code class="docutils literal notranslate"><span class="pre">Dict</span></code>): A dictionary of parameters to facilitate the construction of <code class="docutils literal notranslate"><span class="pre">Workflow</span></code> instances. Provides more flexibility than <code class="docutils literal notranslate"><span class="pre">format_args</span></code> and <code class="docutils literal notranslate"><span class="pre">rollout_args</span></code> by using a dictionary. This field also comes from the YAML configuration file and can be set in <code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.task_set.workflow_args</span></code>. Normally, you do not need to set this field.</p></li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p><code class="docutils literal notranslate"><span class="pre">workflow</span></code>, <code class="docutils literal notranslate"><span class="pre">workflow_args</span></code> and <code class="docutils literal notranslate"><span class="pre">raw_task</span></code> provide different levels of customization.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">workflow</span></code> provides the global settings for all tasks that uses the same workflow. (Global Level)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">workflow_args</span></code> can be set for each task dataset, allowing different task datasets using the same workflow to behave differently. (Dataset Level)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">raw_task</span></code> provides the ability to customize the behavior of each task, which is most flexible. (Data Sample Level)</p></li>
+</ul>
+</div>
+<p>In the math problem scenario, the <code class="docutils literal notranslate"><span class="pre">Task</span></code> dataset can be a <code class="docutils literal notranslate"><span class="pre">jsonl</span></code> file, where each line contains JSON with <code class="docutils literal notranslate"><span class="pre">question</span></code> and <code class="docutils literal notranslate"><span class="pre">answer</span></code> fields representing the problem description and standard answer, respectively. For example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;question&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1+1=&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;answer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2&quot;</span><span class="p">}</span>
+<span class="p">{</span><span class="nt">&quot;question&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2+2=&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;answer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;4&quot;</span><span class="p">}</span>
+<span class="err">...</span>
+</pre></div>
+</div>
+<p>Example configuration snippet:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># some config</span>
+<span class="nt">buffer</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">explorer_input</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">taskset</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">default_workflow</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;math_workflow&quot;</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/PATH/TO/FILE/DIR&quot;</span>
+<span class="w">      </span><span class="nt">format</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">prompt_key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;question&quot;</span>
+<span class="w">        </span><span class="nt">response_key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;answer&quot;</span>
+<span class="w">      </span><span class="nt">rollout_args</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">temperature</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">      </span><span class="c1"># some other configs</span>
+</pre></div>
+</div>
+<p>In this example, each task object’s <code class="docutils literal notranslate"><span class="pre">raw_task</span></code> is a <code class="docutils literal notranslate"><span class="pre">Dict</span></code> with two keys (<code class="docutils literal notranslate"><span class="pre">question</span></code> and <code class="docutils literal notranslate"><span class="pre">answer</span></code>). The <code class="docutils literal notranslate"><span class="pre">MathWorkflow</span></code> uses the <code class="docutils literal notranslate"><span class="pre">prompt_key</span></code> and <code class="docutils literal notranslate"><span class="pre">response_key</span></code> to extract the question and answer from the <code class="docutils literal notranslate"><span class="pre">raw_task</span></code> and use the <code class="docutils literal notranslate"><span class="pre">rollout_args</span></code> to generate the response.</p>
+</section>
+<hr class="docutils" />
+<section id="step-2-implement-a-new-workflow">
+<h3>Step 2: Implement a New Workflow<a class="headerlink" href="#step-2-implement-a-new-workflow" title="Link to this heading">#</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">Workflow</span></code> base class interface is as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Workflow</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">ModelWrapper</span><span class="p">,</span>
+        <span class="n">auxiliary_models</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">openai</span><span class="o">.</span><span class="n">OpenAI</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">=</span> <span class="n">task</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_models</span> <span class="o">=</span> <span class="n">auxiliary_models</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run the workflow and return a list of Experiences.&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<section id="initialize-your-workflow">
+<h4>Initialize Your Workflow<a class="headerlink" href="#initialize-your-workflow" title="Link to this heading">#</a></h4>
+<p>During initialization, <code class="docutils literal notranslate"><span class="pre">Workflow</span></code> receives the following parameters:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">task</span></code>(<a class="reference internal" href="../build_api/trinity.common.workflows.html#trinity.common.workflows.Task" title="trinity.common.workflows.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.workflows.Task</span></code></a>): A single data item from the task dataset.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model</span></code>(<a class="reference internal" href="../build_api/trinity.common.models.model.html#trinity.common.models.model.ModelWrapper" title="trinity.common.models.model.ModelWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.models.model.ModelWrapper</span></code></a>): The model being trained, which provides an interface similar to OpenAI, capable of receiving a list of conversation messages and returning content generated by the LLM (including reply text <code class="docutils literal notranslate"><span class="pre">response_text</span></code>, full sequence token ids <code class="docutils literal notranslate"><span class="pre">tokens</span></code>, prompt part token length <code class="docutils literal notranslate"><span class="pre">prompt_length</span></code>, and a list of output token logprobs <code class="docutils literal notranslate"><span class="pre">logprobs</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">auxiliary_models</span></code>(<code class="docutils literal notranslate"><span class="pre">List[openai.OpenAI]</span></code>):A list of auxiliary models not involved in training. All are provided via OpenAI-compatible APIs.</p></li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>You can switch to using the OpenAI API by setting <code class="docutils literal notranslate"><span class="pre">explorer.rollout_model.enable_openai_api</span></code> to <code class="docutils literal notranslate"><span class="pre">true</span></code> in your config file and calling <code class="docutils literal notranslate"><span class="pre">model.get_openai_client()</span></code> to get an <code class="docutils literal notranslate"><span class="pre">openai.OpenAI</span></code> instance in your workflow.
+And the <code class="docutils literal notranslate"><span class="pre">model</span></code> field when calling openai API can be obtained via <code class="docutils literal notranslate"><span class="pre">openai_client.models.list().data[0].id</span></code> or <code class="docutils literal notranslate"><span class="pre">openai_client.model_path</span></code>.</p>
+</div>
+<p>Here’s an example of initializing a simple workflow using only <code class="docutils literal notranslate"><span class="pre">raw_task</span></code> and <code class="docutils literal notranslate"><span class="pre">rollout_args</span></code>. In more complex cases, you can use the <code class="docutils literal notranslate"><span class="pre">format_args</span></code> for further customization.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">ModelWrapper</span><span class="p">,</span> <span class="n">auxiliary_models</span><span class="p">:</span> <span class="n">List</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">auxiliary_models</span><span class="o">=</span><span class="n">auxiliary_models</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">question</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">raw_task</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;question&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">answer</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">raw_task</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;answer&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rollout_args</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">rollout_args</span>
+        <span class="c1"># Optional: If you want to use OpenAI API in your workflow</span>
+        <span class="c1"># self.openai_client = self.model.get_openai_client()</span>
+</pre></div>
+</div>
+</section>
+<section id="implementing-the-run-method">
+<h4>Implementing the <code class="docutils literal notranslate"><span class="pre">run</span></code> method<a class="headerlink" href="#implementing-the-run-method" title="Link to this heading">#</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">run</span></code> method is the core of your workflow. It returns a list of <code class="docutils literal notranslate"><span class="pre">Experience</span></code>.
+Below is a simple implementation for a math workflow.</p>
+<p>We first call the model to generate multiple response using the provided question and rollout arguments.
+Then we calculate the reward for each response using the <code class="docutils literal notranslate"><span class="pre">calculate_reward</span></code> function.
+Finally, we construct a list of <code class="docutils literal notranslate"><span class="pre">Experience</span></code> with the responses and rewards and return it.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+
+    <span class="c1"># the __init__ function</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_reward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">truth</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">response</span> <span class="o">==</span> <span class="n">truth</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">1.0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+        <span class="c1"># call the model to generate multiple responses</span>
+        <span class="n">responses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">chat</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Question:</span><span class="se">\n</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">question</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">],</span>
+            <span class="n">n</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rollout_args</span><span class="o">.</span><span class="n">n</span><span class="p">,</span>
+            <span class="n">temperature</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rollout_args</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">experiences</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">response</span> <span class="ow">in</span> <span class="n">responses</span><span class="p">:</span>
+            <span class="c1"># calulcate reward</span>
+            <span class="n">reward</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_reward</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">response_text</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">answer</span><span class="p">)</span>
+            <span class="c1"># construct Experience</span>
+            <span class="n">experiences</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">Experience</span><span class="p">(</span>
+                    <span class="n">tokens</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">tokens</span><span class="p">,</span>
+                    <span class="n">prompt_length</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">prompt_length</span><span class="p">,</span>
+                    <span class="n">reward</span><span class="o">=</span><span class="n">reward</span><span class="p">,</span>
+                    <span class="n">logprobs</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">logprobs</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">experiences</span>
+</pre></div>
+</div>
+</section>
+<section id="registering-your-workflow">
+<h4>Registering Your Workflow<a class="headerlink" href="#registering-your-workflow" title="Link to this heading">#</a></h4>
+<p>Register your workflow using the <code class="docutils literal notranslate"><span class="pre">WORKFLOWS.register_module</span></code> decorator.
+Ensure the name does not conflict with existing workflows.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># import some packages</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">WORKFLOWS</span>
+
+<span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;example_workflow&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p>For workflows that are prepared to be contributed to Trinity-RFT project, you need to place the above code in <code class="docutils literal notranslate"><span class="pre">trinity/common/workflows</span></code> folder, e.g., <code class="docutils literal notranslate"><span class="pre">trinity/common/workflows/example_workflow.py</span></code>. And add the following line to <code class="docutils literal notranslate"><span class="pre">trinity/common/workflows/__init__.py</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># existing import lines</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.example_workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExampleWorkflow</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="c1"># existing __all__ lines</span>
+    <span class="s2">&quot;ExampleWorkflow&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="avoid-re-initialization">
+<h4>Avoid Re-initialization<a class="headerlink" href="#avoid-re-initialization" title="Link to this heading">#</a></h4>
+<p>For heavy workflows, re-initializing every time can incurs extra computational costs.
+In this case, you can implement the <code class="docutils literal notranslate"><span class="pre">resettable</span></code> and <code class="docutils literal notranslate"><span class="pre">reset</span></code> methods to avoid re-initialization.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;example_workflow&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+    <span class="c1"># some code</span>
+    <span class="c1"># ...</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">resettable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">question</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">raw_task</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;question&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">answer</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">raw_task</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;answer&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="full-code-example">
+<h4>Full Code Example<a class="headerlink" href="#full-code-example" title="Link to this heading">#</a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;example_workflow&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">ModelWrapper</span><span class="p">,</span> <span class="n">auxiliary_models</span><span class="p">:</span> <span class="n">List</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">auxiliary_models</span><span class="o">=</span><span class="n">auxiliary_models</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">question</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">raw_task</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;question&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">answer</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">raw_task</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;answer&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rollout_args</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">rollout_args</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_reward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">truth</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">response</span> <span class="o">==</span> <span class="n">truth</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">1.0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+        <span class="c1"># call the model to generate multiple responses</span>
+        <span class="n">responses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">chat</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Question:</span><span class="se">\n</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">question</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">],</span>
+            <span class="n">n</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rollout_args</span><span class="o">.</span><span class="n">n</span><span class="p">,</span>
+            <span class="n">temperature</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rollout_args</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">experiences</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">response</span> <span class="ow">in</span> <span class="n">responses</span><span class="p">:</span>
+            <span class="c1"># calulcate reward</span>
+            <span class="n">reward</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_reward</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">response_text</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">answer</span><span class="p">)</span>
+            <span class="c1"># construct Experience</span>
+            <span class="n">experiences</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">Experience</span><span class="p">(</span>
+                    <span class="n">tokens</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">tokens</span><span class="p">,</span>
+                    <span class="n">prompt_length</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">prompt_length</span><span class="p">,</span>
+                    <span class="n">reward</span><span class="o">=</span><span class="n">reward</span><span class="p">,</span>
+                    <span class="n">logprobs</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">logprobs</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">experiences</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">resettable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">question</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">raw_task</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;question&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">answer</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">raw_task</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;answer&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="step-3-use-your-workflow">
+<h3>Step 3: Use Your Workflow<a class="headerlink" href="#step-3-use-your-workflow" title="Link to this heading">#</a></h3>
+<p>After implementing and registering your workflow, you need to update the configuration file to set the <code class="docutils literal notranslate"><span class="pre">default_workflow_type</span></code> in the <code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.taskset</span></code> domain to the newly registered <code class="docutils literal notranslate"><span class="pre">Workflow</span></code> name.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">buffer</span><span class="p">:</span>
+<span class="w">  </span><span class="c1"># Other fields</span>
+<span class="w">  </span><span class="nt">explorer_input</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">taskset</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/path/to/taskset</span>
+<span class="w">      </span><span class="nt">default_workflow_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example_workflow</span>
+<span class="w">      </span><span class="c1"># Other fields</span>
+</pre></div>
+</div>
+<p>Now you can run your workflow in Trinity-RFT using the command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">trinity</span> <span class="n">run</span> <span class="o">--</span><span class="n">config</span> <span class="o">&lt;</span><span class="n">your_yaml_file</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<hr class="docutils" />
+</section>
+</section>
+<section id="algorithms-for-rl-algorithm-developers">
+<span id="algorithms"></span><h2>Algorithms (For RL Algorithm Developers)<a class="headerlink" href="#algorithms-for-rl-algorithm-developers" title="Link to this heading">#</a></h2>
+<p>Trinity-RFT provides a standardized process for implementing new algorithms.</p>
+<section id="step-0-basic-concepts-of-algorithm-module">
+<h3>Step 0: Basic Concepts of Algorithm Module<a class="headerlink" href="#step-0-basic-concepts-of-algorithm-module" title="Link to this heading">#</a></h3>
+<p>In Trinity-RFT, the algorithm module is primarily responsible for extracting experience data from the Replay Buffer during the RL process and calculating the loss to update models based on this data.
+To avoid implementing a new Trainer class each time a new algorithm is added, we have decomposed the representative PPO algorithm process into multiple sub-modules to adapt to various algorithms.</p>
+<ul class="simple">
+<li><p><strong>Sample Strategy</strong> (<a class="reference internal" href="../build_api/trinity.algorithm.html#trinity.algorithm.SampleStrategy" title="trinity.algorithm.SampleStrategy"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.SampleStrategy</span></code></a>): Responsible for sampling experience data from the buffer module. By customizing this module, you can implement functionalities like filtering experience data or mixed sampling from multiple data sources.</p></li>
+<li><p><strong>Advantage Fn</strong>(<a class="reference internal" href="../build_api/trinity.algorithm.html#trinity.algorithm.AdvantageFn" title="trinity.algorithm.AdvantageFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.AdvantageFn</span></code></a>): Responsible for calculating the Advantage and Returns of experience data.</p></li>
+<li><p><strong>Policy Loss Fn</strong>(<a class="reference internal" href="../build_api/trinity.algorithm.html#trinity.algorithm.PolicyLossFn" title="trinity.algorithm.PolicyLossFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.PolicyLossFn</span></code></a>): Responsible for calculating the core training loss of the policy network.</p></li>
+<li><p><strong>KL Fn</strong>(<a class="reference internal" href="../build_api/trinity.algorithm.html#trinity.algorithm.KLFn" title="trinity.algorithm.KLFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.KLFn</span></code></a>): Responsible for calculating KL Divergence, which is generally used in two places in existing RL algorithms: Reward Penalty and Actor Loss.</p></li>
+<li><p><strong>Entropy Loss Fn</strong>(<a class="reference internal" href="../build_api/trinity.algorithm.html#trinity.algorithm.EntropyLossFn" title="trinity.algorithm.EntropyLossFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.EntropyLossFn</span></code></a>): Responsible for calculating the entropy loss of the policy network.</p></li>
+</ul>
+<p>We provide several implementations of above modules in <code class="docutils literal notranslate"><span class="pre">trinity/algorithm</span></code>.</p>
+</section>
+<hr class="docutils" />
+<section id="step-1-implement-algorithm-components">
+<h3>Step 1: Implement Algorithm Components<a class="headerlink" href="#step-1-implement-algorithm-components" title="Link to this heading">#</a></h3>
+<p>Trinity-RFT allows developers to customize all the above modules. Developers only need to implement specific modules according to the requirements of their new algorithm. This section will provide a simple introduction using the <a class="reference internal" href="example_reasoning_advanced.html#opmd"><span class="std std-ref">OPMD</span></a> algorithm as an example.</p>
+<p>The main difference between OPMD and PPO algorithms lies in the calculation of Advantage and Policy Loss.
+OPMD relies on a group-based advantage calculation and does not use the Critic model.
+To implement OPMD, developers need to implement advantage calculation in <code class="docutils literal notranslate"><span class="pre">AdvantageFn</span></code> and policy loss calculation in <code class="docutils literal notranslate"><span class="pre">PolicyLossFn</span></code>.</p>
+<hr class="docutils" />
+<section id="step-1-1-implement-advantagefn">
+<h4>Step 1.1: Implement <code class="docutils literal notranslate"><span class="pre">AdvantageFn</span></code><a class="headerlink" href="#step-1-1-implement-advantagefn" title="Link to this heading">#</a></h4>
+<p>The <a class="reference internal" href="../build_api/trinity.algorithm.html#trinity.algorithm.AdvantageFn" title="trinity.algorithm.AdvantageFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.AdvantageFn</span></code></a> interface includes three methods:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">__call__</span></code>: The main entrance for advantage calculation. It receives a list of experiences (<a class="reference internal" href="../build_api/trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.experience.Experience</span></code></a>) and returns a list of experiences with calculated advantages and returns, along with a metrics dictionary for logging.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">default_args</span></code>: A class method that returns the default initialization parameters in dictionary form. It will be used by default when users don’t specify initialization parameters in the configuration file.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">compute_in_trainer</span></code>: This class method indicates whether to compute advantages in the Trainer. If it returns <code class="docutils literal notranslate"><span class="pre">False</span></code>, the <code class="docutils literal notranslate"><span class="pre">AdvantageFn</span></code> will be called in the experience data processing pipeline.</p></li>
+</ul>
+<p>For convenience, Trinity-RFT provides an abstract class <a class="reference internal" href="../build_api/trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.GroupAdvantage" title="trinity.algorithm.advantage_fn.GroupAdvantage"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.advantage_fn.GroupAdvantage</span></code></a> that implements the <code class="docutils literal notranslate"><span class="pre">__call__</span></code> method for group-based advantage calculation, you can focus on how to group the experiences and calculate advantages on grouped experiences with the following two methods:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">group_experiences</span></code>: This method groups a experiences generated in a step into multiple sub-groups.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">calculate_group_advantage</span></code>: This method calculates the advantage for each group of experiences.</p></li>
+</ul>
+<p>Here’s an implementation example for the OPMD algorithm’s advantage function:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.advantage_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">ADVANTAGE_FN</span><span class="p">,</span> <span class="n">GroupAdvantage</span>
+
+<span class="nd">@ADVANTAGE_FN</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;opmd&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OPMDGroupAdvantage</span><span class="p">(</span><span class="n">GroupAdvantage</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;OPMD Group Advantage computation&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opmd_baseline</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="n">tau</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opmd_baseline</span> <span class="o">=</span> <span class="n">opmd_baseline</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tau</span> <span class="o">=</span> <span class="n">tau</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">group_experiences</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exps</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">group_by</span><span class="p">(</span><span class="n">exps</span><span class="p">,</span> <span class="n">id_type</span><span class="o">=</span><span class="s2">&quot;task&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_group_advantage</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">group_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">exps</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">],</span> <span class="n">Dict</span><span class="p">]:</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">group_baseline</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">group_rewards</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="n">exp</span><span class="o">.</span><span class="n">reward</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">exps</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">opmd_baseline</span> <span class="o">==</span> <span class="s2">&quot;mean&quot;</span><span class="p">:</span>
+                    <span class="n">group_baseline</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">group_rewards</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">group_baseline</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span> <span class="o">*</span> <span class="p">(</span>
+                        <span class="n">torch</span><span class="o">.</span><span class="n">logsumexp</span><span class="p">(</span><span class="n">group_rewards</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="o">-</span> <span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">exps</span><span class="p">)))</span>
+                    <span class="p">)</span>
+            <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">exps</span><span class="p">:</span>
+                <span class="n">score</span> <span class="o">=</span> <span class="n">exp</span><span class="o">.</span><span class="n">reward</span> <span class="o">-</span> <span class="n">group_baseline</span>
+                <span class="n">exp</span><span class="o">.</span><span class="n">advantages</span> <span class="o">=</span> <span class="n">score</span> <span class="o">*</span> <span class="n">exp</span><span class="o">.</span><span class="n">action_mask</span>
+                <span class="n">exp</span><span class="o">.</span><span class="n">returns</span> <span class="o">=</span> <span class="n">exp</span><span class="o">.</span><span class="n">advantages</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+            <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;group_baseline&quot;</span><span class="p">:</span> <span class="n">group_baseline</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
+            <span class="p">}</span>
+        <span class="k">return</span> <span class="n">exps</span><span class="p">,</span> <span class="n">metrics</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">default_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;opmd_baseline&quot;</span><span class="p">:</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;tau&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>After implementation, you need to register this module through <code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.ADVANTAGE_FN</span></code>. Once registered, the module can be configured in the configuration file using the registered name.</p>
+</section>
+<section id="step-1-3-implement-policylossfn">
+<h4>Step 1.3: Implement <code class="docutils literal notranslate"><span class="pre">PolicyLossFn</span></code><a class="headerlink" href="#step-1-3-implement-policylossfn" title="Link to this heading">#</a></h4>
+<p>Developers need to implement the <a class="reference internal" href="../build_api/trinity.algorithm.html#trinity.algorithm.PolicyLossFn" title="trinity.algorithm.PolicyLossFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.PolicyLossFn</span></code></a> interface, which is similar to <code class="docutils literal notranslate"><span class="pre">AdvantageFn</span></code> and includes two methods:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">__call__</span></code>: Calculates the loss based on input parameters. Unlike <code class="docutils literal notranslate"><span class="pre">AdvantageFn</span></code>, the input parameters here are all <code class="docutils literal notranslate"><span class="pre">torch.Tensor</span></code>. This interface automatically scans the parameter list of the <code class="docutils literal notranslate"><span class="pre">__call__</span></code> method and converts it to the corresponding fields in the experience data. Therefore, please write all tensor names needed for loss calculation directly in the parameter list, rather than selecting parameters from <code class="docutils literal notranslate"><span class="pre">kwargs</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">default_args</span></code>: Returns default initialization parameters in dictionary form, which will be used by default when users don’t specify initialization parameters in the configuration file.</p></li>
+</ul>
+<p>Similarly, after implementation, you need to register this module through <code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.POLICY_LOSS_FN</span></code>.</p>
+<p>Here’s an implementation example for the OPMD algorithm’s Policy Loss Fn. Since OPMD’s Policy Loss only requires logprob, action_mask, and advantages, only these three items are specified in the parameter list of the <code class="docutils literal notranslate"><span class="pre">__call__</span></code> method:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@POLICY_LOSS_FN</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;opmd&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OPMDPolicyLossFn</span><span class="p">(</span><span class="n">PolicyLossFn</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tau</span> <span class="o">=</span> <span class="n">tau</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">logprob</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">action_mask</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">advantages</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
+        <span class="n">pg_losses</span> <span class="o">=</span> <span class="o">-</span><span class="n">advantages</span> <span class="o">*</span> <span class="n">logprob</span>
+        <span class="n">opmd_loss</span> <span class="o">=</span> <span class="n">masked_mean</span><span class="p">(</span><span class="n">pg_losses</span><span class="p">,</span> <span class="n">action_mask</span><span class="p">)</span>
+        <span class="n">opmd_loss</span> <span class="o">=</span> <span class="n">opmd_loss</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="p">)</span>  <span class="c1"># for regularization (w.r.t. current pi_theta)</span>
+        <span class="k">return</span> <span class="n">opmd_loss</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;opmd_loss&quot;</span><span class="p">:</span> <span class="n">opmd_loss</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()}</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">default_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;tau&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="step-2-register-your-algorithm">
+<h3>Step 2: Register Your Algorithm<a class="headerlink" href="#step-2-register-your-algorithm" title="Link to this heading">#</a></h3>
+<p>The above steps implement the components needed for the algorithm, but these components are scattered and need to be configured in multiple places to take effect.</p>
+<p>To simplify configuration, Trinity-RFT provides <a class="reference internal" href="../build_api/trinity.algorithm.html#trinity.algorithm.AlgorithmType" title="trinity.algorithm.AlgorithmType"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.AlgorithmType</span></code></a> to describe a complete algorithm and registers it in <code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.algorithm.ALGORITHM_TYPE</span></code>, enabling one-click configuration.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">AlgorithmType</span></code> class includes the following attributes and methods:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">use_critic</span></code>: Whether to use the Critic model</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">use_reference</span></code>: Whether to use the Reference model</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">compute_advantage_in_trainer</span></code>: Whether to calculate Advantages in Trainer; if False, the <code class="docutils literal notranslate"><span class="pre">AdvantageFn</span></code> call in trainer will be skipped</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">can_balance_batch</span></code>: Whether the algorithm allows automatic balancing when splitting a batch into microbatches (which permute the order of samples)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">schema</span></code>: The format of experience data corresponding to the algorithm</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">default_config</span></code>: Gets the default configuration of the algorithm, which will override attributes with the same name in <code class="docutils literal notranslate"><span class="pre">ALGORITHM_TYPE</span></code></p></li>
+</ul>
+<p>Similarly, after implementation, you need to register this module through <code class="docutils literal notranslate"><span class="pre">ALGORITHM_TYPE</span></code>.</p>
+<p>Below is the implementation for the OPMD algorithm.
+Since the OPMD algorithm doesn’t need to use the Critic model, <code class="docutils literal notranslate"><span class="pre">use_critic</span></code> is set to <code class="docutils literal notranslate"><span class="pre">False</span></code>.
+The dictionary returned by the <code class="docutils literal notranslate"><span class="pre">default_config</span></code> method indicates that OPMD will use the <code class="docutils literal notranslate"><span class="pre">opmd</span></code> type <code class="docutils literal notranslate"><span class="pre">AdvantageFn</span></code> and <code class="docutils literal notranslate"><span class="pre">PolicyLossFn</span></code> implemented in Step 1, will not apply KL Penalty on rewards, but will add a <code class="docutils literal notranslate"><span class="pre">k2</span></code> type KL loss when calculating the final loss.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@ALGORITHM_TYPE</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;opmd&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OPMDAlgorithm</span><span class="p">(</span><span class="n">AlgorithmType</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;OPMD algorithm.&quot;&quot;&quot;</span>
+
+    <span class="n">use_critic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">use_reference</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">compute_advantage_in_trainer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">can_balance_batch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">schema</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;experience&quot;</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">default_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;repeat_times&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="s2">&quot;advantage_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;opmd&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;sample_strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;warmup&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;policy_loss_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;opmd&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;kl_penalty_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;kl_loss_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;k2&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;entropy_loss_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="step-3-use-your-algorithm">
+<h3>Step 3: Use Your Algorithm<a class="headerlink" href="#step-3-use-your-algorithm" title="Link to this heading">#</a></h3>
+<p>After completing all the above steps, you can use the newly registered algorithm through a YAML configuration file.</p>
+<p>For default configurations, you just need to add the following content to your <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> file:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># some other configs</span>
+<span class="nt">algorithm</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">algorithm_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;opmd&quot;</span>
+<span class="c1"># some other configs</span>
+</pre></div>
+</div>
+<p>If you need to modify certain parameters, you can simply add the corresponding parameters within the <code class="docutils literal notranslate"><span class="pre">algorithm</span></code> section. For example, if you need to modify <code class="docutils literal notranslate"><span class="pre">repeat_times</span></code> and the initialization parameters of <code class="docutils literal notranslate"><span class="pre">AdvantageFn</span></code> and <code class="docutils literal notranslate"><span class="pre">PolicyLossFn</span></code>, the modified <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> file would be as follows:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># some other configs</span>
+<span class="nt">algorithm</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">algorithm_type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;opmd&quot;</span>
+<span class="w">  </span><span class="nt">repeat_times</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
+<span class="w">  </span><span class="nt">advantage_fn_args</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">opmd_baseline</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;logavgexp&quot;</span>
+<span class="w">    </span><span class="nt">tau</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.99</span>
+<span class="w">  </span><span class="nt">policy_loss_fn_args</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">tau</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.99</span>
+<span class="c1"># some other configs</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="operators-for-data-developers">
+<h2>Operators (For Data Developers)<a class="headerlink" href="#operators-for-data-developers" title="Link to this heading">#</a></h2>
+<section id="step-0-basic-concepts-of-operator-module">
+<h3>Step 0: Basic Concepts of Operator Module<a class="headerlink" href="#step-0-basic-concepts-of-operator-module" title="Link to this heading">#</a></h3>
+<p>In Trinity-RFT, the operator module is responsible for processing experience data in the buffer module. It supports existing data processing capabilities from <a class="reference external" href="https://github.com/modelscope/data-juicer">Data-Juicer</a> naturally, and allows developers to implement their own operators as well.
+By customizing operators, developers can implement various data processing functionalities, such as data augmentation, filtering, and transformation. You can even implement advantages/returns calculation as operators, as shown in <a class="reference internal" href="#algorithms"><span class="std std-ref">Algorithms</span></a> section.</p>
+<ul class="simple">
+<li><p><strong>DataJuicerOperator</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.data.operators.DataJuicerOperator</span></code>): The operator that wraps the data processing operators from Data-Juicer. It provides a simple interface for developers to list the Data-Juicer operators they want to use. The full list of Data-Juicer operators can be found <a class="reference external" href="https://modelscope.github.io/data-juicer/en/main/docs/Operators.html">here</a>.</p></li>
+<li><p><strong>ExperienceOperator</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.data.operators.ExperienceOperator</span></code>): The base class for all operators used in experience data processing. It defines the interface and common functionalities that all operators should have. Each operator processes a batch of experience data and returns the processed data with metrics for logging.</p></li>
+<li><p><strong>ExperiencePipeline</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.data.pipelines.ExperiencePipeline</span></code>): The experience data processing pipeline that manages a sequence of operators. It takes raw experiences from the <code class="docutils literal notranslate"><span class="pre">Explorer</span></code>, passes them through each operator in the pipeline, and writes the final processed experiences into the input buffer of the <code class="docutils literal notranslate"><span class="pre">Trainer</span></code>.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Except for <code class="docutils literal notranslate"><span class="pre">ExperiencePipeline</span></code>, Trinity-RFT also provides <code class="docutils literal notranslate"><span class="pre">TaskPipeline</span></code> for task data processing.
+In the current version, the <code class="docutils literal notranslate"><span class="pre">TaskPipeline</span></code> only supports using Data-Juicer operators. Please see this <a class="reference internal" href="example_data_functionalities.html#data-processing"><span class="std std-ref">section</span></a> for details.</p>
+</div>
+<hr class="docutils" />
+<p>Developers can implement and use their own operators by following the steps below.</p>
+</section>
+<section id="step-1-implement-operator">
+<h3>Step 1: Implement Operator<a class="headerlink" href="#step-1-implement-operator" title="Link to this heading">#</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">ExperienceOperator</span></code> interface includes only one <code class="docutils literal notranslate"><span class="pre">process</span></code> method. The <code class="docutils literal notranslate"><span class="pre">ExperiencePipeline</span></code> will call this method with a list of <code class="docutils literal notranslate"><span class="pre">Experience</span></code> generated by the <code class="docutils literal notranslate"><span class="pre">Explorer</span></code> in one explore step. The <code class="docutils literal notranslate"><span class="pre">process</span></code> method should return a tuple containing the processed list of <code class="docutils literal notranslate"><span class="pre">Experience</span></code> and a dictionary of metrics for logging.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ExperienceOperator</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exps</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">],</span> <span class="n">Dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process a list of experiences and return a transformed list.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            exps (List[Experience]): List of experiences to process, which contains</span>
+<span class="sd">                all experiences generated by the Explorer in one explore step.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple[List[Experience], Dict]: A tuple containing the processed list of experiences and a dictionary of metrics.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>Here is an implementation of a simple operator that filters out experiences with rewards below a certain threshold:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.operators</span><span class="w"> </span><span class="kn">import</span> <span class="n">EXPERIENCE_OPERATORS</span><span class="p">,</span> <span class="n">ExperienceOperator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
+
+
+<span class="nd">@EXPERIENCE_OPERATORS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;reward_filter&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RewardFilter</span><span class="p">(</span><span class="n">ExperienceOperator</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="n">threshold</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exps</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">],</span> <span class="n">Dict</span><span class="p">]:</span>
+        <span class="n">filtered_exps</span> <span class="o">=</span> <span class="p">[</span><span class="n">exp</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">exps</span> <span class="k">if</span> <span class="n">exp</span><span class="o">.</span><span class="n">reward</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span><span class="p">]</span>
+        <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;filtered_count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">filtered_exps</span><span class="p">)}</span>
+        <span class="k">return</span> <span class="n">filtered_exps</span><span class="p">,</span> <span class="n">metrics</span>
+</pre></div>
+</div>
+<p>After implementation, you need to register this module through <code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.data.operators.EXPERIENCE_OPERATORS</span></code>. Once registered, the module can be configured in the configuration file using the registered name.</p>
+</section>
+<section id="step-2-use-your-operator">
+<h3>Step 2: Use Your Operator<a class="headerlink" href="#step-2-use-your-operator" title="Link to this heading">#</a></h3>
+<p>After completing the above steps, you can use the newly registered operator through a YAML configuration file.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># some other configs</span>
+<span class="nt">data_processor</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">experience_pipeline</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">operators</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;reward_filter&quot;</span>
+<span class="w">        </span><span class="nt">args</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
+<span class="nt">synchronizer</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">sync_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nccl</span>
+<span class="w">  </span><span class="nt">sync_style</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dynamic_by_explorer</span>
+<span class="w">  </span><span class="nt">sync_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="c1"># some other configs</span>
+</pre></div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">RewardFilter</span></code> reduces the number of experiences, which may cause the trainer can’t get enough experiences to start a training step. To avoid the issue, you can use the advanced <a class="reference internal" href="synchronizer.html#synchronizer"><span class="std std-ref">Dynamic Synchronization</span></a> feature provided by Trinity-RFT as shown in the above configuration file.
+The above setting means that the <code class="docutils literal notranslate"><span class="pre">Explorer</span></code> will sync with the <code class="docutils literal notranslate"><span class="pre">Trainer</span></code> every 2 steps and will continue running regardless of how many steps the <code class="docutils literal notranslate"><span class="pre">Trainer</span></code> has completed. This ensures that the <code class="docutils literal notranslate"><span class="pre">Trainer</span></code> can always get enough experiences to start a training step as long as the <code class="docutils literal notranslate"><span class="pre">Explorer</span></code> is running.</p>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="adding-new-config-entries-for-the-config-generator-advanced">
+<h2>Adding New Config Entries for the Config Generator (Advanced)<a class="headerlink" href="#adding-new-config-entries-for-the-config-generator-advanced" title="Link to this heading">#</a></h2>
+<section id="step-0-understanding-streamlit">
+<h3>Step 0: Understanding Streamlit<a class="headerlink" href="#step-0-understanding-streamlit" title="Link to this heading">#</a></h3>
+<p>Before adding new parameters to the Config Generator page, it is essential to familiarize yourself with the relevant API and mechanisms of <a class="reference external" href="https://docs.streamlit.io/develop/api-reference">Streamlit</a>. This project primarily utilizes various input components from Streamlit and employs <code class="docutils literal notranslate"><span class="pre">st.session_state</span></code> to store user-input parameters.</p>
+</section>
+<section id="step-1-implement-new-config-entries">
+<h3>Step 1: Implement New Config Entries<a class="headerlink" href="#step-1-implement-new-config-entries" title="Link to this heading">#</a></h3>
+<p>To illustrate the process of creating a new parameter setting for the Config Generator page, we will use <code class="docutils literal notranslate"><span class="pre">train_batch_size</span></code> as an example.</p>
+<ol class="arabic">
+<li><p>Determine the appropriate scope for the parameter. Currently, parameters are categorized into four files:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">trinity/manager/config_registry/buffer_config_manager.py</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trinity/manager/config_registry/explorer_config_manager.py</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trinity/manager/config_registry/model_config_manager.py</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trinity/manager/config_registry/trainer_config_manager.py</span></code></p></li>
+</ul>
+<p>In this case, <code class="docutils literal notranslate"><span class="pre">train_batch_size</span></code> should be placed in the <code class="docutils literal notranslate"><span class="pre">buffer_config_manager.py</span></code> file.</p>
+</li>
+<li><p>Create a parameter setting function using Streamlit. The function name must follow the convention of starting with ‘set_’, and the remainder of the name becomes the config name.</p></li>
+<li><p>Decorate the parameter setting function with the <code class="docutils literal notranslate"><span class="pre">CONFIG_GENERATORS.register_config</span></code> decorator. This decorator requires the following information:</p>
+<ul class="simple">
+<li><p>Default value of the parameter</p></li>
+<li><p>Visibility condition (if applicable)</p></li>
+<li><p>Additional config parameters (if needed)</p></li>
+</ul>
+</li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">CONFIG_GENERATORS.register_config</span></code> decorator automatically passes <code class="docutils literal notranslate"><span class="pre">key=config_name</span></code> as an argument to the registered configuration function. Ensure that your function accepts this keyword argument.</p>
+</div>
+<p>For <code class="docutils literal notranslate"><span class="pre">train_batch_size</span></code>, we will use the following settings:</p>
+<ul class="simple">
+<li><p>Default value: 96</p></li>
+<li><p>Visibility condition: <code class="docutils literal notranslate"><span class="pre">lambda:</span> <span class="pre">st.session_state[&quot;trainer_gpu_num&quot;]</span> <span class="pre">&gt;</span> <span class="pre">0</span></code></p></li>
+<li><p>Additional config: <code class="docutils literal notranslate"><span class="pre">{&quot;_train_batch_size_per_gpu&quot;:</span> <span class="pre">16}</span></code></p></li>
+</ul>
+<p>Here’s the complete code for the <code class="docutils literal notranslate"><span class="pre">train_batch_size</span></code> parameter:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@CONFIG_GENERATORS</span><span class="o">.</span><span class="n">register_config</span><span class="p">(</span>
+    <span class="n">default_value</span><span class="o">=</span><span class="mi">96</span><span class="p">,</span>
+    <span class="n">visible</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;trainer_gpu_num&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">other_configs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;_train_batch_size_per_gpu&quot;</span><span class="p">:</span> <span class="mi">16</span><span class="p">},</span>
+<span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">set_train_batch_size</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;key&quot;</span><span class="p">)</span>
+    <span class="n">trainer_gpu_num</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;trainer_gpu_num&quot;</span><span class="p">]</span>
+    <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;_train_batch_size_per_gpu&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;trainer_gpu_num&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_change</span><span class="p">():</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;_train_batch_size_per_gpu&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">//</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;trainer_gpu_num&quot;</span><span class="p">],</span> <span class="mi">1</span>
+        <span class="p">)</span>
+
+    <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span>
+        <span class="s2">&quot;Train Batch Size&quot;</span><span class="p">,</span>
+        <span class="n">min_value</span><span class="o">=</span><span class="n">trainer_gpu_num</span><span class="p">,</span>
+        <span class="n">step</span><span class="o">=</span><span class="n">trainer_gpu_num</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="n">_str_for_train_batch_size</span><span class="p">(),</span>
+        <span class="n">on_change</span><span class="o">=</span><span class="n">on_change</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p>If the parameter requires validation, create a check function. For <code class="docutils literal notranslate"><span class="pre">train_batch_size</span></code>, we need to ensure it is divisible by <code class="docutils literal notranslate"><span class="pre">trainer_gpu_num</span></code>. If not, a warning should be displayed, and the parameter should be added to <code class="docutils literal notranslate"><span class="pre">unfinished_fields</span></code>.</p>
+<p>Decorate the check function with the <code class="docutils literal notranslate"><span class="pre">CONFIG_GENERATORS.register_check</span></code> decorator:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@CONFIG_GENERATORS</span><span class="o">.</span><span class="n">register_check</span><span class="p">()</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_train_batch_size</span><span class="p">(</span><span class="n">unfinished_fields</span><span class="p">:</span> <span class="nb">set</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">%</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;trainer_gpu_num&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">unfinished_fields</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">_str_for_train_batch_size</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">CONFIG_GENERATORS.register_check</span></code> decorator automatically receives <code class="docutils literal notranslate"><span class="pre">key=config_name</span></code> and <code class="docutils literal notranslate"><span class="pre">unfinished_fields=self.unfinished_fields</span></code> as arguments. Ensure your function accepts these keyword arguments.</p>
+</div>
+</section>
+<section id="step-2-integrating-new-parameters-into-config-manager-py">
+<h3>Step 2: Integrating New Parameters into <code class="docutils literal notranslate"><span class="pre">config_manager.py</span></code><a class="headerlink" href="#step-2-integrating-new-parameters-into-config-manager-py" title="Link to this heading">#</a></h3>
+<p>To successfully integrate new parameters into the <code class="docutils literal notranslate"><span class="pre">config_manager.py</span></code> file, please adhere to the following procedure:</p>
+<ol class="arabic">
+<li><p>Parameter Categorization:
+Determine the appropriate section for the new parameter based on its functionality. The config generator page is structured into two primary modes:</p>
+<ul class="simple">
+<li><p>Beginner Mode: Comprises “Essential Configs” and “Important Configs” sections.</p></li>
+<li><p>Expert Mode: Includes “Model”, “Buffer”, “Explorer and Synchronizer”, and “Trainer” sections.</p></li>
+</ul>
+</li>
+<li><p>Parameter Addition:
+Incorporate the new parameter into the relevant section using the <code class="docutils literal notranslate"><span class="pre">self.get_configs</span></code> method within the <code class="docutils literal notranslate"><span class="pre">ConfigManager</span></code> class.</p>
+<p>Example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ConfigManager</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_expert_buffer_part</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;total_epochs&quot;</span><span class="p">,</span> <span class="s2">&quot;train_batch_size&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p>YAML File Integration:
+Locate the appropriate position for the new parameter within the YAML file structure. This should be done in the <code class="docutils literal notranslate"><span class="pre">generate_config</span></code> function and its associated sub-functions.</p></li>
+<li><p>Parameter Value Assignment:
+Utilize <code class="docutils literal notranslate"><span class="pre">st.session_state</span></code> to retrieve the parameter value from the config generator page and assign it to the corresponding field in the YAML.</p>
+<p>Example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ConfigManager</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_gen_buffer_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">buffer_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;batch_size&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;train_batch_size&quot;</span><span class="p">],</span>
+            <span class="c1"># Additional configuration parameters</span>
+        <span class="p">}</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<p>By meticulously following these steps, you can ensure that new parameters are successfully added to the Config Generator page and properly integrated into the configuration system. This process maintains the integrity and functionality of the configuration management framework.</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="contributing-your-code">
+<h2>Contributing your Code<a class="headerlink" href="#contributing-your-code" title="Link to this heading">#</a></h2>
+<p>For modules that are prepared to be contributed to the Trinity-RFT project, please follow the steps below:</p>
+<ol class="arabic simple">
+<li><p>Implement your code in the appropriate directory, such as <code class="docutils literal notranslate"><span class="pre">trinity/common/workflows</span></code> for workflows, <code class="docutils literal notranslate"><span class="pre">trinity/algorithm</span></code> for algorithms, <code class="docutils literal notranslate"><span class="pre">trinity/buffer/operators</span></code> for operators.</p></li>
+<li><p>Register your module in the corresponding <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> file of the directory.</p></li>
+<li><p>Add tests for your module in the <code class="docutils literal notranslate"><span class="pre">tests</span></code> directory, following the naming conventions and structure of existing tests.</p></li>
+<li><p>Before submitting the code, make sure it passes the code style check with <code class="docutils literal notranslate"><span class="pre">pre-commit</span> <span class="pre">run</span> <span class="pre">--all-files</span></code>.</p></li>
+<li><p>Submit a pull request to the Trinity-RFT repository, including a clear description of your changes.</p></li>
+</ol>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="example_data_functionalities.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Data Processing</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="trinity_configs.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Configuration Guide</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#workflows-for-rl-environment-developers">Workflows (For RL Environment Developers)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-0-basic-concepts">Step 0: Basic Concepts</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-prepare-task-dataset">Step 1: Prepare Task Dataset</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-implement-a-new-workflow">Step 2: Implement a New Workflow</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#initialize-your-workflow">Initialize Your Workflow</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#implementing-the-run-method">Implementing the <code class="docutils literal notranslate"><span class="pre">run</span></code> method</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#registering-your-workflow">Registering Your Workflow</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#avoid-re-initialization">Avoid Re-initialization</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#full-code-example">Full Code Example</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-use-your-workflow">Step 3: Use Your Workflow</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#algorithms-for-rl-algorithm-developers">Algorithms (For RL Algorithm Developers)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-0-basic-concepts-of-algorithm-module">Step 0: Basic Concepts of Algorithm Module</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-implement-algorithm-components">Step 1: Implement Algorithm Components</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-1-implement-advantagefn">Step 1.1: Implement <code class="docutils literal notranslate"><span class="pre">AdvantageFn</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-3-implement-policylossfn">Step 1.3: Implement <code class="docutils literal notranslate"><span class="pre">PolicyLossFn</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-register-your-algorithm">Step 2: Register Your Algorithm</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-use-your-algorithm">Step 3: Use Your Algorithm</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#operators-for-data-developers">Operators (For Data Developers)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-0-basic-concepts-of-operator-module">Step 0: Basic Concepts of Operator Module</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-implement-operator">Step 1: Implement Operator</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-use-your-operator">Step 2: Use Your Operator</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adding-new-config-entries-for-the-config-generator-advanced">Adding New Config Entries for the Config Generator (Advanced)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-0-understanding-streamlit">Step 0: Understanding Streamlit</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-implement-new-config-entries">Step 1: Implement New Config Entries</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-integrating-new-parameters-into-config-manager-py">Step 2: Integrating New Parameters into <code class="docutils literal notranslate"><span class="pre">config_manager.py</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#contributing-your-code">Contributing your Code</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Trinity-RFT Team
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2025, Trinity-RFT Team.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
