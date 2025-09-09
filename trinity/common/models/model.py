@@ -71,7 +71,9 @@ class ModelWrapper:
     def __init__(self, model: Any, model_type: str = "vllm", enable_history: bool = False):
         assert model_type.startswith("vllm"), "Only vLLM model is supported for now."
         self.model = model
+        self.api_address: str = None
         self.openai_client: openai.OpenAI = None
+        self.openai_async_client: openai.AsyncOpenAI = None
         self.logger = get_logger(__name__)
         self.enable_history = enable_history
         self.history = []
@@ -165,14 +167,10 @@ class ModelWrapper:
         """Get the version of the model."""
         return ray.get(self.model.get_model_version.remote())
 
-    def get_openai_client(self) -> openai.OpenAI:
-        """Get the openai client.
-
-        Returns:
-            openai.OpenAI: The openai client. And `model_path` is added to the client which refers to the model path.
-        """
-        if self.openai_client is not None:
-            return self.openai_client
+    def _get_api_server_address(self) -> str:
+        """Get the address of the API server."""
+        if self.api_address:
+            return self.api_address
         if not ray.get(self.model.has_api_server.remote()):
             raise ValueError(
                 "OpenAI API server is not running on current model."
@@ -190,7 +188,19 @@ class ModelWrapper:
             raise RuntimeError(
                 "Failed to connect to the API server. Please check the API server is running."
             )
+        self.api_address = api_address
         self.logger.info(f"Successfully connect to API server at {api_address}")
+        return api_address
+
+    def get_openai_client(self) -> openai.OpenAI:
+        """Get the openai client.
+
+        Returns:
+            openai.OpenAI: The openai client. And `model_path` is added to the client which refers to the model path.
+        """
+        if self.openai_client is not None:
+            return self.openai_client
+        api_address = self._get_api_server_address()
         self.openai_client = openai.OpenAI(
             base_url=api_address,
             api_key="EMPTY",
@@ -207,6 +217,35 @@ class ModelWrapper:
             self.openai_client.chat.completions.create = record_chat_completions
         setattr(self.openai_client, "model_path", self.openai_client.models.list().data[0].id)
         return self.openai_client
+
+    def get_openai_async_client(self) -> openai.AsyncOpenAI:
+        """Get the async openai client.
+
+        Returns:
+            openai.AsyncOpenAI: The async openai client. And `model_path` is added to the client which refers to the model path.
+        """
+        if self.openai_async_client is not None:
+            return self.openai_async_client
+        # first make sure that we have the sync openai client
+        api_address = self._get_api_server_address()
+        self.openai_async_client = openai.AsyncOpenAI(
+            base_url=api_address,
+            api_key="EMPTY",
+        )
+        if self.enable_history:
+            # add a decorator to the openai client to record history
+            ori_create = self.openai_async_client.chat.completions.create
+
+            async def record_chat_completions(*args, **kwargs):
+                response = await ori_create(*args, **kwargs)
+                self.history.extend(convert_api_output_to_experience(response))
+                return response
+
+            self.openai_async_client.chat.completions.create = record_chat_completions
+        # get model_path from the sync openai client to avoid async call here
+        openai_client = self.get_openai_client()
+        setattr(self.openai_async_client, "model_path", openai_client.models.list().data[0].id)
+        return self.openai_async_client
 
     def extract_experience_from_history(self, clear_history: bool = True) -> List[Experience]:
         """Extract experiences from the history."""

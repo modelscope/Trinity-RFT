@@ -8,8 +8,6 @@ from math_verify import LatexExtractionConfig, parse, verify
 from trinity.common.rewards.reward_fn import REWARD_FUNCTIONS, RewardFn
 from trinity.utils.log import get_logger
 
-logger = get_logger(__name__)
-
 
 @REWARD_FUNCTIONS.register_module("accuracy_reward")
 class AccuracyReward(RewardFn):
@@ -19,6 +17,7 @@ class AccuracyReward(RewardFn):
 
     def __init__(self, answer_parser: Optional[Callable[[str], str]] = None):
         self.answer_parser = answer_parser
+        self.logger = get_logger(__name__)
 
     def __call__(  # type: ignore
         self,
@@ -63,6 +62,6 @@ class AccuracyReward(RewardFn):
         try:
             reward = float(verify(answer_parsed, truth_parsed))
         except Exception as e:
-            logger.info(f"verify failed: {e}, answer: {answer_parsed}, gold: {truth_parsed}")
+            self.logger.info(f"verify failed: {e}, answer: {answer_parsed}, gold: {truth_parsed}")
             reward = 0.0
         return {"accuracy": reward}

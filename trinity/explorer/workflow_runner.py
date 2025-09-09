@@ -9,7 +9,7 @@ from typing import List, Optional, Tuple
 from trinity.common.config import Config
 from trinity.common.experience import Experience
 from trinity.common.models.model import InferenceModel, ModelWrapper
-from trinity.common.workflows import Task
+from trinity.common.workflows import Task, Workflow
 from trinity.utils.log import get_logger
 
 
@@ -48,7 +48,7 @@ class WorkflowRunner:
                     "vllm_async",
                 ).get_openai_client()
                 self.auxiliary_models.append(api_client)
-        self.workflow_instance = None
+        self.workflow_instance: Workflow = None
         self.runner_id = runner_id
 
     def is_alive(self):
@@ -66,16 +66,23 @@ class WorkflowRunner:
         else:
             self.workflow_instance.reset(task)
 
-    def _run_task(self, task: Task, repeat_times: int, run_id_base: int) -> List[Experience]:
+    async def _run_workflow(self, workflow_isntance: Workflow) -> List[Experience]:
+        if workflow_isntance.asynchronous:
+            exps = await workflow_isntance.run_async()
+        else:
+            exps = workflow_isntance.run()
+        return exps
+
+    async def _run_task(self, task: Task, repeat_times: int, run_id_base: int) -> List[Experience]:
         """Init workflow from the task and run it."""
         self._create_workflow_instance(task)
         if self.workflow_instance.repeatable:
             self.workflow_instance.set_repeat_times(repeat_times, run_id_base)
-            exps = self.workflow_instance.run()
+            exps = await self._run_workflow(self.workflow_instance)
         else:
             exps = []
             for i in range(repeat_times):
-                new_exps = self.workflow_instance.run()
+                new_exps = await self._run_workflow(self.workflow_instance)
                 for exp in new_exps:
                     exp.eid.run = run_id_base + i
                 exps.extend(new_exps)
@@ -83,7 +90,7 @@ class WorkflowRunner:
                     self._create_workflow_instance(task)
         return exps
 
-    def run_task(
+    async def run_task(
         self,
         task: Task,
         repeat_times: int = 1,
@@ -93,7 +100,7 @@ class WorkflowRunner:
         # TODO: avoid sending the experiences back to the scheduler to reduce the communication overhead
         try:
             st = time.time()
-            exps = self._run_task(task, repeat_times, run_id_base)
+            exps = await self._run_task(task, repeat_times, run_id_base)
             assert exps is not None and len(exps) > 0, "An empty experience is generated"
             metrics: dict[str, List[float]] = defaultdict(list)
             # set eid for each experience
