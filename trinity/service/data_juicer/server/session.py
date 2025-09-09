@@ -86,10 +86,22 @@ class DataJuicerSession:
         ds.to_json(os.path.join(self.config.output_dir, "output.jsonl"))  # type: ignore [arg-type]
         return {"sample_num": ds.num_rows}
 
-    def order_task(self, dataset):
+    def order_task(self, dataset: Dataset) -> Dataset:
         """
         Order the dataset with specified method.
         """
+        # check if priority field exists
+        if "priority" not in dataset.features and self.order_method in {"sort", "folding"}:
+            logger.warning(
+                f'"priority" field not found for {self.order_method}. Use "keep" instead.'
+            )
+            self.order_method = "keep"
+
+        # get top-k
+        top_k = self.config.top_k
+        if top_k == -1:
+            top_k = dataset.num_rows
+
         if self.order_method == "keep":
             # keep the original order
             return dataset
@@ -98,27 +110,16 @@ class DataJuicerSession:
             return dataset.shuffle()
         elif self.order_method == "sort":
             # sort the dataset acording to priority
-            if "priority" in dataset.features:
-                top_k = self.config.top_k
-                if top_k == -1:
-                    top_k = dataset.num_rows
-                return dataset.sort("priority", reverse=True).take(top_k)
-            else:
-                logger.warning('"priority" field not found. Use "keep" instead.')
-                return dataset
+            return dataset.sort("priority", reverse=True).take(top_k)
         elif self.order_method == "folding":
             # folding the dataset to repeat the curriculum learning
             # Reference: https://arxiv.org/abs/2506.21545
-            if "priority" in dataset.features:
-                sorted_dataset = dataset.sort("priority", reverse=True)
-                folding_layers = self.order_args.get("folding_layers", 3)
-                folding_indices = []
-                for j in range(folding_layers):
-                    partition = list(range(j, dataset.num_rows, folding_layers))
-                    folding_indices.extend(partition)
-                return sorted_dataset.select(folding_indices)
-            else:
-                logger.warning('"priority" field not found. Use "keep" instead.')
-                return dataset
+            sorted_dataset = dataset.sort("priority", reverse=True).take(top_k)
+            folding_layers = self.order_args.get("folding_layers", 3)
+            folding_indices = []
+            for j in range(folding_layers):
+                partition = list(range(j, dataset.num_rows, folding_layers))
+                folding_indices.extend(partition)
+            return sorted_dataset.select(folding_indices)
         else:
             raise ValueError(f"Invalid order method: {self.order_method}")
