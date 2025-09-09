@@ -188,6 +188,10 @@ If you just want to use the package without modifying the code:
 ```bash
 pip install trinity-rft==0.3.0
 pip install flash-attn==2.8.1  # Install Flash Attention separately
+
+# Use uv to install trinity-rft
+# uv pip install trinity-rft==0.3.0
+# uv pip install flash-attn==2.8.1
 ```
 
 #### Option C: Use Docker
