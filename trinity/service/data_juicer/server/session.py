@@ -11,6 +11,9 @@ from trinity.service.data_juicer.server.utils import (
     group_scores,
     parse_config,
 )
+from trinity.utils.log import get_logger
+
+logger = get_logger(__name__)
 
 
 def extract_metrics(dataset: Dataset) -> Dict:
@@ -38,6 +41,10 @@ class DataJuicerSession:
             "diversity": 0.8,
             "usage_frequency": -0.5,
             "quality": 1.0,
+        }
+        self.order_method = self.config.order_method
+        self.order_args = self.config.order_args or {
+            "folding_layers": 3,
         }
 
     def process_experience(self, ds: Dataset) -> Tuple[Dataset, Dict]:
@@ -74,11 +81,44 @@ class DataJuicerSession:
         )
         ds = ds.map(compute_priority_scores_func)
         # sort the output dataset in priority
-        if "priority" in ds.features:
-            top_k = self.config.top_k
-            if top_k == -1:
-                top_k = ds.num_rows
-            ds = ds.sort("priority", reverse=True).take(top_k)
+        ds = self.order_task(ds)
         # export to the target directory
         ds.to_json(os.path.join(self.config.output_dir, "output.jsonl"))  # type: ignore [arg-type]
         return {"sample_num": ds.num_rows}
+
+    def order_task(self, dataset):
+        """
+        Order the dataset with specified method.
+        """
+        if self.order_method == "keep":
+            # keep the original order
+            return dataset
+        elif self.order_method == "shuffle":
+            # shuffle the dataset
+            return dataset.shuffle()
+        elif self.order_method == "sort":
+            # sort the dataset acording to priority
+            if "priority" in dataset.features:
+                top_k = self.config.top_k
+                if top_k == -1:
+                    top_k = dataset.num_rows
+                return dataset.sort("priority", reverse=True).take(top_k)
+            else:
+                logger.warning('"priority" field not found. Use "keep" instead.')
+                return dataset
+        elif self.order_method == "folding":
+            # folding the dataset to repeat the curriculum learning
+            # Reference: https://arxiv.org/abs/2506.21545
+            if "priority" in dataset.features:
+                sorted_dataset = dataset.sort("priority", reverse=True)
+                folding_layers = self.order_args.get("folding_layers", 3)
+                folding_indices = []
+                for j in range(folding_layers):
+                    partition = list(range(j, dataset.num_rows, folding_layers))
+                    folding_indices.extend(partition)
+                return sorted_dataset.select(folding_indices)
+            else:
+                logger.warning('"priority" field not found. Use "keep" instead.')
+                return dataset
+        else:
+            raise ValueError(f"Invalid order method: {self.order_method}")
