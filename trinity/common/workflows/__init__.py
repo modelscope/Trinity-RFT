@@ -2,6 +2,7 @@
 """Workflow module"""
 from .customized_math_workflows import MathBoxedWorkflow
 from .customized_toolcall_workflows import ToolCallWorkflow
+from .env.agentscope.agentscopev1_search_workflow import AgentScopeV1ReactSearchWorkflow
 from .envs.agentscope.agentscope_react_workflow import AgentScopeReactV2MathWorkflow
 from .envs.alfworld.alfworld_workflow import AlfworldWorkflow, StepWiseAlfworldWorkflow
 from .envs.alfworld.RAFT_alfworld_workflow import RAFTAlfworldWorkflow
@@ -32,6 +33,7 @@ __all__ = [
     "ToolCallWorkflow",
     "MathEvalWorkflow",
     "AgentScopeReactV2MathWorkflow",
+    "AgentScopeV1ReactSearchWorkflow",
     "EmailSearchWorkflow",
     "MathRULERWorkflow",
     "SimpleMMWorkflow",
