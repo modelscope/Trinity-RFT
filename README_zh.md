@@ -121,7 +121,7 @@ RFT 流程被模块化为三个核心组件：
 
 #### 方式 A：从源码安装（推荐）
 
-这种方式可以让你完全控制项目，适合打算自定义功能或参与项目开发的用户。
+这种方式可以让您完全控制项目代码，适合打算自定义功能或参与项目开发的用户。
 
 ##### 1. 克隆代码仓库
 
@@ -148,7 +148,7 @@ source .venv/bin/activate
 
 ##### 3. 安装软件包
 
-以“可编辑模式”安装，这样你可以修改代码而无需重新安装：
+以“可编辑模式”安装，这样您可以修改代码而无需重新安装：
 
 ```bash
 pip install -e ".[dev]"
@@ -171,7 +171,7 @@ pip install flash-attn==2.8.1 --no-build-isolation
 
 ##### ⚡ 快速替代方案：使用 `uv`（可选）
 
-如果你希望安装得更快，可以试试 [`uv`](https://github.com/astral-sh/uv)，这是一个现代化的 Python 包安装工具：
+如果您希望安装得更快，可以试试 [`uv`](https://github.com/astral-sh/uv)，这是一个现代化的 Python 包安装工具：
 
 ```bash
 uv venv
@@ -183,7 +183,7 @@ uv pip install flash-attn==2.8.1 --no-build-isolation
 
 #### 方式 B：通过 pip 安装（快速开始）
 
-如果你只是想使用这个工具，不需要修改代码，可以选择这种方式：
+如果您只是想使用这个工具，不需要修改代码，可以选择这种方式：
 
 ```bash
 pip install trinity-rft==0.3.0
@@ -202,11 +202,12 @@ pip install flash-attn==2.8.1  # 单独安装 Flash Attention
 git clone https://github.com/modelscope/Trinity-RFT
 cd Trinity-RFT
 
-## 构建 Docker 镜像
-## 提示：你可以修改 Dockerfile，添加镜像源或设置 API 密钥
+# 构建 Docker 镜像
+# 注意：您可以编辑 Dockerfile 来定制环境
+# 例如，设置 pip 镜像源或设置 API 密钥
 docker build -f scripts/docker/Dockerfile -t trinity-rft:latest .
 
-## 启动容器
+# 启动容器
 docker run -it \
   --gpus all \
   --shm-size="64g" \
@@ -216,9 +217,9 @@ docker run -it \
   trinity-rft:latest
 ```
 
-💡 **注意**：请将 `<path_to_your_data_and_checkpoints>` 替换为你电脑上实际存放数据集和模型文件的路径。
+💡 **注意**：请将 `<path_to_your_data_and_checkpoints>` 替换为您电脑上实际存放数据集和模型文件的路径。
 
-> 如果你想集成 **Megatron-LM**，请参考我们的 [Megatron 示例配置指南](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_megatron.html)。
+> 如果您想集成 **Megatron-LM**，请参考我们的 [Megatron 示例配置指南](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_megatron.html)。
 
 
 ### 第二步：准备数据集和模型
