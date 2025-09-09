@@ -218,7 +218,7 @@ docker run -it \
 
 💡 **Note**: Replace `<path_to_your_data_and_checkpoints>` with the actual path on your machine where datasets and model checkpoints are stored.
 
-> If you'd like to integrate with **Megatron-LM**, check out our [example setup guide](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_megatron.html).
+> If you'd like to integrate with **Megatron-LM**, check out our [example setup guide for Megatron](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_megatron.html).
 
 ### Step 2: prepare dataset and model
 
