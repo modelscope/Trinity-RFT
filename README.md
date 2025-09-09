@@ -146,22 +146,12 @@ python3.10 -m venv .venv
 source .venv/bin/activate
 ```
 
-###### Using uv (fast alternative)
-```bash
-uv sync
-source .venv/bin/activate
-```
-
 ##### 3. Install the Package
 
 Install in editable mode so you can make changes without reinstalling:
 
 ```bash
-## For bash users
-pip install -e .[dev]
-
-## For zsh users (brackets need escaping)
-pip install -e .\[dev\]
+pip install -e ".[dev]"
 ```
 
 ##### 4. Install Flash Attention
@@ -176,6 +166,19 @@ If you encounter issues during installation, try this alternative:
 
 ```bash
 pip install flash-attn==2.8.1 --no-build-isolation
+```
+
+
+##### ⚡ Fast Alternative: Use `uv` (Optional)
+
+If you'd like a faster installation, try [`uv`](https://github.com/astral-sh/uv), a modern Python package installer:
+
+```bash
+uv venv
+source .venv/bin/activate
+
+uv pip install -e ".[dev]"
+uv pip install flash-attn==2.8.1 --no-build-isolation
 ```
 
 #### Option B: Install via pip (Quick Start)
@@ -211,7 +214,7 @@ docker run -it \
 
 💡 **Note**: Replace `<path_to_your_data_and_checkpoints>` with the actual path on your machine where datasets and model checkpoints are stored.
 
-> If you'd like to integrate with **Megatron-LM**, check out our [example setup guide](./docs/sphinx_doc/source/tutorial/example_megatron.md).
+> If you'd like to integrate with **Megatron-LM**, check out our [example setup guide](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_megatron.html).
 
 ### Step 2: prepare dataset and model
 
