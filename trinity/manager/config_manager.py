@@ -323,7 +323,7 @@ class ConfigManager:
 
         self.get_configs("actor_grad_clip")
 
-        self.get_configs("actor_checkpoint")
+        self.get_configs("actor_load_checkpoint", "actor_save_checkpoint")
 
     def _expert_verl_critic_part(self):
         st.subheader("Critic Model Config")
@@ -334,7 +334,7 @@ class ConfigManager:
         self.get_configs("critic_lr", "critic_warmup_style", "critic_lr_warmup_steps_ratio")
 
         self.get_configs("critic_grad_clip", "critic_cliprange_value")
-        self.get_configs("critic_checkpoint")
+        self.get_configs("critic_load_checkpoint", "critic_save_checkpoint")
 
     def _expert_verl_trainer_part(self):
         name2func = {
@@ -453,8 +453,8 @@ class ConfigManager:
                     ],
                     "entropy_checkpointing": st.session_state["actor_entropy_checkpointing"],
                     "checkpoint": {
-                        "load_contents": st.session_state["actor_checkpoint"],
-                        "save_contents": st.session_state["actor_checkpoint"],
+                        "load_contents": st.session_state["actor_load_checkpoint"],
+                        "save_contents": st.session_state["actor_save_checkpoint"],
                     },
                     "optim": {
                         "lr": st.session_state["actor_lr"],
@@ -531,8 +531,8 @@ class ConfigManager:
                 "grad_clip": st.session_state["critic_grad_clip"],
                 "cliprange_value": st.session_state["critic_cliprange_value"],
                 "checkpoint": {
-                    "load_contents": st.session_state["critic_checkpoint"],
-                    "save_contents": st.session_state["critic_checkpoint"],
+                    "load_contents": st.session_state["critic_load_checkpoint"],
+                    "save_contents": st.session_state["critic_save_checkpoint"],
                 },
             }
             if st.session_state["training_strategy"] in {"fsdp", "fsdp2"}:

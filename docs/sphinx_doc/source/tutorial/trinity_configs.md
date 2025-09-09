@@ -210,7 +210,6 @@ Defines the dataset(s) used by the explorer for training and evaluation.
 
 ```yaml
 buffer:
-  ...
   explorer_input:
     taskset:
       name: countdown_train
@@ -239,6 +238,7 @@ buffer:
         temperature: 0.1
       default_workflow_type: 'math_workflow'
       default_reward_fn_type: 'countdown_reward'
+    ...
 ```
 
 - `buffer.explorer_input.taskset`: Task dataset used for training exploration policies.

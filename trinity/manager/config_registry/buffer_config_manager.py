@@ -490,9 +490,6 @@ def set_sft_warmup_dataset_args(**kwargs):
     )
 
 
-# TODO: read_experience_strategy
-
-
 @CONFIG_GENERATORS.register_config(default_value=0)
 def set_sft_warmup_steps(**kwargs):
     st.number_input("SFT Warmup Steps", min_value=0, **kwargs)
