@@ -158,70 +158,108 @@ It is designed to support diverse application scenarios and serve as a unified p
 
 ### Step 1: installation
 
+#### Prerequisites
 
-Requirements:
-- Python version >= 3.10, <= 3.12
-- CUDA version >= 12.4, <= 12.8
-- At least 2 GPUs
+Before installing, make sure your system meets the following requirements:
+
+- **Python**: version 3.10 to 3.12 (inclusive)
+- **CUDA**: version 12.4 to 12.8 (inclusive)
+- **GPUs**: at least 2 GPUs
 
 
-Installation from source **(recommended)**:
+#### Option A: Install from Source (Recommended)
 
-```shell
-# Pull the source code from GitHub
+This method gives you full control and is best if you plan to customize or contribute to the project.
+
+##### 1. Clone the Repository
+
+```bash
 git clone https://github.com/modelscope/Trinity-RFT
 cd Trinity-RFT
+```
 
-# Create a new environment using Conda or venv
-# Option 1: Conda
+##### 2. Set Up a Virtual Environment
+
+Choose one of the following options to create an isolated environment:
+
+###### Using Conda
+```bash
 conda create -n trinity python=3.10
 conda activate trinity
+```
 
-# Option 2: venv
+###### Using venv
+```bash
 python3.10 -m venv .venv
 source .venv/bin/activate
+```
 
-# Install the package in editable mode
-# for bash
+###### Using uv (fast alternative)
+```bash
+uv sync
+source .venv/bin/activate
+```
+
+##### 3. Install the Package
+
+Install in editable mode so you can make changes without reinstalling:
+
+```bash
+## For bash users
 pip install -e .[dev]
-# for zsh
+
+## For zsh users (brackets need escaping)
 pip install -e .\[dev\]
-
-# Install flash-attn after all dependencies are installed
-# Note: flash-attn will take a long time to compile, please be patient.
-# for bash
-pip install -e .[flash_attn]
-# for zsh
-pip install -e .\[flash_attn\]
-# Try the following command if you encounter errors during flash-attn installation
-# pip install flash-attn==2.8.0.post2 -v --no-build-isolation
 ```
 
-Installation using pip:
+##### 4. Install Flash Attention
 
-```shell
+Flash Attention boosts training speed. It takes a few minutes to compile — please be patient!
+
+```bash
+pip install flash-attn==2.8.1
+```
+
+If you encounter issues during installation, try this alternative:
+
+```bash
+pip install flash-attn==2.8.1 --no-build-isolation
+```
+
+#### Option B: Install via pip (Quick Start)
+
+If you just want to use the package without modifying the code:
+
+```bash
 pip install trinity-rft==0.2.1
-# install flash-attn separately
-pip install flash-attn==2.8.0.post2
+pip install flash-attn==2.8.1  # Install Flash Attention separately
 ```
 
-Installation from docker:
-we have provided a dockerfile for Trinity-RFT (trinity)
+#### Option C: Use Docker
 
-```shell
+We provide a Docker setup for hassle-free environment configuration.
+
+```bash
 git clone https://github.com/modelscope/Trinity-RFT
 cd Trinity-RFT
 
-# build the docker image
-# Note: you can edit the dockerfile to customize the environment
-# e.g., use pip mirrors or set api key
+## Build the Docker image
+## Tip: You can modify the Dockerfile to add mirrors or set API keys
 docker build -f scripts/docker/Dockerfile -t trinity-rft:latest .
 
-# run the docker image
-docker run -it --gpus all --shm-size="64g" --rm -v $PWD:/workspace -v <root_path_of_data_and_checkpoints>:/data trinity-rft:latest
+## Run the container
+docker run -it \
+  --gpus all \
+  --shm-size="64g" \
+  --rm \
+  -v $PWD:/workspace \
+  -v <path_to_your_data_and_checkpoints>:/data \
+  trinity-rft:latest
 ```
 
-If you want to use Megatron-LM, you can refer to this [example](./docs/sphinx_doc/source/tutorial/example_megatron.md) to setup the environment.
+💡 **Note**: Replace `<path_to_your_data_and_checkpoints>` with the actual path on your machine where datasets and model checkpoints are stored.
+
+> If you'd like to integrate with **Megatron-LM**, check out our [example setup guide](./docs/sphinx_doc/source/tutorial/example_megatron.md).
 
 ### Step 2: prepare dataset and model
 
