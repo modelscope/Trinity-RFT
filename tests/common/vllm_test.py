@@ -1,36 +1,22 @@
-import os
 import unittest
 
 import torch
 from parameterized import parameterized_class
 from transformers import AutoTokenizer
 
-from tests.tools import RayUnittestBase, RayUnittestBaseAysnc, get_template_config
+from tests.tools import (
+    RayUnittestBase,
+    RayUnittestBaseAysnc,
+    get_api_model_path,
+    get_model_path,
+    get_template_config,
+)
 from trinity.common.models import create_inference_models
 from trinity.common.models.model import ModelWrapper
 from trinity.common.models.utils import (
     tokenize_and_mask_messages_default,
     tokenize_and_mask_messages_hf,
 )
-
-
-def get_model_path() -> str:
-    path = os.environ.get("MODEL_PATH")
-    if not path:
-        raise EnvironmentError(
-            "Please set `export MODEL_PATH=<your_model_checkpoint_dir>` before running this test."
-        )
-    return path
-
-
-def get_api_model_path() -> str:
-    path = os.environ.get("API_MODEL_PATH")
-    if not path:
-        raise EnvironmentError(
-            "Please set `export API_MODEL_PATH=<your_api_model_checkpoint_dir>` before running this test."
-        )
-    return path
-
 
 DEBUG = False
 

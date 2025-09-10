@@ -1,6 +1,6 @@
 project: "mix_math"
 name: "expert0.20_mu0.1"
-checkpoint_root_dir: /PATH/TO/CHECKPOINT/
+checkpoint_root_dir: ${oc.env:TRINITY_CHECKPOINT_ROOT_DIR,./checkpoints}
 algorithm:
   algorithm_type: mix
   repeat_times: 8
@@ -17,7 +17,7 @@ algorithm:
     train_batch_size_expert: 64
     train_batch_size_usual: 256
 model:
-  model_path: /PATH/TO/MODEL/
+  model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-1.5B-Instruct}
   max_response_tokens: 10240
   max_model_len: 11264
 cluster:
@@ -31,7 +31,7 @@ buffer:
     taskset:
       name: math_train
       storage_type: file
-      path: /PATH/TO/DATASET/
+      path: ${oc.env:TRINITY_TASKSET_PATH}
       split: 'train'
       format:
         prompt_key: 'problem'
@@ -42,7 +42,7 @@ buffer:
     eval_tasksets:
     - name: math_eval
       storage_type: file
-      path: /PATH/TO/DATASET/
+      path: ${oc.env:TRINITY_TASKSET_PATH}
       split: 'test'
       format:
         prompt_key: 'problem'
@@ -52,12 +52,12 @@ buffer:
     experience_buffer:
       name: math_buffer
       storage_type: queue
-      path: /PATH/TO/BUFFER/
+      path: ${oc.env:TRINITY_BUFFER_PATH}
     sft_warmup_dataset:
       total_epochs: 10
       name: math_sft
       storage_type: file
-      path: /PATH/TO/EXPERT_DATA/
+      path: ${oc.env:TRINITY_SFT_DATASET_PATH,open-r1/Mixture-of-Thoughts}
       split: 'train'
       format:
         prompt_type: messages

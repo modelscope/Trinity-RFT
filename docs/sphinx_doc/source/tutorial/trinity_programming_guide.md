@@ -83,7 +83,7 @@ buffer:
   explorer_input:
     taskset:
       default_workflow: "math_workflow"
-      path: "/PATH/TO/FILE/DIR"
+      path: ${oc.env:TRINITY_TASKSET_PATH}
       format:
         prompt_key: "question"
         response_key: "answer"

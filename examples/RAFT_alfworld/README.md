@@ -22,7 +22,7 @@ python examples/grpo_alfworld/get_alfworld_data.py
 
 ### Configuration
 Before running, make sure to update the following paths in the YAML files:
-- `model.model_path`: Replace with your model path (e.g., `/PATH/TO/MODEL/`)
+- `model.model_path`: Replace with your model path (e.g., `Qwen/Qwen2.5-7B-Instruct`)
 - `buffer.explorer_input.taskset.path`: Replace with your alfworld dataset path
 - `buffer.explorer_input.eval_tasksets[0].path`: Replace with your alfworld dataset path
 - `checkpoint_root_dir`: Replace with your desired checkpoint directory
