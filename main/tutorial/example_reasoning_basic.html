@@ -645,12 +645,12 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>openai/gs
 <p>We use the configurations in <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k/gsm8k.yaml"><code class="docutils literal notranslate"><span class="pre">gsm8k.yaml</span></code></a> for this experiment. Some important setups of <code class="docutils literal notranslate"><span class="pre">gsm8k.yaml</span></code> are listed in the following:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;project_name&gt;</span>
 <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;experiment_name&gt;</span>
-<span class="nt">checkpoint_root_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/CHECKPOINT/</span>
+<span class="nt">checkpoint_root_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${oc.env:TRINITY_CHECKPOINT_ROOT_DIR,./checkpoints}</span>
 <span class="nt">algorithm</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">algorithm_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">grpo</span>
 <span class="w">  </span><span class="nt">repeat_times</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
 <span class="nt">model</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">model_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/MODEL/</span>
+<span class="w">  </span><span class="nt">model_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-1.5B-Instruct}</span>
 <span class="nt">cluster</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">node_num</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="w">  </span><span class="nt">gpu_per_node</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
@@ -661,7 +661,7 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>openai/gs
 <span class="w">    </span><span class="nt">taskset</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gsm8k</span>
 <span class="w">      </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">file</span>
-<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;$DATASET_PATH/gsm8k&gt;</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;openai/gsm8k&#39;</span>
 <span class="w">      </span><span class="nt">subset_name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;main&#39;</span>
 <span class="w">      </span><span class="nt">split</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;train&#39;</span>
 <span class="w">      </span><span class="nt">format</span><span class="p">:</span>
@@ -672,7 +672,7 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>openai/gs
 <span class="w">    </span><span class="nt">eval_tasksets</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gsm8k-eval</span>
 <span class="w">      </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">file</span>
-<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;$DATASET_PATH/gsm8k&gt;</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;openai/gsm8k&#39;</span>
 <span class="w">      </span><span class="nt">subset_name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;main&#39;</span>
 <span class="w">      </span><span class="nt">split</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;test&#39;</span>
 <span class="w">      </span><span class="nt">format</span><span class="p">:</span>

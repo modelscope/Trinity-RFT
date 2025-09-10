@@ -609,7 +609,7 @@ and store the base url and api key in the environment variables <code class="doc
 <span class="w">          </span><span class="nt">input_keys</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;question&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;answer&quot;</span><span class="p p-Indicator">]</span>
 <span class="w">          </span><span class="nt">field_names</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;Question&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;Answer&quot;</span><span class="p p-Indicator">]</span>
 <span class="w">    </span><span class="nt">inputs</span><span class="p">:</span><span class="w">  </span><span class="c1"># the output will be set to the explorer input automatically</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/GSM8K/DATA/FILE</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${oc.env:TRINITY_TASKSET_PATH}</span>
 <span class="w">    </span><span class="nt">target_fields</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;question&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;answer&quot;</span><span class="p p-Indicator">]</span>
 <span class="nt">service</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">data_juicer</span><span class="p">:</span>

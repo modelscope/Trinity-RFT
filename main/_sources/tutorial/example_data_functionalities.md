@@ -53,7 +53,7 @@ data_processor:
           input_keys: ["question", "answer"]
           field_names: ["Question", "Answer"]
     inputs:  # the output will be set to the explorer input automatically
-      - /PATH/TO/GSM8K/DATA/FILE
+      - ${oc.env:TRINITY_TASKSET_PATH}
     target_fields: ["question", "answer"]
 service:
   data_juicer:

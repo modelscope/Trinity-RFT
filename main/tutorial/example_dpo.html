@@ -611,9 +611,9 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>HumanLLMs
 <span class="w">  </span><span class="nt">kl_loss_fn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k1</span>
 <span class="w">  </span><span class="nt">kl_loss_fn_args</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">kl_coef</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w">  </span><span class="c1"># value of beta in DPO</span>
-<span class="nt">checkpoint_root_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/CHECKPOINT/</span>
+<span class="nt">checkpoint_root_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${oc.env:TRINITY_CHECKPOINT_ROOT_DIR,./checkpoints}</span>
 <span class="nt">model</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">model_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">$MODEL_PATH/Qwen2.5-1.5B-Instruct</span>
+<span class="w">  </span><span class="nt">model_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-1.5B-Instruct}</span>
 <span class="nt">cluster</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">node_num</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="w">  </span><span class="nt">gpu_per_node</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
@@ -659,9 +659,9 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>HumanLLMs
 <span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">train</span>
 <span class="nt">algorithm</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">algorithm_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sft</span>
-<span class="nt">checkpoint_root_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/CHECKPOINT/</span>
+<span class="nt">checkpoint_root_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${oc.env:TRINITY_CHECKPOINT_ROOT_DIR,./checkpoints}</span>
 <span class="nt">model</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">model_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/MODEL/</span>
+<span class="w">  </span><span class="nt">model_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-1.5B-Instruct}</span>
 <span class="nt">cluster</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">node_num</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="w">  </span><span class="nt">gpu_per_node</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>

@@ -681,7 +681,7 @@ To handle differences in <code class="docutils literal notranslate"><span class=
 <span class="w">  </span><span class="nt">explorer_input</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">taskset</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">default_workflow</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;math_workflow&quot;</span>
-<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/PATH/TO/FILE/DIR&quot;</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${oc.env:TRINITY_TASKSET_PATH}</span>
 <span class="w">      </span><span class="nt">format</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">prompt_key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;question&quot;</span>
 <span class="w">        </span><span class="nt">response_key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;answer&quot;</span>
