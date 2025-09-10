@@ -13,8 +13,6 @@ from trinity.service.data_juicer.server.utils import (
 )
 from trinity.utils.log import get_logger
 
-logger = get_logger(__name__)
-
 
 def extract_metrics(dataset: Dataset) -> Dict:
     """Extract metrics from the processed dataset."""
@@ -46,6 +44,8 @@ class DataJuicerSession:
         self.order_args = self.config.order_args or {
             "folding_layers": 3,
         }
+
+        self.logger = get_logger(__name__)
 
     def process_experience(self, ds: Dataset) -> Tuple[Dataset, Dict]:
         """Process a batch of experiences.
@@ -92,7 +92,7 @@ class DataJuicerSession:
         """
         # check if priority field exists
         if "priority" not in dataset.features and self.order_method in {"sort", "folding"}:
-            logger.warning(
+            self.logger.warning(
                 f'"priority" field not found for {self.order_method}. Use "keep" instead.'
             )
             self.order_method = "keep"
