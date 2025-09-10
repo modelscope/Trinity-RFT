@@ -39,8 +39,6 @@ def contains_chinese(text):
             return True
         if "\u3400" <= char <= "\u4dbf":
             return True
-        if "\u20000" <= char <= "\u2a6df":
-            return True
     return False
 
 
