@@ -52,7 +52,7 @@ buffer:
     experience_buffer:
       name: math_buffer
       storage_type: queue
-      path: ${oc.env:TRINITY_BUFFER_PATH}
+      path: ${oc.env:TRINITY_BUFFER_PATH,./exp_buffer}
     sft_warmup_dataset:
       total_epochs: 10
       name: math_sft

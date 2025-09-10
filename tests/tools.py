@@ -8,12 +8,15 @@ from tensorboard.backend.event_processing.event_accumulator import EventAccumula
 
 from trinity.common.config import Config, FormatConfig, StorageConfig, load_config
 from trinity.common.constants import (
-    API_MODEL_PATH_ENV_VAR,
     CHECKPOINT_ROOT_DIR_ENV_VAR,
     MODEL_PATH_ENV_VAR,
-    VLM_MODEL_PATH_ENV_VAR,
     PromptType,
 )
+
+
+API_MODEL_PATH_ENV_VAR = "TRINITY_API_MODEL_PATH"
+VLM_MODEL_PATH_ENV_VAR = "TRINITY_VLM_MODEL_PATH"
+SFT_DATASET_PATH_ENV_VAR = "TRINITY_SFT_DATASET_PATH"
 
 
 def get_template_config() -> Config:
