@@ -1,11 +1,11 @@
 project: "Trinity-RFT"
 name: "grpo_vlm"
-checkpoint_root_dir: /PATH/TO/CHECKPOINT/
+checkpoint_root_dir: ${oc.env:TRINITY_CHECKPOINT_ROOT_DIR,./checkpoints}
 algorithm:
   algorithm_type: grpo
   repeat_times: 8
 model:
-  model_path: /PATH/TO/Qwen2.5-VL-3B-Instruct
+  model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-VL-3B-Instruct}
   max_response_tokens: 1024
   max_model_len: 20480
 cluster:

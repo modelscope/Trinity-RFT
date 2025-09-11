@@ -106,12 +106,12 @@ We use the configurations in [`gsm8k.yaml`](https://github.com/modelscope/Trinit
 ```yaml
 project: <project_name>
 name: <experiment_name>
-checkpoint_root_dir: /PATH/TO/CHECKPOINT/
+checkpoint_root_dir: ${oc.env:TRINITY_CHECKPOINT_ROOT_DIR,./checkpoints}
 algorithm:
   algorithm_type: grpo
   repeat_times: 8
 model:
-  model_path: /PATH/TO/MODEL/
+  model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-1.5B-Instruct}
 cluster:
   node_num: 1
   gpu_per_node: 2
@@ -122,7 +122,7 @@ buffer:
     taskset:
       name: gsm8k
       storage_type: file
-      path: <$DATASET_PATH/gsm8k>
+      path: 'openai/gsm8k'
       subset_name: 'main'
       split: 'train'
       format:
@@ -133,7 +133,7 @@ buffer:
     eval_tasksets:
     - name: gsm8k-eval
       storage_type: file
-      path: <$DATASET_PATH/gsm8k>
+      path: 'openai/gsm8k'
       subset_name: 'main'
       split: 'test'
       format:

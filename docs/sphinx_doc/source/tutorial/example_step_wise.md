@@ -91,13 +91,13 @@ The example configuration is shown as:
 ```yaml
 project: "ALFWORLD"
 name: "Step_Wise_Alfworld"
-checkpoint_root_dir: /PATH/TO/CHECKPOINT/ALFWORLD_RFT/
+checkpoint_root_dir: ${oc.env:TRINITY_CHECKPOINT_ROOT_DIR,./checkpoints}
 algorithm:
   algorithm_type: grpo
   repeat_times: 16
   advantage_fn: step_wise_grpo
 model:
-  model_path: /PATH/TO/MODEL/
+  model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-7B-Instruct}
   max_response_tokens: 16384
   max_model_len: 20480
 cluster:
@@ -141,7 +141,7 @@ explorer:
     gpu_memory_utilization: 0.7
     enable_chunked_prefill: true
   env_vars:
-    TMPDIR: /PATH/TO/ALFWORLD_TMP_DIR
+    TMPDIR: ${oc.env:TMPDIR,/tmp}
 synchronizer:
   sync_style: dynamic_by_explorer
   sync_method: 'nccl'
