@@ -3,7 +3,7 @@
 
 Ref: ART's RULER; Kimi-k2.
 
-This example shows an implementation of training a policy model as its own reward model with GRPO, insprired by ART's [RULER](https://art.openpipe.ai/fundamentals/ruler) and KIMI's [K2](https://moonshotai.github.io/Kimi-K2/).
+This example shows an implementation of training a policy model as its own reward model with GRPO, inspired by ART's [RULER](https://art.openpipe.ai/fundamentals/ruler) and KIMI's [K2](https://moonshotai.github.io/Kimi-K2/).
 
 We simulate a scenario where only a fraction (`PROBABILITY_GROUND_TRUTH_AVAILABLE = 0.2`) of tasks have ground-truth answers. We optimize two objectives jointly: one for response generation, the other for RULER-reward generation.
 
@@ -52,4 +52,4 @@ You may compare the above results with [the RULER example](../../examples/grpo_g
 
 ## Potential improvements
 
-As this is a toy example, we may consider some further improvements, including: (a) balance the number of samples for two objectives; and (b) use more sophisticated loss weights for two objectives.
+As this is a toy example, we may consider some further improvements, such as automatically balancing the number of samples for two objectives, or their loss weights. We also plan to test out this approach in broader scenarios, e.g., cross-domain transfer of the model's critic capability.

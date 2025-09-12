@@ -107,7 +107,7 @@ class WorkflowRunner:
             for i, exp in enumerate(exps):
                 exp.eid.batch = task.batch_id
                 # keep exp.eid.task if it has been set before (e.g., in workflow)
-                if exp.eid.task == 0:  # 0 is the default value
+                if exp.eid.task == "":  # "" is the default value
                     exp.eid.task = task.task_id
                 if not hasattr(exp, "info") or exp.info is None:
                     exp.info = {}
