@@ -9,7 +9,7 @@ import time
 import unittest
 from copy import deepcopy
 from datetime import datetime
-from typing import List
+from typing import Dict, List, Tuple
 
 import ray
 from parameterized import parameterized_class
@@ -34,7 +34,7 @@ CHECKPOINT_ROOT_DIR = os.path.join(os.path.dirname(__file__), "temp_checkpoint_d
 
 
 def trainer_monkey_patch(config: Config, max_steps: int, intervals: List[int]):
-    async def new_train_step(self):
+    async def new_train_step(self) -> Tuple[bool, Dict]:
         self.engine.algorithm = ALGORITHM_TYPE.get(config.algorithm.algorithm_type)
         self.engine.global_steps += 1
         self.logger.info(f"Training at step {self.engine.global_steps} started.")
@@ -43,7 +43,7 @@ def trainer_monkey_patch(config: Config, max_steps: int, intervals: List[int]):
         metrics = {"actor/step": self.engine.global_steps}
         self.monitor.log(data=metrics, step=self.engine.global_steps)
         self.logger.info(f"Training at step {self.engine.global_steps} finished.")
-        return self.engine.global_steps < max_steps
+        return self.engine.global_steps < max_steps, metrics
 
     Trainer.train_step = new_train_step
 

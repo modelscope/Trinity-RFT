@@ -360,28 +360,18 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         )
 
         train_status = self.global_steps < self.total_training_steps
-        if not train_status or (
-            self.config.trainer.save_freq > 0
-            and self.global_steps % self.config.trainer.save_freq == 0
-        ):
-            self.logger.info(f"Saving at step {self.global_steps}.")
-            with marked_timer("save_checkpoint", timing_raw):
-                self.save_checkpoint()
-            self.logger.info(f"Saved at step {self.global_steps}.")
         return train_status, metrics
 
     def save_checkpoint(self, block_until_saved: bool = False, save_as_hf: bool = False) -> None:
         if self.last_full_save_step != self.global_steps:
             self.last_full_save_step = self.global_steps
-            self._save_checkpoint()
+            self._save_checkpoint(save_as_hf=save_as_hf)
         if block_until_saved:
             self.actor_rollout_wg.wait_on_save_thread()
             if self.algorithm and self.algorithm.use_critic:
                 self.critic_wg.wait_on_save_thread()
 
     def _save_checkpoint(self, save_as_hf: bool = False):
-        from verl.utils.fs import local_mkdir_safe
-
         # path: given_path + `/global_step_{global_steps}` + `/actor`
         local_global_step_folder = os.path.join(
             self.config.trainer.default_local_dir, f"global_step_{self.global_steps}"
@@ -422,6 +412,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             actor_remote_path,
             self.global_steps,
             max_ckpt_to_keep=max_actor_ckpt_to_keep,
+            save_as_hf=save_as_hf,
         )
 
         if self.use_critic:
@@ -441,12 +432,6 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                 self.global_steps,
                 max_ckpt_to_keep=max_critic_ckpt_to_keep,
             )
-
-        # save dataloader
-        local_mkdir_safe(local_global_step_folder)
-        dataloader_local_path = os.path.join(local_global_step_folder, "data.pt")
-        dataloader_state_dict = self.train_dataloader.state_dict()
-        torch.save(dataloader_state_dict, dataloader_local_path)
 
         # latest checkpointed iteration tracker (for atomic usage)
         local_latest_checkpointed_iteration = os.path.join(

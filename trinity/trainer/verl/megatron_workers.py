@@ -643,6 +643,7 @@ class ActorRolloutRefWorker(MegatronWorker, DistProfilerExtension):
         global_step=0,
         max_ckpt_to_keep=None,
         model_state_dict_only=False,
+        save_as_hf=False,
     ):
         if self._is_offload_param:
             load_megatron_model_to_gpu(self.actor_module)
@@ -652,6 +653,7 @@ class ActorRolloutRefWorker(MegatronWorker, DistProfilerExtension):
             global_step=global_step,
             max_ckpt_to_keep=max_ckpt_to_keep,
             model_state_dict_only=model_state_dict_only,
+            save_as_hf=save_as_hf,
         )
         torch.distributed.barrier()
         if self._is_offload_param:
@@ -962,7 +964,12 @@ class CriticWorker(MegatronWorker, DistProfilerExtension):
 
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
     def save_checkpoint(
-        self, checkpoint_path, hdfs_path=None, global_steps=0, max_ckpt_to_keep=None
+        self,
+        checkpoint_path,
+        hdfs_path=None,
+        global_steps=0,
+        max_ckpt_to_keep=None,
+        save_as_hf=False,
     ):
         if self._is_offload_param:
             load_megatron_model_to_gpu(self.critic_module)
@@ -971,6 +978,7 @@ class CriticWorker(MegatronWorker, DistProfilerExtension):
             hdfs_path=hdfs_path,
             global_step=global_steps,
             max_ckpt_to_keep=max_ckpt_to_keep,
+            save_as_hf=save_as_hf,
         )
         if self._is_offload_param:
             offload_megatron_model_to_cpu(self.critic_module)

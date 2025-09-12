@@ -578,6 +578,13 @@ class TestFullyAsyncMode(unittest.TestCase):
         )
         cache = explorer2_cache.load_explorer()
         self.assertEqual(cache["latest_iteration"], 4)
+        trainer_cache = StateManager(
+            path=trainer_config.checkpoint_job_dir,
+            trainer_name=trainer_config.trainer.name,
+            config=trainer_config,
+        )
+        cache = trainer_cache.load_trainer()
+        self.assertEqual(cache["latest_iteration"], 8)
         # check the lastest checkpoint
         self.assertEqual(
             get_checkpoint_dir_with_step_num(
