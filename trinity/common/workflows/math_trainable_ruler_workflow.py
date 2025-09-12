@@ -187,7 +187,7 @@ Conclude your response with a list of scores, in the following format: [score fo
 
             if (idx1 == -1) or (idx2 == -1) or (idx1 > idx2):
                 logger.warning("Unable to extract a list from judger response.")
-                break
+                continue
 
             lst_as_str = ruler_response_text[idx1 : (idx2 + 1)]
             try:

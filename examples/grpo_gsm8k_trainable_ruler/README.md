@@ -10,7 +10,7 @@ Two RL objectives are optimized jointly: one for solution generation, the other 
 
 ## Configurations and Metrics
 
-The config files are located in [`gsm8k_ruler.yaml`](gsm8k_ruler.yaml) and [`train_gsm8k_trainable_ruler.yaml`](train_gsm8k_trainable_ruler.yaml).
+The config file is located in [`gsm8k_ruler.yaml`](gsm8k_ruler.yaml).
 
 Some key configs in this example are:
 
@@ -33,10 +33,21 @@ Some important metrics to pay attention to are:
 
 ## Results
 
-(TODO)
+We show the results below:
 
-Compare with baseline: previous RULER workflow with Qwen2.5-1.5B-Instruct as LLM judge (`auxiliary_models`)
 
+![reward](../../docs/sphinx_doc/assets/gsm8k_trainable_ruler_reward.png)
+
+![gold_reward](../../docs/sphinx_doc/assets/gsm8k_trainable_ruler_gold_reward.png)
+
+![judge_success](../../docs/sphinx_doc/assets/gsm8k_trainable_ruler_judge_success.png)
+
+![reward_for_judger](../../docs/sphinx_doc/assets/gsm8k_trainable_ruler_reward_for_judger.png)
+
+![eval_accuracy](../../docs/sphinx_doc/assets/gsm8k_trainable_ruler_eval_accuracy.png)
+
+
+You may compare the above results with [the RULER example](../../examples/grpo_gsm8k_ruler/README.md) with Qwen2.5-32B-Instruct as LLM judge (`auxiliary_models`).
 
 
 ## Potential improvements
