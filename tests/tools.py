@@ -7,7 +7,15 @@ import ray
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 
 from trinity.common.config import Config, FormatConfig, StorageConfig, load_config
-from trinity.common.constants import PromptType
+from trinity.common.constants import (
+    CHECKPOINT_ROOT_DIR_ENV_VAR,
+    MODEL_PATH_ENV_VAR,
+    PromptType,
+)
+
+API_MODEL_PATH_ENV_VAR = "TRINITY_API_MODEL_PATH"
+VLM_MODEL_PATH_ENV_VAR = "TRINITY_VLM_MODEL_PATH"
+SFT_DATASET_PATH_ENV_VAR = "TRINITY_SFT_DATASET_PATH"
 
 
 def get_template_config() -> Config:
@@ -21,28 +29,37 @@ def get_template_config() -> Config:
 
 
 def get_model_path() -> str:
-    path = os.environ.get("MODEL_PATH")
+    path = os.environ.get(MODEL_PATH_ENV_VAR)
     if not path:
         raise EnvironmentError(
-            "Please set `export MODEL_PATH=<your_model_dir>` before running this test."
+            f"Please set `export {MODEL_PATH_ENV_VAR}=<your_model_dir>` before running this test."
+        )
+    return path
+
+
+def get_api_model_path() -> str:
+    path = os.environ.get(API_MODEL_PATH_ENV_VAR)
+    if not path:
+        raise EnvironmentError(
+            f"Please set `export {API_MODEL_PATH_ENV_VAR}=<your_api_model_checkpoint_dir>` before running this test."
         )
     return path
 
 
 def get_checkpoint_path() -> str:
-    path = os.environ.get("CHECKPOINT_PATH")
+    path = os.environ.get(CHECKPOINT_ROOT_DIR_ENV_VAR)
     if not path:
         raise EnvironmentError(
-            "Please set `export CHECKPOINT_PATH=<your_checkpoint_dir>` before running this test."
+            f"Please set `export {CHECKPOINT_ROOT_DIR_ENV_VAR}=<your_checkpoint_dir>` before running this test."
         )
     return path
 
 
 def get_vision_languge_model_path() -> str:
-    path = os.environ.get("VLM_MODEL_PATH")
+    path = os.environ.get(VLM_MODEL_PATH_ENV_VAR)
     if not path:
         raise EnvironmentError(
-            "Please set `export VLM_MODEL_PATH=<your_model_dir>` before running this test."
+            f"Please set `export {VLM_MODEL_PATH_ENV_VAR}=<your_model_dir>` before running this test."
         )
     return path
 

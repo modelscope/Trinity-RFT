@@ -24,6 +24,8 @@ class DJConfig(BaseModel):
     target_fields: List[str] = []  # fields in the output dataset
     priority_weights: Dict[str, float] = {}  # weights for priority computing
     top_k: int = -1  # number of samples to select after task pipeline. -1 means all
+    order_method: Literal["keep", "shuffle", "sort", "folding"] = "sort"
+    order_args: Dict = {}
 
     @model_validator(mode="after")
     def check_dj_config(self):

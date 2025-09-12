@@ -47,11 +47,10 @@ buffer:
         decay: 0.1
     sft_warmup_steps: 0
 explorer:
-  runner_num: 32
+  runner_per_model: 8
   max_timeout: 900
   max_retry_times: 2
   rollout_model:
-    engine_type: vllm_async
     engine_num: 2
     tensor_parallel_size: 1
     use_v1: true

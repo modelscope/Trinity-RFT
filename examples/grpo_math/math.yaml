@@ -1,8 +1,8 @@
 project: grpo_math
 name: grpo_math_example
-checkpoint_root_dir: /PATH/TO/CHECKPOINT/
+checkpoint_root_dir: ${oc.env:TRINITY_CHECKPOINT_ROOT_DIR,./checkpoints}
 model:
-  model_path: /PATH/TO/MODEL/
+  model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-7B-Instruct}
   max_response_tokens: 3072
   max_model_len: 4096
 algorithm:
@@ -18,7 +18,7 @@ buffer:
     taskset:
       name: math
       storage_type: file
-      path: /PATH/TO/DATASET/
+      path: ${oc.env:TRINITY_TASKSET_PATH}
       format:
         prompt_key: 'question'
         response_key: 'gt_answer'
@@ -36,9 +36,8 @@ buffer:
       path: 'sqlite:///math.db'
 explorer:
   eval_interval: 10
-  runner_num: 32
+  runner_per_model: 8
   rollout_model:
-    engine_type: vllm_async
     engine_num: 2
     tensor_parallel_size: 1
     enable_prefix_caching: false
@@ -50,6 +49,18 @@ synchronizer:
   sync_interval: 1
   sync_timeout: 1200
 trainer:
-  trainer_type: 'verl'
-  trainer_config_path: 'examples/grpo_math/train_math.yaml'
   save_interval: 100
+  trainer_config:
+    actor_rollout_ref:
+      model:
+        use_remove_padding: true
+      actor:
+        use_dynamic_bsz: true
+        ppo_max_token_len_per_gpu: 16384
+        ulysses_sequence_parallel_size: 1
+        optim:
+          lr: 5e-7
+      ref:
+        log_prob_use_dynamic_bsz: ${trainer.trainer_config.actor_rollout_ref.actor.use_dynamic_bsz}
+        log_prob_max_token_len_per_gpu: ${trainer.trainer_config.actor_rollout_ref.actor.ppo_max_token_len_per_gpu}
+        ulysses_sequence_parallel_size: ${trainer.trainer_config.actor_rollout_ref.actor.ulysses_sequence_parallel_size} # sp size

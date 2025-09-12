@@ -1,8 +1,8 @@
 project: Trinity-RFT-example
 name: dapo
-checkpoint_root_dir: /PATH/TO/CHECKPOINT/
+checkpoint_root_dir: ${oc.env:TRINITY_CHECKPOINT_ROOT_DIR,./checkpoints}
 model:
-  model_path: /PATH/TO/MODEL/
+  model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-32B-Instruct}
   max_response_tokens: 20480
   max_model_len: 21504
 algorithm:
@@ -40,7 +40,7 @@ buffer:
     eval_tasksets:
     - name: AIME2024
       storage_type: file
-      path: /PATH/TO/AIME2024/
+      path: ${oc.env:TRINITY_TASKSET_PATH}  # e.g. path to AIME2024
       split: 'test'
       repeat_times: 32
       format:
@@ -58,9 +58,8 @@ buffer:
       storage_type: queue
 explorer:
   eval_interval: 10
-  runner_num: 32
+  runner_per_model: 8
   rollout_model:
-    engine_type: vllm_async
     engine_num: 4
     tensor_parallel_size: 1
     enable_prefix_caching: false
@@ -72,6 +71,19 @@ synchronizer:
   sync_interval: 16
   sync_timeout: 1200
 trainer:
-  trainer_type: 'verl'
-  trainer_config_path: 'examples/dapo_math/train_dapo.yaml'
   save_interval: 100
+  trainer_config:
+    actor_rollout_ref:
+      model:
+        use_remove_padding: true
+      actor:
+        use_dynamic_bsz: true
+        ppo_max_token_len_per_gpu: 22000
+        ulysses_sequence_parallel_size: 1
+        optim:
+          lr: 1e-6
+          lr_warmup_steps: 20
+      ref:
+        log_prob_use_dynamic_bsz: ${trainer.trainer_config.actor_rollout_ref.actor.use_dynamic_bsz}
+        log_prob_max_token_len_per_gpu: ${trainer.trainer_config.actor_rollout_ref.actor.ppo_max_token_len_per_gpu}
+        ulysses_sequence_parallel_size: ${trainer.trainer_config.actor_rollout_ref.actor.ulysses_sequence_parallel_size} # sp size

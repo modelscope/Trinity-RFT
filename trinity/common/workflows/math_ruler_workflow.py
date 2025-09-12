@@ -9,9 +9,6 @@ from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
 from trinity.common.rewards.math_reward import MathRewardFn
 from trinity.common.workflows.workflow import WORKFLOWS, SimpleWorkflow, Task
-from trinity.utils.log import get_logger
-
-logger = get_logger(__name__)
 
 
 @WORKFLOWS.register_module("math_ruler_workflow")
@@ -73,6 +70,10 @@ class MathRULERWorkflow(SimpleWorkflow):
             response.metrics.update({"gold_reward": gold_reward})
             response.eid.run = i + self.run_id_base
 
+            self.logger.debug(
+                f"self.task_desc: {self.task_desc}, messages: {messages}, response: {response.response_text}, gold_reward: {gold_reward}"
+            )
+
         # === RULER scores as rewards ===
         assert (
             self.auxiliary_models is not None
@@ -131,23 +132,27 @@ Conclude your response with a list of scores, in the following format: [score fo
             model=judger.model_path, messages=messages, stream=False
         )
         judger_response = completion.choices[0].message.content
-        logger.info(f"LLM judge response: {judger_response}")
+        self.logger.info(f"LLM judge response: {judger_response}")
 
         # Step 3: extract scores from judger's response
         idx1, idx2 = judger_response.rfind("["), judger_response.rfind("]")
         if (idx1 == -1) or (idx2 == -1) or (idx1 > idx2):
-            logger.warning("Unable to extract a list from judger response, set scores to all zero.")
+            self.logger.warning(
+                "Unable to extract a list from judger response, set scores to all zero."
+            )
             return False, [0.0 for _ in range(num_responses)]
         lst_as_str = judger_response[idx1 : (idx2 + 1)]
         try:
             scores = ast.literal_eval(lst_as_str)
             scores = [max(0.0, min(1.0, score)) for score in scores]  # clip to range [0, 1]
             if len(scores) != num_responses:
-                logger.warning(
+                self.logger.warning(
                     "The length of list in judger response does not match num_responses."
                 )
                 return False, [0.0 for _ in range(num_responses)]
             return True, scores
         except Exception:
-            logger.warning("Unable to parse the list in judger response, set scores to all zero.")
+            self.logger.warning(
+                "Unable to parse the list in judger response, set scores to all zero."
+            )
             return False, [0.0 for _ in range(num_responses)]

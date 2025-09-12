@@ -50,7 +50,7 @@ For SFT, we download the `open-r1/Mixture-of-Thoughts` dataset to the local dire
 
 ### Configuration for DPO
 
-We use the configurations in [`dpo.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/dpo_humanlike/dpo.yaml) and [`train_dpo.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/dpo_humanlike/train_dpo.yaml) for this experiment. Some important setups are listed in the following:
+We use the configurations in [`dpo.yaml`](https://github.com/modelscope/Trinity-RFT/tree/main/examples/dpo_humanlike/dpo.yaml) for this experiment. Some important setups are listed in the following:
 
 We run the experiment in a train mode, as there is no Explorer. To enable this mode, we config `mode` to `train` and pass the data path to the trainer.
 
@@ -63,9 +63,9 @@ algorithm:
   kl_loss_fn: k1
   kl_loss_fn_args:
     kl_coef: 0.1  # value of beta in DPO
-checkpoint_root_dir: /PATH/TO/CHECKPOINT/
+checkpoint_root_dir: ${oc.env:TRINITY_CHECKPOINT_ROOT_DIR,./checkpoints}
 model:
-  model_path: $MODEL_PATH/Qwen2.5-1.5B-Instruct
+  model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-1.5B-Instruct}
 cluster:
   node_num: 1
   gpu_per_node: 8
@@ -83,8 +83,9 @@ buffer:
         chosen_key: chosen
         rejected_key: rejected
 trainer:
-  trainer_config_path: 'examples/dpo_humanlike/train_dpo.yaml'
   save_interval: 30
+  trainer_config:
+    ... # omitted here for simplicity
 ```
 
 `buffer.trainer_input.experience_buffer` specifies the dataset to be used for training, including its name, storage type, path, and format.
@@ -110,9 +111,9 @@ name: <experiment_name>
 mode: train
 algorithm:
   algorithm_type: sft
-checkpoint_root_dir: /PATH/TO/CHECKPOINT/
+checkpoint_root_dir: ${oc.env:TRINITY_CHECKPOINT_ROOT_DIR,./checkpoints}
 model:
-  model_path: /PATH/TO/MODEL/
+  model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-1.5B-Instruct}
 cluster:
   node_num: 1
   gpu_per_node: 2
@@ -129,8 +130,9 @@ buffer:
         prompt_type: messages
         messages_key: messages
 trainer:
-  trainer_config_path: /PATH/TO/TRAIN_CONFIG_YAML/
   save_interval: 50
+  trainer_config:
+    ... # omitted here for simplicity
 ```
 
 Here we set `buffer.trainer_input.experience_buffer.format.prompt_type` to `messages` because the source data is in message format. We also set `buffer.trainer_input.experience_buffer.format.messages_key` to `messages` to specify the key in the dataset that contains the messages.

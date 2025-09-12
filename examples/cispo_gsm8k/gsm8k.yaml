@@ -1,11 +1,11 @@
 project: "Trinity-RFT-gsm8k"
 name: "qwen2.5-1.5B-gsm8k-cispo"
-checkpoint_root_dir: /PATH/TO/CHECKPOINT/
+checkpoint_root_dir: ${oc.env:TRINITY_CHECKPOINT_ROOT_DIR,./checkpoints}
 algorithm:
   algorithm_type: cispo
   repeat_times: 8
 model:
-  model_path: /PATH/TO/MODEL/
+  model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-1.5B-Instruct}
   max_response_tokens: 1024
   max_model_len: 1280
 cluster:
@@ -45,12 +45,11 @@ buffer:
     # sft_warmup_dataset: # Uncomment these to enable sft warmup
     #   name: warmup_data
     #   storage_type: file
-    #   path: '/PATH/TO/WARMUP_DATA/'
+    #   path: ${oc.env:TRINITY_SFT_DATASET_PATH}
 explorer:
   eval_interval: 50
-  runner_num: 32
+  runner_per_model: 8
   rollout_model:
-    engine_type: vllm_async
     engine_num: 2
     tensor_parallel_size: 1
     enable_prefix_caching: false
@@ -62,6 +61,18 @@ synchronizer:
   sync_interval: 4
   sync_timeout: 1200
 trainer:
-  trainer_type: 'verl'
-  trainer_config_path: 'examples/cispo_gsm8k/train_gsm8k.yaml'
   save_interval: 100
+  trainer_config:
+    actor_rollout_ref:
+      model:
+        use_remove_padding: true
+      actor:
+        use_dynamic_bsz: true
+        ppo_max_token_len_per_gpu: 16384
+        ulysses_sequence_parallel_size: 1
+        optim:
+          lr: 1e-6
+      ref:
+        log_prob_use_dynamic_bsz: ${trainer.trainer_config.actor_rollout_ref.actor.use_dynamic_bsz}
+        log_prob_max_token_len_per_gpu: ${trainer.trainer_config.actor_rollout_ref.actor.ppo_max_token_len_per_gpu}
+        ulysses_sequence_parallel_size: ${trainer.trainer_config.actor_rollout_ref.actor.ulysses_sequence_parallel_size} # sp size

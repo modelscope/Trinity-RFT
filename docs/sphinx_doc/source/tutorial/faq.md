@@ -1,23 +1,21 @@
 # FAQ
 
 ## Part 1: Configurations
-**Q:** Why do most examples have two configuration YAML files, e.g., `gsm8k.yaml` and `train_gsm8k.yaml` in the `examples/grpo_gsm8k` directory?
+**Q:** How do I configure the parameters?
 
-**A:** Trinity-RFT uses [veRL](https://github.com/volcengine/verl) as the training backend, and the auxiliary YAML file starting with `train_` is used for configuring veRL, referred to [veRL documentation](https://verl.readthedocs.io/en/latest/examples/config.html).
-If you specify the path to `train_gsm8k.yaml` in `trainer.trainer_config_path`, Trinity-RFT will automatically pass the parameters to veRL.
+**A:** You can use the config manager to configure the parameters by running `trinity studio --port 8080`. This approach provides a convenient way to configure the parameters.
 
-We provide an alternative way to configure the veRL trainer. You may also directly specify the parameters in the `trainer.trainer_config` dictionary. This approach is mutually exclusive with using `trainer.trainer_config_path`.
-
-Note that some parameters are not listed in the auxiliary configuration file (e.g., `train_gsm8k.yaml`), as they will be overridden by the parameters in the trinity configuration file (e.g., `gsm8k.yaml`). Please refer to `./trinity_configs.md` for more details.
-For users' convenience, future versions will gradually reduce parameters in `trainer.trainer_config` and `trainer.trainer_config_path` until it's fully deprecated.
+Advanced users can also edit the config file directly.
+Trinity-RFT uses [veRL](https://github.com/volcengine/verl) as the training backend, which can have massive parameters, referred to [veRL documentation](https://verl.readthedocs.io/en/latest/examples/config.html). You may specify these parameters in two ways: (1) specify the parameters in the `trainer.trainer_config` dictionary; (2) specify them in an auxiliary YAML file starting with `train_` and pass the path to `train_gsm8k.yaml` in `trainer.trainer_config_path`. These two ways are mutually exclusive.
 
 ---
 
-**Q:** What's the relationship between `buffer.batch_size`, `actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu` and other batch sizes?
+**Q:** What's the relationship between `buffer.batch_size`, `buffer.train_batch_size`, `actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu` and other batch sizes?
 
 **A:** The following parameters are closely related:
 
-- `buffer.batch_size`: The number of tasks in a batch, effective for both the explorer and the trainer.
+- `buffer.batch_size`: The number of tasks in a batch, effective for the explorer.
+- `buffer.train_batch_size`: The number of experiences in a mini-batch, effective for the trainer. If not specified, it defaults to `buffer.batch_size` * `algorithm.repeat_times`.
 - `actor_rollout_ref.actor.ppo_mini_batch_size`: The number of experiences in a mini-batch, overridden by `buffer.train_batch_size`; but in the `update_policy` function, its value becomes the number of experiences in a mini-batch per GPU, i.e., `buffer.train_batch_size (/ ngpus_trainer)`. The expression of dividing `ngpus_trainer` is caused by implict data allocation to GPUs, but this do not affects the result after gradient accumulation.
 - `actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu`: The number of experiences in a micro-batch per GPU.
 
@@ -65,7 +63,7 @@ File ".../flash_attn/flash_attn_interface.py", line 15, in ‹module>
 ImportError: ...
 ```
 
-**A:** The `flash-attn` module is not properly installed. Try to fix it by running `pip install flash-attn==2.8.0.post2` or `pip install flash-attn==2.8.0.post2 -v --no-build-isolation`.
+**A:** The `flash-attn` module is not properly installed. Try to fix it by running `pip install flash-attn==2.8.1` or `pip install flash-attn==2.8.1 -v --no-build-isolation`.
 
 ---
 

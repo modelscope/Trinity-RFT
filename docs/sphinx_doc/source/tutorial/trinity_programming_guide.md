@@ -15,6 +15,10 @@ Below is a table summarizing the modules and components that developers with dif
 Trinity-RFT is under active development, and the following interfaces may change. Please refer to the latest code when using this guide.
 ```
 
+```{tip}
+For modules that only used for local testing or not intended for contribution, you can place them in the `trinity/plugins` directory. Trinity-RFT will automatically load all modules in this directory, and you can use those modules without adding them to the `__init__.py` file. You can specify another directory by setting the `--plugin-dir` option when running Trinity-RFT, e.g., `trinity run --config /path/to/your/config --plugin-dir /path/to/your/plugins`.
+```
+
 ---
 
 (Workflows)=
@@ -79,7 +83,7 @@ buffer:
   explorer_input:
     taskset:
       default_workflow: "math_workflow"
-      path: "/PATH/TO/FILE/DIR"
+      path: ${oc.env:TRINITY_TASKSET_PATH}
       format:
         prompt_key: "question"
         response_key: "answer"
@@ -740,7 +744,3 @@ For modules that are prepared to be contributed to the Trinity-RFT project, plea
 4. Before submitting the code, make sure it passes the code style check with `pre-commit run --all-files`.
 
 5. Submit a pull request to the Trinity-RFT repository, including a clear description of your changes.
-
-```{tip}
-For modules that only used for local testing or not intended for contribution, you can place them in the `trinity/plugins` directory. Trinity-RFT will automatically load all modules in this directory, and you can use those modules without adding them to the `__init__.py` file. You can specify another directory by setting the `--plugin-dir` option when running Trinity-RFT, e.g., `trinity run --config /path/to/your/config --plugin-dir /path/to/your/plugins`.
-```

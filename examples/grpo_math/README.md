@@ -12,4 +12,4 @@ The dataset is organized as:
 
 For more detailed information, please refer to the [documentation](../../docs/sphinx_doc/source/tutorial/example_reasoning_basic.md).
 
-The config files are located in [`math.yaml`](math.yaml) and [`train_math.yaml`](train_math.yaml).
+The config file is located in [`math.yaml`](math.yaml).

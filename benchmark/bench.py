@@ -8,6 +8,7 @@ import torch.distributed as dist
 import yaml
 
 from trinity.algorithm.algorithm import ALGORITHM_TYPE
+from trinity.common.constants import MODEL_PATH_ENV_VAR
 from trinity.utils.dlc_utils import get_dlc_env_vars
 
 
@@ -77,9 +78,8 @@ def prepare_configs(args, rank, current_time):
         set_engine_num(config, args)
         config["model"]["model_path"] = (
             args.model_path
-            or os.environ.get("MODEL_PATH")
             or config["model"]["model_path"]
-            or "Qwen/Qwen2.5-1.5B-Instruct"
+            or os.environ.get(MODEL_PATH_ENV_VAR, "Qwen/Qwen2.5-1.5B-Instruct")
         )
         if ALGORITHM_TYPE.get(config["algorithm"]["algorithm_type"]).use_critic:
             config["model"]["critic_model_path"] = (

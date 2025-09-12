@@ -1,6 +1,6 @@
 import streamlit as st
 
-from trinity.buffer.queue import PRIORITY_FUNC
+from trinity.buffer.storage.queue import PRIORITY_FUNC
 from trinity.common.constants import PromptType, StorageType
 from trinity.common.rewards.reward_fn import REWARD_FUNCTIONS
 from trinity.common.workflows.workflow import WORKFLOWS
@@ -22,6 +22,22 @@ def set_explore_batch_size(**kwargs):
     )
 
 
+def get_train_batch_size() -> int:
+    return (
+        st.session_state["train_batch_size"]
+        or st.session_state["explore_batch_size"] * st.session_state["repeat_times"]
+    )
+
+
+def get_train_batch_size_per_gpu() -> int:
+    return st.session_state["_train_batch_size_per_gpu"] or max(
+        st.session_state["explore_batch_size"]
+        * st.session_state["repeat_times"]
+        // st.session_state["trainer_gpu_num"],
+        1,
+    )
+
+
 def _str_for_train_batch_size():
     trainer_gpu_num_str = (
         "`gpu_per_node * node_num - engine_num * tensor_parallel_size`"
@@ -29,23 +45,26 @@ def _str_for_train_batch_size():
         else "`gpu_per_node * node_num`"
     )
     return (
-        f"Usually set to `task_batch_size` * `repeat_times`."
-        f"Please ensure that `train_batch_size` can be divided by "
-        f"{trainer_gpu_num_str} = {st.session_state['trainer_gpu_num']}."
+        f"`train_batch_size` defaults to `task_batch_size` * `repeat_times`.\n\n"
+        f"Please ensure that `train_batch_size` ({get_train_batch_size()}) can be divided by "
+        f"{trainer_gpu_num_str} ({st.session_state['trainer_gpu_num']})."
     )
 
 
 @CONFIG_GENERATORS.register_config(
-    default_value=96,
+    default_value=None,
     visible=lambda: st.session_state["trainer_gpu_num"] > 0,
-    other_configs={"_train_batch_size_per_gpu": 16},
+    other_configs={"_train_batch_size_per_gpu": None},
 )
 def set_train_batch_size(**kwargs):
     key = kwargs.get("key")
     trainer_gpu_num = st.session_state["trainer_gpu_num"]
     st.session_state[key] = (
         st.session_state["_train_batch_size_per_gpu"] * st.session_state["trainer_gpu_num"]
+        if st.session_state["_train_batch_size_per_gpu"] is not None
+        else None
     )
+    placeholder = st.session_state["explore_batch_size"] * st.session_state["repeat_times"]
 
     def on_change():
         st.session_state["_train_batch_size_per_gpu"] = max(
@@ -58,13 +77,14 @@ def set_train_batch_size(**kwargs):
         step=trainer_gpu_num,
         help=_str_for_train_batch_size(),
         on_change=on_change,
+        placeholder=placeholder,
         **kwargs,
     )
 
 
 @CONFIG_GENERATORS.register_check()
 def check_train_batch_size(unfinished_fields: set, key: str):
-    if st.session_state[key] % st.session_state["trainer_gpu_num"] != 0:
+    if get_train_batch_size() % st.session_state["trainer_gpu_num"] != 0:
         unfinished_fields.add(key)
         st.warning(_str_for_train_batch_size())
 
@@ -89,25 +109,6 @@ def check_taskset_path(unfinished_fields: set, key: str):
     if not st.session_state[key].strip():
         unfinished_fields.add(key)
         st.warning("Please input taskset path.")
-
-
-# def _set_temperature(self):
-#     st.number_input("Temperature", key="temperature", min_value=0.0, max_value=2.0)
-
-# def _set_top_p(self):
-#     st.number_input("Top-p", key="top_p", min_value=0.0, max_value=1.0)
-
-# def _set_top_k(self):
-#     st.number_input(
-#         "Top-k",
-#         key="top_k",
-#         min_value=-1,
-#         max_value=512,
-#         help="Integer that controls the number of top tokens to consider. Set to -1 to consider all tokens.",
-#     )
-
-# def _set_logprobs(self):
-#     st.number_input("Logprobs", key="logprobs", min_value=0, max_value=20)
 
 
 @CONFIG_GENERATORS.register_config(
@@ -138,7 +139,7 @@ def set_taskset_args(**kwargs):
     response_key_col.text_input(
         "Response Key :orange-badge[(Needs review)]", key="taskset_response_key"
     )
-    # self._set_configs_with_st_columns(["temperature", "logprobs"])
+
     temperature_col, logprobs_col = st.columns(2)
     temperature_col.number_input("Temperature", key="temperature", min_value=0.0, max_value=2.0)
     logprobs_col.number_input("Logprobs", key="logprobs", min_value=0, max_value=20)
@@ -487,9 +488,6 @@ def set_sft_warmup_dataset_args(**kwargs):
         "SFT Dataset Response Key :orange-badge[(Needs review)]",
         key="sft_warmup_response_key",
     )
-
-
-# TODO: read_experience_strategy
 
 
 @CONFIG_GENERATORS.register_config(default_value=0)

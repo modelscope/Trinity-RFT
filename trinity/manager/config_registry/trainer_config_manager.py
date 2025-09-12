@@ -1,7 +1,9 @@
 import streamlit as st
 
 from trinity.algorithm.algorithm import ALGORITHM_TYPE
-from trinity.common.constants import SyncMethod
+from trinity.manager.config_registry.buffer_config_manager import (
+    get_train_batch_size_per_gpu,
+)
 from trinity.manager.config_registry.config_registry import CONFIG_GENERATORS
 
 
@@ -15,32 +17,11 @@ def set_trainer_type(**kwargs):
     st.selectbox("Trainer Type", ["verl"], **kwargs)
 
 
-@CONFIG_GENERATORS.register_config(default_value=100, other_configs={"_nccl_save_interval": 100})
+@CONFIG_GENERATORS.register_config(default_value=100)
 def set_save_interval(**kwargs):
-    key = kwargs.get("key")
-    if (
-        st.session_state["algorithm_type"] == "dpo"
-        or st.session_state["sync_method"] == SyncMethod.NCCL.value
-    ):
-        st.session_state[key] = st.session_state["_nccl_save_interval"]
-        freeze_save_interval = False
-    else:
-        st.session_state[key] = st.session_state["sync_interval"]
-        freeze_save_interval = True
-
-    def on_change():
-        if (
-            st.session_state["algorithm_type"] == "dpo"
-            or st.session_state["sync_method"] == SyncMethod.NCCL.value
-        ):
-            st.session_state["_nccl_save_interval"] = st.session_state[key]
-
     st.number_input(
         "Save Interval",
         min_value=1,
-        help="Set to `sync_interval` when `algorithm_type != DPO && sync_method == checkpoint`",
-        disabled=freeze_save_interval,
-        on_change=on_change,
         **kwargs,
     )
 
@@ -95,29 +76,122 @@ def set_ppo_epochs(**kwargs):
 def set_training_strategy(**kwargs):
     st.selectbox(
         "Training Strategy",
-        ["fsdp", "megatron"],
+        ["fsdp", "fsdp2", "megatron"],
         help="megatron is not tested",
         **kwargs,
     )
 
 
-def use_fsdp():
-    return st.session_state["training_strategy"] == "fsdp"
-
-
-@CONFIG_GENERATORS.register_config(default_value=False, visible=use_fsdp)
+@CONFIG_GENERATORS.register_config(default_value=False)
 def set_param_offload(**kwargs):
-    st.checkbox("FSDP Param Offload", **kwargs)
+    st.checkbox("Param Offload", **kwargs)
 
 
-@CONFIG_GENERATORS.register_config(default_value=False, visible=use_fsdp)
+@CONFIG_GENERATORS.register_config(default_value=False)
+def set_grad_offload(**kwargs):
+    st.checkbox("Grad Offload", **kwargs)
+
+
+@CONFIG_GENERATORS.register_config(default_value=False)
 def set_optimizer_offload(**kwargs):
-    st.checkbox("FSDP Optimizer Offload", **kwargs)
+    st.checkbox("Optimizer Offload", **kwargs)
 
 
-@CONFIG_GENERATORS.register_config(default_value=False, visible=use_fsdp)
+@CONFIG_GENERATORS.register_config(default_value=False)
 def set_forward_prefetch(**kwargs):
     st.checkbox("FSDP Forward Prefetch", **kwargs)
+
+
+@CONFIG_GENERATORS.register_config(default_value=False)
+def set_offload_policy(**kwargs):
+    st.checkbox("Enable FSDP2 offload_policy", **kwargs)
+
+
+@CONFIG_GENERATORS.register_config(default_value=True)
+def set_reshard_after_forward(**kwargs):
+    st.checkbox("FSDP2 Reshard After Forward", **kwargs)
+
+
+@CONFIG_GENERATORS.register_config(default_value=1)
+def set_tensor_model_parallel_size(**kwargs):
+    st.number_input("Tensor Model Parallel Size", min_value=1, **kwargs)
+
+
+@CONFIG_GENERATORS.register_config(default_value=1)
+def set_pipeline_model_parallel_size(**kwargs):
+    st.number_input("Pipeline Model Parallel Size", min_value=1, **kwargs)
+
+
+@CONFIG_GENERATORS.register_config(default_value=None)
+def set_virtual_pipeline_model_parallel_size(**kwargs):
+    st.number_input("Virtual Pipeline Model Parallel Size", min_value=1, **kwargs)
+
+
+@CONFIG_GENERATORS.register_config(default_value=1)
+def set_expert_model_parallel_size(**kwargs):
+    st.number_input("Expert Model Parallel Size", min_value=1, **kwargs)
+
+
+@CONFIG_GENERATORS.register_config(default_value=None)
+def set_expert_tensor_parallel_size(**kwargs):
+    st.number_input("Expert Tensor Parallel Size", min_value=1, **kwargs)
+
+
+@CONFIG_GENERATORS.register_config(default_value=1)
+def set_context_parallel_size(**kwargs):
+    st.number_input("Context Parallel Size", min_value=1, **kwargs)
+
+
+@CONFIG_GENERATORS.register_config(default_value=True)
+def set_sequence_parallel(**kwargs):
+    st.checkbox("Sequence Parallel", **kwargs)
+
+
+# TODO: check parallel settings
+
+
+@CONFIG_GENERATORS.register_config(default_value=True)
+def set_use_distributed_optimizer(**kwargs):
+    st.checkbox("Use Distributed Optimizer", **kwargs)
+
+
+@CONFIG_GENERATORS.register_config(default_value=False)
+def set_use_dist_checkpointing(**kwargs):
+    st.checkbox("Use Distributed Checkpointing", **kwargs)
+
+
+@CONFIG_GENERATORS.register_config(default_value=None)
+def set_dist_checkpointing_path(**kwargs):
+    st.text_input("Distributed Checkpointing Path", **kwargs)
+
+
+@CONFIG_GENERATORS.register_config(default_value=False)
+def set_use_mbridge(**kwargs):
+    st.checkbox("Use MBridge", **kwargs)
+
+
+@CONFIG_GENERATORS.register_config(default_value=None)
+def set_recompute_granularity(**kwargs):
+    st.selectbox("Recompute Granularity", ["selective", "full"], **kwargs)
+
+
+@CONFIG_GENERATORS.register_config(default_value=["core_attn"])
+def set_recompute_modules(**kwargs):
+    st.multiselect(
+        "Recompute Modules",
+        ["core_attn", "moe_act", "layernorm", "mla_up_proj", "mlp", "moe", "shared_experts"],
+        **kwargs,
+    )
+
+
+@CONFIG_GENERATORS.register_config(default_value=None)
+def set_recompute_method(**kwargs):
+    st.selectbox("Recompute Method", ["uniform", "block"], **kwargs)
+
+
+@CONFIG_GENERATORS.register_config(default_value=None)
+def set_recompute_num_layers(**kwargs):
+    st.number_input("Recompute Num Layers", min_value=1, **kwargs)
 
 
 @CONFIG_GENERATORS.register_config(default_value="auto")
@@ -166,11 +240,6 @@ def set_total_training_steps(**kwargs):
 @CONFIG_GENERATORS.register_config(default_value=None)
 def set_default_hdfs_dir(**kwargs):
     st.text_input("Default HDFS Dir", **kwargs)
-
-
-@CONFIG_GENERATORS.register_config(default_value=False)
-def set_remove_previous_ckpt_in_save(**kwargs):
-    st.checkbox("Remove Previous Checkpoint in Save", **kwargs)
 
 
 @CONFIG_GENERATORS.register_config(default_value=False)
@@ -226,7 +295,7 @@ def set_target_kl(**kwargs):
 @CONFIG_GENERATORS.register_config(default_value=4)
 def set_actor_ppo_micro_batch_size_per_gpu(**kwargs):
     key = kwargs.get("key")
-    max_value = st.session_state["_train_batch_size_per_gpu"]
+    max_value = get_train_batch_size_per_gpu()
     st.session_state[key] = min(st.session_state[key], max_value)
     st.number_input(
         "Micro Batch Size Per GPU :blue-badge[(Actor)]", min_value=1, max_value=max_value, **kwargs
@@ -236,7 +305,7 @@ def set_actor_ppo_micro_batch_size_per_gpu(**kwargs):
 @CONFIG_GENERATORS.register_config(default_value=8)
 def set_ref_log_prob_micro_batch_size_per_gpu(**kwargs):
     key = kwargs.get("key")
-    max_value = st.session_state["_train_batch_size_per_gpu"]
+    max_value = get_train_batch_size_per_gpu()
     st.session_state[key] = min(st.session_state[key], max_value)
     st.number_input(
         "Micro Batch Size Per GPU :blue-badge[(Ref)]", min_value=1, max_value=max_value, **kwargs
@@ -294,9 +363,18 @@ def set_actor_lr_warmup_steps_ratio(**kwargs):
 
 
 @CONFIG_GENERATORS.register_config(default_value=["model", "hf_model", "optimizer", "extra"])
-def set_actor_checkpoint(**kwargs):
+def set_actor_save_checkpoint(**kwargs):
     st.multiselect(
-        "Checkpoint",
+        "Checkpoint to Save",
+        ["model", "hf_model", "optimizer", "extra"],
+        **kwargs,
+    )
+
+
+@CONFIG_GENERATORS.register_config(default_value=["model", "hf_model", "optimizer", "extra"])
+def set_actor_load_checkpoint(**kwargs):
+    st.multiselect(
+        "Checkpoint to Load",
         ["model", "hf_model", "optimizer", "extra"],
         **kwargs,
     )
@@ -356,7 +434,7 @@ def set_critic_cliprange_value(**kwargs):
 @CONFIG_GENERATORS.register_config(default_value=8, visible=use_critic)
 def set_critic_ppo_micro_batch_size_per_gpu(**kwargs):
     key = kwargs.get("key")
-    max_value = st.session_state["_train_batch_size_per_gpu"]
+    max_value = get_train_batch_size_per_gpu()
     st.session_state[key] = min(st.session_state[key], max_value)
     st.number_input(
         "Micro Batch Size Per GPU :blue-badge[(Critic)]",
@@ -379,9 +457,20 @@ def set_critic_ulysses_sequence_parallel_size(**kwargs):
 @CONFIG_GENERATORS.register_config(
     default_value=["model", "optimizer", "extra"], visible=use_critic
 )
-def set_critic_checkpoint(**kwargs):
+def set_critic_save_checkpoint(**kwargs):
     st.multiselect(
-        "Checkpoint",
-        ["model", "hf_model", "optimizer", "extra"],
+        "Checkpoint to Save",
+        ["model", "optimizer", "extra"],
+        **kwargs,
+    )
+
+
+@CONFIG_GENERATORS.register_config(
+    default_value=["model", "optimizer", "extra"], visible=use_critic
+)
+def set_critic_load_checkpoint(**kwargs):
+    st.multiselect(
+        "Checkpoint to Load",
+        ["model", "optimizer", "extra"],
         **kwargs,
     )

@@ -17,16 +17,19 @@ This tool makes it easy to run benchmarks for the **Trinity-RFT**. Whether you'r
 ## 🛠️ How to Use It
 
 ### 1. Basic Command Structure
+
 ```bash
 python bench.py <dataset> [options]
 ```
 
 ### 2. Example: Run a Benchmark
+
 ```bash
 python bench.py gsm8k --node_num 1 --gpu_per_node 8 --model_path /your/model/path
 ```
 
 ### 3. Key Options Explained
+
 | Option | What It Does |
 |--------|--------------|
 | `dataset` | Choose `gsm8k` or `countdown` |

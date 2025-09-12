@@ -14,8 +14,10 @@ from trinity.algorithm.kl_fn.kl_fn import KL_FN
 from trinity.algorithm.policy_loss_fn.policy_loss_fn import POLICY_LOSS_FN
 from trinity.algorithm.sample_strategy.sample_strategy import SAMPLE_STRATEGY
 from trinity.common.constants import StorageType
+from trinity.manager.config_registry.buffer_config_manager import get_train_batch_size
 from trinity.manager.config_registry.config_registry import CONFIG_GENERATORS
 from trinity.manager.config_registry.trainer_config_manager import use_critic
+from trinity.utils.plugin_loader import load_plugins
 
 register_map = {
     "sample_strategy": SAMPLE_STRATEGY,
@@ -29,6 +31,7 @@ register_map = {
 
 class ConfigManager:
     def __init__(self):
+        load_plugins()
         self.unfinished_fields = set()
         CONFIG_GENERATORS.set_unfinished_fields(self.unfinished_fields)
         st.set_page_config(page_title="Trinity-RFT Config Generator", page_icon=":robot:")
@@ -131,7 +134,7 @@ class ConfigManager:
         st.header("Important Configs")
         self.get_configs("node_num", "gpu_per_node", "engine_num", "tensor_parallel_size")
 
-        self.get_configs("total_epochs", "explore_batch_size", "train_batch_size", "repeat_times")
+        self.get_configs("total_epochs", "explore_batch_size", "repeat_times", "train_batch_size")
 
         self.get_configs("storage_type", "max_response_tokens", "max_model_len", "ppo_epochs")
 
@@ -201,9 +204,10 @@ class ConfigManager:
                 self.get_configs("use_priority_queue")
                 self.get_configs("reuse_cooldown_time", "priority_fn", "priority_decay")
 
-        self.buffer_advanced_tab = st.expander("Advanced Config")
-        with self.buffer_advanced_tab:
-            self.get_configs("buffer_max_retry_times", "max_retry_interval")
+        # TODO: used for SQL storage
+        # self.buffer_advanced_tab = st.expander("Advanced Config")
+        # with self.buffer_advanced_tab:
+        #     self.get_configs("buffer_max_retry_times", "max_retry_interval")
 
     def _expert_explorer_part(self):
         self.get_configs("sync_method", "sync_interval", "sync_timeout")
@@ -265,15 +269,43 @@ class ConfigManager:
 
         self.get_configs("ppo_epochs", "training_strategy", "resume_mode", "impl_backend")
 
-        self.get_configs("param_offload", "optimizer_offload", "forward_prefetch")
         self.get_configs("resume_from_path")
+
+        if st.session_state["training_strategy"] == "fsdp":
+            self.get_configs("param_offload", "optimizer_offload", "forward_prefetch")
+        elif st.session_state["training_strategy"] == "fsdp2":
+            self.get_configs("offload_policy", "reshard_after_forward")
+        elif st.session_state["training_strategy"] == "megatron":
+            with st.expander("Megatron Config"):
+                self.get_configs("param_offload", "grad_offload", "optimizer_offload")
+                self.get_configs(
+                    "tensor_model_parallel_size",
+                    "pipeline_model_parallel_size",
+                    "virtual_pipeline_model_parallel_size",
+                )
+                self.get_configs(
+                    "expert_model_parallel_size",
+                    "expert_tensor_parallel_size",
+                    "context_parallel_size",
+                )
+                self.get_configs(
+                    "sequence_parallel",
+                    "use_distributed_optimizer",
+                    "use_dist_checkpointing",
+                    "use_mbridge",
+                )
+                self.get_configs("dist_checkpointing_path")
+                self.get_configs(
+                    "recompute_granularity", "recompute_method", "recompute_num_layers"
+                )
+                self.get_configs("recompute_modules")
 
         with st.expander("Advanced Config"):
             self.get_configs("critic_warmup", "total_training_steps")
 
             self.get_configs("default_hdfs_dir")
 
-            self.get_configs("remove_previous_ckpt_in_save", "del_local_ckpt_after_load")
+            self.get_configs("del_local_ckpt_after_load")
 
             self.get_configs("max_actor_ckpt_to_keep", "max_critic_ckpt_to_keep")
 
@@ -291,7 +323,7 @@ class ConfigManager:
 
         self.get_configs("actor_grad_clip")
 
-        self.get_configs("actor_checkpoint")
+        self.get_configs("actor_load_checkpoint", "actor_save_checkpoint")
 
     def _expert_verl_critic_part(self):
         st.subheader("Critic Model Config")
@@ -302,7 +334,7 @@ class ConfigManager:
         self.get_configs("critic_lr", "critic_warmup_style", "critic_lr_warmup_steps_ratio")
 
         self.get_configs("critic_grad_clip", "critic_cliprange_value")
-        self.get_configs("critic_checkpoint")
+        self.get_configs("critic_load_checkpoint", "critic_save_checkpoint")
 
     def _expert_verl_trainer_part(self):
         name2func = {
@@ -341,15 +373,56 @@ class ConfigManager:
         use_fused_kernels = "use_fused_kernels" in st.session_state["training_args"]
 
         if st.session_state["training_strategy"] == "fsdp":
-            fsdp_config = {
-                "wrap_policy": {"min_num_params": 0},
-                "param_offload": st.session_state["param_offload"],
-                "optimizer_offload": st.session_state["optimizer_offload"],
-                "fsdp_size": -1,
-                "forward_prefetch": st.session_state["forward_prefetch"],
+            distribution_config = {
+                "fsdp_config": {
+                    "fsdp_size": -1,
+                    "wrap_policy": {"min_num_params": 0},
+                    "param_offload": st.session_state["param_offload"],
+                    "optimizer_offload": st.session_state["optimizer_offload"],
+                    "forward_prefetch": st.session_state["forward_prefetch"],
+                }
+            }
+        elif st.session_state["training_strategy"] == "fsdp2":
+            distribution_config = {
+                "fsdp_config": {
+                    "fsdp_size": -1,
+                    "offload_policy": st.session_state["offload_policy"],
+                    "reshard_after_forward": st.session_state["reshard_after_forward"],
+                }
+            }
+        elif st.session_state["training_strategy"] == "megatron":
+            distribution_config = {
+                "megatron": {
+                    "param_offload": st.session_state["param_offload"],
+                    "grad_offload": st.session_state["grad_offload"],
+                    "optimizer_offload": st.session_state["optimizer_offload"],
+                    "tensor_model_parallel_size": st.session_state["tensor_model_parallel_size"],
+                    "pipeline_model_parallel_size": st.session_state[
+                        "pipeline_model_parallel_size"
+                    ],
+                    "virtual_pipeline_model_parallel_size": st.session_state[
+                        "virtual_pipeline_model_parallel_size"
+                    ],
+                    "expert_model_parallel_size": st.session_state["expert_model_parallel_size"],
+                    "expert_tensor_parallel_size": st.session_state["expert_tensor_parallel_size"],
+                    "context_parallel_size": st.session_state["context_parallel_size"],
+                    "sequence_parallel": st.session_state["sequence_parallel"],
+                    "use_distributed_optimizer": st.session_state["use_distributed_optimizer"],
+                    "use_dist_checkpointing": st.session_state["use_dist_checkpointing"],
+                    "dist_checkpointing_path": st.session_state["dist_checkpointing_path"],
+                    "seed": st.session_state["seed"],
+                    # TODO: override_ddp_config
+                    "override_transformer_config": {
+                        "recompute_granularity": st.session_state["recompute_granularity"],
+                        "recompute_modules": st.session_state["recompute_modules"],
+                        "recompute_method": st.session_state["recompute_method"],
+                        "recompute_num_layers": st.session_state["recompute_num_layers"],
+                    },
+                    "use_mbridge": st.session_state["use_mbridge"],
+                }
             }
         else:
-            fsdp_config = {}
+            distribution_config = {}
 
         ppo_max_token_len_per_gpu = (
             st.session_state["repeat_times"] * st.session_state["max_model_len"]
@@ -372,7 +445,6 @@ class ConfigManager:
                     "use_dynamic_bsz": use_dynamic_bsz,
                     "ppo_max_token_len_per_gpu": ppo_max_token_len_per_gpu,
                     "ppo_epochs": st.session_state["ppo_epochs"],
-                    "shuffle": False,
                     "ulysses_sequence_parallel_size": st.session_state[
                         "actor_ulysses_sequence_parallel_size"
                     ],
@@ -380,21 +452,18 @@ class ConfigManager:
                         "actor_entropy_from_logits_with_chunking"
                     ],
                     "entropy_checkpointing": st.session_state["actor_entropy_checkpointing"],
-                    "checkpoint": {"contents": st.session_state["actor_checkpoint"]},
+                    "checkpoint": {
+                        "load_contents": st.session_state["actor_load_checkpoint"],
+                        "save_contents": st.session_state["actor_save_checkpoint"],
+                    },
                     "optim": {
                         "lr": st.session_state["actor_lr"],
                         "lr_warmup_steps_ratio": st.session_state["actor_lr_warmup_steps_ratio"],
                         "warmup_style": st.session_state["actor_warmup_style"],
-                        "total_training_steps": (
-                            -1
-                            if st.session_state["total_training_steps"] is None
-                            else st.session_state["total_training_steps"]
-                        ),
+                        "total_training_steps": (st.session_state["total_training_steps"] or -1),
                     },
-                    "fsdp_config": copy.deepcopy(fsdp_config),
                 },
                 "ref": {
-                    "fsdp_config": copy.deepcopy(fsdp_config),
                     "log_prob_micro_batch_size_per_gpu": st.session_state[
                         "ref_log_prob_micro_batch_size_per_gpu"
                     ],
@@ -415,13 +484,14 @@ class ConfigManager:
                 "resume_mode": st.session_state["resume_mode"],
                 "resume_from_path": st.session_state["resume_from_path"],
                 "default_hdfs_dir": st.session_state["default_hdfs_dir"],
-                "remove_previous_ckpt_in_save": st.session_state["remove_previous_ckpt_in_save"],
                 "del_local_ckpt_after_load": st.session_state["del_local_ckpt_after_load"],
-                "val_before_train": False,
                 "max_actor_ckpt_to_keep": st.session_state["max_actor_ckpt_to_keep"],
                 "max_critic_ckpt_to_keep": st.session_state["max_critic_ckpt_to_keep"],
             },
         }
+
+        trainer_config["actor_rollout_ref"]["actor"].update(copy.deepcopy(distribution_config))
+        trainer_config["actor_rollout_ref"]["ref"].update(copy.deepcopy(distribution_config))
 
         if use_fused_kernels:
             trainer_config["actor_rollout_ref"]["model"]["fused_kernel_options"] = {
@@ -436,20 +506,15 @@ class ConfigManager:
                     "lr": st.session_state["critic_lr"],
                     "lr_warmup_steps_ratio": st.session_state["critic_lr_warmup_steps_ratio"],
                     "warmup_style": st.session_state["critic_warmup_style"],
-                    "total_training_steps": (
-                        -1
-                        if st.session_state["total_training_steps"] is None
-                        else st.session_state["total_training_steps"]
-                    ),
+                    "total_training_steps": (st.session_state["total_training_steps"] or -1),
                 },
                 "model": {
                     "override_config": {},
                     "external_lib": None,
                     "enable_gradient_checkpointing": enable_gradient_checkpointing,
                     "use_remove_padding": use_remove_padding,
-                    "fsdp_config": copy.deepcopy(fsdp_config),
                 },
-                "ppo_mini_batch_size": st.session_state["train_batch_size"],
+                "ppo_mini_batch_size": get_train_batch_size(),
                 "ppo_micro_batch_size_per_gpu": st.session_state[
                     "critic_ppo_micro_batch_size_per_gpu"
                 ],
@@ -463,11 +528,17 @@ class ConfigManager:
                     "critic_ulysses_sequence_parallel_size"
                 ],
                 "ppo_epochs": st.session_state["ppo_epochs"],
-                "shuffle": False,
                 "grad_clip": st.session_state["critic_grad_clip"],
                 "cliprange_value": st.session_state["critic_cliprange_value"],
-                "checkpoint": {"contents": st.session_state["critic_checkpoint"]},
+                "checkpoint": {
+                    "load_contents": st.session_state["critic_load_checkpoint"],
+                    "save_contents": st.session_state["critic_save_checkpoint"],
+                },
             }
+            if st.session_state["training_strategy"] in {"fsdp", "fsdp2"}:
+                trainer_config["critic"]["model"].update(copy.deepcopy(distribution_config))
+            elif st.session_state["training_strategy"] == "megatron":
+                trainer_config["critic"].update(copy.deepcopy(distribution_config))
         else:
             del trainer_config["critic"]
         return trainer_config
@@ -519,12 +590,14 @@ class ConfigManager:
                     "name": "experience_buffer",
                     "storage_type": st.session_state["storage_type"],
                     "path": experience_buffer_path,
-                    "max_retry_interval": st.session_state["max_retry_interval"],
-                    "max_retry_times": st.session_state["buffer_max_retry_times"],
+                    # "max_retry_interval": st.session_state["max_retry_interval"],
+                    # "max_retry_times": st.session_state["buffer_max_retry_times"],
                 },
                 "sft_warmup_steps": st.session_state["sft_warmup_steps"],
             },
         }
+        if st.session_state["train_batch_size"] is None:
+            del buffer_config["train_batch_size"]
         if st.session_state["algorithm_type"] != "dpo":
             experience_buffer = buffer_config["trainer_input"]["experience_buffer"]
             experience_buffer["use_priority_queue"] = st.session_state["use_priority_queue"]
@@ -665,6 +738,8 @@ class ConfigManager:
                 "data_processor": {},  # TODO: Add data processor config
                 "model": {
                     "model_path": st.session_state["model_path"],
+                    "max_prompt_tokens": st.session_state["max_prompt_tokens"],
+                    "min_response_tokens": st.session_state["min_response_tokens"],
                     "max_response_tokens": st.session_state["max_response_tokens"],
                     "max_model_len": st.session_state["max_model_len"],
                 },

@@ -10,6 +10,10 @@ TRAINER_NAME = "trainer"
 ROLLOUT_WEIGHT_SYNC_GROUP_NAME = "rollout_weight_sync"
 
 # trinity env var names
+CHECKPOINT_ROOT_DIR_ENV_VAR = "TRINITY_CHECKPOINT_ROOT_DIR"
+MODEL_PATH_ENV_VAR = "TRINITY_MODEL_PATH"
+TASKSET_PATH_ENV_VAR = "TRINITY_TASKSET_PATH"
+BUFFER_PATH_ENV_VAR = "TRINITY_BUFFER_PATH"
 PLUGIN_DIRS_ENV_VAR = "TRINITY_PLUGIN_DIRS"
 LOG_DIR_ENV_VAR = "TRINITY_LOG_DIR"  # log dir
 LOG_LEVEL_ENV_VAR = "TRINITY_LOG_LEVEL"  # global log level
@@ -54,14 +58,6 @@ class StorageType(CaseInsensitiveEnum):
     SQL = "sql"
     QUEUE = "queue"
     FILE = "file"
-
-
-class MonitorType(CaseInsensitiveEnum):
-    """Monitor Type."""
-
-    WANDB = "wandb"
-    TENSORBOARD = "tensorboard"
-    MLFLOW = "mlflow"
 
 
 class SyncMethodEnumMeta(CaseInsensitiveEnumMeta):

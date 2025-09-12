@@ -18,13 +18,13 @@ Welcome to Trinity-RFT's documentation!
 
    tutorial/example_reasoning_basic.md
    tutorial/example_reasoning_advanced.md
-   tutorial/example_megatron.md
    tutorial/example_async_mode.md
    tutorial/example_multi_turn.md
    tutorial/example_step_wise.md
    tutorial/example_react.md
    tutorial/example_search_email.md
    tutorial/example_dpo.md
+   tutorial/example_megatron.md
    tutorial/example_data_functionalities.md
 
 .. toctree::

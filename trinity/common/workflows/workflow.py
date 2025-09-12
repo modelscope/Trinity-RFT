@@ -100,8 +100,13 @@ class Workflow(ABC):
 
     @property
     def repeatable(self):
-        """A workflow is repeatable if it can be run multiple times within the run() method."""
+        """A workflow is repeatable if it can be run multiple times within the run() or run_async() method."""
         return True
+
+    @property
+    def asynchronous(self):
+        """Whether the workflow runs in async mode."""
+        return False
 
     @property
     def rollout_args(self):
@@ -122,9 +127,12 @@ class Workflow(ABC):
             "set_repeat_times() must be implemented for a repeatable workflow."
         )
 
-    @abstractmethod
     def run(self) -> List[Experience]:
         """Run workflow and return a list of experiences."""
+        raise NotImplementedError
+
+    async def run_async(self) -> List[Experience]:
+        """Run workflow in async and return a list of experiences."""
         raise NotImplementedError
 
 
@@ -162,8 +170,6 @@ class MultiTurnWorkflow(Workflow):
         assert converted_experience.action_mask is not None
         generation_mask = converted_experience.action_mask
         log_probs = log_probs * generation_mask
-
-        assert tokens.shape == log_probs.shape
 
         metrics = {}
         for k, v in info.items():

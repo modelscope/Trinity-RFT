@@ -129,5 +129,3 @@ jobs:
       run: |
         rm -rf trinity-${{ github.run_id }} 2>/dev/null
       continue-on-error: true
-
-# TODO: run data tests after the dependency conflict is resolved

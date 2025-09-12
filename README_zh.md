@@ -19,115 +19,69 @@
 </div>
 
 
+## 🚀 新闻
 
-## 🚀 最新动态
-
-* [2025-08] 🎵 我们推出了 [CHORD](https://github.com/modelscope/Trinity-RFT/tree/main/examples/mix_chord)，一种动态整合 SFT 和 RL 来微调 LLM 的方法（[论文](https://arxiv.org/pdf/2508.11408)）。
-* [2025-08] ✨ 发布 Trinity-RFT v0.2.1 版本！新增功能包括：
-  * 智能体 RL：支持通用多轮工作流的训练；请参考 [ALFWorld](./docs/sphinx_doc/source/tutorial/example_step_wise.md) 和 [ReAct](./docs/sphinx_doc/source/tutorial/example_react.md) 例子。
-  * Rollout-Training 调度: 通过引入 Scheduler, [Synchronizer](./docs/sphinx_doc/source/tutorial/synchronizer.md) 以及优先队列类型 Buffer, 支持 RFT 流程中更高效与灵活的调度。
-  * [Benchmark 工具](./benchmark)，用于快速验证与实验。
-  * RL 算法：实现 [GSPO](https://github.com/modelscope/Trinity-RFT/pull/154), [AsymRE](https://github.com/modelscope/Trinity-RFT/pull/187), [TOPR, CISPO](https://github.com/modelscope/Trinity-RFT/pull/185), [RAFT](https://github.com/modelscope/Trinity-RFT/pull/174) 等算法。
-* [2025-07] 发布 Trinity-RFT v0.2.0 版本，新增了多项功能优化。
-* [2025-07] 更新了[技术报告](https://arxiv.org/abs/2505.17826) (arXiv v2)，增加了新功能、示例和实验。
-* [2025-06] 发布 Trinity-RFT v0.1.1 版本，修复了已知问题并提升系统稳定性。
-* [2025-05] 发布 Trinity-RFT v0.1.0 版本及配套技术报告。
-* [2025-04] 开源了 Trinity-RFT 的初始代码库，开启项目共建之旅！
+* [2025-09] ✨ [[发布说明](https://github.com/modelscope/Trinity-RFT/releases/tag/v0.3.0)] Trinity-RFT v0.3.0 发布：增强的 Buffer、FSDP2 & Megatron 支持，多模态模型，以及全新 RL 算法/示例。
+* [2025-08] 🎵 推出 [CHORD](https://github.com/modelscope/Trinity-RFT/tree/main/examples/mix_chord)：动态 SFT + RL 集成，实现进阶 LLM 微调（[论文](https://arxiv.org/pdf/2508.11408)）。
+* [2025-08] [[发布说明](https://github.com/modelscope/Trinity-RFT/releases/tag/v0.2.1)] Trinity-RFT v0.2.1 发布。
+* [2025-07] [[发布说明](https://github.com/modelscope/Trinity-RFT/releases/tag/v0.2.0)] Trinity-RFT v0.2.0 发布。
+* [2025-07] 技术报告（arXiv v2）更新，包含新功能、示例和实验：[链接](https://arxiv.org/abs/2505.17826)。
+* [2025-06] [[发布说明](https://github.com/modelscope/Trinity-RFT/releases/tag/v0.1.1)] Trinity-RFT v0.1.1 发布。
+* [2025-05] [[发布说明](https://github.com/modelscope/Trinity-RFT/releases/tag/v0.1.0)] Trinity-RFT v0.1.0 发布，同时发布 [技术报告](https://arxiv.org/abs/2505.17826)。
+* [2025-04] Trinity-RFT 开源。
 
 
-## 💡 Trinity-RFT 是什么？
+## 💡 什么是 Trinity-RFT？
+
+Trinity-RFT 是一个灵活、通用的大语言模型（LLM）强化微调（RFT）框架。它支持广泛的应用场景，并为 [Experience 时代](https://storage.googleapis.com/deepmind-media/Era-of-Experience%20/The%20Era%20of%20Experience%20Paper.pdf) 的 RL 研究提供统一平台。
+
+RFT 流程被模块化为三个核心组件：
+
+* **Explorer**：负责智能体与环境的交互
+* **Trainer**：负责模型训练
+* **Buffer**：负责数据存储与处理
 
 
-
-Trinity-RFT是一个通用、灵活且易于使用的大语言模型强化微调（RFT）框架。
-它旨在支持多样化的应用场景，并作为一个用于在[经验时代](https://storage.googleapis.com/deepmind-media/Era-of-Experience%20/The%20Era%20of%20Experience%20Paper.pdf)探索先进的强化学习（RL）范式的平台。
+<img src="https://img.alicdn.com/imgextra/i2/O1CN01H3UbpF1yP7E1OCLbi_!!6000000006570-2-tps-1334-638.png" alt="Trinity-RFT 整体设计" width="800" />
 
 
 
 ## ✨ 核心特性
 
-* **统一的 RFT 内核：**
+* **灵活的 RFT 模式：**
+  - 支持同步/异步、on-policy/off-policy 以及在线/离线训练。采样与训练可分离运行，并可在多设备上独立扩展。
 
-  灵活应对同步/异步（synchronous/asynchronous）、同策略/异策略（on-policy/off-policy）和在线/离线（online/offline）等多样化训练模式，经验数据的产生（rollout）和训练（training）可独立部署在不同设备并实现分布式扩展。
+  <img src="https://img.alicdn.com/imgextra/i3/O1CN01E7NskS1FFoTI9jlaQ_!!6000000000458-2-tps-1458-682.png" alt="Trinity-RFT 支持的 RFT 模式" width="600" />
 
-* **一流的智能体-环境交互：**
+* **兼容 Agent 框架的工作流：**
+  - 支持拼接式和通用多轮智能体工作流。可自动收集来自模型 API 客户端（如 OpenAI）的训练数据，并兼容 AgentScope 等智能体框架。
 
-  优雅地处理滞后反馈、长尾延迟以及智能体/环境故障，并且支持智能体和环境之间的多轮交互。
+  <img src="https://img.alicdn.com/imgextra/i1/O1CN01z1i7kk1jlMEVa8ZHV_!!6000000004588-2-tps-1262-695.png" alt="智能体工作流" width="600" />
 
-* **优化的数据管道：**
+* **强大的数据流水线：**
+  - 支持 rollout 和经验数据的流水线处理，贯穿 RFT 生命周期实现主动管理（优先级、清洗、增强等）。
 
-  将 RFT 任务和经验数据视为动态资源，支持在整个 RFT 生命周期中进行主动管理（如对数据进行排序、清洗、增强等）。
+  <img src="https://img.alicdn.com/imgextra/i2/O1CN01BfeHp61sXSlGjH7zQ_!!6000000005776-2-tps-1734-473.png" alt="数据流水线设计" width="600" />
 
-* **用户友好的设计：**
+* **用户友好的框架设计：**
+  - 模块化、解耦架构，便于快速上手和二次开发。丰富的图形界面支持低代码使用。
 
-  采用了模块化和解耦的架构，支持快速集成与功能扩展，并配套可视化操作界面，提供低代码的交互式开发体验。
-
-
-<p align="center">
-  <img src="https://img.alicdn.com/imgextra/i2/O1CN01H3UbpF1yP7E1OCLbi_!!6000000006570-2-tps-1334-638.png" alt="Trinity-RFT">
-  <em>图：Trinity-RFT 的整体设计</em>
-</p>
-
-
-<details>
-<summary>图：RFT-core 的架构</summary>
-
-
-<p align="center">
-  <img src="https://img.alicdn.com/imgextra/i1/O1CN01Ti0o4320RywoAuyhN_!!6000000006847-2-tps-3840-2134.png" alt="Trinity-RFT-core-architecture">
-</p>
-
-</details>
-
-
-<details>
-<summary>图：Trinity-RFT 支持的部分 RFT 模式</summary>
-
-<p align="center">
-  <img src="https://img.alicdn.com/imgextra/i3/O1CN01E7NskS1FFoTI9jlaQ_!!6000000000458-2-tps-1458-682.png" alt="Trinity-RFT-modes">
-</p>
-
-</details>
-
-
-<details>
-<summary>图：拼接多轮和通用多轮的对比</summary>
-
-<p align="center">
-  <img src="https://img.alicdn.com/imgextra/i1/O1CN01z1i7kk1jlMEVa8ZHV_!!6000000004588-2-tps-1262-695.png" alt="Trinity-RFT-multi-step">
-</p>
-
-</details>
-
-
-<details>
-<summary>图：Trinity-RFT 中数据处理的设计</summary>
-
-<p align="center">
-  <img src="https://img.alicdn.com/imgextra/i2/O1CN01BfeHp61sXSlGjH7zQ_!!6000000005776-2-tps-1734-473.png" alt="Trinity-RFT-data-pipelines">
-</p>
-
-</details>
+  <img src="https://img.alicdn.com/imgextra/i1/O1CN01Ti0o4320RywoAuyhN_!!6000000006847-2-tps-3840-2134.png" alt="系统架构" width="600" />
 
 
 
-## 🛠️ 我可以用 Trinity-RFT 做什么？
 
+## 🛠️ Trinity-RFT 能做什么？
 
-* **快速构建新场景：**
+* **用 RL 训练智能体应用** [[教程]](https://modelscope.github.io/Trinity-RFT/main/tutorial/trinity_programming_guide.html#workflows-for-rl-environment-developers)
+  - 在 Workflow 中实现智能体-环境交互逻辑 ([示例1](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_multi_turn.html)，[示例2](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_step_wise.html))，
+  - 或直接使用 Agent 框架（如 AgentScope）编写好的工作流 ([示例](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_react.html))。
 
-  通过编写基础交互逻辑配置即可构建新场景，只需在 workflow 类中定义智能体与环境的互动规则 ([查看示例](./docs/sphinx_doc/source/tutorial/example_multi_turn.md))，
-  或者直接调用智能体框架（比如 AgentScope）中已有的智能体工作流 ([查看示例](./docs/sphinx_doc/source/tutorial/example_react.md))。
+* **快速设计和验证 RL 算法** [[教程]](https://modelscope.github.io/Trinity-RFT/main/tutorial/trinity_programming_guide.html#algorithms-for-rl-algorithm-developers)
+  - 在简洁、可插拔的类中开发自定义 RL 算法（损失、采样及其他技巧）([示例](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_react.html))。
 
-
-* **灵活开发算法模块：**
-
-  在轻量级算法模块中开发强化学习算法，包括损失函数设计、数据采样与数据处理等核心环节，模块支持自由组合，便于快速迭代实验。([查看示例](./docs/sphinx_doc/source/tutorial/example_mix_algo.md))
-
-
-* **可视化操作体验：**
-
-  通过图形化界面直观监控训练过程，并且几乎无需编写代码即可完成基础操作。
+* **为 RFT 定制数据集和数据流水线** [[教程]](https://modelscope.github.io/Trinity-RFT/main/tutorial/trinity_programming_guide.html#operators-for-data-developers)
+  - 设计任务定制数据集，构建数据流水线以支持清洗、增强和人类参与场景 ([示例](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_data_functionalities.html))。
 
 
 ---
@@ -157,69 +111,115 @@ Trinity-RFT是一个通用、灵活且易于使用的大语言模型强化微调
 
 ### 第一步：安装
 
-环境要求:
-- Python >= 3.10, <= 3.12
-- CUDA >= 12.4, <= 12.8
-- 至少 2 块 GPU
+#### 环境要求
+在安装之前，请确保您的系统满足以下要求：
+
+- **Python**：版本 3.10 至 3.12（含）
+- **CUDA**：版本 12.4 至 12.8（含）
+- **GPU**：至少 2 块 GPU
 
 
-源码安装 **（推荐）**：
+#### 方式 A：从源码安装（推荐）
 
-```shell
-# 从 GitHub 拉取源码
+这种方式可以让您完全控制项目代码，适合打算自定义功能或参与项目开发的用户。
+
+##### 1. 克隆代码仓库
+
+```bash
 git clone https://github.com/modelscope/Trinity-RFT
 cd Trinity-RFT
+```
 
-# 使用 Conda 或 venv 创建新环境
-# 选项 1：Conda
+##### 2. 创建虚拟环境
+
+选择以下任意一种方式，创建一个独立的 Python 环境：
+
+###### 使用 Conda
+```bash
 conda create -n trinity python=3.10
 conda activate trinity
+```
 
-# 选项 2：venv
+###### 使用 venv
+```bash
 python3.10 -m venv .venv
 source .venv/bin/activate
-
-# 以可编辑模式安装包
-# 适用于 bash
-pip install -e .[dev]
-# 适用于 zsh
-pip install -e .\[dev\]
-
-# 安装完所有依赖后，再安装 flash-attn
-# 注意：flash-attn 编译需要较长时间，请耐心等待。
-# 适用于 bash
-pip install -e .[flash_attn]
-# 适用于 zsh
-pip install -e .\[flash_attn\]
-# 如果安装 flash-attn 时遇到错误，可以尝试以下命令
-# pip install flash-attn==2.8.0.post2 -v --no-build-isolation
 ```
 
-使用 pip 安装：
+##### 3. 安装软件包
 
-```shell
-pip install trinity-rft==0.2.1
-# flash-attn 需要单独安装
-pip install flash-attn==2.8.0.post2
+以“可编辑模式”安装，这样您可以修改代码而无需重新安装：
+
+```bash
+pip install -e ".[dev]"
 ```
 
-使用 Docker 安装：
-我们为 Trinity-RFT (trinity) 提供了 Dockerfile
+##### 4. 安装 Flash Attention
 
-```shell
+Flash Attention 可以显著提升训练速度。编译需要几分钟时间，请耐心等待！
+
+```bash
+pip install flash-attn==2.8.1
+```
+
+如果安装过程中出现问题，可以尝试以下命令：
+
+```bash
+pip install flash-attn==2.8.1 --no-build-isolation
+```
+
+
+##### ⚡ 快速替代方案：使用 `uv`（可选）
+
+如果您希望安装得更快，可以试试 [`uv`](https://github.com/astral-sh/uv)，这是一个现代化的 Python 包安装工具：
+
+```bash
+uv venv
+source .venv/bin/activate
+
+uv pip install -e ".[dev]"
+uv pip install flash-attn==2.8.1 --no-build-isolation
+```
+
+#### 方式 B：通过 pip 安装（快速开始）
+
+如果您只是想使用这个工具，不需要修改代码，可以选择这种方式：
+
+```bash
+pip install trinity-rft==0.3.0
+pip install flash-attn==2.8.1  # 单独安装 Flash Attention
+
+# 也可以用 uv 来安装 trinity-rft
+# uv pip install trinity-rft==0.3.0
+# uv pip install flash-attn==2.8.1
+```
+
+#### 方式 C：使用 Docker
+
+我们提供了 Docker 配置，可以免去复杂的环境设置。
+
+```bash
 git clone https://github.com/modelscope/Trinity-RFT
 cd Trinity-RFT
 
 # 构建 Docker 镜像
 # 注意：您可以编辑 Dockerfile 来定制环境
-# 例如，使用 pip 镜像或设置 API 密钥
+# 例如，设置 pip 镜像源或设置 API 密钥
 docker build -f scripts/docker/Dockerfile -t trinity-rft:latest .
 
-# 运行 Docker 镜像
-docker run -it --gpus all --shm-size="64g" --rm -v $PWD:/workspace -v <root_path_of_data_and_checkpoints>:/data trinity-rft:latest
+# 启动容器
+docker run -it \
+  --gpus all \
+  --shm-size="64g" \
+  --rm \
+  -v $PWD:/workspace \
+  -v <path_to_your_data_and_checkpoints>:/data \
+  trinity-rft:latest
 ```
 
-如果您想使用 Megatron-LM 进行训练，请参考这个[示例](./docs/sphinx.doc/source/tutorial/example.metatron.md)来设置环境。
+💡 **注意**：请将 `<path_to_your_data_and_checkpoints>` 替换为您电脑上实际存放数据集和模型文件的路径。
+
+> 如果您想集成 **Megatron-LM**，请参考我们的 [Megatron 示例配置指南](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_megatron.html)。
 
 
 ### 第二步：准备数据集和模型
@@ -328,43 +328,43 @@ trinity run --config examples/grpo_gsm8k/gsm8k.yaml
 
 ## 更多教程
 
+> [!NOTE]
+> 更多教程请参考 [Trinity-RFT 文档](https://modelscope.github.io/Trinity-RFT/)。
 
 运行不同 RFT 模式的教程：
 
-+ [快速开始：在 GSM8k 上运行 GRPO](./docs/sphinx_doc/source/tutorial/example_reasoning_basic.md)
-+ [Off-Policy RFT](./docs/sphinx_doc/source/tutorial/example_reasoning_advanced.md)
-+ [全异步 RFT](./docs/sphinx_doc/source/tutorial/example_async_mode.md)
-+ [通过 DPO 或 SFT 进行离线学习](./docs/sphinx_doc/source/tutorial/example_dpo.md)
++ [快速开始：在 GSM8k 上运行 GRPO](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_reasoning_basic.html)
++ [Off-Policy RFT](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_reasoning_advanced.html)
++ [全异步 RFT](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_async_mode.html)
++ [通过 DPO 或 SFT 进行离线学习](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_dpo.html)
 
 
 将 Trinity-RFT 适配到新的多轮智能体场景的教程：
 
-+ [拼接多轮任务](./docs/sphinx_doc/source/tutorial/example_multi_turn.md)
-+ [通用多轮任务](./docs/sphinx_doc/source/tutorial/example_step_wise.md)
-+ [调用智能体框架中的 ReAct 工作流](./docs/sphinx_doc/source/tutorial/example_react.md)
++ [拼接多轮任务](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_multi_turn.html)
++ [通用多轮任务](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_step_wise.html)
++ [调用智能体框架中的 ReAct 工作流](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_react.html)
 
 
 数据相关功能的教程：
 
-+ [高级数据处理及 Human-in-the-loop](./docs/sphinx_doc/source/tutorial/example_data_functionalities.md)
++ [高级数据处理及 Human-in-the-loop](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_data_functionalities.html)
 
 
 使用 Trinity-RFT 进行 RL 算法开发/研究的教程：
 
-+ [使用 Trinity-RFT 进行 RL 算法开发](./docs/sphinx_doc/source/tutorial/example_mix_algo.md)
++ [使用 Trinity-RFT 进行 RL 算法开发](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_mix_algo.html)
 
 
 完整配置指南：
 
-+ 请参阅[此文档](./docs/sphinx_doc/source/tutorial/trinity_configs.md)
++ 请参阅[此文档](https://modelscope.github.io/Trinity-RFT/main/tutorial/trinity_configs.html)
 
 
 面向开发者和研究人员的指南：
 
-+ [构建新的 RL 场景](./docs/sphinx_doc/source/tutorial/trinity_programming_guide.md#workflows-for-rl-environment-developers)
-+ [实现新的 RL 算法](./docs/sphinx_doc/source/tutorial/trinity_programming_guide.md#algorithms-for-rl-algorithm-developers)
-+ [开发新的数据处理操作](./docs/sphinx_doc/source/tutorial/trinity_programming_guide.md#operators-for-data-developers)
-+ [理解 explorer-trainer 调度逻辑](./docs/sphinx_doc/source/tutorial/synchronizer.md)
++ [用于快速验证实验的 Benchmark 工具](./benchmark/README.md)
++ [理解 explorer-trainer 同步逻辑](https://modelscope.github.io/Trinity-RFT/main/tutorial/synchronizer.html)
 
 
 
@@ -380,20 +380,7 @@ trinity run --config examples/grpo_gsm8k/gsm8k.yaml
 本项目正处于活跃开发阶段，我们欢迎来自社区的贡献！
 
 
-代码风格检查：
-
-```shell
-pre-commit run --all-files
-```
-
-
-
-单元测试：
-
-```shell
-python -m pytest tests
-```
-
+请参阅 [贡献指南](./CONTRIBUTING.md) 了解详情。
 
 
 ## 致谢
@@ -412,7 +399,7 @@ python -m pytest tests
 ## 引用
 
 
-```plain
+```bibtex
 @misc{trinity-rft,
       title={Trinity-RFT: A General-Purpose and Unified Framework for Reinforcement Fine-Tuning of Large Language Models},
       author={Xuchen Pan and Yanxi Chen and Yushuo Chen and Yuchang Sun and Daoyuan Chen and Wenhao Zhang and Yuexiang Xie and Yilun Huang and Yilei Zhang and Dawei Gao and Yaliang Li and Bolin Ding and Jingren Zhou},

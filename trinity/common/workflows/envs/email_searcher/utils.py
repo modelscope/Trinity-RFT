@@ -12,9 +12,6 @@ from pydantic import BaseModel, Field, field_validator
 
 from trinity.utils.log import get_logger
 
-logger = get_logger(__name__)
-
-
 DEFAULT_DB_PATH = os.environ.get("DEFAULT_EMAIL_DB_PATH")
 conn = None
 
@@ -200,6 +197,8 @@ def search_emails_tool(
             e.date DESC -- Order by date for relevance
         LIMIT ?;
     """
+    logger = get_logger(__name__)
+
     params.append(max_results)
 
     # --- Execute and Fetch ---
@@ -225,6 +224,8 @@ def read_email_tool(message_id: str) -> Optional[Email]:
         An Email object containing the details of the found email,
         or None if the email is not found or an error occurs.
     """
+    logger = get_logger(__name__)
+
     cursor = get_conn().cursor()
 
     # --- Query for Email Core Details ---
@@ -321,6 +322,7 @@ Return your judgement **accept** from **true** and **false**. Do not return any 
         model=judger.model_path, messages=messages, stream=False
     )
     result = completion.choices[0].message.content
+    logger = get_logger(__name__)
     logger.info(f"LLM judge response: {result}")
 
     # TODO: more robust judge

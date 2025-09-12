@@ -48,7 +48,7 @@ This may take a while to run.
 
 ### Modify the running script
 
-Fill in the config files in [`mix_chord.yaml`](mix_chord.yaml) and [`train_mix_chord.yaml`](train_mix_chord.yaml).
+Fill in the config file in [`mix_chord.yaml`](mix_chord.yaml).
 
 ### Run the script
 

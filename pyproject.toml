@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name =  "trinity-rft"
-version = "0.3.0.dev0"
+version = "0.3.1.dev0"
 authors = [
     {name="Trinity-RFT Team", email="trinity-rft@outlook.com"},
 ]
@@ -19,7 +19,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12"
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.10,<3.13"
 dependencies = [
     "verl==0.5.0",
     "ray[default]>=2.45.0",
@@ -79,7 +79,7 @@ megatron = [
 doc = [
     "sphinx",
     "sphinx-autobuild",
-    "sphinx_rtd_theme",
+    "sphinx-book-theme",
     "myst-parser",
     "sphinxcontrib-apidoc",
     "sphinx-multiversion",
@@ -123,3 +123,6 @@ known_third_party = ["wandb"]
 [project.urls]
 "Homepage" = "https://github.com/modelscope/Trinity-RFT"
 "Documentation" = "https://modelscope.github.io/Trinity-RFT/"
+
+[tool.uv]
+override-dependencies=["spacy>=3.8.2"]  # data-juicer requires spacy==3.8.0 which is yanked

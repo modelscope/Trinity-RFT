@@ -15,12 +15,12 @@ Assuming we have a node with 8 GPUs, we allocate 4 GPUs for the trainer and 4 GP
 project: <project_name>
 name: <experiment_name>
 mode: explore
-checkpoint_root_dir: /PATH/TO/CHECKPOINT/
+checkpoint_root_dir: ${oc.env:TRINITY_CHECKPOINT_ROOT_DIR,./checkpoints}
 algorithm:
   algorithm_type: grpo
   repeat_times: 8
 model:
-  model_path: /PATH/TO/MODEL/
+  model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-1.5B-Instruct}
 cluster:
   node_num: 1
   gpu_per_node: 4
@@ -31,7 +31,8 @@ buffer:
     taskset:
       name: gsm8k
       storage_type: file
-      path: /PATH/TO/DATASET/
+      path: 'openai/gsm8k'
+      subset_name: 'main'
       split: train
       format:
         prompt_key: 'question'
@@ -52,8 +53,6 @@ explorer:
 synchronizer:
   sync_method: 'checkpoint'
   sync_interval: 10
-trainer:
-  trainer_config_path: examples/async_gsm8k/verl_config.yaml
 ```
 
 Key configurations in `trainer.yaml` are as follows:
@@ -63,12 +62,12 @@ Key configurations in `trainer.yaml` are as follows:
 project: <project_name>
 name: <experiment_name>
 mode: train
-checkpoint_root_dir: /PATH/TO/CHECKPOINT/
+checkpoint_root_dir: ${oc.env:TRINITY_CHECKPOINT_ROOT_DIR,./checkpoints}
 algorithm:
   algorithm_type: grpo
   repeat_times: 8
 model:
-  model_path: /PATH/TO/MODEL/
+  model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-1.5B-Instruct}
 cluster:
   node_num: 1
   gpu_per_node: 4
@@ -79,7 +78,8 @@ buffer:
     taskset:
       name: gsm8k
       storage_type: file
-      path: /PATH/TO/DATASET/
+      path: 'openai/gsm8k'
+      subset_name: 'main'
       format:
         prompt_key: 'question'
         response_key: 'answer'
@@ -95,7 +95,20 @@ synchronizer:
   sync_method: 'checkpoint'
   sync_interval: 10
 trainer:
-  trainer_config_path: examples/async_gsm8k/verl_config.yaml
+  trainer_config:
+    actor_rollout_ref:
+      model:
+        use_remove_padding: true
+      actor:
+        use_dynamic_bsz: true
+        ppo_max_token_len_per_gpu: 16384
+        ulysses_sequence_parallel_size: 1
+        optim:
+          lr: 1e-6
+      ref:
+        log_prob_use_dynamic_bsz: ${trainer.trainer_config.actor_rollout_ref.actor.use_dynamic_bsz}
+        log_prob_max_token_len_per_gpu: ${trainer.trainer_config.actor_rollout_ref.actor.ppo_max_token_len_per_gpu}
+        ulysses_sequence_parallel_size: ${trainer.trainer_config.actor_rollout_ref.actor.ulysses_sequence_parallel_size} # sp size
 ```
 
 You can run this example with the following command:
@@ -118,12 +131,12 @@ Trinity-RFT also supports dynamic scaling in asynchronous mode. Continuing with 
 project: <project_name>
 name: <experiment_name>
 mode: explore
-checkpoint_root_dir: /PATH/TO/CHECKPOINT/
+checkpoint_root_dir: ${oc.env:TRINITY_CHECKPOINT_ROOT_DIR,./checkpoints}
 algorithm:
   algorithm_type: grpo
   repeat_times: 8
 model:
-  model_path: /PATH/TO/MODEL/
+  model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-1.5B-Instruct}
 cluster:  # important
   node_num: 1
   gpu_per_node: 8
@@ -140,7 +153,8 @@ buffer:
     taskset:  # important
       name: gsm8k
       storage_type: file
-      path: /PATH/TO/DATASET/
+      path: 'openai/gsm8k'
+      subset_name: 'main'
       format:
         prompt_key: 'question'
         response_key: 'answer'

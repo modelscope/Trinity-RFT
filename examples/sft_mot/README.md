@@ -4,4 +4,4 @@ This example shows the usage of SFT on the [Mixture-of-Thoughts](https://hugging
 
 For more detailed information, please refer to the [documentation](../../docs/sphinx_doc/source/tutorial/example_dpo.md).
 
-The config files are located in [`sft.yaml`](sft.yaml) and [`train_sft.yaml`](train_sft.yaml).
+The config file is located in [`sft.yaml`](sft.yaml).

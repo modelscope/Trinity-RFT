@@ -91,13 +91,13 @@ The example configuration is shown as:
 ```yaml
 project: "ALFWORLD"
 name: "Step_Wise_Alfworld"
-checkpoint_root_dir: /PATH/TO/CHECKPOINT/ALFWORLD_RFT/
+checkpoint_root_dir: ${oc.env:TRINITY_CHECKPOINT_ROOT_DIR,./checkpoints}
 algorithm:
   algorithm_type: grpo
   repeat_times: 16
   advantage_fn: step_wise_grpo
 model:
-  model_path: /PATH/TO/MODEL/
+  model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-7B-Instruct}
   max_response_tokens: 16384
   max_model_len: 20480
 cluster:
@@ -141,16 +141,28 @@ explorer:
     gpu_memory_utilization: 0.7
     enable_chunked_prefill: true
   env_vars:
-    TMPDIR: /PATH/TO/ALFWORLD_TMP_DIR
+    TMPDIR: ${oc.env:TMPDIR,/tmp}
 synchronizer:
   sync_style: dynamic_by_explorer
   sync_method: 'nccl'
   sync_interval: 2
   sync_timeout: 3600
 trainer:
-  trainer_type: 'verl'
-  trainer_config_path: 'examples/grpo_alfworld_general_multi_step/train_alfworld.yaml'
   save_interval: 50
+  trainer_config:
+    actor_rollout_ref:
+      model:
+        use_remove_padding: true
+      actor:
+        use_dynamic_bsz: true
+        ppo_max_token_len_per_gpu: 16384
+        ulysses_sequence_parallel_size: 1
+        optim:
+          lr: 5e-6
+      ref:
+        log_prob_use_dynamic_bsz: ${trainer.trainer_config.actor_rollout_ref.actor.use_dynamic_bsz}
+        log_prob_max_token_len_per_gpu: ${trainer.trainer_config.actor_rollout_ref.actor.ppo_max_token_len_per_gpu}
+        ulysses_sequence_parallel_size: ${trainer.trainer_config.actor_rollout_ref.actor.ulysses_sequence_parallel_size} # sp size
 ```
 
 
