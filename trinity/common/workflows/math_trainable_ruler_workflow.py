@@ -11,9 +11,6 @@ from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
 from trinity.common.rewards.math_reward import MathRewardFn
 from trinity.common.workflows.workflow import WORKFLOWS, SimpleWorkflow, Task
-from trinity.utils.log import get_logger
-
-logger = get_logger(__name__)
 
 # the probability that the ground truth is assumed to be available for RL
 PROBABILITY_GROUND_TRUTH_AVAILABLE = 0.2
@@ -186,7 +183,7 @@ Conclude your response with a list of scores, in the following format: [score fo
             idx1, idx2 = ruler_response_text.rfind("["), ruler_response_text.rfind("]")
 
             if (idx1 == -1) or (idx2 == -1) or (idx1 > idx2):
-                logger.warning("Unable to extract a list from judger response.")
+                self.logger.warning("Unable to extract a list from judger response.")
                 continue
 
             lst_as_str = ruler_response_text[idx1 : (idx2 + 1)]
@@ -200,11 +197,11 @@ Conclude your response with a list of scores, in the following format: [score fo
                         mae_error = np.abs(np.array(scores) - np.array(gold_scores)).mean()
                         ruler_response.reward = 1.0 - mae_error
                 else:
-                    logger.warning(
+                    self.logger.warning(
                         "The length of list in judger response does not match num_responses."
                     )
             except Exception:
-                logger.warning("Unable to parse the list in judger response.")
+                self.logger.warning("Unable to parse the list in judger response.")
 
         if judge_success_count > 0:
             ruler_scores = [score / judge_success_count for score in ruler_scores]
