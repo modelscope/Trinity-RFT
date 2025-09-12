@@ -1782,7 +1782,14 @@ document.write(`
 <div class="viewcode-block" id="CriticWorker.save_checkpoint">
 <a class="viewcode-back" href="../../../../build_api/trinity.trainer.verl.fsdp_workers.html#trinity.trainer.verl.fsdp_workers.CriticWorker.save_checkpoint">[docs]</a>
     <span class="nd">@register</span><span class="p">(</span><span class="n">dispatch_mode</span><span class="o">=</span><span class="n">Dispatch</span><span class="o">.</span><span class="n">ONE_TO_ALL</span><span class="p">)</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">save_checkpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">local_path</span><span class="p">,</span> <span class="n">hdfs_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">global_step</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_ckpt_to_keep</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_checkpoint</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">local_path</span><span class="p">,</span>
+        <span class="n">hdfs_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">global_step</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">max_ckpt_to_keep</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">save_as_hf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_offload_param</span><span class="p">:</span>

@@ -395,7 +395,10 @@ document.write(`
                   
   <h1>Source code for trinity.utils.eval_utils</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">concurrent.futures</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">regex</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">math_verify</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse</span><span class="p">,</span> <span class="n">verify</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.math_eval_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">strip_string</span>
 
@@ -403,16 +406,38 @@ document.write(`
 <span class="n">INVALID_ANS</span> <span class="o">=</span> <span class="s2">&quot;[invalid]&quot;</span>
 
 
+<div class="viewcode-block" id="parse_with_timeout">
+<a class="viewcode-back" href="../../../build_api/trinity.utils.eval_utils.html#trinity.utils.eval_utils.parse_with_timeout">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_with_timeout</span><span class="p">(</span><span class="n">pred</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">parsing_timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="k">with</span> <span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="k">as</span> <span class="n">executor</span><span class="p">:</span>
+        <span class="n">future</span> <span class="o">=</span> <span class="n">executor</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">parse</span><span class="p">,</span> <span class="n">pred</span><span class="o">=</span><span class="n">pred</span><span class="p">,</span> <span class="n">parsing_timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="n">parsing_timeout</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">TimeoutError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TimeoutError</span><span class="p">(</span><span class="s2">&quot;Parsing timed out&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="verify_with_timeout">
+<a class="viewcode-back" href="../../../build_api/trinity.utils.eval_utils.html#trinity.utils.eval_utils.verify_with_timeout">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">verify_with_timeout</span><span class="p">(</span><span class="n">gold</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">timeout_seconds</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="k">as</span> <span class="n">executor</span><span class="p">:</span>
+        <span class="n">future</span> <span class="o">=</span> <span class="n">executor</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">verify</span><span class="p">,</span> <span class="n">gold</span><span class="o">=</span><span class="n">gold</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span> <span class="n">timeout_seconds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="n">timeout_seconds</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">TimeoutError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TimeoutError</span><span class="p">(</span><span class="s2">&quot;Verification timed out&quot;</span><span class="p">)</span></div>
+
+
+
 <div class="viewcode-block" id="simple_answer_parser">
 <a class="viewcode-back" href="../../../build_api/trinity.utils.eval_utils.html#trinity.utils.eval_utils.simple_answer_parser">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">simple_answer_parser</span><span class="p">(</span><span class="n">response</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">math_verify</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse</span>
-
+<span class="k">def</span><span class="w"> </span><span class="nf">simple_answer_parser</span><span class="p">(</span><span class="n">response</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
     <span class="n">search_ans</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;&lt;answer&gt;(.*?)&lt;/answer&gt;&quot;</span><span class="p">,</span> <span class="n">response</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">search_ans</span><span class="p">:</span>
         <span class="n">response</span> <span class="o">=</span> <span class="n">search_ans</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">parse</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">parse_with_timeout</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div>
 
 
 

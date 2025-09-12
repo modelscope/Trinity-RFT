@@ -312,7 +312,6 @@
 </ul>
 </details></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.algorithm.algorithm.html">trinity.algorithm.algorithm module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.algorithm.algorithm_manager.html">trinity.algorithm.algorithm_manager module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.algorithm.key_mapper.html">trinity.algorithm.key_mapper module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.algorithm.utils.html">trinity.algorithm.utils module</a></li>
 </ul>
@@ -517,6 +516,7 @@ document.write(`
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">buffer_config</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">expert_data_ratio</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;expert_data_ratio&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sft_dataset_name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sft_dataset_name&quot;</span><span class="p">,</span> <span class="s2">&quot;sft_dataset&quot;</span><span class="p">)</span>
         <span class="n">tot_batch_size</span> <span class="o">=</span> <span class="n">buffer_config</span><span class="o">.</span><span class="n">train_batch_size</span>
         <span class="n">expert_batch_size</span> <span class="o">=</span> <span class="n">ceil</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expert_data_ratio</span> <span class="o">*</span> <span class="n">tot_batch_size</span><span class="p">)</span>
 
@@ -527,16 +527,17 @@ document.write(`
             <span class="n">buffer_config</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="p">,</span> <span class="n">usual_buffer_config</span>  <span class="c1"># type: ignore</span>
         <span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">buffer_config</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">sft_warmup_dataset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">buffer_config</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">auxiliary_buffers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;`buffer_config.trainer_input.sft_warmup_dataset` is required in MIX algorithm&quot;</span>
+                <span class="s2">&quot;`buffer_config.trainer_input.auxiliary_buffers` is required in MIX algorithm&quot;</span>
             <span class="p">)</span>
 
         <span class="c1"># expert experience buffer</span>
         <span class="n">expert_buffer_config</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">buffer_config</span><span class="p">)</span>
         <span class="n">expert_buffer_config</span><span class="o">.</span><span class="n">train_batch_size</span> <span class="o">=</span> <span class="n">expert_batch_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">expert_exp_buffer</span> <span class="o">=</span> <span class="n">get_buffer_reader</span><span class="p">(</span>
-            <span class="n">buffer_config</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">sft_warmup_dataset</span><span class="p">,</span> <span class="n">expert_buffer_config</span>
+            <span class="n">buffer_config</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">auxiliary_buffers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sft_dataset_name</span><span class="p">],</span>
+            <span class="n">expert_buffer_config</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
@@ -596,6 +597,7 @@ document.write(`
     <span class="k">def</span><span class="w"> </span><span class="nf">default_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s2">&quot;expert_data_ratio&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+            <span class="s2">&quot;sft_dataset_name&quot;</span><span class="p">:</span> <span class="s2">&quot;sft_dataset&quot;</span><span class="p">,</span>
         <span class="p">}</span></div>
 </div>
 

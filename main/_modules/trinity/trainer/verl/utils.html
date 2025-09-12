@@ -312,7 +312,6 @@
 </ul>
 </details></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.algorithm.algorithm.html">trinity.algorithm.algorithm module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.algorithm.algorithm_manager.html">trinity.algorithm.algorithm_manager module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.algorithm.key_mapper.html">trinity.algorithm.key_mapper module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.algorithm.utils.html">trinity.algorithm.utils module</a></li>
 </ul>
@@ -491,11 +490,15 @@ document.write(`
   <h1>Source code for trinity.trainer.verl.utils</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Utils for ccompatibility issues with verl.&quot;&quot;&quot;</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">verl</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataProto</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">verl.trainer.ppo.metric_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">_compute_response_info</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.checkpoint.checkpoint_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_latest_ckpt_path</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experiences</span>
 
 
@@ -658,6 +661,20 @@ document.write(`
         <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">metrics</span></div>
+
+
+
+<div class="viewcode-block" id="get_latest_hf_checkpoint_path">
+<a class="viewcode-back" href="../../../../build_api/trinity.trainer.verl.utils.html#trinity.trainer.verl.utils.get_latest_hf_checkpoint_path">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_latest_hf_checkpoint_path</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the latest huggingface checkpoint path&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_type</span> <span class="o">!=</span> <span class="s2">&quot;verl&quot;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;This function is only for verl trainer.&quot;</span><span class="p">)</span>
+    <span class="n">checkpoint_dir</span> <span class="o">=</span> <span class="n">find_latest_ckpt_path</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">checkpoint_job_dir</span><span class="p">)</span>
+    <span class="n">hf_checkpoint_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">checkpoint_dir</span><span class="p">,</span> <span class="s2">&quot;actor&quot;</span><span class="p">,</span> <span class="s2">&quot;huggingface&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">hf_checkpoint_dir</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No huggingface checkpoint found in </span><span class="si">{</span><span class="n">hf_checkpoint_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">hf_checkpoint_dir</span></div>
 
 </pre></div>
 

@@ -313,7 +313,6 @@
 </ul>
 </details></li>
 <li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.algorithm.algorithm.html">trinity.algorithm.algorithm module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.algorithm.algorithm_manager.html">trinity.algorithm.algorithm_manager module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.algorithm.key_mapper.html">trinity.algorithm.key_mapper module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.algorithm.utils.html">trinity.algorithm.utils module</a></li>
 </ul>
@@ -552,6 +551,7 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#service-configuration">Service Configuration</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dataprocessor-configuration">DataProcessor Configuration</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#log-configuration">Log Configuration</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#stages-configuration">Stages Configuration</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#verl-trainer-configuration-advanced">veRL Trainer Configuration (Advanced)</a></li>
 </ul>
             </nav>
@@ -608,6 +608,10 @@ document.write(`
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="nt">log</span><span class="p">:</span>
 <span class="w">  </span><span class="c1"># Ray actor logging</span>
+<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+
+<span class="nt">stages</span><span class="p">:</span>
+<span class="w">  </span><span class="c1"># Stages configuration</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 </pre></div>
 </div>
@@ -761,8 +765,11 @@ Users can use these features to simplify configuration.</p>
 <span class="w">  </span><span class="nt">trainer_input</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">experience_buffer</span><span class="p">:</span>
 <span class="w">      </span><span class="l l-Scalar l-Scalar-Plain">...</span>
-<span class="w">    </span><span class="nt">sft_warmup_dataset</span><span class="p">:</span>
-<span class="w">      </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">    </span><span class="nt">auxiliary_buffers</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">buffer_1</span><span class="p">:</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">      </span><span class="nt">buffer_2</span><span class="p">:</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 
 <span class="w">  </span><span class="nt">default_workflow_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;math_workflow&#39;</span>
 <span class="w">  </span><span class="nt">default_reward_fn_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;countdown_reward&#39;</span>
@@ -845,7 +852,7 @@ Users can use these features to simplify configuration.</p>
 </section>
 <section id="trainer-input">
 <h3>Trainer Input<a class="headerlink" href="#trainer-input" title="Link to this heading">#</a></h3>
-<p>Defines the experience buffer and optional SFT warm-up dataset.</p>
+<p>Defines the experience buffer and optional auxiliary datasets used by the trainer.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">buffer</span><span class="p">:</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">trainer_input</span><span class="p p-Indicator">:</span>
@@ -855,15 +862,16 @@ Users can use these features to simplify configuration.</p>
 <span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sqlite:///countdown_buffer.db</span>
 <span class="w">      </span><span class="nt">max_read_timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1800</span>
 
-<span class="w">    </span><span class="nt">sft_warmup_dataset</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">warmup_data</span>
-<span class="w">      </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">file</span>
-<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${oc.env:TRINITY_SFT_DATASET_PATH}</span>
-<span class="w">      </span><span class="nt">format</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">prompt_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;question&#39;</span>
-<span class="w">        </span><span class="nt">response_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;answer&#39;</span>
-
-<span class="w">    </span><span class="nt">sft_warmup_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">    </span><span class="nt">auxiliary_buffers</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">sft_dataset</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sft_dataset</span>
+<span class="w">        </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">file</span>
+<span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${oc.env:TRINITY_SFT_DATASET_PATH}</span>
+<span class="w">        </span><span class="nt">format</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">prompt_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;question&#39;</span>
+<span class="w">          </span><span class="nt">response_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;answer&#39;</span>
+<span class="w">      </span><span class="nt">other_buffer</span><span class="p">:</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -909,8 +917,7 @@ Users can use these features to simplify configuration.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">reuse_cooldown_time</span></code>: Only take effect when <code class="docutils literal notranslate"><span class="pre">storage_type</span></code> is <code class="docutils literal notranslate"><span class="pre">queue</span></code> and <code class="docutils literal notranslate"><span class="pre">use_priority_queue</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>. If set, it specifies the cooldown time (in seconds) for reusing experiences. If not specified, the default value is <code class="docutils literal notranslate"><span class="pre">None</span></code>, meaning experiences can not be reused.</p></li>
 </ul>
 </li>
-<li><p><code class="docutils literal notranslate"><span class="pre">sft_warmup_dataset</span></code>: Optional dataset used for pre-training (SFT warmup). Its configuration is similar to the <code class="docutils literal notranslate"><span class="pre">experience_buffer</span></code>, but only for SFT usage.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">sft_warmup_steps</span></code>: Number of steps to use SFT warm-up before RL begins.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">auxiliary_buffers</span></code>: Optional buffers used for trainer. It is a dictionary where each key is the buffer name and the value is the buffer configuration. Each buffer configuration is similar to the <code class="docutils literal notranslate"><span class="pre">experience_buffer</span></code>.</p></li>
 </ul>
 </section>
 </section>
@@ -1057,6 +1064,34 @@ Users can use these features to simplify configuration.</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">level</span></code>: The logging level (supports <code class="docutils literal notranslate"><span class="pre">DEBUG</span></code>, <code class="docutils literal notranslate"><span class="pre">INFO</span></code>, <code class="docutils literal notranslate"><span class="pre">WARNING</span></code>, <code class="docutils literal notranslate"><span class="pre">ERROR</span></code>).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">group_by_node</span></code>: Whether to group logs by node IP. If set to <code class="docutils literal notranslate"><span class="pre">True</span></code>, an actor’s logs will be save to <code class="docutils literal notranslate"><span class="pre">&lt;checkpoint_root_dir&gt;/&lt;project&gt;/&lt;name&gt;/log/&lt;node_ip&gt;/&lt;actor_name&gt;.log</span></code>, otherwise it will be saved to <code class="docutils literal notranslate"><span class="pre">&lt;checkpoint_root_dir&gt;/&lt;project&gt;/&lt;name&gt;/log/&lt;actor_name&gt;.log</span></code>.</p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="stages-configuration">
+<h2>Stages Configuration<a class="headerlink" href="#stages-configuration" title="Link to this heading">#</a></h2>
+<p>For multi-stage training, you can define multiple stages in the <code class="docutils literal notranslate"><span class="pre">stages</span></code> field. Each stage can have its own <code class="docutils literal notranslate"><span class="pre">algorithm</span></code>, <code class="docutils literal notranslate"><span class="pre">buffer</span></code> and other configurations. If a parameter is not specified in a stage, it will inherit the value from the global configuration. Multiple stages will be executed sequentially as defined.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">stages</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">stage_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sft_warmup</span>
+<span class="w">    </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">train</span>
+<span class="w">    </span><span class="nt">algorithm</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">algorithm_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sft</span>
+<span class="w">    </span><span class="nt">buffer</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">train_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">64</span>
+<span class="w">      </span><span class="nt">total_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">      </span><span class="nt">trainer_input</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">experience_buffer</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sft_buffer</span>
+<span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${oc.env:TRINITY_DATASET_PATH}</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">stage_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rft</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">stage_name</span></code>: Name of the stage. It should be unique and will be used as a suffix for the experiment name.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mode</span></code>: Running mode of Trinity-RFT for this stage. If not specified, it will inherit from the global <code class="docutils literal notranslate"><span class="pre">mode</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">algorithm</span></code>: Algorithm configuration for this stage. If not specified, it will inherit from the global <code class="docutils literal notranslate"><span class="pre">algorithm</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">buffer</span></code>: Buffer configuration for this stage. If not specified, it will inherit from the global <code class="docutils literal notranslate"><span class="pre">buffer</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">explorer</span></code>: Explorer configuration for this stage. If not specified, it will inherit from the global <code class="docutils literal notranslate"><span class="pre">explorer</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trainer</span></code>: Trainer configuration for this stage. If not specified, it will inherit from the global <code class="docutils literal notranslate"><span class="pre">trainer</span></code>.</p></li>
 </ul>
 </section>
 <hr class="docutils" />
@@ -1269,6 +1304,7 @@ Users can use these features to simplify configuration.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#service-configuration">Service Configuration</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dataprocessor-configuration">DataProcessor Configuration</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#log-configuration">Log Configuration</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#stages-configuration">Stages Configuration</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#verl-trainer-configuration-advanced">veRL Trainer Configuration (Advanced)</a></li>
 </ul>
   </nav></div>

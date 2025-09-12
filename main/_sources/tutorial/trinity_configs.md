@@ -47,6 +47,10 @@ data_processor:
 log:
   # Ray actor logging
   ...
+
+stages:
+  # Stages configuration
+  ...
 ```
 
 Each of these sections will be explained in detail below. For additional details about specific parameters not covered here, please refer to the [source code](https://github.com/modelscope/Trinity-RFT/blob/main/trinity/common/config.py).
@@ -192,8 +196,11 @@ buffer:
   trainer_input:
     experience_buffer:
       ...
-    sft_warmup_dataset:
-      ...
+    auxiliary_buffers:
+      buffer_1:
+        ...
+      buffer_2:
+        ...
 
   default_workflow_type: 'math_workflow'
   default_reward_fn_type: 'countdown_reward'
@@ -266,7 +273,7 @@ The configuration for each task dataset is defined as follows:
 
 ### Trainer Input
 
-Defines the experience buffer and optional SFT warm-up dataset.
+Defines the experience buffer and optional auxiliary datasets used by the trainer.
 
 ```yaml
 buffer:
@@ -278,15 +285,16 @@ buffer:
       path: sqlite:///countdown_buffer.db
       max_read_timeout: 1800
 
-    sft_warmup_dataset:
-      name: warmup_data
-      storage_type: file
-      path: ${oc.env:TRINITY_SFT_DATASET_PATH}
-      format:
-        prompt_key: 'question'
-        response_key: 'answer'
-
-    sft_warmup_steps: 0
+    auxiliary_buffers:
+      sft_dataset:
+        name: sft_dataset
+        storage_type: file
+        path: ${oc.env:TRINITY_SFT_DATASET_PATH}
+        format:
+          prompt_key: 'question'
+          response_key: 'answer'
+      other_buffer:
+        ...
 ```
 
 - `experience_buffer`: It is the input of Trainer and also the output of Explorer. This field is required even in explore mode.
@@ -316,8 +324,7 @@ buffer:
   - `max_read_timeout`: The maximum waiting time (in seconds) to read new experience data. If exceeded, an incomplete batch will be returned directly. Only take effect when `storage_type` is `queue`. Default is 1800 seconds (30 minutes).
   - `use_priority_queue`: Only take effect when `storage_type` is `queue`. If set to `True`, the queue will be a priority queue, which allows for prioritizing certain experiences over others. Default is `False`.
   - `reuse_cooldown_time`: Only take effect when `storage_type` is `queue` and `use_priority_queue` is `True`. If set, it specifies the cooldown time (in seconds) for reusing experiences. If not specified, the default value is `None`, meaning experiences can not be reused.
-- `sft_warmup_dataset`: Optional dataset used for pre-training (SFT warmup). Its configuration is similar to the `experience_buffer`, but only for SFT usage.
-- `sft_warmup_steps`: Number of steps to use SFT warm-up before RL begins.
+- `auxiliary_buffers`: Optional buffers used for trainer. It is a dictionary where each key is the buffer name and the value is the buffer configuration. Each buffer configuration is similar to the `experience_buffer`.
 
 ---
 
@@ -467,6 +474,35 @@ log:
 
 - `level`: The logging level (supports `DEBUG`, `INFO`, `WARNING`, `ERROR`).
 - `group_by_node`: Whether to group logs by node IP. If set to `True`, an actor's logs will be save to `<checkpoint_root_dir>/<project>/<name>/log/<node_ip>/<actor_name>.log`, otherwise it will be saved to `<checkpoint_root_dir>/<project>/<name>/log/<actor_name>.log`.
+
+---
+
+## Stages Configuration
+
+For multi-stage training, you can define multiple stages in the `stages` field. Each stage can have its own `algorithm`, `buffer` and other configurations. If a parameter is not specified in a stage, it will inherit the value from the global configuration. Multiple stages will be executed sequentially as defined.
+
+```yaml
+stages:
+  - stage_name: sft_warmup
+    mode: train
+    algorithm:
+      algorithm_type: sft
+    buffer:
+      train_batch_size: 64
+      total_steps: 100
+      trainer_input:
+        experience_buffer:
+          name: sft_buffer
+          path: ${oc.env:TRINITY_DATASET_PATH}
+  - stage_name: rft
+```
+
+- `stage_name`: Name of the stage. It should be unique and will be used as a suffix for the experiment name.
+- `mode`: Running mode of Trinity-RFT for this stage. If not specified, it will inherit from the global `mode`.
+- `algorithm`: Algorithm configuration for this stage. If not specified, it will inherit from the global `algorithm`.
+- `buffer`: Buffer configuration for this stage. If not specified, it will inherit from the global `buffer`.
+- `explorer`: Explorer configuration for this stage. If not specified, it will inherit from the global `explorer`.
+- `trainer`: Trainer configuration for this stage. If not specified, it will inherit from the global `trainer`.
 
 ---
 

@@ -547,6 +547,9 @@ document.write(`
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get a logger instance, compatible with Ray Actor and standard usage.</span>
 
+<span class="sd">    In most cases, DO NOT USE this function in file-level scope, because the logger</span>
+<span class="sd">    instance will be created at import time, which will cause issues when used in Ray actors.</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        name (Optional[str]): The name of the logger. If None, uses &#39;trinity&#39;.</span>
 <span class="sd">        level (Optional[int]): The logging level. If None, uses LOG_LEVEL_ENV_VAR or INFO.</span>

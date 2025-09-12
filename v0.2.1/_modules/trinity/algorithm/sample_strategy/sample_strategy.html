@@ -471,6 +471,7 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_buffer_reader</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">BufferConfig</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experiences</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.annotations</span><span class="w"> </span><span class="kn">import</span> <span class="n">Deprecated</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Registry</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.timer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Timer</span>
 
@@ -512,54 +513,6 @@ document.write(`
 
 
 
-<div class="viewcode-block" id="WarmupSampleStrategy">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.sample_strategy.html#trinity.algorithm.WarmupSampleStrategy">[docs]</a>
-<span class="nd">@SAMPLE_STRATEGY</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;warmup&quot;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">WarmupSampleStrategy</span><span class="p">(</span><span class="n">SampleStrategy</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The default sample strategy.&quot;&quot;&quot;</span>
-
-<div class="viewcode-block" id="WarmupSampleStrategy.__init__">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.sample_strategy.html#trinity.algorithm.WarmupSampleStrategy.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">buffer_config</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">exp_buffer</span> <span class="o">=</span> <span class="n">get_buffer_reader</span><span class="p">(</span>
-            <span class="n">buffer_config</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">experience_buffer</span><span class="p">,</span> <span class="n">buffer_config</span>  <span class="c1"># type: ignore</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sft_warmup_steps</span> <span class="o">=</span> <span class="n">buffer_config</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">sft_warmup_steps</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sft_warmup_steps</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">buffer_config</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">sft_warmup_dataset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;sft_warmup_dataset is required when sft_warmup_steps &gt; 0&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">buffer_config</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">sft_warmup_dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">sft_buffer</span> <span class="o">=</span> <span class="n">get_buffer_reader</span><span class="p">(</span>
-                <span class="n">buffer_config</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">sft_warmup_dataset</span><span class="p">,</span> <span class="n">buffer_config</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">sft_buffer</span> <span class="o">=</span> <span class="kc">None</span></div>
-
-
-<div class="viewcode-block" id="WarmupSampleStrategy.sample">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.sample_strategy.html#trinity.algorithm.WarmupSampleStrategy.sample">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Experiences</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">]:</span>
-        <span class="n">metrics</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="s2">&quot;read_time&quot;</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">step</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sft_warmup_steps</span><span class="p">:</span>
-                <span class="n">exp_list</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">sft_buffer</span><span class="o">.</span><span class="n">read_async</span><span class="p">()</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">exp_list</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">exp_buffer</span><span class="o">.</span><span class="n">read_async</span><span class="p">()</span>
-            <span class="n">repr_samples</span> <span class="o">=</span> <span class="n">representative_sample</span><span class="p">(</span><span class="n">exp_list</span><span class="p">)</span>
-        <span class="k">with</span> <span class="n">Timer</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="s2">&quot;gather_time&quot;</span><span class="p">):</span>
-            <span class="n">exps</span> <span class="o">=</span> <span class="n">Experiences</span><span class="o">.</span><span class="n">gather_experiences</span><span class="p">(</span><span class="n">exp_list</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pad_token_id</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-        <span class="k">return</span> <span class="n">exps</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">repr_samples</span></div>
-
-
-<div class="viewcode-block" id="WarmupSampleStrategy.default_args">
-<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.sample_strategy.html#trinity.algorithm.WarmupSampleStrategy.default_args">[docs]</a>
-    <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">default_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">{}</span></div>
-</div>
-
-
-
 <div class="viewcode-block" id="DefaultSampleStrategy">
 <a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.sample_strategy.html#trinity.algorithm.DefaultSampleStrategy">[docs]</a>
 <span class="nd">@SAMPLE_STRATEGY</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;default&quot;</span><span class="p">)</span>
@@ -590,6 +543,23 @@ document.write(`
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">default_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">{}</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="WarmupSampleStrategy">
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.sample_strategy.html#trinity.algorithm.WarmupSampleStrategy">[docs]</a>
+<span class="nd">@Deprecated</span>
+<span class="nd">@SAMPLE_STRATEGY</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;warmup&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">WarmupSampleStrategy</span><span class="p">(</span><span class="n">DefaultSampleStrategy</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The warmup sample strategy.</span>
+<span class="sd">    Deprecated, keep this class for backward compatibility only.</span>
+<span class="sd">    Please use DefaultSampleStrategy instead.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="WarmupSampleStrategy.__init__">
+<a class="viewcode-back" href="../../../../build_api/trinity.algorithm.sample_strategy.sample_strategy.html#trinity.algorithm.WarmupSampleStrategy.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer_config</span><span class="p">:</span> <span class="n">BufferConfig</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">buffer_config</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

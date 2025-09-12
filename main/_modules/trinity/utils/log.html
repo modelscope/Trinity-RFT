@@ -312,7 +312,6 @@
 </ul>
 </details></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../build_api/trinity.algorithm.algorithm.html">trinity.algorithm.algorithm module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../build_api/trinity.algorithm.algorithm_manager.html">trinity.algorithm.algorithm_manager module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../build_api/trinity.algorithm.key_mapper.html">trinity.algorithm.key_mapper module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../build_api/trinity.algorithm.utils.html">trinity.algorithm.utils module</a></li>
 </ul>
@@ -546,6 +545,9 @@ document.write(`
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get a logger instance, compatible with Ray Actor and standard usage.</span>
+
+<span class="sd">    In most cases, DO NOT USE this function in file-level scope, because the logger</span>
+<span class="sd">    instance will be created at import time, which will cause issues when used in Ray actors.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        name (Optional[str]): The name of the logger. If None, uses &#39;trinity&#39;.</span>

@@ -312,7 +312,6 @@
 </ul>
 </details></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.algorithm.algorithm.html">trinity.algorithm.algorithm module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.algorithm.algorithm_manager.html">trinity.algorithm.algorithm_manager module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.algorithm.key_mapper.html">trinity.algorithm.key_mapper module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.algorithm.utils.html">trinity.algorithm.utils module</a></li>
 </ul>
@@ -623,6 +622,7 @@ document.write(`
         <span class="n">global_step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
         <span class="n">max_ckpt_to_keep</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">model_state_dict_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">save_as_hf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Modified from verl.utils.checkpoint.fsdp_checkpoint_manager.py:save_checkpoint</span>
@@ -640,6 +640,7 @@ document.write(`
 <span class="sd">            global_step (int): Current training step.</span>
 <span class="sd">            max_ckpt_to_keep (int, optional): Maximum number of checkpoints to keep locally.</span>
 <span class="sd">            model_state_dict_only (bool): Whether to only save the model state dict (no optimizer, etc.).</span>
+<span class="sd">            save_as_hf (bool): Whether to force save the model in Hugging Face format.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">global_step</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">model_state_dict_only</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_upload_state_dict</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">global_step</span><span class="p">)</span>
@@ -804,7 +805,7 @@ document.write(`
         <span class="c1"># wait for everyone to dump to local</span>
         <span class="n">torch</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">should_save_hf_model</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">model_state_dict_only</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">should_save_hf_model</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">model_state_dict_only</span><span class="p">)</span> <span class="ow">or</span> <span class="n">save_as_hf</span><span class="p">:</span>
             <span class="c1"># Only rank 0 will save hf model and,</span>
             <span class="c1"># offload to cpu to save LLMs which may be too large to fit in one GPU</span>
             <span class="n">state_dict</span> <span class="o">=</span> <span class="n">get_fsdp_full_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">offload_to_cpu</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">rank0_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>

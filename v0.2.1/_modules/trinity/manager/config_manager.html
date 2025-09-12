@@ -609,9 +609,7 @@ document.write(`
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;experience_buffer_path&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">,</span> <span class="s2">&quot;sft_warmup_steps&quot;</span><span class="p">,</span> <span class="s2">&quot;monitor_type&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_steps&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;sft_warmup_dataset_path&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">,</span> <span class="s2">&quot;monitor_type&quot;</span><span class="p">)</span>
 
         <span class="n">st</span><span class="o">.</span><span class="n">header</span><span class="p">(</span><span class="s2">&quot;Important Configs&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;node_num&quot;</span><span class="p">,</span> <span class="s2">&quot;gpu_per_node&quot;</span><span class="p">,</span> <span class="s2">&quot;engine_num&quot;</span><span class="p">,</span> <span class="s2">&quot;tensor_parallel_size&quot;</span><span class="p">)</span>
@@ -626,9 +624,6 @@ document.write(`
             <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;taskset_args&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;dpo_dataset_kwargs&quot;</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_steps&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;sft_warmup_dataset_args&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span>
             <span class="s2">&quot;default_workflow_type&quot;</span><span class="p">,</span> <span class="s2">&quot;default_eval_workflow_type&quot;</span><span class="p">,</span> <span class="s2">&quot;default_reward_fn_type&quot;</span>
@@ -675,10 +670,6 @@ document.write(`
 
         <span class="k">with</span> <span class="n">st</span><span class="o">.</span><span class="n">expander</span><span class="p">(</span><span class="s2">&quot;Eval Tasksets Configs&quot;</span><span class="p">,</span> <span class="n">expanded</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;eval_tasksets&quot;</span><span class="p">)</span>
-
-        <span class="k">with</span> <span class="n">st</span><span class="o">.</span><span class="n">expander</span><span class="p">(</span><span class="s2">&quot;SFT Dataset Configs&quot;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;sft_warmup_dataset_path&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;sft_warmup_dataset_args&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;dpo&quot;</span><span class="p">:</span>
             <span class="k">with</span> <span class="n">st</span><span class="o">.</span><span class="n">expander</span><span class="p">(</span><span class="s2">&quot;Experiences Buffer Configs&quot;</span><span class="p">,</span> <span class="n">expanded</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
@@ -1060,12 +1051,6 @@ document.write(`
             <span class="p">):</span>
                 <span class="n">experience_buffer_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;sqlite:///</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s1">&#39;checkpoint_root_dir&#39;</span><span class="p">],</span><span class="w"> </span><span class="s1">&#39;.cache&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s1">&#39;project&#39;</span><span class="p">],</span><span class="w"> </span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s1">&#39;exp_name&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">/data.db&quot;</span>
 
-        <span class="n">sft_storage_type</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">StorageType</span><span class="o">.</span><span class="n">SQL</span><span class="o">.</span><span class="n">value</span>
-            <span class="k">if</span> <span class="s2">&quot;://&quot;</span> <span class="ow">in</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_dataset_path&quot;</span><span class="p">]</span>
-            <span class="k">else</span> <span class="n">StorageType</span><span class="o">.</span><span class="n">FILE</span><span class="o">.</span><span class="n">value</span>
-        <span class="p">)</span>  <span class="c1"># TODO</span>
-
         <span class="n">buffer_config</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;batch_size&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;explore_batch_size&quot;</span><span class="p">],</span>
             <span class="s2">&quot;train_batch_size&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;train_batch_size&quot;</span><span class="p">],</span>
@@ -1079,7 +1064,6 @@ document.write(`
                     <span class="c1"># &quot;max_retry_interval&quot;: st.session_state[&quot;max_retry_interval&quot;],</span>
                     <span class="c1"># &quot;max_retry_times&quot;: st.session_state[&quot;buffer_max_retry_times&quot;],</span>
                 <span class="p">},</span>
-                <span class="s2">&quot;sft_warmup_steps&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_steps&quot;</span><span class="p">],</span>
             <span class="p">},</span>
         <span class="p">}</span>
         <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;train_batch_size&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1149,19 +1133,6 @@ document.write(`
                 <span class="s2">&quot;prompt_key&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;dpo_dataset_prompt_key&quot;</span><span class="p">],</span>
                 <span class="s2">&quot;chosen_key&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;dpo_dataset_chosen_key&quot;</span><span class="p">],</span>
                 <span class="s2">&quot;rejected_key&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;dpo_dataset_rejected_key&quot;</span><span class="p">],</span>
-            <span class="p">}</span>
-        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_dataset_path&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
-            <span class="n">buffer_config</span><span class="p">[</span><span class="s2">&quot;trainer_input&quot;</span><span class="p">][</span><span class="s2">&quot;sft_warmup_dataset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;sft_warmup_dataset&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;storage_type&quot;</span><span class="p">:</span> <span class="n">sft_storage_type</span><span class="p">,</span>
-                <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_dataset_path&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;split&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_train_split&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;format&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;prompt_type&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_prompt_type&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;messages_key&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_messages_key&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;prompt_key&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_prompt_key&quot;</span><span class="p">],</span>
-                    <span class="s2">&quot;response_key&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;sft_warmup_response_key&quot;</span><span class="p">],</span>
-                <span class="p">},</span>
             <span class="p">}</span>
 
         <span class="k">return</span> <span class="n">buffer_config</span>

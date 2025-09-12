@@ -313,7 +313,6 @@
 </ul>
 </details></li>
 <li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.algorithm.algorithm.html">trinity.algorithm.algorithm module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.algorithm.algorithm_manager.html">trinity.algorithm.algorithm_manager module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.algorithm.key_mapper.html">trinity.algorithm.key_mapper module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../build_api/trinity.algorithm.utils.html">trinity.algorithm.utils module</a></li>
 </ul>
@@ -713,18 +712,21 @@ huggingface-cli<span class="w"> </span>download<span class="w"> </span>openai/gs
 </section>
 <section id="optional-rft-with-sft-warmup">
 <h2>Optional: RFT with SFT Warmup<a class="headerlink" href="#optional-rft-with-sft-warmup" title="Link to this heading">#</a></h2>
-<p>Before RFT, we may use SFT as a warmup step. We need to set <code class="docutils literal notranslate"><span class="pre">buffer.trainer_input.sft_warmup_steps</span> <span class="pre">&gt;</span> <span class="pre">0</span></code> and prepare the SFT data to <code class="docutils literal notranslate"><span class="pre">buffer.trainer_input.sft_warmup_dataset.path=$DATASET_PATH/{sft_data}</span></code>.</p>
+<p>Before RFT, we may use SFT as a warmup step. Trinity-RFT supports adding SFT warmup stage before RFT by setting <code class="docutils literal notranslate"><span class="pre">stages</span></code> in the config file. The <code class="docutils literal notranslate"><span class="pre">sft_warmup_dataset</span></code> specifies the dataset used for SFT warmup, and <code class="docutils literal notranslate"><span class="pre">sft_warmup_steps</span></code> specifies the number of training steps for SFT warmup.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Properly add the following configs in gsm8k.yaml</span>
-<span class="nt">buffer</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">trainer_input</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">sft_warmup_dataset</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">file</span>
-<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;$DATASET_PATH/{sft_data}&gt;</span>
-<span class="w">      </span><span class="nt">format</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">prompt_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;prompt_type&gt;</span><span class="w"> </span><span class="c1"># messages/plaintext</span>
-<span class="w">        </span><span class="nt">prompt_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;prompt_key&gt;</span>
-<span class="w">        </span><span class="nt">response_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;response_key&gt;</span>
-<span class="w">    </span><span class="nt">sft_warmup_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="nt">stages</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">stage_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sft_warmup</span>
+<span class="w">    </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">train</span>
+<span class="w">    </span><span class="nt">algorithm</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">algorithm_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sft</span>
+<span class="w">    </span><span class="nt">buffer</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">train_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">128</span>
+<span class="w">      </span><span class="nt">total_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">      </span><span class="nt">trainer_input</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">experience_buffer</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sft_warmup_dataset</span>
+<span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/PATH/TO/YOUR/SFT/DATASET</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">stage_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rft</span><span class="w">  </span><span class="c1"># leave empty to use the original configs for RFT</span>
 </pre></div>
 </div>
 <p>The following command runs SFT and RFT in sequence:</p>

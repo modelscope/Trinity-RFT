@@ -20,7 +20,6 @@ Submodules
    :maxdepth: 4
 
    trinity.algorithm.algorithm
-   trinity.algorithm.algorithm_manager
    trinity.algorithm.key_mapper
    trinity.algorithm.utils
 

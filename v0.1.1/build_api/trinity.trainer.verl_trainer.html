@@ -450,7 +450,6 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.train_step"><code class="docutils literal notranslate"><span class="pre">VerlPPOTrainerWrapper.train_step()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.save_checkpoint"><code class="docutils literal notranslate"><span class="pre">VerlPPOTrainerWrapper.save_checkpoint()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.sync_weight"><code class="docutils literal notranslate"><span class="pre">VerlPPOTrainerWrapper.sync_weight()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.sft_to_rft"><code class="docutils literal notranslate"><span class="pre">VerlPPOTrainerWrapper.sft_to_rft()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.post_process_batch"><code class="docutils literal notranslate"><span class="pre">VerlPPOTrainerWrapper.post_process_batch()</span></code></a></li>
 </ul>
 </li>
@@ -555,7 +554,7 @@ Dict: Metrics of the training step.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.save_checkpoint">
-<span class="sig-name descname"><span class="pre">save_checkpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block_until_saved</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/trainer/verl_trainer.html#VerlPPOTrainerWrapper.save_checkpoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.save_checkpoint" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">save_checkpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block_until_saved</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_as_hf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/trainer/verl_trainer.html#VerlPPOTrainerWrapper.save_checkpoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.save_checkpoint" title="Link to this definition">#</a></dt>
 <dd><p>Save the checkpoint.</p>
 </dd></dl>
 
@@ -564,11 +563,6 @@ Dict: Metrics of the training step.</p>
 <span class="sig-name descname"><span class="pre">sync_weight</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/trainer/verl_trainer.html#VerlPPOTrainerWrapper.sync_weight"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.sync_weight" title="Link to this definition">#</a></dt>
 <dd><p>Sync the model weight.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.sft_to_rft">
-<span class="sig-name descname"><span class="pre">sft_to_rft</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/trainer/verl_trainer.html#VerlPPOTrainerWrapper.sft_to_rft"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.sft_to_rft" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.post_process_batch">
@@ -635,7 +629,6 @@ Dict: Metrics of the training step.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.train_step"><code class="docutils literal notranslate"><span class="pre">VerlPPOTrainerWrapper.train_step()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.save_checkpoint"><code class="docutils literal notranslate"><span class="pre">VerlPPOTrainerWrapper.save_checkpoint()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.sync_weight"><code class="docutils literal notranslate"><span class="pre">VerlPPOTrainerWrapper.sync_weight()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.sft_to_rft"><code class="docutils literal notranslate"><span class="pre">VerlPPOTrainerWrapper.sft_to_rft()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.post_process_batch"><code class="docutils literal notranslate"><span class="pre">VerlPPOTrainerWrapper.post_process_batch()</span></code></a></li>
 </ul>
 </li>
