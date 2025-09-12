@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""We include the customized math workflows in this file."""
+"""We include the agentscope react workflows in this file."""
 
 from typing import List, Optional
 
