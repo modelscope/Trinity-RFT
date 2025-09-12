@@ -50,6 +50,10 @@ class MathEvalWorkflow(Workflow):
     def repeatable(self):
         return False
 
+    @property
+    def asynchronous(self):
+        return True
+
     def format_messages(self):
         """Format message for the evaluation of qwen_boxed type."""
         if not self.raw_task or "question" not in self.raw_task:
@@ -66,10 +70,10 @@ class MathEvalWorkflow(Workflow):
         ]
         return messages
 
-    def run(self) -> List[Experience]:
+    async def run_async(self) -> List[Experience]:
         messages = self.format_messages()
 
-        responses: List[Experience] = self.model.chat(messages, **self.eval_gen_args)
+        responses: List[Experience] = await self.model.chat_async(messages, **self.eval_gen_args)
 
         for response in responses:
             if response.response_text is None or self.task.truth is None:

@@ -167,6 +167,11 @@ class ModelWrapper:
         """Get the version of the model."""
         return ray.get(self.model.get_model_version.remote())
 
+    @property
+    async def model_version_async(self) -> ray.ObjectRef:
+        """Get the version of the model."""
+        return await self.model.get_model_version.remote()
+
     def _get_api_server_address(self) -> str:
         """Get the address of the API server."""
         if self.api_address:

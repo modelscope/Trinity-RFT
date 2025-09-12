@@ -32,6 +32,10 @@ class MathRULERWorkflow(SimpleWorkflow):
             auxiliary_models=auxiliary_models,
         )
 
+    @property
+    def asynchronous(self):
+        return True
+
     def reset(self, task: Task):
         """
         Note that in this workflow, MathRewardFn is only used for calculating the 'golden reward',
@@ -48,13 +52,13 @@ class MathRULERWorkflow(SimpleWorkflow):
         # call the SimpleWorkflow.reset
         super().reset(task)
 
-    def run(self) -> List[Experience]:
+    async def run_async(self) -> List[Experience]:
         """Modified from SimpleWorkflow.run"""
 
         messages = self.format_messages()
 
         self.logger.debug("start chat")
-        responses = self.model.chat(messages, **self.rollout_args)
+        responses = await self.model.chat_async(messages, **self.rollout_args)
 
         for i, response in enumerate(responses):
             gold_reward_dict = self.reward_fn(  # type: ignore [misc]

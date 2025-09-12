@@ -26,6 +26,10 @@ class SimpleMMWorkflow(SimpleWorkflow):
             auxiliary_models=auxiliary_models,
         )
 
+    @property
+    def asynchronous(self):
+        return True
+
     def reset(self, task: Task):
         self.format_args = task.format_args
         self.system_prompt = """You are a helpful assistant that solves MATH problems. You should first thinks about the reasoning process in mind and then provides the user with the answer. You should present your reasoning process using the format: <think>\n ...your reasoning process here... </think>\n first. You should always include your final answer in \\boxed{} as closed-form results."""  # TODO: check
@@ -50,15 +54,15 @@ class SimpleMMWorkflow(SimpleWorkflow):
         if self.video_key and task.raw_task.get(self.video_key) is not None:
             self.raw_mm_data["video"] = task.raw_task[self.video_key]
 
-    def run(self) -> List[Experience]:
+    async def run_async(self) -> List[Experience]:
         messages = self.format_messages()
 
         # TODO: test generate_mm
         self.logger.debug("start chat")
         if self.raw_mm_data:
-            responses = self.model.chat_mm(messages, self.raw_mm_data, **self.rollout_args)
+            responses = await self.model.chat_mm_async(messages, self.raw_mm_data, **self.rollout_args)
         else:
-            responses = self.model.chat(messages, **self.rollout_args)
+            responses = await self.model.chat_async(messages, **self.rollout_args)
         for i, response in enumerate(responses):
             reward_dict = self.reward_fn(  # type: ignore [misc]
                 response=response.response_text,  # type: ignore [arg-type]

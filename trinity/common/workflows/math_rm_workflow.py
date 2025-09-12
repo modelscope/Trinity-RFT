@@ -28,11 +28,15 @@ class MathRMWorkflow(SimpleWorkflow):
             auxiliary_models=auxiliary_models,
         )
 
-    def run(self) -> List[Experience]:
+    @property
+    def asynchronous(self):
+        return True
+
+    async def run_async(self) -> List[Experience]:
         messages = self.format_messages()
 
         self.logger.debug("start chat")
-        responses = self.model.chat(messages, **self.rollout_args)
+        responses = await self.model.chat_async(messages, **self.rollout_args)
         for i, response in enumerate(responses):
             reward_dict = self.reward_fn(  # type: ignore
                 response,

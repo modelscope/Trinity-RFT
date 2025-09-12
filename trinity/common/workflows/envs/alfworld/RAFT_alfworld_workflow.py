@@ -55,6 +55,10 @@ class RAFTAlfworldWorkflow(Workflow):
         )
         self.reset(task)
 
+    @property
+    def asynchronous(self):
+        return True
+
     def reset(self, task: Task):
         """Reset the workflow with a new task"""
         self.game_file_path = task.task_desc or task.raw_task.get("game_file", "")
@@ -64,7 +68,7 @@ class RAFTAlfworldWorkflow(Workflow):
         """Create alfworld environment"""
         return create_alfworld_environment(game_file)
 
-    def run_single_rollout(
+    async def run_single_rollout(
         self, env
     ) -> tuple[List[Dict[str, str]], float, bool, int, List[Dict[str, str]]]:
         """Run a single rollout with RAFT-guided actions"""
@@ -82,7 +86,7 @@ class RAFTAlfworldWorkflow(Workflow):
             trajectory.append({"role": "user", "content": format_observation(observation)})
 
             # Get model response with RAFT guidance
-            responses = self.model.chat(
+            responses = await self.model.chat_async(
                 trajectory,
                 n=1,
                 temperature=self.temperature,
@@ -134,12 +138,12 @@ class RAFTAlfworldWorkflow(Workflow):
         # If timeout, return the last reward from environment instead of fixed value
         return trajectory, last_reward, False, self.max_env_steps, parsed_steps
 
-    def _execute_first_attempt(self) -> tuple:
+    async def _execute_first_attempt(self) -> tuple:
         """Execute the first attempt and return results"""
         env = self.create_environment(self.game_file_path)
 
         try:
-            trajectory, reward, done, steps, parsed_steps = self.run_single_rollout(env)
+            trajectory, reward, done, steps, parsed_steps = await self.run_single_rollout(env)
         except Exception as e:
             print(f"Single rollout failed: {e}")
             env.close()
@@ -151,11 +155,11 @@ class RAFTAlfworldWorkflow(Workflow):
 
         return trajectory, reward, done, steps, parsed_steps, success, traj_format_valid
 
-    def eval_alfworld(self) -> List[Experience]:
+    async def eval_alfworld(self) -> List[Experience]:
         """Evaluate a single alfworld trajectory"""
         env = self.create_environment(self.game_file_path)
         try:
-            trajectory, reward, done, steps, parsed_steps = self.run_single_rollout(env)
+            trajectory, reward, done, steps, parsed_steps = await self.run_single_rollout(env)
         except Exception as e:
             print(f"Single rollout failed during eval: {e}")
             env.close()
@@ -175,11 +179,11 @@ class RAFTAlfworldWorkflow(Workflow):
 
         return [experience]
 
-    def run(self) -> List[Experience]:
+    async def run_async(self) -> List[Experience]:
         """Run the RAFT alfworld workflow and return experiences"""
 
         if self.is_eval:
-            return self.eval_alfworld()
+            return await self.eval_alfworld()
 
         # Execute first attempt
         try:
@@ -191,7 +195,7 @@ class RAFTAlfworldWorkflow(Workflow):
                 parsed_steps,
                 success,
                 traj_format_valid,
-            ) = self._execute_first_attempt()
+            ) = await self._execute_first_attempt()
         except Exception as e:
             return [generate_default_empty_experience(f"Training rollout failed: {str(e)}")]
 

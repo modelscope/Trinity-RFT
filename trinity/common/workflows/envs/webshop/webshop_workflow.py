@@ -217,14 +217,14 @@ class WebShopWorkflow(MultiTurnWorkflow):
         self.task_desc = task.task_desc or "0"
         self.repeat_times = task.repeat_times
 
-    def get_model_response(self, messages):
-        responses = self.model.chat(messages, n=1)
+    async def get_model_response(self, messages):
+        responses = await self.model.chat_async(messages, n=1)
         return responses
 
-    def get_model_response_text(self, messages):
-        return self.get_model_response(messages)[0].response_text
+    async def get_model_response_text(self, messages):
+        return await self.get_model_response(messages)[0].response_text
 
-    def generate_env_inference_samples(self, env, session_id, rollout_num) -> List[Experience]:
+    async def generate_env_inference_samples(self, env, session_id, rollout_num) -> List[Experience]:
         # TODO: Make this parallel
         print("Generating env inference samples...")
         experience_list = []
@@ -238,7 +238,7 @@ class WebShopWorkflow(MultiTurnWorkflow):
                 available_actions = env.get_available_actions()
                 format_obs = format_observation(observation)
                 memory = memory + [{"role": "user", "content": format_obs}]
-                response_text = self.get_model_response_text(memory)
+                response_text = await self.get_model_response_text(memory)
                 memory.append({"role": "assistant", "content": response_text})
                 action = parse_action(response_text)
                 action_valid, error_msg = validate_action(action, available_actions)
@@ -266,8 +266,8 @@ class WebShopWorkflow(MultiTurnWorkflow):
             experience_list.append(experience)
         return experience_list
 
-    def run(self) -> List[Experience]:
+    async def run_async(self) -> List[Experience]:
         # assume the task_description is the session_id generated.
         session_id = int(self.task_desc)
         rollout_n = self.repeat_times
-        return self.generate_env_inference_samples(self.env, session_id, rollout_n)
+        return await self.generate_env_inference_samples(self.env, session_id, rollout_n)

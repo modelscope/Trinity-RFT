@@ -45,6 +45,10 @@ class MathBoxedWorkflow(SimpleWorkflow):
         else:
             self.reward_fn = task.reward_fn(**self.reward_fn_args)
 
+    @property
+    def asynchronous(self):
+        return True
+
     def format_prompt(self):
         prompt_text = ""
         if self.system_prompt:
@@ -54,7 +58,7 @@ class MathBoxedWorkflow(SimpleWorkflow):
             prompt_text += "User:\n" + self.task_desc + "\nAssistant:\n"
         return prompt_text
 
-    def run(self) -> List[Experience]:
+    async def run_async(self) -> List[Experience]:
         if not self.use_base:
             messages = self.format_messages()
         else:
@@ -62,9 +66,9 @@ class MathBoxedWorkflow(SimpleWorkflow):
 
         self.logger.debug("start chat")
         if not self.use_base:
-            responses = self.model.chat(messages, **self.rollout_args)
+            responses = await self.model.chat_async(messages, **self.rollout_args)
         else:
-            responses = self.model.generate([prompt_text], **self.rollout_args)
+            responses = await self.model.generate_async([prompt_text], **self.rollout_args)
 
         for i, response in enumerate(responses):
             reward_dict = self.reward_fn(  # type: ignore [misc]
