@@ -360,6 +360,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.workflows.eval_workflow.html">trinity.common.workflows.eval_workflow module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.workflows.math_rm_workflow.html">trinity.common.workflows.math_rm_workflow module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.workflows.math_ruler_workflow.html">trinity.common.workflows.math_ruler_workflow module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.workflows.math_trainable_ruler_workflow.html">trinity.common.workflows.math_trainable_ruler_workflow module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.workflows.simple_mm_workflow.html">trinity.common.workflows.simple_mm_workflow module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.workflows.step_wise_workflow.html">trinity.common.workflows.step_wise_workflow module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.workflows.workflow.html">trinity.common.workflows.workflow module</a></li>
@@ -629,7 +630,7 @@ ray<span class="w"> </span>start<span class="w"> </span>--head
 <p><strong>A:</strong> The following parameters may be helpful:</p>
 <ul class="simple">
 <li><p>For trainer, adjust <code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu</span></code> when <code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.use_dynamic_bsz=false</span></code>; adjust <code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.ppo_max_token_len_per_gpu</span></code> and <code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.ulysses_sequence_parallel_size</span></code> when <code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.use_dynamic_bsz=true</span></code>. Setting <code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.entropy_from_logits_with_chunking=true</span></code> may also help.</p></li>
-<li><p>For explorer, adjust <code class="docutils literal notranslate"><span class="pre">explorer.rollout_model.tensor_parallel_size</span></code>,</p></li>
+<li><p>For explorer, adjust <code class="docutils literal notranslate"><span class="pre">explorer.rollout_model.tensor_parallel_size</span></code>.</p></li>
 </ul>
 </section>
 <section id="part-3-debugging-methods-coming-soon">
