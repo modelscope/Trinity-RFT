@@ -1,0 +1,8 @@
+{# _templates/article_header_customized.html #}
+<div class="header-extra-switchers" style="display:inline-flex; gap:.25rem; margin-left:.5rem; align-items:center;">
+  {% include "language-switch.html" %}
+</div>
+
+{% include [
+  "sphinx_book_theme/components/article-header-buttons.html",
+] ignore missing %}
