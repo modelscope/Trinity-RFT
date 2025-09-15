@@ -340,7 +340,7 @@ explorer:
   max_retry_times: 2
   env_vars: {}
   rollout_model:
-    engine_type: vllm
+    engine_type: vllm_async
     engine_num: 1
     tensor_parallel_size: 1
     enable_history: False
@@ -356,20 +356,19 @@ explorer:
 - `max_timeout`: Maximum time (in seconds) for a workflow to complete.
 - `max_retry_times`: Maximum number of retries for a workflow.
 - `env_vars`: Environment variables to be set for every workflow runners.
-- `rollout_model.engine_type`: Type of inference engine. For now, only `vllm_async` and `vllm` is supported, they have the same meaning and both use the asynchronous engine. In subsequent versions, only `vllm` may be retained for simplicity.
+- `rollout_model.engine_type`: Type of inference engine. For now, only `vllm_async` is supported.
 - `rollout_model.engine_num`: Number of inference engines.
 - `rollout_model.tensor_parallel_size`: Degree of tensor parallelism.
 - `rollout_model.enable_history`: Whether to enable model call history recording. If set to `True`, the model wrapper automatically records the return experiences of model calls. Please periodically extract the history via `extract_experience_from_history` to avoid out-of-memory issues. Default is `False`.
 - `auxiliary_models`: Additional models used for custom workflows.
 - `eval_interval`: Interval (in steps) for evaluating the model.
 - `eval_on_startup`: Whether to evaluate the model on startup. More precisely, at step 0 with the original model, so it will not be triggered when restarting.
-- `runner_num`: (*Deprecated*) Number of parallel workflow runners.
 
 ---
 
 ## Synchronizer Configuration
 
-Controls how model weights are synchronized between trainer and explorer.
+Controls how model weights are synchronized between trainer and explorer. Please refer to {ref}`Synchronizer in Trinity-RFT <Synchronizer>`。 for more details.
 
 ```yaml
 synchronizer:
@@ -397,15 +396,15 @@ trainer:
   name: trainer
   trainer_type: 'verl'
   save_interval: 100
-  trainer_config_path: ''
   trainer_config: null
+  trainer_config_path: ''
 ```
 
 - `name`: Name of the trainer. This name will be used as the Ray actor's name, so it must be unique.
 - `trainer_type`: Trainer backend implementation. Currently only supports `verl`.
 - `save_interval`: Frequency (in steps) at which to save model checkpoints.
-- `trainer_config_path`: The path to the trainer configuration file.
-- `trainer_config`: The trainer configuration provided inline. Only one of `trainer_config_path` and `trainer_config` should be specified.
+- `trainer_config`: The trainer configuration provided inline.
+- `trainer_config_path`: The path to the trainer configuration file. Only one of `trainer_config_path` and `trainer_config` should be specified.
 
 ---
 
@@ -604,8 +603,7 @@ critic:
 trainer:
   balance_batch: True
   # total_training_steps: null
-  # auto: find the last ckpt to resume. If can't find, start from scratch
-  resume_mode: auto # or auto or resume_path if
+  resume_mode: auto
   resume_from_path: ""
   critic_warmup: 0
   default_hdfs_dir: null
@@ -645,7 +643,7 @@ trainer:
 - `critic.cliprange_value`: Used for compute value loss.
 
 - `trainer.balance_batch`: Whether to balance batch size between GPUs during training.
-- `trainer.resume_mode`: Resume mode for training. Support `disable`, `auto` and `resume_path`.
+- `trainer.resume_mode`: Resume mode for training. Support `disable`, `auto` and `resume_path`. Default value is `auto`, i.e., finding the last ckpt to resume or training from scratch when it cannot find the ckpt.
 - `trainer.resume_from_path`: Path to resume from.
 - `trainer.critic_warmup`: The number of steps to train the critic model before actual policy learning.
 - `trainer.default_hdfs_dir`: Default HDFS directory for saving checkpoints.

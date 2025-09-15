@@ -5,7 +5,7 @@
 
 **A:** You can use the config manager to configure the parameters by running `trinity studio --port 8080`. This approach provides a convenient way to configure the parameters.
 
-Advanced users can also edit the config file directly.
+Advanced users can also edit the config file directly, referred to the YAML files in `examples`.
 Trinity-RFT uses [veRL](https://github.com/volcengine/verl) as the training backend, which can have massive parameters, referred to [veRL documentation](https://verl.readthedocs.io/en/latest/examples/config.html). You may specify these parameters in two ways: (1) specify the parameters in the `trainer.trainer_config` dictionary; (2) specify them in an auxiliary YAML file starting with `train_` and pass the path to `train_gsm8k.yaml` in `trainer.trainer_config_path`. These two ways are mutually exclusive.
 
 ---
@@ -72,7 +72,7 @@ ImportError: ...
 UsageError: api_key not configured (no-tty). call wandb.login(key=[your_api_key]) ...
 ```
 
-**A:** Try to log in to WandB before starting Ray and running the experiment. One way to do this is run the command `export WANDB_API_KEY=[your_api_key]`.
+**A:** Try to log in to WandB before starting Ray and running the experiment. One way to do this is run the command `export WANDB_API_KEY=[your_api_key]`. Yoy may also try using other monitors instead of WandB by setting `monitor.monitor_type=tensorboard/mlflow`.
 
 ---
 
@@ -98,8 +98,10 @@ ray start --head
 - For explorer, adjust `explorer.rollout_model.tensor_parallel_size`.
 
 
-## Part 3: Debugging Methods [Coming Soon]
-To see the full logs of all processes and save it to `debug.log`:
+## Part 3: Debugging Methods
+Trinity-RFT now supports the actor-level logs, which automatically saves the logs for each actor (such as explorer and trainer) to `<checkpoint_job_dir>/log/<actor_name>`. To see the more detailed logs, change the default log level (`info`) to `debug`, by setting `log.level=debug` in config file.
+
+Alternatively, if you want to look at the full logs of all processes and save it to `debug.log`:
 ```bash
 export RAY_DEDUP_LOGS=0
 trinity run --config grpo_gsm8k/gsm8k.yaml 2>&1 | tee debug.log

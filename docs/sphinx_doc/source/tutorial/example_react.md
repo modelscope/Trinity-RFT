@@ -1,4 +1,3 @@
-
 # Multi-Step ReAct
 
 This example serves as a demonstration for adapting the Trinity-RFT training workflow to your own agentic project, through our OpenAI-compatible `ModelWrapper` class.
@@ -62,8 +61,8 @@ The configuration file fine-tunes the behavior of the entire system. Here are th
 
 #### Native Tool Calling Settings
 
-These settings in the `explorer.rollout_model` section configure the VLLM-based engine to generate and parse OpenAI-compatible tool calls.
-We use the `Qwen3` model and host model with vllm. The configuration for different model can be found in [VLLM Toolcalls](https://docs.vllm.ai/en/stable/features/tool_calling.html#qwen-models)
+These settings in the `explorer.rollout_model` section configure the vLLM-based engine to generate and parse OpenAI-compatible tool calls.
+We use the `Qwen3` model and host model with vLLM. The configuration for different model can be found in [vLLM Toolcalls](https://docs.vllm.ai/en/stable/features/tool_calling.html#qwen-models)
 
 
 ```yaml
@@ -100,7 +99,7 @@ synchronizer:
 
 ## How to Run the Example
 
-1.  **Prerequisites**: Ensure you have Trinity installed, along with the dependencies for this example (e.g., `agentscope`). Please refer to [Agentscope Github link](https://github.com/agentscope-ai/agentscope/tree/v0).
+1.  **Prerequisites**: Ensure you have Trinity installed, along with the dependencies for this example (e.g., `AgentScope`). Please refer to [Agentscope Github link](https://github.com/agentscope-ai/agentscope/tree/v0).
 
 > **NOTE**: This example requires AgentScope from either:
 >  - Commit: `ad13ed5dacecb79d20abf626769f8c7d7a7d2afb`

@@ -19,7 +19,7 @@ An overview of the data processor is shown in the following figure.
 
 ## Example: Data Processor for Task Pipeline
 
-In this example, you will learn how to apply the data processor of Trinity-RFT to prepare and prioritize the dataset before task exploring and training. This example takes GSM-8K dataset as the example dataset to figure out:
+In this example, you will learn how to apply the data processor of Trinity-RFT to prepare and prioritize the dataset before task exploring and training. This example takes GSM8K dataset as the example dataset to figure out:
 
 1. how to prepare the data processor
 2. how to configure the data processor
@@ -60,7 +60,7 @@ service:
     auto_start: true
 ```
 
-Here you can set the input files for the GSM-8K dataset and some other items about task pipeline:
+Here you can set the input files for the GSM8K dataset and some other items about task pipeline:
 
 + `task_pipeline`: the configs for the task pipeline. Task pipeline is used to process the raw dataset. It consists of several inner configs:
   + `num_process`: the number of processes to use for the task pipeline.
@@ -73,7 +73,7 @@ It's worth noticing that we don't need to set the output path usually, cause it 
 The data processing of Data-Juicer is maintained as a service. Thus we need to config the data-juicer service.
 Luckily, Trinity-RFT provides an auto-start way to start the data processor server automatically. All you need to do is to set the `auto_start` of `data-juicer` service to `true` in the `service` section.
 
-All config items in the `data_processor` section can be found [here](trinity_configs.md). A prepared config file for this example of GSM-8K can be found in [the config file](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_task_pipeline/gsm8k.yaml).
+All config items in the `data_processor` section can be found [here](trinity_configs.md). A prepared config file for this example of GSM8K can be found in [the config file](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_task_pipeline/gsm8k.yaml).
 
 ```{note}
 Only when one of `xxx_pipeline` is provided, and one of `dj_process_desc` and `dj_config_path` in the pipeline config is provided, the data processor and the data active iterator will be activated. Otherwise, this part will be skipped and it will enter into the exploring stage directly.
@@ -97,7 +97,7 @@ If you follow the steps above, Trinity-RFT will send a request to the data proce
 
 ## Example: Data Processor for Experience Pipeline
 
-In this example, you will learn how to apply the data processor of Trinity-RFT to reshape rewards of experiences after exploring. This example takes GSM-8K dataset as the example dataset to figure out how to reshape rewards of experiences from the explorer before sent to the trainer from a view of the quality of generated responses.
+In this example, you will learn how to apply the data processor of Trinity-RFT to reshape rewards of experiences after exploring. This example takes GSM8K dataset as the example dataset to figure out how to reshape rewards of experiences from the explorer before sent to the trainer from a view of the quality of generated responses.
 
 In addition to the automatic way to start the data processor server in the previous example, you can also start it manually.
 
@@ -174,7 +174,7 @@ process:
       field_names: ["prompt", "response"]
 ```
 
-All config items in the `data_processor` section can be found [here](trinity_configs.md). A prepared config file for this example of GSM-8K can be found in [the config file](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_experience_pipeline/gsm8k.yaml).
+All config items in the `data_processor` section can be found [here](trinity_configs.md). A prepared config file for this example of GSM8K can be found in [the config file](https://github.com/modelscope/Trinity-RFT/tree/main/examples/grpo_gsm8k_experience_pipeline/gsm8k.yaml).
 
 ### Exploring & Training
 After preparing the config files of Trinity-RFT, you can start your ray cluster and run the RFT process including the data active iterator part with the following commands:

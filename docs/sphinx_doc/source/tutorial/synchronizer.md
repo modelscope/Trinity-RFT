@@ -87,7 +87,7 @@ There are **three ways** the model weights can be transferred from Trainer to Ex
 | Method | Medium | Best For | Latency | Notes |
 |-------|--------|--------|--------|-------|
 | `NCCL` | GPU-to-GPU (Direct) | Same machine, multi-GPU | ⬇️ Lowest | Fastest, but requires shared hardware |
-| `MEMORY` | Shared Memory / Network | Distributed clusters (moderate disk) | ⬇️ Low | Good balance of speed and flexibility |
+| `MEMORY` | Shared Memory / Network | Distributed clusters | ⬇️ Low | Good balance of speed and flexibility |
 | `CHECKPOINT` | Disk Files | Cross-device, cloud, or slow systems | ⬆️ Higher | Most compatible, but slower |
 
 ### 1. `SyncMethod.NCCL` – High-Speed Direct Sync

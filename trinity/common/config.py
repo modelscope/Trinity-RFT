@@ -235,7 +235,6 @@ class InferenceModelConfig:
     # ! DO NOT SET in explorer.rollout_model, automatically set from config.model.model_path
     model_path: str = ""
 
-    # support `vllm` or `vllm_async`,
     engine_type: str = "vllm_async"
     engine_num: int = 1
     tensor_parallel_size: int = 1

@@ -48,7 +48,6 @@ buffer:
 explorer:
   runner_num: 32
   rollout_model:
-    engine_type: vllm_async
     engine_num: 4
 synchronizer:
   sync_method: 'checkpoint'
@@ -144,7 +143,6 @@ explorer:
   name: 'explorer_new'  # important
   runner_num: 64
   rollout_model:
-    engine_type: vllm_async
     engine_num: 8
 buffer:
   total_epochs: 1
