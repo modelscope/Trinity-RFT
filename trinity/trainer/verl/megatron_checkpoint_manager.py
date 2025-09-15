@@ -89,6 +89,7 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
         global_step: int = 0,
         max_ckpt_to_keep=None,
         model_state_dict_only: bool = False,
+        save_as_hf: bool = False,
     ):
         # TODO: if resume from checkpoint, synchronization will save model again, which is unnecessary.
         if global_step == 0 and model_state_dict_only:
@@ -201,7 +202,7 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
                 with open(transformer_config_path, "w") as f:
                     json.dump(transformer_config_dict, f, indent=2)
 
-        if self.should_save_hf_model:
+        if self.should_save_hf_model or save_as_hf:
             # wait for everyone to dump to local
             state_dict = self.weight_saver(
                 self.model,

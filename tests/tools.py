@@ -110,6 +110,7 @@ def get_unittest_dataset_config(
             name=dataset_name,
             path=os.path.join(os.path.dirname(__file__), "template", "data", "sft_for_gsm8k"),
             split="train",
+            schema_type="sft",
             format=FormatConfig(
                 prompt_type=PromptType.PLAINTEXT,
                 prompt_key="prompt",

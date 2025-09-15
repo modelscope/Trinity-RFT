@@ -3,9 +3,10 @@
 from typing import Callable, Optional
 
 from latex2sympy2_extended import NormalizationConfig
-from math_verify import LatexExtractionConfig, parse, verify
+from math_verify import LatexExtractionConfig
 
 from trinity.common.rewards.reward_fn import REWARD_FUNCTIONS, RewardFn
+from trinity.utils.eval_utils import parse_with_timeout, verify_with_timeout
 from trinity.utils.log import get_logger
 
 
@@ -30,16 +31,16 @@ class AccuracyReward(RewardFn):
             truth_parsed = self.answer_parser(truth)  # type: ignore [arg-type]
 
         else:
-            truth_parsed = parse(
-                truth,
+            truth_parsed = parse_with_timeout(
+                pred=truth,  # type: ignore [arg-type]
                 extraction_mode="first_match",
                 extraction_config=[LatexExtractionConfig()],
             )
             if len(truth_parsed) == 0:
                 truth_parsed = truth
 
-            answer_parsed = parse(
-                response,
+            answer_parsed = parse_with_timeout(
+                pred=response,
                 extraction_config=[
                     LatexExtractionConfig(
                         normalization_config=NormalizationConfig(
@@ -60,7 +61,7 @@ class AccuracyReward(RewardFn):
 
         # Reward 1 if the content is the same as the ground truth, 0 otherwise
         try:
-            reward = float(verify(answer_parsed, truth_parsed))
+            reward = float(verify_with_timeout(answer_parsed, truth_parsed))
         except Exception as e:
             self.logger.info(f"verify failed: {e}, answer: {answer_parsed}, gold: {truth_parsed}")
             reward = 0.0

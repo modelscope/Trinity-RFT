@@ -313,7 +313,6 @@ class Trainer:
     training_rollout_mode: str = "parallel"
     enable_exp_buffer: bool = True
     sync_freq: int = 0
-    sft_warmup_steps: int = 0
     max_actor_ckpt_to_keep: Optional[int] = None
     max_critic_ckpt_to_keep: Optional[int] = None
     device: str = "cuda"  # default to cuda
@@ -379,7 +378,6 @@ class veRLConfig:
         self.trainer.group_name = config.group
         self.trainer.experiment_name = config.name
         self.trainer.default_local_dir = config.checkpoint_job_dir
-        self.trainer.sft_warmup_steps = config.buffer.trainer_input.sft_warmup_steps
         if not config.continue_from_checkpoint:
             self.trainer.resume_mode = "disable"
         else:

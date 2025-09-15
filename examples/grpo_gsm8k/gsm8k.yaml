@@ -41,11 +41,6 @@ buffer:
       name: gsm8k_buffer
       storage_type: queue
       path: 'sqlite:///gsm8k.db'
-    # sft_warmup_steps: 0
-    # sft_warmup_dataset: # Uncomment these to enable sft warmup
-    #   name: warmup_data
-    #   storage_type: file
-    #   path: ${oc.env:TRINITY_SFT_DATASET_PATH}
 explorer:
   eval_interval: 50
   runner_per_model: 8

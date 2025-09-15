@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
+import concurrent.futures
+
 import regex as re
+from math_verify import parse, verify
 
 from trinity.utils.math_eval_utils import strip_string
 
@@ -7,14 +10,30 @@ ANS_RE = re.compile(r"#### (\-?[0-9\.\,]+)")
 INVALID_ANS = "[invalid]"
 
 
-def simple_answer_parser(response: str) -> str:
-    from math_verify import parse
+def parse_with_timeout(pred: str, parsing_timeout: int = 5, **kwargs) -> list[str]:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+        future = executor.submit(parse, pred=pred, parsing_timeout=None, **kwargs)
+        try:
+            return future.result(timeout=parsing_timeout)
+        except concurrent.futures.TimeoutError:
+            raise TimeoutError("Parsing timed out")
 
+
+def verify_with_timeout(gold: str, target: str, timeout_seconds: int = 5, **kwargs) -> bool:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+        future = executor.submit(verify, gold=gold, target=target, timeout_seconds=None, **kwargs)
+        try:
+            return future.result(timeout=timeout_seconds)
+        except concurrent.futures.TimeoutError:
+            raise TimeoutError("Verification timed out")
+
+
+def simple_answer_parser(response: str) -> list[str]:
     search_ans = re.search(r"<answer>(.*?)</answer>", response)
     if search_ans:
         response = search_ans.group(1)
 
-    return parse(response)
+    return parse_with_timeout(response)
 
 
 def find_boxed_answer(raw_answer, timeout=10):

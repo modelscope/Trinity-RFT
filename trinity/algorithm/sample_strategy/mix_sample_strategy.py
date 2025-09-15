@@ -22,6 +22,7 @@ class MixSampleStrategy(SampleStrategy):
     def __init__(self, buffer_config: BufferConfig, **kwargs):
         super().__init__(buffer_config)
         self.expert_data_ratio = kwargs.get("expert_data_ratio", 0.5)
+        self.sft_dataset_name = kwargs.get("sft_dataset_name", "sft_dataset")
         tot_batch_size = buffer_config.train_batch_size
         expert_batch_size = ceil(self.expert_data_ratio * tot_batch_size)
 
@@ -32,16 +33,17 @@ class MixSampleStrategy(SampleStrategy):
             buffer_config.trainer_input.experience_buffer, usual_buffer_config  # type: ignore
         )
 
-        if buffer_config.trainer_input.sft_warmup_dataset is None:
+        if buffer_config.trainer_input.auxiliary_buffers is None:
             raise ValueError(
-                "`buffer_config.trainer_input.sft_warmup_dataset` is required in MIX algorithm"
+                "`buffer_config.trainer_input.auxiliary_buffers` is required in MIX algorithm"
             )
 
         # expert experience buffer
         expert_buffer_config = copy.deepcopy(buffer_config)
         expert_buffer_config.train_batch_size = expert_batch_size
         self.expert_exp_buffer = get_buffer_reader(
-            buffer_config.trainer_input.sft_warmup_dataset, expert_buffer_config
+            buffer_config.trainer_input.auxiliary_buffers[self.sft_dataset_name],
+            expert_buffer_config,
         )
 
     async def sample(self, step: int) -> Tuple[Experiences, Dict, List]:
@@ -95,4 +97,5 @@ class MixSampleStrategy(SampleStrategy):
     def default_args(cls) -> Dict:
         return {
             "expert_data_ratio": 0.5,
+            "sft_dataset_name": "sft_dataset",
         }

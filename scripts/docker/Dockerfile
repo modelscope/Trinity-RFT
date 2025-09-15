@@ -16,6 +16,7 @@ RUN apt update && apt install -y \
     libomp-dev infiniband-diags libibverbs-dev librdmacm-dev rdma-core perftest \
     && rm -rf /var/lib/apt/lists/* \
     && ln -sf /usr/bin/python3 /usr/bin/python
+    && ln -sf /usr/bin/pip3 /usr/bin/pip
 
 
 # For Aliyun users: update pip mirror to aliyun to speed up pip install

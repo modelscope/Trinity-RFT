@@ -127,9 +127,7 @@ class ConfigManager:
         else:
             self.get_configs("experience_buffer_path")
 
-        self.get_configs("algorithm_type", "sft_warmup_steps", "monitor_type")
-        if st.session_state["sft_warmup_steps"] > 0:
-            self.get_configs("sft_warmup_dataset_path")
+        self.get_configs("algorithm_type", "monitor_type")
 
         st.header("Important Configs")
         self.get_configs("node_num", "gpu_per_node", "engine_num", "tensor_parallel_size")
@@ -144,9 +142,6 @@ class ConfigManager:
             self.get_configs("taskset_args")
         else:
             self.get_configs("dpo_dataset_kwargs")
-
-        if st.session_state["sft_warmup_steps"] > 0:
-            self.get_configs("sft_warmup_dataset_args")
 
         self.get_configs(
             "default_workflow_type", "default_eval_workflow_type", "default_reward_fn_type"
@@ -192,10 +187,6 @@ class ConfigManager:
 
         with st.expander("Eval Tasksets Configs", expanded=True):
             self.get_configs("eval_tasksets")
-
-        with st.expander("SFT Dataset Configs"):
-            self.get_configs("sft_warmup_dataset_path")
-            self.get_configs("sft_warmup_dataset_args")
 
         if st.session_state["algorithm_type"] != "dpo":
             with st.expander("Experiences Buffer Configs", expanded=True):
@@ -574,12 +565,6 @@ class ConfigManager:
             ):
                 experience_buffer_path = f"sqlite:///{os.path.join(st.session_state['checkpoint_root_dir'], '.cache', st.session_state['project'], st.session_state['exp_name'])}/data.db"
 
-        sft_storage_type = (
-            StorageType.SQL.value
-            if "://" in st.session_state["sft_warmup_dataset_path"]
-            else StorageType.FILE.value
-        )  # TODO
-
         buffer_config = {
             "batch_size": st.session_state["explore_batch_size"],
             "train_batch_size": st.session_state["train_batch_size"],
@@ -593,7 +578,6 @@ class ConfigManager:
                     # "max_retry_interval": st.session_state["max_retry_interval"],
                     # "max_retry_times": st.session_state["buffer_max_retry_times"],
                 },
-                "sft_warmup_steps": st.session_state["sft_warmup_steps"],
             },
         }
         if st.session_state["train_batch_size"] is None:
@@ -663,19 +647,6 @@ class ConfigManager:
                 "prompt_key": st.session_state["dpo_dataset_prompt_key"],
                 "chosen_key": st.session_state["dpo_dataset_chosen_key"],
                 "rejected_key": st.session_state["dpo_dataset_rejected_key"],
-            }
-        if st.session_state["sft_warmup_dataset_path"].strip():
-            buffer_config["trainer_input"]["sft_warmup_dataset"] = {
-                "name": "sft_warmup_dataset",
-                "storage_type": sft_storage_type,
-                "path": st.session_state["sft_warmup_dataset_path"],
-                "split": st.session_state["sft_warmup_train_split"],
-                "format": {
-                    "prompt_type": st.session_state["sft_warmup_prompt_type"],
-                    "messages_key": st.session_state["sft_warmup_messages_key"],
-                    "prompt_key": st.session_state["sft_warmup_prompt_key"],
-                    "response_key": st.session_state["sft_warmup_response_key"],
-                },
             }
 
         return buffer_config

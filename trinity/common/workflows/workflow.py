@@ -35,8 +35,8 @@ class Task(dict):
     raw_task: Optional[dict] = None  # The raw data sample
 
     # automatically assigned ids
-    batch_id: Union[int, str] = 0
-    task_id: Union[int, str] = 0
+    batch_id: Union[int, str] = ""
+    task_id: Union[int, str] = ""
 
     def to_workflow(
         self, model: Any, auxiliary_models: Optional[List[openai.OpenAI]] = None

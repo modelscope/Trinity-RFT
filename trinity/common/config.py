@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 """Configs for RFT."""
+from __future__ import annotations
+
 import os
+from copy import deepcopy
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
@@ -310,10 +313,6 @@ class AlgorithmConfig:
     # If not set, use entropy_loss_fn.default_args()
     entropy_loss_fn_args: Optional[dict] = None
 
-    # used for SFT warmup
-    # TODO: move this to SFT warmup
-    use_token_level_loss: bool = True
-
 
 @dataclass
 class ClusterConfig:
@@ -338,14 +337,16 @@ class ExplorerInput:
     reply_prefix: Optional[str] = None
 
 
-@Experimental
 @dataclass
 class TrainerInput:
     """Config for trainer input."""
 
+    # The main experience buffer to be used in trainer
+    # Commonly, it is also the output buffer of the Explorer
     experience_buffer: Optional[StorageConfig] = None
-    sft_warmup_dataset: Optional[StorageConfig] = None
-    sft_warmup_steps: int = 0
+
+    # Some auxiliary buffers to facilitate training (e.g., data mixing)
+    auxiliary_buffers: Dict[str, StorageConfig] = field(default_factory=dict)
 
 
 @dataclass
@@ -487,6 +488,19 @@ class LogConfig:
 
 
 @dataclass
+class StageConfig:
+    """Configs for a stage."""
+
+    stage_name: str
+    mode: Optional[str] = None
+    algorithm: Optional[AlgorithmConfig] = None
+    buffer: Optional[BufferConfig] = None
+    data_processor: Optional[DataProcessorConfig] = None
+    explorer: Optional[ExplorerConfig] = None
+    trainer: Optional[TrainerConfig] = None
+
+
+@dataclass
 class Config:
     """Global Configuration"""
 
@@ -514,6 +528,9 @@ class Config:
     synchronizer: SynchronizerConfig = field(default_factory=SynchronizerConfig)
     service: ServiceConfig = field(default_factory=ServiceConfig)
     log: LogConfig = field(default_factory=LogConfig)
+
+    # configurations for different training stages
+    stages: List[StageConfig] = field(default_factory=list)
 
     def save(self, config_path: str) -> None:
         """Save config to file."""
@@ -656,26 +673,6 @@ class Config:
                 f"your checkpoint directory: {self.checkpoint_job_dir}"
             )
 
-        # check trainer_input.sft_warmup_dataset
-        if (
-            self.buffer.trainer_input.sft_warmup_steps > 0
-            and self.buffer.trainer_input.sft_warmup_dataset is None
-        ):
-            raise ValueError(
-                "`buffer.trainer_input.sft_warmup_dataset` is required when `buffer.trainer_input.sft_warmup_steps` > 0"
-            )
-        if self.buffer.trainer_input.sft_warmup_dataset is not None:
-            self.buffer.trainer_input.sft_warmup_dataset.schema_type = "sft"
-            self.buffer.trainer_input.sft_warmup_dataset.total_steps = (
-                self.buffer.trainer_input.sft_warmup_steps
-            )
-            if self.buffer.trainer_input.sft_warmup_dataset.ray_namespace is None:
-                self.buffer.trainer_input.sft_warmup_dataset.ray_namespace = self.ray_namespace
-            if self.buffer.trainer_input.sft_warmup_dataset.format.chat_template is None:
-                self.buffer.trainer_input.sft_warmup_dataset.format.chat_template = (
-                    self.model.custom_chat_template
-                )
-
         # check input/output buffers in pipelines
         if self.data_processor.experience_pipeline is not None:
             if (
@@ -784,7 +781,24 @@ class Config:
         check_and_set("kl_penalty_fn", KL_FN, "kl_penalty_fn_args")
         check_and_set("entropy_loss_fn", ENTROPY_LOSS_FN, "entropy_loss_fn_args")
 
-    def check_and_update(self) -> None:  # noqa: C901
+    def __iter__(self):
+        """Iterate over configs with each stage applied in order.
+
+        Yields:
+            Config: The config after applying each stage.
+        """
+        for stage in self.stages:
+            new_config = deepcopy(self)
+            for field_name in stage.__dataclass_fields__:
+                stage_value = getattr(stage, field_name)
+                if stage_value is not None and hasattr(new_config, field_name):
+                    setattr(new_config, field_name, stage_value)
+            if stage.stage_name:
+                new_config.name = f"{self.name}/{stage.stage_name}"
+            new_config.stages = []
+            yield new_config
+
+    def check_and_update(self) -> Config:  # noqa: C901
         """Check and update the config."""
         self._check_deprecated()
 
@@ -928,6 +942,7 @@ class Config:
 
         # check log
         self.log.save_dir = os.path.join(self.checkpoint_job_dir, "log")
+        return self
 
     def flatten(self) -> Dict[str, Any]:
         """Flatten the config into a single-level dict with dot-separated keys for nested fields."""

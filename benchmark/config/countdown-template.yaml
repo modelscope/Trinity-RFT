@@ -45,7 +45,6 @@ buffer:
       replay_buffer_kwargs:
         priority_fn: linear_decay
         decay: 0.1
-    sft_warmup_steps: 0
 explorer:
   runner_per_model: 8
   max_timeout: 900

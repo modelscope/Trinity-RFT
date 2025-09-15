@@ -31,7 +31,7 @@ dependencies = [
     "psycopg2-binary",
     "networkx",
     "latex2sympy2_extended",
-    "math_verify",
+    "math_verify>=0.8.0",
     "ninja",
     "fire",
     "streamlit",

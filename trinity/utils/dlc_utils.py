@@ -64,14 +64,20 @@ def wait_for_ray_worker_nodes(world_size: int) -> None:
             time.sleep(1)
 
 
-def setup_ray_cluster(namespace: str, envs: dict):
+def setup_ray_cluster(namespace: str) -> str:
+    """Setup a ray cluster in DLC environment.
+
+    This function will start a ray cluster if it is not running, otherwise it will reuse the existing ray cluster.
+
+    Returns:
+        str: The address of the ray cluster.
+    """
     env_vars = get_dlc_env_vars()
     is_master = env_vars["RANK"] == 0
 
     if is_running():
         # reuse existing ray cluster
-        if is_master:
-            ray.init(namespace=namespace, ignore_reinit_error=True, runtime_env={"env_vars": envs})
+        return "auto"
     else:
         if is_master:
             cmd = f"ray start --head --port={env_vars['MASTER_PORT']} --node-ip-address={env_vars['MASTER_ADDR']}"
@@ -91,11 +97,12 @@ def setup_ray_cluster(namespace: str, envs: dict):
             address=f"{env_vars['MASTER_ADDR']}:{env_vars['MASTER_PORT']}",
             namespace=namespace,
             ignore_reinit_error=True,
-            runtime_env={"env_vars": envs},
         )
         if is_master:
             # master wait for worker nodes to join
             wait_for_ray_worker_nodes(env_vars["WORLD_SIZE"])
+            ray.shutdown()
+            return f"{env_vars['MASTER_ADDR']}:{env_vars['MASTER_PORT']}"
         else:
             # worker wait on the cluster status actor
             cluster_status = (

@@ -33,7 +33,9 @@ class Trainer:
         load_plugins()
         self.synchronizer = Synchronizer.get_actor(config)
         self.engine = get_trainer_wrapper(config)
-        self.state = StateManager(config)
+        self.state = StateManager(
+            path=config.checkpoint_job_dir, trainer_name=config.trainer.name, config=config
+        )
         trainer_state = self.state.load_trainer()
         config.buffer.trainer_input.experience_buffer.index = trainer_state.get(
             "latest_exp_index", 0
@@ -76,7 +78,7 @@ class Trainer:
                 self.logger.error(f"Error in Trainer:\n{traceback.format_exc()}")
                 self.train_continue = False
 
-        self.save_checkpoint(block_until_saved=True)
+        self.save_checkpoint(block_until_saved=True, save_as_hf=True)
         await self.synchronizer.set_trainer_status.remote(RunningStatus.STOPPED)
         self.logger.info("--------------------\n> Trainer finished.\n--------------------")
         return self.config.trainer.name
@@ -94,13 +96,6 @@ class Trainer:
             )
         except StopAsyncIteration:
             self.logger.info("No more samples to train. Stopping training.")
-            if (
-                self.config.trainer.save_interval == 0
-                or self.train_step_num % self.config.trainer.save_interval != 0
-            ):
-                self.logger.info(f"Saving at step {self.train_step_num}.")
-                self.save_checkpoint()
-                self.logger.info(f"Saved at step {self.train_step_num}.")
             return False
         self.logger.info(f"Sampling at step {self.train_step_num + 1} done.")
         continue_run, metrics = self.engine.train_step(batch)
@@ -157,8 +152,8 @@ class Trainer:
             )
             self._sample_exps_to_log.clear()
 
-    def save_checkpoint(self, block_until_saved: bool = False) -> None:
-        self.engine.save_checkpoint(block_until_saved=block_until_saved)
+    def save_checkpoint(self, block_until_saved: bool = False, save_as_hf: bool = False) -> None:
+        self.engine.save_checkpoint(block_until_saved=block_until_saved, save_as_hf=save_as_hf)
         self.state.save_trainer(
             current_exp_index=self.engine.train_step_num * self.config.buffer.train_batch_size,
             current_step=self.train_step_num,
@@ -172,7 +167,7 @@ class Trainer:
         """Get the current training step number."""
         return self.engine.train_step_num
 
-    def is_alive(self) -> bool:
+    async def is_alive(self) -> bool:
         """Check if the trainer is alive."""
         return True
 
@@ -211,7 +206,7 @@ class TrainEngineWrapper(ABC):
         """
 
     @abstractmethod
-    def save_checkpoint(self, block_until_saved: bool = False) -> None:
+    def save_checkpoint(self, block_until_saved: bool = False, save_as_hf: bool = False) -> None:
         """Save the checkpoint."""
 
     @abstractmethod
