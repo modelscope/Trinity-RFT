@@ -60,12 +60,12 @@ jobs:
           BRANCH_NAME=$(git branch --show-current)
         fi
         REDIRECT_PATH="docs/sphinx_doc/build/html/index.html"
-        MAIN_INDEX="${BRANCH_NAME}/index.html"
+        MAIN_INDEX="en/${BRANCH_NAME}/index.html"
         cat > $REDIRECT_PATH <<EOF
         <!DOCTYPE html>
         <html>
           <head>
-            <meta http-equiv=\"refresh\" content=\"0; url=$MAIN_INDEX\" />
+            <meta http-equiv="refresh" content="0; url=$MAIN_INDEX" />
             <script>window.location.href = "$MAIN_INDEX";</script>
             <title>Redirecting...</title>
           </head>

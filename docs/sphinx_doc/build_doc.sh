@@ -1,43 +1,45 @@
 #!/bin/bash
 
 # Usage: ./build_doc.sh [--branch <branch_name>]
+#!/bin/bash
+# Usage:
+#   ./build_doc.sh                # 构建所有语言 & 所有版本
+#   ./build_doc.sh --branch xxx   # 仅构建当前分支版本（PR/feature 分支用）
 
-set -e
+set -euo pipefail
 
-conf_file="source/conf.py"
+SRC_EN="source"
+SRC_ZH="source_zh"
+OUT_ROOT="build/html"
+OUT_EN="${OUT_ROOT}/en"
+OUT_ZH="${OUT_ROOT}/zh"
 
-cleanup() {
-    # Restore the original conf.py if a backup exists
-    if [[ -f "${conf_file}.bak" ]]; then
-        echo "Restoring original ${conf_file}..."
-        mv "${conf_file}.bak" "${conf_file}"
-    fi
+BRANCH_FILTER=""
+
+if [[ "${1:-}" == "--branch" && -n "${2:-}" ]]; then
+  BRANCH_FILTER="$2"
+  echo "[build_doc] Only building branch: ${BRANCH_FILTER}"
+fi
+
+build_one () {
+  local SRC="$1"
+  local DST="$2"
+
+  mkdir -p "${DST}"
+  if [[ -n "${BRANCH_FILTER}" ]]; then
+    sphinx-multiversion \
+      -D smv_branch_whitelist="^(${BRANCH_FILTER})$" \
+      -D smv_tag_whitelist="^$" \
+      "${SRC}" "${DST}"
+  else
+    sphinx-multiversion "${SRC}" "${DST}"
+  fi
 }
 
-if [[ "$1" == "--branch" ]]; then
-    # Ensure cleanup runs on script exit or interruption
-    trap cleanup EXIT
-    branch="$2"
-    echo "Building documentation for branch: ${branch}"
-    # Backup the conf file before modifying
-    cp "${conf_file}" "${conf_file}.bak"
+echo "[build_doc] Building zh -> ${OUT_ZH}"
+build_one "${SRC_ZH}" "${OUT_ZH}"
 
-    # Modify conf.py to build for the current branch only
-    python3 -c "
-import re
-path = '${conf_file}'
-with open(path, 'r', encoding='utf-8') as f:
-    lines = f.readlines()
-with open(path, 'w', encoding='utf-8') as f:
-    for line in lines:
-        if line.startswith('smv_branch_whitelist ='):
-            f.write(f'smv_branch_whitelist = r\"^(${branch})$\"\\n')
-        elif line.startswith('smv_tag_whitelist ='):
-            f.write('smv_tag_whitelist = r\"^$\"\\n')
-        else:
-            f.write(line)
-"
-    sphinx-multiversion source build/html
-else
-    sphinx-multiversion source build/html
-fi
+echo "[build_doc] Building en -> ${OUT_EN}"
+build_one "${SRC_EN}" "${OUT_EN}"
+
+echo "[build_doc] Done. Output at ${OUT_ROOT} (subdirs: en/, zh/)"
