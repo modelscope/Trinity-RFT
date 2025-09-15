@@ -2098,12 +2098,18 @@ document.write(`
       </ul></li>
       <li><a href="build_api/trinity.common.constants.html#trinity.common.constants.SyncMethod.NCCL">NCCL (trinity.common.constants.SyncMethod attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.explorer.html#trinity.explorer.Explorer.need_eval">need_eval() (trinity.explorer.Explorer method)</a>
 
       <ul>
         <li><a href="build_api/trinity.explorer.explorer.html#trinity.explorer.explorer.Explorer.need_eval">(trinity.explorer.explorer.Explorer method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="build_api/trinity.trainer.html#trinity.trainer.Trainer.need_save">need_save() (trinity.trainer.Trainer method)</a>
+
+      <ul>
+        <li><a href="build_api/trinity.trainer.trainer.html#trinity.trainer.trainer.Trainer.need_save">(trinity.trainer.trainer.Trainer method)</a>
 </li>
       </ul></li>
       <li><a href="build_api/trinity.explorer.html#trinity.explorer.Explorer.need_sync">need_sync() (trinity.explorer.Explorer method)</a>
@@ -2788,6 +2794,10 @@ document.write(`
         <li><a href="build_api/trinity.trainer.verl.fsdp_workers.html#trinity.trainer.verl.fsdp_workers.ActorRolloutRefWorker.setup_weight_sync_group">(trinity.trainer.verl.fsdp_workers.ActorRolloutRefWorker method)</a>
 </li>
       </ul></li>
+      <li><a href="build_api/trinity.common.config.html#trinity.common.config.TrainerInput.sft_warmup_dataset">sft_warmup_dataset (trinity.common.config.TrainerInput attribute)</a>
+</li>
+      <li><a href="build_api/trinity.common.config.html#trinity.common.config.TrainerInput.sft_warmup_steps">sft_warmup_steps (trinity.common.config.TrainerInput attribute)</a>
+</li>
       <li><a href="build_api/trinity.buffer.schema.sql_schema.html#trinity.buffer.schema.sql_schema.SFTDataModel">SFTDataModel (class in trinity.buffer.schema.sql_schema)</a>
 </li>
       <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.Actor.shuffle">shuffle (trinity.common.verl_config.Actor attribute)</a>
@@ -2808,10 +2818,10 @@ document.write(`
         <li><a href="build_api/trinity.trainer.trainer.html#trinity.trainer.trainer.Trainer.shutdown">(trinity.trainer.trainer.Trainer method)</a>
 </li>
       </ul></li>
-      <li><a href="build_api/trinity.common.experience.html#trinity.common.experience.EID.sid">sid (trinity.common.experience.EID property)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="build_api/trinity.common.experience.html#trinity.common.experience.EID.sid">sid (trinity.common.experience.EID property)</a>
+</li>
       <li><a href="build_api/trinity.utils.eval_utils.html#trinity.utils.eval_utils.simple_answer_parser">simple_answer_parser() (in module trinity.utils.eval_utils)</a>
 </li>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.SimpleMMWorkflow">SimpleMMWorkflow (class in trinity.common.workflows)</a>
@@ -3067,6 +3077,8 @@ document.write(`
       <ul>
         <li><a href="build_api/trinity.common.config.html#trinity.common.config.StorageConfig.total_steps">(trinity.common.config.StorageConfig attribute)</a>
 </li>
+        <li><a href="build_api/trinity.common.config.html#trinity.common.config.TrainerConfig.total_steps">(trinity.common.config.TrainerConfig attribute)</a>
+</li>
       </ul></li>
       <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.Optim.total_training_steps">total_training_steps (trinity.common.verl_config.Optim attribute)</a>
 
@@ -3190,6 +3202,8 @@ document.write(`
         <li><a href="build_api/trinity.buffer.reader.html#module-trinity.buffer.reader">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     trinity.buffer.reader.file_reader
 
@@ -3197,8 +3211,6 @@ document.write(`
         <li><a href="build_api/trinity.buffer.reader.file_reader.html#module-trinity.buffer.reader.file_reader">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     trinity.buffer.reader.queue_reader
 

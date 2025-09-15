@@ -451,7 +451,7 @@ document.write(`
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">ray</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
@@ -470,6 +470,7 @@ document.write(`
     <span class="n">create_colocated_worker_cls</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">hf_processor</span><span class="p">,</span> <span class="n">hf_tokenizer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.checkpoint.checkpoint_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_latest_ckpt_path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.debug</span><span class="w"> </span><span class="kn">import</span> <span class="n">marked_timer</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.fs</span><span class="w"> </span><span class="kn">import</span> <span class="n">copy_local_path_from_hdfs</span>
 
@@ -481,34 +482,6 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.trainer.trainer</span><span class="w"> </span><span class="kn">import</span> <span class="n">TrainEngineWrapper</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.trainer.verl.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_data_metrics</span><span class="p">,</span> <span class="n">to_data_proto</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
-
-
-<span class="k">class</span><span class="w"> </span><span class="nc">_InternalDataLoader</span><span class="p">:</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">experience_buffer</span> <span class="o">=</span> <span class="kc">None</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">None</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="k">pass</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">state</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">return</span> <span class="bp">self</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">StopIteration</span>
 
 
 <div class="viewcode-block" id="VerlPPOTrainerWrapper">
@@ -728,8 +701,8 @@ document.write(`
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_create_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_dataset</span><span class="p">,</span> <span class="n">val_dataset</span><span class="p">,</span> <span class="n">collate_fn</span><span class="p">,</span> <span class="n">train_sampler</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">train_dataloader</span> <span class="o">=</span> <span class="n">_InternalDataLoader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
-        <span class="c1"># TODO: compute total training steps</span>
+        <span class="c1"># Do not use verl&#39;s dataloader</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_dataloader</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">total_training_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">total_training_steps</span> <span class="ow">or</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">actor_rollout_ref</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">total_training_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_training_steps</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">critic</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">total_training_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_training_steps</span>
@@ -760,7 +733,7 @@ document.write(`
 
 <div class="viewcode-block" id="VerlPPOTrainerWrapper.train_step">
 <a class="viewcode-back" href="../../../build_api/trinity.trainer.verl_trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.train_step">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">train_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="n">Experiences</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>  <span class="c1"># noqa C901</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">train_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="n">Experiences</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>  <span class="c1"># noqa C901</span>
         <span class="n">batch</span> <span class="o">=</span> <span class="n">to_data_proto</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
         <span class="n">batch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">post_process_batch</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
         <span class="n">metrics</span> <span class="o">=</span> <span class="p">{}</span>
@@ -824,16 +797,7 @@ document.write(`
             <span class="n">compute_throughout_metrics</span><span class="p">(</span><span class="n">batch</span><span class="o">=</span><span class="n">batch</span><span class="p">,</span> <span class="n">timing_raw</span><span class="o">=</span><span class="n">timing_raw</span><span class="p">,</span> <span class="n">n_gpus</span><span class="o">=</span><span class="n">n_gpus</span><span class="p">)</span>
         <span class="p">)</span>
 
-        <span class="n">train_status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_training_steps</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">train_status</span> <span class="ow">or</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">save_freq</span> <span class="o">&gt;</span> <span class="mi">0</span>
-            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">save_freq</span> <span class="o">==</span> <span class="mi">0</span>
-        <span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Saving at step </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
-            <span class="k">with</span> <span class="n">marked_timer</span><span class="p">(</span><span class="s2">&quot;save_checkpoint&quot;</span><span class="p">,</span> <span class="n">timing_raw</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">save_checkpoint</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Saved at step </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">train_status</span><span class="p">,</span> <span class="n">metrics</span></div>
+        <span class="k">return</span> <span class="n">metrics</span></div>
 
 
 <div class="viewcode-block" id="VerlPPOTrainerWrapper.save_checkpoint">
@@ -841,7 +805,7 @@ document.write(`
     <span class="k">def</span><span class="w"> </span><span class="nf">save_checkpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">block_until_saved</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">save_as_hf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_full_save_step</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">last_full_save_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_save_checkpoint</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_save_checkpoint</span><span class="p">(</span><span class="n">save_as_hf</span><span class="o">=</span><span class="n">save_as_hf</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">block_until_saved</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_wg</span><span class="o">.</span><span class="n">wait_on_save_thread</span><span class="p">()</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">use_critic</span><span class="p">:</span>
@@ -849,8 +813,6 @@ document.write(`
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_save_checkpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save_as_hf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.fs</span><span class="w"> </span><span class="kn">import</span> <span class="n">local_mkdir_safe</span>
-
         <span class="c1"># path: given_path + `/global_step_{global_steps}` + `/actor`</span>
         <span class="n">local_global_step_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">default_local_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;global_step_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -891,6 +853,7 @@ document.write(`
             <span class="n">actor_remote_path</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="p">,</span>
             <span class="n">max_ckpt_to_keep</span><span class="o">=</span><span class="n">max_actor_ckpt_to_keep</span><span class="p">,</span>
+            <span class="n">save_as_hf</span><span class="o">=</span><span class="n">save_as_hf</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_critic</span><span class="p">:</span>
@@ -911,18 +874,58 @@ document.write(`
                 <span class="n">max_ckpt_to_keep</span><span class="o">=</span><span class="n">max_critic_ckpt_to_keep</span><span class="p">,</span>
             <span class="p">)</span>
 
-        <span class="c1"># save dataloader</span>
-        <span class="n">local_mkdir_safe</span><span class="p">(</span><span class="n">local_global_step_folder</span><span class="p">)</span>
-        <span class="n">dataloader_local_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">local_global_step_folder</span><span class="p">,</span> <span class="s2">&quot;data.pt&quot;</span><span class="p">)</span>
-        <span class="n">dataloader_state_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_dataloader</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
-        <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">dataloader_state_dict</span><span class="p">,</span> <span class="n">dataloader_local_path</span><span class="p">)</span>
-
         <span class="c1"># latest checkpointed iteration tracker (for atomic usage)</span>
         <span class="n">local_latest_checkpointed_iteration</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">default_local_dir</span><span class="p">,</span> <span class="s2">&quot;latest_checkpointed_iteration.txt&quot;</span>
         <span class="p">)</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">local_latest_checkpointed_iteration</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_checkpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">resume_mode</span> <span class="o">==</span> <span class="s2">&quot;disable&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+
+        <span class="n">checkpoint_folder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">default_local_dir</span>  <span class="c1"># TODO: check path</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="n">checkpoint_folder</span><span class="p">):</span>
+            <span class="n">working_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+            <span class="n">checkpoint_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">working_dir</span><span class="p">,</span> <span class="n">checkpoint_folder</span><span class="p">)</span>
+        <span class="n">global_step_folder</span> <span class="o">=</span> <span class="n">find_latest_ckpt_path</span><span class="p">(</span><span class="n">checkpoint_folder</span><span class="p">)</span>  <span class="c1"># None if no latest</span>
+
+        <span class="c1"># find global_step_folder</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">resume_mode</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">global_step_folder</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Training from scratch&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">resume_mode</span> <span class="o">==</span> <span class="s2">&quot;resume_path&quot;</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">resume_from_path</span><span class="p">,</span> <span class="nb">str</span>
+                <span class="p">),</span> <span class="s2">&quot;resume ckpt must be str type&quot;</span>
+                <span class="k">assert</span> <span class="p">(</span>
+                    <span class="s2">&quot;global_step_&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">resume_from_path</span>
+                <span class="p">),</span> <span class="s2">&quot;resume ckpt must specify the global_steps&quot;</span>
+                <span class="n">global_step_folder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">resume_from_path</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="n">global_step_folder</span><span class="p">):</span>
+                    <span class="n">working_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+                    <span class="n">global_step_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">working_dir</span><span class="p">,</span> <span class="n">global_step_folder</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Load from checkpoint folder: </span><span class="si">{</span><span class="n">global_step_folder</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># set global step</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">global_step_folder</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;global_step_&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Setting global step to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Resuming from </span><span class="si">{</span><span class="n">global_step_folder</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">actor_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">global_step_folder</span><span class="p">,</span> <span class="s2">&quot;actor&quot;</span><span class="p">)</span>
+        <span class="n">critic_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">global_step_folder</span><span class="p">,</span> <span class="s2">&quot;critic&quot;</span><span class="p">)</span>
+        <span class="c1"># load actor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_wg</span><span class="o">.</span><span class="n">load_checkpoint</span><span class="p">(</span>
+            <span class="n">actor_path</span><span class="p">,</span> <span class="n">del_local_after_load</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">del_local_ckpt_after_load</span>
+        <span class="p">)</span>
+        <span class="c1"># load critic</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_critic</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">critic_wg</span><span class="o">.</span><span class="n">load_checkpoint</span><span class="p">(</span>
+                <span class="n">critic_path</span><span class="p">,</span> <span class="n">del_local_after_load</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">del_local_ckpt_after_load</span>
+            <span class="p">)</span>
 
 <div class="viewcode-block" id="VerlPPOTrainerWrapper.sync_weight">
 <a class="viewcode-back" href="../../../build_api/trinity.trainer.verl_trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.sync_weight">[docs]</a>

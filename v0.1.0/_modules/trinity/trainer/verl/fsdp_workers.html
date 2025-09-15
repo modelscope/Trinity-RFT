@@ -1220,6 +1220,7 @@ document.write(`
         <span class="n">global_step</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
         <span class="n">max_ckpt_to_keep</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">model_state_dict_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">save_as_hf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">log_with_rank</span>
 
@@ -1235,6 +1236,7 @@ document.write(`
             <span class="n">global_step</span><span class="o">=</span><span class="n">global_step</span><span class="p">,</span>
             <span class="n">max_ckpt_to_keep</span><span class="o">=</span><span class="n">max_ckpt_to_keep</span><span class="p">,</span>
             <span class="n">model_state_dict_only</span><span class="o">=</span><span class="n">model_state_dict_only</span><span class="p">,</span>
+            <span class="n">save_as_hf</span><span class="o">=</span><span class="n">save_as_hf</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">dist</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
 
@@ -1738,6 +1740,7 @@ document.write(`
             <span class="n">hdfs_path</span><span class="o">=</span><span class="n">hdfs_path</span><span class="p">,</span>
             <span class="n">global_step</span><span class="o">=</span><span class="n">global_step</span><span class="p">,</span>
             <span class="n">max_ckpt_to_keep</span><span class="o">=</span><span class="n">max_ckpt_to_keep</span><span class="p">,</span>
+            <span class="n">save_as_hf</span><span class="o">=</span><span class="n">save_as_hf</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="n">torch</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
