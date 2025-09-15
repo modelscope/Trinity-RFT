@@ -800,7 +800,7 @@ Ensure the name does not conflict with existing workflows.</p>
 </div>
 <p>For workflows that are prepared to be contributed to Trinity-RFT project, you need to place the above code in <code class="docutils literal notranslate"><span class="pre">trinity/common/workflows</span></code> folder, e.g., <code class="docutils literal notranslate"><span class="pre">trinity/common/workflows/example_workflow.py</span></code>. And add the following line to <code class="docutils literal notranslate"><span class="pre">trinity/common/workflows/__init__.py</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># existing import lines</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.example_workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExampleWorkflow</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows.example_workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExampleWorkflow</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="c1"># existing __all__ lines</span>

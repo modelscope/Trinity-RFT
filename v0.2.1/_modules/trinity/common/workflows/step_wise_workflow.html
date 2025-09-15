@@ -557,6 +557,68 @@ document.write(`
 
 
 
+<div class="viewcode-block" id="AsyncStepWiseRewardWorkflow">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.step_wise_workflow.html#trinity.common.workflows.step_wise_workflow.AsyncStepWiseRewardWorkflow">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AsyncStepWiseRewardWorkflow</span><span class="p">(</span><span class="n">StepWiseRewardWorkflow</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Async version of `StepWiseRewardWorkflow`.&quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">asynchronous</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="AsyncStepWiseRewardWorkflow.run_async">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.step_wise_workflow.html#trinity.common.workflows.step_wise_workflow.AsyncStepWiseRewardWorkflow.run_async">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run the workflow and return a list of experiences with step-wise rewards asynchronously.&quot;&quot;&quot;</span>
+        <span class="n">experiences</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_step_num</span><span class="p">):</span>
+            <span class="c1"># Run a single step of the agent application</span>
+            <span class="n">continue_run</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">step_async</span><span class="p">(</span><span class="n">step_num</span><span class="o">=</span><span class="n">step</span><span class="p">)</span>
+            <span class="c1"># Collect experiences data of the current step</span>
+            <span class="n">exps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">extract_experience_from_history</span><span class="p">()</span>
+            <span class="c1"># Calculate the reward for the current step</span>
+            <span class="n">reward</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">reward_async</span><span class="p">(</span><span class="n">exps</span><span class="p">,</span> <span class="n">step_num</span><span class="o">=</span><span class="n">step</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">exps</span><span class="p">:</span>
+                <span class="n">exp</span><span class="o">.</span><span class="n">reward</span> <span class="o">=</span> <span class="n">reward</span>
+                <span class="c1"># set the step number in each experience</span>
+                <span class="n">exp</span><span class="o">.</span><span class="n">eid</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="n">step</span>
+            <span class="c1"># Store the step experiences</span>
+            <span class="n">experiences</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">continue_run</span><span class="p">:</span>
+                <span class="k">break</span>
+
+        <span class="k">return</span> <span class="n">experiences</span></div>
+
+
+<div class="viewcode-block" id="AsyncStepWiseRewardWorkflow.step_async">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.step_wise_workflow.html#trinity.common.workflows.step_wise_workflow.AsyncStepWiseRewardWorkflow.step_async">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">step_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step_num</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run a single step of your agent application asynchronously.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            step_num (int): The current step number.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: Whether to continue running the agent application.</span>
+
+<span class="sd">        Tips:</span>
+<span class="sd">            You can use the openai client (`self.client`) to migrate your existing</span>
+<span class="sd">            applications at low cost.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="AsyncStepWiseRewardWorkflow.reward_async">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.step_wise_workflow.html#trinity.common.workflows.step_wise_workflow.AsyncStepWiseRewardWorkflow.reward_async">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">reward_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exps</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Experience</span><span class="p">],</span> <span class="n">step_num</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the reward for the given experiences at the specified step asynchronously.&quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+</div>
+
+
+
 <div class="viewcode-block" id="RewardPropagationWorkflow">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.step_wise_workflow.html#trinity.common.workflows.step_wise_workflow.RewardPropagationWorkflow">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">RewardPropagationWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
@@ -640,6 +702,70 @@ document.write(`
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">repeatable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">False</span></div>
+
+
+
+<div class="viewcode-block" id="AsyncRewardPropagationWorkflow">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.step_wise_workflow.html#trinity.common.workflows.step_wise_workflow.AsyncRewardPropagationWorkflow">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AsyncRewardPropagationWorkflow</span><span class="p">(</span><span class="n">RewardPropagationWorkflow</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Async version of `RewardPropagationWorkflow`.&quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">asynchronous</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="AsyncRewardPropagationWorkflow.run_async">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.step_wise_workflow.html#trinity.common.workflows.step_wise_workflow.AsyncRewardPropagationWorkflow.run_async">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run the workflow and return a list of experiences with step-wise rewards asynchronously.&quot;&quot;&quot;</span>
+        <span class="n">experiences</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_step_num</span><span class="p">):</span>
+            <span class="c1"># Run a single step of the agent application</span>
+            <span class="n">continue_run</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">step_async</span><span class="p">(</span><span class="n">step_num</span><span class="o">=</span><span class="n">step</span><span class="p">)</span>
+            <span class="c1"># Collect experiences data of the current step</span>
+            <span class="n">exps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">extract_experience_from_history</span><span class="p">()</span>
+            <span class="c1"># set the step number in each experience</span>
+            <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">exps</span><span class="p">:</span>
+                <span class="n">exp</span><span class="o">.</span><span class="n">eid</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="n">step</span>
+            <span class="c1"># Store the step experiences</span>
+            <span class="n">experiences</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">continue_run</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="n">reward</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reward</span><span class="p">(</span><span class="n">experiences</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiences</span><span class="p">:</span>
+            <span class="n">exp</span><span class="o">.</span><span class="n">reward</span> <span class="o">=</span> <span class="n">reward</span>
+            <span class="k">if</span> <span class="n">exp</span><span class="o">.</span><span class="n">metrics</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">exp</span><span class="o">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">exp</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;actual_env_steps&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">step</span> <span class="o">+</span> <span class="mi">1</span>  <span class="c1"># +1 because step starts from 0</span>
+        <span class="k">return</span> <span class="n">experiences</span></div>
+
+
+<div class="viewcode-block" id="AsyncRewardPropagationWorkflow.step_async">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.step_wise_workflow.html#trinity.common.workflows.step_wise_workflow.AsyncRewardPropagationWorkflow.step_async">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">step_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step_num</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run a single step of your agent application asynchronously.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            step_num (int): The current step number.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: Whether to continue running the agent application.</span>
+
+<span class="sd">        Tips:</span>
+<span class="sd">            You can use the openai client (`self.client`) to migrate your existing</span>
+<span class="sd">            applications at low cost.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="AsyncRewardPropagationWorkflow.reward_async">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.step_wise_workflow.html#trinity.common.workflows.step_wise_workflow.AsyncRewardPropagationWorkflow.reward_async">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">reward_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exps</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Experience</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the reward for the given experiences of the entire run asynchronously.&quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+</div>
 
 </pre></div>
 

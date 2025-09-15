@@ -451,10 +451,14 @@ document.write(`
 <span class="kn">import</span><span class="w"> </span><span class="nn">openai</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelWrapper</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows.envs.email_searcher.react_agent</span><span class="w"> </span><span class="kn">import</span> <span class="n">EmailSearchAgent</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows.envs.email_searcher.utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AnswerModel</span><span class="p">,</span>
+    <span class="n">FinalRubric</span><span class="p">,</span>
+    <span class="n">QueryModel</span><span class="p">,</span>
+    <span class="n">judge_correctness</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">WORKFLOWS</span><span class="p">,</span> <span class="n">Task</span><span class="p">,</span> <span class="n">Workflow</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">.react_agent</span><span class="w"> </span><span class="kn">import</span> <span class="n">EmailSearchAgent</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">AnswerModel</span><span class="p">,</span> <span class="n">FinalRubric</span><span class="p">,</span> <span class="n">QueryModel</span><span class="p">,</span> <span class="n">judge_correctness</span>
 
 <span class="n">SYSTEM_PROMPT</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;You are an email search agent. You are given a user query and a list of tools you can use to search the user&#39;s email. Use the tools to search the user&#39;s emails and find the answer to the user&#39;s query. You may take up to </span><span class="si">{max_turns}</span><span class="s2"> turns to find the answer, so if your first seach doesn&#39;t find the answer, you can try with different keywords.</span>
 <span class="s2">Always describe what you see and plan your next steps clearly. When taking actions, explain what you&#39;re doing and why. When the answer to the task is found, call `generate_response` to finish the process. Only call `generate_response` when answer is found. You should not respond any next steps in `generate_response`. Complete all steps and then call `generate_response`.</span>

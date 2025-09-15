@@ -567,6 +567,58 @@ document.write(`
             <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_responses</span><span class="p">)]</span></div>
 </div>
 
+
+
+<div class="viewcode-block" id="AsyncMathRULERWorkflow">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.AsyncMathRULERWorkflow">[docs]</a>
+<span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;async_math_ruler_workflow&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AsyncMathRULERWorkflow</span><span class="p">(</span><span class="n">MathRULERWorkflow</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">asynchronous</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="AsyncMathRULERWorkflow.run_async">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.AsyncMathRULERWorkflow.run_async">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Modified from SimpleWorkflow.run&quot;&quot;&quot;</span>
+
+        <span class="n">messages</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_messages</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;start chat&quot;</span><span class="p">)</span>
+        <span class="n">responses</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">chat_async</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">rollout_args</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">response</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">responses</span><span class="p">):</span>
+            <span class="n">gold_reward_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reward_fn</span><span class="p">(</span>  <span class="c1"># type: ignore [misc]</span>
+                <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">response_text</span><span class="p">,</span>  <span class="c1"># type: ignore [arg-type]</span>
+                <span class="n">truth</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">truth</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">metrics</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">response</span><span class="o">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="n">response</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">gold_reward_dict</span><span class="p">)</span>
+            <span class="n">gold_reward</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">gold_reward_dict</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="n">response</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;gold_reward&quot;</span><span class="p">:</span> <span class="n">gold_reward</span><span class="p">})</span>
+            <span class="n">response</span><span class="o">.</span><span class="n">eid</span><span class="o">.</span><span class="n">run</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_id_base</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;self.task_desc: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">task_desc</span><span class="si">}</span><span class="s2">, messages: </span><span class="si">{</span><span class="n">messages</span><span class="si">}</span><span class="s2">, response: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">response_text</span><span class="si">}</span><span class="s2">, gold_reward: </span><span class="si">{</span><span class="n">gold_reward</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># === RULER scores as rewards ===</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_models</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">),</span> <span class="s2">&quot;Current implementation of RULER requires that auxiliary_models is not None.&quot;</span>
+        <span class="n">judge_success</span><span class="p">,</span> <span class="n">ruler_scores</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_ruler_scores</span><span class="p">(</span>
+            <span class="n">responses</span><span class="o">=</span><span class="n">responses</span><span class="p">,</span> <span class="n">judger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_models</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">response</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">responses</span><span class="p">):</span>
+            <span class="n">response</span><span class="o">.</span><span class="n">reward</span> <span class="o">=</span> <span class="n">ruler_scores</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">response</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;judge_success&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">judge_success</span><span class="p">)})</span>
+
+        <span class="k">return</span> <span class="n">responses</span></div>
+</div>
+
 </pre></div>
 
                 </article>

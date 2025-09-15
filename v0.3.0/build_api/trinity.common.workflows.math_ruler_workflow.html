@@ -542,6 +542,11 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.math_ruler_workflow.MathRULERWorkflow.get_ruler_scores"><code class="docutils literal notranslate"><span class="pre">MathRULERWorkflow.get_ruler_scores()</span></code></a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.math_ruler_workflow.AsyncMathRULERWorkflow"><code class="docutils literal notranslate"><span class="pre">AsyncMathRULERWorkflow</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.math_ruler_workflow.AsyncMathRULERWorkflow.asynchronous"><code class="docutils literal notranslate"><span class="pre">AsyncMathRULERWorkflow.asynchronous</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.math_ruler_workflow.AsyncMathRULERWorkflow.run_async"><code class="docutils literal notranslate"><span class="pre">AsyncMathRULERWorkflow.run_async()</span></code></a></li>
+</ul>
+</li>
 </ul>
             </nav>
         </div>
@@ -585,6 +590,24 @@ whereasa the rewards used by RL training are calculated by RULER.</p>
 <dt class="sig sig-object py" id="trinity.common.workflows.math_ruler_workflow.MathRULERWorkflow.get_ruler_scores">
 <span class="sig-name descname"><span class="pre">get_ruler_scores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">responses</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">judger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/workflows/math_ruler_workflow.html#MathRULERWorkflow.get_ruler_scores"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.math_ruler_workflow.MathRULERWorkflow.get_ruler_scores" title="Link to this definition">#</a></dt>
 <dd><p>Get RULER scores</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="trinity.common.workflows.math_ruler_workflow.AsyncMathRULERWorkflow">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.common.workflows.math_ruler_workflow.</span></span><span class="sig-name descname"><span class="pre">AsyncMathRULERWorkflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.workflows.workflow.html#trinity.common.workflows.workflow.Task" title="trinity.common.workflows.workflow.Task"><span class="pre">Task</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.ModelWrapper" title="trinity.common.models.model.ModelWrapper"><span class="pre">ModelWrapper</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">OpenAI</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/math_ruler_workflow.html#AsyncMathRULERWorkflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.math_ruler_workflow.AsyncMathRULERWorkflow" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#trinity.common.workflows.math_ruler_workflow.MathRULERWorkflow" title="trinity.common.workflows.math_ruler_workflow.MathRULERWorkflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">MathRULERWorkflow</span></code></a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="trinity.common.workflows.math_ruler_workflow.AsyncMathRULERWorkflow.asynchronous">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">asynchronous</span></span><a class="headerlink" href="#trinity.common.workflows.math_ruler_workflow.AsyncMathRULERWorkflow.asynchronous" title="Link to this definition">#</a></dt>
+<dd><p>Whether the workflow runs in async mode.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.workflows.math_ruler_workflow.AsyncMathRULERWorkflow.run_async">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run_async</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/workflows/math_ruler_workflow.html#AsyncMathRULERWorkflow.run_async"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.math_ruler_workflow.AsyncMathRULERWorkflow.run_async" title="Link to this definition">#</a></dt>
+<dd><p>Modified from SimpleWorkflow.run</p>
 </dd></dl>
 
 </dd></dl>
@@ -641,6 +664,11 @@ whereasa the rewards used by RL training are calculated by RULER.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.math_ruler_workflow.MathRULERWorkflow.reset"><code class="docutils literal notranslate"><span class="pre">MathRULERWorkflow.reset()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.math_ruler_workflow.MathRULERWorkflow.run"><code class="docutils literal notranslate"><span class="pre">MathRULERWorkflow.run()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.math_ruler_workflow.MathRULERWorkflow.get_ruler_scores"><code class="docutils literal notranslate"><span class="pre">MathRULERWorkflow.get_ruler_scores()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.math_ruler_workflow.AsyncMathRULERWorkflow"><code class="docutils literal notranslate"><span class="pre">AsyncMathRULERWorkflow</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.math_ruler_workflow.AsyncMathRULERWorkflow.asynchronous"><code class="docutils literal notranslate"><span class="pre">AsyncMathRULERWorkflow.asynchronous</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.math_ruler_workflow.AsyncMathRULERWorkflow.run_async"><code class="docutils literal notranslate"><span class="pre">AsyncMathRULERWorkflow.run_async()</span></code></a></li>
 </ul>
 </li>
 </ul>

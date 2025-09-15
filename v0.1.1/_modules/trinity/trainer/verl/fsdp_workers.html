@@ -700,7 +700,10 @@ document.write(`
                     <span class="n">_apply_liger_kernel_to_instance</span><span class="p">,</span>
                 <span class="p">)</span>
 
-                <span class="n">_apply_liger_kernel_to_instance</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">actor_module</span><span class="p">)</span>
+                <span class="n">fused_linear_cross_entropy</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">use_fused_kernels</span>
+                <span class="n">_apply_liger_kernel_to_instance</span><span class="p">(</span>
+                    <span class="n">model</span><span class="o">=</span><span class="n">actor_module</span><span class="p">,</span> <span class="n">fused_linear_cross_entropy</span><span class="o">=</span><span class="n">fused_linear_cross_entropy</span>
+                <span class="p">)</span>
 
             <span class="n">fused_kernel_options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;fused_kernel_options&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
             <span class="n">fused_kernels_backend</span> <span class="o">=</span> <span class="p">(</span>

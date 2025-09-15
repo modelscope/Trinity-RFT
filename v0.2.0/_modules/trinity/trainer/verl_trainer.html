@@ -460,7 +460,6 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">verl.trainer.ppo.metric_utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">compute_throughout_metrics</span><span class="p">,</span>
     <span class="n">compute_timing_metrics</span><span class="p">,</span>
-    <span class="n">reduce_metrics</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">verl.trainer.ppo.ray_trainer</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">RayClassWithInitArgs</span><span class="p">,</span>
@@ -473,6 +472,7 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.checkpoint.checkpoint_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_latest_ckpt_path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.debug</span><span class="w"> </span><span class="kn">import</span> <span class="n">marked_timer</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.fs</span><span class="w"> </span><span class="kn">import</span> <span class="n">copy_local_path_from_hdfs</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.metric</span><span class="w"> </span><span class="kn">import</span> <span class="n">reduce_metrics</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm</span><span class="w"> </span><span class="kn">import</span> <span class="n">ADVANTAGE_FN</span><span class="p">,</span> <span class="n">KL_FN</span><span class="p">,</span> <span class="n">SAMPLE_STRATEGY</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.algorithm</span><span class="w"> </span><span class="kn">import</span> <span class="n">ALGORITHM_TYPE</span>

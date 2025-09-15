@@ -611,8 +611,8 @@ document.write(`
 <p>and include it in the init file <code class="docutils literal notranslate"><span class="pre">trinity/common/workflows/__init__.py</span></code></p>
 <div class="highlight-diff notranslate"><div class="highlight"><pre><span></span><span class="w"> </span># -*- coding: utf-8 -*-
 <span class="w"> </span>&quot;&quot;&quot;Workflow module&quot;&quot;&quot;
-<span class="w"> </span>from .workflow import WORKFLOWS, MathWorkflow, SimpleWorkflow
-<span class="gi">+from .envs.alfworld.alfworld_workflow import StepWiseAlfworldWorkflow</span>
+<span class="w"> </span>from trinity.common.workflows.workflow import WORKFLOWS, MathWorkflow, SimpleWorkflow
+<span class="gi">+from trinity.common.workflows.envs.alfworld.alfworld_workflow import StepWiseAlfworldWorkflow</span>
 
 <span class="w"> </span>__all__ = [
 <span class="w"> </span>    &quot;WORKFLOWS&quot;,

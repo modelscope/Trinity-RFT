@@ -623,20 +623,22 @@ document.write(`
 
 <div class="viewcode-block" id="WebShopWorkflow.get_model_response">
 <a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.WebShopWorkflow.get_model_response">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_model_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">):</span>
-        <span class="n">responses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">chat</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_model_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">):</span>
+        <span class="n">responses</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">chat_async</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">responses</span></div>
 
 
 <div class="viewcode-block" id="WebShopWorkflow.get_model_response_text">
 <a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.WebShopWorkflow.get_model_response_text">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_model_response_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_model_response</span><span class="p">(</span><span class="n">messages</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">response_text</span></div>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_model_response_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_model_response</span><span class="p">(</span><span class="n">messages</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">response_text</span></div>
 
 
 <div class="viewcode-block" id="WebShopWorkflow.generate_env_inference_samples">
 <a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.WebShopWorkflow.generate_env_inference_samples">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">generate_env_inference_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">session_id</span><span class="p">,</span> <span class="n">rollout_num</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">generate_env_inference_samples</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">session_id</span><span class="p">,</span> <span class="n">rollout_num</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
         <span class="c1"># TODO: Make this parallel</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Generating env inference samples...&quot;</span><span class="p">)</span>
         <span class="n">experience_list</span> <span class="o">=</span> <span class="p">[]</span>
@@ -650,7 +652,7 @@ document.write(`
                 <span class="n">available_actions</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_available_actions</span><span class="p">()</span>
                 <span class="n">format_obs</span> <span class="o">=</span> <span class="n">format_observation</span><span class="p">(</span><span class="n">observation</span><span class="p">)</span>
                 <span class="n">memory</span> <span class="o">=</span> <span class="n">memory</span> <span class="o">+</span> <span class="p">[{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">format_obs</span><span class="p">}]</span>
-                <span class="n">response_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_model_response_text</span><span class="p">(</span><span class="n">memory</span><span class="p">)</span>
+                <span class="n">response_text</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_model_response_text</span><span class="p">(</span><span class="n">memory</span><span class="p">)</span>
                 <span class="n">memory</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;assistant&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">response_text</span><span class="p">})</span>
                 <span class="n">action</span> <span class="o">=</span> <span class="n">parse_action</span><span class="p">(</span><span class="n">response_text</span><span class="p">)</span>
                 <span class="n">action_valid</span><span class="p">,</span> <span class="n">error_msg</span> <span class="o">=</span> <span class="n">validate_action</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">available_actions</span><span class="p">)</span>
@@ -679,13 +681,13 @@ document.write(`
         <span class="k">return</span> <span class="n">experience_list</span></div>
 
 
-<div class="viewcode-block" id="WebShopWorkflow.run">
-<a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.WebShopWorkflow.run">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+<div class="viewcode-block" id="WebShopWorkflow.run_async">
+<a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.WebShopWorkflow.run_async">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
         <span class="c1"># assume the task_description is the session_id generated.</span>
         <span class="n">session_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">task_desc</span><span class="p">)</span>
         <span class="n">rollout_n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repeat_times</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_env_inference_samples</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">,</span> <span class="n">session_id</span><span class="p">,</span> <span class="n">rollout_n</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_env_inference_samples</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">,</span> <span class="n">session_id</span><span class="p">,</span> <span class="n">rollout_n</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

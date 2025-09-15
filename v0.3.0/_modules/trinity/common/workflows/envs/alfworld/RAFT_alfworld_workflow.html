@@ -551,6 +551,10 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">task</span><span class="p">)</span></div>
 
 
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">asynchronous</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
 <div class="viewcode-block" id="RAFTAlfworldWorkflow.reset">
 <a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.RAFTAlfworldWorkflow.reset">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">):</span>
@@ -568,7 +572,7 @@ document.write(`
 
 <div class="viewcode-block" id="RAFTAlfworldWorkflow.run_single_rollout">
 <a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.RAFTAlfworldWorkflow.run_single_rollout">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">run_single_rollout</span><span class="p">(</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_single_rollout</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">env</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Run a single rollout with RAFT-guided actions&quot;&quot;&quot;</span>
@@ -586,7 +590,7 @@ document.write(`
             <span class="n">trajectory</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">format_observation</span><span class="p">(</span><span class="n">observation</span><span class="p">)})</span>
 
             <span class="c1"># Get model response with RAFT guidance</span>
-            <span class="n">responses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">chat</span><span class="p">(</span>
+            <span class="n">responses</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">chat_async</span><span class="p">(</span>
                 <span class="n">trajectory</span><span class="p">,</span>
                 <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                 <span class="n">temperature</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span>
@@ -639,12 +643,12 @@ document.write(`
         <span class="k">return</span> <span class="n">trajectory</span><span class="p">,</span> <span class="n">last_reward</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_env_steps</span><span class="p">,</span> <span class="n">parsed_steps</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_execute_first_attempt</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_execute_first_attempt</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Execute the first attempt and return results&quot;&quot;&quot;</span>
         <span class="n">env</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_environment</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">game_file_path</span><span class="p">)</span>
 
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">trajectory</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">parsed_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_single_rollout</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+            <span class="n">trajectory</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">parsed_steps</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_single_rollout</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Single rollout failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">env</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -658,11 +662,11 @@ document.write(`
 
 <div class="viewcode-block" id="RAFTAlfworldWorkflow.eval_alfworld">
 <a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.RAFTAlfworldWorkflow.eval_alfworld">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">eval_alfworld</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">eval_alfworld</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Evaluate a single alfworld trajectory&quot;&quot;&quot;</span>
         <span class="n">env</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_environment</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">game_file_path</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">trajectory</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">parsed_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_single_rollout</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+            <span class="n">trajectory</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">parsed_steps</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_single_rollout</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Single rollout failed during eval: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">env</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -683,13 +687,13 @@ document.write(`
         <span class="k">return</span> <span class="p">[</span><span class="n">experience</span><span class="p">]</span></div>
 
 
-<div class="viewcode-block" id="RAFTAlfworldWorkflow.run">
-<a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.RAFTAlfworldWorkflow.run">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+<div class="viewcode-block" id="RAFTAlfworldWorkflow.run_async">
+<a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.RAFTAlfworldWorkflow.run_async">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Run the RAFT alfworld workflow and return experiences&quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_eval</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_alfworld</span><span class="p">()</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_alfworld</span><span class="p">()</span>
 
         <span class="c1"># Execute first attempt</span>
         <span class="k">try</span><span class="p">:</span>
@@ -701,7 +705,7 @@ document.write(`
                 <span class="n">parsed_steps</span><span class="p">,</span>
                 <span class="n">success</span><span class="p">,</span>
                 <span class="n">traj_format_valid</span><span class="p">,</span>
-            <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_execute_first_attempt</span><span class="p">()</span>
+            <span class="p">)</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_execute_first_attempt</span><span class="p">()</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[</span><span class="n">generate_default_empty_experience</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Training rollout failed: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)]</span>
 

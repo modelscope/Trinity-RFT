@@ -543,6 +543,11 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.eval_workflow.MathEvalWorkflow.run"><code class="docutils literal notranslate"><span class="pre">MathEvalWorkflow.run()</span></code></a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.eval_workflow.AsyncMathEvalWorkflow"><code class="docutils literal notranslate"><span class="pre">AsyncMathEvalWorkflow</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.eval_workflow.AsyncMathEvalWorkflow.asynchronous"><code class="docutils literal notranslate"><span class="pre">AsyncMathEvalWorkflow.asynchronous</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.eval_workflow.AsyncMathEvalWorkflow.run_async"><code class="docutils literal notranslate"><span class="pre">AsyncMathEvalWorkflow.run_async()</span></code></a></li>
+</ul>
+</li>
 </ul>
             </nav>
         </div>
@@ -591,6 +596,24 @@ model’s evaluation methodology. For more details on their approach, see:
 <dt class="sig sig-object py" id="trinity.common.workflows.eval_workflow.MathEvalWorkflow.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/workflows/eval_workflow.html#MathEvalWorkflow.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.eval_workflow.MathEvalWorkflow.run" title="Link to this definition">#</a></dt>
 <dd><p>Run workflow and return a list of experiences.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="trinity.common.workflows.eval_workflow.AsyncMathEvalWorkflow">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.common.workflows.eval_workflow.</span></span><span class="sig-name descname"><span class="pre">AsyncMathEvalWorkflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.workflows.workflow.html#trinity.common.workflows.workflow.Task" title="trinity.common.workflows.workflow.Task"><span class="pre">Task</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.ModelWrapper" title="trinity.common.models.model.ModelWrapper"><span class="pre">ModelWrapper</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">OpenAI</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/eval_workflow.html#AsyncMathEvalWorkflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.eval_workflow.AsyncMathEvalWorkflow" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#trinity.common.workflows.eval_workflow.MathEvalWorkflow" title="trinity.common.workflows.eval_workflow.MathEvalWorkflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">MathEvalWorkflow</span></code></a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="trinity.common.workflows.eval_workflow.AsyncMathEvalWorkflow.asynchronous">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">asynchronous</span></span><a class="headerlink" href="#trinity.common.workflows.eval_workflow.AsyncMathEvalWorkflow.asynchronous" title="Link to this definition">#</a></dt>
+<dd><p>Whether the workflow runs in async mode.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.workflows.eval_workflow.AsyncMathEvalWorkflow.run_async">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run_async</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/workflows/eval_workflow.html#AsyncMathEvalWorkflow.run_async"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.eval_workflow.AsyncMathEvalWorkflow.run_async" title="Link to this definition">#</a></dt>
+<dd><p>Run workflow in async and return a list of experiences.</p>
 </dd></dl>
 
 </dd></dl>
@@ -648,6 +671,11 @@ model’s evaluation methodology. For more details on their approach, see:
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.eval_workflow.MathEvalWorkflow.repeatable"><code class="docutils literal notranslate"><span class="pre">MathEvalWorkflow.repeatable</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.eval_workflow.MathEvalWorkflow.format_messages"><code class="docutils literal notranslate"><span class="pre">MathEvalWorkflow.format_messages()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.eval_workflow.MathEvalWorkflow.run"><code class="docutils literal notranslate"><span class="pre">MathEvalWorkflow.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.eval_workflow.AsyncMathEvalWorkflow"><code class="docutils literal notranslate"><span class="pre">AsyncMathEvalWorkflow</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.eval_workflow.AsyncMathEvalWorkflow.asynchronous"><code class="docutils literal notranslate"><span class="pre">AsyncMathEvalWorkflow.asynchronous</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.eval_workflow.AsyncMathEvalWorkflow.run_async"><code class="docutils literal notranslate"><span class="pre">AsyncMathEvalWorkflow.run_async()</span></code></a></li>
 </ul>
 </li>
 </ul>

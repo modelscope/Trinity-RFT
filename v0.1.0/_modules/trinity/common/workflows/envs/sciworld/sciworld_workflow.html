@@ -462,22 +462,26 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">max_env_steps</span> <span class="o">=</span> <span class="mi">30</span>  <span class="c1"># should be less than 100</span></div>
 
 
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">asynchronous</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
 <div class="viewcode-block" id="SciWorldWorkflow.get_model_response">
 <a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.SciWorldWorkflow.get_model_response">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_model_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">):</span>
-        <span class="n">responses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">chat</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_model_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">):</span>
+        <span class="n">responses</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">chat_async</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">responses</span></div>
 
 
 <div class="viewcode-block" id="SciWorldWorkflow.get_model_response_text">
 <a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.SciWorldWorkflow.get_model_response_text">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_model_response_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_model_response</span><span class="p">(</span><span class="n">messages</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">response_text</span></div>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_model_response_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_model_response</span><span class="p">(</span><span class="n">messages</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">response_text</span></div>
 
 
 <div class="viewcode-block" id="SciWorldWorkflow.generate_env_inference_samples">
 <a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.SciWorldWorkflow.generate_env_inference_samples">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">generate_env_inference_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">rollout_num</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">generate_env_inference_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">rollout_num</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
         <span class="c1"># TODO: Make this parallel</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Generating env inference samples...&quot;</span><span class="p">)</span>
         <span class="n">golden_rounds</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">get_gold_action_sequence</span><span class="p">())</span>
@@ -494,7 +498,7 @@ document.write(`
             <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_env_steps</span><span class="p">):</span>
                 <span class="n">format_obs</span> <span class="o">=</span> <span class="n">format_observation</span><span class="p">(</span><span class="n">observation</span><span class="p">)</span>
                 <span class="n">memory</span> <span class="o">=</span> <span class="n">memory</span> <span class="o">+</span> <span class="p">[{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">format_obs</span><span class="p">}]</span>
-                <span class="n">response_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_model_response_text</span><span class="p">(</span><span class="n">memory</span><span class="p">)</span>
+                <span class="n">response_text</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_model_response_text</span><span class="p">(</span><span class="n">memory</span><span class="p">)</span>
                 <span class="n">memory</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;assistant&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">response_text</span><span class="p">})</span>
                 <span class="n">action</span> <span class="o">=</span> <span class="n">parse_action</span><span class="p">(</span><span class="n">response_text</span><span class="p">)</span>
                 <span class="n">observation</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
@@ -514,9 +518,9 @@ document.write(`
         <span class="k">return</span> <span class="n">experience_list</span></div>
 
 
-<div class="viewcode-block" id="SciWorldWorkflow.run">
-<a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.SciWorldWorkflow.run">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+<div class="viewcode-block" id="SciWorldWorkflow.run_async">
+<a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.SciWorldWorkflow.run_async">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
         <span class="c1"># assume the task_description is the json object containing task index and the var_num</span>
         <span class="c1"># see Trinity-RFT/script/data_prepare/get_scriworld_data.py</span>
         <span class="n">task_desc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">task_desc</span>
@@ -541,7 +545,7 @@ document.write(`
             <span class="n">error_message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Error importing SciWorldTWEnv </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">. Please make sure you have installed the sciworld package successfully, following the instructions in https://github.com/allenai/ScienceWorld&quot;</span>
             <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
         <span class="n">env</span> <span class="o">=</span> <span class="n">create_environment</span><span class="p">(</span><span class="n">task_config</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_env_inference_samples</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">rollout_n</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_env_inference_samples</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">rollout_n</span><span class="p">)</span></div>
 </div>
 
 </pre></div>
