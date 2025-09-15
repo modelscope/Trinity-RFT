@@ -601,13 +601,14 @@ document.write(`
 <p>Below we show you how to perform this step-by-step.</p>
 <section id="the-workflow-workflow-py">
 <h3>The Workflow (<code class="docutils literal notranslate"><span class="pre">workflow.py</span></code>)<a class="headerlink" href="#the-workflow-workflow-py" title="Link to this heading">#</a></h3>
-<p>The core logic is encapsulated in the <code class="docutils literal notranslate"><span class="pre">AgentScopeReactV2MathWorkflow</span></code> class.</p>
+<p>The core logic is encapsulated in the <code class="docutils literal notranslate"><span class="pre">AgentScopeReactMathWorkflow</span></code> class.</p>
 <ol class="arabic">
 <li><p><strong>Initialization (<code class="docutils literal notranslate"><span class="pre">__init__</span></code>)</strong>:</p>
 <ul>
-<li><p>It first initializes the AgentScope environment and the desired agent (<code class="docutils literal notranslate"><span class="pre">ReActAgentV2</span></code>).</p></li>
+<li><p>It first initializes the AgentScope environment and the desired agent (<code class="docutils literal notranslate"><span class="pre">ReActAgent</span></code>).</p></li>
 <li><p>The most critical integration step is injecting Trinity’s model client into the AgentScope agent:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">openai_client</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_openai_client</span><span class="p">()</span>
+<span class="c1"># self.openai_client = get_openai_async_client() # or async client depend on whether you are using async openai client</span>
 <span class="c1"># ...</span>
 <span class="bp">self</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">openai_client</span>
 </pre></div>
@@ -619,7 +620,7 @@ document.write(`
 <li><p><strong>Execution (<code class="docutils literal notranslate"><span class="pre">run</span></code>)</strong>:</p>
 <ul>
 <li><p>The <code class="docutils literal notranslate"><span class="pre">run</span></code> method is remarkably simple. It just passes the task description to the agent.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span><span class="o">.</span><span class="n">content</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span><span class="o">.</span><span class="n">content</span> <span class="c1"># your agent logic</span>
 </pre></div>
 </div>
 </li>
@@ -689,13 +690,13 @@ We use the <code class="docutils literal notranslate"><span class="pre">Qwen3</s
 </ul>
 </div></blockquote>
 <ol class="arabic" start="2">
-<li><p>Download the model you want to use, and fill in the configuration files in <code class="docutils literal notranslate"><span class="pre">examples/agentscope_tool_react/agentscope_tool_react_gsm8k.yaml</span></code> or <code class="docutils literal notranslate"><span class="pre">examples/agentscope_tool_react/agentscope_tool_react_dapo.yaml</span></code></p></li>
+<li><p>Download the model you want to use, and fill in the configuration files in <code class="docutils literal notranslate"><span class="pre">examples/agentscope_tool_react/agentscopev0_tool_react_gsm8k.yaml</span></code> or <code class="docutils literal notranslate"><span class="pre">examples/agentscope_tool_react/agentscopev0_tool_react_dapo.yaml</span></code></p></li>
 <li><p><strong>Launch the training job</strong>: Run the following command from the root directory of the repository.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>examples/agentscope_tool_react/agentscope_tool_react_gsm8k.yaml
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>examples/agentscope_tool_react/agentscopev0_tool_react_gsm8k.yaml
 </pre></div>
 </div>
 <p>or</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>examples/agentscope_tool_react/agentscope_tool_react_dapo.yaml
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>examples/agentscope_tool_react/agentscopev0_tool_react_dapo.yaml
 </pre></div>
 </div>
 </li>
@@ -706,6 +707,8 @@ We use the <code class="docutils literal notranslate"><span class="pre">Qwen3</s
 <p><img alt="" src="../_images/agentscope_dapo_reward.png" /></p>
 <p>We can also see that the model generally start to use more tool calls to solve the problems.</p>
 <p><img alt="" src="../_images/agentscope_dapo_turns.png" /></p>
+<p>We can also update the agentscope version to v1, and training on the qwen3-4b-instrcut-2507</p>
+<p><img alt="" src="../_images/agentscope_dapo_qwen3-4B_reward.png" /></p>
 </section>
 <section id="summary">
 <h2>Summary<a class="headerlink" href="#summary" title="Link to this heading">#</a></h2>

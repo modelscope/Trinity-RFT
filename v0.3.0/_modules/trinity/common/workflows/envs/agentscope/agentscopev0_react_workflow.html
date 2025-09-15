@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>trinity.common.workflows.envs.agentscope.agentscope_react_workflow &#8212; Trinity-RFT 0.3.1.dev0 documentation</title>
+    <title>trinity.common.workflows.envs.agentscope.agentscopev0_react_workflow &#8212; Trinity-RFT 0.3.1.dev0 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
     <script src="../../../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/trinity/common/workflows/envs/agentscope/agentscope_react_workflow';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/trinity/common/workflows/envs/agentscope/agentscopev0_react_workflow';</script>
     <link rel="index" title="Index" href="../../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -149,12 +149,12 @@
           <summary>
             <p class="caption" aria-level="2" role="heading" style="text-align: center;">
               <span class="fa fa-book"></span>
-             <b>latest</b>
+             <b>v0.3.0</b>
             </p>
           </summary>
           <ul>
-            <li class="toctree-l2 current "><a class="reference" href="agentscope_react_workflow.html">latest</a></li>
-            <li class="toctree-l2  "><a class="reference" href="../../../../../../../v0.3.0/index.html">v0.3.0</a></li>
+            <li class="toctree-l2  "><a class="reference" href="../../../../../../../main/index.html">latest</a></li>
+            <li class="toctree-l2 current "><a class="reference" href="agentscopev0_react_workflow.html">v0.3.0</a></li>
             <li class="toctree-l2  "><a class="reference" href="../../../../../../../v0.2.1/index.html">v0.2.1</a></li>
             <li class="toctree-l2  "><a class="reference" href="../../../../../../../v0.2.0/index.html">v0.2.0</a></li>
             <li class="toctree-l2  "><a class="reference" href="../../../../../../../v0.1.1/index.html">v0.1.1</a></li>
@@ -312,6 +312,7 @@
 </ul>
 </details></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../../build_api/trinity.algorithm.algorithm.html">trinity.algorithm.algorithm module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../build_api/trinity.algorithm.algorithm_manager.html">trinity.algorithm.algorithm_manager module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../../build_api/trinity.algorithm.key_mapper.html">trinity.algorithm.key_mapper module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../../build_api/trinity.algorithm.utils.html">trinity.algorithm.utils module</a></li>
 </ul>
@@ -359,7 +360,6 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../../../build_api/trinity.common.workflows.eval_workflow.html">trinity.common.workflows.eval_workflow module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../../build_api/trinity.common.workflows.math_rm_workflow.html">trinity.common.workflows.math_rm_workflow module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../../build_api/trinity.common.workflows.math_ruler_workflow.html">trinity.common.workflows.math_ruler_workflow module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../../../build_api/trinity.common.workflows.math_trainable_ruler_workflow.html">trinity.common.workflows.math_trainable_ruler_workflow module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../../build_api/trinity.common.workflows.simple_mm_workflow.html">trinity.common.workflows.simple_mm_workflow module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../../build_api/trinity.common.workflows.step_wise_workflow.html">trinity.common.workflows.step_wise_workflow module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../../build_api/trinity.common.workflows.workflow.html">trinity.common.workflows.workflow module</a></li>
@@ -488,7 +488,7 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <h1>Source code for trinity.common.workflows.envs.agentscope.agentscope_react_workflow</h1><div class="highlight"><pre>
+  <h1>Source code for trinity.common.workflows.envs.agentscope.agentscopev0_react_workflow</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;We include the customized math workflows in this file.&quot;&quot;&quot;</span>
 
@@ -499,18 +499,21 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelWrapper</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.rewards.math_reward</span><span class="w"> </span><span class="kn">import</span> <span class="n">MathBoxedRewardFn</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">WORKFLOWS</span><span class="p">,</span> <span class="n">Task</span><span class="p">,</span> <span class="n">Workflow</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.annotations</span><span class="w"> </span><span class="kn">import</span> <span class="n">Deprecated</span>
 
 
-<div class="viewcode-block" id="AgentScopeReactV2MathWorkflow">
-<a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeReactV2MathWorkflow">[docs]</a>
-<span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;agentscope_reactv2_math_workflow&quot;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">AgentScopeReactV2MathWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+<div class="viewcode-block" id="AgentScopeV0ReactMathWorkflow">
+<a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeV0ReactMathWorkflow">[docs]</a>
+<span class="nd">@Deprecated</span>
+<span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;agentscopev0_react_math_workflow&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AgentScopeV0ReactMathWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This workflow serves as an example of how to use the agentscope framework within the trinity workflow.</span>
+<span class="sd">    We use the AgentScope V0 version here. The code will be deprecated soon.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="AgentScopeReactV2MathWorkflow.__init__">
-<a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeReactV2MathWorkflow.__init__">[docs]</a>
+<div class="viewcode-block" id="AgentScopeV0ReactMathWorkflow.__init__">
+<a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeV0ReactMathWorkflow.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
@@ -518,6 +521,11 @@ document.write(`
         <span class="n">model</span><span class="p">:</span> <span class="n">ModelWrapper</span><span class="p">,</span>
         <span class="n">auxiliary_models</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">openai</span><span class="o">.</span><span class="n">OpenAI</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span>
+            <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+            <span class="n">auxiliary_models</span><span class="o">=</span><span class="n">auxiliary_models</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="c1"># make sure that we have the correct import</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="kn">import</span><span class="w"> </span><span class="nn">agentscope</span>
@@ -530,11 +538,6 @@ document.write(`
         <span class="c1"># get openai client from model</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">openai_client</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_openai_client</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">openai_client</span><span class="o">.</span><span class="n">model_path</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span>
-            <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
-            <span class="n">auxiliary_models</span><span class="o">=</span><span class="n">auxiliary_models</span><span class="p">,</span>
-        <span class="p">)</span>
 
         <span class="n">temperature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rollout_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;temperature&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
         <span class="n">max_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rollout_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;max_tokens&quot;</span><span class="p">,</span> <span class="mi">4096</span><span class="p">)</span>
@@ -569,8 +572,8 @@ document.write(`
     <span class="k">def</span><span class="w"> </span><span class="nf">resettable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">True</span>
 
-<div class="viewcode-block" id="AgentScopeReactV2MathWorkflow.reset">
-<a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeReactV2MathWorkflow.reset">[docs]</a>
+<div class="viewcode-block" id="AgentScopeV0ReactMathWorkflow.reset">
+<a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeV0ReactMathWorkflow.reset">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">You are an agent specialized in solving math problems with tools. Please solve the math problem given to you. You can write and execute Python code to perform calculation or verify your answer. You should return your final answer within </span><span class="se">\\</span><span class="s2">boxed{{}}.</span>
@@ -615,8 +618,8 @@ document.write(`
     <span class="k">def</span><span class="w"> </span><span class="nf">repeatable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">False</span>
 
-<div class="viewcode-block" id="AgentScopeReactV2MathWorkflow.run">
-<a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeReactV2MathWorkflow.run">[docs]</a>
+<div class="viewcode-block" id="AgentScopeV0ReactMathWorkflow.run">
+<a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeV0ReactMathWorkflow.run">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># make sure that we have the correct import</span>
         <span class="k">try</span><span class="p">:</span>
