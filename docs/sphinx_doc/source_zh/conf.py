@@ -43,8 +43,8 @@ napoleon_google_docstring = True
 
 autodoc_member_order = "bysource"
 
-templates_path = ["../_templates"]
-exclude_patterns = ["../build"]
+templates_path = ["_templates"]
+exclude_patterns = ["build"]
 
 autodoc_default_options = {
     "members": True,
@@ -52,9 +52,9 @@ autodoc_default_options = {
 }
 
 # auto api configs
-apidoc_module_dir = "../../../../trinity"
+apidoc_module_dir = "../../../trinity"
 apidoc_output_dir = "build_api"
-apidoc_excluded_paths = ["../tests", "../build"]
+apidoc_excluded_paths = ["tests", "build"]
 apidoc_separate_modules = True
 
 # Multiversion configs
@@ -69,7 +69,7 @@ smv_prefer_remote_refs = False
 
 html_theme = "sphinx_book_theme"
 
-html_logo = "../_static/logo.svg"
+html_logo = "_static/logo.svg"
 
 html_theme_options = {
     "show_navbar_depth": 3,
@@ -93,10 +93,10 @@ html_context = {
     "github_user": "modelscope",
     "github_repo": "Trinity-RFT",
     "github_version": "main",
-    "conf_py_path": "/docs/sphinx_doc/source/zh/",
+    "conf_py_path": "/docs/sphinx_doc/source_zh/",
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["../_static"]
+html_static_path = ["_static"]
