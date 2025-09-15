@@ -66,8 +66,25 @@ class StepWiseRewardWorkflow(Workflow):
         """Calculate the reward for the given experiences at the specified step."""
         pass
 
+    @property
+    @abstractmethod
+    def max_step_num(self):
+        """Return the maximum number of steps in the task."""
+
+    @property
+    def repeatable(self):
+        return False
+
+
+class AsyncStepWiseRewardWorkflow(StepWiseRewardWorkflow):
+    """Async version of `StepWiseRewardWorkflow`."""
+
+    @property
+    def asynchronous(self):
+        return True
+
     async def run_async(self) -> list[Experience]:
-        """Run the workflow and return a list of experiences with step-wise rewards."""
+        """Run the workflow and return a list of experiences with step-wise rewards asynchronously."""
         experiences = []
         for step in range(self.max_step_num):
             # Run a single step of the agent application
@@ -89,22 +106,24 @@ class StepWiseRewardWorkflow(Workflow):
 
     @abstractmethod
     async def step_async(self, step_num: int) -> bool:
-        """Async version of `self.step`."""
+        """Run a single step of your agent application asynchronously.
+
+        Args:
+            step_num (int): The current step number.
+
+        Returns:
+            bool: Whether to continue running the agent application.
+
+        Tips:
+            You can use the openai client (`self.client`) to migrate your existing
+            applications at low cost.
+        """
         pass
 
     @abstractmethod
     async def reward_async(self, exps: list[Experience], step_num: int) -> float:
-        """Async version of `self.reward`."""
+        """Calculate the reward for the given experiences at the specified step asynchronously."""
         pass
-
-    @property
-    @abstractmethod
-    def max_step_num(self):
-        """Return the maximum number of steps in the task."""
-
-    @property
-    def repeatable(self):
-        return False
 
 
 class RewardPropagationWorkflow(Workflow):
@@ -168,8 +187,25 @@ class RewardPropagationWorkflow(Workflow):
         """Calculate the reward for the given experiences of the entire run."""
         pass
 
+    @property
+    @abstractmethod
+    def max_step_num(self):
+        """Return the maximum number of steps in the task."""
+
+    @property
+    def repeatable(self):
+        return False
+
+
+class AsyncRewardPropagationWorkflow(RewardPropagationWorkflow):
+    """Async version of `RewardPropagationWorkflow`."""
+
+    @property
+    def asynchronous(self):
+        return True
+
     async def run_async(self) -> list[Experience]:
-        """Run the workflow and return a list of experiences with step-wise rewards."""
+        """Run the workflow and return a list of experiences with step-wise rewards asynchronously."""
         experiences = []
         for step in range(self.max_step_num):
             # Run a single step of the agent application
@@ -193,19 +229,21 @@ class RewardPropagationWorkflow(Workflow):
 
     @abstractmethod
     async def step_async(self, step_num: int) -> bool:
-        """Async version of `self.step`."""
+        """Run a single step of your agent application asynchronously.
+
+        Args:
+            step_num (int): The current step number.
+
+        Returns:
+            bool: Whether to continue running the agent application.
+
+        Tips:
+            You can use the openai client (`self.client`) to migrate your existing
+            applications at low cost.
+        """
         pass
 
     @abstractmethod
     async def reward_async(self, exps: list[Experience]) -> float:
-        """Async version of `self.reward`."""
+        """Calculate the reward for the given experiences of the entire run asynchronously."""
         pass
-
-    @property
-    @abstractmethod
-    def max_step_num(self):
-        """Return the maximum number of steps in the task."""
-
-    @property
-    def repeatable(self):
-        return False

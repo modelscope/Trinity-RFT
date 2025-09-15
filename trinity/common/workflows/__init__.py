@@ -1,26 +1,59 @@
 # -*- coding: utf-8 -*-
 """Workflow module"""
-from .customized_math_workflows import MathBoxedWorkflow
-from .customized_toolcall_workflows import ToolCallWorkflow
-from .envs.agentscope.agentscope_react_workflow import AgentScopeReactV2MathWorkflow
-from .envs.alfworld.alfworld_workflow import AlfworldWorkflow, StepWiseAlfworldWorkflow
-from .envs.alfworld.RAFT_alfworld_workflow import RAFTAlfworldWorkflow
-from .envs.alfworld.RAFT_reflect_alfworld_workflow import RAFTReflectAlfworldWorkflow
-from .envs.email_searcher.workflow import EmailSearchWorkflow
-from .envs.sciworld.sciworld_workflow import SciWorldWorkflow
-from .envs.webshop.webshop_workflow import WebShopWorkflow
-from .eval_workflow import MathEvalWorkflow
-from .math_rm_workflow import MathRMWorkflow
-from .math_ruler_workflow import MathRULERWorkflow
-from .math_trainable_ruler_workflow import MathTrainableRULERWorkflow
-from .simple_mm_workflow import SimpleMMWorkflow
-from .workflow import WORKFLOWS, MathWorkflow, SimpleWorkflow, Task, Workflow
+from trinity.common.workflows.customized_math_workflows import MathBoxedWorkflow
+from trinity.common.workflows.customized_toolcall_workflows import ToolCallWorkflow
+from trinity.common.workflows.envs.agentscope.agentscope_react_workflow import (
+    AgentScopeReactV2MathWorkflow,
+)
+from trinity.common.workflows.envs.alfworld.alfworld_workflow import (
+    AlfworldWorkflow,
+    StepWiseAlfworldWorkflow,
+)
+from trinity.common.workflows.envs.alfworld.RAFT_alfworld_workflow import (
+    RAFTAlfworldWorkflow,
+)
+from trinity.common.workflows.envs.alfworld.RAFT_reflect_alfworld_workflow import (
+    RAFTReflectAlfworldWorkflow,
+)
+from trinity.common.workflows.envs.email_searcher.workflow import EmailSearchWorkflow
+from trinity.common.workflows.envs.sciworld.sciworld_workflow import SciWorldWorkflow
+from trinity.common.workflows.envs.webshop.webshop_workflow import WebShopWorkflow
+from trinity.common.workflows.eval_workflow import (
+    AsyncMathEvalWorkflow,
+    MathEvalWorkflow,
+)
+from trinity.common.workflows.math_rm_workflow import (
+    AsyncMathRMWorkflow,
+    MathRMWorkflow,
+)
+from trinity.common.workflows.math_ruler_workflow import (
+    AsyncMathRULERWorkflow,
+    MathRULERWorkflow,
+)
+from trinity.common.workflows.math_trainable_ruler_workflow import (
+    MathTrainableRULERWorkflow,
+)
+from trinity.common.workflows.simple_mm_workflow import (
+    AsyncSimpleMMWorkflow,
+    SimpleMMWorkflow,
+)
+from trinity.common.workflows.workflow import (
+    WORKFLOWS,
+    AsyncMathWorkflow,
+    AsyncSimpleWorkflow,
+    MathWorkflow,
+    SimpleWorkflow,
+    Task,
+    Workflow,
+)
 
 __all__ = [
     "Task",
     "Workflow",
     "WORKFLOWS",
+    "AsyncSimpleWorkflow",
     "SimpleWorkflow",
+    "AsyncMathWorkflow",
     "MathWorkflow",
     "WebShopWorkflow",
     "AlfworldWorkflow",
@@ -29,12 +62,16 @@ __all__ = [
     "RAFTReflectAlfworldWorkflow",
     "SciWorldWorkflow",
     "MathBoxedWorkflow",
+    "AsyncMathRMWorkflow",
     "MathRMWorkflow",
     "ToolCallWorkflow",
+    "AsyncMathEvalWorkflow",
     "MathEvalWorkflow",
     "AgentScopeReactV2MathWorkflow",
     "EmailSearchWorkflow",
+    "AsyncMathRULERWorkflow",
     "MathRULERWorkflow",
     "MathTrainableRULERWorkflow",
+    "AsyncSimpleMMWorkflow",
     "SimpleMMWorkflow",
 ]
