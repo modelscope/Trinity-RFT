@@ -52,15 +52,15 @@ RFT 流程被模块化为三个核心组件：
 
 ## 🛠️ Trinity-RFT 能做什么？
 
-* **用 RL 训练智能体应用** [[教程]](https://modelscope.github.io/Trinity-RFT/main/tutorial/trinity_programming_guide.html#workflows-for-rl-environment-developers)
-  - 在 Workflow 中实现智能体-环境交互逻辑 ([示例1](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_multi_turn.html)，[示例2](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_step_wise.html))，
-  - 或直接使用 Agent 框架（如 AgentScope）编写好的工作流 ([示例](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_react.html))。
+* **用 RL 训练智能体应用**
+  - 在 Workflow 中实现智能体-环境交互逻辑  ([示例1](tutorial/example_multi_turn.md)，[示例2](tutorial/example_step_wise.md))，
+  - 或直接使用 Agent 框架（如 AgentScope）编写好的工作流 ([示例](tutorial/example_react.md))。
 
-* **快速设计和验证 RL 算法** [[教程]](https://modelscope.github.io/Trinity-RFT/main/tutorial/trinity_programming_guide.html#algorithms-for-rl-algorithm-developers)
-  - 在简洁、可插拔的类中开发自定义 RL 算法（损失、采样及其他技巧）([示例](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_react.html))。
+* **快速设计和验证 RL 算法**
+  - 在简洁、可插拔的类中开发自定义 RL 算法（损失、采样及其他技巧） ([教程](tutorial/trinity_programming_guide.md#algorithms-for-rl-algorithm-developers)，[示例](tutorial/example_mix_algo.md))。
 
-* **为 RFT 定制数据集和数据流水线** [[教程]](https://modelscope.github.io/Trinity-RFT/main/tutorial/trinity_programming_guide.html#operators-for-data-developers)
-  - 设计任务定制数据集，构建数据流水线以支持清洗、增强和人类参与场景 ([示例](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_data_functionalities.html))。
+* **为 RFT 定制数据集和数据流水线**
+  - 设计任务定制数据集，构建数据流水线以支持清洗、增强和人类参与场景 ([教程](tutorial/trinity_programming_guide.md#operators-for-data-developers)，[示例](tutorial/example_data_functionalities.md))。
 
 
 ## 致谢

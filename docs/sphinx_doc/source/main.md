@@ -49,14 +49,14 @@ The RFT process is modularized into three core components:
 ## 🛠️ What can I use Trinity-RFT for?
 
 * **Train agent applications with RL and minimal migration cost**
-  - Implement agent-environment interaction logic in a single workflow class ([example](/tutorial/example_multi_turn.md)),
+  - Implement agent-environment interaction logic in a single workflow class ([example 1](tutorial/example_multi_turn.md), [example 2](tutorial/example_step_wise.md)),
   - Or import workflows from agent frameworks like AgentScope ([example](/tutorial/example_react.md)).
 
 * **Rapid RL algorithm design and validation**
-  - Develop custom RL algorithms (loss design, sampling strategy, etc.) in compact, plug-and-play classes ([example](/tutorial/example_mix_algo.md)).
+  - Develop custom RL algorithms (loss design, sampling strategy, etc.) in compact, plug-and-play classes ([tutorial](tutorial/trinity_programming_guide.html#algorithms-for-rl-algorithm-developers), [example](tutorial/example_mix_algo.md)).
 
 * **Custom datasets and data pipelines for RFT**
-  - Design task-specific datasets and build data pipelines for cleaning, augmentation, and human-in-the-loop scenarios ([example](/tutorial/example_data_functionalities.md)).
+  - Design task-specific datasets and build data pipelines for cleaning, augmentation, and human-in-the-loop scenarios ([tutorial](tutorial/trinity_programming_guide.md#operators-for-data-developers), [example](tutorial/example_data_functionalities.md)).
 
 
 ## Acknowledgements
