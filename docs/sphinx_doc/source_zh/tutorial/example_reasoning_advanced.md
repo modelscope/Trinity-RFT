@@ -7,7 +7,7 @@
 ## OPMD：一种原生的 off-policy 强化学习算法
 
 作为 Trinity-RFT 的一个实验性功能，我们开发了一种极其简单的 off-policy 强化学习算法，称为 OPMD（Online Policy Mirror Descent，灵感来自 [Kimi k1.5](https://arxiv.org/abs/2501.12599)）。
-该算法的设计与分析详见此 [技术报告](../../assets/opmd.pdf)。
+该算法的设计与分析详见[Trinity-RFT 技术报告](https://arxiv.org/abs/2505.17826)的附录A。
 本例子对应的配置文件为 [`opmd_gsm8k.yaml`](https://github.com/modelscope/Trinity-RFT/blob/main/examples/opmd_gsm8k/opmd_gsm8k.yaml)。
 
 要尝试 OPMD 算法，请运行：
