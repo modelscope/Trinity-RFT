@@ -33,13 +33,14 @@ Below we show you how to perform this step-by-step.
 
 ### The Workflow (`workflow.py`)
 
-The core logic is encapsulated in the `AgentScopeReactV2MathWorkflow` class.
+The core logic is encapsulated in the `AgentScopeReactMathWorkflow` class.
 
 1.  **Initialization (`__init__`)**:
-    - It first initializes the AgentScope environment and the desired agent (`ReActAgentV2`).
+    - It first initializes the AgentScope environment and the desired agent (`ReActAgent`).
     - The most critical integration step is injecting Trinity's model client into the AgentScope agent:
       ```python
       self.openai_client = model.get_openai_client()
+      # self.openai_client = get_openai_async_client() # or async client depend on whether you are using async openai client
       # ...
       self.agent.model.client = self.openai_client
       ```
@@ -48,7 +49,7 @@ The core logic is encapsulated in the `AgentScopeReactV2MathWorkflow` class.
 2.  **Execution (`run`)**:
     - The `run` method is remarkably simple. It just passes the task description to the agent.
       ```python
-      content = self.agent.reply(msg).content
+      content = self.agent.reply(msg).content # your agent logic
       ```
     - After the agent completes its multi-step reasoning and produces a final answer, Trinity extracts all the intermediate turns from the model's history:
       ```python
