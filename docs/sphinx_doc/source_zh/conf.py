@@ -72,7 +72,7 @@ html_theme = "sphinx_book_theme"
 html_logo = "../_static/logo.svg"
 
 html_theme_options = {
-    "show_navbar_depth": 3,
+    "navigation_depth": 3,
     "article_header_end": "article_header_customized.html",
     "use_download_button": True,
     "use_fullscreen_button": True,
