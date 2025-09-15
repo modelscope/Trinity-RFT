@@ -209,10 +209,6 @@ class SimpleWorkflow(Workflow):
     def resettable(self):
         return True
 
-    @property
-    def asynchronous(self):
-        return True
-
     def reset(self, task: Task):
         self.format_args = task.format_args
         self.system_prompt = task.format_args.system_prompt
@@ -243,6 +239,37 @@ class SimpleWorkflow(Workflow):
         if self.reply_prefix:
             messages.append({"role": "assistant", "content": self.reply_prefix})
         return messages
+
+    def run(self) -> List[Experience]:
+        # TODO: Optimize the generate function
+        messages = self.format_messages()
+
+        self.logger.debug("start chat")
+        responses = self.model.chat(messages, **self.rollout_args)
+        for i, response in enumerate(responses):
+            reward_dict = self.reward_fn(  # type: ignore [misc]
+                response=response.response_text,  # type: ignore [arg-type]
+                truth=self.truth,
+            )
+
+            if response.metrics is None:
+                response.metrics = {}
+            response.metrics.update(reward_dict)
+            reward = sum(reward_dict.values())
+            response.reward = reward
+            response.eid.run = i + self.run_id_base
+
+            self.logger.debug(
+                f"self.task_desc: {self.task_desc}, messages: {messages}, response: {response.response_text}, reward: {reward}"
+            )
+        return responses
+
+
+@WORKFLOWS.register_module("async_simple_workflow")
+class AsyncSimpleWorkflow(Workflow):
+    @property
+    def asynchronous(self):
+        return True
 
     async def run_async(self) -> List[Experience]:
         # TODO: Optimize the generate function
@@ -297,3 +324,8 @@ class MathWorkflow(SimpleWorkflow):
 """
         # call the SimpleWorkflow.reset
         super().reset(task)
+
+
+@WORKFLOWS.register_module("async_math_workflow")
+class AsyncMathWorkflow(AsyncSimpleWorkflow, MathWorkflow):
+    pass

@@ -32,10 +32,6 @@ class MathRULERWorkflow(SimpleWorkflow):
             auxiliary_models=auxiliary_models,
         )
 
-    @property
-    def asynchronous(self):
-        return True
-
     def reset(self, task: Task):
         """
         Note that in this workflow, MathRewardFn is only used for calculating the 'golden reward',
@@ -52,13 +48,13 @@ class MathRULERWorkflow(SimpleWorkflow):
         # call the SimpleWorkflow.reset
         super().reset(task)
 
-    async def run_async(self) -> List[Experience]:
+    def run(self) -> List[Experience]:
         """Modified from SimpleWorkflow.run"""
 
         messages = self.format_messages()
 
         self.logger.debug("start chat")
-        responses = await self.model.chat_async(messages, **self.rollout_args)
+        responses = self.model.chat(messages, **self.rollout_args)
 
         for i, response in enumerate(responses):
             gold_reward_dict = self.reward_fn(  # type: ignore [misc]
@@ -155,3 +151,49 @@ Conclude your response with a list of scores, in the following format: [score fo
                 "Unable to parse the list in judger response, set scores to all zero."
             )
             return False, [0.0 for _ in range(num_responses)]
+
+
+@WORKFLOWS.register_module("async_math_ruler_workflow")
+class AsyncMathRULERWorkflow(MathRULERWorkflow):
+    @property
+    def asynchronous(self):
+        return True
+
+    async def run_async(self) -> List[Experience]:
+        """Modified from SimpleWorkflow.run"""
+
+        messages = self.format_messages()
+
+        self.logger.debug("start chat")
+        responses = await self.model.chat_async(messages, **self.rollout_args)
+
+        for i, response in enumerate(responses):
+            gold_reward_dict = self.reward_fn(  # type: ignore [misc]
+                response=response.response_text,  # type: ignore [arg-type]
+                truth=self.truth,
+            )
+
+            if response.metrics is None:
+                response.metrics = {}
+
+            response.metrics.update(gold_reward_dict)
+            gold_reward = sum(gold_reward_dict.values())
+            response.metrics.update({"gold_reward": gold_reward})
+            response.eid.run = i + self.run_id_base
+
+            self.logger.debug(
+                f"self.task_desc: {self.task_desc}, messages: {messages}, response: {response.response_text}, gold_reward: {gold_reward}"
+            )
+
+        # === RULER scores as rewards ===
+        assert (
+            self.auxiliary_models is not None
+        ), "Current implementation of RULER requires that auxiliary_models is not None."
+        judge_success, ruler_scores = self.get_ruler_scores(
+            responses=responses, judger=self.auxiliary_models[0]
+        )
+        for i, response in enumerate(responses):
+            response.reward = ruler_scores[i]
+            response.metrics.update({"judge_success": float(judge_success)})
+
+        return responses

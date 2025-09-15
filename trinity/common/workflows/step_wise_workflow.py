@@ -66,6 +66,37 @@ class StepWiseRewardWorkflow(Workflow):
         """Calculate the reward for the given experiences at the specified step."""
         pass
 
+    async def run_async(self) -> list[Experience]:
+        """Run the workflow and return a list of experiences with step-wise rewards."""
+        experiences = []
+        for step in range(self.max_step_num):
+            # Run a single step of the agent application
+            continue_run = await self.step_async(step_num=step)
+            # Collect experiences data of the current step
+            exps = self.model.extract_experience_from_history()
+            # Calculate the reward for the current step
+            reward = await self.reward_async(exps, step_num=step)
+            for exp in exps:
+                exp.reward = reward
+                # set the step number in each experience
+                exp.eid.step = step
+            # Store the step experiences
+            experiences.extend(exps)
+            if not continue_run:
+                break
+
+        return experiences
+
+    @abstractmethod
+    async def step_async(self, step_num: int) -> bool:
+        """Async version of `self.step`."""
+        pass
+
+    @abstractmethod
+    async def reward_async(self, exps: list[Experience], step_num: int) -> float:
+        """Async version of `self.reward`."""
+        pass
+
     @property
     @abstractmethod
     def max_step_num(self):
@@ -135,6 +166,39 @@ class RewardPropagationWorkflow(Workflow):
     @abstractmethod
     def reward(self, exps: list[Experience]) -> float:
         """Calculate the reward for the given experiences of the entire run."""
+        pass
+
+    async def run_async(self) -> list[Experience]:
+        """Run the workflow and return a list of experiences with step-wise rewards."""
+        experiences = []
+        for step in range(self.max_step_num):
+            # Run a single step of the agent application
+            continue_run = await self.step_async(step_num=step)
+            # Collect experiences data of the current step
+            exps = self.model.extract_experience_from_history()
+            # set the step number in each experience
+            for exp in exps:
+                exp.eid.step = step
+            # Store the step experiences
+            experiences.extend(exps)
+            if not continue_run:
+                break
+        reward = self.reward(experiences)
+        for exp in experiences:
+            exp.reward = reward
+            if exp.metrics is None:
+                exp.metrics = {}
+            exp.metrics["actual_env_steps"] = step + 1  # +1 because step starts from 0
+        return experiences
+
+    @abstractmethod
+    async def step_async(self, step_num: int) -> bool:
+        """Async version of `self.step`."""
+        pass
+
+    @abstractmethod
+    async def reward_async(self, exps: list[Experience]) -> float:
+        """Async version of `self.reward`."""
         pass
 
     @property
