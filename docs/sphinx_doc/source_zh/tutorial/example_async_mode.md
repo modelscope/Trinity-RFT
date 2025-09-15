@@ -6,9 +6,9 @@ Trinity-RFT 支持通过在独立进程中运行 trainer 和 explorer 来实现�
 
 我们提供了两个主要配置文件：[`explorer.yaml`](https://github.com/modelscope/Trinity-RFT/blob/main/examples/async_gsm8k/explorer.yaml) 和 [`trainer.yaml`](https://github.com/modelscope/Trinity-RFT/blob/main/examples/async_gsm8k/trainer.yaml)。
 两者之间的主要区别是：在 `explorer.yaml` 中将 `mode` 设置为 `explore`，而在 `trainer.yaml` 中将 `mode` 设置为 `train`。
- explorer 与训练器的模型权重每处理 `sync_interval * batch_size` 个任务后同步一次。
+Explorer 与 Trainer 的模型权重每处理 `sync_interval * batch_size` 个任务后同步一次。
 
-假设我们有一个包含 8 块 GPU 的节点，我们将其中 4 块分配给训练器，另外 4 块分配给 explorer 。`explorer.yaml` 中的关键配置如下：
+假设我们有一个包含 8 块 GPU 的节点，我们将其中 4 块分配给 trainer，另外 4 块分配给 explorer 。`explorer.yaml` 中的关键配置如下：
 
 ```yaml
 # explorer.yaml

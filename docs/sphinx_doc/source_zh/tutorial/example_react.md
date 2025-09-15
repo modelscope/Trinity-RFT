@@ -39,6 +39,7 @@ Trinity-RFT 的推理引擎和训练流水线专为支持原生 OpenAI `tool_cal
     - 最关键的集成步骤是将 Trinity 的模型客户端注入到 Agent 中：
       ```python
       self.openai_client = model.get_openai_client()
+      # self.openai_client = get_openai_async_client() # or async client depend on whether you are using async openai client
       # ...
       self.agent.model.client = self.openai_client
       ```
@@ -47,7 +48,7 @@ Trinity-RFT 的推理引擎和训练流水线专为支持原生 OpenAI `tool_cal
 2.  **执行 (`run`)**
     - `run` 方法非常简洁，它只是将任务描述传递给 Agent。
       ```python
-      content = self.agent.reply(msg).content
+      content = self.agent.reply(msg).content # your agent logic
       ```
     - 在 Agent 完成其多步推理并产生最终答案后，Trinity 从模型历史中提取所有中间轮次：
       ```python
@@ -99,24 +100,24 @@ synchronizer:
 
 ## 如何运行示例
 
-1.  **前置条件**：确保已安装 Trinity 及本示例所需依赖（如 `AgentScope`）。请参考 [Agentscope Github link](https://github.com/agentscope-ai/agentscope/tree/v0_zh)
+1.  **前置条件**：确保已安装 Trinity 及本示例所需依赖（如 `AgentScope`）。请参考 [Agentscope Github link](https://github.com/agentscope-ai/agentscope/tree/v0)
 
 > **注意**：本示例需要以下来源之一的 AgentScope：
 >  - Commit: `ad13ed5dacecb79d20abf626769f8c7d7a7d2afb`
->  - 分支: [`v0`](https://github.com/agentscope-ai/agentscope/tree/v0_zh)
+>  - 分支: [`v0`](https://github.com/agentscope-ai/agentscope/tree/v0)
 
-2. 下载你想使用的模型，并填写 `examples/agentscope_tool_react/agentscope_tool_react_gsm8k.yaml` 或 `examples/agentscope_tool_react/agentscope_tool_react_dapo.yaml` 中的配置文件
+2. 下载你想使用的模型，并填写 `examples/agentscope_tool_react/agentscopev0_tool_react_gsm8k.yaml` 或 `examples/agentscope_tool_react/agentscopev0_tool_react_dapo.yaml` 中的配置文件
 
 3.  **启动训练任务**：从仓库根目录运行以下命令。
 
     ```bash
-    trinity run --config examples/agentscope_tool_react/agentscope_tool_react_gsm8k.yaml
+    trinity run --config examples/agentscope_tool_react/agentscopev0_tool_react_gsm8k.yaml
     ```
 
     或
 
     ```bash
-    trinity run --config examples/agentscope_tool_react/agentscope_tool_react_dapo.yaml
+    trinity run --config examples/agentscope_tool_react/agentscopev0_tool_react_dapo.yaml
     ```
 
 
@@ -132,6 +133,9 @@ DAPO 数据集的示例耗时稍长，但也能够收敛。
 
 ![](../../assets/agentscope_dapo_turns.png)
 
+我们也可以把使用 v1 版本的 AgentScope 仓库，然后对 Qwen3-4b-instrcut-2507 进行训练：
+
+![](../../assets/agentscope_dapo_qwen3-4B_reward.png)
 
 
 ## 总结

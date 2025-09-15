@@ -115,7 +115,7 @@ docker run -it \
 
 ## 步骤 2：配置并运行训练
 
-大多数配置设置已在 [快速入门指南](../../docs/sphinx_doc/source_zh/tutorial/example_reasoning_basic.md#step-0-environment-preparation) 中涵盖。此处我们仅关注 **Megatron-LM 特有** 的配置。
+大多数配置设置已在 [快速入门指南](./example_reasoning_basic.md) 中涵盖。此处我们仅关注 **Megatron-LM 特有** 的配置。
 
 ### Megatron 配置示例
 
