@@ -29,7 +29,7 @@ buffer:
       rollout_args:
         temperature: 1.0
     eval_tasksets: []
-    default_workflow_type: 'agentscope_reactv2_math_workflow'
+    default_workflow_type: 'agentscopev0_react_math_workflow'
   trainer_input:
     experience_buffer:
       name: agentscope_dapo_buffer
