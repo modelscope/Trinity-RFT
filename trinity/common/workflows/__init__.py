@@ -2,8 +2,10 @@
 """Workflow module"""
 from .customized_math_workflows import MathBoxedWorkflow
 from .customized_toolcall_workflows import ToolCallWorkflow
-from .env.agentscope.agentscopev1_search_workflow import AgentScopeV1ReactSearchWorkflow
 from .envs.agentscope.agentscope_react_workflow import AgentScopeReactV2MathWorkflow
+from .envs.agentscope.agentscopev1_search_workflow import (
+    AgentScopeV1ReactSearchWorkflow,
+)
 from .envs.alfworld.alfworld_workflow import AlfworldWorkflow, StepWiseAlfworldWorkflow
 from .envs.alfworld.RAFT_alfworld_workflow import RAFTAlfworldWorkflow
 from .envs.alfworld.RAFT_reflect_alfworld_workflow import RAFTReflectAlfworldWorkflow

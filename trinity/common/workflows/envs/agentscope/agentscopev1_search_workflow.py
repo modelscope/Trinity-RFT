@@ -51,6 +51,11 @@ class AgentScopeV1ReactSearchWorkflow(Workflow):
     def reset(self, task: Task):
         self.workflow_args = task.workflow_args
         self.max_turns = int(self.workflow_args.get("max_turns", 10))
+        self.search_client_type = self.workflow_args.get("search_client_type", "searxng")
+        if self.search_client_type not in ["searxng", "tavily"]:
+            raise ValueError(
+                f"search_client_type must be one of ['searxng', 'tavily'], but got {self.search_client_type}"
+            )
         self.system_prompt = "You are a Web Information Seeking Master. Your task is to thoroughly seek the internet for information and provide accurate answers to questions."
 
         self.raw_task = task.raw_task
@@ -119,7 +124,9 @@ Your judgement must be in the format and criteria specified below:
             from agentscope.formatter import OpenAIChatFormatter
             from agentscope.mcp import StdIOStatefulClient
             from agentscope.memory import InMemoryMemory
+            from agentscope.message import Msg
             from agentscope.model import OpenAIChatModel
+            from pydantic import BaseModel, Field
         except ImportError as e:
             error_message = f"AgentScope V1 is not installed. Please install the agentscope framework first before running the workflow. Error: {str(e)}"
             self.logger.error(error_message)
@@ -142,27 +149,35 @@ Your judgement must be in the format and criteria specified below:
         )
         self.agent.model.client = self.openai_async_client
 
-        tavily_api_key = os.getenv("TAVILY_API_KEY", "")
-        if not tavily_api_key:
-            raise ValueError(
-                "TAVILY_API_KEY environment variable is not set. Please set it to use the Tavily search tool."
-            )
-        self.tavily_search_client = StdIOStatefulClient(
-            name="tavily_mcp",
-            command="npx",
-            args=["-y", "tavily-mcp@latest"],
-            env={"TAVILY_API_KEY": tavily_api_key},
-        )
-        await self.tavily_search_client.connect()
-        await self.agent.toolkit.register_mcp_client(self.tavily_search_client)
+        if self.search_client_type == "tavily":
+            tavily_api_key = os.getenv("TAVILY_API_KEY", "")
+            if not tavily_api_key:
+                raise ValueError(
+                    "TAVILY_API_KEY environment variable is not set. Please set it to use the Tavily search tool."
+                )
 
-        try:
-            from agentscope.message import Msg
-            from pydantic import BaseModel, Field
-        except ImportError as e:
-            error_message = f"AgentScope V1 is not installed. Please install the agentscope framework first before running the workflow. Error: {str(e)}"
-            self.logger.error(error_message)
-            raise ImportError(error_message)
+            self.search_client = StdIOStatefulClient(
+                name="tavily_mcp",
+                command="npx",
+                args=["-y", "tavily-mcp@latest"],
+                env={"TAVILY_API_KEY": tavily_api_key},
+            )
+        elif self.search_client_type == "searxng":
+            searxng_url = os.getenv("SEARXNG_URL", "")
+            if not searxng_url:
+                raise ValueError(
+                    "SEARXNG_URL environment variable is not set. Please set it to use the SearXNG search tool."
+                )
+            self.search_client = StdIOStatefulClient(  # refer to https://github.com/ihor-sokoliuk/mcp-searxng for more details
+                name="searxng_mcp",
+                command="npx",
+                args=["-y", "mcp-searxng"],
+                env={"SEARXNG_URL": searxng_url},
+            )
+        else:
+            raise ValueError(
+                f"search_client_type must be one of ['searxng', 'tavily'], but got {self.search_client_type}"
+            )
 
         instruction = Msg("user", content=self.task_desc, role="user")
 
@@ -170,10 +185,14 @@ Your judgement must be in the format and criteria specified below:
             result: str = Field(description="The final result to the initial user query")
 
         try:
+            await self.search_client.connect()
+            await self.agent.toolkit.register_mcp_client(self.search_client)
             result = await self.agent.reply(instruction, structured_model=FinalResult)
         except Exception as e:
             self.logger.error(f"Error during agent reply: {e}")
             result = None
+        finally:
+            await self.search_client.close()
 
         # Reward calculation (judge_result can stay sync if your judge_model only has sync chat, otherwise you need to make it async)
         try:
@@ -200,5 +219,4 @@ Your judgement must be in the format and criteria specified below:
         self.logger.debug(
             f"return experience len: {len(experiences)}, run_id: {str(experiences[-1].eid.run)}, final step reward: {experiences[-1].reward}"
         )
-        await self.tavily_search_client.close()
         return experiences
