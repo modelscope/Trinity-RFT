@@ -12,8 +12,8 @@ from trinity.utils.annotations import Deprecated
 
 
 @Deprecated
-@WORKFLOWS.register_module("agentscope_reactv2_math_workflow")
-class AgentScopeReactV2MathWorkflow(Workflow):
+@WORKFLOWS.register_module("agentscopev0_react_math_workflow")
+class AgentScopeV0ReactMathWorkflow(Workflow):
     """
     This workflow serves as an example of how to use the agentscope framework within the trinity workflow.
     We use the AgentScope V0 version here. The code will be deprecated soon.
