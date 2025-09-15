@@ -8,12 +8,15 @@ import openai
 from trinity.common.models.model import ModelWrapper
 from trinity.common.rewards.math_reward import MathBoxedRewardFn
 from trinity.common.workflows.workflow import WORKFLOWS, Task, Workflow
+from trinity.utils.annotations import Deprecated
 
 
-@WORKFLOWS.register_module("agentscope_reactv2_math_workflow")
-class AgentScopeReactV2MathWorkflow(Workflow):
+@Deprecated
+@WORKFLOWS.register_module("agentscopev0_react_math_workflow")
+class AgentScopeV0ReactMathWorkflow(Workflow):
     """
     This workflow serves as an example of how to use the agentscope framework within the trinity workflow.
+    We use the AgentScope V0 version here. The code will be deprecated soon.
     """
 
     def __init__(
@@ -23,6 +26,11 @@ class AgentScopeReactV2MathWorkflow(Workflow):
         model: ModelWrapper,
         auxiliary_models: Optional[List[openai.OpenAI]] = None,
     ):
+        super().__init__(
+            task=task,
+            model=model,
+            auxiliary_models=auxiliary_models,
+        )
         # make sure that we have the correct import
         try:
             import agentscope
@@ -35,11 +43,6 @@ class AgentScopeReactV2MathWorkflow(Workflow):
         # get openai client from model
         self.openai_client = model.get_openai_client()
         self.model_name = self.openai_client.model_path
-        super().__init__(
-            task=task,
-            model=model,
-            auxiliary_models=auxiliary_models,
-        )
 
         temperature = self.rollout_args.get("temperature", 1.0)
         max_tokens = self.rollout_args.get("max_tokens", 4096)
