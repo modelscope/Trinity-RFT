@@ -1,10 +1,7 @@
 #!/bin/bash
-
-# Usage: ./build_doc.sh [--branch <branch_name>]
-#!/bin/bash
 # Usage:
-#   ./build_doc.sh                # 构建所有语言 & 所有版本
-#   ./build_doc.sh --branch xxx   # 仅构建当前分支版本（PR/feature 分支用）
+#   ./build_doc.sh                # all language and all versions
+#   ./build_doc.sh --branch xxx   # Only current branch
 
 set -euo pipefail
 

@@ -3,22 +3,18 @@
 </button>
 <script>
 (function () {
-  var btn = document.getElementById('lang-toggle-btn');
-  var lab = document.getElementById('lang-toggle-label');
+  const btn = document.getElementById('lang-toggle-btn');
+  const lab = document.getElementById('lang-toggle-label');
   if (!btn || !lab) return;
-
-  var m = location.pathname.match(/^(.*\/build\/html\/)(en|zh)(\/.*)$/);
-  var cur = m ? m[2] : 'en';
-
+  const m = location.pathname.match(/^(.*\/build\/html\/)(en|zh)(\/.*)$/);
+  const cur = m ? m[2] : 'en';
   if (cur === 'en') { lab.textContent = '中'; btn.title = '切换到中文'; }
   else              { lab.textContent = 'EN'; btn.title = 'Switch to English'; }
-
-  var targetHref = (function(){
+  const targetHref = (function(){
     if (!m) return location.href;
-    var other = (cur === 'en') ? 'zh' : 'en';
+    const other = (cur === 'en') ? 'zh' : 'en';
     return m[1] + other + m[3] + (location.search || '') + (location.hash || '');
   })();
-
   btn.addEventListener('click', function () { location.href = targetHref; });
 })();
 </script>

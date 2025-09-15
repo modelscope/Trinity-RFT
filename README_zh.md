@@ -73,15 +73,15 @@ RFT 流程被模块化为三个核心组件：
 
 ## 🛠️ Trinity-RFT 能做什么？
 
-* **用 RL 训练智能体应用** [[教程]](https://modelscope.github.io/Trinity-RFT/main/tutorial/trinity_programming_guide.html#workflows-for-rl-environment-developers)
-  - 在 Workflow 中实现智能体-环境交互逻辑 ([示例1](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_multi_turn.html)，[示例2](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_step_wise.html))，
-  - 或直接使用 Agent 框架（如 AgentScope）编写好的工作流 ([示例](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_react.html))。
+* **用 RL 训练智能体应用** [[教程]](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/trinity_programming_guide.html#workflows-for-rl-environment-developers)
+  - 在 Workflow 中实现智能体-环境交互逻辑 ([示例1](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_multi_turn.html)，[示例2](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_step_wise.html))，
+  - 或直接使用 Agent 框架（如 AgentScope）编写好的工作流 ([示例](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_react.html))。
 
-* **快速设计和验证 RL 算法** [[教程]](https://modelscope.github.io/Trinity-RFT/main/tutorial/trinity_programming_guide.html#algorithms-for-rl-algorithm-developers)
-  - 在简洁、可插拔的类中开发自定义 RL 算法（损失、采样及其他技巧）([示例](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_react.html))。
+* **快速设计和验证 RL 算法** [[教程]](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/trinity_programming_guide.html#algorithms-for-rl-algorithm-developers)
+  - 在简洁、可插拔的类中开发自定义 RL 算法（损失、采样及其他技巧）([示例](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_react.html))。
 
-* **为 RFT 定制数据集和数据流水线** [[教程]](https://modelscope.github.io/Trinity-RFT/main/tutorial/trinity_programming_guide.html#operators-for-data-developers)
-  - 设计任务定制数据集，构建数据流水线以支持清洗、增强和人类参与场景 ([示例](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_data_functionalities.html))。
+* **为 RFT 定制数据集和数据流水线** [[教程]](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/trinity_programming_guide.html#operators-for-data-developers)
+  - 设计任务定制数据集，构建数据流水线以支持清洗、增强和人类参与场景 ([示例](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_data_functionalities.html))。
 
 
 ---
@@ -219,7 +219,7 @@ docker run -it \
 
 💡 **注意**：请将 `<path_to_your_data_and_checkpoints>` 替换为您电脑上实际存放数据集和模型文件的路径。
 
-> 如果您想集成 **Megatron-LM**，请参考我们的 [Megatron 示例配置指南](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_megatron.html)。
+> 如果您想集成 **Megatron-LM**，请参考我们的 [Megatron 示例配置指南](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_megatron.html)。
 
 
 ### 第二步：准备数据集和模型
@@ -333,38 +333,38 @@ trinity run --config examples/grpo_gsm8k/gsm8k.yaml
 
 运行不同 RFT 模式的教程：
 
-+ [快速开始：在 GSM8k 上运行 GRPO](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_reasoning_basic.html)
-+ [Off-Policy RFT](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_reasoning_advanced.html)
-+ [全异步 RFT](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_async_mode.html)
-+ [通过 DPO 或 SFT 进行离线学习](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_dpo.html)
++ [快速开始：在 GSM8k 上运行 GRPO](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_reasoning_basic.html)
++ [Off-Policy RFT](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_reasoning_advanced.html)
++ [全异步 RFT](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_async_mode.html)
++ [通过 DPO 或 SFT 进行离线学习](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_dpo.html)
 
 
 将 Trinity-RFT 适配到新的多轮智能体场景的教程：
 
-+ [拼接多轮任务](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_multi_turn.html)
-+ [通用多轮任务](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_step_wise.html)
-+ [调用智能体框架中的 ReAct 工作流](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_react.html)
++ [拼接多轮任务](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_multi_turn.html)
++ [通用多轮任务](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_step_wise.html)
++ [调用智能体框架中的 ReAct 工作流](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_react.html)
 
 
 数据相关功能的教程：
 
-+ [高级数据处理及 Human-in-the-loop](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_data_functionalities.html)
++ [高级数据处理及 Human-in-the-loop](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_data_functionalities.html)
 
 
 使用 Trinity-RFT 进行 RL 算法开发/研究的教程：
 
-+ [使用 Trinity-RFT 进行 RL 算法开发](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_mix_algo.html)
++ [使用 Trinity-RFT 进行 RL 算法开发](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/example_mix_algo.html)
 
 
 完整配置指南：
 
-+ 请参阅[此文档](https://modelscope.github.io/Trinity-RFT/main/tutorial/trinity_configs.html)
++ 请参阅[此文档](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/trinity_configs.html)
 
 
 面向开发者和研究人员的指南：
 
 + [用于快速验证实验的 Benchmark 工具](./benchmark/README.md)
-+ [理解 explorer-trainer 同步逻辑](https://modelscope.github.io/Trinity-RFT/main/tutorial/synchronizer.html)
++ [理解 explorer-trainer 同步逻辑](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/synchronizer.html)
 
 
 
