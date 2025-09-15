@@ -68,6 +68,7 @@ explorer:
 trainer:
   trainer_type: verl
   save_interval: 100
+  total_steps: 1000
   enable_preview: true
   actor_grad_clip: 1.0
   trainer_config:
@@ -99,7 +100,6 @@ trainer:
           lr: 1.0e-06
           lr_warmup_steps_ratio: 0.0
           warmup_style: constant
-          total_training_steps: -1
         fsdp_config:
           wrap_policy:
             min_num_params: 0
@@ -127,7 +127,6 @@ trainer:
         kl_coef: 0.001
     trainer:
       balance_batch: true
-      total_training_steps: 1000
       resume_mode: auto
       resume_from_path: ''
       critic_warmup: 0
@@ -143,7 +142,6 @@ trainer:
         lr: 1.0e-05
         lr_warmup_steps_ratio: 0.0
         warmup_style: constant
-        total_training_steps: -1
       model:
         override_config: {}
         external_lib: null

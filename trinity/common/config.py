@@ -348,6 +348,10 @@ class TrainerInput:
     # Some auxiliary buffers to facilitate training (e.g., data mixing)
     auxiliary_buffers: Dict[str, StorageConfig] = field(default_factory=dict)
 
+    # ! Deprecated, keep for backward compatibility, do not use it in new code
+    sft_warmup_dataset: Optional[StorageConfig] = None
+    sft_warmup_steps: Optional[int] = None
+
 
 @dataclass
 class BufferConfig:
@@ -386,7 +390,7 @@ class ExplorerConfig:
         int
     ] = None  # the number of time to repeat each task in a single workflow runner (for GRPO-like algorithms)
 
-    runner_num: Optional[int] = None  # deprecated
+    runner_num: Optional[int] = None  # ! Deprecated
 
     # for inference models
     # for rollout model
@@ -408,6 +412,9 @@ class TrainerConfig:
     trainer_type: str = "verl"
     save_interval: int = 0
     enable_preview: bool = True  # enable rollout preview in wandb
+    total_steps: Optional[
+        int
+    ] = None  # total training steps, training stops when reaching this step, None means no limit
 
     # trainer configs
     actor_grad_clip: Optional[float] = None
@@ -538,7 +545,18 @@ class Config:
             OmegaConf.save(self, f)
 
     def _check_deprecated(self) -> None:
-        pass
+        if self.buffer.trainer_input.sft_warmup_steps is not None:
+            logger.warning(
+                "`buffer.trainer_input.sft_warmup_steps` is deprecated, SFT warmup related settings are moved to `stages`."
+            )
+        if self.buffer.trainer_input.sft_warmup_dataset is not None:
+            logger.warning(
+                "`buffer.trainer_input.sft_warmup_dataset` is deprecated, SFT warmup related settings are moved to `stages`."
+            )
+        if self.explorer.runner_num is not None:
+            logger.warning(
+                "`explorer.runner_num` is deprecated, please use `explorer.runner_per_model` instead."
+            )
 
     def _check_interval(self) -> None:
         assert self.synchronizer.sync_interval > 0

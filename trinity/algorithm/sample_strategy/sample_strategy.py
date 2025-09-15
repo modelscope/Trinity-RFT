@@ -45,10 +45,10 @@ class DefaultSampleStrategy(SampleStrategy):
 
     async def sample(self, step: int, **kwargs) -> Tuple[Any, Dict, List]:
         metrics = {}
-        with Timer(metrics, "read_time"):
+        with Timer(metrics, "time/read_experience"):
             exp_list = await self.exp_buffer.read_async()
             repr_samples = representative_sample(exp_list)
-        with Timer(metrics, "gather_time"):
+        with Timer(metrics, "time/gather_experience"):
             exps = Experiences.gather_experiences(exp_list, self.pad_token_id)  # type: ignore
         return exps, metrics, repr_samples
 

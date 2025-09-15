@@ -72,6 +72,7 @@ explorer:
 trainer:
   trainer_type: verl
   save_interval: 100
+  total_steps: 100
   enable_preview: true
   actor_grad_clip: 1.0
   trainer_config:
@@ -125,7 +126,6 @@ trainer:
         ulysses_sequence_parallel_size: 1
     trainer:
       balance_batch: true
-      total_training_steps: 100
       resume_mode: auto
       resume_from_path: ''
       default_hdfs_dir: null
