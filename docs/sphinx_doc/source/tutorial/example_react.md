@@ -107,18 +107,18 @@ synchronizer:
 >  - Commit: `ad13ed5dacecb79d20abf626769f8c7d7a7d2afb`
 >  - Branch: [`v0`](https://github.com/agentscope-ai/agentscope/tree/v0)
 
-2. Download the model you want to use, and fill in the configuration files in `examples/agentscope_tool_react/agentscope_tool_react_gsm8k.yaml` or `examples/agentscope_tool_react/agentscope_tool_react_dapo.yaml`
+2. Download the model you want to use, and fill in the configuration files in `examples/agentscope_tool_react/agentscopev0_tool_react_gsm8k.yaml` or `examples/agentscope_tool_react/agentscopev0_tool_react_dapo.yaml`
 
 3.  **Launch the training job**: Run the following command from the root directory of the repository.
 
     ```bash
-    trinity run --config examples/agentscope_tool_react/agentscope_tool_react_gsm8k.yaml
+    trinity run --config examples/agentscope_tool_react/agentscopev0_tool_react_gsm8k.yaml
     ```
 
     or
 
     ```bash
-    trinity run --config examples/agentscope_tool_react/agentscope_tool_react_dapo.yaml
+    trinity run --config examples/agentscope_tool_react/agentscopev0_tool_react_dapo.yaml
     ```
 
 
