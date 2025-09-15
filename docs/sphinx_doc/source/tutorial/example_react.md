@@ -134,7 +134,9 @@ We can also see that the model generally start to use more tool calls to solve t
 
 ![](../../assets/agentscope_dapo_turns.png)
 
+We can also update the agentscope version to v1, and training on the qwen3-4b-instrcut-2507
 
+![](../../assets/agentscope_dapo_qwen3-4B_reward.png)
 
 ## Summary
 

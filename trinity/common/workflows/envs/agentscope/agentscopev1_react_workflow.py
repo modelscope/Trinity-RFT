@@ -31,8 +31,8 @@ class AgentScopeReactMathWorkflow(Workflow):
         )
         # make sure that we have the correct import
         try:
-            from agentscope.model import OpenAIChatModel
             from agentscope.formatter import OpenAIChatFormatter
+            from agentscope.model import OpenAIChatModel
         except ImportError as e:
             error_message = f"AgentScope is not installed. Please install the agentscope framework first before running the workflow. Error: {str(e)}"
             self.logger.error(error_message)
@@ -51,7 +51,7 @@ class AgentScopeReactMathWorkflow(Workflow):
             generate_kwargs={
                 "temperature": temperature,
                 "max_tokens": max_tokens,
-            }
+            },
         )
         self.agent_model.client = self.openai_async_client
         self.agent_model_formatter = OpenAIChatFormatter()
@@ -107,7 +107,7 @@ You are an agent specialized in solving math problems with tools. Please solve t
     @property
     def repeatable(self):
         return False
-    
+
     @property
     def asynchronous(self):
         """Whether the workflow runs in async mode."""
@@ -128,8 +128,9 @@ You are an agent specialized in solving math problems with tools. Please solve t
 
         # Note that the main workflow can have arbitrary steps and include different logic
         class FinalResult(BaseModel):
-            result: str = Field(description="Your solution of the given math problem. Put your final answer in boxed format, e.g., \\boxed{42}")
-
+            result: str = Field(
+                description="Your solution of the given math problem. Put your final answer in boxed format, e.g., \\boxed{42}"
+            )
 
         def extract_final_answer(result) -> str:
             """Extract the final answer from the agent's response."""
