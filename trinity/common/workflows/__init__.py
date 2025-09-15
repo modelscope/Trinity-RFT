@@ -2,7 +2,7 @@
 """Workflow module"""
 from .customized_math_workflows import MathBoxedWorkflow
 from .customized_toolcall_workflows import ToolCallWorkflow
-from .envs.agentscope.agentscope_react_workflow import (  # will be deprecated soon
+from .envs.agentscope.agentscopev0_react_workflow import (  # will be deprecated soon
     AgentScopeV0ReactMathWorkflow,
 )
 from .envs.agentscope.agentscopev1_react_workflow import AgentScopeReactMathWorkflow
