@@ -1,10 +1,14 @@
 """Utils for ccompatibility issues with verl."""
 
+import os
+
 import numpy as np
 import torch
 from verl import DataProto
 from verl.trainer.ppo.metric_utils import _compute_response_info
+from verl.utils.checkpoint.checkpoint_manager import find_latest_ckpt_path
 
+from trinity.common.config import Config
 from trinity.common.experience import Experiences
 
 
@@ -162,3 +166,14 @@ def compute_data_metrics(batch: DataProto, use_critic: bool = False) -> dict:
         )
 
     return metrics
+
+
+def get_latest_hf_checkpoint_path(config: Config):
+    """Get the latest huggingface checkpoint path"""
+    if config.trainer.trainer_type != "verl":
+        raise ValueError("This function is only for verl trainer.")
+    checkpoint_dir = find_latest_ckpt_path(config.checkpoint_job_dir)
+    hf_checkpoint_dir = os.path.join(checkpoint_dir, "actor", "huggingface")
+    if not os.path.exists(hf_checkpoint_dir):
+        raise ValueError(f"No huggingface checkpoint found in {hf_checkpoint_dir}")
+    return hf_checkpoint_dir

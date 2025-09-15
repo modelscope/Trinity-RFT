@@ -1,4 +1,5 @@
 import math
+import sys
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
@@ -40,7 +41,7 @@ class Optim:
     lr_warmup_steps_ratio: float = 0.0
     min_lr_ratio: Optional[float] = 0.0
     warmup_style: str = "constant"
-    total_training_steps: int = -1
+    total_training_steps: int = -1  # ! DO NOT SET, use trainer.total_steps
     betas: List[float] = field(default_factory=lambda: [0.9, 0.999])
     optimizer: str = "adam"
     clip_grad: float = 1.0
@@ -292,7 +293,7 @@ class Algorithm:
 class Trainer:
     balance_batch: bool = True
     total_epochs: int = 30
-    total_training_steps: Optional[int] = None
+    total_training_steps: Optional[int] = None  # ! DO NOT SET, use trainer.total_steps
     project_name: str = ""
     group_name: str = ""
     experiment_name: str = ""
@@ -313,7 +314,6 @@ class Trainer:
     training_rollout_mode: str = "parallel"
     enable_exp_buffer: bool = True
     sync_freq: int = 0
-    sft_warmup_steps: int = 0
     max_actor_ckpt_to_keep: Optional[int] = None
     max_critic_ckpt_to_keep: Optional[int] = None
     device: str = "cuda"  # default to cuda
@@ -372,14 +372,13 @@ class veRLConfig:
             raise ValueError(
                 f"batch_size ({config.buffer.train_batch_size}) must be divisible by ({world_size})"
             )
-
+        self.trainer.total_training_steps = config.trainer.total_steps or sys.maxsize
         self.trainer.sync_freq = config.synchronizer.sync_interval
         self.trainer.save_freq = config.trainer.save_interval
         self.trainer.project_name = config.project
         self.trainer.group_name = config.group
         self.trainer.experiment_name = config.name
         self.trainer.default_local_dir = config.checkpoint_job_dir
-        self.trainer.sft_warmup_steps = config.buffer.trainer_input.sft_warmup_steps
         if not config.continue_from_checkpoint:
             self.trainer.resume_mode = "disable"
         else:
@@ -397,6 +396,7 @@ class veRLConfig:
         # Actor / Critic config
         self.actor_rollout_ref.model.path = config.model.model_path
         self.actor_rollout_ref.model.custom_chat_template = config.model.custom_chat_template
+        self.actor_rollout_ref.actor.optim.total_training_steps = self.trainer.total_training_steps
         self.critic.strategy = self.actor_rollout_ref.actor.strategy
         self.critic.model.path = config.model.critic_model_path
         self.critic.model.tokenizer_path = config.model.critic_model_path
@@ -407,6 +407,7 @@ class veRLConfig:
         self.actor_rollout_ref.rollout.n = config.algorithm.repeat_times
         self.critic.ppo_mini_batch_size = config.buffer.train_batch_size
         self.critic.rollout_n = self.actor_rollout_ref.rollout.n
+        self.critic.optim.total_training_steps = self.trainer.total_training_steps
 
         if config.trainer.actor_grad_clip is not None:
             self.actor_rollout_ref.actor.grad_clip = config.trainer.actor_grad_clip

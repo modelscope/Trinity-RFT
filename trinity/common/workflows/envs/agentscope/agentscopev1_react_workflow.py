@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""We include the agentscope react workflows in this file."""
+"""We include the customized math workflows in this file."""
 
 from typing import List, Optional
 
@@ -10,10 +10,11 @@ from trinity.common.rewards.math_reward import MathBoxedRewardFn
 from trinity.common.workflows.workflow import WORKFLOWS, Task, Workflow
 
 
-@WORKFLOWS.register_module("agentscope_reactv2_math_workflow")
-class AgentScopeReactV2MathWorkflow(Workflow):
+@WORKFLOWS.register_module("agentscope_react_math_workflow")
+class AgentScopeReactMathWorkflow(Workflow):
     """
     This workflow serves as an example of how to use the agentscope framework within the trinity workflow.
+    We use the AgentScope V1 version here.
     """
 
     def __init__(
@@ -23,50 +24,37 @@ class AgentScopeReactV2MathWorkflow(Workflow):
         model: ModelWrapper,
         auxiliary_models: Optional[List[openai.OpenAI]] = None,
     ):
+        super().__init__(
+            task=task,
+            model=model,
+            auxiliary_models=auxiliary_models,
+        )
         # make sure that we have the correct import
         try:
-            import agentscope
-            from agentscope.service import ServiceToolkit, execute_python_code
+            from agentscope.formatter import OpenAIChatFormatter
+            from agentscope.model import OpenAIChatModel
         except ImportError as e:
             error_message = f"AgentScope is not installed. Please install the agentscope framework first before running the workflow. Error: {str(e)}"
             self.logger.error(error_message)
             raise ImportError(error_message)
 
         # get openai client from model
-        self.openai_client = model.get_openai_client()
-        self.model_name = self.openai_client.model_path
-        super().__init__(
-            task=task,
-            model=model,
-            auxiliary_models=auxiliary_models,
-        )
+        self.openai_async_client = model.get_openai_async_client()
+        self.model_name = self.openai_async_client.model_path
 
         temperature = self.rollout_args.get("temperature", 1.0)
         max_tokens = self.rollout_args.get("max_tokens", 4096)
-
-        agentscope.init(
-            model_configs=[
-                {
-                    "model_type": "openai_chat",
-                    "config_name": "my_model",
-                    "model_name": self.model_name,
-                    "api_key": "EMPTY",
-                    "generate_args": {
-                        "temperature": temperature,
-                        "max_tokens": max_tokens,
-                    },
-                    "use_openai_formatter": True,
-                }
-            ],
-            disable_saving=True,
+        self.agent_model = OpenAIChatModel(
+            api_key="EMPTY",
+            model_name=self.model_name,
+            stream=False,
+            generate_kwargs={
+                "temperature": temperature,
+                "max_tokens": max_tokens,
+            },
         )
-        self.toolkit = ServiceToolkit()
-        self.toolkit.add(
-            execute_python_code,
-            timeout=300,
-            use_docker=False,
-            maximum_memory_bytes=None,
-        )
+        self.agent_model.client = self.openai_async_client
+        self.agent_model_formatter = OpenAIChatFormatter()
         self.reset(task)
 
     @property
@@ -78,21 +66,25 @@ class AgentScopeReactV2MathWorkflow(Workflow):
 You are an agent specialized in solving math problems with tools. Please solve the math problem given to you. You can write and execute Python code to perform calculation or verify your answer. You should return your final answer within \\boxed{{}}.
 """
         try:
-            from agentscope.agents import ReActAgentV2
+            from agentscope.agent import ReActAgent
+            from agentscope.memory import InMemoryMemory
+            from agentscope.tool import Toolkit, execute_python_code
         except ImportError as e:
             error_message = f"AgentScope is not installed. Please install the agentscope framework first before running the workflow. Error: {str(e)}"
             self.logger.error(error_message)
             raise ImportError(error_message)
-        self.agent = ReActAgentV2(
+        self.toolkit = Toolkit()
+        self.toolkit.register_tool_function(execute_python_code)
+        self.agent = ReActAgent(
             name="math_react_agent",
             sys_prompt=self.system_prompt,
-            model_config_name="my_model",  # replace by your model config name
-            service_toolkit=self.toolkit,
-            max_iters=5,
-            verbose=False,
+            model=self.agent_model,
+            formatter=self.agent_model_formatter,
+            toolkit=self.toolkit,
+            memory=InMemoryMemory(),
         )
         # we set the openai client to the agent's model
-        self.agent.model.client = self.openai_client
+        self.agent.model.client = self.openai_async_client
 
         self.raw_task = task.raw_task
         self.task_desc = task.task_desc
@@ -116,10 +108,16 @@ You are an agent specialized in solving math problems with tools. Please solve t
     def repeatable(self):
         return False
 
-    def run(self):
+    @property
+    def asynchronous(self):
+        """Whether the workflow runs in async mode."""
+        return True
+
+    async def run_async(self):
         # make sure that we have the correct import
         try:
             from agentscope.message import Msg
+            from pydantic import BaseModel, Field
         except ImportError as e:
             error_message = f"AgentScope is not installed. Please install the agentscope framework first before running the workflow. Error: {str(e)}"
             self.logger.error(error_message)
@@ -127,21 +125,36 @@ You are an agent specialized in solving math problems with tools. Please solve t
 
         # provide the task to the react agent
         msg = Msg("user", self.task_desc, role="user")
+
         # Note that the main workflow can have arbitrary steps and include different logic
-        content = self.agent.reply(msg).content
+        class FinalResult(BaseModel):
+            result: str = Field(
+                description="Your solution of the given math problem. Put your final answer in boxed format, e.g., \\boxed{42}"
+            )
 
-        # unify the response format to text
-        try:
-            if isinstance(content, list):
-                response_text = content[0]["text"]
-            else:
-                response_text = content
-        except Exception as e:
-            error_message = f"Error in processing the response: {e}"
-            self.logger.info(error_message)
-            response_text = str(content)
+        def extract_final_answer(result) -> str:
+            """Extract the final answer from the agent's response."""
+            try:
+                if (
+                    hasattr(result, "metadata")
+                    and isinstance(result.metadata, dict)
+                    and "result" in result.metadata
+                ):
+                    return result.metadata["result"]
+                if hasattr(result, "content"):
+                    if isinstance(result.content, dict) and "result" in result.content:
+                        return result.content["result"]
+                    return str(result.content)
+                return str(result)
+            except Exception as e:
+                self.logger.warning(f"Extract final answer error: {e}. Raw: {result}")
+                return str(result)
 
-        reward = self.reward_fn(response_text, self.answer)
+        result = await self.agent.reply(msg, structured_model=FinalResult)
+
+        final_answer = extract_final_answer(result)
+
+        reward = self.reward_fn(final_answer, self.answer)
         reward = sum(reward.values())
         self.logger.debug(f"Reward: {reward}")
         experiences = self.model.extract_experience_from_history(clear_history=True)
@@ -149,7 +162,7 @@ You are an agent specialized in solving math problems with tools. Please solve t
         for i, experience in enumerate(experiences):
             experience.eid.step = i
             experience.reward = reward
-            agent_metrics = {"react_memory_length": len(self.agent.memory.get_memory())}
+            agent_metrics = {"react_memory_length": len(self.agent.memory.content)}
             if experience.metrics is None:
                 experience.metrics = {}
             experience.metrics.update(agent_metrics)

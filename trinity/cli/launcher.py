@@ -17,8 +17,9 @@ from trinity.common.constants import (
     PLUGIN_DIRS_ENV_VAR,
 )
 from trinity.explorer.explorer import Explorer
+from trinity.manager.state_manager import StateManager
 from trinity.trainer.trainer import Trainer
-from trinity.utils.dlc_utils import setup_ray_cluster
+from trinity.utils.dlc_utils import is_running, setup_ray_cluster, stop_ray_cluster
 from trinity.utils.log import get_logger
 from trinity.utils.plugin_loader import load_plugins
 
@@ -124,35 +125,22 @@ def both(config: Config) -> None:
         logger.error(f"Explorer or Trainer failed:\n{traceback.format_exc()}")
 
 
-def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
-    if plugin_dir:
-        os.environ[PLUGIN_DIRS_ENV_VAR] = plugin_dir
-    load_plugins()
-    config = load_config(config_path)
-    config.check_and_update()
-    pprint(config)
-
+def run_stage(config: Config, ray_address: str) -> None:
     envs = {
         PLUGIN_DIRS_ENV_VAR: os.environ.get(PLUGIN_DIRS_ENV_VAR, ""),
         LOG_DIR_ENV_VAR: config.log.save_dir,
         LOG_LEVEL_ENV_VAR: config.log.level,
         LOG_NODE_IP_ENV_VAR: "1" if config.log.group_by_node else "0",
     }
-    if dlc:
-        setup_ray_cluster(namespace=config.ray_namespace, envs=envs)
-    else:
-        from trinity.utils.dlc_utils import is_running
-
-        if not is_running:
-            raise RuntimeError("Ray is not running, please start it by `ray start --head`.")
-        ray.init(
-            namespace=config.ray_namespace, ignore_reinit_error=True, runtime_env={"env_vars": envs}
-        )
-
-    # try to run task pipeline for raw data
-    check_and_run_task_pipeline(config)
-
+    ray.init(
+        address=ray_address,
+        ignore_reinit_error=True,
+        namespace=config.ray_namespace,
+        runtime_env={"env_vars": envs},
+    )
+    pprint(config)
     try:
+        check_and_run_task_pipeline(config)
         if config.mode == "explore":
             explore(config)
         elif config.mode == "train":
@@ -167,11 +155,64 @@ def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
             logger.info(f"Exporting Ray timeline to {timeline_file}...")
             ray.timeline(filename=timeline_file)
             logger.info("Done. You can open the timeline file in `chrome://tracing`")
+        ray.shutdown()
 
+
+def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
+    if plugin_dir:
+        os.environ[PLUGIN_DIRS_ENV_VAR] = plugin_dir
+    load_plugins()
+    config = load_config(config_path)
+
+    ray_address = "auto"
+
+    if dlc:
+        cluster_namespace = f"{config.project}-{config.name}"
+        ray_address = setup_ray_cluster(namespace=cluster_namespace)
+
+    if not is_running():
+        raise RuntimeError("Ray is not running, please start it by `ray start --head`.")
+
+    try:
+        from trinity.trainer.verl.utils import get_latest_hf_checkpoint_path
+
+        if config.stages:
+            state_manager = StateManager(
+                path=os.path.join(config.checkpoint_root_dir, config.project, config.name)
+            )
+            latest_stage = state_manager.load_stage().get("latest_stage", 0)
+            prev_stage_checkpoint = None
+            for i, stage_config in enumerate(config):
+                if i < latest_stage:
+                    logger.info(
+                        "===========================================================\n"
+                        f"> Skipping completed stage {i + 1}/{len(config.stages)}...\n"
+                        "==========================================================="
+                    )
+                else:
+                    logger.info(
+                        "===========================================================\n"
+                        f"> Starting stage {i + 1}/{len(config.stages)}...\n"
+                        "==========================================================="
+                    )
+                    state_manager.save_stage(i)
+                    if prev_stage_checkpoint is not None:
+                        stage_config.model.model_path = prev_stage_checkpoint
+                    stage_config.check_and_update()
+                    run_stage(stage_config, ray_address=ray_address)
+                    logger.info(
+                        "===========================================================\n"
+                        f"> Stage {i + 1}/{len(config.stages)} finished.\n"
+                        "==========================================================="
+                    )
+                prev_stage_checkpoint = get_latest_hf_checkpoint_path(stage_config)
+        else:
+            config.check_and_update()
+            run_stage(config, ray_address=ray_address)
+
+    finally:
         if dlc:
-            from trinity.utils.dlc_utils import stop_ray_cluster
-
-            stop_ray_cluster(namespace=config.ray_namespace)
+            stop_ray_cluster(namespace=cluster_namespace)
 
 
 def studio(port: int = 8501):

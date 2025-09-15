@@ -805,6 +805,7 @@ class ActorRolloutRefWorker(Worker):
         global_step=0,
         max_ckpt_to_keep=None,
         model_state_dict_only=False,
+        save_as_hf: bool = False,
     ):
         from verl.utils.logger import log_with_rank
 
@@ -820,6 +821,7 @@ class ActorRolloutRefWorker(Worker):
             global_step=global_step,
             max_ckpt_to_keep=max_ckpt_to_keep,
             model_state_dict_only=model_state_dict_only,
+            save_as_hf=save_as_hf,
         )
         dist.barrier()
 
@@ -1278,7 +1280,14 @@ class CriticWorker(Worker):
         return output
 
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
-    def save_checkpoint(self, local_path, hdfs_path=None, global_step=0, max_ckpt_to_keep=None):
+    def save_checkpoint(
+        self,
+        local_path,
+        hdfs_path=None,
+        global_step=0,
+        max_ckpt_to_keep=None,
+        save_as_hf: bool = False,
+    ):
         import torch
 
         if self._is_offload_param:
@@ -1289,6 +1298,7 @@ class CriticWorker(Worker):
             hdfs_path=hdfs_path,
             global_step=global_step,
             max_ckpt_to_keep=max_ckpt_to_keep,
+            save_as_hf=save_as_hf,
         )
 
         torch.distributed.barrier()

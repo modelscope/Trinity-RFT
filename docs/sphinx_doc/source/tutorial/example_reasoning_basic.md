@@ -167,6 +167,7 @@ trainer:
 ### Run the Experiment
 
 Run the RFT process with the following command:
+
 ```bash
 trinity run --config examples/grpo_gsm8k/gsm8k.yaml
 ```
@@ -175,23 +176,27 @@ trinity run --config examples/grpo_gsm8k/gsm8k.yaml
 
 ## Optional: RFT with SFT Warmup
 
-Before RFT, we may use SFT as a warmup step. We need to set `buffer.trainer_input.sft_warmup_steps > 0` and prepare the SFT data to `buffer.trainer_input.sft_warmup_dataset.path=$DATASET_PATH/{sft_data}`.
+Before RFT, we may use SFT as a warmup step. Trinity-RFT supports adding SFT warmup stage before RFT by setting `stages` in the config file. The `sft_warmup_dataset` specifies the dataset used for SFT warmup, and `sft_warmup_steps` specifies the number of training steps for SFT warmup.
 
 ```yaml
 # Properly add the following configs in gsm8k.yaml
-buffer:
-  trainer_input:
-    sft_warmup_dataset:
-      storage_type: file
-      path: <$DATASET_PATH/{sft_data}>
-      format:
-        prompt_type: <prompt_type> # messages/plaintext
-        prompt_key: <prompt_key>
-        response_key: <response_key>
-    sft_warmup_steps: 10
+stages:
+  - stage_name: sft_warmup
+    mode: train
+    algorithm:
+      algorithm_type: sft
+    buffer:
+      train_batch_size: 128
+      total_steps: 10
+      trainer_input:
+        experience_buffer:
+          name: sft_warmup_dataset
+          path: /PATH/TO/YOUR/SFT/DATASET
+  - stage_name: rft  # leave empty to use the original configs for RFT
 ```
 
 The following command runs SFT and RFT in sequence:
+
 ```bash
 trinity run --config examples/grpo_gsm8k/gsm8k.yaml
 ```

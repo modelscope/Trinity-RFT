@@ -34,6 +34,7 @@ synchronizer:
   sync_timeout: 1200
 trainer:
   save_interval: 30
+  total_steps: 200
   trainer_config:
     actor_rollout_ref:
       model:
@@ -48,7 +49,6 @@ trainer:
           lr_warmup_steps_ratio: 0.03  # the total steps will be injected during runtime
           min_lr_ratio: 0.1   # only useful for warmup with cosine
           warmup_style: cosine  # select from constant/cosine
-          total_training_steps: 200
           betas: [0.9, 0.95]
       ref:
         log_prob_micro_batch_size_per_gpu: 2

@@ -13,7 +13,6 @@ import pandas as pd
 import ray
 
 from trinity.algorithm import SAMPLE_STRATEGY
-from trinity.algorithm.utils import prefix_metrics
 from trinity.common.config import Config
 from trinity.common.constants import RunningStatus, SyncMethod, SyncStyle
 from trinity.common.experience import Experiences
@@ -22,6 +21,7 @@ from trinity.manager.synchronizer import Synchronizer
 from trinity.utils.log import get_logger
 from trinity.utils.monitor import MONITOR
 from trinity.utils.plugin_loader import load_plugins
+from trinity.utils.timer import Timer
 
 
 class Trainer:
@@ -33,7 +33,9 @@ class Trainer:
         load_plugins()
         self.synchronizer = Synchronizer.get_actor(config)
         self.engine = get_trainer_wrapper(config)
-        self.state = StateManager(config)
+        self.state = StateManager(
+            path=config.checkpoint_job_dir, trainer_name=config.trainer.name, config=config
+        )
         trainer_state = self.state.load_trainer()
         config.buffer.trainer_input.experience_buffer.index = trainer_state.get(
             "latest_exp_index", 0
@@ -51,67 +53,81 @@ class Trainer:
             buffer_config=config.buffer,
             **config.algorithm.sample_strategy_args,
         )
-        self.train_continue = True
+        self.save_interval = config.trainer.save_interval
         self.last_sync_step = None
+        self.total_steps = config.trainer.total_steps or float("inf")
 
-    def prepare(self) -> None:
+    async def prepare(self) -> None:
         """Prepare the trainer."""
         self.engine.prepare()
         self.last_trainer_sync_step = self.train_step_num
-        ray.get(self.synchronizer.set_trainer_status.remote(RunningStatus.RUNNING))
+        await self.synchronizer.set_trainer_status.remote(RunningStatus.RUNNING)
 
     async def train(self) -> str:
         """Train the model."""
-        while self.train_continue:
+        while self.train_step_num < self.total_steps:
             try:
-                train_task = asyncio.create_task(self.train_step())
-                while not train_task.done():
-                    if self.need_sync():
-                        self.sync_weight()
+                # sample may be blocked due to explorer does not generate enough data
+                self.logger.info(f"Sample data for step {self.train_step_num + 1} started.")
+                sample_task = asyncio.create_task(self._sample_data())
+                while not sample_task.done():
+                    # sync weight to make sure the explorer can continue to explore and generate enough data
+                    if await self.need_sync():
+                        # Currently, we do not record the metrics of sync_weight here
+                        await self.sync_weight()
                     await asyncio.sleep(1)
-                self.train_continue &= await train_task
-                if self.train_continue and self.need_sync():
-                    self.sync_weight()
+                exps, metrics, repr_samples = await sample_task
+                self.logger.info(f"Sample data for step {self.train_step_num + 1} finished.")
+                metrics.update(await self.train_step(exps))
+                if await self.need_sync():
+                    metrics.update(await self.sync_weight())
+                if self.need_save():
+                    metrics.update(self.save_checkpoint())
+                if self.config.trainer.enable_preview:
+                    self._log_experiences(repr_samples)
+                self.monitor.log(metrics, self.train_step_num)
+            except StopAsyncIteration:
+                self.logger.info("No more samples to train. Stopping training.")
+                break
             except Exception:
                 self.logger.error(f"Error in Trainer:\n{traceback.format_exc()}")
-                self.train_continue = False
+                break
 
-        self.save_checkpoint(block_until_saved=True)
+        self.save_checkpoint(block_until_saved=True, save_as_hf=True)
         await self.synchronizer.set_trainer_status.remote(RunningStatus.STOPPED)
         self.logger.info("--------------------\n> Trainer finished.\n--------------------")
         return self.config.trainer.name
 
-    async def train_step(self) -> bool:
+    async def train_step(self, exps: Experiences) -> Dict:
         """Train one step.
 
         Returns:
             bool: Whether to continue training.
+            Dict: Metrics of the training step.
         """
         self.logger.info(f"Training at step {self.train_step_num + 1} started.")
-        try:
-            batch, sample_metrics, repr_samples = await self.sample_strategy.sample(
+        metrics = {}
+        with Timer(metrics, "time/train_step"):
+            train_metrics = self.engine.train_step(exps)
+        self.logger.info(f"Training at step {self.train_step_num} finished.")
+        metrics.update(train_metrics)
+        return metrics
+
+    async def _sample_data(self) -> Tuple[Experiences, Dict, List[Dict]]:
+        """Sample a batch of experiences.
+
+        Returns:
+            Experiences: A batch of experiences.
+            Dict: Metrics of the sampling step.
+            List[Dict]: A list of representative samples for logging.
+        """
+        with Timer({}, "time/sample_data"):
+            batch, metrics, repr_samples = await self.sample_strategy.sample(
                 self.train_step_num + 1
             )
-        except StopAsyncIteration:
-            self.logger.info("No more samples to train. Stopping training.")
-            if (
-                self.config.trainer.save_interval == 0
-                or self.train_step_num % self.config.trainer.save_interval != 0
-            ):
-                self.logger.info(f"Saving at step {self.train_step_num}.")
-                self.save_checkpoint()
-                self.logger.info(f"Saved at step {self.train_step_num}.")
-            return False
-        self.logger.info(f"Sampling at step {self.train_step_num + 1} done.")
-        continue_run, metrics = self.engine.train_step(batch)
-        self.logger.info(f"Training at step {self.train_step_num} finished.")
-        prefix_metrics(sample_metrics, "sample", metrics)
-        self.monitor.log(data=metrics, step=self.train_step_num)
-        if self.config.trainer.enable_preview:
-            self._log_experiences(repr_samples)
-        return continue_run
+        return batch, metrics, repr_samples
 
-    def need_sync(self) -> bool:
+    async def need_sync(self) -> bool:
         """Whether to sync the model weight."""
         if self.config.synchronizer.sync_style == SyncStyle.FIXED:
             return (
@@ -122,32 +138,39 @@ class Trainer:
             if self.config.synchronizer.sync_style == SyncStyle.DYNAMIC_BY_TRAINER:
                 delta = self.train_step_num - self.last_trainer_sync_step
                 if delta >= self.config.synchronizer.sync_interval:
-                    ray.get(self.synchronizer.set_trainer_status.remote(RunningStatus.REQUIRE_SYNC))
-            explorer_status_counts = ray.get(self.synchronizer.get_explorer_status_counts.remote())
+                    await self.synchronizer.set_trainer_status.remote(RunningStatus.REQUIRE_SYNC)
+            explorer_status_counts = await self.synchronizer.get_explorer_status_counts.remote()
             if self.config.synchronizer.sync_method == SyncMethod.NCCL:
                 return explorer_status_counts[RunningStatus.WAITING_SYNC] > 0
             else:  # memory & checkpoint
                 return explorer_status_counts[RunningStatus.REQUIRE_SYNC] > 0
 
-    def sync_weight(self) -> None:
+    def need_save(self) -> bool:
+        """Whether to save the checkpoint."""
+        return self.save_interval > 0 and self.train_step_num % self.save_interval == 0
+
+    async def sync_weight(self) -> Dict:
         """Sync the model weight."""
         self.logger.info(f"Trainer synchronizing weights at step {self.train_step_num} starting..")
-        if self.config.synchronizer.sync_method == SyncMethod.NCCL:
-            result = ray.get(
-                self.synchronizer.ready_to_nccl_sync.remote("trainer", self.train_step_num)
-            )
-            if result is None:
-                self.logger.error("Trainer synchronizing weights failed.")
-            else:
-                self.engine.sync_weight()
-                self.last_trainer_sync_step = self.train_step_num
-        elif self.config.synchronizer.sync_method == SyncMethod.CHECKPOINT:
-            self.engine.save_state_dict()
-        elif self.config.synchronizer.sync_method == SyncMethod.MEMORY:
-            self.engine.upload_state_dict()
+        metrics = {}
+        with Timer(metrics, "time/sync_weight"):
+            if self.config.synchronizer.sync_method == SyncMethod.NCCL:
+                result = await self.synchronizer.ready_to_nccl_sync.remote(
+                    "trainer", self.train_step_num
+                )
+                if result is None:
+                    self.logger.error("Trainer synchronizing weights failed.")
+                else:
+                    self.engine.sync_weight()
+                    self.last_trainer_sync_step = self.train_step_num
+            elif self.config.synchronizer.sync_method == SyncMethod.CHECKPOINT:
+                self.engine.save_state_dict()
+            elif self.config.synchronizer.sync_method == SyncMethod.MEMORY:
+                self.engine.upload_state_dict()
+            self.last_sync_step = self.train_step_num
+            await self.synchronizer.set_trainer_status.remote(RunningStatus.RUNNING)
         self.logger.info(f"Trainer synchronizing weights at step {self.train_step_num} end.")
-        self.last_sync_step = self.train_step_num
-        ray.get(self.synchronizer.set_trainer_status.remote(RunningStatus.RUNNING))
+        return metrics
 
     def _log_experiences(self, samples: List[Dict]) -> None:
         self._sample_exps_to_log.extend(samples)
@@ -157,12 +180,17 @@ class Trainer:
             )
             self._sample_exps_to_log.clear()
 
-    def save_checkpoint(self, block_until_saved: bool = False) -> None:
-        self.engine.save_checkpoint(block_until_saved=block_until_saved)
-        self.state.save_trainer(
-            current_exp_index=self.engine.train_step_num * self.config.buffer.train_batch_size,
-            current_step=self.train_step_num,
-        )
+    def save_checkpoint(self, block_until_saved: bool = False, save_as_hf: bool = False) -> Dict:
+        metrics = {}
+        with Timer(metrics, "time/save_checkpoint"):
+            self.logger.info(f"Saving checkpoint at step {self.train_step_num}...")
+            self.engine.save_checkpoint(block_until_saved=block_until_saved, save_as_hf=save_as_hf)
+            self.state.save_trainer(
+                current_exp_index=self.engine.train_step_num * self.config.buffer.train_batch_size,
+                current_step=self.train_step_num,
+            )
+            self.logger.info(f"Checkpoint at step {self.train_step_num} saved.")
+        return metrics
 
     async def shutdown(self) -> None:
         self.monitor.close()
@@ -172,7 +200,7 @@ class Trainer:
         """Get the current training step number."""
         return self.engine.train_step_num
 
-    def is_alive(self) -> bool:
+    async def is_alive(self) -> bool:
         """Check if the trainer is alive."""
         return True
 
@@ -199,19 +227,18 @@ class TrainEngineWrapper(ABC):
         """Get the current training step number."""
 
     @abstractmethod
-    def train_step(self, batch: Experiences) -> Tuple[bool, Dict]:
+    def train_step(self, batch: Experiences) -> Dict:
         """Training one step.
 
         Args:
             batch (Experiences): A batch of experiences to train.
 
         Returns:
-            bool: Whether to continue training.
             Dict: Metrics of the training step.
         """
 
     @abstractmethod
-    def save_checkpoint(self, block_until_saved: bool = False) -> None:
+    def save_checkpoint(self, block_until_saved: bool = False, save_as_hf: bool = False) -> None:
         """Save the checkpoint."""
 
     @abstractmethod

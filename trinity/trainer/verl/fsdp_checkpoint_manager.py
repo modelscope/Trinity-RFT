@@ -122,6 +122,7 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
         global_step: int = 0,
         max_ckpt_to_keep: Optional[int] = None,
         model_state_dict_only: bool = False,
+        save_as_hf: bool = False,
     ):
         """
         Modified from verl.utils.checkpoint.fsdp_checkpoint_manager.py:save_checkpoint
@@ -139,6 +140,7 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
             global_step (int): Current training step.
             max_ckpt_to_keep (int, optional): Maximum number of checkpoints to keep locally.
             model_state_dict_only (bool): Whether to only save the model state dict (no optimizer, etc.).
+            save_as_hf (bool): Whether to force save the model in Hugging Face format.
         """
         if global_step == 0 and model_state_dict_only:
             self._upload_state_dict(None, global_step)
@@ -303,7 +305,7 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
         # wait for everyone to dump to local
         torch.distributed.barrier()
 
-        if self.should_save_hf_model and not model_state_dict_only:
+        if (self.should_save_hf_model and not model_state_dict_only) or save_as_hf:
             # Only rank 0 will save hf model and,
             # offload to cpu to save LLMs which may be too large to fit in one GPU
             state_dict = get_fsdp_full_state_dict(self.model, offload_to_cpu=True, rank0_only=True)

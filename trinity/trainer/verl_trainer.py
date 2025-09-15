@@ -5,7 +5,7 @@ Modified from verl/trainer/ppo/ray_trainer.py
 """
 import os
 import sys
-from typing import Dict, Tuple
+from typing import Dict
 
 import ray
 import torch
@@ -22,49 +22,20 @@ from verl.trainer.ppo.ray_trainer import (
     ResourcePoolManager,
     Role,
     create_colocated_worker_cls,
-    find_latest_ckpt_path,
 )
 from verl.utils import hf_processor, hf_tokenizer
+from verl.utils.checkpoint.checkpoint_manager import find_latest_ckpt_path
 from verl.utils.debug import marked_timer
 from verl.utils.fs import copy_local_path_from_hdfs
 
 from trinity.algorithm import ADVANTAGE_FN, KL_FN, SAMPLE_STRATEGY
-from trinity.algorithm.algorithm import ALGORITHM_TYPE, SFTAlgorithm
-from trinity.algorithm.algorithm_manager import AlgorithmManager
+from trinity.algorithm.algorithm import ALGORITHM_TYPE
 from trinity.algorithm.utils import prefix_metrics
 from trinity.common.config import Config
 from trinity.common.experience import Experiences
 from trinity.trainer.trainer import TrainEngineWrapper
 from trinity.trainer.verl.utils import compute_data_metrics, to_data_proto
 from trinity.utils.log import get_logger
-
-
-class _InternalDataLoader:
-    def __init__(self, config):
-        self.config = config
-        self.dataset = None
-        self.index = 0
-        self.experience_buffer = None
-
-    def state_dict(self):
-        return None
-
-    def load_state_dict(self, *args, **kwargs):
-        pass
-
-    def __getstate__(self):
-        state = self.__dict__.copy()
-        return state
-
-    def __setstate__(self, state):
-        self.__dict__.update(state)
-
-    def __iter__(self):
-        self.index = 0
-        return self
-
-    def __next__(self):
-        raise StopIteration
 
 
 class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
@@ -74,6 +45,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         self,
         global_config: Config,
     ):
+        self.logger = get_logger(__name__, in_ray_actor=True)
         train_config = global_config.trainer
         config = OmegaConf.structured(train_config.trainer_config)
         # download the checkpoint from hdfs
@@ -130,12 +102,10 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             resource_pool_spec=resource_pool_spec, mapping=mapping
         )
         self.algorithm_config = global_config.algorithm
-        self.algorithm = None
-        self.algorithm_manager = AlgorithmManager(global_config)
 
         # specify advantage function for various rft algorithms
-        algorithm = ALGORITHM_TYPE.get(self.algorithm_config.algorithm_type)
-        if algorithm.compute_advantage_in_trainer:
+        self.algorithm = ALGORITHM_TYPE.get(self.algorithm_config.algorithm_type)
+        if self.algorithm.compute_advantage_in_trainer:
             self.advantage_fn = ADVANTAGE_FN.get(self.algorithm_config.advantage_fn)(
                 **self.algorithm_config.advantage_fn_args
             )
@@ -156,7 +126,6 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             processor=processor,
         )
         self.init_workers()
-        self.logger = get_logger(__name__, in_ray_actor=True)
         self.last_full_save_step = None
 
     def _validate_config(self):  # TODO
@@ -264,6 +233,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
 
     def prepare(self):
         self.actor_rollout_wg.setup_weight_sync_group()
+        self.actor_rollout_wg.set_algorithm(self.algorithm_config)
 
         # The global step counter, initialized to 0
         # It represents the total number of training steps completed so far
@@ -274,8 +244,8 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         self._load_checkpoint()
 
     def _create_dataloader(self, train_dataset, val_dataset, collate_fn, train_sampler):
-        self.train_dataloader = _InternalDataLoader(self.config)
-        # TODO: compute total training steps
+        # Do not use verl's dataloader
+        self.train_dataloader = None
         self.total_training_steps = self.config.trainer.total_training_steps or sys.maxsize
         self.config.actor_rollout_ref.actor.optim.total_training_steps = self.total_training_steps
         self.config.critic.optim.total_training_steps = self.total_training_steps
@@ -298,19 +268,12 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
     def upload_state_dict(self):  # state dict sync
         self.actor_rollout_wg.upload_state_dict(self.global_steps)
 
-    def train_step(self, batch: Experiences) -> Tuple[bool, Dict]:  # noqa C901
+    def train_step(self, batch: Experiences) -> Dict:  # noqa C901
         batch = to_data_proto(batch)
         batch = self.post_process_batch(batch)
         metrics = {}
         self.global_steps += 1
         timing_raw = {}
-        algorithm_config = self.algorithm_manager.get_current_algorithm_config(self.global_steps)
-        algorithm = ALGORITHM_TYPE.get(algorithm_config.algorithm_type)
-        if self.algorithm != algorithm:
-            self.actor_rollout_wg.set_algorithm(algorithm_config)
-            if self.algorithm == SFTAlgorithm:
-                self.sft_to_rft()
-            self.algorithm = algorithm
 
         with marked_timer("step", timing_raw):
             batch.meta_info["temperature"] = self.config.actor_rollout_ref.rollout.temperature
@@ -369,76 +332,134 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             compute_throughout_metrics(batch=batch, timing_raw=timing_raw, n_gpus=n_gpus)
         )
 
-        train_status = self.global_steps < self.total_training_steps
-        if (
-            not train_status
-            or self.algorithm_manager.need_save(self.global_steps)
-            or (
-                self.config.trainer.save_freq > 0
-                and self.global_steps % self.config.trainer.save_freq == 0
-            )
-        ):
-            self.logger.info(f"Saving at step {self.global_steps}.")
-            with marked_timer("save_checkpoint", timing_raw):
-                self.save_checkpoint()
-            self.logger.info(f"Saved at step {self.global_steps}.")
-        return train_status, metrics
+        return metrics
 
-    def save_checkpoint(self, block_until_saved: bool = False) -> None:
+    def save_checkpoint(self, block_until_saved: bool = False, save_as_hf: bool = False) -> None:
         if self.last_full_save_step != self.global_steps:
             self.last_full_save_step = self.global_steps
-            self._save_checkpoint()
+            self._save_checkpoint(save_as_hf=save_as_hf)
         if block_until_saved:
             self.actor_rollout_wg.wait_on_save_thread()
             if self.algorithm and self.algorithm.use_critic:
                 self.critic_wg.wait_on_save_thread()
 
-    def sync_weight(self) -> None:
-        self.actor_rollout_wg.sync_weight()
+    def _save_checkpoint(self, save_as_hf: bool = False):
+        # path: given_path + `/global_step_{global_steps}` + `/actor`
+        local_global_step_folder = os.path.join(
+            self.config.trainer.default_local_dir, f"global_step_{self.global_steps}"
+        )
 
-    def sft_to_rft(self) -> None:
-        # load from hdfs
-        if self.config.trainer.default_hdfs_dir is not None:
-            raise NotImplementedError("load from hdfs is not implemented yet")
-        else:
-            checkpoint_folder = self.config.trainer.default_local_dir  # TODO: check path
-            if not os.path.isabs(checkpoint_folder):
-                working_dir = os.getcwd()
-                checkpoint_folder = os.path.join(working_dir, checkpoint_folder)
-            global_step_folder = find_latest_ckpt_path(checkpoint_folder)  # None if no latest
+        self.logger.info(f"local_global_step_folder: {local_global_step_folder}")
+        actor_local_path = os.path.join(local_global_step_folder, "actor")
+
+        actor_remote_path = (
+            None
+            if self.config.trainer.default_hdfs_dir is None
+            else os.path.join(
+                self.config.trainer.default_hdfs_dir, f"global_step_{self.global_steps}", "actor"
+            )
+        )
+
+        remove_previous_ckpt_in_save = self.config.trainer.get(
+            "remove_previous_ckpt_in_save", False
+        )
+        if remove_previous_ckpt_in_save:
+            self.logger.warning(
+                "Warning: remove_previous_ckpt_in_save is deprecated,"
+                + " set max_actor_ckpt_to_keep=1 and max_critic_ckpt_to_keep=1 instead"
+            )
+        max_actor_ckpt_to_keep = (
+            self.config.trainer.get("max_actor_ckpt_to_keep", None)
+            if not remove_previous_ckpt_in_save
+            else 1
+        )
+        max_critic_ckpt_to_keep = (
+            self.config.trainer.get("max_critic_ckpt_to_keep", None)
+            if not remove_previous_ckpt_in_save
+            else 1
+        )
+
+        self.actor_rollout_wg.save_checkpoint(
+            actor_local_path,
+            actor_remote_path,
+            self.global_steps,
+            max_ckpt_to_keep=max_actor_ckpt_to_keep,
+            save_as_hf=save_as_hf,
+        )
+
+        if self.use_critic:
+            critic_local_path = os.path.join(local_global_step_folder, "critic")
+            critic_remote_path = (
+                None
+                if self.config.trainer.default_hdfs_dir is None
+                else os.path.join(
+                    self.config.trainer.default_hdfs_dir,
+                    f"global_step_{self.global_steps}",
+                    "critic",
+                )
+            )
+            self.critic_wg.save_checkpoint(
+                critic_local_path,
+                critic_remote_path,
+                self.global_steps,
+                max_ckpt_to_keep=max_critic_ckpt_to_keep,
+            )
+
+        # latest checkpointed iteration tracker (for atomic usage)
+        local_latest_checkpointed_iteration = os.path.join(
+            self.config.trainer.default_local_dir, "latest_checkpointed_iteration.txt"
+        )
+        with open(local_latest_checkpointed_iteration, "w") as f:
+            f.write(str(self.global_steps))
+
+    def _load_checkpoint(self):
+        if self.config.trainer.resume_mode == "disable":
+            return 0
+
+        checkpoint_folder = self.config.trainer.default_local_dir  # TODO: check path
+        if not os.path.isabs(checkpoint_folder):
+            working_dir = os.getcwd()
+            checkpoint_folder = os.path.join(working_dir, checkpoint_folder)
+        global_step_folder = find_latest_ckpt_path(checkpoint_folder)  # None if no latest
 
         # find global_step_folder
-        self.actor_rollout_wg.wait_on_save_thread()
         if self.config.trainer.resume_mode == "auto":
             if global_step_folder is None:
                 self.logger.info("Training from scratch")
-                return
+                return 0
         else:
-            if not (self.config.trainer.resume_from_path and global_step_folder is not None):
+            if self.config.trainer.resume_mode == "resume_path":
                 assert isinstance(
-                    self.config.trainer.resume_mode, str
+                    self.config.trainer.resume_from_path, str
                 ), "resume ckpt must be str type"
                 assert (
-                    "global_step_" in self.config.trainer.resume_mode
+                    "global_step_" in self.config.trainer.resume_from_path
                 ), "resume ckpt must specify the global_steps"
-                global_step_folder = self.config.trainer.resume_mode
+                global_step_folder = self.config.trainer.resume_from_path
                 if not os.path.isabs(global_step_folder):
                     working_dir = os.getcwd()
                     global_step_folder = os.path.join(working_dir, global_step_folder)
         self.logger.info(f"Load from checkpoint folder: {global_step_folder}")
         # set global step
-        global_steps = int(global_step_folder.split("global_step_")[-1])
-        assert self.global_steps == global_steps + 1
+        self.global_steps = int(global_step_folder.split("global_step_")[-1])
 
+        self.logger.info(f"Setting global step to {self.global_steps}")
         self.logger.info(f"Resuming from {global_step_folder}")
 
         actor_path = os.path.join(global_step_folder, "actor")
-        self.logger.info(f"Loading actor from {actor_path} to ref_policy_wg")
-        self.ref_policy_wg.load_checkpoint(actor_path, del_local_after_load=False)
-        self.actor_rollout_wg.clear_optimizer_state()
+        critic_path = os.path.join(global_step_folder, "critic")
+        # load actor
+        self.actor_rollout_wg.load_checkpoint(
+            actor_path, del_local_after_load=self.config.trainer.del_local_ckpt_after_load
+        )
+        # load critic
         if self.use_critic:
-            self.critic_wg.clear_optimizer_state()
-        self.logger.info("sft to rft finished")
+            self.critic_wg.load_checkpoint(
+                critic_path, del_local_after_load=self.config.trainer.del_local_ckpt_after_load
+            )
+
+    def sync_weight(self) -> None:
+        self.actor_rollout_wg.sync_weight()
 
     def post_process_batch(self, batch: DataProto) -> DataProto:
         """Adapted from verl/utils/dataset/rl_dataset.py"""

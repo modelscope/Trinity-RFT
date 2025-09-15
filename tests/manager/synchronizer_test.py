@@ -9,7 +9,7 @@ import time
 import unittest
 from copy import deepcopy
 from datetime import datetime
-from typing import List
+from typing import Dict, List
 
 import ray
 from parameterized import parameterized_class
@@ -34,18 +34,25 @@ CHECKPOINT_ROOT_DIR = os.path.join(os.path.dirname(__file__), "temp_checkpoint_d
 
 
 def trainer_monkey_patch(config: Config, max_steps: int, intervals: List[int]):
-    async def new_train_step(self):
+    async def new_sample_data(self):
+        self.logger.info(f"Sample data for step {self.train_step_num + 1} started.")
+        await asyncio.sleep(0.1)
+        time.sleep(intervals[self.engine.global_steps - 1])
+        self.logger.info(f"Sample data for step {self.train_step_num + 1} finished.")
+        return [], {}, []
+
+    async def new_train_step(self, exps) -> Dict:
         self.engine.algorithm = ALGORITHM_TYPE.get(config.algorithm.algorithm_type)
         self.engine.global_steps += 1
         self.logger.info(f"Training at step {self.engine.global_steps} started.")
         await asyncio.sleep(0.1)
         time.sleep(intervals[self.engine.global_steps - 1])
         metrics = {"actor/step": self.engine.global_steps}
-        self.monitor.log(data=metrics, step=self.engine.global_steps)
         self.logger.info(f"Training at step {self.engine.global_steps} finished.")
-        return self.engine.global_steps < max_steps
+        return metrics
 
     Trainer.train_step = new_train_step
+    Trainer._sample_data = new_sample_data
 
 
 def explorer_monkey_patch(config: Config, max_steps: int, intervals: List[int]):
@@ -248,6 +255,7 @@ class TestStateDictBasedSynchronizer(BaseTestSynchronizer):
         config.synchronizer.sync_style = self.sync_style
         config.synchronizer.sync_interval = 2
         config.trainer.save_interval = 100
+        config.trainer.total_steps = self.max_steps
         config.monitor.monitor_type = "tensorboard"
         trainer_config = deepcopy(config)
         trainer_config.mode = "train"
@@ -337,6 +345,7 @@ class TestNCCLBasedSynchronizer(BaseTestSynchronizer):
         config.checkpoint_root_dir = get_checkpoint_path()
         config.buffer.total_epochs = 1
         config.buffer.batch_size = 4
+        config.trainer.total_steps = self.max_steps
         config.model.model_path = get_model_path()
         config.buffer.explorer_input.taskset = get_unittest_dataset_config("countdown")
         config.buffer.trainer_input.experience_buffer = StorageConfig(

@@ -45,6 +45,9 @@ def get_logger(
     """
     Get a logger instance, compatible with Ray Actor and standard usage.
 
+    In most cases, DO NOT USE this function in file-level scope, because the logger
+    instance will be created at import time, which will cause issues when used in Ray actors.
+
     Args:
         name (Optional[str]): The name of the logger. If None, uses 'trinity'.
         level (Optional[int]): The logging level. If None, uses LOG_LEVEL_ENV_VAR or INFO.
