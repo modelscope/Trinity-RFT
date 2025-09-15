@@ -5,7 +5,7 @@ from __future__ import annotations
 import pickle
 import uuid
 from dataclasses import asdict, dataclass, field, fields
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional, Union
 
 import torch
 from datasets import Dataset
@@ -22,10 +22,10 @@ class EID:
     # TODO: do we need to add project/name here to make it unique across different projects?
     # Batch number, e.g., the explorer step num
     # Automatically set by the workflow runner
-    batch: int = 0
+    batch: Union[int, str] = ""
     # Task number, e.g., the task sequence in the batch, the first task in the batch has task=0
     # Automatically set by the workflow runner
-    task: int = 0
+    task: Union[int, str] = ""
     # Run id, e.g., the first run in the task has run=0
     # User should set this field in custom workflows when creating experiences
     run: int = 0

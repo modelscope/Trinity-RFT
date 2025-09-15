@@ -4,8 +4,6 @@ This example shows a toy implementation of ART's [RULER](https://art.openpipe.ai
 
 RULER (Relative Universal LLM-Elicited Rewards) is a general-purpose reward function that uses an LLM-as-judge to rank the rollouts for a given task.
 
-https://github.com/OpenPipe/ART/blob/main/src/art/rewards/ruler.py
-
 
 ## Configurations and Metrics
 

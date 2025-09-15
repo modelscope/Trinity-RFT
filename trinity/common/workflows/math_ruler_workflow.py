@@ -120,7 +120,7 @@ Below is a question and several candidate solutions.
 Please assign a score within the range [0, 1] for each of them, reflecting how well they solve the question.
 You may compare them against each other and think step by step before returning your final scores, but keep your reasoning process brief and concise when possible.
 
-Conclude your response with a list of scores, in the following format: [score for solution 1, score for solution 2, ..., score for solution {num_responses + 1}]
+Conclude your response with a list of scores, in the following format: [score for solution 1, score for solution 2, ..., score for solution {num_responses}]
 """
 
         # Step 2: invoke judger LLM
@@ -145,6 +145,11 @@ Conclude your response with a list of scores, in the following format: [score fo
         try:
             scores = ast.literal_eval(lst_as_str)
             scores = [max(0.0, min(1.0, score)) for score in scores]  # clip to range [0, 1]
+            if len(scores) != num_responses:
+                self.logger.warning(
+                    "The length of list in judger response does not match num_responses."
+                )
+                return False, [0.0 for _ in range(num_responses)]
             return True, scores
         except Exception:
             self.logger.warning(
