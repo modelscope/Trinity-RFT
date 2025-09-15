@@ -60,7 +60,9 @@ class SimpleMMWorkflow(SimpleWorkflow):
         # TODO: test generate_mm
         self.logger.debug("start chat")
         if self.raw_mm_data:
-            responses = await self.model.chat_mm_async(messages, self.raw_mm_data, **self.rollout_args)
+            responses = await self.model.chat_mm_async(
+                messages, self.raw_mm_data, **self.rollout_args
+            )
         else:
             responses = await self.model.chat_async(messages, **self.rollout_args)
         for i, response in enumerate(responses):

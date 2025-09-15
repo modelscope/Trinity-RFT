@@ -224,9 +224,9 @@ def set_default_workflow_type(**kwargs):
     st.selectbox(
         "Default Workflow Type :orange-badge[(Needs review)]",
         WORKFLOWS.modules.keys(),
-        help=r"""`simple_workflow`: call 'model.chat()' to get responses.
+        help=r"""`simple_workflow`: call 'model.chat_async()' to get responses.
 
-`math_workflow`: call 'model.chat()' with a pre-defined system prompt to get responses.
+`math_workflow`: call 'model.chat_async()' with a pre-defined system prompt to get responses.
 
 Other workflows: conduct multi-turn task for the given dataset.
 """,
@@ -239,9 +239,9 @@ def set_default_eval_workflow_type(**kwargs):
     st.selectbox(
         "Default Eval Workflow Type :orange-badge[(Needs review)]",
         WORKFLOWS.modules.keys(),
-        help=r"""`simple_workflow`: call 'model.chat()' to get responses.
+        help=r"""`simple_workflow`: call 'model.chat_async()' to get responses.
 
-`math_workflow`: call 'model.chat()' with a pre-defined system prompt to get responses.
+`math_workflow`: call 'model.chat_async()' with a pre-defined system prompt to get responses.
 
 Other workflows: conduct multi-turn task for the given dataset.
 """,
