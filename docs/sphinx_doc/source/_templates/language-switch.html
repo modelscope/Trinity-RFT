@@ -14,7 +14,7 @@
   else              { lab.textContent = 'EN'; btn.title = 'Switch to English'; }
 
   var targetHref = (function(){
-    if (!m) return location.href; 
+    if (!m) return location.href;
     var other = (cur === 'en') ? 'zh' : 'en';
     return m[1] + other + m[3] + (location.search || '') + (location.hash || '');
   })();
