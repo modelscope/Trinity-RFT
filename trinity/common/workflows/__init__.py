@@ -6,7 +6,9 @@ from .envs.agentscope.agentscopev0_react_workflow import (  # will be deprecated
     AgentScopeV0ReactMathWorkflow,
 )
 from .envs.agentscope.agentscopev1_react_workflow import AgentScopeReactMathWorkflow
-from .envs.agentscope.agentscopev1_search_workflow import AgentScopeV1ReactSearchWorkflow
+from .envs.agentscope.agentscopev1_search_workflow import (
+    AgentScopeV1ReactSearchWorkflow,
+)
 from .envs.alfworld.alfworld_workflow import AlfworldWorkflow, StepWiseAlfworldWorkflow
 from .envs.alfworld.RAFT_alfworld_workflow import RAFTAlfworldWorkflow
 from .envs.alfworld.RAFT_reflect_alfworld_workflow import RAFTReflectAlfworldWorkflow
