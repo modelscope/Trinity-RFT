@@ -120,7 +120,7 @@ class AlfworldWorkflow(MultiTurnWorkflow):
         return responses
 
     async def get_model_response_text(self, messages):
-        return await self.get_model_response(messages)[0].response_text
+        return (await self.get_model_response(messages))[0].response_text
 
     async def generate_env_inference_samples(self, env, rollout_num) -> List[Experience]:
         # TODO: Make this parallel

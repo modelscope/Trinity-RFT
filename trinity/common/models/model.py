@@ -168,7 +168,7 @@ class ModelWrapper:
         return ray.get(self.model.get_model_version.remote())
 
     @property
-    async def model_version_async(self) -> ray.ObjectRef:
+    async def model_version_async(self) -> int:
         """Get the version of the model."""
         return await self.model.get_model_version.remote()
 
