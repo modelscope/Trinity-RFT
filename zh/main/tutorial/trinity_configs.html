@@ -571,20 +571,20 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">全局配置</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">算法配置</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">监控配置</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">模型配置</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">集群配置</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">缓冲区配置</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#model">Model 配置</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cluster">Cluster 配置</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#buffer">Buffer 配置</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#explorer">Explorer 输入</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trainer">Trainer 输入</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">Explorer 配置</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">Explorer 配置</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#synchronizer">Synchronizer 配置</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id10">Trainer 配置</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id11">服务配置</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">Trainer 配置</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">服务配置</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dataprocessor">DataProcessor 配置</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id12">日志配置</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id13">阶段配置</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">日志配置</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id10">阶段配置</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#verl-trainer">veRL Trainer 配置（高级）</a></li>
 </ul>
             </nav>
@@ -750,27 +750,35 @@ document.write(`
 </ul>
 </section>
 <hr class="docutils" />
-<section id="id6">
-<h2>模型配置<a class="headerlink" href="#id6" title="Link to this heading">#</a></h2>
+<section id="model">
+<h2>Model 配置<a class="headerlink" href="#model" title="Link to this heading">#</a></h2>
 <p>定义模型路径和 token 限制。</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">model_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${oc.env:MODEL_PATH}</span><span class="w">  </span><span class="c1"># MODEL_PATH 是预先设置的环境变量</span>
 <span class="w">  </span><span class="nt">critic_model_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${model.model_path}</span><span class="w">  </span><span class="c1"># 使用 model.model_path 的值</span>
-<span class="w">  </span><span class="nt">max_response_tokens</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16384</span>
 <span class="w">  </span><span class="nt">max_model_len</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20480</span>
+<span class="w">  </span><span class="nt">max_prompt_tokens</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4096</span>
+<span class="w">  </span><span class="nt">max_response_tokens</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16384</span>
+<span class="w">  </span><span class="nt">min_response_tokens</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 </pre></div>
 </div>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">model_path</span></code>: 被训练模型的路径。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">critic_model_path</span></code>: 可选的独立 critic 模型路径。若为空，则默认为 <code class="docutils literal notranslate"><span class="pre">model_path</span></code>。</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">max_response_tokens</span></code>: 模型生成的回复中允许的最大 token 数。</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">max_model_len</span></code>: 序列中最大 token 数。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_model_len</span></code>: 该模型所支持的单个序列最大 token 数。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_prompt_tokens</span></code>: 输入 prompt 中允许的最大 token 数。仅对 <code class="docutils literal notranslate"><span class="pre">InferenceModel</span></code> 中的 <code class="docutils literal notranslate"><span class="pre">chat</span></code> 和 <code class="docutils literal notranslate"><span class="pre">generate</span></code> 方法生效。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_response_tokens</span></code>: 模型生成的回复中允许的最大 token 数。仅对 <code class="docutils literal notranslate"><span class="pre">InferenceModel</span></code> 中的 <code class="docutils literal notranslate"><span class="pre">chat</span></code> 和 <code class="docutils literal notranslate"><span class="pre">generate</span></code> 方法生效。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">min_response_tokens</span></code>: 模型生成的回复中允许的最小 token 数。仅对 <code class="docutils literal notranslate"><span class="pre">InferenceModel</span></code> 中的 <code class="docutils literal notranslate"><span class="pre">chat</span></code> 和 <code class="docutils literal notranslate"><span class="pre">generate</span></code> 方法生效。</p></li>
 </ul>
+<div class="admonition tip">
+<p class="admonition-title">小技巧</p>
+<p>如果使用的是 Explorer 提供的 openai API，则只有 <code class="docutils literal notranslate"><span class="pre">max_model_len</span></code> 会生效，而 <code class="docutils literal notranslate"><span class="pre">max_response_tokens</span></code>、<code class="docutils literal notranslate"><span class="pre">max_prompt_tokens</span></code> 和 <code class="docutils literal notranslate"><span class="pre">min_response_tokens</span></code> 的值将被忽略，在没有独立指定 <code class="docutils literal notranslate"><span class="pre">max_tokens</span></code> 时，每次 API 调用将生成最多 <code class="docutils literal notranslate"><span class="pre">max_model_len</span> <span class="pre">-</span> <span class="pre">prompt_length</span></code> 个 token，因此在使用时请确保 prompt 长度小于 <code class="docutils literal notranslate"><span class="pre">max_model_len</span></code>。</p>
+</div>
 </section>
 <hr class="docutils" />
-<section id="id7">
-<h2>集群配置<a class="headerlink" href="#id7" title="Link to this heading">#</a></h2>
-<p>定义使用的节点数和每节点的 GPU 数。</p>
+<section id="cluster">
+<h2>Cluster 配置<a class="headerlink" href="#cluster" title="Link to this heading">#</a></h2>
+<p>定义使用的集群包含的节点数和每节点的 GPU 数。</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">cluster</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">node_num</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="w">  </span><span class="nt">gpu_per_node</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
@@ -782,8 +790,8 @@ document.write(`
 </ul>
 </section>
 <hr class="docutils" />
-<section id="id8">
-<h2>缓冲区配置<a class="headerlink" href="#id8" title="Link to this heading">#</a></h2>
+<section id="buffer">
+<h2>Buffer 配置<a class="headerlink" href="#buffer" title="Link to this heading">#</a></h2>
 <p>配置 explorer 和 trainer 使用的数据缓冲区（Buffer）。</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">buffer</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32</span>
@@ -955,8 +963,8 @@ document.write(`
 </section>
 </section>
 <hr class="docutils" />
-<section id="id9">
-<h2>Explorer 配置<a class="headerlink" href="#id9" title="Link to this heading">#</a></h2>
+<section id="id6">
+<h2>Explorer 配置<a class="headerlink" href="#id6" title="Link to this heading">#</a></h2>
 <p>控制 rollout 模型和工作流执行。</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">explorer</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">explorer</span>
@@ -1015,8 +1023,8 @@ document.write(`
 </ul>
 </section>
 <hr class="docutils" />
-<section id="id10">
-<h2>Trainer 配置<a class="headerlink" href="#id10" title="Link to this heading">#</a></h2>
+<section id="id7">
+<h2>Trainer 配置<a class="headerlink" href="#id7" title="Link to this heading">#</a></h2>
 <p>指定 trainer 的后端和行为。</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">trainer</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">trainer</span>
@@ -1037,8 +1045,8 @@ document.write(`
 </ul>
 </section>
 <hr class="docutils" />
-<section id="id11">
-<h2>服务配置<a class="headerlink" href="#id11" title="Link to this heading">#</a></h2>
+<section id="id8">
+<h2>服务配置<a class="headerlink" href="#id8" title="Link to this heading">#</a></h2>
 <p>配置 Trinity-RFT 使用的服务。目前仅支持 Data Juicer 服务。</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">service</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">data_juicer</span><span class="p">:</span>
@@ -1085,8 +1093,8 @@ document.write(`
 </div>
 <p>--</p>
 </section>
-<section id="id12">
-<h2>日志配置<a class="headerlink" href="#id12" title="Link to this heading">#</a></h2>
+<section id="id9">
+<h2>日志配置<a class="headerlink" href="#id9" title="Link to this heading">#</a></h2>
 <p>Ray actor 日志配置。</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">log</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">INFO</span>
@@ -1099,8 +1107,8 @@ document.write(`
 </ul>
 </section>
 <hr class="docutils" />
-<section id="id13">
-<h2>阶段配置<a class="headerlink" href="#id13" title="Link to this heading">#</a></h2>
+<section id="id10">
+<h2>阶段配置<a class="headerlink" href="#id10" title="Link to this heading">#</a></h2>
 <p>对于多阶段训练，可以在 <code class="docutils literal notranslate"><span class="pre">stages</span></code> 字段中定义多个阶段。每个阶段可以有自己的 <code class="docutils literal notranslate"><span class="pre">algorithm</span></code>、<code class="docutils literal notranslate"><span class="pre">buffer</span></code> 和其他配置。如果某个参数未在阶段中指定，则继承自全局配置。多个阶段将按定义顺序依次执行。</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">stages</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">stage_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sft_warmup</span>
@@ -1322,20 +1330,20 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">全局配置</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">算法配置</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">监控配置</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">模型配置</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">集群配置</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">缓冲区配置</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#model">Model 配置</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cluster">Cluster 配置</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#buffer">Buffer 配置</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#explorer">Explorer 输入</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trainer">Trainer 输入</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">Explorer 配置</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">Explorer 配置</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#synchronizer">Synchronizer 配置</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id10">Trainer 配置</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id11">服务配置</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">Trainer 配置</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">服务配置</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dataprocessor">DataProcessor 配置</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id12">日志配置</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id13">阶段配置</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">日志配置</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id10">阶段配置</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#verl-trainer">veRL Trainer 配置（高级）</a></li>
 </ul>
   </nav></div>

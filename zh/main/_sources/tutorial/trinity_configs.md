@@ -144,7 +144,7 @@ monitor:
 
 ---
 
-## 模型配置
+## Model 配置
 
 定义模型路径和 token 限制。
 
@@ -152,20 +152,28 @@ monitor:
 model:
   model_path: ${oc.env:MODEL_PATH}  # MODEL_PATH 是预先设置的环境变量
   critic_model_path: ${model.model_path}  # 使用 model.model_path 的值
-  max_response_tokens: 16384
   max_model_len: 20480
+  max_prompt_tokens: 4096
+  max_response_tokens: 16384
+  min_response_tokens: 1
 ```
 
 - `model_path`: 被训练模型的路径。
 - `critic_model_path`: 可选的独立 critic 模型路径。若为空，则默认为 `model_path`。
-- `max_response_tokens`: 模型生成的回复中允许的最大 token 数。
-- `max_model_len`: 序列中最大 token 数。
+- `max_model_len`: 该模型所支持的单个序列最大 token 数。
+- `max_prompt_tokens`: 输入 prompt 中允许的最大 token 数。仅对 `InferenceModel` 中的 `chat` 和 `generate` 方法生效。
+- `max_response_tokens`: 模型生成的回复中允许的最大 token 数。仅对 `InferenceModel` 中的 `chat` 和 `generate` 方法生效。
+- `min_response_tokens`: 模型生成的回复中允许的最小 token 数。仅对 `InferenceModel` 中的 `chat` 和 `generate` 方法生效。
+
+```{tip}
+如果使用的是 Explorer 提供的 openai API，则只有 `max_model_len` 会生效，而 `max_response_tokens`、`max_prompt_tokens` 和 `min_response_tokens` 的值将被忽略，在没有独立指定 `max_tokens` 时，每次 API 调用将生成最多 `max_model_len - prompt_length` 个 token，因此在使用时请确保 prompt 长度小于 `max_model_len`。
+```
 
 ---
 
-## 集群配置
+## Cluster 配置
 
-定义使用的节点数和每节点的 GPU 数。
+定义使用的集群包含的节点数和每节点的 GPU 数。
 
 ```yaml
 cluster:
@@ -178,7 +186,7 @@ cluster:
 
 ---
 
-## 缓冲区配置
+## Buffer 配置
 
 配置 explorer 和 trainer 使用的数据缓冲区（Buffer）。
 

@@ -530,11 +530,13 @@ document.write(`
 <span class="kn">import</span><span class="w"> </span><span class="nn">ray</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">vllm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">packaging.version</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse</span> <span class="k">as</span> <span class="n">parse_version</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoProcessor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">vllm.sampling_params</span><span class="w"> </span><span class="kn">import</span> <span class="n">RequestOutputKind</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">InferenceModelConfig</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.api.vllm_patch</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_vllm_version</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.mm_utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">attach_images_to_messages</span><span class="p">,</span>
     <span class="n">build_multi_modal_inputs</span><span class="p">,</span>
@@ -544,7 +546,7 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
 
 
-<span class="c1"># TODO: remove V0 when V1 is stable</span>
+<span class="c1"># V0 engine is deprecated since vLLM v0.10.2, related code will be removed in the future.</span>
 <div class="viewcode-block" id="vLLMRolloutModel">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel">[文档]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">vLLMRolloutModel</span><span class="p">(</span><span class="n">InferenceModel</span><span class="p">):</span>
@@ -577,7 +579,7 @@ document.write(`
             <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">temperature</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
             <span class="n">max_tokens</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">max_response_tokens</span><span class="p">,</span>
-            <span class="n">min_tokens</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">min_tokens</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">min_response_tokens</span><span class="p">,</span>
             <span class="n">truncate_prompt_tokens</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">max_prompt_tokens</span><span class="p">,</span>
             <span class="n">skip_special_tokens</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">include_stop_str_in_output</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -600,11 +602,14 @@ document.write(`
             <span class="n">dtype</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
             <span class="n">trust_remote_code</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">task</span><span class="o">=</span><span class="s2">&quot;generate&quot;</span><span class="p">,</span>
-            <span class="n">disable_log_requests</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">gpu_memory_utilization</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">gpu_memory_utilization</span><span class="p">,</span>
             <span class="n">enable_chunked_prefill</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">enable_chunked_prefill</span><span class="p">,</span>
             <span class="c1"># max_num_batched_tokens=256, # you can further set this parameter to reduce the vllm peak memory usage</span>
         <span class="p">)</span>
+        <span class="k">if</span> <span class="n">get_vllm_version</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">parse_version</span><span class="p">(</span><span class="s2">&quot;0.10.0&quot;</span><span class="p">):</span>
+            <span class="n">engine_args</span><span class="o">.</span><span class="n">enable_log_requests</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">engine_args</span><span class="o">.</span><span class="n">disable_log_requests</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span> <span class="o">=</span> <span class="n">vllm</span><span class="o">.</span><span class="n">AsyncLLMEngine</span><span class="o">.</span><span class="n">from_engine_args</span><span class="p">(</span><span class="n">engine_args</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">processor</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="kc">None</span>
@@ -828,7 +833,8 @@ document.write(`
 <span class="sd">        to align with the actual response length.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            token_ids (List[int]): The input token ids (seq_length).</span>
+<span class="sd">            token_ids (List[int]): The input token ids (seq_length). Please make sure the length of</span>
+<span class="sd">                it does not exceed `max_model_len - 1`.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            A tensor of logprobs (seq_length - 1).</span>

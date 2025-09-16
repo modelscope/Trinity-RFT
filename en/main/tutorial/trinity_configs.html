@@ -760,16 +760,24 @@ Users can use these features to simplify configuration.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">model_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${oc.env:MODEL_PATH}</span><span class="w">  </span><span class="c1"># MODEL_PATH is an environment variable set in advance</span>
 <span class="w">  </span><span class="nt">critic_model_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${model.model_path}</span><span class="w">  </span><span class="c1"># use the value of model.model_path</span>
-<span class="w">  </span><span class="nt">max_response_tokens</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16384</span>
 <span class="w">  </span><span class="nt">max_model_len</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20480</span>
+<span class="w">  </span><span class="nt">max_prompt_tokens</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4096</span>
+<span class="w">  </span><span class="nt">max_response_tokens</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16384</span>
+<span class="w">  </span><span class="nt">min_response_tokens</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 </pre></div>
 </div>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">model_path</span></code>: Path to the model being trained.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">critic_model_path</span></code>: Optional path to a separate critic model. If empty, defaults to <code class="docutils literal notranslate"><span class="pre">model_path</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">max_response_tokens</span></code>: Maximum number of tokens allowed in generated responses.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">max_model_len</span></code>: Maximum number of tokens in a sequence.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_model_len</span></code>: Maximum number of tokens in a sequence. It is recommended to set this value manually. If not set, it will be inferred from the model configuration.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_response_tokens</span></code>: Maximum number of tokens allowed in generated responses. Only for <code class="docutils literal notranslate"><span class="pre">chat</span></code> and <code class="docutils literal notranslate"><span class="pre">generate</span></code> methods in <code class="docutils literal notranslate"><span class="pre">InferenceModel</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_prompt_tokens</span></code>: Maximum number of tokens allowed in prompts. Only for <code class="docutils literal notranslate"><span class="pre">chat</span></code> and <code class="docutils literal notranslate"><span class="pre">generate</span></code> methods in <code class="docutils literal notranslate"><span class="pre">InferenceModel</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">min_response_tokens</span></code>: Minimum number of tokens allowed in generated responses. Only for <code class="docutils literal notranslate"><span class="pre">chat</span></code> and <code class="docutils literal notranslate"><span class="pre">generate</span></code> methods in <code class="docutils literal notranslate"><span class="pre">InferenceModel</span></code>. Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>. It must be less than <code class="docutils literal notranslate"><span class="pre">max_response_tokens</span></code>.</p></li>
 </ul>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>If you are using the openai API provided by Explorer, only <code class="docutils literal notranslate"><span class="pre">max_model_len</span></code> will take effect, and the value of <code class="docutils literal notranslate"><span class="pre">max_response_tokens</span></code>, <code class="docutils literal notranslate"><span class="pre">max_prompt_tokens</span></code>, and <code class="docutils literal notranslate"><span class="pre">min_response_tokens</span></code> will be ignored. When <code class="docutils literal notranslate"><span class="pre">max_tokens</span></code> is not independently specified, each API call will generate up to <code class="docutils literal notranslate"><span class="pre">max_model_len</span> <span class="pre">-</span> <span class="pre">prompt_length</span></code> tokens. Therefore, please ensure that the prompt length is less than <code class="docutils literal notranslate"><span class="pre">max_model_len</span></code> when using the API.</p>
+</div>
 </section>
 <hr class="docutils" />
 <section id="cluster-configuration">
