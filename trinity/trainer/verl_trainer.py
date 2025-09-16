@@ -14,7 +14,6 @@ from verl import DataProto
 from verl.trainer.ppo.metric_utils import (
     compute_throughout_metrics,
     compute_timing_metrics,
-    reduce_metrics,
 )
 from verl.trainer.ppo.ray_trainer import (
     RayClassWithInitArgs,
@@ -27,6 +26,7 @@ from verl.utils import hf_processor, hf_tokenizer
 from verl.utils.checkpoint.checkpoint_manager import find_latest_ckpt_path
 from verl.utils.debug import marked_timer
 from verl.utils.fs import copy_local_path_from_hdfs
+from verl.utils.metric import reduce_metrics
 
 from trinity.algorithm import ADVANTAGE_FN, KL_FN, SAMPLE_STRATEGY
 from trinity.algorithm.algorithm import ALGORITHM_TYPE

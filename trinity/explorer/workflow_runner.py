@@ -103,6 +103,7 @@ class WorkflowRunner:
             exps = await self._run_task(task, repeat_times, run_id_base)
             assert exps is not None and len(exps) > 0, "An empty experience is generated"
             metrics: dict[str, List[float]] = defaultdict(list)
+            model_version = await self.model_wrapper.model_version_async
             # set eid for each experience
             for i, exp in enumerate(exps):
                 exp.eid.batch = task.batch_id
@@ -111,7 +112,7 @@ class WorkflowRunner:
                     exp.eid.task = task.task_id
                 if not hasattr(exp, "info") or exp.info is None:
                     exp.info = {}
-                exp.info["model_version"] = self.model_wrapper.model_version
+                exp.info["model_version"] = model_version
                 exp.info["use_count"] = 0
 
                 if not hasattr(exp, "metrics") or exp.metrics is None:

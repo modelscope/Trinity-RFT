@@ -227,16 +227,20 @@ class ToolCallWorkflow(SimpleWorkflow):
         self.workflow_args = task.workflow_args
         self.reward_fn_args = task.reward_fn_args
 
+    @property
+    def asynchronous(self):
+        return True
+
     def format_prompt(self):
         raw_task = self.raw_task
         messages = construct_prompt(raw_task)
         return messages
 
-    def run(self) -> List[Experience]:
+    async def run_async(self) -> List[Experience]:
         messages = self.format_prompt()
 
         self.logger.debug("start chat")
-        responses = self.model.chat(messages, **self.rollout_args)
+        responses = await self.model.chat_async(messages, **self.rollout_args)
 
         for i, response in enumerate(responses):
             reward = 0.0

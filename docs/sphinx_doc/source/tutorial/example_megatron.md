@@ -115,7 +115,7 @@ Replace `<your_data_and_checkpoints_path>` with the actual path on your machine 
 
 ## Step 2: Configure and Run Training
 
-Most configuration settings are covered in the [Quick Start Guide](../../docs/sphinx_doc/source/tutorial/example_reasoning_basic.md#step-0-environment-preparation). Here, we'll focus only on **Megatron-LM-specific** settings.
+Most configuration settings are covered in the [Quick Start Guide](./example_reasoning_basic.md). Here, we'll focus only on **Megatron-LM-specific** settings.
 
 ### Megatron Configuration Example
 

@@ -212,7 +212,7 @@ For workflows that are prepared to be contributed to Trinity-RFT project, you ne
 
 ```python
 # existing import lines
-from .example_workflow import ExampleWorkflow
+from trinity.common.workflows.example_workflow import ExampleWorkflow
 
 __all__ = [
     # existing __all__ lines

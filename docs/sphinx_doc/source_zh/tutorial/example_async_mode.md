@@ -1,14 +1,14 @@
-# Asynchronous RFT
+# 异步 RFT
 
-This example demonstrates how to run RFT in fully asynchronous mode using the GRPO algorithm, Qwen2.5-1.5B-Instruct model, and GSM8K dataset.
+本示例展示了如何使用 Qwen2.5-1.5B-Instruct 模型和 GSM8K 数据集以完全异步模式运行 GRPO 算法。
 
-Trinity-RFT supports Asynchronous RFT by running the trainer and explorer in separate processes.
+Trinity-RFT 支持通过在独立进程中运行 trainer 和 explorer 来实现异步 RFT。
 
-For this purpose, we provide two main configuration files: [`explorer.yaml`](https://github.com/modelscope/Trinity-RFT/blob/main/examples/async_gsm8k/explorer.yaml) and [`trainer.yaml`](https://github.com/modelscope/Trinity-RFT/blob/main/examples/async_gsm8k/trainer.yaml).
-The primary difference between them is that in `explorer.yaml` we set `mode` as `explore`, while in `trainer.yaml` we set `mode` as `train`.
-The model weights of the explorer and trainer are synchronized once every `sync_interval * batch_size` tasks.
+我们提供了两个主要配置文件：[`explorer.yaml`](https://github.com/modelscope/Trinity-RFT/blob/main/examples/async_gsm8k/explorer.yaml) 和 [`trainer.yaml`](https://github.com/modelscope/Trinity-RFT/blob/main/examples/async_gsm8k/trainer.yaml)。
+两者之间的主要区别是：在 `explorer.yaml` 中将 `mode` 设置为 `explore`，而在 `trainer.yaml` 中将 `mode` 设置为 `train`。
+Explorer 与 Trainer 的模型权重每处理 `sync_interval * batch_size` 个任务后同步一次。
 
-Assuming we have a node with 8 GPUs, we allocate 4 GPUs for the trainer and 4 GPUs for the explorer. Key configurations in `explorer.yaml` are as follows:
+假设我们有一个包含 8 块 GPU 的节点，我们将其中 4 块分配给 trainer，另外 4 块分配给 explorer 。`explorer.yaml` 中的关键配置如下：
 
 ```yaml
 # explorer.yaml
@@ -54,7 +54,7 @@ synchronizer:
   sync_interval: 10
 ```
 
-Key configurations in `trainer.yaml` are as follows:
+`trainer.yaml` 中的关键配置如下：
 
 ```yaml
 # trainer.yaml
@@ -110,20 +110,20 @@ trainer:
         ulysses_sequence_parallel_size: ${trainer.trainer_config.actor_rollout_ref.actor.ulysses_sequence_parallel_size} # sp size
 ```
 
-You can run this example with the following command:
+你可以使用以下命令运行此示例：
 
 ```bash
 bash examples/async_gsm8k/run.sh
 ```
 
-The following plot shows the learning curve of GRPO in the asynchronous mode.
-> This result should be regarded merely as a baseline, since GRPO is supposed to be an on-policy algorithm.
-> We are continuously investigating other RL algorithms (e.g., [OPMD](./example_reasoning_advanced.md)) in the asynchronous mode.
+下图展示了 GRPO 在异步模式下的学习曲线：
+> 此结果仅应视为基线，因为 GRPO 本质上是一种 on-policy 算法。
+> 我们正在持续研究其他在异步模式下适用的强化学习算法（例如 [OPMD](./example_reasoning_advanced.md)）。
 
 ![async](../../assets/async-curve.png)
 
 
-Trinity-RFT also supports dynamic scaling in asynchronous mode. Continuing with the previous example, if an additional machine with 8 GPUs joins the Ray cluster during training, you can launch a new explorer using the following configuration `explorer_new.yaml`.
+Trinity-RFT 还支持在异步模式下的动态扩展。延续之前的例子，如果在训练过程中有另一台带有 8 块 GPU 的机器加入 Ray 集群，你可以使用以下配置文件 `explorer_new.yaml` 启动一个新的 explorer 。
 
 ```yaml
 # explorer_new.yaml
@@ -170,11 +170,11 @@ synchronizer:
 # other configs are the same as explorer.yaml
 ```
 
-The differences between `explorer_new.yaml` and `explorer.yaml` include:
+`explorer_new.yaml` 与 `explorer.yaml` 的差异包括：
 
-- `cluster.node_num/gpu_per_node`: Specify the cluster configuration for the newly added explorer.
-- `explorer.name`: The later-started explorer requires a different name than "explorer", which is the default name for the existing explorer.
-- `explorer.rollout_model.engine_num/tensor_parallel_size`: Define the engine number and tensor parallel size to optimally utilize GPU resources.
-- `buffer.explorer_input.taskset`: Provide another task dataset as input for the new explorer.
+- `cluster.node_num/gpu_per_node`：指定新加入的 explorer 所在集群的配置。
+- `explorer.name`：后启动的 explorer 需要一个不同于默认名称 "explorer" 的名称。
+- `explorer.rollout_model.engine_num/tensor_parallel_size`：定义引擎数量和张量并行大小，以最优地利用 GPU 资源。
+- `buffer.explorer_input.taskset`：为新的 explorer 提供另一个任务数据集作为输入。
 
-All other parameters remain the same as in `explorer.yaml`.
+其余所有参数均与 `explorer.yaml` 中保持一致。

@@ -149,7 +149,6 @@ explorer:
   eval_interval: 50
   runner_num: 16
   rollout_model:
-    engine_type: vllm_async
     engine_num: 1
 synchronizer:
   sync_method: 'nccl'

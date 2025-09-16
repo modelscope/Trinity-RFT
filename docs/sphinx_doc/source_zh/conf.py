@@ -11,7 +11,7 @@ project = "Trinity-RFT"
 copyright = "2025, Trinity-RFT Team"
 author = "Trinity-RFT Team"
 release = version
-language = "en"
+language = "zh_CN"
 root_doc = "index"
 
 # -- General configuration ---------------------------------------------------
@@ -93,7 +93,7 @@ html_context = {
     "github_user": "modelscope",
     "github_repo": "Trinity-RFT",
     "github_version": "main",
-    "conf_py_path": "/docs/sphinx_doc/source/",
+    "conf_py_path": "/docs/sphinx_doc/source_zh/",
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,

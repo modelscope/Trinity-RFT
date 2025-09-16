@@ -11,7 +11,7 @@ Let's continue with the [previous GSM8k example](./example_reasoning_basic.md) a
 
 
 As an experimental feature of Trinity-RFT, we develop an embarrasingly simple off-policy RL algorithm, termed as OPMD (Online Policy Mirror Descent, inspired by [Kimi k1.5](https://arxiv.org/abs/2501.12599)).
-The algorithm design and analysis can be found in this [technical report](../../assets/opmd.pdf).
+The algorithm design and analysis can be found in Appendix A of [the technique report of Trinity-RFT](https://arxiv.org/abs/2505.17826).
 The config file is [`opmd_gsm8k.yaml`](https://github.com/modelscope/Trinity-RFT/blob/main/examples/opmd_gsm8k/opmd_gsm8k.yaml).
 
 To try out the OPMD algorithm:

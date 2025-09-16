@@ -363,13 +363,12 @@ explorer:
 - `auxiliary_models`: Additional models used for custom workflows.
 - `eval_interval`: Interval (in steps) for evaluating the model.
 - `eval_on_startup`: Whether to evaluate the model on startup. More precisely, at step 0 with the original model, so it will not be triggered when restarting.
-- `runner_num`: (*Deprecated*) Number of parallel workflow runners.
 
 ---
 
 ## Synchronizer Configuration
 
-Controls how model weights are synchronized between trainer and explorer.
+Controls how model weights are synchronized between trainer and explorer. Please refer to {ref}`Synchronizer in Trinity-RFT <Synchronizer>` for more details.
 
 ```yaml
 synchronizer:
@@ -398,16 +397,16 @@ trainer:
   trainer_type: 'verl'
   save_interval: 100
   total_steps: 1000
-  trainer_config_path: ''
   trainer_config: null
+  trainer_config_path: ''
 ```
 
 - `name`: Name of the trainer. This name will be used as the Ray actor's name, so it must be unique.
 - `trainer_type`: Trainer backend implementation. Currently only supports `verl`.
 - `save_interval`: Frequency (in steps) at which to save model checkpoints.
 - `total_steps`: Total number of training steps.
-- `trainer_config_path`: The path to the trainer configuration file.
-- `trainer_config`: The trainer configuration provided inline. Only one of `trainer_config_path` and `trainer_config` should be specified.
+- `trainer_config`: The trainer configuration provided inline.
+- `trainer_config_path`: The path to the trainer configuration file. Only one of `trainer_config_path` and `trainer_config` should be specified.
 
 ---
 
@@ -435,8 +434,6 @@ Configures the task / experience pipeline, please refer to {ref}`Data Processing
 
 ```yaml
 data_processor:
-  task_pipeline:
-  # task pipeline related
   task_pipeline:
     num_process: 32
     operators:
@@ -606,8 +603,7 @@ critic:
 trainer:
   balance_batch: True
   # total_training_steps: null
-  # auto: find the last ckpt to resume. If can't find, start from scratch
-  resume_mode: auto # or auto or resume_path if
+  resume_mode: auto
   resume_from_path: ""
   critic_warmup: 0
   default_hdfs_dir: null
@@ -647,7 +643,7 @@ trainer:
 - `critic.cliprange_value`: Used for compute value loss.
 
 - `trainer.balance_batch`: Whether to balance batch size between GPUs during training.
-- `trainer.resume_mode`: Resume mode for training. Support `disable`, `auto` and `resume_path`.
+- `trainer.resume_mode`: Resume mode for training. Support `disable`, `auto` and `resume_path`. Default value is `auto`, i.e., finding the last ckpt to resume or training from scratch when it cannot find the ckpt.
 - `trainer.resume_from_path`: Path to resume from.
 - `trainer.critic_warmup`: The number of steps to train the critic model before actual policy learning.
 - `trainer.default_hdfs_dir`: Default HDFS directory for saving checkpoints.

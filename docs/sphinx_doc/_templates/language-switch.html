@@ -1,0 +1,32 @@
+<button id="lang-toggle-btn" class="btn btn-sm btn-outline-secondary" title="">
+  <span id="lang-toggle-label"></span>
+</button>
+<script>
+(function () {
+  const btn = document.getElementById('lang-toggle-btn');
+  const lab = document.getElementById('lang-toggle-label');
+  if (!btn || !lab) return;
+
+  const m = location.pathname.match(/^(.*\/)(en|zh)(\/.*)$/);
+
+  const cur = m ? m[2] : 'en';
+  if (cur === 'en') {
+    lab.textContent = '中';
+    btn.title = '切换到中文';
+  } else {
+    lab.textContent = 'EN';
+    btn.title = 'Switch to English';
+  }
+
+  const targetHref = (function () {
+    if (!m) return location.href;
+    const other = cur === 'en' ? 'zh' : 'en';
+    const suffix = m[3] || '/';
+    return m[1] + other + suffix + location.search + location.hash;
+  })();
+
+  btn.addEventListener('click', function () {
+    location.href = targetHref;
+  });
+})();
+</script>

@@ -62,8 +62,8 @@ and include it in the init file `trinity/common/workflows/__init__.py`
 ```diff
  # -*- coding: utf-8 -*-
  """Workflow module"""
- from .workflow import WORKFLOWS, MathWorkflow, SimpleWorkflow
-+from .envs.alfworld.alfworld_workflow import StepWiseAlfworldWorkflow
+ from trinity.common.workflows.workflow import WORKFLOWS, MathWorkflow, SimpleWorkflow
++from trinity.common.workflows.envs.alfworld.alfworld_workflow import StepWiseAlfworldWorkflow
 
  __all__ = [
      "WORKFLOWS",
@@ -81,7 +81,7 @@ In general multi-step scenarios, each run may generate various number of experie
 
 - `buffer.train_batch_size`: The number of experiences to be sampled from the buffer for training, which can be different from the number of generated experiences in each explore step.
 
-- `buffer.trainer_input.use_priority_queue = true`: Using `PriorityQueue` allows the model to use the experiences with higher priority.
+- `buffer.trainer_input.use_priority_queue = true`: Using `PriorityQueue` allows the model to use the experiences with higher priority, which prefers newly-generated experiences by default.
 
 - `synchronizer.sync_style = dynamic_by_explorer`: The explorer determines when to synchronize the model weights with the trainer.
 

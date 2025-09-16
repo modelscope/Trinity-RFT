@@ -73,15 +73,15 @@ The RFT process is modularized into three core components:
 
 ## 🛠️ What can I use Trinity-RFT for?
 
-* **Train agent applications with RL and minimal migration cost** [[Tutorial]](https://modelscope.github.io/Trinity-RFT/main/tutorial/trinity_programming_guide.html#workflows-for-rl-environment-developers)
-  - Implement agent-environment interaction logic in a single workflow class ([example1](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_multi_turn.html), [example2](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_step_wise.html)),
-  - Or import workflows from agent frameworks like AgentScope ([example](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_react.html)).
+* **Train agent applications with RL and minimal migration cost** [[Tutorial]](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/trinity_programming_guide.html#workflows-for-rl-environment-developers)
+  - Implement agent-environment interaction logic in a single workflow class ([example1](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_multi_turn.html), [example2](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_step_wise.html)),
+  - Or import workflows from agent frameworks like AgentScope ([example](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_react.html)).
 
-* **Rapid RL algorithm design and validation** [[Tutorial]](https://modelscope.github.io/Trinity-RFT/main/tutorial/trinity_programming_guide.html#algorithms-for-rl-algorithm-developers)
-  - Develop custom RL algorithms (loss design, sampling strategy, etc.) in compact, plug-and-play classes ([example](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_mix_algo.html)).
+* **Rapid RL algorithm design and validation** [[Tutorial]](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/trinity_programming_guide.html#algorithms-for-rl-algorithm-developers)
+  - Develop custom RL algorithms (loss design, sampling strategy, etc.) in compact, plug-and-play classes ([example](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_mix_algo.html)).
 
-* **Custom datasets and data pipelines for RFT** [[Tutorial]](https://modelscope.github.io/Trinity-RFT/main/tutorial/trinity_programming_guide.html#operators-for-data-developers)
-  - Design task-specific datasets and build data pipelines for cleaning, augmentation, and human-in-the-loop scenarios ([example](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_data_functionalities.html)).
+* **Custom datasets and data pipelines for RFT** [[Tutorial]](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/trinity_programming_guide.html#operators-for-data-developers)
+  - Design task-specific datasets and build data pipelines for cleaning, augmentation, and human-in-the-loop scenarios ([example](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_data_functionalities.html)).
 
 ---
 
@@ -218,7 +218,7 @@ docker run -it \
 
 💡 **Note**: Replace `<path_to_your_data_and_checkpoints>` with the actual path on your machine where datasets and model checkpoints are stored.
 
-> If you'd like to integrate with **Megatron-LM**, check out our [example setup guide for Megatron](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_megatron.html).
+> If you'd like to integrate with **Megatron-LM**, check out our [example setup guide for Megatron](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_megatron.html).
 
 ### Step 2: prepare dataset and model
 
@@ -332,38 +332,38 @@ For studio users, click "Run" in the web interface.
 
 Tutorials for running different RFT modes:
 
-+ [Quick example: GRPO on GSM8k](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_reasoning_basic.html)
-+ [Off-policy RFT](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_reasoning_advanced.html)
-+ [Fully asynchronous RFT](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_async_mode.html)
-+ [Offline learning by DPO or SFT](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_dpo.html)
++ [Quick example: GRPO on GSM8k](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_reasoning_basic.html)
++ [Off-policy RFT](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_reasoning_advanced.html)
++ [Fully asynchronous RFT](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_async_mode.html)
++ [Offline learning by DPO or SFT](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_dpo.html)
 
 
 Tutorials for adapting Trinity-RFT to multi-step agentic scenarios:
 
-+ [Concatenated multi-turn workflow](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_multi_turn.html)
-+ [General multi-step workflow](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_step_wise.html)
-+ [ReAct workflow with an agent framework](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_react.html)
++ [Concatenated multi-turn workflow](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_multi_turn.html)
++ [General multi-step workflow](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_step_wise.html)
++ [ReAct workflow with an agent framework](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_react.html)
 
 
 Tutorials for data-related functionalities:
 
-+ [Advanced data processing & human-in-the-loop](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_data_functionalities.html)
++ [Advanced data processing & human-in-the-loop](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_data_functionalities.html)
 
 
 Tutorials for RL algorithm development/research with Trinity-RFT:
 
-+ [RL algorithm development with Trinity-RFT](https://modelscope.github.io/Trinity-RFT/main/tutorial/example_mix_algo.html)
++ [RL algorithm development with Trinity-RFT](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/example_mix_algo.html)
 
 
 Guidelines for full configurations:
 
-+ See [this document](https://modelscope.github.io/Trinity-RFT/main/tutorial/trinity_configs.html)
++ See [this document](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/trinity_configs.html)
 
 
 Guidelines for developers and researchers:
 
 + [Benchmark Toolkit for quick verification and experimentation](./benchmark/README.md)
-+ [Understand the coordination between explorer and trainer](https://modelscope.github.io/Trinity-RFT/main/tutorial/synchronizer.html)
++ [Understand the coordination between explorer and trainer](https://modelscope.github.io/Trinity-RFT/en/main/tutorial/synchronizer.html)
 
 
 ## Upcoming features

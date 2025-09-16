@@ -139,8 +139,8 @@ and include it in the init file `trinity/common/workflows/__init__.py`
 ```diff
  # -*- coding: utf-8 -*-
  """Workflow module"""
- from .workflow import WORKFLOWS, MathWorkflow, SimpleWorkflow
-+from .envs.alfworld.alfworld_workflow import AlfworldWorkflow
+ from trinity.common.workflows.workflow import WORKFLOWS, MathWorkflow, SimpleWorkflow
++from trinity.common.workflows.envs.alfworld.alfworld_workflow import AlfworldWorkflow
 
  __all__ = [
      "WORKFLOWS",
