@@ -52,6 +52,7 @@ class AgentScopeV1ReactSearchWorkflow(Workflow):
         self.workflow_args = task.workflow_args
         self.max_turns = int(self.workflow_args.get("max_turns", 10))
         self.search_client_type = self.workflow_args.get("search_client_type", "searxng")
+        self.max_model_tokens = int(self.workflow_args.get("max_model_tokens", 24000))
         if self.search_client_type not in ["searxng", "tavily"]:
             raise ValueError(
                 f"search_client_type must be one of ['searxng', 'tavily'], but got {self.search_client_type}"
@@ -115,7 +116,7 @@ Your judgement must be in the format and criteria specified below:
         )
 
         # Yes if the response is correct, No otherwise
-        match = re.search(r"Correctness\s*:?[\s]*YES", judge_output, re.IGNORECASE)
+        match = re.search(r"Correctness.*?YES", judge_output, re.IGNORECASE)
         return match is not None
 
     async def run_async(self):
@@ -135,7 +136,7 @@ Your judgement must be in the format and criteria specified below:
         model = OpenAIChatModel(
             api_key="EMPTY",
             model_name=self.model_name,
-            stream=True,
+            stream=False,
         )
         model.client = self.openai_async_client
 
@@ -192,7 +193,8 @@ Your judgement must be in the format and criteria specified below:
             self.logger.error(f"Error during agent reply: {e}")
             result = None
         finally:
-            await self.search_client.close()
+            if self.search_client and self.search_client.is_connected:
+                await self.search_client.close()
 
         # Reward calculation (judge_result can stay sync if your judge_model only has sync chat, otherwise you need to make it async)
         try:
@@ -205,6 +207,7 @@ Your judgement must be in the format and criteria specified below:
 
         self.logger.debug(f"Reward: {reward}")
         experiences = self.model.extract_experience_from_history(clear_history=True)
+        return_experiences = []
         self.logger.debug(f"Experiences extracted len: {len(experiences)}")
         for i, experience in enumerate(experiences):
             experience.eid.step = i
@@ -216,7 +219,10 @@ Your judgement must be in the format and criteria specified below:
             if experience.metrics is None:
                 experience.metrics = {}
             experience.metrics.update(agent_metrics)
+            if len(experience.tokens) > self.max_model_tokens:
+                continue
+            return_experiences.append(experience)
         self.logger.debug(
-            f"return experience len: {len(experiences)}, run_id: {str(experiences[-1].eid.run)}, final step reward: {experiences[-1].reward}"
+            f"return experience len: {len(return_experiences)}, run_id: {str(return_experiences[-1].eid.run)}, final step reward: {return_experiences[-1].reward}"
         )
-        return experiences
+        return return_experiences
