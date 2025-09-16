@@ -4,10 +4,10 @@
 ## 概述
 
 Trinity-RFT 提供了一个统一的数据处理器，用于处理 task 流水线和 experience 流水线中的原始数据集及 experience 数据。
-- 对于任务，数据处理能力来源于 [Data-Juicer](https://github.com/modelscope/data-juicer)。你可以使用 Data-Juicer 提供的数据处理算子。完整的 Data-Juicer 算子列表可在此处查看：[Operators.html](https://modelscope.github.io/data-juicer/en/main/docs/Operators.html)
+- 对于任务，数据处理能力来源于 [Data-Juicer](https://github.com/modelscope/data-juicer)。你可以使用 Data-Juicer 提供的数据处理算子。完整的 Data-Juicer 算子列表可在 [此处](https://modelscope.github.io/data-juicer/en/main/docs/Operators.html) 查看。
 - 对于 experience 数据，除了 Data-Juicer 算子外，Trinity-RFT 还提供了若干与 RFT 相关的算子，并允许开发者实现自定义算子。
 
-如需实现自己的数据处理器，可参考此文档：[trinity_programming_guide.md#operators-for-data-developers](trinity_programming_guide.md#operators-for-data-developers)。
+如需实现自己的数据处理器，可参考[开发者指南](trinity_programming_guide.md#operators-for-data-developers)。
 
 为了支持 Data-Juicer 和 RFT 相关算子的数据处理功能，Trinity-RFT 将 Data-Juicer 算子封装为一个统一的服务，该服务可以自动启动。`DataJuicerOperator` 使用客户端向服务器发送任务或 experience 数据处理请求。
 
@@ -25,7 +25,7 @@ Trinity-RFT 提供了一个统一的数据处理器，用于处理 task 流水�
 2. 如何配置数据处理器
 3. 数据处理器的功能
 
-开始之前，请根据 [快速入门中的安装部分](example_reasoning_basic.md) 配置 Trinity-RFT 的主环境，并在环境变量 `OPENAI_BASE_URL` 和 `OPENAI_API_KEY` 中设置基础 URL 和 API 密钥，以便在需要时支持智能体或 API 模型调用。
+开始之前，请根据 [快速入门中的安装部分](example_reasoning_basic.md#step-0-environment-preparation) 配置 Trinity-RFT 的主环境，并在环境变量 `OPENAI_BASE_URL` 和 `OPENAI_API_KEY` 中设置基础 URL 和 API 密钥，以便在需要时支持智能体或 API 模型调用。
 
 此外，为了能够自动启动数据处理器服务，你还需要安装 `data` 分支的依赖项：
 
@@ -243,7 +243,7 @@ service:
 
 区别在于本例使用了 Data-Juicer 的 `human_preference_annotation_mapper` 算子。该算子帮助你在 UI 界面上进行基于人类偏好的数据标注。
 
-你还可以为此算子设置更多配置项（例如标注完成时的通知）。更多细节请参考此文档：[doc](https://github.com/modelscope/data-juicer/tree/main/configs/annotation)。
+你还可以为此算子设置更多配置项（例如标注完成时的通知）。更多细节请参考 [此文档](https://github.com/modelscope/data-juicer/tree/main/configs/annotation)。
 
 `data_processor` 部分的所有配置项详见 [此处](trinity_configs.md)。本示例的配置文件可在 [该配置文件](https://github.com/modelscope/Trinity-RFT/tree/main/examples/dpo_human_in_the_loop/dpo.yaml) 中找到。
 

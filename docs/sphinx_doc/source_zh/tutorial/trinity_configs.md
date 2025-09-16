@@ -340,7 +340,7 @@ explorer:
   max_retry_times: 2
   env_vars: {}
   rollout_model:
-    engine_type: vllm_async
+    engine_type: vllm
     engine_num: 1
     tensor_parallel_size: 1
     enable_history: False
@@ -356,7 +356,7 @@ explorer:
 - `max_timeout`: 工作流完成的最大时间（秒）。
 - `max_retry_times`: 工作流的最大重试次数。
 - `env_vars`: 为每个工作流执行器设置的环境变量。
-- `rollout_model.engine_type`: 推理引擎类型。目前仅支持 `vllm_async`。
+- `rollout_model.engine_type`: 推理引擎类型。支持 `vllm_async` 和 `vllm`，二者的含义相同，都使用了异步引擎。后续版本会只保留 `vllm`。
 - `rollout_model.engine_num`: 推理引擎数量。
 - `rollout_model.tensor_parallel_size`: 张量并行度。
 - `rollout_model.enable_history`: 是否启用模型调用历史记录。若设为 `True`，模型包装器会自动记录模型调用返回的 experience。请定期通过 `extract_experience_from_history` 提取历史，以避免内存溢出。默认为 `False`。
