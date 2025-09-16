@@ -1,7 +1,7 @@
 # Example of Training a Multi-Turn Web Search Agent
 
 This example demonstrates how to train a multi-turn web search agent based on the ReAct (Reasoning and Acting) paradigm.
-It utilizes the **AgentScope ** framework, integrated within the Trinity workflow, to equip an agent with external search tools to find information on the web and answer questions.
+It utilizes the **AgentScope** framework, integrated within the Trinity workflow, to equip an agent with external search tools to find information on the web and answer questions.
 
 We use a subset of the `WebWalkerQA` dataset here. The original dataset can be found at [Hugging Face Datasets](https://huggingface.co/datasets/callanwu/WebWalkerQA).
 

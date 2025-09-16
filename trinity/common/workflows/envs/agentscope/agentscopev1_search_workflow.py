@@ -236,7 +236,10 @@ Your judgement must be in the format and criteria specified below:
             if len(experience.tokens) > self.max_model_tokens:
                 continue
             return_experiences.append(experience)
-        self.logger.debug(
-            f"return experience len: {len(return_experiences)}, run_id: {str(return_experiences[-1].eid.run)}, final step reward: {return_experiences[-1].reward}"
-        )
+        if return_experiences:
+            self.logger.debug(
+                f"return experience len: {len(return_experiences)}, run_id: {str(return_experiences[-1].eid.run)}, final step reward: {return_experiences[-1].reward}"
+            )
+        else:
+            self.logger.info("No valid experiences to return (all filtered out).")
         return return_experiences
