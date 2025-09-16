@@ -51,7 +51,7 @@ class Explorer:
         self.taskset = get_buffer_reader(
             self.config.buffer.explorer_input.taskset, self.config.buffer
         )
-        self.scheduler = self._init_scheduler()
+        self.scheduler = Scheduler(self.config, self.models, self.auxiliary_models)
         self.monitor = MONITOR.get(self.config.monitor.monitor_type)(
             project=self.config.project,
             group=self.config.group,
@@ -102,15 +102,6 @@ class Explorer:
             for i, model in enumerate(self.models)
         ]
         await asyncio.gather(*refs)
-
-    def _init_scheduler(self) -> Scheduler:
-        if self.config.explorer.rollout_model.engine_type != "vllm_async":
-            # sync model requires the same number of runners as the number of models
-            self.config.explorer.runner_per_model = 1
-            self.logger.info(
-                "Sync vLLM model requires the same number of runners as the number of models"
-            )
-        return Scheduler(self.config, self.models, self.auxiliary_models)
 
     async def _checkpoint_weights_update(self, step_num: Optional[int] = None) -> int:
         step_num = await self.synchronizer.set_model_state_dict_with_step_num.remote(step_num)

@@ -396,6 +396,7 @@ trainer:
   name: trainer
   trainer_type: 'verl'
   save_interval: 100
+  total_steps: 1000
   trainer_config: null
   trainer_config_path: ''
 ```
@@ -403,6 +404,7 @@ trainer:
 - `name`: Name of the trainer. This name will be used as the Ray actor's name, so it must be unique.
 - `trainer_type`: Trainer backend implementation. Currently only supports `verl`.
 - `save_interval`: Frequency (in steps) at which to save model checkpoints.
+- `total_steps`: Total number of training steps.
 - `trainer_config`: The trainer configuration provided inline.
 - `trainer_config_path`: The path to the trainer configuration file. Only one of `trainer_config_path` and `trainer_config` should be specified.
 
@@ -432,8 +434,6 @@ Configures the task / experience pipeline, please refer to {ref}`Data Processing
 
 ```yaml
 data_processor:
-  task_pipeline:
-  # task pipeline related
   task_pipeline:
     num_process: 32
     operators:

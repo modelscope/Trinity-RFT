@@ -396,6 +396,7 @@ trainer:
   name: trainer
   trainer_type: 'verl'
   save_interval: 100
+  total_steps: 1000
   trainer_config: null
   trainer_config_path: ''
 ```
@@ -403,6 +404,7 @@ trainer:
 - `name`: trainer 的名称。该名称将用作 Ray actor 的名称，因此必须唯一。
 - `trainer_type`: trainer 后端实现。目前仅支持 `verl`。
 - `save_interval`: 保存模型检查点的频率（步）。
+- `total_steps`: 总训练步数。
 - `trainer_config`: 内联提供的 trainer 配置。
 - `trainer_config_path`: trainer 配置文件的路径。`trainer_config_path` 和 `trainer_config` 只能指定其一。
 
@@ -432,8 +434,6 @@ service:
 
 ```yaml
 data_processor:
-  task_pipeline:
-  # 任务流水线相关
   task_pipeline:
     num_process: 32
     operators:

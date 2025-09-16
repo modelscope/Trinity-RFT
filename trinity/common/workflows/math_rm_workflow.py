@@ -51,3 +51,34 @@ class MathRMWorkflow(SimpleWorkflow):
                 f"self.task_desc: {self.task_desc}, messages: {messages}, response: {response.response_text}, reward: {reward}"
             )
         return responses
+
+
+@WORKFLOWS.register_module("async_math_rm_workflow")
+class AsyncMathRMWorkflow(MathRMWorkflow):
+    @property
+    def asynchronous(self):
+        return True
+
+    async def run_async(self) -> List[Experience]:
+        messages = self.format_messages()
+
+        self.logger.debug("start chat")
+        responses = await self.model.chat_async(messages, **self.rollout_args)
+        for i, response in enumerate(responses):
+            reward_dict = self.reward_fn(  # type: ignore
+                response,
+                messages,
+                ground_truth=self.truth,
+            )
+
+            if response.metrics is None:
+                response.metrics = {}
+            response.metrics.update(reward_dict)
+            reward = sum(reward_dict.values())
+            response.reward = reward
+            response.eid.run = i + self.run_id_base
+
+            self.logger.debug(
+                f"self.task_desc: {self.task_desc}, messages: {messages}, response: {response.response_text}, reward: {reward}"
+            )
+        return responses

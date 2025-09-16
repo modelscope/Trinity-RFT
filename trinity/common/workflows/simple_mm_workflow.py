@@ -74,3 +74,37 @@ class SimpleMMWorkflow(SimpleWorkflow):
 
         self.logger.debug(f"Generated {len(responses)} responses")
         return responses
+
+
+@WORKFLOWS.register_module("async_simple_mm_workflow")
+class AsyncSimpleMMWorkflow(SimpleMMWorkflow):
+    @property
+    def asynchronous(self):
+        return True
+
+    async def run_async(self) -> List[Experience]:
+        messages = self.format_messages()
+
+        # TODO: test generate_mm
+        self.logger.debug("start chat")
+        if self.raw_mm_data:
+            responses = await self.model.chat_mm_async(
+                messages, self.raw_mm_data, **self.rollout_args
+            )
+        else:
+            responses = await self.model.chat_async(messages, **self.rollout_args)
+        for i, response in enumerate(responses):
+            reward_dict = self.reward_fn(  # type: ignore [misc]
+                response=response.response_text,  # type: ignore [arg-type]
+                truth=self.truth,
+            )
+
+            if response.metrics is None:
+                response.metrics = {}
+            response.metrics.update(reward_dict)
+            reward = sum(reward_dict.values())
+            response.reward = reward
+            response.eid.run = i + self.run_id_base
+
+        self.logger.debug(f"Generated {len(responses)} responses")
+        return responses

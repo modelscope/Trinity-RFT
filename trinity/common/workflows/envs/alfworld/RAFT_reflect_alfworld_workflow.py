@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
@@ -59,7 +59,11 @@ class RAFTReflectAlfworldWorkflow(RAFTAlfworldWorkflow):
             f"Initializing RAFTReflectAlfworldWorkflow with RAFT learning, temperature={self.temperature}"
         )
 
-    def construct_sft_data(
+    @property
+    def asynchronous(self):
+        return True
+
+    async def construct_sft_data(
         self,
         first_trajectory: List[Dict[str, str]],
         success: bool,
@@ -75,7 +79,7 @@ class RAFTReflectAlfworldWorkflow(RAFTAlfworldWorkflow):
             new_success,
             new_steps,
             new_parsed_steps,
-        ) = self.re_explore_with_context(first_trajectory, reward, success, original_steps)
+        ) = await self.re_explore_with_context(first_trajectory, reward, success, original_steps)
 
         # Consider improvement if reward is higher OR same reward with fewer steps
         reward_improved = new_reward > reward
@@ -92,7 +96,7 @@ class RAFTReflectAlfworldWorkflow(RAFTAlfworldWorkflow):
             new_parsed_steps,
         )
 
-    def re_explore_with_context(
+    async def re_explore_with_context(
         self,
         first_trajectory: List[Dict[str, str]],
         original_reward: float,
@@ -130,7 +134,7 @@ class RAFTReflectAlfworldWorkflow(RAFTAlfworldWorkflow):
             # Add to clean SFT trajectory
             sft_trajectory.append({"role": "user", "content": format_observation(observation)})
 
-            responses = self.model.chat(
+            responses = await self.model.chat_async(
                 context_messages,
                 n=1,
                 temperature=self.temperature,
@@ -183,18 +187,18 @@ class RAFTReflectAlfworldWorkflow(RAFTAlfworldWorkflow):
         )
         return [experience]
 
-    def _execute_second_attempt(
+    async def _execute_second_attempt(
         self, trajectory: list, success: bool, reward: float, steps: int
-    ) -> tuple:
+    ) -> Union[tuple[List[Dict[str, str]], Dict[str, Any], List[Dict[str, str]],], Exception]:
         """Execute second attempt and return SFT data"""
         try:
-            sft_messages, re_explore_info, new_parsed_steps = self.construct_sft_data(
+            sft_messages, re_explore_info, new_parsed_steps = await self.construct_sft_data(
                 trajectory, success, reward, steps
             )
-            return sft_messages, re_explore_info, new_parsed_steps, None
+            return sft_messages, re_explore_info, new_parsed_steps
         except Exception as e:
             print(f"SFT data construction failed: {e}")
-            return None, None, None, e
+            return e
 
     def _build_metrics(
         self, reward: float, steps: int, new_parsed_steps: list, re_explore_info: dict
@@ -220,11 +224,11 @@ class RAFTReflectAlfworldWorkflow(RAFTAlfworldWorkflow):
         """Generate experience from SFT messages"""
         return process_messages_to_experience(self.model, sft_messages, info=metrics)
 
-    def run(self) -> List[Experience]:
+    async def run_async(self) -> List[Experience]:
         """Run the RAFT alfworld workflow and return experiences"""
 
         if self.is_eval:
-            return self.eval_alfworld()
+            return await self.eval_alfworld()
 
         # Generate unique task ID using timestamp
         task_id = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
@@ -239,7 +243,7 @@ class RAFTReflectAlfworldWorkflow(RAFTAlfworldWorkflow):
                 parsed_steps,
                 success,
                 traj_format_valid,
-            ) = self._execute_first_attempt()
+            ) = await self._execute_first_attempt()
         except Exception as e:
             return [generate_default_empty_experience(f"Training rollout failed: {str(e)}")]
 
@@ -256,14 +260,15 @@ class RAFTReflectAlfworldWorkflow(RAFTAlfworldWorkflow):
         print(f"Task result: done={done}, reward={reward:.3f}, steps={steps}, success={success}")
 
         # Execute second attempt
-        sft_messages, re_explore_info, new_parsed_steps, error = self._execute_second_attempt(
-            trajectory, success, reward, steps
-        )
-        if error:
+        ret = await self._execute_second_attempt(trajectory, success, reward, steps)
+        if isinstance(ret, Exception):
+            error = ret
             default_experience = generate_default_empty_experience(
                 f"SFT data construction failed: {str(error)}",
             )
             return [default_experience]
+        else:
+            sft_messages, re_explore_info, new_parsed_steps = ret
 
         # Validate second attempt and build metrics
         second_success = re_explore_info["new_reward"] >= 1

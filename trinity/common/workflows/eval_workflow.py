@@ -85,3 +85,30 @@ class MathEvalWorkflow(Workflow):
             response.metrics.update(acc_metrics)
 
         return responses
+
+
+@WORKFLOWS.register_module("async_math_eval_workflow")
+class AsyncMathEvalWorkflow(MathEvalWorkflow):
+    @property
+    def asynchronous(self):
+        return True
+
+    async def run_async(self) -> List[Experience]:
+        messages = self.format_messages()
+
+        responses: List[Experience] = await self.model.chat_async(messages, **self.eval_gen_args)
+
+        for response in responses:
+            if response.response_text is None or self.task.truth is None:
+                continue
+
+            accuracy, _ = verify_math_answer(
+                response_text=response.response_text, ground_truth=self.task.truth
+            )
+
+            acc_metrics = {"accuracy": accuracy}
+            if response.metrics is None:
+                response.metrics = {}
+            response.metrics.update(acc_metrics)
+
+        return responses

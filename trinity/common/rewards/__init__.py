@@ -2,13 +2,13 @@
 """Reward functions for RFT"""
 
 # isort: off
-from .reward_fn import REWARD_FUNCTIONS, RewardFn, RMGalleryFn
+from trinity.common.rewards.reward_fn import REWARD_FUNCTIONS, RewardFn, RMGalleryFn
 
-from .accuracy_reward import AccuracyReward
-from .countdown_reward import CountDownRewardFn
-from .dapo_reward import MathDAPORewardFn
-from .format_reward import FormatReward
-from .math_reward import MathBoxedRewardFn, MathRewardFn
+from trinity.common.rewards.accuracy_reward import AccuracyReward
+from trinity.common.rewards.countdown_reward import CountDownRewardFn
+from trinity.common.rewards.dapo_reward import MathDAPORewardFn
+from trinity.common.rewards.format_reward import FormatReward
+from trinity.common.rewards.math_reward import MathBoxedRewardFn, MathRewardFn
 
 # isort: on
 

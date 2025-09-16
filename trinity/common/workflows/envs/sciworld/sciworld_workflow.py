@@ -73,14 +73,18 @@ class SciWorldWorkflow(MultiTurnWorkflow):
         self.repeat_times = task.repeat_times
         self.max_env_steps = 30  # should be less than 100
 
-    def get_model_response(self, messages):
-        responses = self.model.chat(messages, n=1)
+    @property
+    def asynchronous(self):
+        return True
+
+    async def get_model_response(self, messages):
+        responses = await self.model.chat_async(messages, n=1)
         return responses
 
-    def get_model_response_text(self, messages):
-        return self.get_model_response(messages)[0].response_text
+    async def get_model_response_text(self, messages):
+        return (await self.get_model_response(messages))[0].response_text
 
-    def generate_env_inference_samples(self, env, rollout_num) -> List[Experience]:
+    async def generate_env_inference_samples(self, env, rollout_num) -> List[Experience]:
         # TODO: Make this parallel
         print("Generating env inference samples...")
         golden_rounds = len(env.get_gold_action_sequence())
@@ -97,7 +101,7 @@ class SciWorldWorkflow(MultiTurnWorkflow):
             for r in range(self.max_env_steps):
                 format_obs = format_observation(observation)
                 memory = memory + [{"role": "user", "content": format_obs}]
-                response_text = self.get_model_response_text(memory)
+                response_text = await self.get_model_response_text(memory)
                 memory.append({"role": "assistant", "content": response_text})
                 action = parse_action(response_text)
                 observation, reward, done, info = env.step(action)
@@ -116,7 +120,7 @@ class SciWorldWorkflow(MultiTurnWorkflow):
         env.close()
         return experience_list
 
-    def run(self) -> List[Experience]:
+    async def run_async(self) -> List[Experience]:
         # assume the task_description is the json object containing task index and the var_num
         # see Trinity-RFT/script/data_prepare/get_scriworld_data.py
         task_desc = self.task_desc
@@ -141,4 +145,4 @@ class SciWorldWorkflow(MultiTurnWorkflow):
             error_message = f"Error importing SciWorldTWEnv {str(e)}. Please make sure you have installed the sciworld package successfully, following the instructions in https://github.com/allenai/ScienceWorld"
             raise ImportError(error_message)
         env = create_environment(task_config)
-        return self.generate_env_inference_samples(env, rollout_n)
+        return await self.generate_env_inference_samples(env, rollout_n)
