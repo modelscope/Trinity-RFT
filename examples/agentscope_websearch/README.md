@@ -58,11 +58,11 @@ All workflow parameters can be configured in the [`agentscopev1_websearch_agent.
 
 
 ## Result
-Below we provide the training curve of running using `tavily` search tools:
+Below we provide the training curve of running using `tavily` search tools.
+It takes around 8 hours on 8 H20 GPUs.
 
+Reward curve:
 ![](../../docs/sphinx_doc/assets/agentscope_websearch_reward.png)
 
+Memory length of ReAct Agent:
 ![](../../docs/sphinx_doc/assets/agentscope_websearch_turns.png)
-
-
-It takes around 8 hours on 8 H20 GPUs.
