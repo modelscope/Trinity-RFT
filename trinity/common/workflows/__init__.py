@@ -11,9 +11,6 @@ from trinity.common.workflows.envs.agentscope.agentscopev0_react_workflow import
 from trinity.common.workflows.envs.agentscope.agentscopev1_react_workflow import (
     AgentScopeReactMathWorkflow,
 )
-from .envs.agentscope.agentscopev1_search_workflow import (
-    AgentScopeV1ReactSearchWorkflow,
-)
 from trinity.common.workflows.envs.alfworld.alfworld_workflow import (
     AlfworldWorkflow,
     StepWiseAlfworldWorkflow,
@@ -54,6 +51,10 @@ from trinity.common.workflows.workflow import (
     SimpleWorkflow,
     Task,
     Workflow,
+)
+
+from .envs.agentscope.agentscopev1_search_workflow import (
+    AgentScopeV1ReactSearchWorkflow,
 )
 
 __all__ = [
