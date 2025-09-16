@@ -1,0 +1,101 @@
+project: "Trinity_Multi_Step"
+name: WebQA_Search_Example
+checkpoint_root_dir: ${oc.env:TRINITY_CHECKPOINT_ROOT_DIR,./checkpoints}
+algorithm:
+  algorithm_type: grpo
+  repeat_times: 8
+  advantage_fn: grpo
+model:
+  model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-7B-Instruct}
+  max_response_tokens: 4096
+  max_model_len: 20480
+cluster:
+  node_num: 1
+  gpu_per_node: 8
+buffer:
+  total_epochs: 8
+  batch_size: 16
+  train_batch_size: 512 # 16*8*4
+  explorer_input:
+    taskset:
+      name: webqa_train
+      storage_type: file
+      path: 'examples/agentscope_websearch/webwalker_rl_dataset'
+      split: train
+      format:
+        prompt_key: 'problem'
+        response_key: 'answer'
+      workflow_args:
+        max_turns: 10
+        search_client_type: tavily
+      rollout_args:
+        temperature: 1.0
+        max_tokens: 4096
+      enable_progress_bar: false
+    eval_tasksets:
+    - name: webqa_test
+      storage_type: file
+      path: 'examples/agentscope_websearch/webwalker_rl_dataset'
+      split: test
+      format:
+        prompt_key: 'problem'
+        response_key: 'answer'
+      enable_progress_bar: false
+      workflow_args:
+        max_turns: 10
+      rollout_args:
+        temperature: 0.6
+        max_tokens: 4096
+    default_workflow_type: 'agentscope_v1_react_search_workflow'
+  trainer_input:
+    experience_buffer:
+      name: experience_buffer
+      storage_type: queue
+      use_priority_queue: true
+explorer:
+  eval_interval: 10
+  max_repeat_times_per_runner: 1
+  max_timeout: 3600
+  rollout_model:
+    enable_thinking: true
+    enable_history: true
+    enable_openai_api: true
+    enable_auto_tool_choice: true
+    tool_call_parser: hermes
+    engine_num: 4
+    tensor_parallel_size: 1
+    enable_prefix_caching: false
+    enforce_eager: true
+    dtype: bfloat16
+    seed: 42
+    gpu_memory_utilization: 0.7
+    enable_chunked_prefill: true
+  auxiliary_models:
+    - model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen3-4B-Instruct-2507}
+      engine_num: 1
+      tensor_parallel_size: 2
+      enable_thinking: false
+      max_prompt_tokens: 20480
+      max_response_tokens: 10240
+      max_model_len: 32000
+synchronizer:
+  sync_style: dynamic_by_explorer
+  sync_method: 'nccl'
+  sync_interval: 5
+  sync_timeout: 3600
+trainer:
+  save_interval: 20
+  trainer_config:
+    actor_rollout_ref:
+      model:
+        use_remove_padding: true
+      actor:
+        use_dynamic_bsz: true
+        ppo_max_token_len_per_gpu: 16384
+        ulysses_sequence_parallel_size: 2
+        optim:
+          lr: 1e-6
+      ref:
+        log_prob_use_dynamic_bsz: ${trainer.trainer_config.actor_rollout_ref.actor.use_dynamic_bsz}
+        log_prob_max_token_len_per_gpu: ${trainer.trainer_config.actor_rollout_ref.actor.ppo_max_token_len_per_gpu}
+        ulysses_sequence_parallel_size: ${trainer.trainer_config.actor_rollout_ref.actor.ulysses_sequence_parallel_size} # sp size

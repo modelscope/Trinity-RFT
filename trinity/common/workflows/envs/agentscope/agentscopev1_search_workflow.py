@@ -23,15 +23,38 @@ class AgentScopeV1ReactSearchWorkflow(Workflow):
         task: Task,
         model: ModelWrapper,
         auxiliary_models: Optional[List[openai.OpenAI]] = None,
-    ):
-        # get openai client from model
-        self.openai_async_client = model.get_openai_async_client()
-        self.model_name = self.openai_async_client.model_path
+    ):  # get openai client from model
         super().__init__(
             task=task,
             model=model,
             auxiliary_models=auxiliary_models,
         )
+        # make sure that we have the correct import
+        try:
+            from agentscope.formatter import OpenAIChatFormatter
+            from agentscope.model import OpenAIChatModel
+        except ImportError as e:
+            error_message = f"AgentScope is not installed. Please install the agentscope framework first before running the workflow. Error: {str(e)}"
+            self.logger.error(error_message)
+            raise ImportError(error_message)
+
+        # get openai client from model
+        self.openai_async_client = model.get_openai_async_client()
+        self.model_name = self.openai_async_client.model_path
+
+        temperature = self.rollout_args.get("temperature", 1.0)
+        max_tokens = self.rollout_args.get("max_tokens", 4096)
+        self.agent_model = OpenAIChatModel(
+            api_key="EMPTY",
+            model_name=self.model_name,
+            stream=False,
+            generate_kwargs={
+                "temperature": temperature,
+                "max_tokens": max_tokens,
+            },
+        )
+        self.agent_model.client = self.openai_async_client
+        self.agent_model_formatter = OpenAIChatFormatter()
 
         self.reset(task)
 
@@ -122,29 +145,20 @@ Your judgement must be in the format and criteria specified below:
     async def run_async(self):
         try:
             from agentscope.agent import ReActAgent
-            from agentscope.formatter import OpenAIChatFormatter
             from agentscope.mcp import StdIOStatefulClient
             from agentscope.memory import InMemoryMemory
             from agentscope.message import Msg
-            from agentscope.model import OpenAIChatModel
             from pydantic import BaseModel, Field
         except ImportError as e:
             error_message = f"AgentScope V1 is not installed. Please install the agentscope framework first before running the workflow. Error: {str(e)}"
             self.logger.error(error_message)
             raise ImportError(error_message)
 
-        model = OpenAIChatModel(
-            api_key="EMPTY",
-            model_name=self.model_name,
-            stream=False,
-        )
-        model.client = self.openai_async_client
-
         self.agent = ReActAgent(
             name="Friday",
             sys_prompt=self.system_prompt,
-            model=model,
-            formatter=OpenAIChatFormatter(),
+            model=self.agent_model,
+            formatter=self.agent_model_formatter,
             memory=InMemoryMemory(),
             max_iters=self.max_turns,
         )
