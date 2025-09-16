@@ -71,7 +71,7 @@ explorer:
     gpu_memory_utilization: 0.7
     enable_chunked_prefill: true
   auxiliary_models:
-    - model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen3-4B-Instruct-2507}
+    - model_path: ${oc.env:TRINITY_AUX_MODEL_PATH,Qwen/Qwen3-4B-Instruct-2507}
       engine_num: 1
       tensor_parallel_size: 2
       enable_thinking: false
