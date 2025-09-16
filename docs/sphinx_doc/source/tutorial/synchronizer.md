@@ -27,19 +27,30 @@ To achieve this, the Synchronizer:
 
 ```python
 async def train(self) -> str:
-    while self.train_continue:
+    while self.train_step_num < self.total_steps:
         try:
-            train_task = asyncio.create_task(self.train_step())
-            while not train_task.done():
-                if self.need_sync():
-                    self.sync_weight()  # Ask Synchronizer if sync is needed
+            # sample may be blocked due to explorer does not generate enough data
+            self.logger.info(f"Sample data for step {self.train_step_num + 1} started.")
+            sample_task = asyncio.create_task(self._sample_data())
+            while not sample_task.done():
+                # sync weight to make sure the explorer can continue to explore and generate enough data
+                if await self.need_sync():
+                    # Currently, we do not record the metrics of sync_weight here
+                    await self.sync_weight()
                 await asyncio.sleep(1)
-            self.train_continue &= await train_task
-            if self.train_continue and self.need_sync():
-                self.sync_weight()
+            exps, metrics, repr_samples = await sample_task
+            self.logger.info(f"Sample data for step {self.train_step_num + 1} finished.")
+            metrics.update(await self.train_step(exps))
+            if await self.need_sync():
+                metrics.update(await self.sync_weight())
+            # ...
+            self.monitor.log(metrics, self.train_step_num)
+        except StopAsyncIteration:
+            self.logger.info("No more samples to train. Stopping training.")
+            break
         except Exception:
             self.logger.error(f"Error in Trainer:\n{traceback.format_exc()}")
-            self.train_continue = False
+            break
 ```
 
 The Trainer checks whether synchronization is needed:
