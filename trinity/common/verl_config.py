@@ -32,6 +32,7 @@ class ActorModel:
     use_fused_kernels: bool = False
     fused_kernel_options: FusedKernelOptions = field(default_factory=FusedKernelOptions)
     custom_chat_template: Optional[str] = None
+    enable_activation_offload: bool = False
 
 
 @dataclass
