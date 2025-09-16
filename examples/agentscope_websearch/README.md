@@ -18,24 +18,36 @@ The config file is located in [`agentscopev1_websearch_agent.yaml`](agentscopev1
 
 ## Prerequisites
 
-Before running this workflow, ensure you have the following set up:
+Before running this workflow, please complete the following setup steps.
 
-1.  **Dependencies**: Install the required AgentScope framework.
+1.  **Install Dependencies**
+
+    Install the core AgentScope framework.
     ```bash
-    pip install "agentscope"
+    pip install agentscope
     ```
-    The specific MCP clients (`tavily-mcp` and `mcp-searxng`) will be automatically installed via `npx` on the first run.
+    > **Note**: The required MCP clients (`tavily-mcp` and `mcp-searxng`) will be automatically installed via `npx` on the first run, so no manual installation is needed for them.
 
-2.  **Environment Variables**: You must configure the environment variables for the search tool you intend to use.
+2.  **Configure Environment Variables**
 
-    *   For [Tavily Search](https://tavily.com/), set your API key:
+    Set the environment variables for the search tool you plan to use.
+
+    *   For **Tavily Search**, set your API key:
       ```bash
       export TAVILY_API_KEY="your_tavily_api_key"
       ```
-    *   For [SearXNG](https://docs.searxng.org/), set the URL of your SearXNG instance:
+    *   For **SearXNG**, set the URL of your self-hosted instance:
       ```bash
       export SEARXNG_URL="http://your-searxng-instance.com"
       ```
+
+3.  **Generate the Dataset**
+
+    Run the following script to generate the dataset for evaluation.
+    ```bash
+    python examples/agentscope_websearch/get_webwalkerQA_data.py
+    ```
+    *   **(Optional) Filter the Dataset**: For a more focused evaluation, you can filter the dataset by difficulty. For example, you might want to remove samples that cannot be answered even by more capable models, allowing you to benchmark performance on a more consistent set of problems.
 
 ## Configuration
 

@@ -12,10 +12,12 @@ The script performs the following actions:
 4. Saves the processed data into 'train.jsonl' and 'test.jsonl' files.
 5. Generates a 'dataset_dict.json' file describing the dataset's structure.
 """
-import os
 import json
+import os
 import random
+
 from datasets import load_dataset
+
 
 def create_dataset_files(output_dir, train_sample_size=160, test_sample_size=16):
     """
@@ -52,8 +54,8 @@ def create_dataset_files(output_dir, train_sample_size=160, test_sample_size=16)
         # For example, we filtered out examples that can not be answered by gpt4.1
 
         info = item.get("info", {})
-        difficulty = info.get('difficulty_level', '')
-        lang = info.get('lang', '')
+        difficulty = info.get("difficulty_level", "")
+        lang = info.get("lang", "")
 
         # Construct the 'problem' field.
         problem = (
@@ -64,7 +66,7 @@ def create_dataset_files(output_dir, train_sample_size=160, test_sample_size=16)
             + ". The answer should be based on the information on the website."
         )
         answer = item.get("expected_answer", "")
-        
+
         simple_item = {"problem": problem, "answer": answer}
 
         # Split the data into test and train candidates.
@@ -72,20 +74,26 @@ def create_dataset_files(output_dir, train_sample_size=160, test_sample_size=16)
             test_candidates.append(simple_item)
         else:
             train_candidates.append(simple_item)
-    
-    print(f"Processing complete. Found {len(train_candidates)} training candidates and {len(test_candidates)} test candidates.")
+
+    print(
+        f"Processing complete. Found {len(train_candidates)} training candidates and {len(test_candidates)} test candidates."
+    )
 
     # 4. Randomly sample from the candidate lists.
     # Or you can filter based on other criteria.
     random.seed(42)
     final_test_list = random.sample(test_candidates, min(test_sample_size, len(test_candidates)))
-    final_train_list = random.sample(train_candidates, min(train_sample_size, len(train_candidates)))
-    
-    print(f"Sampling complete. Final train set size: {len(final_train_list)}, Final test set size: {len(final_test_list)}")
+    final_train_list = random.sample(
+        train_candidates, min(train_sample_size, len(train_candidates))
+    )
+
+    print(
+        f"Sampling complete. Final train set size: {len(final_train_list)}, Final test set size: {len(final_test_list)}"
+    )
 
     # 5. Save the data to .jsonl files.
     dataset_splits = {"train": final_train_list, "test": final_test_list}
-    
+
     for split_name, data_list in dataset_splits.items():
         output_file = os.path.join(output_dir, f"{split_name}.jsonl")
         with open(output_file, "w", encoding="utf-8") as f:
@@ -99,15 +107,15 @@ def create_dataset_files(output_dir, train_sample_size=160, test_sample_size=16)
         "description": "A custom dataset created from callanwu/WebWalkerQA for RL training.",
         "splits": {
             "train": {"name": "train", "num_examples": len(final_train_list)},
-            "test": {"name": "test", "num_examples": len(final_test_list)}
-        }
+            "test": {"name": "test", "num_examples": len(final_test_list)},
+        },
     }
-    
+
     dict_path = os.path.join(output_dir, "dataset_dict.json")
     with open(dict_path, "w", encoding="utf-8") as f:
         json.dump(dataset_info, f, ensure_ascii=False, indent=2)
     print(f"Successfully wrote to {dict_path}")
-    
+
     print("\nAll files created successfully!")
 
 
@@ -116,16 +124,12 @@ if __name__ == "__main__":
     # This example uses a folder named "webwalker_rl_dataset" in the same directory as the script.
     current_file_dir = os.path.dirname(os.path.abspath(__file__))
     output_directory = os.path.join(current_file_dir, "webwalker_rl_dataset")
-    
+
     # Alternatively, you can use an absolute path like in your original script:
     # output_directory = "/mnt/data/zhangwenhao.zwh/webwalker_rl_dataset"
 
     # Call the main function to create the dataset files.
-    create_dataset_files(
-        output_dir=output_directory,
-        train_sample_size=160,
-        test_sample_size=16
-    )
+    create_dataset_files(output_dir=output_directory, train_sample_size=160, test_sample_size=16)
 
     # --- Verification Step: Test loading the generated dataset ---
     print("\n--- Verifying the created dataset ---")
@@ -136,4 +140,3 @@ if __name__ == "__main__":
         print(f"Test set size: {len(load_ds['test'])}")
     except Exception as e:
         print(f"Failed to load the created dataset: {e}")
-
