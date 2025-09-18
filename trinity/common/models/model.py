@@ -68,8 +68,8 @@ def _history_recorder(func):
 class ModelWrapper:
     """A wrapper for the InferenceModel Ray Actor"""
 
-    def __init__(self, model: Any, model_type: str = "vllm", enable_history: bool = False):
-        assert model_type.startswith("vllm"), "Only vLLM model is supported for now."
+    def __init__(self, model: Any, engine_type: str = "vllm", enable_history: bool = False):
+        assert engine_type.startswith("vllm"), "Only vLLM model is supported for now."
         self.model = model
         self.api_address: str = None
         self.openai_client: openai.OpenAI = None

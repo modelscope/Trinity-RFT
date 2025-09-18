@@ -121,7 +121,7 @@ class ModelWrapperTest(RayUnittestBaseAysnc):
         pprint(self.config)
         self.engines, self.auxiliary_engines = create_inference_models(self.config)
         self.model_wrapper = ModelWrapper(
-            self.engines[0], model_type="vllm_async", enable_history=self.enable_history
+            self.engines[0], engine_type="vllm", enable_history=self.enable_history
         )
 
     async def test_generate(
@@ -240,7 +240,7 @@ class TestModelLen(RayUnittestBase):
         self.config.check_and_update()
 
         self.engines, self.auxiliary_engines = create_inference_models(self.config)
-        self.model_wrapper = ModelWrapper(self.engines[0], model_type="vllm", enable_history=True)
+        self.model_wrapper = ModelWrapper(self.engines[0], engine_type="vllm", enable_history=True)
 
     def test_model_len(self):
         messages = [
@@ -277,7 +277,7 @@ class TestAPIServer(RayUnittestBase):
         self.config = get_template_config()
         self.config.mode = "explore"
         self.config.model.model_path = get_model_path()
-        self.config.explorer.rollout_model.engine_type = "vllm_async"
+        self.config.explorer.rollout_model.engine_type = "vllm"
         self.config.explorer.rollout_model.engine_num = 1
         self.config.explorer.rollout_model.tensor_parallel_size = 1
         self.config.explorer.rollout_model.use_v1 = True
@@ -286,11 +286,9 @@ class TestAPIServer(RayUnittestBase):
 
         self.config.check_and_update()
         self.engines, self.auxiliary_engines = create_inference_models(self.config)
-        self.model_wrapper = ModelWrapper(
-            self.engines[0], model_type="vllm_async", enable_history=True
-        )
+        self.model_wrapper = ModelWrapper(self.engines[0], engine_type="vllm", enable_history=True)
         self.model_wrapper_no_history = ModelWrapper(
-            self.engines[0], model_type="vllm_async", enable_history=False
+            self.engines[0], engine_type="vllm", enable_history=False
         )
 
     def test_api(self):
@@ -348,7 +346,7 @@ class TestAsyncAPIServer(RayUnittestBaseAysnc):
         self.config = get_template_config()
         self.config.mode = "explore"
         self.config.model.model_path = get_model_path()
-        self.config.explorer.rollout_model.engine_type = "vllm_async"
+        self.config.explorer.rollout_model.engine_type = "vllm"
         self.config.explorer.rollout_model.engine_num = 1
         self.config.explorer.rollout_model.tensor_parallel_size = 1
         self.config.explorer.rollout_model.use_v1 = True
@@ -357,11 +355,9 @@ class TestAsyncAPIServer(RayUnittestBaseAysnc):
 
         self.config.check_and_update()
         self.engines, self.auxiliary_engines = create_inference_models(self.config)
-        self.model_wrapper = ModelWrapper(
-            self.engines[0], model_type="vllm_async", enable_history=True
-        )
+        self.model_wrapper = ModelWrapper(self.engines[0], engine_type="vllm", enable_history=True)
         self.model_wrapper_no_history = ModelWrapper(
-            self.engines[0], model_type="vllm_async", enable_history=False
+            self.engines[0], engine_type="vllm", enable_history=False
         )
 
     async def test_api_async(self):
@@ -537,7 +533,7 @@ class TestAPIServerToolCall(RayUnittestBase):
         self.config = get_template_config()
         self.config.mode = "explore"
         self.config.model.model_path = get_api_model_path()
-        self.config.explorer.rollout_model.engine_type = "vllm_async"
+        self.config.explorer.rollout_model.engine_type = "vllm"
         self.config.explorer.rollout_model.engine_num = 1
         self.config.explorer.rollout_model.tensor_parallel_size = 1
         self.config.explorer.rollout_model.use_v1 = True
@@ -551,11 +547,9 @@ class TestAPIServerToolCall(RayUnittestBase):
 
         self.config.check_and_update()
         self.engines, self.auxiliary_engines = create_inference_models(self.config)
-        self.model_wrapper = ModelWrapper(
-            self.engines[0], model_type="vllm_async", enable_history=True
-        )
+        self.model_wrapper = ModelWrapper(self.engines[0], engine_type="vllm", enable_history=True)
         self.model_wrapper_no_history = ModelWrapper(
-            self.engines[0], model_type="vllm_async", enable_history=False
+            self.engines[0], engine_type="vllm", enable_history=False
         )
 
     def test_api_tool_calls(self):

@@ -56,7 +56,7 @@ agent = [
     "agentscope"
 ]
 rm_gallery = [
-    "rm-gallery>=0.1.1"
+    "rm-gallery>=0.1.5"
 ]
 dev = [
     "pre-commit>=2.17.0",
@@ -123,6 +123,3 @@ known_third_party = ["wandb"]
 [project.urls]
 "Homepage" = "https://github.com/modelscope/Trinity-RFT"
 "Documentation" = "https://modelscope.github.io/Trinity-RFT/"
-
-[tool.uv]
-override-dependencies=["math_verify>=0.8.0"]  # rm-gallery requires math_verify<0.8.0 which is not compatible with trinity-rft
