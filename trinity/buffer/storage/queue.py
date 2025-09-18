@@ -219,7 +219,7 @@ class QueueStorage:
         self.queue = QueueBuffer.get_queue(storage_config, config)
         st_config = deepcopy(storage_config)
         st_config.wrap_in_ray = False
-        if st_config.path is not None:
+        if st_config.path:
             if is_database_url(st_config.path):
                 from trinity.buffer.writer.sql_writer import SQLWriter
 

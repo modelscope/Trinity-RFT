@@ -40,7 +40,6 @@ buffer:
     experience_buffer:
       name: experience_buffer
       storage_type: queue
-      path: ''
       use_priority_queue: true
       replay_buffer_kwargs:
         priority_fn: linear_decay
@@ -133,7 +132,6 @@ trainer:
       default_hdfs_dir: null
       remove_previous_ckpt_in_save: false
       del_local_ckpt_after_load: false
-      val_before_train: false
       max_actor_ckpt_to_keep: null
       max_critic_ckpt_to_keep: null
     critic:

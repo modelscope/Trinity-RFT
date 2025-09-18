@@ -617,7 +617,6 @@ trainer:
   default_hdfs_dir: null
   remove_previous_ckpt_in_save: False
   del_local_ckpt_after_load: False
-  val_before_train: False
   max_actor_ckpt_to_keep: 5
   max_critic_ckpt_to_keep: 5
 ```

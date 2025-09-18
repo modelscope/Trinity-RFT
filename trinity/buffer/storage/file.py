@@ -34,7 +34,7 @@ class FileStorage:
     """
 
     def __init__(self, storage_config: StorageConfig, config: BufferConfig) -> None:
-        if storage_config.path is None:
+        if not storage_config.path:
             storage_config.path = default_storage_path(storage_config, config)
         ext = os.path.splitext(storage_config.path)[-1]
         if ext != ".jsonl" and ext != ".json":

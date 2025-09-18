@@ -580,6 +580,8 @@ class ConfigManager:
                 },
             },
         }
+        if not experience_buffer_path:
+            del buffer_config["trainer_input"]["experience_buffer"]["path"]
         if st.session_state["train_batch_size"] is None:
             del buffer_config["train_batch_size"]
         if st.session_state["algorithm_type"] != "dpo":
