@@ -26,6 +26,11 @@ from trinity.utils.log import get_logger
 logger = get_logger(__name__)
 
 
+def set_if_none(obj, attr, val):
+    if getattr(obj, attr, None) is None:
+        setattr(obj, attr, val)
+
+
 @dataclass
 class FormatConfig:
     """Configuration for data formatting"""
@@ -70,6 +75,7 @@ class GenerationConfig:
     top_p: float = 1.0
     top_k: int = -1
     logprobs: int = 0  # vLLM return `logprobs + 1` elements
+    max_tokens: Optional[int] = None  # if None, use model.max_response_tokens
     # repeat each task for `n` times
     # ! DO NOT SET in `buffer.explorer_input.taskset.rollout_args`
     n: int = 1
@@ -583,112 +589,84 @@ class Config:
     def _check_buffer(self) -> None:  # noqa: C901
         # TODO: split this function into different buffer read/writer
         # check explorer_input
-        if self.mode != "train" and not self.buffer.explorer_input.taskset.path:
+        trainer_input = self.buffer.trainer_input
+        experience_buffer = trainer_input.experience_buffer
+        explorer_input = self.buffer.explorer_input
+        taskset = explorer_input.taskset
+
+        if self.mode != "train" and not taskset.path:
             raise ValueError(
                 "`buffer.explorer_input.taskset.path` is required, please set it to the path of the taskset."
             )
-        if not self.buffer.explorer_input.taskset.name:
-            self.buffer.explorer_input.taskset.name = "taskset"
-        if (
-            self.buffer.explorer_input.taskset.repeat_times is None
-            or self.buffer.explorer_input.taskset.repeat_times != self.algorithm.repeat_times
-        ):
-            self.buffer.explorer_input.taskset.repeat_times = self.algorithm.repeat_times
+        if not taskset.name:
+            taskset.name = "taskset"
+        if taskset.repeat_times is None or taskset.repeat_times != self.algorithm.repeat_times:
+            taskset.repeat_times = self.algorithm.repeat_times
             logger.info(
                 "`buffer.explorer_input.taskset.repeat_times` is set to `algorithm.repeat_times`"
                 f" (={self.algorithm.repeat_times})."
             )
         if self.mode == "train":
             assert (
-                self.buffer.trainer_input.experience_buffer is not None
+                experience_buffer is not None
             ), "`buffer.trainer_input.experience_buffer` is required when `mode` is `train`."
-            self.buffer.trainer_input.experience_buffer.total_epochs = self.buffer.total_epochs
-            self.buffer.trainer_input.experience_buffer.total_steps = self.buffer.total_steps
+            experience_buffer.total_epochs = self.buffer.total_epochs
+            experience_buffer.total_steps = self.buffer.total_steps
         else:
-            self.buffer.explorer_input.taskset.is_eval = False
-            self.buffer.explorer_input.taskset.total_epochs = self.buffer.total_epochs
-            self.buffer.explorer_input.taskset.total_steps = self.buffer.total_steps
-        if self.buffer.explorer_input.taskset.default_workflow_type is None:
-            self.buffer.explorer_input.taskset.default_workflow_type = (
-                self.buffer.explorer_input.default_workflow_type
-            )
-        if self.buffer.explorer_input.taskset.default_eval_workflow_type is None:
-            self.buffer.explorer_input.taskset.default_eval_workflow_type = (
-                self.buffer.explorer_input.default_eval_workflow_type
-            )
-        if self.buffer.explorer_input.taskset.default_reward_fn_type is None:
-            self.buffer.explorer_input.taskset.default_reward_fn_type = (
-                self.buffer.explorer_input.default_reward_fn_type
-            )
-        if self.buffer.explorer_input.taskset.format.system_prompt is None:
-            self.buffer.explorer_input.taskset.format.system_prompt = (
-                self.buffer.explorer_input.system_prompt
-            )
-        if self.buffer.explorer_input.taskset.format.reply_prefix is None:
-            self.buffer.explorer_input.taskset.format.reply_prefix = (
-                self.buffer.explorer_input.reply_prefix
-            )
-        if self.buffer.explorer_input.taskset.ray_namespace is None:
-            self.buffer.explorer_input.taskset.ray_namespace = self.ray_namespace
+            taskset.is_eval = False
+            taskset.total_epochs = self.buffer.total_epochs
+            taskset.total_steps = self.buffer.total_steps
+
+        set_if_none(taskset, "default_workflow_type", explorer_input.default_workflow_type)
+        set_if_none(
+            taskset, "default_eval_workflow_type", explorer_input.default_eval_workflow_type
+        )
+        set_if_none(taskset, "default_reward_fn_type", explorer_input.default_reward_fn_type)
+        set_if_none(taskset.format, "system_prompt", explorer_input.system_prompt)
+        set_if_none(taskset.format, "reply_prefix", explorer_input.reply_prefix)
+        set_if_none(taskset, "ray_namespace", self.ray_namespace)
+        set_if_none(taskset.rollout_args, "max_tokens", self.model.max_response_tokens)
 
         remained_tasksets = []
-        for idx, dataset in enumerate(self.buffer.explorer_input.eval_tasksets):
+        for idx, dataset in enumerate(explorer_input.eval_tasksets):
             if not dataset.path:
                 logger.warning(f"Eval dataset [{dataset}]'s path is not configured. Skip.")
                 continue
             dataset.is_eval = True
             if not dataset.name:
                 dataset.name = f"eval_taskset_{idx}"
-            if dataset.repeat_times is None:
-                dataset.repeat_times = 1
-            if dataset.default_workflow_type is None:
-                dataset.default_workflow_type = self.buffer.explorer_input.default_workflow_type
-            if dataset.default_eval_workflow_type is None:
-                dataset.default_eval_workflow_type = (
-                    self.buffer.explorer_input.default_eval_workflow_type
-                )
-            if dataset.default_reward_fn_type is None:
-                dataset.default_reward_fn_type = self.buffer.explorer_input.default_reward_fn_type
-            if dataset.format.system_prompt is None:
-                dataset.format.system_prompt = self.buffer.explorer_input.system_prompt
-            if dataset.format.reply_prefix is None:
-                dataset.format.reply_prefix = self.buffer.explorer_input.reply_prefix
-            if dataset.ray_namespace is None:
-                dataset.ray_namespace = self.ray_namespace
+            set_if_none(dataset, "repeat_times", 1)
+            set_if_none(dataset, "default_workflow_type", explorer_input.default_workflow_type)
+            set_if_none(
+                dataset, "default_eval_workflow_type", explorer_input.default_eval_workflow_type
+            )
+            set_if_none(dataset, "default_reward_fn_type", explorer_input.default_reward_fn_type)
+            set_if_none(dataset.format, "system_prompt", explorer_input.system_prompt)
+            set_if_none(dataset.format, "reply_prefix", explorer_input.reply_prefix)
+            set_if_none(dataset, "ray_namespace", self.ray_namespace)
+            set_if_none(dataset.rollout_args, "max_tokens", self.model.max_response_tokens)
             remained_tasksets.append(dataset)
-        self.buffer.explorer_input.eval_tasksets = remained_tasksets
+        explorer_input.eval_tasksets = remained_tasksets
 
         # check trainer_input.experience_buffer
-        if self.buffer.trainer_input.experience_buffer is None:
-            self.buffer.trainer_input.experience_buffer = StorageConfig(
+        if experience_buffer is None:
+            experience_buffer = trainer_input.experience_buffer = StorageConfig(
                 name="experience_buffer",
                 storage_type=StorageType.QUEUE,
             )
-            logger.info(
-                f"Auto set `buffer.trainer_input.experience_buffer` to {self.buffer.trainer_input.experience_buffer}"
-            )
-        elif (
-            self.buffer.trainer_input.experience_buffer.storage_type is StorageType.FILE
-            and self.mode == "both"
-        ):
+            logger.info(f"Auto set `buffer.trainer_input.experience_buffer` to {experience_buffer}")
+        elif experience_buffer.storage_type is StorageType.FILE and self.mode == "both":
             logger.warning(
                 "`FILE` storage is not supported to use as experience_buffer in `both` mode, use `QUEUE` instead."
             )
-            self.buffer.trainer_input.experience_buffer.storage_type = StorageType.QUEUE
+            experience_buffer.storage_type = StorageType.QUEUE
 
         from trinity.algorithm.algorithm import ALGORITHM_TYPE
 
-        self.buffer.trainer_input.experience_buffer.schema_type = ALGORITHM_TYPE.get(
-            self.algorithm.algorithm_type
-        ).schema
+        experience_buffer.schema_type = ALGORITHM_TYPE.get(self.algorithm.algorithm_type).schema
 
-        if self.buffer.trainer_input.experience_buffer.ray_namespace is None:
-            self.buffer.trainer_input.experience_buffer.ray_namespace = self.ray_namespace
-
-        if self.buffer.trainer_input.experience_buffer.format.chat_template is None:
-            self.buffer.trainer_input.experience_buffer.format.chat_template = (
-                self.model.custom_chat_template
-            )
+        set_if_none(experience_buffer, "ray_namespace", self.ray_namespace)
+        set_if_none(experience_buffer.format, "chat_template", self.model.custom_chat_template)
 
         # create buffer.cache_dir at <checkpoint_root_dir>/<project>/<name>/buffer
         self.buffer.cache_dir = os.path.abspath(os.path.join(self.checkpoint_job_dir, "buffer"))
@@ -701,39 +679,35 @@ class Config:
             )
 
         # check input/output buffers in pipelines
-        if self.data_processor.experience_pipeline is not None:
-            if (
-                self.data_processor.experience_pipeline.save_input
-                and self.data_processor.experience_pipeline.input_save_path is None
-            ):
-                self.data_processor.experience_pipeline.input_save_path = os.path.join(
+        experience_pipeline = self.data_processor.experience_pipeline
+        if experience_pipeline is not None:
+            if experience_pipeline.save_input and experience_pipeline.input_save_path is None:
+                experience_pipeline.input_save_path = os.path.join(
                     self.buffer.cache_dir, "explorer_output.jsonl"
                 )
                 logger.info(
-                    f"Auto set `data_processor.experience_pipeline.input_save_path` to {self.data_processor.experience_pipeline.input_save_path}"
+                    f"Auto set `data_processor.experience_pipeline.input_save_path` to {experience_pipeline.input_save_path}"
                 )
-        if self.data_processor.task_pipeline is not None:
-            if self.data_processor.task_pipeline.output is None:
-                if self.buffer.explorer_input.taskset.path is not None:
-                    self.data_processor.task_pipeline.output = self.buffer.explorer_input.taskset
+
+        task_pipeline = self.data_processor.task_pipeline
+        if task_pipeline is not None:
+            if task_pipeline.output is None:
+                if taskset.path is not None:
+                    task_pipeline.output = taskset
                 elif (
-                    self.buffer.trainer_input.experience_buffer.schema_type in {"dpo", "sft"}
-                    and self.buffer.trainer_input.experience_buffer.path is not None
+                    experience_buffer.schema_type in {"dpo", "sft"}
+                    and experience_buffer.path is not None
                 ):
-                    self.data_processor.task_pipeline.output = (
-                        self.buffer.trainer_input.experience_buffer
-                    )
+                    task_pipeline.output = experience_buffer
                 else:
                     raise ValueError(
                         "`data_processor.task_pipeline.output` is required when both "
                         "`buffer.explorer_input.taskset.path` and `buffer.trainer_input.experience_buffer.path` are "
                         "None"
                     )
-            if self.data_processor.task_pipeline.output.path and os.path.exists(
-                self.data_processor.task_pipeline.output.path
-            ):
+            if task_pipeline.output.path and os.path.exists(task_pipeline.output.path):
                 raise ValueError(
-                    f"Task pipeline output path {self.data_processor.task_pipeline.output.path} already exists.\n"
+                    f"Task pipeline output path {task_pipeline.output.path} already exists.\n"
                     "Please choose a different output path to avoid overwriting."
                 )
 
@@ -790,15 +764,13 @@ class Config:
         }
         default_config.update(algorithm.default_config())
         for key, value in default_config.items():
-            if getattr(self.algorithm, key, None) is None:
-                setattr(self.algorithm, key, value)
+            set_if_none(self.algorithm, key, value)
 
         def check_and_set(name, registry, args_attr):
             fn_cls = registry.get(getattr(self.algorithm, name))
             if fn_cls is None:
                 raise ValueError(f"Invalid {name}: {getattr(self.algorithm, name)}")
-            if getattr(self.algorithm, args_attr) is None:
-                setattr(self.algorithm, args_attr, fn_cls.default_args())
+            set_if_none(self.algorithm, args_attr, fn_cls.default_args())
             return fn_cls
 
         check_and_set("sample_strategy", SAMPLE_STRATEGY, "sample_strategy_args")
@@ -809,44 +781,37 @@ class Config:
         check_and_set("entropy_loss_fn", ENTROPY_LOSS_FN, "entropy_loss_fn_args")
 
     def _check_model(self) -> None:
-        if not self.model.critic_model_path:
-            self.model.critic_model_path = self.model.model_path
+        model = self.model
+        if not model.critic_model_path:
+            model.critic_model_path = model.model_path
 
         # check max_model_len, max_prompt_tokens, max_response_tokens
 
         # if all three are set, check if they are valid
         if (
-            self.model.max_model_len is not None
-            and self.model.max_prompt_tokens is not None
-            and self.model.max_response_tokens is not None
+            model.max_model_len is not None
+            and model.max_prompt_tokens is not None
+            and model.max_response_tokens is not None
         ):
-            if (
-                self.model.max_prompt_tokens + self.model.max_response_tokens
-                > self.model.max_model_len
-            ):
+            if model.max_prompt_tokens + model.max_response_tokens > model.max_model_len:
                 raise ValueError(
-                    f"`max_prompt_tokens` + `max_response_tokens` ({self.model.max_prompt_tokens} + {self.model.max_response_tokens}) "
-                    f"exceeds `max_model_len` ({self.model.max_model_len}). Please adjust them accordingly."
+                    f"`max_prompt_tokens` + `max_response_tokens` ({model.max_prompt_tokens} + {model.max_response_tokens}) "
+                    f"exceeds `max_model_len` ({model.max_model_len}). Please adjust them accordingly."
                 )
 
         # check max_model_len first
-        if self.model.max_model_len is None:
-            if (
-                self.model.max_prompt_tokens is not None
-                and self.model.max_response_tokens is not None
-            ):
-                self.model.max_model_len = (
-                    self.model.max_prompt_tokens + self.model.max_response_tokens
-                )
+        if model.max_model_len is None:
+            if model.max_prompt_tokens is not None and model.max_response_tokens is not None:
+                model.max_model_len = model.max_prompt_tokens + model.max_response_tokens
                 logger.warning(
-                    f"`max_model_len` is set to {self.model.max_model_len} from `max_prompt_tokens` and `max_response_tokens`."
+                    f"`max_model_len` is set to {model.max_model_len} from `max_prompt_tokens` and `max_response_tokens`."
                 )
             else:
                 from transformers import AutoConfig, AutoTokenizer
                 from transformers.tokenization_utils_base import LARGE_INTEGER
 
-                tokenizer = AutoTokenizer.from_pretrained(self.model.model_path)
-                config = AutoConfig.from_pretrained(self.model.model_path)
+                tokenizer = AutoTokenizer.from_pretrained(model.model_path)
+                config = AutoConfig.from_pretrained(model.model_path)
                 max_model_len = min(
                     getattr(tokenizer, "model_max_length", LARGE_INTEGER),
                     getattr(config, "max_position_embeddings", LARGE_INTEGER),
@@ -854,42 +819,38 @@ class Config:
                 if max_model_len >= LARGE_INTEGER:
                     max_model_len = MAX_MODEL_LEN
                     logger.warning(
-                        f"Failed to get `max_model_len` from model {self.model.model_path}, use {MAX_MODEL_LEN} instead."
+                        f"Failed to get `max_model_len` from model {model.model_path}, use {MAX_MODEL_LEN} instead."
                     )
-                self.model.max_model_len = max_model_len
+                model.max_model_len = max_model_len
 
         # both max_prompt_tokens and max_response_tokens are None
-        if self.model.max_prompt_tokens is None and self.model.max_response_tokens is None:
+        if model.max_prompt_tokens is None and model.max_response_tokens is None:
             # default to max_model_len / 2
-            self.model.max_prompt_tokens = self.model.max_model_len // 2
-            self.model.max_response_tokens = self.model.max_model_len - self.model.max_prompt_tokens
+            model.max_prompt_tokens = model.max_model_len // 2
+            model.max_response_tokens = model.max_model_len - model.max_prompt_tokens
             logger.warning(
-                f"`max_prompt_tokens` and `max_response_tokens` are not set, set to {self.model.max_prompt_tokens} and {self.model.max_response_tokens} respectively."
+                f"`max_prompt_tokens` and `max_response_tokens` are not set, set to {model.max_prompt_tokens} and {model.max_response_tokens} respectively."
             )
 
         # only max_prompt_tokens is None
-        if self.model.max_prompt_tokens is None and self.model.max_response_tokens is not None:
-            self.model.max_response_tokens = min(
-                self.model.max_response_tokens, self.model.max_model_len - 1
-            )
-            self.model.max_prompt_tokens = self.model.max_model_len - self.model.max_response_tokens
+        if model.max_prompt_tokens is None and model.max_response_tokens is not None:
+            model.max_response_tokens = min(model.max_response_tokens, model.max_model_len - 1)
+            model.max_prompt_tokens = model.max_model_len - model.max_response_tokens
             logger.warning(
-                f"`max_prompt_tokens` is set to {self.model.max_prompt_tokens}, `max_response_tokens` is set to {self.model.max_response_tokens}."
+                f"`max_prompt_tokens` is set to {model.max_prompt_tokens}, `max_response_tokens` is set to {model.max_response_tokens}."
             )
 
         # only max_response_tokens is None
-        if self.model.max_response_tokens is None and self.model.max_prompt_tokens is not None:
-            self.model.max_prompt_tokens = min(
-                self.model.max_prompt_tokens, self.model.max_model_len - 1
-            )
-            self.model.max_response_tokens = self.model.max_model_len - self.model.max_prompt_tokens
+        if model.max_response_tokens is None and model.max_prompt_tokens is not None:
+            model.max_prompt_tokens = min(model.max_prompt_tokens, model.max_model_len - 1)
+            model.max_response_tokens = model.max_model_len - model.max_prompt_tokens
             logger.warning(
-                f"`max_response_tokens` is set to {self.model.max_response_tokens}, `max_prompt_tokens` is set to {self.model.max_prompt_tokens}."
+                f"`max_response_tokens` is set to {model.max_response_tokens}, `max_prompt_tokens` is set to {model.max_prompt_tokens}."
             )
 
-        if self.model.min_response_tokens >= self.model.max_response_tokens:  # type: ignore [operator]
-            self.model.min_response_tokens = max(self.model.max_response_tokens - 1, 0)  # type: ignore [operator]
-            logger.warning(f"`min_response_tokens` is set to {self.model.min_response_tokens}.")
+        if model.min_response_tokens >= model.max_response_tokens:  # type: ignore [operator]
+            model.min_response_tokens = max(model.max_response_tokens - 1, 0)  # type: ignore [operator]
+            logger.warning(f"`min_response_tokens` is set to {model.min_response_tokens}.")
 
     def __iter__(self):
         """Iterate over configs with each stage applied in order.
@@ -954,14 +915,10 @@ class Config:
             for aux_model in self.explorer.auxiliary_models:
                 if not aux_model.model_path:
                     raise ValueError("auxiliary model's model_path is required.")
-                if aux_model.max_model_len is None:
-                    aux_model.max_model_len = self.model.max_model_len
-                if aux_model.max_prompt_tokens is None:
-                    aux_model.max_prompt_tokens = self.model.max_prompt_tokens
-                if aux_model.max_response_tokens is None:
-                    aux_model.max_response_tokens = self.model.max_response_tokens
-                if aux_model.min_response_tokens is None:
-                    aux_model.min_response_tokens = self.model.min_response_tokens
+                set_if_none(aux_model, "max_model_len", self.model.max_model_len)
+                set_if_none(aux_model, "max_prompt_tokens", self.model.max_prompt_tokens)
+                set_if_none(aux_model, "max_response_tokens", self.model.max_response_tokens)
+                set_if_none(aux_model, "min_response_tokens", self.model.min_response_tokens)
 
         # check synchronizer
         self.synchronizer.ray_namespace = self.ray_namespace
@@ -986,8 +943,7 @@ class Config:
         monitor_cls = MONITOR.get(self.monitor.monitor_type)
         if monitor_cls is None:
             raise ValueError(f"Invalid monitor type: {self.monitor.monitor_type}")
-        if self.monitor.monitor_args is None:
-            self.monitor.monitor_args = monitor_cls.default_args()
+        set_if_none(self.monitor, "monitor_args", monitor_cls.default_args())
         # create a job dir in <checkpoint_root_dir>/<project>/<name>/monitor
         self.monitor.cache_dir = os.path.join(self.checkpoint_job_dir, "monitor")
         try:
