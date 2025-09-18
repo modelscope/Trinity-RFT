@@ -1,6 +1,6 @@
 services:
   trinity-node-1:
-    image: trinity-rft-megatron:latest-unittest
+    image: trinity-rft-unittest:20250918
     pull_policy: never
     command: sh -c "pip install -e .[dev] && ray start --head --dashboard-host 0.0.0.0 --include-dashboard true --block"
     environment:
@@ -28,7 +28,7 @@ services:
             capabilities: [gpu]
 
   trinity-node-2:
-    image: trinity-rft-megatron:latest-unittest
+    image: trinity-rft-unittest:20250918
     pull_policy: never
     command: sh -c "pip install -e .[dev] && ray start --address=trinity-node-1:6379 --block"
     environment:
