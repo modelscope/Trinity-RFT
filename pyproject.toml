@@ -50,7 +50,7 @@ trinity = "trinity.cli.launcher:main"
 
 [project.optional-dependencies]
 data = [
-    "py-data-juicer>=1.4"
+    "py-data-juicer>=1.4.3"
 ]
 agent = [
     "agentscope"
@@ -125,4 +125,4 @@ known_third_party = ["wandb"]
 "Documentation" = "https://modelscope.github.io/Trinity-RFT/"
 
 [tool.uv]
-override-dependencies=["spacy>=3.8.2"]  # data-juicer requires spacy==3.8.0 which is yanked
+override-dependencies=["math_verify>=0.8.0"]  # rm-gallery requires math_verify<0.8.0 which is not compatible with trinity-rft
