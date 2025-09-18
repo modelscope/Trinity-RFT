@@ -76,6 +76,17 @@ class GenerationConfig:
 
 
 @dataclass
+class LoRAConfig:
+    name: str = ""
+    path: str = "placeholder"
+    base_model_name: Optional[str] = ""
+    lora_rank: int = 16
+    lora_alpha: int = 16
+    lora_dtype: Optional[str] = "auto"
+    target_modules: Optional[str] = "all-linear"
+
+
+@dataclass
 class StorageConfig:
     """Storage config."""
 
@@ -239,6 +250,12 @@ class ModelConfig:
     # the minimum number of tokens for the response
     min_response_tokens: int = 1
 
+    # lora config
+    # lora_model_path: Optional[List[str]] = None
+    lora_configs: Optional[List[LoRAConfig]] = None
+    fully_sharded_loras: bool = False
+    max_cpu_loras: Optional[int] = None
+
 
 @dataclass
 class InferenceModelConfig:
@@ -288,6 +305,11 @@ class InferenceModelConfig:
 
     # ! DO NOT SET
     bundle_indices: str = ""
+
+    # ! DO NOT SET, automatically set from model.lora_configs
+    enable_lora: Optional[bool] = False
+    lora_modules: Optional[List[str]] = None
+    lora_kwargs: Optional[dict] = field(default_factory=dict)
 
 
 @dataclass
@@ -962,6 +984,27 @@ class Config:
                     aux_model.max_response_tokens = self.model.max_response_tokens
                 if aux_model.min_response_tokens is None:
                     aux_model.min_response_tokens = self.model.min_response_tokens
+            if self.model.lora_configs is not None:
+                if len(self.model.lora_configs) > 1:
+                    raise ValueError("Only one lora adapter is supported for now.")
+                self.explorer.rollout_model.enable_lora = True
+                self.explorer.rollout_model.lora_modules = [
+                    {
+                        "lora_int_id": i + 1,
+                        "lora_name": cfg.name,
+                        "lora_path": cfg.path,
+                        "base_model_name": cfg.base_model_name,
+                    }
+                    for i, cfg in enumerate(self.model.lora_configs)
+                ]
+                self.explorer.rollout_model.lora_kwargs = {
+                    "max_loras": len(self.model.lora_configs),
+                    "max_lora_rank": max(
+                        model_config.lora_rank
+                        for model_config in self.model.lora_configs
+                        if model_config.lora_rank > 0
+                    ),
+                }
 
         # check synchronizer
         self.synchronizer.ray_namespace = self.ray_namespace

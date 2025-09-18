@@ -33,6 +33,12 @@ class ActorModel:
     fused_kernel_options: FusedKernelOptions = field(default_factory=FusedKernelOptions)
     custom_chat_template: Optional[str] = None
     enable_activation_offload: bool = False
+    use_shm: bool = False
+
+    # lora configs
+    lora_rank: int = 0
+    lora_alpha: int = 16
+    target_modules: Optional[str] = "all-linear"
 
 
 @dataclass
@@ -434,6 +440,24 @@ class veRLConfig:
             )
         if config.trainer.actor_grad_clip is not None:
             self.actor_rollout_ref.actor.grad_clip = config.trainer.actor_grad_clip
+
+        # LoRA related config
+        if config.model.lora_configs is not None:
+            self.actor_rollout_ref.model.lora_rank = config.model.lora_configs[0].lora_rank
+            self.actor_rollout_ref.model.lora_alpha = config.model.lora_configs[0].lora_alpha
+            self.actor_rollout_ref.model.target_modules = config.model.lora_configs[
+                0
+            ].target_modules
+            if self.actor_rollout_ref.actor.strategy not in ["fsdp", "fsdp2"]:
+                logger.warning(
+                    f"Lora is only supported for fsdp and fsdp2, but got {self.actor_rollout_ref.actor.strategy} instead, changed to fsdp."
+                )
+                self.actor_rollout_ref.actor.strategy = "fsdp"
+            if self.critic.strategy not in ["fsdp", "fsdp2"]:
+                logger.warning(
+                    f"Lora is only supported for fsdp and fsdp2, but got {self.critic.strategy} instead, changed to fsdp."
+                )
+                self.critic.strategy = "fsdp"
 
         # Algorithm related config
         self.actor_rollout_ref.actor.use_kl_loss = config.algorithm.kl_loss_fn != "none"

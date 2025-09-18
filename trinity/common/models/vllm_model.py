@@ -9,6 +9,7 @@ import torch
 import vllm
 from packaging.version import parse as parse_version
 from transformers import AutoProcessor
+from vllm.lora.request import LoRARequest
 from vllm.sampling_params import RequestOutputKind
 
 from trinity.common.config import InferenceModelConfig
@@ -21,6 +22,9 @@ from trinity.common.models.mm_utils import (
 from trinity.common.models.model import InferenceModel
 from trinity.common.models.utils import get_action_mask_method
 from trinity.utils.log import get_logger
+from trinity.utils.lora_utils import VLLMHijack
+
+VLLMHijack.hijack()
 
 
 # V0 engine is deprecated since vLLM v0.10.2, related code will be removed in the future.
@@ -78,6 +82,8 @@ class vLLMRolloutModel(InferenceModel):
             gpu_memory_utilization=config.gpu_memory_utilization,
             enable_chunked_prefill=config.enable_chunked_prefill,
             # max_num_batched_tokens=256, # you can further set this parameter to reduce the vllm peak memory usage
+            enable_lora=config.enable_lora,
+            **self.config.lora_kwargs,
         )
         if get_vllm_version() > parse_version("0.10.0"):
             engine_args.enable_log_requests = False
@@ -94,13 +100,24 @@ class vLLMRolloutModel(InferenceModel):
         self.model_version = 0  # TODO: resume the value from the checkpoint
         self.api_server_host = None
         self.api_server_port = None
+        # for lora
+        self.enable_lora = self.config.enable_lora
+        if self.enable_lora:
+            self.lora_request = LoRARequest(**self.config.lora_modules[0])
+        else:
+            self.lora_request = None
 
     async def _initialize_tokenizer(self):
         if self.tokenizer is None:
             if self.processor and hasattr(self.processor, "tokenizer"):
                 self.tokenizer = self.processor.tokenizer
             else:
-                self.tokenizer = await self.async_llm.get_tokenizer()
+                if self.enable_lora:
+                    self.tokenizer = await self.async_llm.get_tokenizer(
+                        lora_request=self.lora_request
+                    )
+                else:
+                    self.tokenizer = await self.async_llm.get_tokenizer()
         self.tokenizer.truncation_side = "left"
 
     def _initialize_processor(self):
@@ -109,7 +126,9 @@ class vLLMRolloutModel(InferenceModel):
         )
         self.tokenizer = self.processor.tokenizer
 
-    async def chat(self, messages: List[Dict], **kwargs) -> Sequence[Experience]:
+    async def chat(
+        self, messages: List[Dict], lora_request: LoRARequest = None, **kwargs
+    ) -> Sequence[Experience]:
         """Chat with the model with a list of messages in async.
 
         Args:
@@ -138,9 +157,11 @@ class vLLMRolloutModel(InferenceModel):
                 chat_template=self.chat_template,
                 enable_thinking=self.enable_thinking,
             )
-        return await self.generate(prompt=prompt, **kwargs)
+        return await self.generate(prompt=prompt, lora_request=lora_request, **kwargs)
 
-    async def generate(self, prompt: str, **kwargs) -> Sequence[Experience]:
+    async def generate(
+        self, prompt: str, lora_request: LoRARequest = None, **kwargs
+    ) -> Sequence[Experience]:
         """Generate a response from the provided prompt in async.
 
         Args:
@@ -155,7 +176,9 @@ class vLLMRolloutModel(InferenceModel):
         token_ids = self.tokenizer(  # type: ignore
             prompt, truncation=True, max_length=self.config.max_prompt_tokens, return_tensors="pt"
         )["input_ids"][0].tolist()
-        output = await self._generate_internal(prompt={"prompt_token_ids": token_ids}, **kwargs)
+        output = await self._generate_internal(
+            prompt={"prompt_token_ids": token_ids}, lora_request=lora_request, **kwargs
+        )
         experiences = [
             Experience(
                 tokens=torch.cat(
@@ -286,7 +309,9 @@ class vLLMRolloutModel(InferenceModel):
         ]
         return experiences
 
-    async def logprobs(self, token_ids: List[int]) -> torch.Tensor:
+    async def logprobs(
+        self, token_ids: List[int], lora_request: LoRARequest = None
+    ) -> torch.Tensor:
         """Calculate the logprobs of the given tokens in async. Please slice the result carefully
         to align with the actual response length.
 
@@ -299,6 +324,7 @@ class vLLMRolloutModel(InferenceModel):
         """
         output = await self._generate_internal(
             prompt={"prompt_token_ids": token_ids},
+            lora_request=lora_request,
             n=1,
             max_tokens=1,
             prompt_logprobs=0,  # vLLM return `prompt_logprobs + 1` logrpobs for each token
@@ -308,13 +334,16 @@ class vLLMRolloutModel(InferenceModel):
             dtype=torch.float32,
         )
 
-    async def _generate_internal(self, prompt: Any, **kwargs) -> Any:
+    async def _generate_internal(
+        self, prompt: Any, lora_request: LoRARequest = None, **kwargs
+    ) -> Any:
         # Send the request to the LLM engine.
         self.request_id += 1
         stream = self.async_llm.generate(
             request_id=str(self.request_id),
             prompt=prompt,
             sampling_params=self._create_sampling_params(**kwargs),
+            lora_request=lora_request,
         )
 
         # Consume the stream until the request is finished.
@@ -333,7 +362,10 @@ class vLLMRolloutModel(InferenceModel):
     ) -> Experience:
         """Convert a list of messages into an experience."""
         if self.tokenizer is None:
-            self.tokenizer = await self.async_llm.get_tokenizer()
+            if self.enable_lora:
+                self.tokenizer = await self.async_llm.get_tokenizer(lora_request=self.lora_request)
+            else:
+                self.tokenizer = await self.async_llm.get_tokenizer()
         if self.chat_template is None:
             self.chat_template = self.tokenizer.get_chat_template()
         token_ids, action_mask, prompt_length = self.action_mask_method(
@@ -470,6 +502,9 @@ class vLLMRolloutModel(InferenceModel):
 
     def get_model_version(self) -> int:
         return self.model_version
+
+    def get_lora_request(self) -> str:
+        return self.lora_request
 
     async def sleep(self, level: int = 1) -> None:
         await self.async_llm.sleep(level=level)

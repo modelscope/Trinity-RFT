@@ -38,6 +38,7 @@ class WorkflowRunner:
         self.model_wrapper = ModelWrapper(
             model,
             config.explorer.rollout_model.engine_type,
+            enable_lora=config.explorer.rollout_model.enable_lora,
             enable_history=config.explorer.rollout_model.enable_history,
         )
         self.auxiliary_models = []
