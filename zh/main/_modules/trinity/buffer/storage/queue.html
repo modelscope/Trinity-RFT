@@ -809,7 +809,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="o">=</span> <span class="n">QueueBuffer</span><span class="o">.</span><span class="n">get_queue</span><span class="p">(</span><span class="n">storage_config</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
         <span class="n">st_config</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">storage_config</span><span class="p">)</span>
         <span class="n">st_config</span><span class="o">.</span><span class="n">wrap_in_ray</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">if</span> <span class="n">st_config</span><span class="o">.</span><span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">st_config</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">is_database_url</span><span class="p">(</span><span class="n">st_config</span><span class="o">.</span><span class="n">path</span><span class="p">):</span>
                 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.buffer.writer.sql_writer</span><span class="w"> </span><span class="kn">import</span> <span class="n">SQLWriter</span>
 

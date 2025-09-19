@@ -1123,6 +1123,8 @@ document.write(`
                 <span class="p">},</span>
             <span class="p">},</span>
         <span class="p">}</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">experience_buffer_path</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">buffer_config</span><span class="p">[</span><span class="s2">&quot;trainer_input&quot;</span><span class="p">][</span><span class="s2">&quot;experience_buffer&quot;</span><span class="p">][</span><span class="s2">&quot;path&quot;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;train_batch_size&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">del</span> <span class="n">buffer_config</span><span class="p">[</span><span class="s2">&quot;train_batch_size&quot;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;algorithm_type&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;dpo&quot;</span><span class="p">:</span>
