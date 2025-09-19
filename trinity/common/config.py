@@ -80,11 +80,11 @@ class GenerationConfig:
 class LoRAConfig:
     name: str = ""
     path: str = ""
-    base_model_name: Optional[str] = ""
+    base_model_name: str = ""
     lora_rank: int = 16
     lora_alpha: int = 16
-    lora_dtype: Optional[str] = "auto"
-    target_modules: Optional[str] = "all-linear"
+    lora_dtype: str = "auto"
+    target_modules: str = "all-linear"
 
 
 @dataclass

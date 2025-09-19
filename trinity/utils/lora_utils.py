@@ -17,7 +17,7 @@ def create_dummy_lora(
     checkpoint_job_dir: str,
     lora_rank: int,
     lora_alpha: int,
-    target_modules: list[str],
+    target_modules: str,
 ) -> str:
     config = AutoConfig.from_pretrained(model_path)
     model = AutoModelForCausalLM.from_config(config)

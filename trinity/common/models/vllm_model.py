@@ -356,6 +356,7 @@ class vLLMRolloutModel(InferenceModel):
         """Convert a list of messages into an experience."""
         if self.tokenizer is None:
             if self.enable_lora:
+                assert self.config.lora_modules is not None
                 self.tokenizer = await self.async_llm.get_tokenizer(
                     lora_request=LoRARequest(**self.config.lora_modules[0])
                 )
@@ -418,6 +419,7 @@ class vLLMRolloutModel(InferenceModel):
             self.default_lora_path = self.default_lora_path.replace(
                 str(self.model_version), str(model_version)
             )
+            assert self.config.lora_modules is not None
             self.config.lora_modules[0]["lora_path"] = self.default_lora_path
             self.logger.info(f"Point lora_path to the path of {model_version=} successfully.")
             return True
@@ -507,6 +509,7 @@ class vLLMRolloutModel(InferenceModel):
         return self.model_version
 
     def get_lora_request(self) -> str:
+        assert self.config.lora_modules is not None
         return LoRARequest(**self.config.lora_modules[0])
 
     async def sleep(self, level: int = 1) -> None:
