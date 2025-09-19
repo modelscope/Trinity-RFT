@@ -171,7 +171,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             self.resource_pool_to_cls[resource_pool]["critic"] = critic_cls
 
         # create reference policy if needed
-        if self.use_reference_policy:
+        if self.use_reference_policy and not self.ref_in_actor:
             resource_pool = self.resource_pool_manager.get_resource_pool(Role.RefPolicy)
             ref_policy_cls = RayClassWithInitArgs(
                 self.role_worker_mapping[Role.RefPolicy],
@@ -179,7 +179,6 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
                 role="ref",
             )
             self.resource_pool_to_cls[resource_pool]["ref"] = ref_policy_cls
-
         # create a reward model if reward_fn is None
         if self.use_rm:
             # we create a RM here
@@ -289,7 +288,10 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
             if self.algorithm.use_reference:  # ref_logprob may not be used
                 # compute reference log_prob
                 with marked_timer("ref", timing_raw):
-                    ref_log_prob = self.ref_policy_wg.compute_ref_log_prob(batch)
+                    if not self.ref_in_actor:
+                        ref_log_prob = self.ref_policy_wg.compute_ref_log_prob(batch)
+                    else:
+                        ref_log_prob = self.actor_rollout_wg.compute_ref_log_prob(batch)
                     batch = batch.union(ref_log_prob)
 
             if self.algorithm.use_critic:

@@ -10,7 +10,6 @@ import openai
 import ray
 import torch
 from torch import Tensor
-from vllm.lora.request import LoRARequest
 
 from trinity.common.experience import Experience
 from trinity.utils.log import get_logger

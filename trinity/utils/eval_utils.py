@@ -1,13 +1,19 @@
 # -*- coding: utf-8 -*-
 import concurrent.futures
 
+# import  math_verify.grader, math_verify.parser
 import regex as re
+
+# math_verify.grader.TIMEOUT_WARNING_SHOWN = True
+# math_verify.parser.TIMEOUT_WARNING_SHOWN = True
 from math_verify import parse, verify
 
 from trinity.utils.math_eval_utils import strip_string
 
 ANS_RE = re.compile(r"#### (\-?[0-9\.\,]+)")
-INVALID_ANS = "[invalid]"
+INVALID_ANS = "[invalid]"  # 在导入 parse 后执行
+parse.__globals__["TIMEOUT_WARNING_SHOWN"] = True
+verify.__globals__["TIMEOUT_WARNING_SHOWN"] = True
 
 
 def parse_with_timeout(pred: str, parsing_timeout: int = 5, **kwargs) -> list[str]:

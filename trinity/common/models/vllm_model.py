@@ -22,9 +22,6 @@ from trinity.common.models.mm_utils import (
 from trinity.common.models.model import InferenceModel
 from trinity.common.models.utils import get_action_mask_method
 from trinity.utils.log import get_logger
-from trinity.utils.lora_utils import VLLMHijack
-
-VLLMHijack.hijack()
 
 
 # V0 engine is deprecated since vLLM v0.10.2, related code will be removed in the future.
@@ -67,6 +64,8 @@ class vLLMRolloutModel(InferenceModel):
         self.enable_thinking = config.enable_thinking
         self.request_id = 0
         max_model_len = config.max_model_len
+        self.enable_lora = config.enable_lora
+        self.default_lora_path = config.lora_kwargs.pop("default_lora_path", None)
         engine_args = vllm.AsyncEngineArgs(
             model=config.model_path,
             enforce_eager=config.enforce_eager,
@@ -83,7 +82,7 @@ class vLLMRolloutModel(InferenceModel):
             enable_chunked_prefill=config.enable_chunked_prefill,
             # max_num_batched_tokens=256, # you can further set this parameter to reduce the vllm peak memory usage
             enable_lora=config.enable_lora,
-            **self.config.lora_kwargs,
+            **config.lora_kwargs,
         )
         if get_vllm_version() > parse_version("0.10.0"):
             engine_args.enable_log_requests = False
@@ -100,12 +99,6 @@ class vLLMRolloutModel(InferenceModel):
         self.model_version = 0  # TODO: resume the value from the checkpoint
         self.api_server_host = None
         self.api_server_port = None
-        # for lora
-        self.enable_lora = self.config.enable_lora
-        if self.enable_lora:
-            self.lora_request = LoRARequest(**self.config.lora_modules[0])
-        else:
-            self.lora_request = None
 
     async def _initialize_tokenizer(self):
         if self.tokenizer is None:
@@ -114,7 +107,7 @@ class vLLMRolloutModel(InferenceModel):
             else:
                 if self.enable_lora:
                     self.tokenizer = await self.async_llm.get_tokenizer(
-                        lora_request=self.lora_request
+                        lora_request=LoRARequest(**self.config.lora_modules[0])
                     )
                 else:
                     self.tokenizer = await self.async_llm.get_tokenizer()
@@ -363,7 +356,9 @@ class vLLMRolloutModel(InferenceModel):
         """Convert a list of messages into an experience."""
         if self.tokenizer is None:
             if self.enable_lora:
-                self.tokenizer = await self.async_llm.get_tokenizer(lora_request=self.lora_request)
+                self.tokenizer = await self.async_llm.get_tokenizer(
+                    lora_request=LoRARequest(**self.config.lora_modules[0])
+                )
             else:
                 self.tokenizer = await self.async_llm.get_tokenizer()
         if self.chat_template is None:
@@ -418,6 +413,14 @@ class vLLMRolloutModel(InferenceModel):
 
     async def sync_model(self, model_version: int) -> bool:
         """Sync model weights to vLLM."""
+        if self.enable_lora:
+            """Revise the lora path; no need to sync weights manually."""
+            self.default_lora_path = self.default_lora_path.replace(
+                str(self.model_version), str(model_version)
+            )
+            self.config.lora_modules[0]["lora_path"] = self.default_lora_path
+            self.logger.info(f"Point lora_path to the path of {model_version=} successfully.")
+            return True
         await self._collective_rpc("update_weight")
         self.logger.info("Sync model weights to vLLM successfully.")
         self.model_version = model_version
@@ -504,7 +507,7 @@ class vLLMRolloutModel(InferenceModel):
         return self.model_version
 
     def get_lora_request(self) -> str:
-        return self.lora_request
+        return LoRARequest(**self.config.lora_modules[0])
 
     async def sleep(self, level: int = 1) -> None:
         await self.async_llm.sleep(level=level)

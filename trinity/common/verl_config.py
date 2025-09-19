@@ -193,8 +193,10 @@ class Rollout:
     multi_turn: _MultiTurn = field(default_factory=_MultiTurn)
     temperature: float = 1.0
     n: int = 1  # > 1 for grpo
+    log_prob_use_dynamic_bsz: bool = True
     log_prob_micro_batch_size: Optional[int] = None
-    log_prob_micro_batch_size_per_gpu: int = 1
+    log_prob_micro_batch_size_per_gpu: Optional[int] = None
+    log_prob_max_token_len_per_gpu: Optional[int] = None
 
 
 @dataclass
@@ -473,6 +475,25 @@ class veRLConfig:
             self.actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu *= 2
             if self.actor_rollout_ref.rollout.n != 2:
                 self.actor_rollout_ref.rollout.n = 2
+
+        # check rollout config (only works for lora)
+        self.actor_rollout_ref.rollout.n = config.algorithm.repeat_times
+        self.actor_rollout_ref.rollout.log_prob_use_dynamic_bsz = (
+            self.actor_rollout_ref.actor.use_dynamic_bsz
+        )
+        if self.actor_rollout_ref.rollout.log_prob_micro_batch_size is None:
+            self.actor_rollout_ref.rollout.log_prob_micro_batch_size = (
+                self.actor_rollout_ref.actor.ppo_micro_batch_size
+            )
+        if self.actor_rollout_ref.rollout.log_prob_micro_batch_size_per_gpu is None:
+            self.actor_rollout_ref.rollout.log_prob_micro_batch_size_per_gpu = (
+                self.actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu
+            )
+        if self.actor_rollout_ref.rollout.log_prob_max_token_len_per_gpu is None:
+            self.actor_rollout_ref.rollout.log_prob_max_token_len_per_gpu = (
+                self.actor_rollout_ref.actor.ppo_max_token_len_per_gpu
+            )
+
         # TODO: check other fields
         self.enable_preview = config.trainer.enable_preview
 

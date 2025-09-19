@@ -33,6 +33,7 @@ class Synchronizer:
     def __init__(self, config: Config, module_ref: ray.actor.ActorHandle):
         self.logger = get_logger("synchronizer", in_ray_actor=True)
         self.config = config
+        self.enable_lora = config.explorer.rollout_model.enable_lora
         self.trainer_status = RunningStatus.STOPPED
         self.explorer_status_counts: Dict[RunningStatus, int] = defaultdict(lambda: 0)
         self._ready_condition = asyncio.Condition()

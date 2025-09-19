@@ -69,6 +69,7 @@ class Explorer:
         # For checkpoint weights update
         # Use explorer to periodically load the latest model weights and
         # boradcast to all rollout models
+        self.enable_lora = self.config.explorer.rollout_model.enable_lora
         self.model_version = -1
         self.last_sync_successful = True
         self.logger.info("Finished initializing Explorer.")

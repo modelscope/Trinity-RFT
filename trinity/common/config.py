@@ -22,6 +22,7 @@ from trinity.common.constants import (
 )
 from trinity.utils.annotations import Experimental
 from trinity.utils.log import get_logger
+from trinity.utils.lora_utils import create_dummy_lora
 
 logger = get_logger(__name__)
 
@@ -78,7 +79,7 @@ class GenerationConfig:
 @dataclass
 class LoRAConfig:
     name: str = ""
-    path: str = "placeholder"
+    path: str = ""
     base_model_name: Optional[str] = ""
     lora_rank: int = 16
     lora_alpha: int = 16
@@ -307,8 +308,8 @@ class InferenceModelConfig:
     bundle_indices: str = ""
 
     # ! DO NOT SET, automatically set from model.lora_configs
-    enable_lora: Optional[bool] = False
-    lora_modules: Optional[List[str]] = None
+    enable_lora: bool = False
+    lora_modules: Optional[List[Dict]] = None
     lora_kwargs: Optional[dict] = field(default_factory=dict)
 
 
@@ -985,9 +986,19 @@ class Config:
                 if aux_model.min_response_tokens is None:
                     aux_model.min_response_tokens = self.model.min_response_tokens
             if self.model.lora_configs is not None:
+                self.explorer.rollout_model.enable_lora = True
                 if len(self.model.lora_configs) > 1:
                     raise ValueError("Only one lora adapter is supported for now.")
-                self.explorer.rollout_model.enable_lora = True
+                if self.model.lora_configs[0].path == "":
+                    logger.info("Creating dummy lora, since no lora_path is provided.")
+                    lora_path = create_dummy_lora(
+                        model_path=self.model.model_path,
+                        checkpoint_job_dir=self.checkpoint_job_dir,
+                        lora_rank=self.model.lora_configs[0].lora_rank,
+                        lora_alpha=self.model.lora_configs[0].lora_alpha,
+                        target_modules=self.model.lora_configs[0].target_modules,
+                    )
+                    self.model.lora_configs[0].path = lora_path
                 self.explorer.rollout_model.lora_modules = [
                     {
                         "lora_int_id": i + 1,
@@ -1004,6 +1015,9 @@ class Config:
                         for model_config in self.model.lora_configs
                         if model_config.lora_rank > 0
                     ),
+                    "default_lora_path": os.path.join(
+                        self.checkpoint_job_dir, "global_step_0", "actor", "lora_adapter"
+                    ),  # will be poped later
                 }
 
         # check synchronizer
