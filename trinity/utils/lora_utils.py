@@ -4,14 +4,6 @@ from transformers import AutoConfig, AutoModelForCausalLM
 from verl.utils.py_functional import convert_to_regular_types
 
 
-def key_mapper(key: str) -> str:
-    if "base_model.model." in key:
-        key = key.replace("base_model.model.", "")
-    elif "base_model." in key:
-        key = key.replace("base_model.", "")
-    return key
-
-
 def create_dummy_lora(
     model_path: str,
     checkpoint_job_dir: str,
@@ -32,5 +24,4 @@ def create_dummy_lora(
     peft_model.save_pretrained(f"{checkpoint_job_dir}/dummy_lora")
     del model, peft_model
     torch.cuda.empty_cache()
-    print(f"!!! [LoRA] Dummy LoRA adapter created at {checkpoint_job_dir}/dummy_lora")
     return f"{checkpoint_job_dir}/dummy_lora"

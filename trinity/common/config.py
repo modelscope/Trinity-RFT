@@ -1011,9 +1011,12 @@ class Config:
                 self.explorer.rollout_model.lora_kwargs = {
                     "max_loras": len(self.model.lora_configs),
                     "max_lora_rank": max(
-                        model_config.lora_rank
-                        for model_config in self.model.lora_configs
-                        if model_config.lora_rank > 0
+                        (
+                            model_config.lora_rank
+                            for model_config in self.model.lora_configs
+                            if model_config.lora_rank > 0
+                        ),
+                        default=0,
                     ),
                     "default_lora_path": os.path.join(
                         self.checkpoint_job_dir, "global_step_0", "actor", "lora_adapter"

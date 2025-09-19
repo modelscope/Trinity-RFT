@@ -355,13 +355,7 @@ class vLLMRolloutModel(InferenceModel):
     ) -> Experience:
         """Convert a list of messages into an experience."""
         if self.tokenizer is None:
-            if self.enable_lora:
-                assert self.config.lora_modules is not None
-                self.tokenizer = await self.async_llm.get_tokenizer(
-                    lora_request=LoRARequest(**self.config.lora_modules[0])
-                )
-            else:
-                self.tokenizer = await self.async_llm.get_tokenizer()
+            await self._initialize_tokenizer()
         if self.chat_template is None:
             self.chat_template = self.tokenizer.get_chat_template()
         token_ids, action_mask, prompt_length = self.action_mask_method(
@@ -415,7 +409,7 @@ class vLLMRolloutModel(InferenceModel):
     async def sync_model(self, model_version: int) -> bool:
         """Sync model weights to vLLM."""
         if self.enable_lora:
-            """Revise the lora path; no need to sync weights manually."""
+            # Revise the lora path; no need to sync weights manually.
             self.default_lora_path = self.default_lora_path.replace(
                 str(self.model_version), str(model_version)
             )
@@ -508,7 +502,7 @@ class vLLMRolloutModel(InferenceModel):
     def get_model_version(self) -> int:
         return self.model_version
 
-    def get_lora_request(self) -> str:
+    def get_lora_request(self) -> LoRARequest:
         assert self.config.lora_modules is not None
         return LoRARequest(**self.config.lora_modules[0])
 

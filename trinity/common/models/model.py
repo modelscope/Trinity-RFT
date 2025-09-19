@@ -97,26 +97,22 @@ class ModelWrapper:
     @_history_recorder
     def generate(self, prompts: List[str], **kwargs) -> List[Experience]:
         """Generate a list of experiences from a list of prompts."""
-        lora_requests = None
         if self.enable_lora:
             lora_request = self.get_lora_request()
-            lora_requests = [lora_request for _ in len(prompts)]
 
         results = ray.get(
-            [self.model.generate.remote(prompt, lora_requests, **kwargs) for prompt in prompts]
+            [self.model.generate.remote(prompt, lora_request, **kwargs) for prompt in prompts]
         )
         return [exp for exps in results for exp in exps]
 
     @_history_recorder
     async def generate_async(self, prompts: List[str], **kwargs) -> List[Experience]:
         """Generate a list of experiences from a list of prompts in async."""
-        lora_requests = None
         if self.enable_lora:
             lora_request = self.get_lora_request()
-            lora_requests = [lora_request for _ in len(prompts)]
 
         results = await asyncio.gather(
-            *[self.model.generate.remote(prompt, lora_requests, **kwargs) for prompt in prompts]
+            *[self.model.generate.remote(prompt, lora_request, **kwargs) for prompt in prompts]
         )
         return [exp for exps in results for exp in exps]
 
