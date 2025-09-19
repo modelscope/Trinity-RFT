@@ -161,9 +161,8 @@ class ExperiencePipelineConfig:
     # The list of experience operators to apply, operators will be applied in the order they are defined
     operators: List[OperatorConfig] = field(default_factory=list)
     save_input: bool = True  # whether to save the input experiences
-    input_save_path: Optional[
-        str
-    ] = None  # the path to save the input experiences, can be a jsonl file or a sqlite database file
+    # the path to save the input experiences, can be a jsonl file or a sqlite database file
+    input_save_path: Optional[str] = None
 
     # The following fields are experimental, do not set them unless you know what you are doing
 
@@ -419,6 +418,14 @@ class ExplorerConfig:
 
     # for benchmark
     bench_on_latest_checkpoint: bool = False  # only benchmark the latest checkpoint
+
+    # for serve mode
+    api_port: int = 8010
+    listen_address: str = "0.0.0.0"
+    service_status_check_interval: int = (
+        60  # check the running status of the server every 60 seconds
+    )
+    min_running_model_num: int = 1  # keep at least 1 model in running status
 
 
 @dataclass
@@ -881,7 +888,7 @@ class Config:
         self._check_algorithm()
 
         # check mode
-        if self.mode not in ["explore", "train", "both", "bench"]:
+        if self.mode not in ["explore", "train", "both", "bench", "serve"]:
             raise ValueError(f"Invalid mode: {self.mode}")
 
         # prepare for the checkpoint directory

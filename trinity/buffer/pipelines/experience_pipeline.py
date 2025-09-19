@@ -1,4 +1,5 @@
 import traceback
+from queue import Queue
 from typing import Dict, List, Optional
 
 from trinity.buffer.buffer import BufferWriter, get_buffer_reader, get_buffer_writer
@@ -49,6 +50,7 @@ class ExperiencePipeline:
             buffer_config.trainer_input.experience_buffer,  # type: ignore [arg-type]
             buffer_config,
         )
+        self.queue = Queue()
 
     def _init_input_storage(
         self,
@@ -114,6 +116,7 @@ class ExperiencePipeline:
         """
         if self.input_store is not None:
             await self.input_store.write_async(exps)
+
         metrics = {}
 
         # Process experiences through operators

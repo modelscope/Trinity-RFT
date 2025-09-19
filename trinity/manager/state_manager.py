@@ -21,16 +21,19 @@ class StateManager:
     ):
         self.logger = get_logger(__name__, in_ray_actor=True)
         self.cache_dir = path
-        os.makedirs(self.cache_dir, exist_ok=True)  # type: ignore
-        self.stage_state_path = os.path.join(self.cache_dir, "stage_meta.json")  # type: ignore
-        self.explorer_state_path = os.path.join(self.cache_dir, f"{explorer_name}_meta.json")  # type: ignore
-        self.trainer_state_path = os.path.join(self.cache_dir, f"{trainer_name}_meta.json")  # type: ignore
+        os.makedirs(self.cache_dir, exist_ok=True)
+        self.stage_state_path = os.path.join(self.cache_dir, "stage_meta.json")
+        self.explorer_state_path = os.path.join(self.cache_dir, f"{explorer_name}_meta.json")
+        self.trainer_state_path = os.path.join(self.cache_dir, f"{trainer_name}_meta.json")
+        self.explorer_server_url_path = os.path.join(
+            self.cache_dir, f"{explorer_name}_server_url.txt"
+        )
         if check_config and config is not None:
             self._check_config_consistency(config)
 
     def _check_config_consistency(self, config: Config) -> None:
         """Check if the config is consistent with the cache dir backup."""
-        backup_config_path = os.path.join(self.cache_dir, "config.json")  # type: ignore
+        backup_config_path = os.path.join(self.cache_dir, "config.json")
         if not os.path.exists(backup_config_path):
             config.save(backup_config_path)
         else:
@@ -74,6 +77,27 @@ class StateManager:
             except Exception as e:
                 self.logger.error(f"Failed to load explore state file: {e}")
         return {}
+
+    def save_explorer_server_url(self, url: str) -> None:
+        with open(self.explorer_server_url_path, "w", encoding="utf-8") as f:
+            f.write(url)
+        self.logger.info(f"Saved explorer server URL to {self.explorer_server_url_path}")
+
+    def load_explorer_server_url(self) -> Optional[str]:
+        if os.path.exists(self.explorer_server_url_path):
+            try:
+                with open(self.explorer_server_url_path, "r", encoding="utf-8") as f:
+                    url = f.read().strip()
+                self.logger.info(
+                    "----------------------------------\n"
+                    "Found existing explorer server URL:\n"
+                    f"  > {url}\n"
+                    "----------------------------------"
+                )
+                return url
+            except Exception as e:
+                self.logger.error(f"Failed to load explorer server URL file: {e}")
+        return None
 
     def save_trainer(
         self,

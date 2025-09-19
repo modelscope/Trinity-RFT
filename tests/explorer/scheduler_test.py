@@ -1,7 +1,7 @@
 import asyncio
 import time
 import unittest
-from typing import List
+from typing import List, Optional
 
 import ray
 import torch
@@ -147,6 +147,12 @@ class DummyModel(InferenceModel):
     ) -> None:
         pass
 
+    def has_api_server(self) -> bool:
+        return False
+
+    def get_api_server_url(self) -> Optional[str]:
+        return None
+
 
 @ray.remote
 class DummyAuxiliaryModel(InferenceModel):
@@ -171,8 +177,8 @@ class DummyAuxiliaryModel(InferenceModel):
     def has_api_server(self) -> bool:
         return True
 
-    def api_server_ready(self) -> str:
-        return "http://localhosts:12345"
+    def get_api_server_url(self) -> str:
+        return "http://localhost:12345"
 
 
 def generate_tasks(

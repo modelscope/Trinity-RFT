@@ -720,3 +720,7 @@ class TestTrainerMultiModal(BaseTrainerCase):
         )
         self.assertTrue(len(os.listdir(os.path.join(checkpoint_step_2, "actor"))) > 0)
         self.assertEqual(step_num, 2)
+
+    def tearDown(self):
+        # remove dir only when the test passed
+        shutil.rmtree(self.config.checkpoint_job_dir)

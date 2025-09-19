@@ -362,6 +362,7 @@ async def run_api_server_in_ray_actor(
         str(port),
         "--model",
         model_path,
+        "--enable-server-load-tracking",  # enable tracking for load balancing
     ]
     if enable_auto_tool_choice:
         cli_args.append("--enable-auto-tool-choice")
