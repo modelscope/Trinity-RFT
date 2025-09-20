@@ -338,3 +338,26 @@ class sPPOAlgorithm(AlgorithmType):
             "kl_loss_fn": "none",
             "entropy_loss_fn": "none",
         }
+
+
+@ALGORITHM_TYPE.register_module("rec")
+class RECAlgorithm(AlgorithmType):
+    """REC Algorithm."""
+
+    use_critic: bool = False
+    use_reference: bool = True
+    compute_advantage_in_trainer: bool = False
+    can_balance_batch: bool = True
+    schema: str = "experience"
+
+    @classmethod
+    def default_config(cls) -> Dict:
+        return {
+            "repeat_times": 2,
+            "sample_strategy": "warmup",
+            "policy_loss_fn": "rec",
+            "advantage_fn": "rec",
+            "kl_penalty_fn": "none",
+            "kl_loss_fn": "none",
+            "entropy_loss_fn": "none",
+        }
