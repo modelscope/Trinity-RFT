@@ -942,7 +942,7 @@ class Config:
                 set_if_none(aux_model, "max_prompt_tokens", self.model.max_prompt_tokens)
                 set_if_none(aux_model, "max_response_tokens", self.model.max_response_tokens)
                 set_if_none(aux_model, "min_response_tokens", self.model.min_response_tokens)
-            
+
             # for lora configs
             if self.model.lora_configs is not None:
                 self.explorer.rollout_model.enable_lora = True
