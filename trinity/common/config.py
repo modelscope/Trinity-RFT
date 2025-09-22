@@ -84,6 +84,8 @@ class GenerationConfig:
 
 @dataclass
 class LoRAConfig:
+    """LoRA config, only effective for rollout model, not for auxiliary models."""
+
     name: str = ""
     path: str = ""
     base_model_name: str = ""
@@ -918,11 +920,17 @@ class Config:
         if not self.continue_from_checkpoint and (
             os.path.exists(self.checkpoint_job_dir) and os.listdir(self.checkpoint_job_dir)
         ):
-            ori_name = self.name
-            timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-            self.name = f"{ori_name}_{timestamp}"
-            self.checkpoint_job_dir = f"{self.checkpoint_job_dir}_{timestamp}"
-            logger.warning(f"Experiment [{ori_name}] already exists, renamed as {self.name}.")
+            if self.mode == "bench":
+                logger.warning(
+                    "For bench mode, `continue_from_checkpoint` is set as `true` to enable using existing checkpoints."
+                )
+                self.continue_from_checkpoint = True
+            else:
+                ori_name = self.name
+                timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+                self.name = f"{ori_name}_{timestamp}"
+                self.checkpoint_job_dir = f"{self.checkpoint_job_dir}_{timestamp}"
+                logger.warning(f"Experiment [{ori_name}] already exists, renamed as {self.name}.")
         os.makedirs(self.checkpoint_job_dir, exist_ok=True)
 
         # check model
@@ -1019,7 +1027,7 @@ class Config:
         # check buffer
         self._check_buffer()
         # check and update trainer
-        if self.mode in ["train", "both"]:
+        if self.mode in ["train", "both", "bench"]:
             if self.trainer.trainer_type == "verl":
                 if self.trainer.trainer_config:
                     from trinity.common.verl_config import veRLConfig
