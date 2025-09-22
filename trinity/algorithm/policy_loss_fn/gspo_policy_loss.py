@@ -19,7 +19,7 @@ class GSPOLossFn(PolicyLossFn):
         clip_range: Optional[float] = None,
         clip_range_low: Optional[float] = None,
         clip_range_high: Optional[float] = None,
-        loss_agg_mode: Optional[float] = "seq-mean-token-mean",
+        loss_agg_mode: Optional[str] = "seq-mean-token-mean",
     ) -> None:
         super().__init__(backend=backend)
         _clip_range_low = clip_range_low if clip_range_low is not None else clip_range

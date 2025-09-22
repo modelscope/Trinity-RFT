@@ -15,7 +15,7 @@ algorithm:
     mu_valley: 0.02 # 0.05 for chord-mu and 0.1 for chord-phi
     enable_phi_function: true # false for chord-mu and true for chord-phi
     clip_range: 0.2
-    use_token_level_loss_in_sft: true
+    sft_loss_agg_mode: "token-mean"
     use_dynamic_bsz: true
     ppo_mini_batch_size: 320 # 320 = 256 + 64; if you set repeat times = 16, then it shoudle be 32 * 16 + 64
     ppo_micro_batch_size_per_gpu: 4
