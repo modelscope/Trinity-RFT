@@ -571,6 +571,7 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.utils.masked_loss"><code class="docutils literal notranslate"><span class="pre">masked_loss()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.utils.masked_sum"><code class="docutils literal notranslate"><span class="pre">masked_sum()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.utils.masked_mean"><code class="docutils literal notranslate"><span class="pre">masked_mean()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.utils.masked_var"><code class="docutils literal notranslate"><span class="pre">masked_var()</span></code></a></li>
@@ -591,6 +592,33 @@ document.write(`
 <span id="trinity-algorithm-utils-module"></span><h1>trinity.algorithm.utils module<a class="headerlink" href="#module-trinity.algorithm.utils" title="Link to this heading">#</a></h1>
 <p>Common utils for algorithm module.</p>
 <p>Modified from <a class="github reference external" href="https://github.com/volcengine/verl/blob/main/verl/utils/torch_functional.py">volcengine/verl</a></p>
+<dl class="py function">
+<dt class="sig sig-object py" id="trinity.algorithm.utils.masked_loss">
+<span class="sig-prename descclassname"><span class="pre">trinity.algorithm.utils.</span></span><span class="sig-name descname"><span class="pre">masked_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss_agg_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'token-mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/utils.html#masked_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.utils.masked_loss" title="Link to this definition">#</a></dt>
+<dd><p>Compute loss from values and mask with various aggregation modes.
+Modified from: <a class="github reference external" href="https://github.com/volcengine/verl/blob/main/verl/trainer/ppo/core_algos.py">volcengine/verl</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>values</strong> (<em>torch.Tensor</em>) – Arbitrary shape tensor of values to aggregate.</p></li>
+<li><p><strong>mask</strong> (<em>torch.BoolTensor</em><em> or </em><em>torch.FloatTensor</em>) – Same shape as values, 1/True = include, 0 = ignore.</p></li>
+<li><p><strong>loss_agg_mode</strong> (<em>str</em>) – One of the following:
+- “token-mean”: mean over all unmasked elements.
+- “seq-mean-token-sum”: average over sequences, where each sequence’s loss is sum of unmasked values.
+- “seq-mean-token-mean”: average over sequences, where each sequence’s loss is mean of unmasked values.
+- “seq-mean-token-sum-norm”: total sum of unmasked values divided by a fixed normalizer (e.g., seq length).</p></li>
+<li><p><strong>normalizer</strong> (<em>float</em><em> or </em><em>None</em>) – Only used in ‘seq-mean-token-sum-norm’. If None, uses mask.shape[-1].</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Scalar loss value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="trinity.algorithm.utils.masked_sum">
 <span class="sig-prename descclassname"><span class="pre">trinity.algorithm.utils.</span></span><span class="sig-name descname"><span class="pre">masked_sum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/algorithm/utils.html#masked_sum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.algorithm.utils.masked_sum" title="Link to this definition">#</a></dt>
@@ -683,6 +711,7 @@ if False, the original mean is re-added after scaling.</p></li>
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.utils.masked_loss"><code class="docutils literal notranslate"><span class="pre">masked_loss()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.utils.masked_sum"><code class="docutils literal notranslate"><span class="pre">masked_sum()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.utils.masked_mean"><code class="docutils literal notranslate"><span class="pre">masked_mean()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.algorithm.utils.masked_var"><code class="docutils literal notranslate"><span class="pre">masked_var()</span></code></a></li>

@@ -535,7 +535,7 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.policy_loss_fn.policy_loss_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">POLICY_LOSS_FN</span><span class="p">,</span> <span class="n">PolicyLossFn</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.policy_loss_fn.ppo_policy_loss</span><span class="w"> </span><span class="kn">import</span> <span class="n">PPOPolicyLossFn</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.policy_loss_fn.sft_loss</span><span class="w"> </span><span class="kn">import</span> <span class="n">SFTLossFn</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">masked_mean</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">masked_loss</span>
 
 
 <div class="viewcode-block" id="mu_schedule_function">
@@ -571,9 +571,9 @@ document.write(`
 
 <div class="viewcode-block" id="SFTISLossFn.__init__">
 <a class="viewcode-back" href="../../../../build_api/trinity.algorithm.policy_loss_fn.chord_policy_loss.html#trinity.algorithm.policy_loss_fn.SFTISLossFn.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">backend</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;verl&quot;</span><span class="p">,</span> <span class="n">use_token_level_loss</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">backend</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;verl&quot;</span><span class="p">,</span> <span class="n">loss_agg_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;token-mean&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">use_token_level_loss</span> <span class="o">=</span> <span class="n">use_token_level_loss</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loss_agg_mode</span> <span class="o">=</span> <span class="n">loss_agg_mode</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
@@ -583,10 +583,9 @@ document.write(`
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
         <span class="n">token_prob</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">logprob</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_token_level_loss</span><span class="p">:</span>
-            <span class="n">sft_loss</span> <span class="o">=</span> <span class="n">masked_mean</span><span class="p">(</span><span class="o">-</span><span class="n">logprob</span> <span class="o">*</span> <span class="n">token_prob</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">action_mask</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">sft_loss</span> <span class="o">=</span> <span class="n">masked_mean</span><span class="p">(</span><span class="o">-</span><span class="n">logprob</span> <span class="o">*</span> <span class="n">token_prob</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">action_mask</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">sft_loss</span> <span class="o">=</span> <span class="n">masked_loss</span><span class="p">(</span>
+            <span class="o">-</span><span class="n">logprob</span> <span class="o">*</span> <span class="n">token_prob</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">action_mask</span><span class="p">,</span> <span class="n">loss_agg_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">loss_agg_mode</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="n">sft_loss</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;sft_is_loss&quot;</span><span class="p">:</span> <span class="n">sft_loss</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()}</span>
 
 <div class="viewcode-block" id="SFTISLossFn.default_args">
@@ -594,7 +593,7 @@ document.write(`
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">default_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">{</span>
-            <span class="s2">&quot;use_token_level_loss&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;loss_agg_mode&quot;</span><span class="p">:</span> <span class="s2">&quot;token-mean&quot;</span><span class="p">,</span>
         <span class="p">}</span></div>
 </div>
 
@@ -622,10 +621,10 @@ document.write(`
 <div class="viewcode-block" id="SFTPhiLossFn.__init__">
 <a class="viewcode-back" href="../../../../build_api/trinity.algorithm.policy_loss_fn.chord_policy_loss.html#trinity.algorithm.policy_loss_fn.SFTPhiLossFn.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">backend</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;verl&quot;</span><span class="p">,</span> <span class="n">use_token_level_loss</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">cutoff_prob</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">backend</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;verl&quot;</span><span class="p">,</span> <span class="n">loss_agg_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;token-mean&quot;</span><span class="p">,</span> <span class="n">cutoff_prob</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">use_token_level_loss</span> <span class="o">=</span> <span class="n">use_token_level_loss</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loss_agg_mode</span> <span class="o">=</span> <span class="n">loss_agg_mode</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cutoff_prob</span> <span class="o">=</span> <span class="n">cutoff_prob</span>
         <span class="k">assert</span> <span class="mf">0.0</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cutoff_prob</span> <span class="o">&lt;=</span> <span class="mf">1.0</span></div>
 
@@ -642,10 +641,9 @@ document.write(`
 
         <span class="n">weighted_phi</span> <span class="o">=</span> <span class="n">phi_function</span><span class="p">(</span><span class="n">token_prob</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_token_level_loss</span><span class="p">:</span>
-            <span class="n">sft_loss</span> <span class="o">=</span> <span class="n">masked_mean</span><span class="p">(</span><span class="o">-</span><span class="n">logprob</span> <span class="o">*</span> <span class="n">weighted_phi</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">action_mask</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">sft_loss</span> <span class="o">=</span> <span class="n">masked_mean</span><span class="p">(</span><span class="o">-</span><span class="n">logprob</span> <span class="o">*</span> <span class="n">weighted_phi</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">action_mask</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">sft_loss</span> <span class="o">=</span> <span class="n">masked_loss</span><span class="p">(</span>
+            <span class="o">-</span><span class="n">logprob</span> <span class="o">*</span> <span class="n">weighted_phi</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">action_mask</span><span class="p">,</span> <span class="n">loss_agg_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">loss_agg_mode</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="n">sft_loss</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;sft_phi_loss&quot;</span><span class="p">:</span> <span class="n">sft_loss</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()}</span>
 
 <div class="viewcode-block" id="SFTPhiLossFn.default_args">
@@ -653,7 +651,7 @@ document.write(`
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">default_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">{</span>
-            <span class="s2">&quot;use_token_level_loss&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;loss_agg_mode&quot;</span><span class="p">:</span> <span class="s2">&quot;token-mean&quot;</span><span class="p">,</span>
             <span class="s2">&quot;cutoff_prob&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
         <span class="p">}</span></div>
 </div>
@@ -698,7 +696,8 @@ document.write(`
         <span class="n">ngpus_trainer</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">train_batch_size_usual</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">train_batch_size_expert</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="n">use_token_level_loss_in_sft</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">sft_loss_agg_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;token-mean&quot;</span><span class="p">,</span>
+        <span class="n">grpo_loss_agg_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;token-mean&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mu_warmup_steps</span> <span class="o">=</span> <span class="n">mu_warmup_steps</span>
@@ -715,11 +714,12 @@ document.write(`
             <span class="n">clip_range</span><span class="o">=</span><span class="n">clip_range</span><span class="p">,</span>
             <span class="n">clip_range_low</span><span class="o">=</span><span class="n">clip_range_low</span><span class="p">,</span>
             <span class="n">clip_range_high</span><span class="o">=</span><span class="n">clip_range_high</span><span class="p">,</span>
+            <span class="n">loss_agg_mode</span><span class="o">=</span><span class="n">grpo_loss_agg_mode</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">enable_phi_function</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">sft_loss_fn</span> <span class="o">=</span> <span class="n">SFTPhiLossFn</span><span class="p">(</span><span class="n">use_token_level_loss</span><span class="o">=</span><span class="n">use_token_level_loss_in_sft</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sft_loss_fn</span> <span class="o">=</span> <span class="n">SFTPhiLossFn</span><span class="p">(</span><span class="n">loss_agg_mode</span><span class="o">=</span><span class="n">sft_loss_agg_mode</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">sft_loss_fn</span> <span class="o">=</span> <span class="n">SFTLossFn</span><span class="p">(</span><span class="n">use_token_level_loss</span><span class="o">=</span><span class="n">use_token_level_loss_in_sft</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sft_loss_fn</span> <span class="o">=</span> <span class="n">SFTLossFn</span><span class="p">(</span><span class="n">loss_agg_mode</span><span class="o">=</span><span class="n">sft_loss_agg_mode</span><span class="p">)</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>

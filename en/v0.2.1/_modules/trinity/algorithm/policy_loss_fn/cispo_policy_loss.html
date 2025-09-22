@@ -509,7 +509,7 @@ document.write(`
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.policy_loss_fn.policy_loss_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">POLICY_LOSS_FN</span><span class="p">,</span> <span class="n">PolicyLossFn</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">masked_mean</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">masked_loss</span><span class="p">,</span> <span class="n">masked_mean</span>
 
 
 <div class="viewcode-block" id="CISPOPolicyLossFn">
@@ -526,13 +526,15 @@ document.write(`
         <span class="n">enable_mask_clip</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">mask_clip_range_low</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
         <span class="n">mask_clip_range_high</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.28</span><span class="p">,</span>
+        <span class="n">loss_agg_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;token-mean&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">clip_range_low</span> <span class="o">=</span> <span class="n">clip_range_low</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">clip_range_high</span> <span class="o">=</span> <span class="n">clip_range_high</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">enable_mask_clip</span> <span class="o">=</span> <span class="n">enable_mask_clip</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mask_clip_range_low</span> <span class="o">=</span> <span class="n">mask_clip_range_low</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mask_clip_range_high</span> <span class="o">=</span> <span class="n">mask_clip_range_high</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask_clip_range_high</span> <span class="o">=</span> <span class="n">mask_clip_range_high</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loss_agg_mode</span> <span class="o">=</span> <span class="n">loss_agg_mode</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
@@ -568,13 +570,13 @@ document.write(`
 
         <span class="n">cispo_loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">advantages</span> <span class="o">*</span> <span class="n">ratio_clamped</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span> <span class="o">*</span> <span class="n">mask</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span> <span class="o">*</span> <span class="n">logprob</span>
 
-        <span class="n">loss</span> <span class="o">=</span> <span class="n">masked_mean</span><span class="p">(</span><span class="n">cispo_loss</span><span class="p">,</span> <span class="n">action_mask</span><span class="p">)</span>
-        <span class="n">masked_frac</span> <span class="o">=</span> <span class="n">masked_mean</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">action_mask</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">masked_loss</span><span class="p">(</span><span class="n">cispo_loss</span><span class="p">,</span> <span class="n">action_mask</span><span class="p">,</span> <span class="n">loss_agg_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">loss_agg_mode</span><span class="p">)</span>
+        <span class="n">unmasked_frac</span> <span class="o">=</span> <span class="n">masked_mean</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">action_mask</span><span class="p">)</span>
 
         <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;cispo_loss&quot;</span><span class="p">:</span> <span class="n">loss</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
             <span class="s2">&quot;ppo_kl&quot;</span><span class="p">:</span> <span class="n">ppo_kl</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
-            <span class="s2">&quot;masked_frac&quot;</span><span class="p">:</span> <span class="n">masked_frac</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
+            <span class="s2">&quot;unmasked_frac&quot;</span><span class="p">:</span> <span class="n">unmasked_frac</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
         <span class="p">}</span>
 
         <span class="k">return</span> <span class="n">loss</span><span class="p">,</span> <span class="n">metrics</span>
@@ -594,6 +596,7 @@ document.write(`
             <span class="s2">&quot;enable_mask_clip&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
             <span class="s2">&quot;mask_clip_range_low&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
             <span class="s2">&quot;mask_clip_range_high&quot;</span><span class="p">:</span> <span class="mf">0.28</span><span class="p">,</span>
+            <span class="s2">&quot;loss_agg_mode&quot;</span><span class="p">:</span> <span class="s2">&quot;token-mean&quot;</span><span class="p">,</span>
         <span class="p">}</span></div>
 </div>
 

@@ -746,21 +746,23 @@ document.write(`
         <span class="n">ngpus_trainer</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">train_batch_size_usual</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">train_batch_size_expert</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="n">use_token_level_loss_in_sft</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">sft_loss_agg_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;token-mean&quot;</span><span class="p">,</span>
+        <span class="n">grpo_loss_agg_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;token-mean&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mu</span> <span class="o">=</span> <span class="n">mu</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_dynamic_bsz</span> <span class="o">=</span> <span class="n">use_dynamic_bsz</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">experience_per_gpu</span> <span class="o">=</span> <span class="n">ppo_mini_batch_size</span> <span class="o">//</span> <span class="n">ngpus_trainer</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gradient_accumulation</span> <span class="o">=</span> <span class="n">ppo_mini_batch_size</span> <span class="o">//</span> <span class="n">ppo_micro_batch_size_per_gpu</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">train_batch_size_usual</span> <span class="o">=</span> <span class="n">train_batch_size_usual</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">train_batch_size_expert</span> <span class="o">=</span> <span class="n">train_batch_size_expert</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_batch_size_usual</span> <span class="o">=</span> <span class="n">train_batch_size_usual</span> <span class="o">//</span> <span class="n">ngpus_trainer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_batch_size_expert</span> <span class="o">=</span> <span class="n">train_batch_size_expert</span> <span class="o">//</span> <span class="n">ngpus_trainer</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">grpo_loss_fn</span> <span class="o">=</span> <span class="n">PPOPolicyLossFn</span><span class="p">(</span>
             <span class="n">clip_range</span><span class="o">=</span><span class="n">clip_range</span><span class="p">,</span>
             <span class="n">clip_range_low</span><span class="o">=</span><span class="n">clip_range_low</span><span class="p">,</span>
             <span class="n">clip_range_high</span><span class="o">=</span><span class="n">clip_range_high</span><span class="p">,</span>
+            <span class="n">loss_agg_mode</span><span class="o">=</span><span class="n">grpo_loss_agg_mode</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sft_loss_fn</span> <span class="o">=</span> <span class="n">SFTLossFn</span><span class="p">(</span><span class="n">use_token_level_loss</span><span class="o">=</span><span class="n">use_token_level_loss_in_sft</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sft_loss_fn</span> <span class="o">=</span> <span class="n">SFTLossFn</span><span class="p">(</span><span class="n">loss_agg_mode</span><span class="o">=</span><span class="n">sft_loss_agg_mode</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -823,7 +825,7 @@ document.write(`
 
         <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span><span class="sa">f</span><span class="s2">&quot;usual/</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">grpo_metrics</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
         <span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="sa">f</span><span class="s2">&quot;expert/</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">sft_metrics</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
-        <span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;loss&quot;</span><span class="p">:</span> <span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">()})</span>
+        <span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">loss</span><span class="p">,</span> <span class="n">metrics</span>
 
@@ -848,8 +850,8 @@ document.write(`
 <span class="w">  </span><span class="nt">policy_loss_fn_args</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">mu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
 <span class="w">    </span><span class="nt">clip_range</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span>
-<span class="w">    </span><span class="nt">use_token_level_loss_in_sft</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
-<span class="w">    </span><span class="nt">use_dynamic_bsz</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">    </span><span class="nt">sft_loss_agg_mode</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;token-mean&quot;</span>
+<span class="w">    </span><span class="nt">use_dynamic_bsz</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
 <span class="w">    </span><span class="nt">repeat_times</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
 <span class="w">    </span><span class="nt">ppo_mini_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">256</span>
 <span class="w">    </span><span class="nt">ppo_micro_batch_size_per_gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>

@@ -532,7 +532,7 @@ document.write(`
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.policy_loss_fn.policy_loss_fn</span><span class="w"> </span><span class="kn">import</span> <span class="n">POLICY_LOSS_FN</span><span class="p">,</span> <span class="n">PolicyLossFn</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">masked_mean</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.algorithm.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">masked_loss</span>
 
 
 <div class="viewcode-block" id="SFTLossFn">
@@ -541,9 +541,9 @@ document.write(`
 <span class="k">class</span><span class="w"> </span><span class="nc">SFTLossFn</span><span class="p">(</span><span class="n">PolicyLossFn</span><span class="p">):</span>
 <div class="viewcode-block" id="SFTLossFn.__init__">
 <a class="viewcode-back" href="../../../../build_api/trinity.algorithm.policy_loss_fn.sft_loss.html#trinity.algorithm.policy_loss_fn.SFTLossFn.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">backend</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;verl&quot;</span><span class="p">,</span> <span class="n">use_token_level_loss</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">backend</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;verl&quot;</span><span class="p">,</span> <span class="n">loss_agg_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;token-mean&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">use_token_level_loss</span> <span class="o">=</span> <span class="n">use_token_level_loss</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loss_agg_mode</span> <span class="o">=</span> <span class="n">loss_agg_mode</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
@@ -552,10 +552,8 @@ document.write(`
         <span class="n">action_mask</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_token_level_loss</span><span class="p">:</span>
-            <span class="n">sft_loss</span> <span class="o">=</span> <span class="n">masked_mean</span><span class="p">(</span><span class="o">-</span><span class="n">logprob</span><span class="p">,</span> <span class="n">action_mask</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">sft_loss</span> <span class="o">=</span> <span class="n">masked_mean</span><span class="p">(</span><span class="o">-</span><span class="n">logprob</span><span class="p">,</span> <span class="n">action_mask</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">sft_loss</span> <span class="o">=</span> <span class="n">masked_loss</span><span class="p">(</span><span class="o">-</span><span class="n">logprob</span><span class="p">,</span> <span class="n">action_mask</span><span class="p">,</span> <span class="n">loss_agg_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">loss_agg_mode</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">sft_loss</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;sft_loss&quot;</span><span class="p">:</span> <span class="n">sft_loss</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()}</span>
 
 <div class="viewcode-block" id="SFTLossFn.default_args">
@@ -563,7 +561,7 @@ document.write(`
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">default_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">{</span>
-            <span class="s2">&quot;use_token_level_loss&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;loss_agg_mode&quot;</span><span class="p">:</span> <span class="s2">&quot;token-mean&quot;</span><span class="p">,</span>
         <span class="p">}</span></div>
 </div>
 

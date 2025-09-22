@@ -1042,13 +1042,13 @@ To implement OPMD, developers need to implement advantage calculation in <code c
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
         <span class="n">pg_losses</span> <span class="o">=</span> <span class="o">-</span><span class="n">advantages</span> <span class="o">*</span> <span class="n">logprob</span>
-        <span class="n">opmd_loss</span> <span class="o">=</span> <span class="n">masked_mean</span><span class="p">(</span><span class="n">pg_losses</span><span class="p">,</span> <span class="n">action_mask</span><span class="p">)</span>
+        <span class="n">opmd_loss</span> <span class="o">=</span> <span class="n">masked_loss</span><span class="p">(</span><span class="n">pg_losses</span><span class="p">,</span> <span class="n">action_mask</span><span class="p">,</span> <span class="n">loss_agg_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">loss_agg_mode</span><span class="p">)</span>
         <span class="n">opmd_loss</span> <span class="o">=</span> <span class="n">opmd_loss</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="p">)</span>  <span class="c1"># for regularization (w.r.t. current pi_theta)</span>
         <span class="k">return</span> <span class="n">opmd_loss</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;opmd_loss&quot;</span><span class="p">:</span> <span class="n">opmd_loss</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()}</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">default_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;tau&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;tau&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;loss_agg_mode&quot;</span><span class="p">:</span> <span class="s2">&quot;token-mean&quot;</span><span class="p">}</span>
 </pre></div>
 </div>
 </section>

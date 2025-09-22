@@ -440,6 +440,8 @@ document.write(`
 
 <span class="n">ANS_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;#### (\-?[0-9\.\,]+)&quot;</span><span class="p">)</span>
 <span class="n">INVALID_ANS</span> <span class="o">=</span> <span class="s2">&quot;[invalid]&quot;</span>
+<span class="n">parse</span><span class="o">.</span><span class="vm">__globals__</span><span class="p">[</span><span class="s2">&quot;TIMEOUT_WARNING_SHOWN&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">verify</span><span class="o">.</span><span class="vm">__globals__</span><span class="p">[</span><span class="s2">&quot;TIMEOUT_WARNING_SHOWN&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
 
 
 <div class="viewcode-block" id="parse_with_timeout">
