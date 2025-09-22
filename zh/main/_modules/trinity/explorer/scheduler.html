@@ -245,7 +245,13 @@
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../build_api/trinity.explorer.html">trinity.explorer package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../build_api/trinity.explorer.api.html">trinity.explorer.api package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../build_api/trinity.explorer.api.api.html">trinity.explorer.api.api module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../build_api/trinity.explorer.api.service.html">trinity.explorer.api.service module</a></li>
+</ul>
+</details></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../build_api/trinity.explorer.explorer.html">trinity.explorer.explorer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../build_api/trinity.explorer.explorer_client.html">trinity.explorer.explorer_client module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../build_api/trinity.explorer.scheduler.html">trinity.explorer.scheduler module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../build_api/trinity.explorer.workflow_runner.html">trinity.explorer.workflow_runner module</a></li>
 </ul>
@@ -593,6 +599,12 @@ document.write(`
             <span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rollout_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_models</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner_id</span><span class="p">)</span>
         <span class="p">)</span>
 
+<div class="viewcode-block" id="RunnerWrapper.prepare">
+<a class="viewcode-back" href="../../../build_api/trinity.explorer.scheduler.html#trinity.explorer.scheduler.RunnerWrapper.prepare">[文档]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">prepare</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span></div>
+
+
 <div class="viewcode-block" id="RunnerWrapper.run_with_retry">
 <a class="viewcode-back" href="../../../build_api/trinity.explorer.scheduler.html#trinity.explorer.scheduler.RunnerWrapper.run_with_retry">[文档]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_with_retry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">TaskWrapper</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Status</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
@@ -636,9 +648,10 @@ document.write(`
 
 <div class="viewcode-block" id="RunnerWrapper.restart_runner">
 <a class="viewcode-back" href="../../../build_api/trinity.explorer.scheduler.html#trinity.explorer.scheduler.RunnerWrapper.restart_runner">[文档]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">restart_runner</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">restart_runner</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">old_runner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">runner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_runner</span><span class="p">()</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">prepare</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">ray</span><span class="o">.</span><span class="n">kill</span><span class="p">(</span><span class="n">old_runner</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
@@ -710,7 +723,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">total_completed</span> <span class="o">=</span> <span class="mi">0</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_create_runner</span><span class="p">(</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_create_runner</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">runner_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="p">):</span>
@@ -723,10 +736,11 @@ document.write(`
             <span class="p">],</span>
             <span class="n">config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="k">await</span> <span class="n">runner</span><span class="o">.</span><span class="n">prepare</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">runners</span><span class="p">[</span><span class="n">runner_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">runner</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">idle_runners</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">runner_id</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_restart_runner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runner_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_restart_runner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runner_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Restart a runner.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">runners</span><span class="p">[</span><span class="n">runner_id</span><span class="p">]</span><span class="o">.</span><span class="n">restart_runner</span><span class="p">()</span>
 
@@ -808,8 +822,7 @@ document.write(`
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">running</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">running</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runner_num</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_create_runner</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_create_runner</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runner_num</span><span class="p">)])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scheduler_task</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_scheduler_loop</span><span class="p">())</span>
         <span class="n">ready_refs</span> <span class="o">=</span> <span class="p">[</span><span class="n">runner</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">__ray_ready__</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span> <span class="k">for</span> <span class="n">runner</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">runners</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
         <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">ready_refs</span><span class="p">)</span>
@@ -932,7 +945,7 @@ document.write(`
                 <span class="bp">self</span><span class="o">.</span><span class="n">_clear_timeout_tasks</span><span class="p">(</span><span class="n">batch_id</span><span class="o">=</span><span class="n">batch_id</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">runner_id</span><span class="p">,</span> <span class="n">task</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">busy_runners</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
                     <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">batch_id</span> <span class="o">==</span> <span class="n">batch_id</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">_restart_runner</span><span class="p">(</span><span class="n">runner_id</span><span class="p">)</span>
+                        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_restart_runner</span><span class="p">(</span><span class="n">runner_id</span><span class="p">)</span>
 
         <span class="n">statuses</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">experiences</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1010,7 +1023,7 @@ document.write(`
                 <span class="bp">self</span><span class="o">.</span><span class="n">_clear_timeout_tasks</span><span class="p">(</span><span class="n">batch_id</span><span class="p">)</span>
             <span class="n">busy_runner_ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">busy_runners</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
             <span class="k">for</span> <span class="n">runner_id</span> <span class="ow">in</span> <span class="n">busy_runner_ids</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_restart_runner</span><span class="p">(</span><span class="n">runner_id</span><span class="p">)</span>
+                <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_restart_runner</span><span class="p">(</span><span class="n">runner_id</span><span class="p">)</span>
 
         <span class="k">raise</span> <span class="ne">TimeoutError</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span></div>
 </div>

@@ -245,7 +245,13 @@
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../build_api/trinity.explorer.html">trinity.explorer package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../build_api/trinity.explorer.api.html">trinity.explorer.api package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../build_api/trinity.explorer.api.api.html">trinity.explorer.api.api module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../build_api/trinity.explorer.api.service.html">trinity.explorer.api.service module</a></li>
+</ul>
+</details></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../build_api/trinity.explorer.explorer.html">trinity.explorer.explorer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../build_api/trinity.explorer.explorer_client.html">trinity.explorer.explorer_client module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../build_api/trinity.explorer.scheduler.html">trinity.explorer.scheduler module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../build_api/trinity.explorer.workflow_runner.html">trinity.explorer.workflow_runner module</a></li>
 </ul>
@@ -701,9 +707,8 @@ document.write(`
     <span class="c1"># The list of experience operators to apply, operators will be applied in the order they are defined</span>
     <span class="n">operators</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">OperatorConfig</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
     <span class="n">save_input</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># whether to save the input experiences</span>
-    <span class="n">input_save_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span>
-        <span class="nb">str</span>
-    <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># the path to save the input experiences, can be a jsonl file or a sqlite database file</span>
+    <span class="c1"># the path to save the input experiences, can be a jsonl file or a sqlite database file</span>
+    <span class="n">input_save_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1"># The following fields are experimental, do not set them unless you know what you are doing</span>
 
@@ -988,7 +993,16 @@ document.write(`
     <span class="n">eval_on_startup</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># evalulate at step 0</span>
 
     <span class="c1"># for benchmark</span>
-    <span class="n">bench_on_latest_checkpoint</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># only benchmark the latest checkpoint</span></div>
+    <span class="n">bench_on_latest_checkpoint</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># only benchmark the latest checkpoint</span>
+
+    <span class="c1"># for serve mode</span>
+    <span class="n">api_port</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8010</span>
+    <span class="c1"># listen on all interfaces by default</span>
+    <span class="n">listen_address</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;0.0.0.0&quot;</span>
+    <span class="c1"># check the running status of the server every 60 seconds</span>
+    <span class="n">service_status_check_interval</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">60</span>
+    <span class="c1"># keep at least 1 model in running status</span>
+    <span class="n">min_running_model_num</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span></div>
 
 
 
@@ -1480,7 +1494,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_algorithm</span><span class="p">()</span>
 
         <span class="c1"># check mode</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;explore&quot;</span><span class="p">,</span> <span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="s2">&quot;bench&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;explore&quot;</span><span class="p">,</span> <span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="s2">&quot;bench&quot;</span><span class="p">,</span> <span class="s2">&quot;serve&quot;</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid mode: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="c1"># prepare for the checkpoint directory</span>
@@ -1526,7 +1540,7 @@ document.write(`
             <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">rollout_model</span><span class="o">.</span><span class="n">tensor_parallel_size</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="s2">&quot;explore&quot;</span><span class="p">,</span> <span class="s2">&quot;bench&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="s2">&quot;explore&quot;</span><span class="p">,</span> <span class="s2">&quot;bench&quot;</span><span class="p">,</span> <span class="s2">&quot;serve&quot;</span><span class="p">]</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_method</span> <span class="o">==</span> <span class="n">SyncMethod</span><span class="o">.</span><span class="n">NCCL</span>
         <span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">sync_method</span> <span class="o">=</span> <span class="n">SyncMethod</span><span class="o">.</span><span class="n">CHECKPOINT</span>

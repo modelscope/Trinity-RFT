@@ -246,7 +246,13 @@
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="trinity.explorer.html">trinity.explorer package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="trinity.explorer.api.html">trinity.explorer.api package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="trinity.explorer.api.api.html">trinity.explorer.api.api module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.explorer.api.service.html">trinity.explorer.api.service module</a></li>
+</ul>
+</details></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.explorer.explorer.html">trinity.explorer.explorer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.explorer.explorer_client.html">trinity.explorer.explorer_client module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.explorer.scheduler.html">trinity.explorer.scheduler module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.explorer.workflow_runner.html">trinity.explorer.workflow_runner module</a></li>
 </ul>
@@ -580,7 +586,7 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_model.vLLMRolloutModel.init_process_group"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.init_process_group()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_model.vLLMRolloutModel.run_api_server"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.run_api_server()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_model.vLLMRolloutModel.has_api_server"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.has_api_server()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_model.vLLMRolloutModel.api_server_ready"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.api_server_ready()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_model.vLLMRolloutModel.get_api_server_url"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.get_api_server_url()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_model.vLLMRolloutModel.reset_prefix_cache"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.reset_prefix_cache()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_model.vLLMRolloutModel.get_model_version"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.get_model_version()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_model.vLLMRolloutModel.sleep"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.sleep()</span></code></a></li>
@@ -713,7 +719,7 @@ it does not exceed <cite>max_model_len - 1</cite>.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.common.models.vllm_model.vLLMRolloutModel.shutdown">
-<span class="sig-name descname"><span class="pre">shutdown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/models/vllm_model.html#vLLMRolloutModel.shutdown"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.common.models.vllm_model.vLLMRolloutModel.shutdown" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">shutdown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/models/vllm_model.html#vLLMRolloutModel.shutdown"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.common.models.vllm_model.vLLMRolloutModel.shutdown" title="Link to this definition">#</a></dt>
 <dd><p>Shutdown the vLLM v1 engine. This kills child processes forked
 by the vLLM engine. If not called, the child processes will be
 orphaned and will not be killed when the parent process exits,
@@ -722,7 +728,7 @@ and they won't be able to be tracked by Ray anymore.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.common.models.vllm_model.vLLMRolloutModel.sync_model">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sync_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/vllm_model.html#vLLMRolloutModel.sync_model"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.common.models.vllm_model.vLLMRolloutModel.sync_model" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sync_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/vllm_model.html#vLLMRolloutModel.sync_model"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.common.models.vllm_model.vLLMRolloutModel.sync_model" title="Link to this definition">#</a></dt>
 <dd><p>Sync model weights to vLLM.</p>
 </dd></dl>
 
@@ -735,22 +741,18 @@ and they won't be able to be tracked by Ray anymore.</p>
 <dt class="sig sig-object py" id="trinity.common.models.vllm_model.vLLMRolloutModel.run_api_server">
 <em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run_api_server</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/models/vllm_model.html#vLLMRolloutModel.run_api_server"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.common.models.vllm_model.vLLMRolloutModel.run_api_server" title="Link to this definition">#</a></dt>
 <dd><p>Run the OpenAI API server in a Ray actor.</p>
-<div class="admonition note">
-<p class="admonition-title">备注</p>
-<p>Do not use <cite>ray.get()</cite> on this method.
-This method will run forever until the server is shut down.</p>
-</div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.common.models.vllm_model.vLLMRolloutModel.has_api_server">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">has_api_server</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/vllm_model.html#vLLMRolloutModel.has_api_server"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.common.models.vllm_model.vLLMRolloutModel.has_api_server" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">has_api_server</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/vllm_model.html#vLLMRolloutModel.has_api_server"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.common.models.vllm_model.vLLMRolloutModel.has_api_server" title="Link to this definition">#</a></dt>
+<dd><p>Check if the model has an API server.</p>
+</dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.models.vllm_model.vLLMRolloutModel.api_server_ready">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">api_server_ready</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/vllm_model.html#vLLMRolloutModel.api_server_ready"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.common.models.vllm_model.vLLMRolloutModel.api_server_ready" title="Link to this definition">#</a></dt>
-<dd><p>Check if the OpenAI API server is ready.</p>
+<dt class="sig sig-object py" id="trinity.common.models.vllm_model.vLLMRolloutModel.get_api_server_url">
+<span class="sig-name descname"><span class="pre">get_api_server_url</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/common/models/vllm_model.html#vLLMRolloutModel.get_api_server_url"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.common.models.vllm_model.vLLMRolloutModel.get_api_server_url" title="Link to this definition">#</a></dt>
+<dd><p>Get the URL of the OpenAI API server.</p>
 <dl class="field-list simple">
 <dt class="field-odd">返回<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The URL of the OpenAI API server.</p>
@@ -844,7 +846,7 @@ This method will run forever until the server is shut down.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_model.vLLMRolloutModel.init_process_group"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.init_process_group()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_model.vLLMRolloutModel.run_api_server"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.run_api_server()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_model.vLLMRolloutModel.has_api_server"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.has_api_server()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_model.vLLMRolloutModel.api_server_ready"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.api_server_ready()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_model.vLLMRolloutModel.get_api_server_url"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.get_api_server_url()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_model.vLLMRolloutModel.reset_prefix_cache"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.reset_prefix_cache()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_model.vLLMRolloutModel.get_model_version"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.get_model_version()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.models.vllm_model.vLLMRolloutModel.sleep"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.sleep()</span></code></a></li>

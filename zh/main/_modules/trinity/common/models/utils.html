@@ -245,7 +245,13 @@
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../build_api/trinity.explorer.html">trinity.explorer package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../build_api/trinity.explorer.api.html">trinity.explorer.api package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.explorer.api.api.html">trinity.explorer.api.api module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.explorer.api.service.html">trinity.explorer.api.service module</a></li>
+</ul>
+</details></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.explorer.explorer.html">trinity.explorer.explorer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.explorer.explorer_client.html">trinity.explorer.explorer_client module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.explorer.scheduler.html">trinity.explorer.scheduler module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.explorer.workflow_runner.html">trinity.explorer.workflow_runner module</a></li>
 </ul>
@@ -669,6 +675,7 @@ document.write(`
     <span class="n">checkpoint_root_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">trainer_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;verl&quot;</span><span class="p">,</span>
     <span class="n">step_num</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">raise_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the checkpoint directory from a root checkpoint directory.</span>
 
@@ -678,12 +685,16 @@ document.write(`
 <span class="sd">        step_num (Optional[int], optional): The step number. If specified,</span>
 <span class="sd">            load the checkpoint with the specified step number. If None,</span>
 <span class="sd">            load the latest checkpoint. Defaults to None.</span>
+<span class="sd">        raise_error (bool): Whether to raise an error if the checkpoint does not exist.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Tuple[str, int]: The checkpoint directory and the step number of the checkpoint.</span>
+<span class="sd">            If the checkpoint does not exist and `raise_error` is False, return (None, 0).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">trainer_type</span> <span class="o">==</span> <span class="s2">&quot;verl&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">get_verl_checkpoint_info</span><span class="p">(</span><span class="n">checkpoint_path</span><span class="o">=</span><span class="n">checkpoint_root_path</span><span class="p">,</span> <span class="n">step_num</span><span class="o">=</span><span class="n">step_num</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">get_verl_checkpoint_info</span><span class="p">(</span>
+            <span class="n">checkpoint_path</span><span class="o">=</span><span class="n">checkpoint_root_path</span><span class="p">,</span> <span class="n">step_num</span><span class="o">=</span><span class="n">step_num</span><span class="p">,</span> <span class="n">raise_error</span><span class="o">=</span><span class="n">raise_error</span>
+        <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported trainer type </span><span class="si">{</span><span class="n">trainer_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
@@ -736,7 +747,7 @@ document.write(`
 <div class="viewcode-block" id="get_verl_checkpoint_info">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.utils.html#trinity.common.models.utils.get_verl_checkpoint_info">[文档]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_verl_checkpoint_info</span><span class="p">(</span>
-    <span class="n">checkpoint_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">step_num</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">checkpoint_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">step_num</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">raise_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the checkpoint directory from a Verl root checkpoint directory.</span>
 
@@ -745,6 +756,7 @@ document.write(`
 <span class="sd">        step_num (Optional[int], optional): The step number. If specified,</span>
 <span class="sd">            load the checkpoint with the specified step number. If None,</span>
 <span class="sd">            load the latest checkpoint. Defaults to None.</span>
+<span class="sd">        raise_error (bool): Whether to raise an error if the checkpoint does not exist.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Tuple[str, int]: The checkpoint directory and the step number of the checkpoint.</span>
@@ -758,11 +770,16 @@ document.write(`
             <span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>  <span class="c1"># TODO: this file may be modified simultaneously</span>
                 <span class="n">iteration</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
                 <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">checkpoint_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;global_step_</span><span class="si">{</span><span class="n">iteration</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">iteration</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">raise_error</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No iteration file found in </span><span class="si">{</span><span class="n">checkpoint_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span>  <span class="c1"># type: ignore</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># load specific iteration checkpoint</span>
-        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">checkpoint_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;global_step_</span><span class="si">{</span><span class="n">step_num</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span> <span class="n">step_num</span></div>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">checkpoint_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;global_step_</span><span class="si">{</span><span class="n">step_num</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="ow">and</span> <span class="n">raise_error</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Checkpoint </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2"> not found&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">path</span><span class="p">,</span> <span class="n">step_num</span></div>
 
 
 

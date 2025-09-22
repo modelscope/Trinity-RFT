@@ -1,6 +1,14 @@
 trinity.explorer package
 ========================
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   trinity.explorer.api
+
 Submodules
 ----------
 
@@ -8,6 +16,7 @@ Submodules
    :maxdepth: 4
 
    trinity.explorer.explorer
+   trinity.explorer.explorer_client
    trinity.explorer.scheduler
    trinity.explorer.workflow_runner
 

@@ -45,7 +45,7 @@
     <link rel="index" title="索引" href="../genindex.html" />
     <link rel="search" title="搜索" href="../search.html" />
     <link rel="next" title="trinity.explorer.workflow_runner module" href="trinity.explorer.workflow_runner.html" />
-    <link rel="prev" title="trinity.explorer.explorer module" href="trinity.explorer.explorer.html" />
+    <link rel="prev" title="trinity.explorer.explorer_client module" href="trinity.explorer.explorer_client.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="zh-CN"/>
   </head>
@@ -246,7 +246,13 @@
 </ul>
 </details></li>
 <li class="toctree-l2 current active has-children"><a class="reference internal" href="trinity.explorer.html">trinity.explorer package</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l3 has-children"><a class="reference internal" href="trinity.explorer.api.html">trinity.explorer.api package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="trinity.explorer.api.api.html">trinity.explorer.api.api module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.explorer.api.service.html">trinity.explorer.api.service module</a></li>
+</ul>
+</details></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.explorer.explorer.html">trinity.explorer.explorer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.explorer.explorer_client.html">trinity.explorer.explorer_client module</a></li>
 <li class="toctree-l3 current active"><a class="current reference internal" href="#">trinity.explorer.scheduler module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.explorer.workflow_runner.html">trinity.explorer.workflow_runner module</a></li>
 </ul>
@@ -577,6 +583,7 @@ document.write(`
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.RunnerWrapper"><code class="docutils literal notranslate"><span class="pre">RunnerWrapper</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.RunnerWrapper.__init__"><code class="docutils literal notranslate"><span class="pre">RunnerWrapper.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.RunnerWrapper.prepare"><code class="docutils literal notranslate"><span class="pre">RunnerWrapper.prepare()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.RunnerWrapper.run_with_retry"><code class="docutils literal notranslate"><span class="pre">RunnerWrapper.run_with_retry()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.RunnerWrapper.restart_runner"><code class="docutils literal notranslate"><span class="pre">RunnerWrapper.restart_runner()</span></code></a></li>
 </ul>
@@ -650,6 +657,11 @@ document.write(`
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="trinity.explorer.scheduler.RunnerWrapper.prepare">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">prepare</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/scheduler.html#RunnerWrapper.prepare"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.explorer.scheduler.RunnerWrapper.prepare" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="trinity.explorer.scheduler.RunnerWrapper.run_with_retry">
 <em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run_with_retry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#trinity.explorer.scheduler.TaskWrapper" title="trinity.explorer.scheduler.TaskWrapper"><span class="pre">TaskWrapper</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.explorer.workflow_runner.html#trinity.explorer.workflow_runner.Status" title="trinity.explorer.workflow_runner.Status"><span class="pre">Status</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/explorer/scheduler.html#RunnerWrapper.run_with_retry"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.explorer.scheduler.RunnerWrapper.run_with_retry" title="Link to this definition">#</a></dt>
 <dd><dl class="field-list simple">
@@ -666,7 +678,7 @@ document.write(`
 
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.explorer.scheduler.RunnerWrapper.restart_runner">
-<span class="sig-name descname"><span class="pre">restart_runner</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/scheduler.html#RunnerWrapper.restart_runner"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.explorer.scheduler.RunnerWrapper.restart_runner" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">restart_runner</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/explorer/scheduler.html#RunnerWrapper.restart_runner"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.explorer.scheduler.RunnerWrapper.restart_runner" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -768,12 +780,12 @@ starting with an integer (e.g., 123, &quot;123/my_task&quot;)</p></li>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="trinity.explorer.explorer.html"
+       href="trinity.explorer.explorer_client.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">上一页</p>
-        <p class="prev-next-title">trinity.explorer.explorer module</p>
+        <p class="prev-next-title">trinity.explorer.explorer_client module</p>
       </div>
     </a>
     <a class="right-next"
@@ -811,6 +823,7 @@ starting with an integer (e.g., 123, &quot;123/my_task&quot;)</p></li>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.RunnerWrapper"><code class="docutils literal notranslate"><span class="pre">RunnerWrapper</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.RunnerWrapper.__init__"><code class="docutils literal notranslate"><span class="pre">RunnerWrapper.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.RunnerWrapper.prepare"><code class="docutils literal notranslate"><span class="pre">RunnerWrapper.prepare()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.RunnerWrapper.run_with_retry"><code class="docutils literal notranslate"><span class="pre">RunnerWrapper.run_with_retry()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.explorer.scheduler.RunnerWrapper.restart_runner"><code class="docutils literal notranslate"><span class="pre">RunnerWrapper.restart_runner()</span></code></a></li>
 </ul>

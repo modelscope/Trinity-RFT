@@ -245,7 +245,13 @@
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../build_api/trinity.explorer.html">trinity.explorer package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../build_api/trinity.explorer.api.html">trinity.explorer.api package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.explorer.api.api.html">trinity.explorer.api.api module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.explorer.api.service.html">trinity.explorer.api.service module</a></li>
+</ul>
+</details></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.explorer.explorer.html">trinity.explorer.explorer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.explorer.explorer_client.html">trinity.explorer.explorer_client module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.explorer.scheduler.html">trinity.explorer.scheduler module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.explorer.workflow_runner.html">trinity.explorer.workflow_runner module</a></li>
 </ul>
@@ -523,10 +529,10 @@ document.write(`
   <h1>trinity.common.models.vllm_model 源代码</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;A wrapper around the vllm.AsyncEngine to handle async requests.&quot;&quot;&quot;</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">aiohttp</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ray</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">vllm</span>
@@ -620,7 +626,8 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">state_dict_meta</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_version</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># TODO: resume the value from the checkpoint</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">api_server_host</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">api_server_port</span> <span class="o">=</span> <span class="kc">None</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api_server_port</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api_server</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_initialize_tokenizer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -898,12 +905,19 @@ document.write(`
 
 <div class="viewcode-block" id="vLLMRolloutModel.shutdown">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.shutdown">[文档]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Shutdown the vLLM v1 engine. This kills child processes forked</span>
 <span class="sd">        by the vLLM engine. If not called, the child processes will be</span>
 <span class="sd">        orphaned and will not be killed when the parent process exits,</span>
 <span class="sd">        and they won&#39;t be able to be tracked by Ray anymore.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_server</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api_server</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_server</span>
+            <span class="k">except</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">CancelledError</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api_server</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="p">,</span> <span class="s2">&quot;shutdown&quot;</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Shutting down vLLM engine&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span></div>
@@ -935,12 +949,12 @@ document.write(`
 
 <div class="viewcode-block" id="vLLMRolloutModel.sync_model">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.sync_model">[文档]</a>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">sync_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_version</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">sync_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_version</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sync model weights to vLLM.&quot;&quot;&quot;</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collective_rpc</span><span class="p">(</span><span class="s2">&quot;update_weight&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Sync model weights to vLLM successfully.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_version</span> <span class="o">=</span> <span class="n">model_version</span>
-        <span class="k">return</span> <span class="kc">True</span></div>
+        <span class="k">return</span> <span class="n">model_version</span></div>
 
 
 <div class="viewcode-block" id="vLLMRolloutModel.init_process_group">
@@ -977,56 +991,42 @@ document.write(`
 <div class="viewcode-block" id="vLLMRolloutModel.run_api_server">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.run_api_server">[文档]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_api_server</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run the OpenAI API server in a Ray actor.</span>
-
-<span class="sd">        Note:</span>
-<span class="sd">            Do not use `ray.get()` on this method.</span>
-<span class="sd">            This method will run forever until the server is shut down.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run the OpenAI API server in a Ray actor.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api_server_host</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_server_port</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;API server is already running.&quot;</span><span class="p">)</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.api.vllm_patch</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_api_server_in_ray_actor</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">api_server_host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_server_port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_available_address</span><span class="p">()</span>
-        <span class="k">await</span> <span class="n">run_api_server_in_ray_actor</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">api_server_host</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">api_server_port</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model_path</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">enable_auto_tool_choice</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">tool_call_parser</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">reasoning_parser</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api_server</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span>
+            <span class="n">run_api_server_in_ray_actor</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">api_server_host</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">api_server_port</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model_path</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">enable_auto_tool_choice</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">tool_call_parser</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">reasoning_parser</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="vLLMRolloutModel.has_api_server">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.has_api_server">[文档]</a>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">has_api_server</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">has_api_server</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">enable_openai_api</span></div>
 
 
-<div class="viewcode-block" id="vLLMRolloutModel.api_server_ready">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.api_server_ready">[文档]</a>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">api_server_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the OpenAI API server is ready.</span>
+<div class="viewcode-block" id="vLLMRolloutModel.get_api_server_url">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.get_api_server_url">[文档]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_api_server_url</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the URL of the OpenAI API server.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            api_url (str): The URL of the OpenAI API server.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_api_server</span><span class="p">():</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_api_server</span><span class="p">():</span>
             <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">async</span> <span class="k">with</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">ClientSession</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
-                <span class="k">async</span> <span class="k">with</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;http://</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">api_server_host</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">api_server_port</span><span class="si">}</span><span class="s2">/health&quot;</span>
-                <span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
-                        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;http://</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">api_server_host</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">api_server_port</span><span class="si">}</span><span class="s2">/v1&quot;</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-            <span class="k">return</span> <span class="kc">None</span></div>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;http://</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">api_server_host</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">api_server_port</span><span class="si">}</span><span class="s2">&quot;</span></div>
 
 
 <div class="viewcode-block" id="vLLMRolloutModel.reset_prefix_cache">

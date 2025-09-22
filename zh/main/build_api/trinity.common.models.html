@@ -246,7 +246,13 @@
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="trinity.explorer.html">trinity.explorer package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="trinity.explorer.api.html">trinity.explorer.api package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="trinity.explorer.api.api.html">trinity.explorer.api.api module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.explorer.api.service.html">trinity.explorer.api.service module</a></li>
+</ul>
+</details></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.explorer.explorer.html">trinity.explorer.explorer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.explorer.explorer_client.html">trinity.explorer.explorer_client module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.explorer.scheduler.html">trinity.explorer.scheduler module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.explorer.workflow_runner.html">trinity.explorer.workflow_runner module</a></li>
 </ul>
@@ -602,10 +608,13 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.InferenceModel.convert_messages_to_experience"><code class="docutils literal notranslate"><span class="pre">InferenceModel.convert_messages_to_experience()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.InferenceModel.get_model_version"><code class="docutils literal notranslate"><span class="pre">InferenceModel.get_model_version()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.InferenceModel.get_available_address"><code class="docutils literal notranslate"><span class="pre">InferenceModel.get_available_address()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.InferenceModel.has_api_server"><code class="docutils literal notranslate"><span class="pre">InferenceModel.has_api_server()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.InferenceModel.get_api_server_url"><code class="docutils literal notranslate"><span class="pre">InferenceModel.get_api_server_url()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.ModelWrapper"><code class="docutils literal notranslate"><span class="pre">ModelWrapper</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.ModelWrapper.__init__"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.ModelWrapper.prepare"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.prepare()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.ModelWrapper.generate"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.generate()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.ModelWrapper.generate_async"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.generate_async()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.ModelWrapper.generate_mm"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.generate_mm()</span></code></a></li>
@@ -622,6 +631,8 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.ModelWrapper.model_version_async"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.model_version_async</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.ModelWrapper.get_openai_client"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.get_openai_client()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.ModelWrapper.get_openai_async_client"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.get_openai_async_client()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.ModelWrapper.get_current_load"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.get_current_load()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.ModelWrapper.sync_model_weights"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.sync_model_weights()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.ModelWrapper.extract_experience_from_history"><code class="docutils literal notranslate"><span class="pre">ModelWrapper.extract_experience_from_history()</span></code></a></li>
 </ul>
 </li>
@@ -656,7 +667,7 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.init_process_group"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.init_process_group()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.run_api_server"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.run_api_server()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.has_api_server"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.has_api_server()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.api_server_ready"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.api_server_ready()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.get_api_server_url"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.get_api_server_url()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.reset_prefix_cache"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.reset_prefix_cache()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.get_model_version"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.get_model_version()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.sleep"><code class="docutils literal notranslate"><span class="pre">vLLMRolloutModel.sleep()</span></code></a></li>

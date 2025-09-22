@@ -246,7 +246,13 @@
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="trinity.explorer.html">trinity.explorer package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="trinity.explorer.api.html">trinity.explorer.api package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="trinity.explorer.api.api.html">trinity.explorer.api.api module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.explorer.api.service.html">trinity.explorer.api.service module</a></li>
+</ul>
+</details></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.explorer.explorer.html">trinity.explorer.explorer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.explorer.explorer_client.html">trinity.explorer.explorer_client module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.explorer.scheduler.html">trinity.explorer.scheduler module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.explorer.workflow_runner.html">trinity.explorer.workflow_runner module</a></li>
 </ul>
@@ -571,6 +577,8 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.state_manager.StateManager.__init__"><code class="docutils literal notranslate"><span class="pre">StateManager.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.state_manager.StateManager.save_explorer"><code class="docutils literal notranslate"><span class="pre">StateManager.save_explorer()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.state_manager.StateManager.load_explorer"><code class="docutils literal notranslate"><span class="pre">StateManager.load_explorer()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.state_manager.StateManager.save_explorer_server_url"><code class="docutils literal notranslate"><span class="pre">StateManager.save_explorer_server_url()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.state_manager.StateManager.load_explorer_server_url"><code class="docutils literal notranslate"><span class="pre">StateManager.load_explorer_server_url()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.state_manager.StateManager.save_trainer"><code class="docutils literal notranslate"><span class="pre">StateManager.save_trainer()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.state_manager.StateManager.load_trainer"><code class="docutils literal notranslate"><span class="pre">StateManager.load_trainer()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.state_manager.StateManager.save_stage"><code class="docutils literal notranslate"><span class="pre">StateManager.save_stage()</span></code></a></li>
@@ -609,6 +617,16 @@ document.write(`
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.manager.state_manager.StateManager.load_explorer">
 <span class="sig-name descname"><span class="pre">load_explorer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/trinity/manager/state_manager.html#StateManager.load_explorer"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.manager.state_manager.StateManager.load_explorer" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.manager.state_manager.StateManager.save_explorer_server_url">
+<span class="sig-name descname"><span class="pre">save_explorer_server_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/manager/state_manager.html#StateManager.save_explorer_server_url"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.manager.state_manager.StateManager.save_explorer_server_url" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.manager.state_manager.StateManager.load_explorer_server_url">
+<span class="sig-name descname"><span class="pre">load_explorer_server_url</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/trinity/manager/state_manager.html#StateManager.load_explorer_server_url"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.manager.state_manager.StateManager.load_explorer_server_url" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -684,6 +702,8 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.state_manager.StateManager.__init__"><code class="docutils literal notranslate"><span class="pre">StateManager.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.state_manager.StateManager.save_explorer"><code class="docutils literal notranslate"><span class="pre">StateManager.save_explorer()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.state_manager.StateManager.load_explorer"><code class="docutils literal notranslate"><span class="pre">StateManager.load_explorer()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.state_manager.StateManager.save_explorer_server_url"><code class="docutils literal notranslate"><span class="pre">StateManager.save_explorer_server_url()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.state_manager.StateManager.load_explorer_server_url"><code class="docutils literal notranslate"><span class="pre">StateManager.load_explorer_server_url()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.state_manager.StateManager.save_trainer"><code class="docutils literal notranslate"><span class="pre">StateManager.save_trainer()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.state_manager.StateManager.load_trainer"><code class="docutils literal notranslate"><span class="pre">StateManager.load_trainer()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.manager.state_manager.StateManager.save_stage"><code class="docutils literal notranslate"><span class="pre">StateManager.save_stage()</span></code></a></li>

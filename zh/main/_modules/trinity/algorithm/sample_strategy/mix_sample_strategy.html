@@ -245,7 +245,13 @@
 </ul>
 </details></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../build_api/trinity.explorer.html">trinity.explorer package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../build_api/trinity.explorer.api.html">trinity.explorer.api package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.explorer.api.api.html">trinity.explorer.api.api module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.explorer.api.service.html">trinity.explorer.api.service module</a></li>
+</ul>
+</details></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.explorer.explorer.html">trinity.explorer.explorer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.explorer.explorer_client.html">trinity.explorer.explorer_client module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.explorer.scheduler.html">trinity.explorer.scheduler module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../build_api/trinity.explorer.workflow_runner.html">trinity.explorer.workflow_runner module</a></li>
 </ul>
@@ -564,6 +570,18 @@ document.write(`
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s2">&quot;`buffer_config.trainer_input.auxiliary_buffers` is required in MIX algorithm&quot;</span>
             <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">buffer_config</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">auxiliary_buffers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sft_dataset_name</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sft_dataset_name</span><span class="si">}</span><span class="s2">` is not found in `buffer_config.trainer_input.auxiliary_buffers`&quot;</span>
+            <span class="p">)</span>
+        <span class="n">expert_storage_config</span> <span class="o">=</span> <span class="n">buffer_config</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">auxiliary_buffers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sft_dataset_name</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">expert_storage_config</span><span class="o">.</span><span class="n">schema_type</span> <span class="o">!=</span> <span class="s2">&quot;sft&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;schema_type of </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sft_dataset_name</span><span class="si">}</span><span class="s2"> is not `sft`, set it to `sft`&quot;</span>
+            <span class="p">)</span>
+            <span class="n">expert_storage_config</span><span class="o">.</span><span class="n">schema_type</span> <span class="o">=</span> <span class="s2">&quot;sft&quot;</span>
 
         <span class="c1"># expert experience buffer</span>
         <span class="n">expert_buffer_config</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">buffer_config</span><span class="p">)</span>
