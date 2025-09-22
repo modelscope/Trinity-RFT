@@ -16,11 +16,11 @@ from tests.tools import (
     RayUnittestBase,
     TensorBoardParser,
     get_checkpoint_path,
+    get_lora_config,
     get_model_path,
     get_template_config,
     get_unittest_dataset_config,
     get_vision_languge_model_path,
-    get_lora_config,
 )
 from trinity.cli.launcher import bench, both, explore, run, train
 from trinity.common.config import (

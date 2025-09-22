@@ -6,7 +6,13 @@ from typing import Dict, List
 import ray
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 
-from trinity.common.config import Config, FormatConfig, StorageConfig, LoRAConfig, load_config
+from trinity.common.config import (
+    Config,
+    FormatConfig,
+    LoRAConfig,
+    StorageConfig,
+    load_config,
+)
 from trinity.common.constants import (
     CHECKPOINT_ROOT_DIR_ENV_VAR,
     MODEL_PATH_ENV_VAR,
