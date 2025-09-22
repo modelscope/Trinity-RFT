@@ -97,6 +97,7 @@ class ModelWrapper:
     @_history_recorder
     def generate(self, prompts: List[str], **kwargs) -> List[Experience]:
         """Generate a list of experiences from a list of prompts."""
+        lora_request = None
         if self.enable_lora:
             lora_request = self.get_lora_request()
 
@@ -108,6 +109,7 @@ class ModelWrapper:
     @_history_recorder
     async def generate_async(self, prompts: List[str], **kwargs) -> List[Experience]:
         """Generate a list of experiences from a list of prompts in async."""
+        lora_request = None
         if self.enable_lora:
             lora_request = self.get_lora_request()
 
