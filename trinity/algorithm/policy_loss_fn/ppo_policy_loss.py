@@ -8,7 +8,7 @@ from typing import Dict, Optional, Tuple
 import torch
 
 from trinity.algorithm.policy_loss_fn.policy_loss_fn import POLICY_LOSS_FN, PolicyLossFn
-from trinity.algorithm.utils import masked_mean
+from trinity.algorithm.utils import masked_loss, masked_mean
 
 
 @POLICY_LOSS_FN.register_module("ppo")
@@ -19,6 +19,7 @@ class PPOPolicyLossFn(PolicyLossFn):
         clip_range: Optional[float] = None,
         clip_range_low: Optional[float] = None,
         clip_range_high: Optional[float] = None,
+        loss_agg_mode: Optional[str] = "token-mean",
     ) -> None:
         super().__init__(backend=backend)
         if clip_range_low is None:
@@ -31,6 +32,7 @@ class PPOPolicyLossFn(PolicyLossFn):
             self.clip_range_high = clip_range_high
         assert self.clip_range_low is not None, "clip_range_low must be specified."
         assert self.clip_range_high is not None, "clip_range_high must be specified."
+        self.loss_agg_mode = loss_agg_mode
 
     def __call__(  # type: ignore
         self,
@@ -49,7 +51,9 @@ class PPOPolicyLossFn(PolicyLossFn):
             ratio, 1.0 - self.clip_range_low, 1.0 + self.clip_range_high  # type: ignore
         )
 
-        pg_loss = masked_mean(torch.max(pg_losses, pg_losses2), action_mask)
+        pg_loss = masked_loss(
+            torch.max(pg_losses, pg_losses2), action_mask, loss_agg_mode=self.loss_agg_mode
+        )
         pg_clipfrac = masked_mean(torch.gt(pg_losses2, pg_losses).float(), action_mask)
         metrics = {
             "pg_clipfrac": pg_clipfrac.detach().item(),
@@ -62,4 +66,5 @@ class PPOPolicyLossFn(PolicyLossFn):
     def default_args(cls) -> Dict:
         return {
             "clip_range": 0.2,
+            "loss_agg_mode": "token-mean",
         }

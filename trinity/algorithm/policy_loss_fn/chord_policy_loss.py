@@ -8,7 +8,7 @@ import torch
 from trinity.algorithm.policy_loss_fn.policy_loss_fn import POLICY_LOSS_FN, PolicyLossFn
 from trinity.algorithm.policy_loss_fn.ppo_policy_loss import PPOPolicyLossFn
 from trinity.algorithm.policy_loss_fn.sft_loss import SFTLossFn
-from trinity.algorithm.utils import masked_mean
+from trinity.algorithm.utils import masked_loss
 
 
 def mu_schedule_function(
@@ -49,9 +49,14 @@ class SFTISLossFn(PolicyLossFn):
     ) -> Tuple[torch.Tensor, Dict]:
         token_prob = torch.exp(logprob)
         if self.use_token_level_loss:
-            sft_loss = masked_mean(-logprob * token_prob.detach(), action_mask)
+            sft_loss = masked_loss(
+                -logprob * token_prob.detach(), action_mask, loss_agg_mode="token-mean"
+            )
         else:
-            sft_loss = masked_mean(-logprob * token_prob.detach(), action_mask, axis=1).mean()
+            sft_loss = masked_loss(
+                -logprob * token_prob.detach(), action_mask, loss_agg_mode="seq-mean-token-mean"
+            )
+
         return sft_loss, {"sft_is_loss": sft_loss.detach().item()}
 
     @classmethod
@@ -96,9 +101,13 @@ class SFTPhiLossFn(PolicyLossFn):
         weighted_phi = phi_function(token_prob)
 
         if self.use_token_level_loss:
-            sft_loss = masked_mean(-logprob * weighted_phi.detach(), action_mask)
+            sft_loss = masked_loss(
+                -logprob * weighted_phi.detach(), action_mask, loss_agg_mode="token-mean"
+            )
         else:
-            sft_loss = masked_mean(-logprob * weighted_phi.detach(), action_mask, axis=1).mean()
+            sft_loss = masked_loss(
+                -logprob * weighted_phi.detach(), action_mask, loss_agg_mode="seq-mean-token-mean"
+            )
         return sft_loss, {"sft_phi_loss": sft_loss.detach().item()}
 
     @classmethod
@@ -144,6 +153,7 @@ class MIXCHORDPolicyLossFn(PolicyLossFn):
         train_batch_size_usual: int = 1,
         train_batch_size_expert: int = 1,
         use_token_level_loss_in_sft: bool = True,
+        grpo_loss_agg_mode: str = "token-mean",
     ) -> None:
         super().__init__(backend=backend)
         self.mu_warmup_steps = mu_warmup_steps
@@ -160,6 +170,7 @@ class MIXCHORDPolicyLossFn(PolicyLossFn):
             clip_range=clip_range,
             clip_range_low=clip_range_low,
             clip_range_high=clip_range_high,
+            loss_agg_mode=grpo_loss_agg_mode,
         )
         if enable_phi_function:
             self.sft_loss_fn = SFTPhiLossFn(use_token_level_loss=use_token_level_loss_in_sft)

@@ -8,7 +8,7 @@ from typing import Dict, Optional, Tuple
 import torch
 
 from trinity.algorithm.policy_loss_fn.policy_loss_fn import POLICY_LOSS_FN, PolicyLossFn
-from trinity.algorithm.utils import masked_mean
+from trinity.algorithm.utils import masked_loss, masked_mean
 
 
 @POLICY_LOSS_FN.register_module("gspo")
@@ -19,6 +19,7 @@ class GSPOLossFn(PolicyLossFn):
         clip_range: Optional[float] = None,
         clip_range_low: Optional[float] = None,
         clip_range_high: Optional[float] = None,
+        loss_agg_mode: Optional[float] = "seq-mean-token-mean",
     ) -> None:
         super().__init__(backend=backend)
         _clip_range_low = clip_range_low if clip_range_low is not None else clip_range
@@ -30,6 +31,7 @@ class GSPOLossFn(PolicyLossFn):
         if _clip_range_high is None:
             raise ValueError("Either clip_range or clip_range_high must be specified.")
         self.clip_range_high = _clip_range_high
+        self.loss_agg_mode = loss_agg_mode
 
     def __call__(  # type: ignore
         self,
@@ -52,10 +54,11 @@ class GSPOLossFn(PolicyLossFn):
             ratio, 1.0 - self.clip_range_low, 1.0 + self.clip_range_high
         )  # [batch_size, seq_len]
 
-        seq_losses = masked_mean(
-            torch.max(pg_losses, pg_losses_clipped), action_mask, axis=-1
-        )  # [batch_size]
-        pg_loss = torch.mean(seq_losses)
+        pg_loss = masked_loss(
+            values=torch.max(pg_losses, pg_losses_clipped),
+            mask=action_mask,
+            loss_agg_mode=self.loss_agg_mode,
+        )
         pg_clipfrac = masked_mean(torch.gt(pg_losses_clipped, pg_losses).float(), action_mask)
         ppo_kl = masked_mean(-negative_approx_kl, action_mask)
         ppo_kl_seq = torch.mean(-negative_approx_kl_seq)
@@ -73,4 +76,5 @@ class GSPOLossFn(PolicyLossFn):
         return {
             "clip_range_low": 0.0003,
             "clip_range_high": 0.0004,
+            "loss_agg_mode": "seq-mean-token-mean",
         }

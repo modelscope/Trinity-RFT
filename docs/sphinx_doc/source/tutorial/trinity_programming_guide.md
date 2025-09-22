@@ -436,13 +436,13 @@ class OPMDPolicyLossFn(PolicyLossFn):
         **kwargs,
     ) -> Tuple[torch.Tensor, Dict]:
         pg_losses = -advantages * logprob
-        opmd_loss = masked_mean(pg_losses, action_mask)
+        opmd_loss = masked_loss(pg_losses, action_mask, loss_agg_mode=self.loss_agg_mode)
         opmd_loss = opmd_loss / (1.0 + self.tau)  # for regularization (w.r.t. current pi_theta)
         return opmd_loss, {"opmd_loss": opmd_loss.detach().item()}
 
     @classmethod
     def default_args(cls) -> Dict:
-        return {"tau": 1.0}
+        return {"tau": 1.0, "loss_agg_mode": "token-mean"}
 ```
 
 ---

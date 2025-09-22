@@ -148,7 +148,7 @@ class Actor:
     clip_ratio_high: Optional[float] = None
     entropy_coeff: float = 0.001
     use_kl_loss: bool = False
-    kl_loss_coef: float = 0.001
+    kl_loss_coef: float = 0.0
     kl_loss_type: str = "low_var_kl"
 
 

@@ -5,7 +5,7 @@ from typing import Dict, Tuple
 import torch
 
 from trinity.algorithm.policy_loss_fn.policy_loss_fn import POLICY_LOSS_FN, PolicyLossFn
-from trinity.algorithm.utils import masked_mean
+from trinity.algorithm.utils import masked_loss
 
 
 @POLICY_LOSS_FN.register_module("sft")
@@ -21,9 +21,10 @@ class SFTLossFn(PolicyLossFn):
         **kwargs,
     ) -> Tuple[torch.Tensor, Dict]:
         if self.use_token_level_loss:
-            sft_loss = masked_mean(-logprob, action_mask)
+            sft_loss = masked_loss(-logprob, action_mask, loss_agg_mode="token-mean")
         else:
-            sft_loss = masked_mean(-logprob, action_mask, axis=1).mean()
+            sft_loss = masked_loss(-logprob, action_mask, loss_agg_mode="seq-mean-token-mean")
+
         return sft_loss, {"sft_loss": sft_loss.detach().item()}
 
     @classmethod

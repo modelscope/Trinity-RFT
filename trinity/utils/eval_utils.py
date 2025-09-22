@@ -8,6 +8,8 @@ from trinity.utils.math_eval_utils import strip_string
 
 ANS_RE = re.compile(r"#### (\-?[0-9\.\,]+)")
 INVALID_ANS = "[invalid]"
+parse.__globals__["TIMEOUT_WARNING_SHOWN"] = True
+verify.__globals__["TIMEOUT_WARNING_SHOWN"] = True
 
 
 def parse_with_timeout(pred: str, parsing_timeout: int = 5, **kwargs) -> list[str]:
