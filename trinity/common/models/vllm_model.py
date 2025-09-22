@@ -415,7 +415,7 @@ class vLLMRolloutModel(InferenceModel):
             )
             assert self.config.lora_modules is not None
             self.config.lora_modules[0]["lora_path"] = self.default_lora_path
-            self.logger.info(f"Point lora_path to the path of {model_version=} successfully.")
+            self.logger.info(f"Redirect `lora_path` to the path of {model_version=} successfully.")
             return True
         await self._collective_rpc("update_weight")
         self.logger.info("Sync model weights to vLLM successfully.")

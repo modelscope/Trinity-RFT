@@ -6,7 +6,7 @@ from typing import Dict, List
 import ray
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 
-from trinity.common.config import Config, FormatConfig, StorageConfig, load_config
+from trinity.common.config import Config, FormatConfig, StorageConfig, LoRAConfig, load_config
 from trinity.common.constants import (
     CHECKPOINT_ROOT_DIR_ENV_VAR,
     MODEL_PATH_ENV_VAR,
@@ -64,11 +64,15 @@ def get_vision_languge_model_path() -> str:
     return path
 
 
+def get_lora_config() -> LoRAConfig:
+    return LoRAConfig(name="lora", lora_rank=16, lora_alpha=16)
+
+
 def get_unittest_dataset_config(
     dataset_name: str = "countdown", split: str = "train"
 ) -> StorageConfig:
-    """Countdown dataset with 17 samples."""
     if dataset_name == "countdown" or dataset_name == "copy_countdown":
+        # Countdown dataset with 17 samples
         return StorageConfig(
             name=dataset_name,
             path=os.path.join(os.path.dirname(__file__), "template", "data", "countdown"),
@@ -82,6 +86,7 @@ def get_unittest_dataset_config(
             default_reward_fn_type="countdown_reward",
         )
     elif dataset_name in {"eval_short", "eval_long"}:
+        # Eval_short dataset with 2 samples, eval_long dataset with 8 samples
         return StorageConfig(
             name=dataset_name,
             path=os.path.join(os.path.dirname(__file__), "template", "data", dataset_name),
@@ -94,6 +99,7 @@ def get_unittest_dataset_config(
             default_reward_fn_type="math_reward",
         )
     elif dataset_name == "gsm8k":
+        # GSM8K dataset with 16 samples
         return StorageConfig(
             name=dataset_name,
             path=os.path.join(os.path.dirname(__file__), "template", "data", "gsm8k"),
@@ -106,6 +112,7 @@ def get_unittest_dataset_config(
             default_reward_fn_type="math_reward",
         )
     elif dataset_name == "sft_for_gsm8k":
+        # SFT dataset with 8 samples
         return StorageConfig(
             name=dataset_name,
             path=os.path.join(os.path.dirname(__file__), "template", "data", "sft_for_gsm8k"),
@@ -118,6 +125,7 @@ def get_unittest_dataset_config(
             ),
         )
     elif dataset_name == "sft_with_tools":
+        # SFT_with_tools dataset with 4 samples
         return StorageConfig(
             name=dataset_name,
             path=os.path.join(os.path.dirname(__file__), "template", "data", "sft_with_tools"),
@@ -130,6 +138,7 @@ def get_unittest_dataset_config(
             ),
         )
     elif dataset_name == "dpo":
+        # HumanLike DPO dataset with 17 samples
         return StorageConfig(
             name=dataset_name,
             path=os.path.join(os.path.dirname(__file__), "template", "data", "human_like"),
@@ -142,6 +151,7 @@ def get_unittest_dataset_config(
             ),
         )
     elif dataset_name == "geometry":
+        # Multi-modal geometry dataset with 8 samples
         return StorageConfig(
             name=dataset_name,
             path=os.path.join(os.path.dirname(__file__), "template", "data", "geometry"),
