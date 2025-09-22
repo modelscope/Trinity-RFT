@@ -4,12 +4,13 @@ import asyncio
 import socket
 import time
 from abc import ABC, abstractmethod
-from typing import Any, List, Sequence, Tuple, Union
+from typing import Any, List, Optional, Sequence, Tuple, Union
 
 import openai
 import ray
 import torch
 from torch import Tensor
+from vllm.lora.request import LoRARequest
 
 from trinity.common.experience import Experience
 from trinity.utils.log import get_logger
@@ -97,10 +98,7 @@ class ModelWrapper:
     @_history_recorder
     def generate(self, prompts: List[str], **kwargs) -> List[Experience]:
         """Generate a list of experiences from a list of prompts."""
-        lora_request = None
-        if self.enable_lora:
-            lora_request = self.get_lora_request()
-
+        lora_request = self.get_lora_request()
         results = ray.get(
             [self.model.generate.remote(prompt, lora_request, **kwargs) for prompt in prompts]
         )
@@ -109,10 +107,7 @@ class ModelWrapper:
     @_history_recorder
     async def generate_async(self, prompts: List[str], **kwargs) -> List[Experience]:
         """Generate a list of experiences from a list of prompts in async."""
-        lora_request = None
-        if self.enable_lora:
-            lora_request = self.get_lora_request()
-
+        lora_request = self.get_lora_request_async()
         results = await asyncio.gather(
             *[self.model.generate.remote(prompt, lora_request, **kwargs) for prompt in prompts]
         )
@@ -146,17 +141,13 @@ class ModelWrapper:
     @_history_recorder
     def chat(self, messages: List[dict], **kwargs) -> List[Experience]:
         """Generate a list of experiences from a list of messages."""
-        lora_request = None
-        if self.enable_lora:
-            lora_request = self.get_lora_request()
+        lora_request = self.get_lora_request()
         return ray.get(self.model.chat.remote(messages, lora_request, **kwargs))
 
     @_history_recorder
     async def chat_async(self, messages: List[dict], **kwargs) -> List[Experience]:
         """Generate a list of experiences from a list of messages in async."""
-        lora_request = None
-        if self.enable_lora:
-            lora_request = self.get_lora_request()
+        lora_request = self.get_lora_request_async()
         return await self.model.chat.remote(messages, lora_request, **kwargs)
 
     @_history_recorder
@@ -195,9 +186,17 @@ class ModelWrapper:
         """Get the version of the model."""
         return await self.model.get_model_version.remote()
 
-    def get_lora_request(self) -> str:
-        """Get the LoRA request."""
-        return ray.get(self.model.get_lora_request.remote())
+    def get_lora_request(self) -> Optional[LoRARequest]:
+        if self.enable_lora:
+            return ray.get(self.model.get_lora_request.remote())
+        else:
+            return None
+
+    async def get_lora_request_async(self) -> Optional[LoRARequest]:
+        if self.enable_lora:
+            return await self.model.get_lora_request.remote()
+        else:
+            return None
 
     def _get_api_server_address(self) -> str:
         """Get the address of the API server."""

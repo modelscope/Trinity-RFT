@@ -86,9 +86,9 @@ class GenerationConfig:
 class LoRAConfig:
     """LoRA config, only effective for rollout model, not for auxiliary models."""
 
-    name: str = ""
-    path: str = ""
-    base_model_name: str = ""
+    name: Optional[str] = None
+    path: Optional[str] = None
+    base_model_name: Optional[str] = None
     lora_rank: int = 16
     lora_alpha: int = 16
     lora_dtype: str = "auto"
@@ -956,7 +956,7 @@ class Config:
                 self.explorer.rollout_model.enable_lora = True
                 if len(self.model.lora_configs) > 1:
                     raise ValueError("Only one lora adapter is supported for now.")
-                if self.model.lora_configs[0].path == "":
+                if self.model.lora_configs[0].path is None:
                     logger.info("Creating dummy lora, since no lora_path is provided.")
                     lora_path = create_dummy_lora(
                         model_path=self.model.model_path,

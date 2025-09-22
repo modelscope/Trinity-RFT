@@ -737,9 +737,9 @@ class TestTrainerLoRA(BaseTrainerCase):
         self.config.cluster.node_num = 1
         self.config.cluster.gpu_per_node = 4
         self.config.model.lora_configs = [get_lora_config()]
-        self.config.synchronizer.sync_method = "checkpoint"
+        self.config.synchronizer.sync_method = SyncMethod.CHECKPOINT
         self.config.synchronizer.sync_interval = 2
-        self.config.trainer.save_interval = 1
+        self.config.trainer.save_interval = 2
         self.config.check_and_update()
         both(self.config)
         # check metrics are available
@@ -764,3 +764,17 @@ class TestTrainerLoRA(BaseTrainerCase):
             len(os.listdir(os.path.join(checkpoint_step_2, "actor", "lora_adapter"))) > 0
         )
         self.assertEqual(step_num, 2)
+
+        # test bench mode
+        ray.init(ignore_reinit_error=True, namespace=self.config.ray_namespace)
+        self.config.mode = "bench"
+        self.config.synchronizer.sync_method = SyncMethod.CHECKPOINT
+        self.config.explorer.bench_on_latest_checkpoint = False
+        self.config.check_and_update()
+        bench(self.config)
+        parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
+        for prefix in ["eval", "bench"]:
+            countdown_metrics = parser.metric_list(f"{prefix}/gsm8k")
+            self.assertTrue(len(countdown_metrics) > 0)
+            countdown_metric_steps = parser.metric_steps(countdown_metrics[0])
+            self.assertEqual([0, 2], countdown_metric_steps)
