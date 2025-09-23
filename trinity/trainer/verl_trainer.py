@@ -257,12 +257,9 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
 
         actor_local_path = os.path.join(local_global_step_folder, "actor")
         if not os.path.exists(actor_local_path):
-            self.actor_rollout_wg.save_checkpoint(
+            self.actor_rollout_wg.save_state_dict(
                 actor_local_path,
-                None,
-                self.global_steps,
-                max_ckpt_to_keep=None,
-                model_state_dict_only=True,
+                global_step=self.global_steps,
             )
 
     def upload_state_dict(self):  # state dict sync

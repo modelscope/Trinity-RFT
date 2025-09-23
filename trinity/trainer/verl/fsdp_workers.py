@@ -68,6 +68,7 @@ from verl.utils.fsdp_utils import (
     offload_fsdp_optimizer,
 )
 from verl.utils.import_utils import import_external_libs
+from verl.utils.logger import log_with_rank
 from verl.utils.py_functional import convert_to_regular_types
 from verl.workers.fsdp_workers import (
     create_device_mesh,
@@ -800,34 +801,7 @@ class ActorRolloutRefWorker(Worker):
 
         return output
 
-    @register(dispatch_mode=Dispatch.ONE_TO_ALL)
-    def save_checkpoint(
-        self,
-        local_path,
-        hdfs_path=None,
-        global_step=0,
-        max_ckpt_to_keep=None,
-        model_state_dict_only=False,
-        save_as_hf: bool = False,
-    ):
-        from verl.utils.logger import log_with_rank
-
-        # only support save and load ckpt for actor
-        assert self._is_actor
-
-        if self._is_offload_param:
-            load_fsdp_model_to_gpu(self.actor_module_fsdp)
-
-        self.checkpoint_manager.save_checkpoint(
-            local_path=local_path,
-            hdfs_path=hdfs_path,
-            global_step=global_step,
-            max_ckpt_to_keep=max_ckpt_to_keep,
-            model_state_dict_only=model_state_dict_only,
-            save_as_hf=save_as_hf,
-        )
-        dist.barrier()
-
+    def _save_lora(self, local_path):
         if self._is_lora and hasattr(
             getattr(self, "actor_module", self.actor_module_fsdp), "peft_config"
         ):
@@ -870,8 +844,50 @@ class ActorRolloutRefWorker(Worker):
                 log_only_rank_0=True,
             )
 
-        if self._is_offload_param:
-            offload_fsdp_model_to_cpu(self.actor_module_fsdp)
+    @register(dispatch_mode=Dispatch.ONE_TO_ALL)
+    def save_state_dict(
+        self,
+        local_path,
+        hdfs_path=None,
+        global_step=0,
+    ):
+        assert self._is_actor
+
+        with self._fsdp_offload_context():
+            self.checkpoint_manager.save_state_dict(
+                local_path=local_path,
+                hdfs_path=hdfs_path,
+                global_step=global_step,
+            )
+            dist.barrier()
+
+            self._save_lora(local_path)
+
+    @register(dispatch_mode=Dispatch.ONE_TO_ALL)
+    def save_checkpoint(
+        self,
+        local_path,
+        hdfs_path=None,
+        global_step=0,
+        max_ckpt_to_keep=None,
+        model_state_dict_only=False,
+        save_as_hf: bool = False,
+    ):
+        # only support save and load ckpt for actor
+        assert self._is_actor
+
+        with self._fsdp_offload_context():
+            self.checkpoint_manager.save_checkpoint(
+                local_path=local_path,
+                hdfs_path=hdfs_path,
+                global_step=global_step,
+                max_ckpt_to_keep=max_ckpt_to_keep,
+                model_state_dict_only=model_state_dict_only,
+                save_as_hf=save_as_hf,
+            )
+            dist.barrier()
+
+            self._save_lora(local_path)
 
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
     def load_checkpoint(self, local_path, hdfs_path=None, del_local_after_load=False):

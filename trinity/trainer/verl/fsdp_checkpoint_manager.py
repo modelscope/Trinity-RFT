@@ -75,6 +75,7 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
         self._optimizer_state_dict_thread = None
         self._extra_state_dict_thread = None
         self._save_model_thread = None
+        self.previous_state_dict_step = None
 
     def _notify_synchronizer_with_step_num(self, global_step):
         """
@@ -115,13 +116,112 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
             state_dict = self.model.state_dict()
         self._upload_state_dict(state_dict, global_step)
 
+    def _save_model(self, local_path, global_step):
+        model_path = os.path.join(
+            local_path, f"model_world_size_{self.world_size}_rank_{self.rank}.pt"
+        )
+        model_state_dict = self.model.state_dict()
+        if self._model_state_dict_thread is not None:
+            self._model_state_dict_thread.join()
+
+        def _save_model_state_dict():
+            torch.save(model_state_dict, model_path)
+            log_with_rank(
+                f"Saved model to {os.path.abspath(model_path)}",
+                rank=self.rank,
+                logger=logger,
+            )
+            self._notify_synchronizer_with_step_num(global_step)
+
+        self._model_state_dict_thread = threading.Thread(
+            target=_save_model_state_dict,
+        )
+        self._model_state_dict_thread.start()
+
+    def _save_optimizer(self, local_path):
+        optim_path = os.path.join(
+            local_path, f"optim_world_size_{self.world_size}_rank_{self.rank}.pt"
+        )
+        optimizer_state_dict = self.optimizer.state_dict()
+        if self._optimizer_state_dict_thread is not None:
+            self._optimizer_state_dict_thread.join()
+
+        def _save_optimizer_state_dict():
+            torch.save(optimizer_state_dict, optim_path)
+            log_with_rank(
+                f"Saved optim to {os.path.abspath(optim_path)}",
+                rank=self.rank,
+                logger=logger,
+            )
+
+        self._optimizer_state_dict_thread = threading.Thread(
+            target=_save_optimizer_state_dict,
+        )
+        self._optimizer_state_dict_thread.start()
+
+    def _save_extra_state(self, local_path):
+        extra_path = os.path.join(
+            local_path, f"extra_state_world_size_{self.world_size}_rank_{self.rank}.pt"
+        )
+        lr_scheduler_state_dict = (
+            self.lr_scheduler.state_dict() if self.lr_scheduler is not None else None
+        )
+        extra_state_dict = {
+            "lr_scheduler": lr_scheduler_state_dict,
+            "rng": self.get_rng_state(),
+        }
+        if self._extra_state_dict_thread is not None:
+            self._extra_state_dict_thread.join()
+
+        def _save_extra_state_dict():
+            torch.save(extra_state_dict, extra_path)
+            log_with_rank(
+                f"Saved extra_state to {os.path.abspath(extra_path)}",
+                rank=self.rank,
+                logger=logger,
+            )
+
+        self._extra_state_dict_thread = threading.Thread(
+            target=_save_extra_state_dict,
+        )
+        self._extra_state_dict_thread.start()
+
+    def save_state_dict(  # noqa: C901
+        self,
+        local_path: str,
+        hdfs_path: str = None,
+        global_step: int = 0,
+    ):
+        if self.previous_state_dict_step is None:
+            self.previous_state_dict_step = global_step
+            self._upload_state_dict(None, global_step)
+            return
+        elif self.previous_state_dict_step == global_step:
+            self._notify_synchronizer_with_step_num(global_step)
+            return
+        if local_path is None:
+            return
+
+        local_path = local_mkdir_safe(local_path)
+        torch.distributed.barrier()
+
+        state_dict_cfg = ShardedStateDictConfig(offload_to_cpu=True if is_cuda_available else False)
+        optim_cfg = ShardedOptimStateDictConfig(offload_to_cpu=True if is_cuda_available else False)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            with get_fsdp_state_ctx(
+                self.model, StateDictType.SHARDED_STATE_DICT, state_dict_cfg, optim_cfg
+            ):
+                self._save_model(local_path, global_step)
+
+        self.previous_state_dict_step = global_step
+
     def save_checkpoint(  # noqa: C901
         self,
         local_path: str,
         hdfs_path: str = None,
         global_step: int = 0,
         max_ckpt_to_keep: Optional[int] = None,
-        model_state_dict_only: bool = False,
         save_as_hf: bool = False,
     ):
         """
@@ -142,14 +242,8 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
             model_state_dict_only (bool): Whether to only save the model state dict (no optimizer, etc.).
             save_as_hf (bool): Whether to force save the model in Hugging Face format.
         """
-        if global_step == 0 and model_state_dict_only:
-            self._upload_state_dict(None, global_step)
-            return
         if local_path is None:
             return
-
-        # record the previous global step
-        self.previous_global_step = global_step
 
         # remove previous local_path, only rank 0 should do this
         if (
@@ -184,81 +278,17 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
             with get_fsdp_state_ctx(
                 self.model, StateDictType.SHARDED_STATE_DICT, state_dict_cfg, optim_cfg
             ):
-                model_path = os.path.join(
-                    local_path, f"model_world_size_{self.world_size}_rank_{self.rank}.pt"
-                )
-                optim_path = os.path.join(
-                    local_path, f"optim_world_size_{self.world_size}_rank_{self.rank}.pt"
-                )
-                extra_path = os.path.join(
-                    local_path, f"extra_state_world_size_{self.world_size}_rank_{self.rank}.pt"
-                )
-
-                if self.should_save_model or model_state_dict_only:
-                    if os.path.exists(model_path):
-                        if self._model_state_dict_thread is None:
-                            # If resuming from a checkpoint, notify synchronizer immediately
-                            self._notify_synchronizer_with_step_num(global_step)
+                if self.should_save_model:
+                    if self.previous_state_dict_step == global_step:
+                        self._notify_synchronizer_with_step_num(global_step)
                     else:
-                        model_state_dict = self.model.state_dict()
-                        if self._model_state_dict_thread is not None:
-                            self._model_state_dict_thread.join()
+                        self._save_model(local_path, global_step)
 
-                        def _save_model_state_dict():
-                            torch.save(model_state_dict, model_path)
-                            log_with_rank(
-                                f"Saved model to {os.path.abspath(model_path)}",
-                                rank=self.rank,
-                                logger=logger,
-                            )
-                            self._notify_synchronizer_with_step_num(global_step)
+                if self.should_save_optimizer:
+                    self._save_optimizer(local_path)
 
-                        self._model_state_dict_thread = threading.Thread(
-                            target=_save_model_state_dict,
-                        )
-                        self._model_state_dict_thread.start()
-
-                if self.should_save_optimizer and not model_state_dict_only:
-                    optimizer_state_dict = self.optimizer.state_dict()
-                    if self._optimizer_state_dict_thread is not None:
-                        self._optimizer_state_dict_thread.join()
-
-                    def _save_optimizer_state_dict():
-                        torch.save(optimizer_state_dict, optim_path)
-                        log_with_rank(
-                            f"Saved optim to {os.path.abspath(optim_path)}",
-                            rank=self.rank,
-                            logger=logger,
-                        )
-
-                    self._optimizer_state_dict_thread = threading.Thread(
-                        target=_save_optimizer_state_dict,
-                    )
-                    self._optimizer_state_dict_thread.start()
-
-                if self.should_save_extra and not model_state_dict_only:
-                    lr_scheduler_state_dict = (
-                        self.lr_scheduler.state_dict() if self.lr_scheduler is not None else None
-                    )
-                    extra_state_dict = {
-                        "lr_scheduler": lr_scheduler_state_dict,
-                        "rng": self.get_rng_state(),
-                    }
-                    if self._extra_state_dict_thread is not None:
-                        self._extra_state_dict_thread.join()
-
-                    def _save_extra_state_dict():
-                        torch.save(extra_state_dict, extra_path)
-                        log_with_rank(
-                            f"Saved extra_state to {os.path.abspath(extra_path)}",
-                            rank=self.rank,
-                            logger=logger,
-                        )
-
-                    self._extra_state_dict_thread = threading.Thread(
-                        target=_save_extra_state_dict,
-                    )
-                    self._extra_state_dict_thread.start()
+                if self.should_save_extra:
+                    self._save_extra_state(local_path)
 
         if self.rank == 0:
             # Save HF tokenizer/processor and model config on rank 0 to huggingface/ directory, no matter whether
@@ -305,7 +335,7 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
         # wait for everyone to dump to local
         torch.distributed.barrier()
 
-        if (self.should_save_hf_model and not model_state_dict_only) or save_as_hf:
+        if self.should_save_hf_model or save_as_hf:
             # Only rank 0 will save hf model and,
             # offload to cpu to save LLMs which may be too large to fit in one GPU
             state_dict = get_fsdp_full_state_dict(self.model, offload_to_cpu=True, rank0_only=True)
@@ -366,8 +396,10 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
             # wait for rank0 to dump hf_model to local
             torch.distributed.barrier()
 
-        if not model_state_dict_only:
-            self.previous_saved_paths.append(local_path)
+        # record the previous global step
+        self.previous_global_step = global_step
+        self.previous_state_dict_step = global_step
+        self.previous_saved_paths.append(local_path)
 
     def wait_on_save_thread(self) -> None:
         """
