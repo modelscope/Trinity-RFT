@@ -135,6 +135,7 @@ def get_checkpoint_dir_with_step_num(
     checkpoint_root_path: str,
     trainer_type: str = "verl",
     step_num: Optional[int] = None,
+    raise_error: bool = True,
 ) -> Tuple[str, int]:
     """Get the checkpoint directory from a root checkpoint directory.
 
@@ -144,12 +145,16 @@ def get_checkpoint_dir_with_step_num(
         step_num (Optional[int], optional): The step number. If specified,
             load the checkpoint with the specified step number. If None,
             load the latest checkpoint. Defaults to None.
+        raise_error (bool): Whether to raise an error if the checkpoint does not exist.
 
     Returns:
         Tuple[str, int]: The checkpoint directory and the step number of the checkpoint.
+            If the checkpoint does not exist and `raise_error` is False, return (None, 0).
     """
     if trainer_type == "verl":
-        return get_verl_checkpoint_info(checkpoint_path=checkpoint_root_path, step_num=step_num)
+        return get_verl_checkpoint_info(
+            checkpoint_path=checkpoint_root_path, step_num=step_num, raise_error=raise_error
+        )
     else:
         raise NotImplementedError(f"Unsupported trainer type {trainer_type}")
 
@@ -193,7 +198,7 @@ def merge_by_placement(tensors: List[torch.Tensor], placement: Placement):
 
 
 def get_verl_checkpoint_info(
-    checkpoint_path: str, step_num: Optional[int] = None
+    checkpoint_path: str, step_num: Optional[int] = None, raise_error: bool = True
 ) -> Tuple[str, int]:
     """Get the checkpoint directory from a Verl root checkpoint directory.
 
@@ -202,6 +207,7 @@ def get_verl_checkpoint_info(
         step_num (Optional[int], optional): The step number. If specified,
             load the checkpoint with the specified step number. If None,
             load the latest checkpoint. Defaults to None.
+        raise_error (bool): Whether to raise an error if the checkpoint does not exist.
 
     Returns:
         Tuple[str, int]: The checkpoint directory and the step number of the checkpoint.
@@ -215,11 +221,16 @@ def get_verl_checkpoint_info(
             ) as f:  # TODO: this file may be modified simultaneously
                 iteration = f.read().strip()
                 return os.path.join(checkpoint_path, f"global_step_{iteration}"), int(iteration)
-        else:
+        elif raise_error:
             raise FileNotFoundError(f"No iteration file found in {checkpoint_path}")
+        else:
+            return None, 0  # type: ignore
     else:
         # load specific iteration checkpoint
-        return os.path.join(checkpoint_path, f"global_step_{step_num}"), step_num
+        path = os.path.join(checkpoint_path, f"global_step_{step_num}")
+        if not os.path.exists(path) and raise_error:
+            raise FileNotFoundError(f"Checkpoint {path} not found")
+        return path, step_num
 
 
 # copy from verl/scripts/model_merger.py

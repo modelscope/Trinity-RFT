@@ -114,6 +114,7 @@ class ExperiencePipeline:
         """
         if self.input_store is not None:
             await self.input_store.write_async(exps)
+
         metrics = {}
 
         # Process experiences through operators

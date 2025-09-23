@@ -6,7 +6,6 @@ from parameterized import parameterized_class
 from transformers import AutoTokenizer
 
 from tests.tools import (
-    RayUnittestBase,
     RayUnittestBaseAysnc,
     get_api_model_path,
     get_model_path,
@@ -127,6 +126,7 @@ class ModelWrapperTest(RayUnittestBaseAysnc):
     async def test_generate(
         self,
     ):
+        await self.model_wrapper.prepare()
         prompts = ["Hello, world!", "Hello, my name is"]
         n = self.config.algorithm.repeat_times
         if self.use_async:
@@ -228,7 +228,7 @@ class ModelWrapperTest(RayUnittestBaseAysnc):
         (20, None, 1),
     ],
 )
-class TestModelLen(RayUnittestBase):
+class TestModelLen(RayUnittestBaseAysnc):
     def setUp(self):
         self.config = get_template_config()
         self.config.mode = "explore"
@@ -242,7 +242,8 @@ class TestModelLen(RayUnittestBase):
         self.engines, self.auxiliary_engines = create_inference_models(self.config)
         self.model_wrapper = ModelWrapper(self.engines[0], engine_type="vllm", enable_history=True)
 
-    def test_model_len(self):
+    async def test_model_len(self):
+        await self.model_wrapper.prepare()
         messages = [
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": "What's the weather like today?"},
@@ -272,7 +273,7 @@ class TestModelLen(RayUnittestBase):
         self.assertEqual(len(exps[0].tokens), self.max_model_len)
 
 
-class TestAPIServer(RayUnittestBase):
+class TestAPIServer(RayUnittestBaseAysnc):
     def setUp(self):
         self.config = get_template_config()
         self.config.mode = "explore"
@@ -291,7 +292,9 @@ class TestAPIServer(RayUnittestBase):
             self.engines[0], engine_type="vllm", enable_history=False
         )
 
-    def test_api(self):
+    async def test_api(self):
+        await self.model_wrapper.prepare()
+        await self.model_wrapper_no_history.prepare()
         openai_client = self.model_wrapper.get_openai_client()
         messages = [
             {"role": "system", "content": "You are a helpful assistant."},
@@ -361,6 +364,8 @@ class TestAsyncAPIServer(RayUnittestBaseAysnc):
         )
 
     async def test_api_async(self):
+        await self.model_wrapper.prepare()
+        await self.model_wrapper_no_history.prepare()
         openai_client = self.model_wrapper.get_openai_async_client()
         messages = [
             {"role": "system", "content": "You are a helpful assistant."},
@@ -528,7 +533,7 @@ class TestTokenizer(unittest.TestCase):
         (False, None),
     ],
 )
-class TestAPIServerToolCall(RayUnittestBase):
+class TestAPIServerToolCall(RayUnittestBaseAysnc):
     def setUp(self):
         self.config = get_template_config()
         self.config.mode = "explore"
@@ -552,13 +557,15 @@ class TestAPIServerToolCall(RayUnittestBase):
             self.engines[0], engine_type="vllm", enable_history=False
         )
 
-    def test_api_tool_calls(self):
+    async def test_api_tool_calls(self):
         """Tests the full conversation flow of a tool call via the OpenAI API.
         Note: This test require a model that supports tool calls and thinking mode, e.g. Qwen3-1.7B.
         """
         import json
         import time
 
+        await self.model_wrapper.prepare()
+        await self.model_wrapper_no_history.prepare()
         tokenizer = AutoTokenizer.from_pretrained(get_api_model_path())
         print_debug("\n\n" + "=" * 30 + " Running test_api_tool_calls " + "=" * 30)
         start_time = time.time()

@@ -722,6 +722,10 @@ class TestTrainerMultiModal(BaseTrainerCase):
         self.assertTrue(len(os.listdir(os.path.join(checkpoint_step_2, "actor"))) > 0)
         self.assertEqual(step_num, 2)
 
+    def tearDown(self):
+        # remove dir only when the test passed
+        shutil.rmtree(self.config.checkpoint_job_dir)
+
 
 class TestTrainerLoRA(BaseTrainerCase):
     def test_trainer(self):
@@ -778,3 +782,6 @@ class TestTrainerLoRA(BaseTrainerCase):
             self.assertTrue(len(countdown_metrics) > 0)
             countdown_metric_steps = parser.metric_steps(countdown_metrics[0])
             self.assertEqual([0, 2], countdown_metric_steps)
+
+    def tearDown(self):
+        shutil.rmtree(self.config.checkpoint_job_dir)

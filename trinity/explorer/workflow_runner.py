@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """The Workflow Runner Module."""
+import asyncio
 import time
 import traceback
 from collections import defaultdict
@@ -41,16 +42,25 @@ class WorkflowRunner:
             enable_lora=config.explorer.rollout_model.enable_lora,
             enable_history=config.explorer.rollout_model.enable_history,
         )
-        self.auxiliary_models = []
-        if auxiliary_models is not None:
-            for model in auxiliary_models:
-                api_client = ModelWrapper(
-                    model,
-                    "vllm_async",
-                ).get_openai_client()
-                self.auxiliary_models.append(api_client)
+        self.auxiliary_models = [
+            ModelWrapper(
+                model,
+            )
+            for model in (auxiliary_models or [])
+        ]
+        self.auxiliary_model_clients = []
         self.workflow_instance: Workflow = None
         self.runner_id = runner_id
+
+    async def prepare(self) -> None:
+        """Prepare the runner."""
+        await asyncio.gather(
+            self.model_wrapper.prepare(),
+            *(aux_model.prepare() for aux_model in self.auxiliary_models),
+        )
+        for model in self.auxiliary_models:
+            api_client = model.get_openai_client()
+            self.auxiliary_model_clients.append(api_client)
 
     def is_alive(self):
         return True
@@ -63,15 +73,17 @@ class WorkflowRunner:
             or not self.workflow_instance.__class__ == task.workflow
             or not self.workflow_instance.resettable
         ):
-            self.workflow_instance = task.to_workflow(self.model_wrapper, self.auxiliary_models)
+            self.workflow_instance = task.to_workflow(
+                self.model_wrapper, self.auxiliary_model_clients
+            )
         else:
             self.workflow_instance.reset(task)
 
-    async def _run_workflow(self, workflow_isntance: Workflow) -> List[Experience]:
-        if workflow_isntance.asynchronous:
-            exps = await workflow_isntance.run_async()
+    async def _run_workflow(self, workflow_instance: Workflow) -> List[Experience]:
+        if workflow_instance.asynchronous:
+            exps = await workflow_instance.run_async()
         else:
-            exps = workflow_isntance.run()
+            exps = workflow_instance.run()
         return exps
 
     async def _run_task(self, task: Task, repeat_times: int, run_id_base: int) -> List[Experience]:

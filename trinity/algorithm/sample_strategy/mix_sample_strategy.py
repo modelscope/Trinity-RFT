@@ -38,6 +38,18 @@ class MixSampleStrategy(SampleStrategy):
                 "`buffer_config.trainer_input.auxiliary_buffers` is required in MIX algorithm"
             )
 
+        if buffer_config.trainer_input.auxiliary_buffers.get(self.sft_dataset_name) is None:
+            raise ValueError(
+                f"`{self.sft_dataset_name}` is not found in `buffer_config.trainer_input.auxiliary_buffers`"
+            )
+        expert_storage_config = buffer_config.trainer_input.auxiliary_buffers[self.sft_dataset_name]
+
+        if expert_storage_config.schema_type != "sft":
+            self.logger.warning(
+                f"schema_type of {self.sft_dataset_name} is not `sft`, set it to `sft`"
+            )
+            expert_storage_config.schema_type = "sft"
+
         # expert experience buffer
         expert_buffer_config = copy.deepcopy(buffer_config)
         expert_buffer_config.train_batch_size = expert_batch_size

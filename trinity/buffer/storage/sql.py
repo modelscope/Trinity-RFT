@@ -32,7 +32,7 @@ class SQLStorage:
 
     def __init__(self, storage_config: StorageConfig, config: BufferConfig) -> None:
         self.logger = get_logger(f"sql_{storage_config.name}", in_ray_actor=True)
-        if storage_config.path is None:
+        if not storage_config.path:
             storage_config.path = default_storage_path(storage_config, config)
         self.engine, self.table_model_cls = init_engine(
             db_url=storage_config.path,

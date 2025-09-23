@@ -293,12 +293,19 @@ def set_clip_range_in_policy_loss_fn(**kwargs):
 
 
 @CONFIG_GENERATORS.register_config(
-    default_value=SFTLossFn.default_args()["use_token_level_loss"],
+    default_value=SFTLossFn.default_args()["loss_agg_mode"],
     visible=lambda: st.session_state["policy_loss_fn"] == "sft",
 )
-def set_use_token_level_loss_in_policy_loss_fn(**kwargs):
-    st.checkbox(
-        "Use Token Level Loss",
+def set_sft_loss_agg_mode(**kwargs):
+    candidates = [
+        "token-mean",
+        "seq-mean-token-sum",
+        "seq-mean-token-mean",
+        "seq-mean-token-sum-norm",
+    ]
+    st.selectbox(
+        "SFT Loss Aggregation Mode",
+        candidates,
         **kwargs,
     )
 

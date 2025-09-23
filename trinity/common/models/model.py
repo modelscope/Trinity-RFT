@@ -2,16 +2,17 @@
 """Base Model Class"""
 import asyncio
 import socket
-import time
 from abc import ABC, abstractmethod
 from typing import Any, List, Optional, Sequence, Tuple, Union
 
+import httpx
 import openai
 import ray
 import torch
 from torch import Tensor
 from vllm.lora.request import LoRARequest
 
+from trinity.common.constants import RunningStatus
 from trinity.common.experience import Experience
 from trinity.utils.log import get_logger
 
@@ -46,6 +47,14 @@ class InferenceModel(ABC):
             s.bind(("", 0))
             port = s.getsockname()[1]
         return address, port
+
+    def has_api_server(self) -> bool:
+        """Check if the model has an API server."""
+        return False
+
+    def get_api_server_url(self) -> Optional[str]:
+        """Get the API server URL if available."""
+        return None
 
 
 def _history_recorder(func):
@@ -85,6 +94,31 @@ class ModelWrapper:
         self.enable_lora = enable_lora
         self.enable_history = enable_history
         self.history = []
+        self.status = RunningStatus.RUNNING
+        self.request_count = 0
+
+    async def prepare(self) -> None:
+        """Prepare the model wrapper."""
+        if await self.model.has_api_server.remote():
+            self.api_address = await self.model.get_api_server_url.remote()
+            if self.api_address is None:
+                raise RuntimeError(
+                    "Failed to connect to the API server. Please set `enable_openai_api` to `True`."
+                )
+            max_retries = 30
+            interval = 2  # seconds
+            for i in range(max_retries):
+                try:
+                    async with httpx.AsyncClient() as client:
+                        response = await client.get(self.api_address + "/health", timeout=5)
+                        if response.status_code == 200:
+                            return
+                except Exception as e:
+                    self.logger.info(f"API server not ready (attempt {i+1}/{max_retries}): {e}")
+                await asyncio.sleep(interval)
+            raise RuntimeError(
+                f"API server at {self.api_address} not ready after {max_retries} attempts."
+            )
 
     def _record_history(self, exps: Union[Experience, List[Experience]]) -> None:
         """Record experiences to history."""
@@ -198,31 +232,6 @@ class ModelWrapper:
         else:
             return None
 
-    def _get_api_server_address(self) -> str:
-        """Get the address of the API server."""
-        if self.api_address:
-            return self.api_address
-        if not ray.get(self.model.has_api_server.remote()):
-            raise ValueError(
-                "OpenAI API server is not running on current model."
-                "Please set `enable_openai_api` to `True`."
-            )
-        api_address = None
-        while True:
-            api_address = ray.get(self.model.api_server_ready.remote())
-            if api_address is not None:
-                break
-            else:
-                self.logger.info("Waiting for OpenAI API server to be ready...")
-                time.sleep(5)
-        if api_address is None:
-            raise RuntimeError(
-                "Failed to connect to the API server. Please check the API server is running."
-            )
-        self.api_address = api_address
-        self.logger.info(f"Successfully connect to API server at {api_address}")
-        return api_address
-
     def get_openai_client(self) -> openai.OpenAI:
         """Get the openai client.
 
@@ -231,9 +240,12 @@ class ModelWrapper:
         """
         if self.openai_client is not None:
             return self.openai_client
-        api_address = self._get_api_server_address()
+        if not self.api_address:
+            raise ValueError(
+                "API server is not enabled for this model. OpenAI client is unavailable."
+            )
         self.openai_client = openai.OpenAI(
-            base_url=api_address,
+            base_url=f"{self.api_address}/v1",
             api_key="EMPTY",
         )
         if self.enable_history:
@@ -257,10 +269,13 @@ class ModelWrapper:
         """
         if self.openai_async_client is not None:
             return self.openai_async_client
+        if not self.api_address:
+            raise ValueError(
+                "API server is not enabled for this model. OpenAI async client is unavailable."
+            )
         # first make sure that we have the sync openai client
-        api_address = self._get_api_server_address()
         self.openai_async_client = openai.AsyncOpenAI(
-            base_url=api_address,
+            base_url=f"{self.api_address}/v1",
             api_key="EMPTY",
         )
         if self.enable_history:
@@ -277,6 +292,21 @@ class ModelWrapper:
         openai_client = self.get_openai_client()
         setattr(self.openai_async_client, "model_path", openai_client.models.list().data[0].id)
         return self.openai_async_client
+
+    async def get_current_load(self) -> int:
+        """Get the current load metrics of the model."""
+        if not self.api_address:
+            raise ValueError(
+                "API server is not enabled for this model. Load metrics is unavailable."
+            )
+        with httpx.AsyncClient() as client:
+            response = await client.get(f"{self.api_address}/load")
+            data = response.json()
+            return data["server_load"]
+
+    async def sync_model_weights(self, model_version: int) -> None:
+        """Sync the model weights"""
+        await self.model.sync_model.remote(model_version)
 
     def extract_experience_from_history(self, clear_history: bool = True) -> List[Experience]:
         """Extract experiences from the history."""

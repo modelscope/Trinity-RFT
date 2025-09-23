@@ -7,7 +7,7 @@ from typing import Dict, Tuple
 import torch
 
 from trinity.algorithm.policy_loss_fn.policy_loss_fn import POLICY_LOSS_FN, PolicyLossFn
-from trinity.algorithm.utils import masked_mean
+from trinity.algorithm.utils import masked_loss, masked_mean
 
 
 @POLICY_LOSS_FN.register_module("cispo")
@@ -20,6 +20,7 @@ class CISPOPolicyLossFn(PolicyLossFn):
         enable_mask_clip: bool = False,
         mask_clip_range_low: float = 1.0,
         mask_clip_range_high: float = 0.28,
+        loss_agg_mode: str = "token-mean",
     ) -> None:
         super().__init__(backend=backend)
         self.clip_range_low = clip_range_low
@@ -27,6 +28,7 @@ class CISPOPolicyLossFn(PolicyLossFn):
         self.enable_mask_clip = enable_mask_clip
         self.mask_clip_range_low = mask_clip_range_low
         self.mask_clip_range_high = mask_clip_range_high
+        self.loss_agg_mode = loss_agg_mode
 
     def __call__(  # type: ignore
         self,
@@ -61,13 +63,13 @@ class CISPOPolicyLossFn(PolicyLossFn):
 
         cispo_loss = -advantages * ratio_clamped.detach() * mask.detach() * logprob
 
-        loss = masked_mean(cispo_loss, action_mask)
-        masked_frac = masked_mean(mask, action_mask)
+        loss = masked_loss(cispo_loss, action_mask, loss_agg_mode=self.loss_agg_mode)
+        unmasked_frac = masked_mean(mask, action_mask)
 
         metrics = {
             "cispo_loss": loss.detach().item(),
             "ppo_kl": ppo_kl.detach().item(),
-            "masked_frac": masked_frac.detach().item(),
+            "unmasked_frac": unmasked_frac.detach().item(),
         }
 
         return loss, metrics
@@ -85,4 +87,5 @@ class CISPOPolicyLossFn(PolicyLossFn):
             "enable_mask_clip": False,
             "mask_clip_range_low": 1.0,
             "mask_clip_range_high": 0.28,
+            "loss_agg_mode": "token-mean",
         }

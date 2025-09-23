@@ -1,9 +1,9 @@
 """A wrapper around the vllm.AsyncEngine to handle async requests."""
 
+import asyncio
 import os
-from typing import Any, Dict, List, Optional, Sequence, Union
+from typing import Any, Dict, List, Optional, Sequence
 
-import aiohttp
 import ray
 import torch
 import vllm
@@ -99,6 +99,7 @@ class vLLMRolloutModel(InferenceModel):
         self.model_version = 0  # TODO: resume the value from the checkpoint
         self.api_server_host = None
         self.api_server_port = None
+        self.api_server = None
 
     async def _initialize_tokenizer(self):
         if self.tokenizer is None:
@@ -372,12 +373,19 @@ class vLLMRolloutModel(InferenceModel):
             action_mask=action_mask[prompt_length:],  # Exclude the prompt tokens
         )
 
-    def shutdown(self):
+    async def shutdown(self):
         """Shutdown the vLLM v1 engine. This kills child processes forked
         by the vLLM engine. If not called, the child processes will be
         orphaned and will not be killed when the parent process exits,
         and they won't be able to be tracked by Ray anymore.
         """
+        if self.api_server is not None:
+            self.api_server.cancel()
+            try:
+                await self.api_server
+            except asyncio.CancelledError:
+                pass
+            self.api_server = None
         if hasattr(self.async_llm, "shutdown"):
             self.logger.info("Shutting down vLLM engine")
             self.async_llm.shutdown()
@@ -406,7 +414,7 @@ class vLLMRolloutModel(InferenceModel):
                 method, timeout, args, kwargs
             )
 
-    async def sync_model(self, model_version: int) -> bool:
+    async def sync_model(self, model_version: int) -> int:
         """Sync model weights to vLLM."""
         if self.enable_lora:
             # Revise the lora path; no need to sync weights manually.
@@ -425,7 +433,7 @@ class vLLMRolloutModel(InferenceModel):
         await self._collective_rpc("update_weight")
         self.logger.info("Sync model weights to vLLM successfully.")
         self.model_version = model_version
-        return True
+        return model_version
 
     async def init_process_group(
         self,
@@ -456,50 +464,36 @@ class vLLMRolloutModel(InferenceModel):
         )
 
     async def run_api_server(self):
-        """Run the OpenAI API server in a Ray actor.
-
-        Note:
-            Do not use `ray.get()` on this method.
-            This method will run forever until the server is shut down.
-        """
+        """Run the OpenAI API server in a Ray actor."""
         if not (self.api_server_host is None or self.api_server_port is None):
             raise RuntimeError("API server is already running.")
         from trinity.common.models.api.vllm_patch import run_api_server_in_ray_actor
 
         self.api_server_host, self.api_server_port = self.get_available_address()
-        await run_api_server_in_ray_actor(
-            self.async_llm,
-            self.api_server_host,
-            self.api_server_port,
-            self.config.model_path,
-            self.config.enable_auto_tool_choice,
-            self.config.tool_call_parser,
-            self.config.reasoning_parser,
+        self.api_server = asyncio.create_task(
+            run_api_server_in_ray_actor(
+                self.async_llm,
+                self.api_server_host,
+                self.api_server_port,
+                self.config.model_path,
+                self.config.enable_auto_tool_choice,
+                self.config.tool_call_parser,
+                self.config.reasoning_parser,
+            )
         )
 
-    async def has_api_server(self) -> bool:
+    def has_api_server(self) -> bool:
         return self.config.enable_openai_api
 
-    async def api_server_ready(self) -> Union[str, None]:
-        """Check if the OpenAI API server is ready.
+    def get_api_server_url(self) -> Optional[str]:
+        """Get the URL of the OpenAI API server.
 
         Returns:
             api_url (str): The URL of the OpenAI API server.
         """
-        if not await self.has_api_server():
+        if not self.has_api_server():
             return None
-        try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    f"http://{self.api_server_host}:{self.api_server_port}/health"
-                ) as response:
-                    if response.status == 200:
-                        return f"http://{self.api_server_host}:{self.api_server_port}/v1"
-                    else:
-                        return None
-        except Exception as e:
-            self.logger.error(e)
-            return None
+        return f"http://{self.api_server_host}:{self.api_server_port}"
 
     async def reset_prefix_cache(self) -> None:
         await self.async_llm.reset_prefix_cache()

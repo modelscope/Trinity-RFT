@@ -23,9 +23,11 @@ from trinity.common.constants import (
     SyncStyle,
 )
 from trinity.common.models import create_inference_models
+from trinity.common.models.utils import get_checkpoint_dir_with_step_num
 from trinity.explorer.scheduler import Scheduler
 from trinity.manager.state_manager import StateManager
 from trinity.manager.synchronizer import Synchronizer
+from trinity.utils.annotations import Experimental
 from trinity.utils.log import get_logger
 from trinity.utils.monitor import MONITOR, gather_metrics
 from trinity.utils.plugin_loader import load_plugins
@@ -48,10 +50,12 @@ class Explorer:
         self.models, self.auxiliary_models = create_inference_models(config)
         self.experience_pipeline = self._init_experience_pipeline()
         self.config.buffer.explorer_input.taskset.index = explorer_state.get("latest_task_index", 0)
-        self.taskset = get_buffer_reader(
-            self.config.buffer.explorer_input.taskset, self.config.buffer
+        self.taskset = (
+            get_buffer_reader(self.config.buffer.explorer_input.taskset, self.config.buffer)
+            if self.config.mode != "serve"
+            else None
         )
-        self.scheduler = Scheduler(self.config, self.models, self.auxiliary_models)
+        self.scheduler = None
         self.monitor = MONITOR.get(self.config.monitor.monitor_type)(
             project=self.config.project,
             group=self.config.group,
@@ -146,16 +150,18 @@ class Explorer:
         """Preparation before running."""
         try:
             await self.experience_pipeline.prepare.remote()
-
+            self.logger.info("Experience pipeline is ready.")
             # make sure all rollout models are ready
             model_ready_ref = [model.__ray_ready__.remote() for model in self.models]
             await asyncio.gather(*model_ready_ref)
+            self.logger.info("All rollout models are ready.")
 
             if not self.use_nccl_sync:
                 master_address, master_port = await self.models[0].get_available_address.remote()
                 await self.setup_weight_sync_group(master_address, master_port)
-
-            await self.scheduler.start()
+            if self.config.mode != "serve":
+                self.scheduler = Scheduler(self.config, self.models, self.auxiliary_models)
+                await self.scheduler.start()
             if self.config.explorer.eval_on_startup and self.explore_step_num == 0:
                 await self.eval()
 
@@ -299,7 +305,10 @@ class Explorer:
         return True
 
     async def save_checkpoint(self, sync_weight: bool = False) -> None:
-        await self._finish_steps(self.last_sync_step + 1, self.explore_step_num, self.model_version)
+        if self.scheduler:
+            await self._finish_steps(
+                self.last_sync_step + 1, self.explore_step_num, self.model_version
+            )
 
         if sync_weight:
             # sync weights
@@ -391,6 +400,55 @@ class Explorer:
             )
             .remote(self.config)
         )
+
+    @Experimental
+    async def serve(self) -> None:
+        """Run the explorer in serving mode.
+
+        In serving mode, the explorer starts an OpenAI compatible server to handle requests.
+        Agent applications can be deployed separately and interact with the explorer via the API.
+
+
+        .. code-block:: python
+
+            import openai
+
+
+            client = openai.OpenAI(
+                base_url=f"{explorer_server_url}/v1",
+                api_key="EMPTY",
+            )
+            response = client.chat.completions.create(
+                model=config.model.model_path,
+                messages=[{"role": "user", "content": "Hello!"}]
+            )
+        """
+        from trinity.explorer.api.service import ExplorerService
+
+        self.service = ExplorerService(
+            self,
+            listen_address=self.config.explorer.listen_address,
+            port=self.config.explorer.api_port,
+        )
+        await self.service.serve()
+        self.server_url = f"http://{ray.util.get_node_ip_address()}:{self.service.port}"
+        self.logger.info(
+            f"Explorer API Server is started on {self.server_url} and listening to {self.service.listen_address}."
+        )
+        self.state.save_explorer_server_url(self.server_url)
+        while True:
+            self.explore_step_num += 1
+            await asyncio.sleep(self.config.explorer.service_status_check_interval)
+            # process experiences generated in the last interval
+            exps = await self.service.get_all_experiences()
+            metrics = await self.experience_pipeline.process.remote(exps)
+            metrics.update(self.service.collect_metrics())
+            self.monitor.log(metrics, self.explore_step_num)
+            # get the latest checkpoint
+            _, step_num = get_checkpoint_dir_with_step_num(
+                self.config.checkpoint_job_dir, raise_error=False
+            )
+            self.service.set_latest_model_version(step_num)
 
     @classmethod
     def get_actor(cls, config: Config):

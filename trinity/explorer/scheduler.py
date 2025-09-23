@@ -62,6 +62,9 @@ class RunnerWrapper:
             .remote(self.config, self.rollout_model, self.auxiliary_models, self.runner_id)
         )
 
+    async def prepare(self):
+        await self.runner.prepare.remote()
+
     async def run_with_retry(self, task: TaskWrapper) -> Tuple[Status, List, int]:
         """
         Returns:
@@ -100,9 +103,10 @@ class RunnerWrapper:
             status.metric["task_run_time"] = end_time - start_time
         return status, exps, self.runner_id
 
-    def restart_runner(self):
+    async def restart_runner(self):
         old_runner = self.runner
         self.runner = self._create_runner()
+        await self.runner.prepare.remote()
         try:
             ray.kill(old_runner)
         except Exception:
@@ -164,7 +168,7 @@ class Scheduler:
         self.total_scheduled = 0
         self.total_completed = 0
 
-    def _create_runner(
+    async def _create_runner(
         self,
         runner_id: int,
     ):
@@ -177,10 +181,11 @@ class Scheduler:
             ],
             config=self.config,
         )
+        await runner.prepare()
         self.runners[runner_id] = runner
         self.idle_runners.add(runner_id)
 
-    def _restart_runner(self, runner_id: int):
+    async def _restart_runner(self, runner_id: int):
         """Restart a runner."""
         self.runners[runner_id].restart_runner()
 
@@ -257,8 +262,7 @@ class Scheduler:
         if self.running:
             return
         self.running = True
-        for i in range(self.runner_num):
-            self._create_runner(i)
+        await asyncio.gather(*[self._create_runner(i) for i in range(self.runner_num)])
         self.scheduler_task = asyncio.create_task(self._scheduler_loop())
         ready_refs = [runner.runner.__ray_ready__.remote() for runner in self.runners.values()]
         await asyncio.gather(*ready_refs)
@@ -372,7 +376,7 @@ class Scheduler:
                 self._clear_timeout_tasks(batch_id=batch_id)
                 for runner_id, task in list(self.busy_runners.items()):
                     if task.batch_id == batch_id:
-                        self._restart_runner(runner_id)
+                        await self._restart_runner(runner_id)
 
         statuses = []
         experiences = []
@@ -444,6 +448,6 @@ class Scheduler:
                 self._clear_timeout_tasks(batch_id)
             busy_runner_ids = list(self.busy_runners.keys())
             for runner_id in busy_runner_ids:
-                self._restart_runner(runner_id)
+                await self._restart_runner(runner_id)
 
         raise TimeoutError(error_msg)

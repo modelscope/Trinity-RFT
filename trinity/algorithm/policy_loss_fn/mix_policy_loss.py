@@ -37,7 +37,8 @@ class MIXPolicyLossFn(PolicyLossFn):
         ngpus_trainer: int = 1,
         train_batch_size_usual: int = 1,
         train_batch_size_expert: int = 1,
-        use_token_level_loss_in_sft: bool = True,
+        sft_loss_agg_mode: str = "token-mean",
+        grpo_loss_agg_mode: str = "token-mean",
     ) -> None:
         super().__init__(backend=backend)
         self.mu = mu
@@ -50,8 +51,9 @@ class MIXPolicyLossFn(PolicyLossFn):
             clip_range=clip_range,
             clip_range_low=clip_range_low,
             clip_range_high=clip_range_high,
+            loss_agg_mode=grpo_loss_agg_mode,
         )
-        self.sft_loss_fn = SFTLossFn(use_token_level_loss=use_token_level_loss_in_sft)
+        self.sft_loss_fn = SFTLossFn(loss_agg_mode=sft_loss_agg_mode)
 
     def __call__(  # type: ignore
         self,

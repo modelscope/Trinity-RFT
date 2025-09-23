@@ -6,6 +6,49 @@ Modified from https://github.com/volcengine/verl/blob/main/verl/utils/torch_func
 import torch
 
 
+def masked_loss(values, mask, loss_agg_mode="token-mean", normalizer=None):
+    """
+    Compute loss from values and mask with various aggregation modes.
+    Modified from: https://github.com/volcengine/verl/blob/main/verl/trainer/ppo/core_algos.py
+
+    Args:
+        values (torch.Tensor): Arbitrary shape tensor of values to aggregate.
+        mask (torch.BoolTensor or torch.FloatTensor): Same shape as values, 1/True = include, 0 = ignore.
+        loss_agg_mode (str): One of the following:
+            - "token-mean": mean over all unmasked elements.
+            - "seq-mean-token-sum": average over sequences, where each sequence's loss is sum of unmasked values.
+            - "seq-mean-token-mean": average over sequences, where each sequence's loss is mean of unmasked values.
+            - "seq-mean-token-sum-norm": total sum of unmasked values divided by a fixed normalizer (e.g., seq length).
+        normalizer (float or None): Only used in 'seq-mean-token-sum-norm'. If None, uses mask.shape[-1].
+
+    Returns:
+        torch.Tensor: Scalar loss value.
+    """
+    if loss_agg_mode == "token-mean":
+        return masked_mean(values, mask)
+
+    elif loss_agg_mode == "seq-mean-token-sum":
+        # Sum over last dimension (token-level), then take mean across batch (sequence-level)
+        seq_losses = masked_sum(values, mask, axis=-1)  # [batch]
+        return seq_losses.mean()
+
+    elif loss_agg_mode == "seq-mean-token-mean":
+        # Mean over tokens per sequence, then mean over sequences
+        seq_losses = masked_mean(values, mask, axis=-1)  # [batch]
+        return seq_losses.mean()
+
+    elif loss_agg_mode == "seq-mean-token-sum-norm":
+        total_token_sum = masked_sum(values, mask)  # scalar
+        norm = normalizer if normalizer is not None else mask.shape[-1]
+        return total_token_sum / (norm + 1e-8)
+
+    else:
+        raise ValueError(
+            f"Invalid loss_agg_mode: {loss_agg_mode}. "
+            f"Choose from ['token-mean', 'seq-mean-token-sum', 'seq-mean-token-mean', 'seq-mean-token-sum-norm']"
+        )
+
+
 def masked_sum(values, mask, axis=None):
     """Compute mean of tensor with a masked values."""
     return (values * mask).sum(axis=axis)
