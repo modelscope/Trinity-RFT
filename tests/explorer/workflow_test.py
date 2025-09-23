@@ -6,11 +6,14 @@ from dataclasses import dataclass, field
 from typing import Dict, Optional
 from unittest.mock import MagicMock
 
-from parameterized import parameterized
+from parameterized import parameterized, parameterized_class
 from torch import Tensor
 
-from tests.tools import get_unittest_dataset_config
+from tests.common.vllm_test import CHAT_TEMPLATE
+from tests.tools import get_model_path, get_template_config, get_unittest_dataset_config
 from trinity.common.experience import EID
+from trinity.common.models import create_inference_models
+from trinity.common.models.model import ModelWrapper
 from trinity.common.rewards import RMGalleryFn
 from trinity.common.workflows import (
     MathBoxedWorkflow,
@@ -19,7 +22,7 @@ from trinity.common.workflows import (
     MathWorkflow,
     Workflow,
 )
-from trinity.common.workflows.workflow import Task
+from trinity.common.workflows.workflow import MultiTurnWorkflow, Task
 
 
 @dataclass
@@ -109,6 +112,43 @@ class DummyAsyncWorkflow(Workflow):
             return [yaml.safe_dump(self.obj)] * self.repeat_times
         else:
             raise ValueError("Invalid output format")
+
+
+class DummyMultiTurnWorkflow(MultiTurnWorkflow):
+    def __init__(self, model, task: Task, auxiliary_models=None):
+        super().__init__(task=task, model=model, auxiliary_models=auxiliary_models)
+        self.contents = task.raw_task["contents"]  # type: ignore
+
+    def run(self):
+        memory = [{"role": "system", "content": "You are a helpful assistant."}]
+        experience_list = []
+        for content in self.contents:
+            memory.append({"role": "user", "content": content})
+            memory.append({"role": "assistant", "content": content.upper()})
+            experience = self.process_messages_to_experience(memory, 0, {})
+            experience_list.append(experience)
+        return experience_list
+
+
+class DummyAsyncMultiTurnWorkflow(MultiTurnWorkflow):
+    def __init__(self, model, task: Task, auxiliary_models=None):
+        super().__init__(task=task, model=model, auxiliary_models=auxiliary_models)
+        self.contents = task.raw_task["contents"]  # type: ignore
+
+    @property
+    def asynchronous(self):
+        return True
+
+    async def run_async(self):
+        memory = [{"role": "system", "content": "You are a helpful assistant."}]
+        experience_list = []
+        for content in self.contents:
+            await asyncio.sleep(0.1)
+            memory.append({"role": "user", "content": content})
+            memory.append({"role": "assistant", "content": content.upper()})
+            experience = self.process_messages_to_experience(memory, 0, {})
+            experience_list.append(experience)
+        return experience_list
 
 
 class WorkflowTest(unittest.TestCase):
@@ -406,6 +446,45 @@ class WorkflowTest(unittest.TestCase):
         workflow = task.to_workflow(model)
         workflow.set_repeat_times(2, run_id_base=0)
         self.assertEqual(workflow.repeat_times, 2)
+        if workflow.asynchronous:
+            answer = asyncio.run(workflow.run_async())
+        else:
+            answer = workflow.run()
+        self.assertEqual(len(answer), 2)
+
+
+@parameterized_class(
+    ("workflow_cls",),
+    [
+        (DummyMultiTurnWorkflow,),
+        (DummyAsyncMultiTurnWorkflow,),
+    ],
+)
+class MultiTurnWorkflowTest(unittest.TestCase):
+    def setUp(self):
+        # configure the model
+        self.config = get_template_config()
+        self.config.mode = "explore"
+        self.config.model.model_path = get_model_path()
+        self.config.model.max_model_len = None  # self.max_model_len
+        self.config.explorer.rollout_model.engine_num = 1  # self.engine_num
+        self.config.explorer.rollout_model.tensor_parallel_size = 1  # self.tensor_parallel_size
+        self.config.explorer.rollout_model.chat_template = CHAT_TEMPLATE
+        self.config.algorithm.repeat_times = 2  # self.repeat_times
+        self.config.explorer.rollout_model.enable_history = True  # self.enable_history
+        self.config.check_and_update()
+        self.engines, self.auxiliary_engines = create_inference_models(self.config)
+        self.model_wrapper = ModelWrapper(self.engines[0], engine_type="vllm", enable_history=True)
+
+    def test_multi_turn_workflow(self):
+        task = Task(
+            workflow=self.workflow_cls,
+            repeat_times=3,
+            raw_task={"contents": ["hello world!", "how are you?"]},
+            workflow_args={"output_format": "json"},
+        )
+        workflow = task.to_workflow(self.model_wrapper)
+        workflow.set_repeat_times(2, run_id_base=0)
         if workflow.asynchronous:
             answer = asyncio.run(workflow.run_async())
         else:
