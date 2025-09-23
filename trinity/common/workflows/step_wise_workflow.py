@@ -211,7 +211,7 @@ class AsyncRewardPropagationWorkflow(RewardPropagationWorkflow):
             experiences.extend(exps)
             if not continue_run:
                 break
-        reward = self.reward(experiences)
+        reward = await self.reward_async(experiences)
         for exp in experiences:
             exp.reward = reward
             if exp.metrics is None:

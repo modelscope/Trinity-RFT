@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-from abc import ABC
 from dataclasses import asdict, dataclass, field
 from typing import Any, List, Optional, Type, Union
 
@@ -75,7 +74,7 @@ class Task(dict):
         return self.raw_task  # type: ignore
 
 
-class Workflow(ABC):
+class Workflow:
     """The base workflow class.
 
     A workflow is a runnable object which generates a list of experiences.
