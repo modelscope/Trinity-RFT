@@ -532,7 +532,6 @@ document.write(`
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">asdict</span><span class="p">,</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
 
@@ -615,7 +614,7 @@ document.write(`
 
 <div class="viewcode-block" id="Workflow">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.Workflow">[文档]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">Workflow</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Workflow</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;The base workflow class.</span>
 
 <span class="sd">    A workflow is a runnable object which generates a list of experiences.</span>
@@ -720,13 +719,6 @@ document.write(`
     <span class="k">def</span><span class="w"> </span><span class="nf">set_repeat_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">repeat_times</span><span class="p">,</span> <span class="n">run_id_base</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">repeat_times</span> <span class="o">=</span> <span class="n">repeat_times</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">run_id_base</span> <span class="o">=</span> <span class="n">run_id_base</span></div>
-
-
-<div class="viewcode-block" id="MultiTurnWorkflow.run">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.MultiTurnWorkflow.run">[文档]</a>
-    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run workflow and return a list of experiences.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="MultiTurnWorkflow.process_messages_to_experience">
