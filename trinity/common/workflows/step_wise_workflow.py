@@ -1,5 +1,3 @@
-from abc import abstractmethod
-
 import openai
 
 from trinity.common.experience import Experience
@@ -45,7 +43,6 @@ class StepWiseRewardWorkflow(Workflow):
 
         return experiences
 
-    @abstractmethod
     def step(self, step_num: int) -> bool:
         """Run a single step of your agent application.
 
@@ -59,17 +56,16 @@ class StepWiseRewardWorkflow(Workflow):
             You can use the openai client (`self.client`) to migrate your existing
             applications at low cost.
         """
-        pass
+        raise NotImplementedError
 
-    @abstractmethod
     def reward(self, exps: list[Experience], step_num: int) -> float:
         """Calculate the reward for the given experiences at the specified step."""
-        pass
+        raise NotImplementedError
 
     @property
-    @abstractmethod
     def max_step_num(self):
         """Return the maximum number of steps in the task."""
+        raise NotImplementedError
 
     @property
     def repeatable(self):
@@ -104,7 +100,6 @@ class AsyncStepWiseRewardWorkflow(StepWiseRewardWorkflow):
 
         return experiences
 
-    @abstractmethod
     async def step_async(self, step_num: int) -> bool:
         """Run a single step of your agent application asynchronously.
 
@@ -118,12 +113,11 @@ class AsyncStepWiseRewardWorkflow(StepWiseRewardWorkflow):
             You can use the openai client (`self.client`) to migrate your existing
             applications at low cost.
         """
-        pass
+        raise NotImplementedError
 
-    @abstractmethod
     async def reward_async(self, exps: list[Experience], step_num: int) -> float:
         """Calculate the reward for the given experiences at the specified step asynchronously."""
-        pass
+        raise NotImplementedError
 
 
 class RewardPropagationWorkflow(Workflow):
@@ -166,7 +160,6 @@ class RewardPropagationWorkflow(Workflow):
             exp.metrics["actual_env_steps"] = step + 1  # +1 because step starts from 0
         return experiences
 
-    @abstractmethod
     def step(self, step_num: int) -> bool:
         """Run a single step of your agent application.
 
@@ -180,17 +173,16 @@ class RewardPropagationWorkflow(Workflow):
             You can use the openai client (`self.client`) to migrate your existing
             applications at low cost.
         """
-        pass
+        raise NotImplementedError
 
-    @abstractmethod
     def reward(self, exps: list[Experience]) -> float:
         """Calculate the reward for the given experiences of the entire run."""
-        pass
+        raise NotImplementedError
 
     @property
-    @abstractmethod
     def max_step_num(self):
         """Return the maximum number of steps in the task."""
+        raise NotImplementedError
 
     @property
     def repeatable(self):
@@ -227,7 +219,6 @@ class AsyncRewardPropagationWorkflow(RewardPropagationWorkflow):
             exp.metrics["actual_env_steps"] = step + 1  # +1 because step starts from 0
         return experiences
 
-    @abstractmethod
     async def step_async(self, step_num: int) -> bool:
         """Run a single step of your agent application asynchronously.
 
@@ -241,9 +232,8 @@ class AsyncRewardPropagationWorkflow(RewardPropagationWorkflow):
             You can use the openai client (`self.client`) to migrate your existing
             applications at low cost.
         """
-        pass
+        raise NotImplementedError
 
-    @abstractmethod
     async def reward_async(self, exps: list[Experience]) -> float:
         """Calculate the reward for the given experiences of the entire run asynchronously."""
-        pass
+        raise NotImplementedError

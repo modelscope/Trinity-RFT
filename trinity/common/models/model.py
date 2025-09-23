@@ -106,7 +106,7 @@ class ModelWrapper:
                         if response.status_code == 200:
                             return
                 except Exception as e:
-                    self.logger.info(f"API server not ready (attempt {i+1}/{max_retries}): {e}")
+                    self.logger.info(f"API server not ready (attempt {i + 1}/{max_retries}): {e}")
                 await asyncio.sleep(interval)
             raise RuntimeError(
                 f"API server at {self.api_address} not ready after {max_retries} attempts."
