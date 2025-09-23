@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 """Test for the workflow module"""
+import asyncio
 import unittest
 from dataclasses import dataclass, field
 from typing import Dict, Optional
 from unittest.mock import MagicMock
 
+from parameterized import parameterized
 from torch import Tensor
 
 from tests.tools import get_unittest_dataset_config
@@ -56,6 +58,47 @@ class DummyWorkflow(Workflow):
         self.run_id_base = run_id_base
 
     def run(self):
+        if self.output_format == "json":
+            import json
+
+            return [json.dumps(self.obj)] * self.repeat_times
+        elif self.output_format == "yaml":
+            import yaml
+
+            return [yaml.safe_dump(self.obj)] * self.repeat_times
+        else:
+            raise ValueError("Invalid output format")
+
+
+class DummyAsyncWorkflow(Workflow):
+    def __init__(self, model, task: Task, auxiliary_models=None):
+        super().__init__(task=task, model=model, auxiliary_models=auxiliary_models)
+        self.obj = task.raw_task
+        self.output_format = task.workflow_args["output_format"]
+        self.repeat_times = task.rollout_args.n
+
+    @property
+    def resettable(self):
+        return True
+
+    @property
+    def repeatable(self):
+        return True
+
+    @property
+    def asynchronous(self):
+        return True
+
+    def reset(self, task: Task):
+        self.obj = task.raw_task
+        self.output_format = task.workflow_args["output_format"]
+
+    def set_repeat_times(self, repeat_times, run_id_base):
+        self.repeat_times = repeat_times
+        self.run_id_base = run_id_base
+
+    async def run_async(self):
+        await asyncio.sleep(0.1)
         if self.output_format == "json":
             import json
 
@@ -323,31 +366,39 @@ class WorkflowTest(unittest.TestCase):
                 assert exp.metrics is not None, f"Metrics for response {i} should not be None"
                 self.assertEqual(exp.metrics["accuracy"], expected_acc)
 
-    def test_workflow_resettable(self) -> None:
+    @parameterized.expand([(DummyWorkflow,), (DummyAsyncWorkflow,)])
+    def test_workflow_resettable(self, workflow_cls) -> None:
         model = MagicMock()
         json_task = Task(
-            workflow=DummyWorkflow,
+            workflow=workflow_cls,
             repeat_times=1,
             raw_task={"a": 1},
             workflow_args={"output_format": "json"},
         )
         yaml_task = Task(
-            workflow=DummyWorkflow,
+            workflow=workflow_cls,
             repeat_times=1,
             raw_task={"a": 1},
             workflow_args={"output_format": "yaml"},
         )
         workflow = json_task.to_workflow(model)
-        answer = workflow.run()
+        if workflow.asynchronous:
+            answer = asyncio.run(workflow.run_async())
+        else:
+            answer = workflow.run()
         self.assertEqual(answer[0], '{"a": 1}')
         workflow.reset(yaml_task)
-        answer = workflow.run()
+        if workflow.asynchronous:
+            answer = asyncio.run(workflow.run_async())
+        else:
+            answer = workflow.run()
         self.assertEqual(answer[0], "a: 1\n")
 
-    def test_workflow_repeatable(self) -> None:
+    @parameterized.expand([(DummyWorkflow,), (DummyAsyncWorkflow,)])
+    def test_workflow_repeatable(self, workflow_cls) -> None:
         model = MagicMock()
         task = Task(
-            workflow=DummyWorkflow,
+            workflow=workflow_cls,
             repeat_times=3,
             raw_task={"a": 1},
             workflow_args={"output_format": "json"},
@@ -355,5 +406,8 @@ class WorkflowTest(unittest.TestCase):
         workflow = task.to_workflow(model)
         workflow.set_repeat_times(2, run_id_base=0)
         self.assertEqual(workflow.repeat_times, 2)
-        answer = workflow.run()
+        if workflow.asynchronous:
+            answer = asyncio.run(workflow.run_async())
+        else:
+            answer = workflow.run()
         self.assertEqual(len(answer), 2)
