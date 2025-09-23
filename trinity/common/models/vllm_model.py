@@ -411,11 +411,16 @@ class vLLMRolloutModel(InferenceModel):
         if self.enable_lora:
             # Revise the lora path; no need to sync weights manually.
             self.default_lora_path = self.default_lora_path.replace(
-                str(self.model_version), str(model_version)
+                f"global_step_{self.model_version}", f"global_step_{model_version}"
             )
-            assert self.config.lora_modules is not None
-            self.config.lora_modules[0]["lora_path"] = self.default_lora_path
-            self.logger.info(f"Redirect `lora_path` to the path of {model_version=} successfully.")
+            self.logger.info(
+                f"Redirect `lora_path` from old_model_version={self.model_version} to {model_version=} successfully."
+            )
+            lora_int_ids = await self.async_llm.list_loras()
+            for lora_id in lora_int_ids:
+                await self.async_llm.remove_lora(lora_id)
+            await self.async_llm.add_lora(self.get_lora_request(self.default_lora_path))
+            self.model_version = model_version
             return True
         await self._collective_rpc("update_weight")
         self.logger.info("Sync model weights to vLLM successfully.")
@@ -502,9 +507,13 @@ class vLLMRolloutModel(InferenceModel):
     def get_model_version(self) -> int:
         return self.model_version
 
-    def get_lora_request(self) -> LoRARequest:
+    def get_lora_request(self, lora_path: Optional[str] = None) -> LoRARequest:
         assert self.config.lora_modules is not None
-        return LoRARequest(**self.config.lora_modules[0])
+        lora_request = LoRARequest(**self.config.lora_modules[0])
+        if lora_path is not None:
+            self.config.lora_modules[0]["lora_path"] = lora_path  # for consistency
+            lora_request.lora_path = lora_path
+        return lora_request
 
     async def sleep(self, level: int = 1) -> None:
         await self.async_llm.sleep(level=level)
