@@ -38,9 +38,8 @@ from verl.utils.megatron_utils import (
     get_transformer_config_checkpoint_path,
 )
 
-from trinity.common.config import SynchronizerConfig
-from trinity.common.constants import SyncMethod
 from trinity.manager.synchronizer import Synchronizer
+from trinity.trainer.verl_trainer import CheckpointMonitor
 
 
 class MegatronCheckpointManager(OldMegatronCheckpointManager):
@@ -53,34 +52,17 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
     def __init__(
         self,
         *args,
-        sync_config: SynchronizerConfig = None,
+        ray_namespace: str = "",
         **kwargs,
     ):
         super().__init__(
             *args,
             **kwargs,
         )
-        self.synchronizer_config = sync_config
-        if sync_config is not None:
-            # Retrieve the remote Synchronizer actor using the provided namespace
-            self.synchronizer = Synchronizer.get_actor(namespace=sync_config.ray_namespace)
-        else:
-            self.synchronizer = None
-
-    def _notify_synchronizer_with_step_num(self, global_step):
-        """
-        Notifies the Synchronizer actor about the current training step number,
-        used when SyncMethod is CHECKPOINT.
-
-        Args:
-            global_step (int): The current global training step.
-        """
-        if getattr(self.synchronizer_config, "sync_method", None) == SyncMethod.CHECKPOINT:
-            ray.get(
-                self.synchronizer.set_model_state_dict_with_step_num.remote(
-                    global_step, self.world_size
-                )
-            )
+        self.synchronizer = Synchronizer.get_actor(namespace=ray_namespace)
+        self.checkpoint_monitor = CheckpointMonitor.get_actor(
+            namespace=ray_namespace,
+        )
 
     def save_checkpoint(  # noqa: C901
         self,
@@ -260,6 +242,8 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
                         log_only_rank_0=True,
                     )
 
+        ray.get(self.checkpoint_monitor.register_checkpoint_save_count.remote(global_step, 1, 0))
+
         def finalize_save_fn():
             # Rank 0 uploads checkpoint to HDFS if hdfs_path is provided
             log_with_rank(
@@ -267,7 +251,7 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
                 rank=self.rank,
                 logger=logger,
             )
-            self._notify_synchronizer_with_step_num(global_step)
+            ray.get(self.checkpoint_monitor.notify_finished.remote(global_step, True))
             if self.rank == 0:
                 if hdfs_path is not None:
                     log_with_rank(

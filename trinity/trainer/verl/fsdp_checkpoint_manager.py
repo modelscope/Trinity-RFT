@@ -46,8 +46,8 @@ from verl.utils.fsdp_utils import (
 )
 from verl.utils.logger import log_with_rank
 
-from trinity.common.constants import SyncMethod
 from trinity.manager.synchronizer import Synchronizer
+from trinity.trainer.verl_trainer import CheckpointMonitor
 
 
 class FSDPCheckpointManager(OldFSDPCheckpointManager):
@@ -60,15 +60,12 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
     This class is useful in distributed training scenarios where synchronization and non-blocking I/O are important.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, ray_namespace: str = "", **kwargs):
         super().__init__(*args, **kwargs)
-        config = kwargs.pop("config", None)
-        self.synchronizer_config = config
-        if config is not None:
-            # Retrieve the remote Synchronizer actor using the provided namespace
-            self.synchronizer = Synchronizer.get_actor(namespace=config.ray_namespace)
-        else:
-            self.synchronizer = None
+        self.synchronizer = Synchronizer.get_actor(namespace=ray_namespace)
+        self.checkpoint_monitor = CheckpointMonitor.get_actor(
+            namespace=ray_namespace,
+        )
 
         # Threads for asynchronous saving of different components
         self._model_state_dict_thread = None
@@ -76,21 +73,6 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
         self._extra_state_dict_thread = None
         self._save_model_thread = None
         self.previous_state_dict_step = None
-
-    def _notify_synchronizer_with_step_num(self, global_step):
-        """
-        Notifies the Synchronizer actor about the current training step number,
-        used when SyncMethod is CHECKPOINT.
-
-        Args:
-            global_step (int): The current global training step.
-        """
-        if getattr(self.synchronizer_config, "sync_method", None) == SyncMethod.CHECKPOINT:
-            ray.get(
-                self.synchronizer.set_model_state_dict_with_step_num.remote(
-                    global_step, self.world_size
-                )
-            )
 
     def _upload_state_dict(self, state_dict: Union[dict, None], global_step: int):
         """
@@ -131,14 +113,16 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
                 rank=self.rank,
                 logger=logger,
             )
-            self._notify_synchronizer_with_step_num(global_step)
+            ray.get(self.checkpoint_monitor.notify_finished.remote(global_step, True))
 
         self._model_state_dict_thread = threading.Thread(
             target=_save_model_state_dict,
         )
         self._model_state_dict_thread.start()
 
-    def _save_optimizer(self, local_path):
+        self.previous_state_dict_step = global_step
+
+    def _save_optimizer(self, local_path, global_step):
         optim_path = os.path.join(
             local_path, f"optim_world_size_{self.world_size}_rank_{self.rank}.pt"
         )
@@ -153,13 +137,14 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
                 rank=self.rank,
                 logger=logger,
             )
+            ray.get(self.checkpoint_monitor.notify_finished.remote(global_step))
 
         self._optimizer_state_dict_thread = threading.Thread(
             target=_save_optimizer_state_dict,
         )
         self._optimizer_state_dict_thread.start()
 
-    def _save_extra_state(self, local_path):
+    def _save_extra_state(self, local_path, global_step):
         extra_path = os.path.join(
             local_path, f"extra_state_world_size_{self.world_size}_rank_{self.rank}.pt"
         )
@@ -180,6 +165,7 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
                 rank=self.rank,
                 logger=logger,
             )
+            ray.get(self.checkpoint_monitor.notify_finished.remote(global_step))
 
         self._extra_state_dict_thread = threading.Thread(
             target=_save_extra_state_dict,
@@ -193,11 +179,12 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
         global_step: int = 0,
     ):
         if self.previous_state_dict_step is None:
+            # First sync in trainer.prepare
             self.previous_state_dict_step = global_step
             self._upload_state_dict(None, global_step)
             return
         elif self.previous_state_dict_step == global_step:
-            self._notify_synchronizer_with_step_num(global_step)
+            # No need to save for sync again
             return
         if local_path is None:
             return
@@ -213,8 +200,7 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
                 self.model, StateDictType.SHARDED_STATE_DICT, state_dict_cfg, optim_cfg
             ):
                 self._save_model(local_path, global_step)
-
-        self.previous_state_dict_step = global_step
+        ray.get(self.checkpoint_monitor.register_state_dict_save_count.remote(global_step, 1))
 
     def save_checkpoint(  # noqa: C901
         self,
@@ -239,11 +225,13 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
             hdfs_path (str, optional): HDFS path for saving the checkpoint (not implemented here).
             global_step (int): Current training step.
             max_ckpt_to_keep (int, optional): Maximum number of checkpoints to keep locally.
-            model_state_dict_only (bool): Whether to only save the model state dict (no optimizer, etc.).
             save_as_hf (bool): Whether to force save the model in Hugging Face format.
         """
         if local_path is None:
             return
+
+        # record the previous global step
+        self.previous_global_step = global_step
 
         # remove previous local_path, only rank 0 should do this
         if (
@@ -270,6 +258,9 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
                 self.optimizer is not None
             ), "optimizer must be provided when checkpoint_contents.save includes ['optimizer']"
 
+        state_dict_thread_count = 0
+        other_thread_count = 0
+
         # every rank will save its own model and optim shard
         state_dict_cfg = ShardedStateDictConfig(offload_to_cpu=True if is_cuda_available else False)
         optim_cfg = ShardedOptimStateDictConfig(offload_to_cpu=True if is_cuda_available else False)
@@ -279,16 +270,17 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
                 self.model, StateDictType.SHARDED_STATE_DICT, state_dict_cfg, optim_cfg
             ):
                 if self.should_save_model:
-                    if self.previous_state_dict_step == global_step:
-                        self._notify_synchronizer_with_step_num(global_step)
-                    else:
+                    if self.previous_state_dict_step != global_step:
+                        state_dict_thread_count += 1
                         self._save_model(local_path, global_step)
 
                 if self.should_save_optimizer:
-                    self._save_optimizer(local_path)
+                    other_thread_count += 1
+                    self._save_optimizer(local_path, global_step)
 
                 if self.should_save_extra:
-                    self._save_extra_state(local_path)
+                    other_thread_count += 1
+                    self._save_extra_state(local_path, global_step)
 
         if self.rank == 0:
             # Save HF tokenizer/processor and model config on rank 0 to huggingface/ directory, no matter whether
@@ -341,6 +333,7 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
             state_dict = get_fsdp_full_state_dict(self.model, offload_to_cpu=True, rank0_only=True)
 
             if self.rank == 0:
+                other_thread_count += 1
                 hf_local_path = os.path.join(local_path, "huggingface")
                 os.makedirs(hf_local_path, exist_ok=True)
 
@@ -386,19 +379,21 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
                         logger=logger,
                         log_only_rank_0=True,
                     )
+                    ray.get(self.checkpoint_monitor.notify_finished.remote(global_step))
 
                 self._save_model_thread = threading.Thread(
                     target=_save_model,
                 )
                 self._save_model_thread.start()
-                self.processing_class.save_pretrained(hf_local_path)
 
             # wait for rank0 to dump hf_model to local
             torch.distributed.barrier()
 
-        # record the previous global step
-        self.previous_global_step = global_step
-        self.previous_state_dict_step = global_step
+        ray.get(
+            self.checkpoint_monitor.register_checkpoint_save_count.remote(
+                global_step, state_dict_thread_count, other_thread_count
+            )
+        )
         self.previous_saved_paths.append(local_path)
 
     def wait_on_save_thread(self) -> None:

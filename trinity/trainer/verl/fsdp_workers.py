@@ -569,6 +569,7 @@ class ActorRolloutRefWorker(Worker):
                 lr_scheduler=None,
                 processing_class=self.processor if self.processor is not None else self.tokenizer,
                 checkpoint_config=self.config.ref.checkpoint,
+                ray_namespace=self.config.synchronizer.ray_namespace,
             )
 
         if self._is_actor:
@@ -579,7 +580,7 @@ class ActorRolloutRefWorker(Worker):
                 lr_scheduler=self.actor_lr_scheduler,
                 processing_class=self.processor if self.processor is not None else self.tokenizer,
                 checkpoint_config=self.config.actor.checkpoint,
-                config=self.config.synchronizer,
+                ray_namespace=self.config.synchronizer.ray_namespace,
             )
 
     @register(dispatch_mode=Dispatch.ONE_TO_ALL)
@@ -870,7 +871,6 @@ class ActorRolloutRefWorker(Worker):
         hdfs_path=None,
         global_step=0,
         max_ckpt_to_keep=None,
-        model_state_dict_only=False,
         save_as_hf: bool = False,
     ):
         # only support save and load ckpt for actor
@@ -882,7 +882,6 @@ class ActorRolloutRefWorker(Worker):
                 hdfs_path=hdfs_path,
                 global_step=global_step,
                 max_ckpt_to_keep=max_ckpt_to_keep,
-                model_state_dict_only=model_state_dict_only,
                 save_as_hf=save_as_hf,
             )
             dist.barrier()
@@ -1233,6 +1232,7 @@ class CriticWorker(Worker):
             lr_scheduler=self.critic_lr_scheduler,
             processing_class=self.processor if self.processor is not None else self.tokenizer,
             checkpoint_config=self.config.checkpoint,
+            ray_namespace=self.config.synchronizer.ray_namespace,
         )
 
     @register(dispatch_mode=Dispatch.DP_COMPUTE_PROTO)

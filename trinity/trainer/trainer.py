@@ -189,7 +189,6 @@ class Trainer:
                 current_exp_index=self.engine.train_step_num * self.config.buffer.train_batch_size,
                 current_step=self.train_step_num,
             )
-            self.logger.info(f"Checkpoint at step {self.train_step_num} saved.")
         return metrics
 
     async def shutdown(self) -> None:

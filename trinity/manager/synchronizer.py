@@ -8,7 +8,7 @@ from typing import Dict, List, Optional, Tuple, Union
 import ray
 
 from trinity.common.config import Config
-from trinity.common.constants import RunningStatus
+from trinity.common.constants import RunningStatus, SyncMethod
 from trinity.common.models.utils import (
     get_checkpoint_dir_with_step_num,
     load_state_dict,
@@ -43,6 +43,8 @@ class Synchronizer:
         self._modules = {module_ref}
         self._modules_lock = asyncio.Lock()
         asyncio.create_task(self._check_modules())
+        if self.config.synchronizer.sync_method == SyncMethod.CHECKPOINT:
+            asyncio.create_task(self._find_latest_state_dict())
 
     async def add_module(self, module_ref: ray.actor.ActorHandle) -> None:
         """Adds a module to be tracked by the synchronizer.
@@ -71,6 +73,32 @@ class Synchronizer:
             ray.actor.exit_actor()
         except Exception:
             pass
+
+    async def _find_latest_state_dict(self) -> None:
+        assert self.config.trainer.trainer_type == "verl"
+        default_local_dir = self.config.trainer.trainer_config.trainer.default_local_dir
+        local_latest_state_dict_iteration = os.path.join(
+            default_local_dir, "latest_state_dict_iteration.txt"
+        )
+        while True:
+            if os.path.exists(local_latest_state_dict_iteration):
+                with open(local_latest_state_dict_iteration, "r") as f:
+                    latest_model_version = int(f.read().strip())
+                if latest_model_version > self.model_version:
+                    self.logger.info(
+                        f"Synchronizer has found a new model state dict at step {latest_model_version}."
+                    )
+                    model_state_dict = load_state_dict(
+                        os.path.join(
+                            default_local_dir, f"global_step_{latest_model_version}", "actor"
+                        ),
+                        self.config.trainer,
+                    )
+                    self.logger.info(
+                        f"Synchronizer has loaded model state dict from checkpoint {self.model_version}."
+                    )
+                    await self.set_model_state_dict(model_state_dict, latest_model_version)
+            await asyncio.sleep(1)
 
     async def set_trainer_status(self, status: RunningStatus):
         """Update the status of the trainer."""
