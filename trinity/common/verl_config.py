@@ -1,7 +1,7 @@
 import math
 import sys
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from omegaconf import OmegaConf
 
@@ -36,9 +36,9 @@ class ActorModel:
     use_shm: bool = False
 
     # lora configs
-    lora_rank: int = 0
-    lora_alpha: int = 16
-    target_modules: Optional[str] = "all-linear"
+    lora_rank: int = 0  # The rank of the LoRA model, default to 0. If lora_rank > 0, LoRA module is enabled in trainer
+    lora_alpha: int = 32
+    target_modules: Optional[Union[Dict, List, str]] = "all-linear"
 
 
 @dataclass

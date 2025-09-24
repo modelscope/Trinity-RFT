@@ -7,7 +7,7 @@ from copy import deepcopy
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from omegaconf import OmegaConf
 
@@ -89,10 +89,10 @@ class LoRAConfig:
     name: Optional[str] = None
     path: Optional[str] = None
     base_model_name: Optional[str] = None
-    lora_rank: int = 16
-    lora_alpha: int = 16
+    lora_rank: int = 32
+    lora_alpha: int = 32
     lora_dtype: str = "auto"
-    target_modules: str = "all-linear"
+    target_modules: Union[Dict, List, str] = "all-linear"
 
 
 @dataclass

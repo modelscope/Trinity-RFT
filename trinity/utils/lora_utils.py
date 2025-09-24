@@ -1,7 +1,8 @@
+from typing import Dict, List, Union
+
 import torch
 from peft import LoraConfig, TaskType, get_peft_model
 from transformers import AutoConfig, AutoModelForCausalLM
-from verl.utils.py_functional import convert_to_regular_types
 
 
 def create_dummy_lora(
@@ -9,7 +10,7 @@ def create_dummy_lora(
     checkpoint_job_dir: str,
     lora_rank: int,
     lora_alpha: int,
-    target_modules: str,
+    target_modules: Union[Dict, List, str],
 ) -> str:
     config = AutoConfig.from_pretrained(model_path)
     model = AutoModelForCausalLM.from_config(config)
@@ -17,7 +18,7 @@ def create_dummy_lora(
         "task_type": TaskType.CAUSAL_LM,
         "r": lora_rank,
         "lora_alpha": lora_alpha,
-        "target_modules": convert_to_regular_types(target_modules),
+        "target_modules": target_modules,
         "bias": "none",
     }
     peft_model = get_peft_model(model, LoraConfig(**lora_config))

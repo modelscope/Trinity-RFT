@@ -11,8 +11,8 @@ name: "qwen2.5-1.5B-gsm8k"
 model:
   lora_configs:
   - name: lora
-    lora_rank: 16
-    lora_alpha: 16
+    lora_rank: 32
+    lora_alpha: 32
 synchronizer:
   sync_method: 'checkpoint'
 ```
@@ -31,8 +31,8 @@ name: "qwen2.5-1.5B-gsm8k"  # same as training
 model:
   lora_configs:  # same as training
   - name: lora
-    lora_rank: 16
-    lora_alpha: 16
+    lora_rank: 32
+    lora_alpha: 32
 explorer:
   rollout_model:
     engine_num: 2  # ensure all gpus are used for benchmarking

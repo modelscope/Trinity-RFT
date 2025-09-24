@@ -10,8 +10,8 @@ model:
   max_model_len: 1280
   lora_configs:
   - name: lora
-    lora_rank: 16
-    lora_alpha: 16
+    lora_rank: 32
+    lora_alpha: 32
 cluster:
   node_num: 1
   gpu_per_node: 8
