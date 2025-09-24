@@ -259,7 +259,6 @@ class ModelConfig:
     min_response_tokens: int = 1
 
     # lora config
-    # lora_model_path: Optional[List[str]] = None
     lora_configs: Optional[List[LoRAConfig]] = None
     fully_sharded_loras: bool = False
     max_cpu_loras: Optional[int] = None
