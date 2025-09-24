@@ -103,15 +103,12 @@ class vLLMRolloutModel(InferenceModel):
 
     async def _initialize_tokenizer(self):
         if self.tokenizer is None:
-            if self.processor and hasattr(self.processor, "tokenizer"):
-                self.tokenizer = self.processor.tokenizer
+            if self.enable_lora:
+                self.tokenizer = await self.async_llm.get_tokenizer(
+                    lora_request=self.get_lora_request()
+                )
             else:
-                if self.enable_lora:
-                    self.tokenizer = await self.async_llm.get_tokenizer(
-                        lora_request=LoRARequest(**self.config.lora_modules[0])
-                    )
-                else:
-                    self.tokenizer = await self.async_llm.get_tokenizer()
+                self.tokenizer = await self.async_llm.get_tokenizer()
         self.tokenizer.truncation_side = "left"
 
     def _initialize_processor(self):
