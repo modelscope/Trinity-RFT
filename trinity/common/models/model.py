@@ -141,7 +141,7 @@ class ModelWrapper:
     @_history_recorder
     async def generate_async(self, prompts: List[str], **kwargs) -> List[Experience]:
         """Generate a list of experiences from a list of prompts in async."""
-        lora_request = self.get_lora_request_async()
+        lora_request = await self.get_lora_request_async()
         results = await asyncio.gather(
             *[self.model.generate.remote(prompt, lora_request, **kwargs) for prompt in prompts]
         )
@@ -181,7 +181,7 @@ class ModelWrapper:
     @_history_recorder
     async def chat_async(self, messages: List[dict], **kwargs) -> List[Experience]:
         """Generate a list of experiences from a list of messages in async."""
-        lora_request = self.get_lora_request_async()
+        lora_request = await self.get_lora_request_async()
         return await self.model.chat.remote(messages, lora_request, **kwargs)
 
     @_history_recorder

@@ -731,6 +731,9 @@ class TestTrainerLoRA(BaseTrainerCase):
     def test_trainer(self):
         """Test both mode with LoRA request."""
         self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("gsm8k")
+        self.config.buffer.explorer_input.eval_tasksets.append(
+            get_unittest_dataset_config("gsm8k", "test")
+        )
         self.config.model.model_path = get_model_path()
         self.config.algorithm.algorithm_type = "grpo"
         self.config.algorithm.advantage_fn = "grpo"
@@ -740,6 +743,7 @@ class TestTrainerLoRA(BaseTrainerCase):
         self.config.buffer.total_steps = 2
         self.config.cluster.node_num = 1
         self.config.cluster.gpu_per_node = 4
+        self.config.explorer.eval_interval = 2
         self.config.model.lora_configs = [get_lora_config()]
         self.config.synchronizer.sync_method = SyncMethod.CHECKPOINT
         self.config.synchronizer.sync_interval = 2
@@ -778,10 +782,10 @@ class TestTrainerLoRA(BaseTrainerCase):
         bench(self.config)
         parser = TensorBoardParser(os.path.join(self.config.monitor.cache_dir, "tensorboard"))
         for prefix in ["eval", "bench"]:
-            countdown_metrics = parser.metric_list(f"{prefix}/gsm8k")
-            self.assertTrue(len(countdown_metrics) > 0)
-            countdown_metric_steps = parser.metric_steps(countdown_metrics[0])
-            self.assertEqual([0, 2], countdown_metric_steps)
+            gsm8k_metrics = parser.metric_list(f"{prefix}/gsm8k")
+            self.assertTrue(len(gsm8k_metrics) > 0)
+            gsm8k_metric_steps = parser.metric_steps(gsm8k_metrics[0])
+            self.assertEqual([0, 2], gsm8k_metric_steps)
 
-    def tearDown(self):
-        shutil.rmtree(self.config.checkpoint_job_dir)
+    # def tearDown(self):
+    #     shutil.rmtree(self.config.checkpoint_job_dir)
