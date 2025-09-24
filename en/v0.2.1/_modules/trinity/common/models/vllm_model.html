@@ -506,10 +506,12 @@ document.write(`
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ray</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">vllm</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">packaging.version</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse</span> <span class="k">as</span> <span class="n">parse_version</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoProcessor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">vllm.lora.request</span><span class="w"> </span><span class="kn">import</span> <span class="n">LoRARequest</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">vllm.sampling_params</span><span class="w"> </span><span class="kn">import</span> <span class="n">RequestOutputKind</span>
@@ -518,8 +520,8 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.experience</span><span class="w"> </span><span class="kn">import</span> <span class="n">Experience</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.api.vllm_patch</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_vllm_version</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.mm_utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">attach_images_to_messages</span><span class="p">,</span>
     <span class="n">build_multi_modal_inputs</span><span class="p">,</span>
+    <span class="n">convert_messages_to_mm_format</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">InferenceModel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_action_mask_method</span>
@@ -713,7 +715,7 @@ document.write(`
 <div class="viewcode-block" id="vLLMRolloutModel.chat_mm">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.chat_mm">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">chat_mm</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">],</span> <span class="n">raw_mm_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">],</span> <span class="n">images</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">],</span> <span class="n">videos</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Chat with the model with a list of messages in async.</span>
 
@@ -725,13 +727,11 @@ document.write(`
 <span class="sd">        Returns:</span>
 <span class="sd">            A list of experiences.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># if self.tokenizer is None:</span>
-        <span class="c1">#     await self._initialize_tokenizer()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">processor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_processor</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">chat_template</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">chat_template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">get_chat_template</span><span class="p">()</span>
-        <span class="n">messages</span> <span class="o">=</span> <span class="n">attach_images_to_messages</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span> <span class="n">raw_mm_data</span><span class="p">)</span>
+        <span class="n">messages</span> <span class="o">=</span> <span class="n">convert_messages_to_mm_format</span><span class="p">(</span><span class="n">messages</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">messages</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;role&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;assistant&quot;</span><span class="p">:</span>
             <span class="n">prompt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processor</span><span class="o">.</span><span class="n">apply_chat_template</span><span class="p">(</span>
                 <span class="n">messages</span><span class="p">,</span>
@@ -748,41 +748,34 @@ document.write(`
                 <span class="n">enable_thinking</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">enable_thinking</span><span class="p">,</span>
             <span class="p">)</span>
 
-        <span class="n">mm_inputs</span> <span class="o">=</span> <span class="n">build_multi_modal_inputs</span><span class="p">(</span>
-            <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
-            <span class="n">raw_mm_data</span><span class="o">=</span><span class="n">raw_mm_data</span><span class="p">,</span>
-            <span class="n">processor</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">processor</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_mm</span><span class="p">(</span><span class="n">mm_inputs</span><span class="o">=</span><span class="n">mm_inputs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_mm</span><span class="p">(</span><span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span> <span class="n">images</span><span class="o">=</span><span class="n">images</span><span class="p">,</span> <span class="n">videos</span><span class="o">=</span><span class="n">videos</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="vLLMRolloutModel.generate_mm">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.generate_mm">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">generate_mm</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">raw_mm_data</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">mm_inputs</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">images</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">videos</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate a response from the provided prompt in async.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            prompt (str): The input prompt.</span>
-<span class="sd">            raw_mm_data (dict): The raw multi-modal data.</span>
-<span class="sd">            mm_inputs (dict): The multi-modal inputs, already processed.</span>
-<span class="sd">                - keys: &quot;prompt&quot;, &quot;multi_modal_data&quot;, &quot;multi_modal_inputs&quot;.</span>
-<span class="sd">            kwargs (dict): A dictionary of sampling parameters.</span>
-
-<span class="sd">            Either (`prompt`, raw_mm_data) or (mm_inputs) should be provided.</span>
+<span class="sd">            images (List): The list of image inputs.</span>
+<span class="sd">            videos (List): The list of video inputs.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            A list of experiences.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">mm_inputs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">mm_inputs</span> <span class="o">=</span> <span class="n">build_multi_modal_inputs</span><span class="p">(</span>
-                <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
-                <span class="n">raw_mm_data</span><span class="o">=</span><span class="n">raw_mm_data</span><span class="p">,</span>
-                <span class="n">processor</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">processor</span><span class="p">,</span>
-                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-            <span class="p">)</span>
+        <span class="n">mm_inputs</span> <span class="o">=</span> <span class="n">build_multi_modal_inputs</span><span class="p">(</span>
+            <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
+            <span class="n">images</span><span class="o">=</span><span class="n">images</span><span class="p">,</span>
+            <span class="n">videos</span><span class="o">=</span><span class="n">videos</span><span class="p">,</span>
+            <span class="n">processor</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">processor</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="n">vllm_inputs</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;prompt&quot;</span><span class="p">:</span> <span class="n">mm_inputs</span><span class="p">[</span><span class="s2">&quot;prompt&quot;</span><span class="p">],</span>

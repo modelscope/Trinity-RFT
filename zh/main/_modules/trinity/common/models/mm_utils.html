@@ -528,89 +528,84 @@ document.write(`
                 <article class="bd-article">
                   
   <h1>trinity.common.models.mm_utils 源代码</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span>
+<span></span><span class="sd">&quot;&quot;&quot;&quot;Multi-modal utilities for processing and handling multi-modal data such as images and videos.</span>
+<span class="sd">Only support Qwen2.5 VL series.</span>
+
+<span class="sd">Modified from: verl/utils/dataset/rl_dataset.py</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span>
 
 
 <div class="viewcode-block" id="build_multi_modal_inputs">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.mm_utils.html#trinity.common.models.mm_utils.build_multi_modal_inputs">[文档]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">build_multi_modal_inputs</span><span class="p">(</span>
     <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">raw_mm_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">images</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">],</span>
+    <span class="n">videos</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
     <span class="n">processor</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Preprocess multi-modal data and build multi-modal inputs</span>
-<span class="sd">    Adapted from: verl/utils/dataset/rl_dataset.py</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.dataset.vision_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">process_image</span><span class="p">,</span> <span class="n">process_video</span>
-
     <span class="k">if</span> <span class="n">prompt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Prompt is required for build multi-modal inputs&quot;</span><span class="p">)</span>
 
-    <span class="n">raw_images</span><span class="p">,</span> <span class="n">raw_videos</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="s2">&quot;image&quot;</span> <span class="ow">in</span> <span class="n">raw_mm_data</span><span class="p">:</span>
-        <span class="n">raw_images</span> <span class="o">=</span> <span class="n">raw_mm_data</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">]</span>
-    <span class="k">if</span> <span class="s2">&quot;video&quot;</span> <span class="ow">in</span> <span class="n">raw_mm_data</span><span class="p">:</span>
-        <span class="n">raw_videos</span> <span class="o">=</span> <span class="n">raw_mm_data</span><span class="p">[</span><span class="s2">&quot;video&quot;</span><span class="p">]</span>
-
     <span class="n">multi_modal_data</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">images</span><span class="p">,</span> <span class="n">videos</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="n">raw_images</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">images</span> <span class="o">=</span> <span class="p">[</span><span class="n">process_image</span><span class="p">(</span><span class="n">image</span><span class="p">)</span> <span class="k">for</span> <span class="n">image</span> <span class="ow">in</span> <span class="n">raw_images</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">images</span><span class="p">:</span>
         <span class="n">multi_modal_data</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">images</span>
-    <span class="k">if</span> <span class="n">raw_videos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">videos</span> <span class="o">=</span> <span class="p">[</span><span class="n">process_video</span><span class="p">(</span><span class="n">video</span><span class="p">)</span> <span class="k">for</span> <span class="n">video</span> <span class="ow">in</span> <span class="n">raw_videos</span><span class="p">]</span>
-        <span class="n">multi_modal_data</span><span class="p">[</span><span class="s2">&quot;video&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">video</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span> <span class="k">for</span> <span class="n">video</span> <span class="ow">in</span> <span class="n">videos</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">videos</span><span class="p">:</span>
+        <span class="n">multi_modal_data</span><span class="p">[</span><span class="s2">&quot;video&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">videos</span>
 
-    <span class="n">model_inputs</span> <span class="o">=</span> <span class="n">processor</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="p">[</span><span class="n">prompt</span><span class="p">],</span> <span class="n">images</span><span class="o">=</span><span class="n">images</span><span class="p">,</span> <span class="n">videos</span><span class="o">=</span><span class="n">videos</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s2">&quot;pt&quot;</span><span class="p">)</span>
+    <span class="n">model_inputs</span> <span class="o">=</span> <span class="n">processor</span><span class="p">(</span>
+        <span class="n">text</span><span class="o">=</span><span class="p">[</span><span class="n">prompt</span><span class="p">],</span>
+        <span class="n">images</span><span class="o">=</span><span class="n">multi_modal_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;image&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="n">videos</span><span class="o">=</span><span class="n">multi_modal_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;video&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="n">return_tensors</span><span class="o">=</span><span class="s2">&quot;pt&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 
-    <span class="n">model_inputs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;input_ids&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># TODO: check</span>
-    <span class="n">model_inputs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;attention_mask&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">input_ids</span> <span class="o">=</span> <span class="n">model_inputs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;input_ids&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">model_inputs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;attention_mask&quot;</span><span class="p">)</span>
 
-    <span class="c1"># There&#39;s a trap here, multi_modal_inputs has to be a dict, not BatchFeature</span>
-    <span class="n">multi_modal_inputs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">model_inputs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s2">&quot;second_per_grid_ts&quot;</span> <span class="ow">in</span> <span class="n">model_inputs</span><span class="p">:</span>
+        <span class="n">model_inputs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;second_per_grid_ts&quot;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="p">{</span>
         <span class="s2">&quot;prompt&quot;</span><span class="p">:</span> <span class="n">prompt</span><span class="p">,</span>
-        <span class="s2">&quot;multi_modal_inputs&quot;</span><span class="p">:</span> <span class="n">multi_modal_inputs</span><span class="p">,</span>
+        <span class="s2">&quot;prompt_token_ids&quot;</span><span class="p">:</span> <span class="n">input_ids</span><span class="p">,</span>
         <span class="s2">&quot;multi_modal_data&quot;</span><span class="p">:</span> <span class="n">multi_modal_data</span><span class="p">,</span>
+        <span class="s2">&quot;multi_modal_inputs&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">model_inputs</span><span class="p">),</span>
     <span class="p">}</span></div>
 
 
 
-<div class="viewcode-block" id="attach_images_to_messages">
-<a class="viewcode-back" href="../../../../build_api/trinity.common.models.mm_utils.html#trinity.common.models.mm_utils.attach_images_to_messages">[文档]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">attach_images_to_messages</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span> <span class="n">raw_mm_data</span><span class="p">):</span>
-    <span class="n">new_msgs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">messages</span><span class="p">]</span>
-    <span class="n">imgs</span> <span class="o">=</span> <span class="p">(</span><span class="n">raw_mm_data</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;image&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">imgs</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">new_msgs</span>
+<div class="viewcode-block" id="convert_messages_to_mm_format">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.models.mm_utils.html#trinity.common.models.mm_utils.convert_messages_to_mm_format">[文档]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">convert_messages_to_mm_format</span><span class="p">(</span><span class="n">messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
+    <span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">messages</span><span class="p">:</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">]</span>
+        <span class="n">content_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">segments</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;(&lt;image&gt;|&lt;video&gt;)&quot;</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+        <span class="n">segments</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">segments</span> <span class="k">if</span> <span class="n">item</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">segment</span> <span class="ow">in</span> <span class="n">segments</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">segment</span> <span class="o">==</span> <span class="s2">&quot;&lt;image&gt;&quot;</span><span class="p">:</span>
+                <span class="n">content_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;image&quot;</span><span class="p">}</span>
+                <span class="p">)</span>  <span class="c1"># chat template will fill the actual image data later</span>
+            <span class="k">elif</span> <span class="n">segment</span> <span class="o">==</span> <span class="s2">&quot;&lt;video&gt;&quot;</span><span class="p">:</span>
+                <span class="n">content_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;video&quot;</span><span class="p">}</span>
+                <span class="p">)</span>  <span class="c1"># chat template will fill the actual video data later</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">content_list</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">segment</span><span class="p">})</span>
 
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">new_msgs</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">new_msgs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;role&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;user&quot;</span><span class="p">:</span>
-            <span class="n">content</span> <span class="o">=</span> <span class="n">new_msgs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-            <span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="n">text</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&lt;image&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&lt;|image_pad|&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-                <span class="k">if</span> <span class="n">text</span><span class="p">:</span>
-                    <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">text</span><span class="p">})</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">content</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                        <span class="n">t</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&lt;image&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&lt;|image_pad|&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-                        <span class="k">if</span> <span class="n">t</span><span class="p">:</span>
-                            <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">t</span><span class="p">})</span>
-                    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-                        <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
-
-            <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">imgs</span><span class="p">:</span>
-                <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;image&quot;</span><span class="p">,</span> <span class="s2">&quot;image&quot;</span><span class="p">:</span> <span class="n">img</span><span class="p">})</span>
-
-            <span class="n">new_msgs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;content&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">items</span>
-            <span class="k">break</span>
-
-    <span class="k">return</span> <span class="n">new_msgs</span></div>
+        <span class="n">message</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">content_list</span>
+    <span class="k">return</span> <span class="n">messages</span></div>
 
 </pre></div>
 

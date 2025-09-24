@@ -934,7 +934,6 @@ document.write(`
             <span class="n">position_ids</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">multi_modal_inputs</span> <span class="o">=</span> <span class="n">batch</span><span class="o">.</span><span class="n">non_tensor_batch</span><span class="p">[</span><span class="s2">&quot;multi_modal_inputs&quot;</span><span class="p">]</span>
             <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">mm_inputs</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">multi_modal_inputs</span><span class="p">):</span>
-                <span class="c1"># self.logger.info(f&quot;{key = }, {value.shape =}&quot;)</span>
                 <span class="n">input_ids</span> <span class="o">=</span> <span class="n">batch</span><span class="o">.</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;input_ids&quot;</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span>
                 <span class="n">attention_mask</span> <span class="o">=</span> <span class="n">batch</span><span class="o">.</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;attention_mask&quot;</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span>
 
