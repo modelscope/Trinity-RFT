@@ -491,6 +491,7 @@ document.write(`
 <span class="kn">import</span><span class="w"> </span><span class="nn">vllm</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">packaging.version</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse</span> <span class="k">as</span> <span class="n">parse_version</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoProcessor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">vllm.lora.request</span><span class="w"> </span><span class="kn">import</span> <span class="n">LoRARequest</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">vllm.sampling_params</span><span class="w"> </span><span class="kn">import</span> <span class="n">RequestOutputKind</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">InferenceModelConfig</span>
@@ -549,6 +550,8 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">enable_thinking</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">enable_thinking</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">request_id</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">max_model_len</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">max_model_len</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enable_lora</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">enable_lora</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_lora_path</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">lora_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;default_lora_path&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">engine_args</span> <span class="o">=</span> <span class="n">vllm</span><span class="o">.</span><span class="n">AsyncEngineArgs</span><span class="p">(</span>
             <span class="n">model</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">model_path</span><span class="p">,</span>
             <span class="n">enforce_eager</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">enforce_eager</span><span class="p">,</span>
@@ -564,6 +567,8 @@ document.write(`
             <span class="n">gpu_memory_utilization</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">gpu_memory_utilization</span><span class="p">,</span>
             <span class="n">enable_chunked_prefill</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">enable_chunked_prefill</span><span class="p">,</span>
             <span class="c1"># max_num_batched_tokens=256, # you can further set this parameter to reduce the vllm peak memory usage</span>
+            <span class="n">enable_lora</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">enable_lora</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">config</span><span class="o">.</span><span class="n">lora_kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">get_vllm_version</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">parse_version</span><span class="p">(</span><span class="s2">&quot;0.10.0&quot;</span><span class="p">):</span>
             <span class="n">engine_args</span><span class="o">.</span><span class="n">enable_log_requests</span> <span class="o">=</span> <span class="kc">False</span>
@@ -585,8 +590,10 @@ document.write(`
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_initialize_tokenizer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">processor</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">processor</span><span class="p">,</span> <span class="s2">&quot;tokenizer&quot;</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">processor</span><span class="o">.</span><span class="n">tokenizer</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">enable_lora</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="o">.</span><span class="n">get_tokenizer</span><span class="p">(</span>
+                    <span class="n">lora_request</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_lora_request</span><span class="p">()</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="o">.</span><span class="n">get_tokenizer</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">truncation_side</span> <span class="o">=</span> <span class="s2">&quot;left&quot;</span>
@@ -599,7 +606,9 @@ document.write(`
 
 <div class="viewcode-block" id="vLLMRolloutModel.chat">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.chat">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">chat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">chat</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">],</span> <span class="n">lora_request</span><span class="p">:</span> <span class="n">LoRARequest</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Chat with the model with a list of messages in async.</span>
 
 <span class="sd">        Args:</span>
@@ -628,12 +637,14 @@ document.write(`
                 <span class="n">chat_template</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">chat_template</span><span class="p">,</span>
                 <span class="n">enable_thinking</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">enable_thinking</span><span class="p">,</span>
             <span class="p">)</span>
-        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span> <span class="n">lora_request</span><span class="o">=</span><span class="n">lora_request</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="vLLMRolloutModel.generate">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.generate">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">generate</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">lora_request</span><span class="p">:</span> <span class="n">LoRARequest</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate a response from the provided prompt in async.</span>
 
 <span class="sd">        Args:</span>
@@ -648,7 +659,9 @@ document.write(`
         <span class="n">token_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
             <span class="n">prompt</span><span class="p">,</span> <span class="n">truncation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">max_prompt_tokens</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s2">&quot;pt&quot;</span>
         <span class="p">)[</span><span class="s2">&quot;input_ids&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-        <span class="n">output</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_internal</span><span class="p">(</span><span class="n">prompt</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;prompt_token_ids&quot;</span><span class="p">:</span> <span class="n">token_ids</span><span class="p">},</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_internal</span><span class="p">(</span>
+            <span class="n">prompt</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;prompt_token_ids&quot;</span><span class="p">:</span> <span class="n">token_ids</span><span class="p">},</span> <span class="n">lora_request</span><span class="o">=</span><span class="n">lora_request</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
         <span class="n">experiences</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">Experience</span><span class="p">(</span>
                 <span class="n">tokens</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span>
@@ -788,7 +801,9 @@ document.write(`
 
 <div class="viewcode-block" id="vLLMRolloutModel.logprobs">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.logprobs">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">logprobs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token_ids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">logprobs</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">token_ids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">lora_request</span><span class="p">:</span> <span class="n">LoRARequest</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the logprobs of the given tokens in async. Please slice the result carefully</span>
 <span class="sd">        to align with the actual response length.</span>
 
@@ -801,6 +816,7 @@ document.write(`
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">output</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_internal</span><span class="p">(</span>
             <span class="n">prompt</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;prompt_token_ids&quot;</span><span class="p">:</span> <span class="n">token_ids</span><span class="p">},</span>
+            <span class="n">lora_request</span><span class="o">=</span><span class="n">lora_request</span><span class="p">,</span>
             <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">max_tokens</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">prompt_logprobs</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="c1"># vLLM return `prompt_logprobs + 1` logrpobs for each token</span>
@@ -811,13 +827,16 @@ document.write(`
         <span class="p">)</span></div>
 
 
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_generate_internal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prompt</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_generate_internal</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">prompt</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">lora_request</span><span class="p">:</span> <span class="n">LoRARequest</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
         <span class="c1"># Send the request to the LLM engine.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">request_id</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">stream</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span>
             <span class="n">request_id</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request_id</span><span class="p">),</span>
             <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
             <span class="n">sampling_params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_create_sampling_params</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">),</span>
+            <span class="n">lora_request</span><span class="o">=</span><span class="n">lora_request</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># Consume the stream until the request is finished.</span>
@@ -838,7 +857,7 @@ document.write(`
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Experience</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert a list of messages into an experience.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="o">.</span><span class="n">get_tokenizer</span><span class="p">()</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_tokenizer</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">chat_template</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">chat_template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">get_chat_template</span><span class="p">()</span>
         <span class="n">token_ids</span><span class="p">,</span> <span class="n">action_mask</span><span class="p">,</span> <span class="n">prompt_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_mask_method</span><span class="p">(</span>
@@ -904,6 +923,20 @@ document.write(`
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.sync_model">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">sync_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_version</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sync model weights to vLLM.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">enable_lora</span><span class="p">:</span>
+            <span class="c1"># Revise the lora path; no need to sync weights manually.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">default_lora_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_lora_path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;global_step_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model_version</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;global_step_</span><span class="si">{</span><span class="n">model_version</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Redirect `lora_path` from old_model_version=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model_version</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">model_version</span><span class="si">=}</span><span class="s2"> successfully.&quot;</span>
+            <span class="p">)</span>
+            <span class="n">lora_int_ids</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="o">.</span><span class="n">list_loras</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">lora_id</span> <span class="ow">in</span> <span class="n">lora_int_ids</span><span class="p">:</span>
+                <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="o">.</span><span class="n">remove_lora</span><span class="p">(</span><span class="n">lora_id</span><span class="p">)</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">async_llm</span><span class="o">.</span><span class="n">add_lora</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_lora_request</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default_lora_path</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_version</span> <span class="o">=</span> <span class="n">model_version</span>
+            <span class="k">return</span> <span class="n">model_version</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collective_rpc</span><span class="p">(</span><span class="s2">&quot;update_weight&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Sync model weights to vLLM successfully.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_version</span> <span class="o">=</span> <span class="n">model_version</span>
@@ -992,6 +1025,17 @@ document.write(`
 <a class="viewcode-back" href="../../../../build_api/trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.get_model_version">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_model_version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_version</span></div>
+
+
+<div class="viewcode-block" id="vLLMRolloutModel.get_lora_request">
+<a class="viewcode-back" href="../../../../build_api/trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.get_lora_request">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_lora_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lora_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LoRARequest</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">lora_modules</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="n">lora_request</span> <span class="o">=</span> <span class="n">LoRARequest</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">lora_modules</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">lora_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">lora_modules</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;lora_path&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">lora_path</span>  <span class="c1"># for consistency</span>
+            <span class="n">lora_request</span><span class="o">.</span><span class="n">lora_path</span> <span class="o">=</span> <span class="n">lora_path</span>
+        <span class="k">return</span> <span class="n">lora_request</span></div>
 
 
 <div class="viewcode-block" id="vLLMRolloutModel.sleep">

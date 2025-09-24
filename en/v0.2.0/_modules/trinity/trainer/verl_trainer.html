@@ -668,7 +668,6 @@ document.write(`
                 <span class="n">role</span><span class="o">=</span><span class="s2">&quot;ref&quot;</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">resource_pool_to_cls</span><span class="p">[</span><span class="n">resource_pool</span><span class="p">][</span><span class="s2">&quot;ref&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ref_policy_cls</span>
-
         <span class="c1"># create a reward model if reward_fn is None</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_rm</span><span class="p">:</span>
             <span class="c1"># we create a RM here</span>
@@ -790,7 +789,10 @@ document.write(`
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">use_reference</span><span class="p">:</span>  <span class="c1"># ref_logprob may not be used</span>
                 <span class="c1"># compute reference log_prob</span>
                 <span class="k">with</span> <span class="n">marked_timer</span><span class="p">(</span><span class="s2">&quot;ref&quot;</span><span class="p">,</span> <span class="n">timing_raw</span><span class="p">):</span>
-                    <span class="n">ref_log_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref_policy_wg</span><span class="o">.</span><span class="n">compute_ref_log_prob</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref_in_actor</span><span class="p">:</span>
+                        <span class="n">ref_log_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref_policy_wg</span><span class="o">.</span><span class="n">compute_ref_log_prob</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">ref_log_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_wg</span><span class="o">.</span><span class="n">compute_ref_log_prob</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
                     <span class="n">batch</span> <span class="o">=</span> <span class="n">batch</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">ref_log_prob</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">use_critic</span><span class="p">:</span>

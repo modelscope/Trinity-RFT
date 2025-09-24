@@ -380,6 +380,7 @@
 <li class="toctree-l3"><a class="reference internal" href="trinity.utils.dlc_utils.html">trinity.utils.dlc_utils module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.utils.eval_utils.html">trinity.utils.eval_utils module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.utils.log.html">trinity.utils.log module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.utils.lora_utils.html">trinity.utils.lora_utils module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.utils.math_eval_utils.html">trinity.utils.math_eval_utils module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.utils.monitor.html">trinity.utils.monitor module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.utils.plugin_loader.html">trinity.utils.plugin_loader module</a></li>
@@ -1031,6 +1032,17 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.GenerationConfig.__init__"><code class="docutils literal notranslate"><span class="pre">GenerationConfig.__init__()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.LoRAConfig"><code class="docutils literal notranslate"><span class="pre">LoRAConfig</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.LoRAConfig.name"><code class="docutils literal notranslate"><span class="pre">LoRAConfig.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.LoRAConfig.path"><code class="docutils literal notranslate"><span class="pre">LoRAConfig.path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.LoRAConfig.base_model_name"><code class="docutils literal notranslate"><span class="pre">LoRAConfig.base_model_name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.LoRAConfig.lora_rank"><code class="docutils literal notranslate"><span class="pre">LoRAConfig.lora_rank</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.LoRAConfig.lora_alpha"><code class="docutils literal notranslate"><span class="pre">LoRAConfig.lora_alpha</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.LoRAConfig.lora_dtype"><code class="docutils literal notranslate"><span class="pre">LoRAConfig.lora_dtype</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.LoRAConfig.target_modules"><code class="docutils literal notranslate"><span class="pre">LoRAConfig.target_modules</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.LoRAConfig.__init__"><code class="docutils literal notranslate"><span class="pre">LoRAConfig.__init__()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.StorageConfig"><code class="docutils literal notranslate"><span class="pre">StorageConfig</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.StorageConfig.name"><code class="docutils literal notranslate"><span class="pre">StorageConfig.name</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.StorageConfig.storage_type"><code class="docutils literal notranslate"><span class="pre">StorageConfig.storage_type</span></code></a></li>
@@ -1105,6 +1117,9 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.ModelConfig.max_prompt_tokens"><code class="docutils literal notranslate"><span class="pre">ModelConfig.max_prompt_tokens</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.ModelConfig.max_response_tokens"><code class="docutils literal notranslate"><span class="pre">ModelConfig.max_response_tokens</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.ModelConfig.min_response_tokens"><code class="docutils literal notranslate"><span class="pre">ModelConfig.min_response_tokens</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.ModelConfig.lora_configs"><code class="docutils literal notranslate"><span class="pre">ModelConfig.lora_configs</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.ModelConfig.fully_sharded_loras"><code class="docutils literal notranslate"><span class="pre">ModelConfig.fully_sharded_loras</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.ModelConfig.max_cpu_loras"><code class="docutils literal notranslate"><span class="pre">ModelConfig.max_cpu_loras</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.ModelConfig.__init__"><code class="docutils literal notranslate"><span class="pre">ModelConfig.__init__()</span></code></a></li>
 </ul>
 </li>
@@ -1133,6 +1148,9 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.InferenceModelConfig.tool_call_parser"><code class="docutils literal notranslate"><span class="pre">InferenceModelConfig.tool_call_parser</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.InferenceModelConfig.reasoning_parser"><code class="docutils literal notranslate"><span class="pre">InferenceModelConfig.reasoning_parser</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.InferenceModelConfig.bundle_indices"><code class="docutils literal notranslate"><span class="pre">InferenceModelConfig.bundle_indices</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.InferenceModelConfig.enable_lora"><code class="docutils literal notranslate"><span class="pre">InferenceModelConfig.enable_lora</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.InferenceModelConfig.lora_modules"><code class="docutils literal notranslate"><span class="pre">InferenceModelConfig.lora_modules</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.InferenceModelConfig.lora_kwargs"><code class="docutils literal notranslate"><span class="pre">InferenceModelConfig.lora_kwargs</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.config.html#trinity.common.config.InferenceModelConfig.__init__"><code class="docutils literal notranslate"><span class="pre">InferenceModelConfig.__init__()</span></code></a></li>
 </ul>
 </li>
@@ -1449,6 +1467,10 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.ActorModel.fused_kernel_options"><code class="docutils literal notranslate"><span class="pre">ActorModel.fused_kernel_options</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.ActorModel.custom_chat_template"><code class="docutils literal notranslate"><span class="pre">ActorModel.custom_chat_template</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.ActorModel.enable_activation_offload"><code class="docutils literal notranslate"><span class="pre">ActorModel.enable_activation_offload</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.ActorModel.use_shm"><code class="docutils literal notranslate"><span class="pre">ActorModel.use_shm</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.ActorModel.lora_rank"><code class="docutils literal notranslate"><span class="pre">ActorModel.lora_rank</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.ActorModel.lora_alpha"><code class="docutils literal notranslate"><span class="pre">ActorModel.lora_alpha</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.ActorModel.target_modules"><code class="docutils literal notranslate"><span class="pre">ActorModel.target_modules</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.ActorModel.__init__"><code class="docutils literal notranslate"><span class="pre">ActorModel.__init__()</span></code></a></li>
 </ul>
 </li>
@@ -1587,8 +1609,10 @@ document.write(`
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Rollout.multi_turn"><code class="docutils literal notranslate"><span class="pre">Rollout.multi_turn</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Rollout.temperature"><code class="docutils literal notranslate"><span class="pre">Rollout.temperature</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Rollout.n"><code class="docutils literal notranslate"><span class="pre">Rollout.n</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Rollout.log_prob_use_dynamic_bsz"><code class="docutils literal notranslate"><span class="pre">Rollout.log_prob_use_dynamic_bsz</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Rollout.log_prob_micro_batch_size"><code class="docutils literal notranslate"><span class="pre">Rollout.log_prob_micro_batch_size</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Rollout.log_prob_micro_batch_size_per_gpu"><code class="docutils literal notranslate"><span class="pre">Rollout.log_prob_micro_batch_size_per_gpu</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Rollout.log_prob_max_token_len_per_gpu"><code class="docutils literal notranslate"><span class="pre">Rollout.log_prob_max_token_len_per_gpu</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="trinity.common.verl_config.html#trinity.common.verl_config.Rollout.__init__"><code class="docutils literal notranslate"><span class="pre">Rollout.__init__()</span></code></a></li>
 </ul>
 </li>
