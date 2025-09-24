@@ -787,5 +787,5 @@ class TestTrainerLoRA(BaseTrainerCase):
             gsm8k_metric_steps = parser.metric_steps(gsm8k_metrics[0])
             self.assertEqual([0, 2], gsm8k_metric_steps)
 
-    # def tearDown(self):
-    #     shutil.rmtree(self.config.checkpoint_job_dir)
+    def tearDown(self):
+        shutil.rmtree(self.config.checkpoint_job_dir)
