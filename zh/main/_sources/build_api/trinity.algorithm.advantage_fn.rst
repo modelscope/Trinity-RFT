@@ -13,6 +13,7 @@ Submodules
    trinity.algorithm.advantage_fn.multi_step_grpo_advantage
    trinity.algorithm.advantage_fn.opmd_advantage
    trinity.algorithm.advantage_fn.ppo_advantage
+   trinity.algorithm.advantage_fn.rec_advantage
    trinity.algorithm.advantage_fn.reinforce_advantage
    trinity.algorithm.advantage_fn.reinforce_plus_plus_advantage
    trinity.algorithm.advantage_fn.remax_advantage

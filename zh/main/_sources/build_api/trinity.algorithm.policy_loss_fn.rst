@@ -15,6 +15,7 @@ Submodules
    trinity.algorithm.policy_loss_fn.opmd_policy_loss
    trinity.algorithm.policy_loss_fn.policy_loss_fn
    trinity.algorithm.policy_loss_fn.ppo_policy_loss
+   trinity.algorithm.policy_loss_fn.rec_policy_loss
    trinity.algorithm.policy_loss_fn.sft_loss
    trinity.algorithm.policy_loss_fn.sppo_loss_fn
    trinity.algorithm.policy_loss_fn.topr_policy_loss
