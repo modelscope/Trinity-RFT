@@ -98,56 +98,52 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
             state_dict = self.model.state_dict()
         self._upload_state_dict(state_dict, global_step)
 
-    def _save_model(self, local_path, global_step):
-        model_path = os.path.join(
-            local_path, f"model_world_size_{self.world_size}_rank_{self.rank}.pt"
+    def _save_with_thread(
+        self,
+        obj,
+        local_path: str,
+        prefix: str,
+        thread_name: str,
+        global_step: int,
+        is_state_dict: bool = False,
+    ):
+        path = os.path.join(
+            local_path, f"{prefix}_world_size_{self.world_size}_rank_{self.rank}.pt"
         )
-        model_state_dict = self.model.state_dict()
-        if self._model_state_dict_thread is not None:
-            self._model_state_dict_thread.join()
+        thread = getattr(self, thread_name)
+        if thread is not None:
+            thread.join()
 
-        def _save_model_state_dict():
-            torch.save(model_state_dict, model_path)
+        def _save():
+            torch.save(obj, path)
             log_with_rank(
-                f"Saved model to {os.path.abspath(model_path)}",
+                f"Saved {prefix} to {os.path.abspath(path)}",
                 rank=self.rank,
                 logger=logger,
             )
-            ray.get(self.checkpoint_monitor.notify_finished.remote(global_step, True))
+            ray.get(self.checkpoint_monitor.notify_finished.remote(global_step, is_state_dict))
 
-        self._model_state_dict_thread = threading.Thread(
-            target=_save_model_state_dict,
+        thread = threading.Thread(
+            target=_save,
         )
-        self._model_state_dict_thread.start()
+        thread.start()
+        setattr(self, thread_name, thread)
+
+    def _save_model(self, local_path, global_step):
+        model_state_dict = self.model.state_dict()
+        self._save_with_thread(
+            model_state_dict, local_path, "model", "_model_state_dict_thread", global_step, True
+        )
 
         self.previous_state_dict_step = global_step
 
     def _save_optimizer(self, local_path, global_step):
-        optim_path = os.path.join(
-            local_path, f"optim_world_size_{self.world_size}_rank_{self.rank}.pt"
-        )
         optimizer_state_dict = self.optimizer.state_dict()
-        if self._optimizer_state_dict_thread is not None:
-            self._optimizer_state_dict_thread.join()
-
-        def _save_optimizer_state_dict():
-            torch.save(optimizer_state_dict, optim_path)
-            log_with_rank(
-                f"Saved optim to {os.path.abspath(optim_path)}",
-                rank=self.rank,
-                logger=logger,
-            )
-            ray.get(self.checkpoint_monitor.notify_finished.remote(global_step))
-
-        self._optimizer_state_dict_thread = threading.Thread(
-            target=_save_optimizer_state_dict,
+        self._save_with_thread(
+            optimizer_state_dict, local_path, "optim", "_optimizer_state_dict_thread", global_step
         )
-        self._optimizer_state_dict_thread.start()
 
     def _save_extra_state(self, local_path, global_step):
-        extra_path = os.path.join(
-            local_path, f"extra_state_world_size_{self.world_size}_rank_{self.rank}.pt"
-        )
         lr_scheduler_state_dict = (
             self.lr_scheduler.state_dict() if self.lr_scheduler is not None else None
         )
@@ -155,22 +151,9 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
             "lr_scheduler": lr_scheduler_state_dict,
             "rng": self.get_rng_state(),
         }
-        if self._extra_state_dict_thread is not None:
-            self._extra_state_dict_thread.join()
-
-        def _save_extra_state_dict():
-            torch.save(extra_state_dict, extra_path)
-            log_with_rank(
-                f"Saved extra_state to {os.path.abspath(extra_path)}",
-                rank=self.rank,
-                logger=logger,
-            )
-            ray.get(self.checkpoint_monitor.notify_finished.remote(global_step))
-
-        self._extra_state_dict_thread = threading.Thread(
-            target=_save_extra_state_dict,
+        self._save_with_thread(
+            extra_state_dict, local_path, "extra_state", "_extra_state_dict_thread", global_step
         )
-        self._extra_state_dict_thread.start()
 
     def save_state_dict(  # noqa: C901
         self,
@@ -200,7 +183,11 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
                 self.model, StateDictType.SHARDED_STATE_DICT, state_dict_cfg, optim_cfg
             ):
                 self._save_model(local_path, global_step)
-        ray.get(self.checkpoint_monitor.register_state_dict_save_count.remote(global_step, 1))
+        ray.get(
+            self.checkpoint_monitor.register_thread_count.remote(
+                global_step, state_dict_thread_count=1
+            )
+        )
 
     def save_checkpoint(  # noqa: C901
         self,
@@ -259,7 +246,7 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
             ), "optimizer must be provided when checkpoint_contents.save includes ['optimizer']"
 
         state_dict_thread_count = 0
-        other_thread_count = 0
+        checkpoint_thread_count = 0
 
         # every rank will save its own model and optim shard
         state_dict_cfg = ShardedStateDictConfig(offload_to_cpu=True if is_cuda_available else False)
@@ -275,11 +262,11 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
                         self._save_model(local_path, global_step)
 
                 if self.should_save_optimizer:
-                    other_thread_count += 1
+                    checkpoint_thread_count += 1
                     self._save_optimizer(local_path, global_step)
 
                 if self.should_save_extra:
-                    other_thread_count += 1
+                    checkpoint_thread_count += 1
                     self._save_extra_state(local_path, global_step)
 
         if self.rank == 0:
@@ -333,7 +320,7 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
             state_dict = get_fsdp_full_state_dict(self.model, offload_to_cpu=True, rank0_only=True)
 
             if self.rank == 0:
-                other_thread_count += 1
+                checkpoint_thread_count += 1
                 hf_local_path = os.path.join(local_path, "huggingface")
                 os.makedirs(hf_local_path, exist_ok=True)
 
@@ -390,8 +377,10 @@ class FSDPCheckpointManager(OldFSDPCheckpointManager):
             torch.distributed.barrier()
 
         ray.get(
-            self.checkpoint_monitor.register_checkpoint_save_count.remote(
-                global_step, state_dict_thread_count, other_thread_count
+            self.checkpoint_monitor.register_thread_count.remote(
+                global_step,
+                state_dict_thread_count=state_dict_thread_count,
+                checkpoint_thread_count=checkpoint_thread_count,
             )
         )
         self.previous_saved_paths.append(local_path)

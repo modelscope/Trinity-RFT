@@ -63,38 +63,11 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
         self.checkpoint_monitor = CheckpointMonitor.get_actor(
             namespace=ray_namespace,
         )
+        self.previous_state_dict_step = None
 
-    def save_checkpoint(  # noqa: C901
-        self,
-        local_path: str,
-        hdfs_path: str = None,
-        global_step: int = 0,
-        max_ckpt_to_keep=None,
-        model_state_dict_only: bool = False,
-        save_as_hf: bool = False,
-    ):
-        # TODO: if resume from checkpoint, synchronization will save model again, which is unnecessary.
-        if global_step == 0 and model_state_dict_only:
-            if self.rank == 0:
-                ray.get(self.synchronizer.set_model_state_dict.remote(None, global_step))
-            return
-
-        # record the previous global step
-        self.previous_global_step = global_step
-
-        # remove previous local_path
-        if (
-            max_ckpt_to_keep
-            and isinstance(max_ckpt_to_keep, int)
-            and max_ckpt_to_keep > 0
-            and len(self.previous_saved_paths) >= max_ckpt_to_keep  # type: ignore
-        ):
-            keep_start = len(self.previous_saved_paths) - max_ckpt_to_keep + 1  # type: ignore
-            self.remove_previous_save_local_path(self.previous_saved_paths[:keep_start])  # type: ignore
-            self.previous_saved_paths = self.previous_saved_paths[keep_start:]  # type: ignore
-
-        local_path = local_mkdir_safe(local_path)
+    def _save_state_dict(self, local_path, global_step):
         dist_checkpoint_path = get_dist_checkpoint_path(local_path)
+        hf_ckpt_path = get_hf_model_checkpoint_path(local_path)
 
         if self.use_dist_checkpointing:
             # Generate state dict for saving
@@ -115,6 +88,10 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
                 async_save=self.checkpoint_config.async_save,
             )
 
+            if self.rank == 0:
+                # Save huggingface config
+                self.hf_config.save_pretrained(hf_ckpt_path)
+
             # Synchronize all async save requests
             if not self.checkpoint_config.async_save:
                 assert (
@@ -130,36 +107,105 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
                 rank=self.rank,
                 logger=logger,
             )
-            hf_ckpt_path = get_hf_model_checkpoint_path(local_path)
             self.bridge.save_weights(self.model, hf_ckpt_path)
             log_with_rank(
                 f"Saved bridge checkpoint to {hf_ckpt_path}", rank=self.rank, logger=logger
             )
 
+        if self.rank == 0:
+            if hasattr(self.hf_config, "name_or_path") and self.hf_config.name_or_path:
+                try:
+                    generation_config = GenerationConfig.from_pretrained(
+                        self.hf_config.name_or_path
+                    )
+                    generation_config.save_pretrained(hf_ckpt_path)
+                except Exception:
+                    # if the generation config isn't available, we don't save it
+                    pass
+
+        def finalize_save_fn():
+            # Rank 0 uploads checkpoint to HDFS if hdfs_path is provided
+            log_with_rank(
+                f"Dist checkpointing save completed for {dist_checkpoint_path}",
+                rank=self.rank,
+                logger=logger,
+            )
+            ray.get(self.checkpoint_monitor.notify_finished.remote(global_step, True))
+
+        if self.checkpoint_config.async_save:
+            assert (
+                async_save_request is not None
+            ), "Async save request should not be None when using async save."
+            async_save_request.add_finalize_fn(finalize_save_fn)
+        else:
+            finalize_save_fn()
+
+        self.previous_state_dict_step = global_step
+
+    def save_state_dict(  # noqa: C901
+        self,
+        local_path: str,
+        hdfs_path: str = None,
+        global_step: int = 0,
+    ):
+        if self.previous_state_dict_step is None:
+            # First sync in trainer.prepare
+            self.previous_state_dict_step = global_step
+            return
+        elif self.previous_state_dict_step == global_step:
+            # No need to save for sync again
+            return
+
+        local_path = local_mkdir_safe(local_path)
+        self._save_state_dict(local_path, global_step)
+        ray.get(
+            self.checkpoint_monitor.register_thread_count.remote(
+                global_step, state_dict_thread_count=1
+            )
+        )
+
+    def save_checkpoint(  # noqa: C901
+        self,
+        local_path: str,
+        hdfs_path: str = None,
+        global_step: int = 0,
+        max_ckpt_to_keep=None,
+        save_as_hf: bool = False,
+    ):
+        # record the previous global step
+        self.previous_global_step = global_step
+
+        # remove previous local_path
+        if (
+            max_ckpt_to_keep
+            and isinstance(max_ckpt_to_keep, int)
+            and max_ckpt_to_keep > 0
+            and len(self.previous_saved_paths) >= max_ckpt_to_keep  # type: ignore
+        ):
+            keep_start = len(self.previous_saved_paths) - max_ckpt_to_keep + 1  # type: ignore
+            self.remove_previous_save_local_path(self.previous_saved_paths[:keep_start])  # type: ignore
+            self.previous_saved_paths = self.previous_saved_paths[keep_start:]  # type: ignore
+
+        local_path = local_mkdir_safe(local_path)
+
+        state_dict_thread_count = 0
         if self.should_save_model:
-            # Only rank 0 saves the hf config and tokenizer to huggingface path
-            # No matter whether we save hf model or not
-            if self.rank == 0:
-                # Save tokenizer
-                hf_config_tokenizer_path = get_hf_model_checkpoint_path(local_path)
-                self.processing_class.save_pretrained(hf_config_tokenizer_path)
-                # Save huggingface config
-                self.hf_config.save_pretrained(hf_config_tokenizer_path)
-                if hasattr(self.hf_config, "name_or_path") and self.hf_config.name_or_path:
-                    try:
-                        generation_config = GenerationConfig.from_pretrained(
-                            self.hf_config.name_or_path
-                        )
-                        generation_config.save_pretrained(hf_config_tokenizer_path)
-                    except Exception:
-                        # if the generation config isn't available, we don't save it
-                        pass
-                log_with_rank(
-                    f"Saved Huggingface config and tokenizer to {hf_config_tokenizer_path}",
-                    rank=self.rank,
-                    logger=logger,
-                    log_only_rank_0=True,
-                )
+            if self.previous_state_dict_step != global_step:
+                self._save_state_dict(local_path, global_step)
+                state_dict_thread_count += 1
+
+        # Only rank 0 saves the hf config and tokenizer to huggingface path
+        # No matter whether we save hf model or not
+        if self.rank == 0:
+            # Save tokenizer
+            hf_config_tokenizer_path = get_hf_model_checkpoint_path(local_path)
+            self.processing_class.save_pretrained(hf_config_tokenizer_path)
+            log_with_rank(
+                f"Saved Huggingface tokenizer to {hf_config_tokenizer_path}",
+                rank=self.rank,
+                logger=logger,
+                log_only_rank_0=True,
+            )
 
         if self.should_save_extra:
             if self.rank == 0:
@@ -196,6 +242,7 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
 
             torch.distributed.barrier()
             if self.rank == 0:
+                # TODO: async save or use mbridge to save hf model
                 hf_model_ckpt_path = get_hf_model_checkpoint_path(local_path)
                 import warnings
 
@@ -224,51 +271,9 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
                     log_only_rank_0=True,
                 )
 
-                if hdfs_path is not None:
-                    log_with_rank(
-                        f"Uploading checkpoint to {hdfs_path}",
-                        rank=self.rank,
-                        logger=logger,
-                        log_only_rank_0=True,
-                    )
-                    from verl.utils import hdfs_io
-
-                    hdfs_io.makedirs(hdfs_path, exist_ok=True)
-                    hdfs_io.copy(src=hf_model_ckpt_path, dst=hdfs_path, dirs_exist_ok=True)
-                    log_with_rank(
-                        f"HDFS checkpoint uploaded to {hdfs_path}",
-                        rank=self.rank,
-                        logger=logger,
-                        log_only_rank_0=True,
-                    )
-
-        ray.get(self.checkpoint_monitor.register_checkpoint_save_count.remote(global_step, 1, 0))
-
-        def finalize_save_fn():
-            # Rank 0 uploads checkpoint to HDFS if hdfs_path is provided
-            log_with_rank(
-                f"Dist checkpointing save completed for {dist_checkpoint_path}",
-                rank=self.rank,
-                logger=logger,
+        ray.get(
+            self.checkpoint_monitor.register_thread_count.remote(
+                global_step, state_dict_thread_count=state_dict_thread_count
             )
-            ray.get(self.checkpoint_monitor.notify_finished.remote(global_step, True))
-            if self.rank == 0:
-                if hdfs_path is not None:
-                    log_with_rank(
-                        f"Uploading checkpoint to {hdfs_path}", rank=self.rank, logger=logger
-                    )
-                    from verl.utils import hdfs_io
-
-                    hdfs_io.makedirs(hdfs_path, exist_ok=True)
-                    hdfs_io.copy(src=dist_checkpoint_path, dst=hdfs_path, dirs_exist_ok=True)
-                    hdfs_io.copy(src=hf_config_tokenizer_path, dst=hdfs_path, dirs_exist_ok=True)
-
-        if self.checkpoint_config.async_save:
-            assert (
-                async_save_request is not None
-            ), "Async save request should not be None when using async save."
-            async_save_request.add_finalize_fn(finalize_save_fn)
-        else:
-            finalize_save_fn()
-
+        )
         self.previous_saved_paths.append(local_path)
