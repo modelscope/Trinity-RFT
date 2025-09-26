@@ -780,6 +780,7 @@ class TestTrainerCheckpointSave(unittest.TestCase):
                 print(f"Checkpoint check at {state_dict_iteration} iteration passed.")
 
             time.sleep(1)
+        trainer_process.join()
 
     def tearDown(self):
         # remove dir only when the test passed
