@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 """Workflow module"""
+from trinity.common.workflows.agentscope.react.react_workflow import (
+    AgentScopeReActWorkflow,
+)
 from trinity.common.workflows.customized_math_workflows import (
     AsyncMathBoxedWorkflow,
     MathBoxedWorkflow,
@@ -80,6 +83,7 @@ __all__ = [
     "AgentScopeV0ReactMathWorkflow",  # will be deprecated soon
     "AgentScopeReactMathWorkflow",
     "AgentScopeV1ReactSearchWorkflow",
+    "AgentScopeReActWorkflow",
     "EmailSearchWorkflow",
     "AsyncMathRULERWorkflow",
     "MathRULERWorkflow",
