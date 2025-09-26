@@ -145,7 +145,6 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
     def save_state_dict(  # noqa: C901
         self,
         local_path: str,
-        hdfs_path: str = None,
         global_step: int = 0,
     ):
         if self.previous_state_dict_step is None:
@@ -167,7 +166,6 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
     def save_checkpoint(  # noqa: C901
         self,
         local_path: str,
-        hdfs_path: str = None,
         global_step: int = 0,
         max_ckpt_to_keep=None,
         save_as_hf: bool = False,

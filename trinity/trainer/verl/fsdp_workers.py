@@ -849,7 +849,6 @@ class ActorRolloutRefWorker(Worker):
     def save_state_dict(
         self,
         local_path,
-        hdfs_path=None,
         global_step=0,
     ):
         assert self._is_actor
@@ -857,7 +856,6 @@ class ActorRolloutRefWorker(Worker):
         with self._fsdp_offload_context():
             self.checkpoint_manager.save_state_dict(
                 local_path=local_path,
-                hdfs_path=hdfs_path,
                 global_step=global_step,
             )
             dist.barrier()
@@ -868,7 +866,6 @@ class ActorRolloutRefWorker(Worker):
     def save_checkpoint(
         self,
         local_path,
-        hdfs_path=None,
         global_step=0,
         max_ckpt_to_keep=None,
         save_as_hf: bool = False,
@@ -879,7 +876,6 @@ class ActorRolloutRefWorker(Worker):
         with self._fsdp_offload_context():
             self.checkpoint_manager.save_checkpoint(
                 local_path=local_path,
-                hdfs_path=hdfs_path,
                 global_step=global_step,
                 max_ckpt_to_keep=max_ckpt_to_keep,
                 save_as_hf=save_as_hf,
@@ -1232,7 +1228,7 @@ class CriticWorker(Worker):
             lr_scheduler=self.critic_lr_scheduler,
             processing_class=self.processor if self.processor is not None else self.tokenizer,
             checkpoint_config=self.config.checkpoint,
-            ray_namespace=self.config.synchronizer.ray_namespace,
+            ray_namespace=self.config.ray_namespace,
         )
 
     @register(dispatch_mode=Dispatch.DP_COMPUTE_PROTO)
@@ -1302,7 +1298,6 @@ class CriticWorker(Worker):
     def save_checkpoint(
         self,
         local_path,
-        hdfs_path=None,
         global_step=0,
         max_ckpt_to_keep=None,
         save_as_hf: bool = False,
@@ -1314,7 +1309,6 @@ class CriticWorker(Worker):
 
         self.checkpoint_manager.save_checkpoint(
             local_path=local_path,
-            hdfs_path=hdfs_path,
             global_step=global_step,
             max_ckpt_to_keep=max_ckpt_to_keep,
             save_as_hf=save_as_hf,

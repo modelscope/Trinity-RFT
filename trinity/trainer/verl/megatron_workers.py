@@ -639,14 +639,12 @@ class ActorRolloutRefWorker(MegatronWorker, DistProfilerExtension):
     def save_state_dict(
         self,
         checkpoint_path,
-        hdfs_path=None,
         global_step=0,
     ):
         if self._is_offload_param:
             load_megatron_model_to_gpu(self.actor_module)
         self.checkpoint_mananager.save_state_dict(
             local_path=checkpoint_path,
-            hdfs_path=hdfs_path,
             global_step=global_step,
         )
         torch.distributed.barrier()
@@ -657,7 +655,6 @@ class ActorRolloutRefWorker(MegatronWorker, DistProfilerExtension):
     def save_checkpoint(
         self,
         checkpoint_path,
-        hdfs_path=None,
         global_step=0,
         max_ckpt_to_keep=None,
         save_as_hf=False,
@@ -666,7 +663,6 @@ class ActorRolloutRefWorker(MegatronWorker, DistProfilerExtension):
             load_megatron_model_to_gpu(self.actor_module)
         self.checkpoint_mananager.save_checkpoint(
             local_path=checkpoint_path,
-            hdfs_path=hdfs_path,
             global_step=global_step,
             max_ckpt_to_keep=max_ckpt_to_keep,
             save_as_hf=save_as_hf,
@@ -910,7 +906,7 @@ class CriticWorker(MegatronWorker, DistProfilerExtension):
             use_checkpoint_opt_param_scheduler=self.config.optim.use_checkpoint_opt_param_scheduler,
             bridge=self.bridge,
             use_dist_checkpointing=self.config.megatron.use_dist_checkpointing,
-            ray_namespace=self.config.synchronizer.ray_namespace,
+            ray_namespace=self.config.ray_namespace,
         )
 
     @register(dispatch_mode=Dispatch.MEGATRON_COMPUTE_PROTO)
@@ -983,7 +979,6 @@ class CriticWorker(MegatronWorker, DistProfilerExtension):
     def save_checkpoint(
         self,
         checkpoint_path,
-        hdfs_path=None,
         global_steps=0,
         max_ckpt_to_keep=None,
         save_as_hf=False,
@@ -992,7 +987,6 @@ class CriticWorker(MegatronWorker, DistProfilerExtension):
             load_megatron_model_to_gpu(self.critic_module)
         self.checkpoint_mananager.save_checkpoint(
             local_path=checkpoint_path,
-            hdfs_path=hdfs_path,
             global_step=global_steps,
             max_ckpt_to_keep=max_ckpt_to_keep,
             save_as_hf=save_as_hf,

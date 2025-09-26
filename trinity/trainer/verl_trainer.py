@@ -40,9 +40,10 @@ from trinity.utils.log import get_logger
 
 
 class CheckpointMonitor:
-    def __init__(self, default_local_dir):
+    def __init__(self, default_local_dir: str, default_hdfs_dir: str = None):
         self.logger = get_logger("Checkpoint Monitor", in_ray_actor=True)
         self.default_local_dir = default_local_dir
+        self.default_hdfs_dir = default_hdfs_dir
         self.local_latest_checkpointed_iteration = os.path.join(
             default_local_dir, "latest_checkpointed_iteration.txt"
         )
@@ -66,16 +67,16 @@ class CheckpointMonitor:
         if step in self.state_dict_counter:
             assert self.state_dict_counter[step] == 0
             self.update_latest_state_dict_step(step)
-        # TODO: upload checkpoint to hdfs
-        # if hdfs_path is not None:
-        #     log_with_rank(
-        #         f"Uploading checkpoint to {hdfs_path}", rank=self.rank, logger=logger
-        #     )
-        #     from verl.utils import hdfs_io
 
-        #     hdfs_io.makedirs(hdfs_path, exist_ok=True)
-        #     hdfs_io.copy(src=dist_checkpoint_path, dst=hdfs_path, dirs_exist_ok=True)
-        #     hdfs_io.copy(src=hf_config_tokenizer_path, dst=hdfs_path, dirs_exist_ok=True)
+        # Upload checkpoint to hdfs
+        if self.default_hdfs_dir is not None:
+            local_path = os.path.join(self.default_local_dir, f"global_step_{step}")
+            hdfs_path = os.path.join(self.default_hdfs_dir, f"global_step_{step}")
+            self.logger.info(f"Uploading checkpoint to {hdfs_path}")
+            from verl.utils import hdfs_io
+
+            hdfs_io.makedirs(hdfs_path, exist_ok=True)
+            hdfs_io.copy(src=local_path, dst=hdfs_path, dirs_exist_ok=True)
         self.logger.info(f"Checkpoint at step {step} saved.")
 
     def update_latest_state_dict_step(self, step: int):
@@ -127,7 +128,12 @@ class CheckpointMonitor:
                 self.update_latest_checkpoint_step(step)
 
     @classmethod
-    def get_actor(cls, namespace: str, default_local_dir: Optional[str] = None):
+    def get_actor(
+        cls,
+        namespace: str,
+        default_local_dir: Optional[str] = None,
+        default_hdfs_dir: Optional[str] = None,
+    ):
         return (
             ray.remote(cls)
             .options(
@@ -135,7 +141,7 @@ class CheckpointMonitor:
                 namespace=namespace,
                 get_if_exists=True,
             )
-            .remote(default_local_dir=default_local_dir)
+            .remote(default_local_dir=default_local_dir, default_hdfs_dir=default_hdfs_dir)
         )
 
 
@@ -186,6 +192,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         self.checkpoint_monitor = CheckpointMonitor.get_actor(
             namespace=global_config.synchronizer.ray_namespace,
             default_local_dir=config.trainer.default_local_dir,
+            default_hdfs_dir=config.trainer.default_hdfs_dir,
         )
 
         role_worker_mapping = {
@@ -453,14 +460,6 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
         self.logger.info(f"local_global_step_folder: {local_global_step_folder}")
         actor_local_path = os.path.join(local_global_step_folder, "actor")
 
-        actor_remote_path = (
-            None
-            if self.config.trainer.default_hdfs_dir is None
-            else os.path.join(
-                self.config.trainer.default_hdfs_dir, f"global_step_{self.global_steps}", "actor"
-            )
-        )
-
         remove_previous_ckpt_in_save = self.config.trainer.get(
             "remove_previous_ckpt_in_save", False
         )
@@ -482,7 +481,6 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
 
         self.actor_rollout_wg.save_checkpoint(
             actor_local_path,
-            actor_remote_path,
             self.global_steps,
             max_ckpt_to_keep=max_actor_ckpt_to_keep,
             save_as_hf=save_as_hf,
@@ -490,18 +488,8 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
 
         if self.use_critic:
             critic_local_path = os.path.join(local_global_step_folder, "critic")
-            critic_remote_path = (
-                None
-                if self.config.trainer.default_hdfs_dir is None
-                else os.path.join(
-                    self.config.trainer.default_hdfs_dir,
-                    f"global_step_{self.global_steps}",
-                    "critic",
-                )
-            )
             self.critic_wg.save_checkpoint(
                 critic_local_path,
-                critic_remote_path,
                 self.global_steps,
                 max_ckpt_to_keep=max_critic_ckpt_to_keep,
             )
