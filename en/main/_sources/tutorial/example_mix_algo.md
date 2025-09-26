@@ -1,4 +1,4 @@
-# Algorithm Development
+# Advanced Algorithm Development
 
 ```{note}
 This guide is an advanced version of the {ref}`Algorithms <Algorithms>` section in the Developer Guide.

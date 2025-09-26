@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>🚀 News &#8212; Trinity-RFT 0.3.1.dev0 documentation</title>
+    <title>💡 What is Trinity-RFT? &#8212; Trinity-RFT 0.3.1.dev0 documentation</title>
   
   
   
@@ -180,7 +180,18 @@
  </script></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
-        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples</span></p>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Guidelines</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="tutorial/trinity_installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/develop_overview.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/develop_workflow.html">Workflow Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/develop_algorithm.html">Algorithms Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/example_mix_algo.html">Advanced Algorithm Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/develop_operator.html">Operator Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/trinity_configs.html">Configuration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/synchronizer.html">Synchronizer in Trinity-RFT</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="tutorial/example_reasoning_basic.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial/example_reasoning_advanced.html">Off-Policy RFT</a></li>
@@ -192,13 +203,6 @@
 <li class="toctree-l1"><a class="reference internal" href="tutorial/example_dpo.html">Offline DPO and SFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial/example_megatron.html">Megatron-LM Backend</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial/example_data_functionalities.html">Data Processing</a></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Guidelines</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="tutorial/trinity_programming_guide.html">Developer Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial/trinity_configs.html">Configuration Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial/example_mix_algo.html">Algorithm Development</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial/synchronizer.html">Synchronizer in Trinity-RFT</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">FAQ</span></p>
 <ul class="nav bd-sidenav">
@@ -570,7 +574,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>🚀 News</h1>
+    <h1>💡 What is Trinity-RFT?</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -580,10 +584,7 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">🚀 News</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-trinity-rft">💡 What is Trinity-RFT?</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#key-features">✨ Key Features</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#what-can-i-use-trinity-rft-for">🛠️ What can I use Trinity-RFT for?</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">💡 What is Trinity-RFT?</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#acknowledgements">Acknowledgements</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#citation">Citation</a></li>
 </ul>
@@ -598,32 +599,30 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="news">
-<h1>🚀 News<a class="headerlink" href="#news" title="Link to this heading">#</a></h1>
-<ul class="simple">
-<li><p>[2025-09] ✨ [<a class="reference external" href="https://github.com/modelscope/Trinity-RFT/releases/tag/v0.3.0">Release Notes</a>] Trinity-RFT v0.3.0 released: enhanced Buffer, FSDP2 &amp; Megatron support, multi-modal models, and new RL algorithms/examples.</p></li>
-<li><p>[2025-08] 🎵 Introducing <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/mix_chord">CHORD</a>: dynamic SFT + RL integration for advanced LLM fine-tuning (<a class="reference external" href="https://arxiv.org/pdf/2508.11408">paper</a>).</p></li>
-<li><p>[2025-08] [<a class="reference external" href="https://github.com/modelscope/Trinity-RFT/releases/tag/v0.2.1">Release Notes</a>] Trinity-RFT v0.2.1 released.</p></li>
-<li><p>[2025-07] [<a class="reference external" href="https://github.com/modelscope/Trinity-RFT/releases/tag/v0.2.0">Release Notes</a>] Trinity-RFT v0.2.0 released.</p></li>
-<li><p>[2025-07] Technical report (arXiv v2) updated with new features, examples, and experiments: <a class="reference external" href="https://arxiv.org/abs/2505.17826">link</a>.</p></li>
-<li><p>[2025-06] [<a class="reference external" href="https://github.com/modelscope/Trinity-RFT/releases/tag/v0.1.1">Release Notes</a>] Trinity-RFT v0.1.1 released.</p></li>
-<li><p>[2025-05] [<a class="reference external" href="https://github.com/modelscope/Trinity-RFT/releases/tag/v0.1.0">Release Notes</a>] Trinity-RFT v0.1.0 released, plus <a class="reference external" href="https://arxiv.org/abs/2505.17826">technical report</a>.</p></li>
-<li><p>[2025-04] Trinity-RFT open sourced.</p></li>
-</ul>
-</section>
-<section id="what-is-trinity-rft">
+  <section id="what-is-trinity-rft">
 <h1>💡 What is Trinity-RFT?<a class="headerlink" href="#what-is-trinity-rft" title="Link to this heading">#</a></h1>
-<p>Trinity-RFT is a flexible, general-purpose framework for reinforcement fine-tuning (RFT) of large language models (LLMs). It supports a wide range of applications and provides a unified platform for RL research in the <a class="reference external" href="https://storage.googleapis.com/deepmind-media/Era-of-Experience%20/The%20Era%20of%20Experience%20Paper.pdf">era of experience</a>.</p>
-<p>The RFT process is modularized into three core components:</p>
+<p>Trinity-RFT is a flexible, general-purpose framework for reinforcement fine-tuning (RFT) of large language models (LLMs). It provides three independent modules for users with different needs:</p>
 <ul class="simple">
-<li><p><strong>Explorer</strong>: Handles agent-environment interaction</p></li>
-<li><p><strong>Trainer</strong>: Manages model training</p></li>
-<li><p><strong>Buffer</strong>: Manages data storage and processing</p></li>
+<li><p>🤖 <strong>Explorer</strong>：For agent application developers. <a class="reference internal" href="tutorial/develop_workflow.html"><span class="std std-doc">[tutorial]</span></a></p>
+<ul>
+<li><p>Train an agent application to enhance its ability to complete tasks in a specified environment</p></li>
+<li><p>Examples: <a class="reference internal" href="tutorial/example_multi_turn.html"><span class="std std-doc">Multi-Turn Interaction</span></a>, <a class="reference internal" href="tutorial/example_react.html"><span class="std std-doc">ReAct Agent</span></a></p></li>
 </ul>
-<img src="https://img.alicdn.com/imgextra/i2/O1CN01H3UbpF1yP7E1OCLbi_!!6000000006570-2-tps-1334-638.png" alt="The high-level design of Trinity-RFT" width="800" />
-</section>
-<section id="key-features">
-<h1>✨ Key Features<a class="headerlink" href="#key-features" title="Link to this heading">#</a></h1>
+</li>
+<li><p>🧠 <strong>Trainer</strong>: For RL algorithm researchers. <a class="reference internal" href="tutorial/develop_algorithm.html"><span class="std std-doc">[tutorial]</span></a></p>
+<ul>
+<li><p>Design and validate new RL algorithms in compact, plug-and-play classes</p></li>
+<li><p>Examples: <a class="reference internal" href="tutorial/example_mix_algo.html"><span class="std std-doc">Mixture of RL Algorithms</span></a></p></li>
+</ul>
+</li>
+<li><p>🗃️ <strong>Buffer</strong>: For data engineers. <a class="reference internal" href="tutorial/develop_operator.html"><span class="std std-doc">[tutorial]</span></a></p>
+<ul>
+<li><p>Design task-specific datasets and build data pipelines for cleaning, augmentation, and human-in-the-loop scenarios</p></li>
+<li><p>Examples: <a class="reference internal" href="tutorial/example_data_functionalities.html"><span class="std std-doc">Data Functionalities</span></a></p></li>
+</ul>
+</li>
+</ul>
+<p>Trinity-RFT unifies the above three modules and provides the following key features:</p>
 <ul>
 <li><p><strong>Flexible RFT Modes:</strong></p>
 <ul class="simple">
@@ -631,13 +630,13 @@ document.write(`
 </ul>
 <img src="https://img.alicdn.com/imgextra/i3/O1CN01E7NskS1FFoTI9jlaQ_!!6000000000458-2-tps-1458-682.png" alt="RFT modes supported by Trinity-RFT" width="600" />
 </li>
-<li><p><strong>Agent Framework Compatible Workflows:</strong></p>
+<li><p><strong>General Agentic-RL Support:</strong></p>
 <ul class="simple">
-<li><p>Supports both concatenated and general multi-turn agentic workflows. Automatically collects training data from model API clients (e.g., OpenAI) and is compatible with agent frameworks like AgentScope.</p></li>
+<li><p>Supports both concatenated and general multi-turn agentic workflows. Able to directly train agent applications developed using agent frameworks like AgentScope.</p></li>
 </ul>
 <img src="https://img.alicdn.com/imgextra/i1/O1CN01z1i7kk1jlMEVa8ZHV_!!6000000004588-2-tps-1262-695.png" alt="Agentic workflows" width="600" />
 </li>
-<li><p><strong>Powerful Data Pipelines:</strong></p>
+<li><p><strong>Full Lifecycle Data Pipelines:</strong></p>
 <ul class="simple">
 <li><p>Enables pipeline processing of rollout and experience data, supporting active management (prioritization, cleaning, augmentation) throughout the RFT lifecycle.</p></li>
 </ul>
@@ -648,27 +647,6 @@ document.write(`
 <li><p>Modular, decoupled architecture for easy adoption and development. Rich graphical user interfaces enable low-code usage.</p></li>
 </ul>
 <img src="https://img.alicdn.com/imgextra/i1/O1CN01Ti0o4320RywoAuyhN_!!6000000006847-2-tps-3840-2134.png" alt="System architecture" width="600" />
-</li>
-</ul>
-</section>
-<section id="what-can-i-use-trinity-rft-for">
-<h1>🛠️ What can I use Trinity-RFT for?<a class="headerlink" href="#what-can-i-use-trinity-rft-for" title="Link to this heading">#</a></h1>
-<ul class="simple">
-<li><p><strong>Train agent applications with RL and minimal migration cost</strong></p>
-<ul>
-<li><p>Implement agent-environment interaction logic in a single workflow class (<a class="reference internal" href="tutorial/example_multi_turn.html"><span class="std std-doc">example 1</span></a>, <a class="reference internal" href="tutorial/example_step_wise.html"><span class="std std-doc">example 2</span></a>),</p></li>
-<li><p>Or import workflows from agent frameworks like AgentScope (<a class="reference internal" href="tutorial/example_react.html"><span class="std std-doc">example</span></a>).</p></li>
-</ul>
-</li>
-<li><p><strong>Rapid RL algorithm design and validation</strong></p>
-<ul>
-<li><p>Develop custom RL algorithms (loss design, sampling strategy, etc.) in compact, plug-and-play classes (<a class="reference internal" href="#tutorial/trinity_programming_guide.html#algorithms-for-rl-algorithm-developers"><span class="xref myst">tutorial</span></a>, <a class="reference internal" href="tutorial/example_mix_algo.html"><span class="std std-doc">example</span></a>).</p></li>
-</ul>
-</li>
-<li><p><strong>Custom datasets and data pipelines for RFT</strong></p>
-<ul>
-<li><p>Design task-specific datasets and build data pipelines for cleaning, augmentation, and human-in-the-loop scenarios (<a class="reference internal" href="tutorial/trinity_programming_guide.html#operators-for-data-developers"><span class="std std-ref">tutorial</span></a>, <a class="reference internal" href="tutorial/example_data_functionalities.html"><span class="std std-doc">example</span></a>).</p></li>
-</ul>
 </li>
 </ul>
 </section>
@@ -727,10 +705,7 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">🚀 News</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-trinity-rft">💡 What is Trinity-RFT?</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#key-features">✨ Key Features</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#what-can-i-use-trinity-rft-for">🛠️ What can I use Trinity-RFT for?</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">💡 What is Trinity-RFT?</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#acknowledgements">Acknowledgements</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#citation">Citation</a></li>
 </ul>

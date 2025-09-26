@@ -8,12 +8,26 @@
 .. include:: main.md
    :parser: myst_parser.sphinx_
 
+.. toctree::
+   :maxdepth: 2
+   :glob:
+   :hidden:
+   :caption: 教程
+
+   tutorial/trinity_installation.md
+   tutorial/develop_overview.md
+   tutorial/develop_workflow.md
+   tutorial/develop_algorithm.md
+   tutorial/example_mix_algo.md
+   tutorial/develop_operator.md
+   tutorial/trinity_configs.md
+   tutorial/synchronizer.md
 
 .. toctree::
    :maxdepth: 1
    :glob:
    :hidden:
-   :caption: 教程
+   :caption: 样例
 
    tutorial/example_reasoning_basic.md
    tutorial/example_reasoning_advanced.md
@@ -25,17 +39,6 @@
    tutorial/example_dpo.md
    tutorial/example_megatron.md
    tutorial/example_data_functionalities.md
-
-.. toctree::
-   :maxdepth: 2
-   :glob:
-   :hidden:
-   :caption: 帮助文档
-
-   tutorial/trinity_programming_guide.md
-   tutorial/trinity_configs.md
-   tutorial/example_mix_algo.md
-   tutorial/synchronizer.md
 
 .. toctree::
    :maxdepth: 2

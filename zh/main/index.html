@@ -46,7 +46,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'index';</script>
     <link rel="index" title="索引" href="genindex.html" />
     <link rel="search" title="搜索" href="search.html" />
-    <link rel="next" title="快速上手" href="tutorial/example_reasoning_basic.html" />
+    <link rel="next" title="安装指南" href="tutorial/trinity_installation.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="zh-CN"/>
   </head>
@@ -181,6 +181,17 @@
     <div class="bd-toc-item navbar-nav active">
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">教程</span></p>
 <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="tutorial/trinity_installation.html">安装指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/develop_overview.html">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/develop_workflow.html">Workflow 开发指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/develop_algorithm.html">Algorithm 开发指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/example_mix_algo.html">Algorithm 进阶开发</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/develop_operator.html">Operator 开发指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/trinity_configs.html">参数配置指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/synchronizer.html">Synchronizer 介绍</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">样例</span></p>
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="tutorial/example_reasoning_basic.html">快速上手</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial/example_reasoning_advanced.html">Off-Policy RFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial/example_async_mode.html">异步 RFT</a></li>
@@ -191,13 +202,6 @@
 <li class="toctree-l1"><a class="reference internal" href="tutorial/example_dpo.html">离线 DPO 和 SFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial/example_megatron.html">Megatron-LM 支持</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial/example_data_functionalities.html">数据处理</a></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">帮助文档</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="tutorial/trinity_programming_guide.html">开发者指南</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial/trinity_configs.html">参数配置指南</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial/example_mix_algo.html">集成新算法</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial/synchronizer.html">Synchronizer 介绍</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">常见问题</span></p>
 <ul class="nav bd-sidenav">
@@ -579,12 +583,9 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">🚀 新闻</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity-rft">💡 什么是 Trinity-RFT？</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">✨ 核心特性</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">🛠️ Trinity-RFT 能做什么？</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">致谢</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">引用</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">致谢</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">引用</a></li>
 </ul>
             </nav>
         </div>
@@ -598,32 +599,30 @@ document.write(`
                   
   <section id="trinity-rft">
 <h1>欢迎来到 Trinity-RFT 的文档!<a class="headerlink" href="#trinity-rft" title="Link to this heading">#</a></h1>
-<section id="id1">
-<h2>🚀 新闻<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
-<ul class="simple">
-<li><p>[2025-09] ✨ [<a class="reference external" href="https://github.com/modelscope/Trinity-RFT/releases/tag/v0.3.0">发布说明</a>] Trinity-RFT v0.3.0 发布：增强的 Buffer、FSDP2 &amp; Megatron 支持，多模态模型，以及全新 RL 算法/示例。</p></li>
-<li><p>[2025-08] 🎵 推出 <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/mix_chord">CHORD</a>：动态 SFT + RL 集成，实现进阶 LLM 微调（<a class="reference external" href="https://arxiv.org/pdf/2508.11408">论文</a>）。</p></li>
-<li><p>[2025-08] [<a class="reference external" href="https://github.com/modelscope/Trinity-RFT/releases/tag/v0.2.1">发布说明</a>] Trinity-RFT v0.2.1 发布。</p></li>
-<li><p>[2025-07] [<a class="reference external" href="https://github.com/modelscope/Trinity-RFT/releases/tag/v0.2.0">发布说明</a>] Trinity-RFT v0.2.0 发布。</p></li>
-<li><p>[2025-07] 技术报告（arXiv v2）更新，包含新功能、示例和实验：<a class="reference external" href="https://arxiv.org/abs/2505.17826">链接</a>。</p></li>
-<li><p>[2025-06] [<a class="reference external" href="https://github.com/modelscope/Trinity-RFT/releases/tag/v0.1.1">发布说明</a>] Trinity-RFT v0.1.1 发布。</p></li>
-<li><p>[2025-05] [<a class="reference external" href="https://github.com/modelscope/Trinity-RFT/releases/tag/v0.1.0">发布说明</a>] Trinity-RFT v0.1.0 发布，同时发布 <a class="reference external" href="https://arxiv.org/abs/2505.17826">技术报告</a>。</p></li>
-<li><p>[2025-04] Trinity-RFT 开源。</p></li>
-</ul>
-</section>
 <section id="trinity-rft">
 <h2>💡 什么是 Trinity-RFT？<a class="headerlink" href="#trinity-rft" title="Link to this heading">#</a></h2>
-<p>Trinity-RFT 是一个灵活、通用的大语言模型（LLM）强化微调（RFT）框架。它支持广泛的应用场景，并为 <a class="reference external" href="https://storage.googleapis.com/deepmind-media/Era-of-Experience%20/The%20Era%20of%20Experience%20Paper.pdf">Experience 时代</a> 的 RL 研究提供统一平台。</p>
-<p>RFT 流程被模块化为三个核心组件：</p>
+<p>Trinity-RFT 是一个灵活、通用的大语言模型（LLM）强化微调（RFT）框架。其提供三个独立模块，满足不同用户的需求：</p>
 <ul class="simple">
-<li><p><strong>Explorer</strong>：负责智能体与环境的交互</p></li>
-<li><p><strong>Trainer</strong>：负责模型训练</p></li>
-<li><p><strong>Buffer</strong>：负责数据存储与处理</p></li>
+<li><p>🤖 <strong>Explorer</strong>：面向智能体应用开发者。<a class="reference internal" href="tutorial/develop_workflow.html"><span class="std std-doc">[教程]</span></a></p>
+<ul>
+<li><p>训练智能体应用，以增强其在指定环境中完成任务的能力</p></li>
+<li><p>示例：<a class="reference internal" href="tutorial/example_multi_turn.html"><span class="std std-doc">多轮交互</span></a>，<a class="reference internal" href="tutorial/example_react.html"><span class="std std-doc">ReAct 智能体</span></a></p></li>
 </ul>
-<img src="https://img.alicdn.com/imgextra/i2/O1CN01H3UbpF1yP7E1OCLbi_!!6000000006570-2-tps-1334-638.png" alt="Trinity-RFT 整体设计" width="800" />
-</section>
-<section id="id2">
-<h2>✨ 核心特性<a class="headerlink" href="#id2" title="Link to this heading">#</a></h2>
+</li>
+<li><p>🧠 <strong>Trainer</strong>：面向 RL 算法研究者。<a class="reference internal" href="tutorial/develop_algorithm.html"><span class="std std-doc">[教程]</span></a></p>
+<ul>
+<li><p>在简洁、可插拔的类中设计和验证新的 RL 算法</p></li>
+<li><p>示例：<a class="reference internal" href="tutorial/example_mix_algo.html"><span class="std std-doc">混合 RL 算法</span></a></p></li>
+</ul>
+</li>
+<li><p>🗄️ <strong>Buffer</strong>：面向数据工程师。<a class="reference internal" href="tutorial/develop_operator.html"><span class="std std-doc">[教程]</span></a></p>
+<ul>
+<li><p>设计任务定制数据集，构建数据流水线以支持清洗、增强和人类参与场景</p></li>
+<li><p>示例：<a class="reference internal" href="tutorial/example_data_functionalities.html"><span class="std std-doc">数据功能</span></a></p></li>
+</ul>
+</li>
+</ul>
+<p>Trinity-RFT 统一了上述三个模块，并提供以下核心特性：</p>
 <ul>
 <li><p><strong>灵活的 RFT 模式：</strong></p>
 <ul class="simple">
@@ -631,13 +630,13 @@ document.write(`
 </ul>
 <img src="https://img.alicdn.com/imgextra/i3/O1CN01E7NskS1FFoTI9jlaQ_!!6000000000458-2-tps-1458-682.png" alt="Trinity-RFT 支持的 RFT 模式" width="600" />
 </li>
-<li><p><strong>兼容 Agent 框架的工作流：</strong></p>
+<li><p><strong>通用 Agentic-RL：</strong></p>
 <ul class="simple">
-<li><p>支持拼接式和通用多轮智能体工作流。可自动收集来自模型 API 客户端（如 OpenAI）的训练数据，并兼容 AgentScope 等智能体框架。</p></li>
+<li><p>支持拼接式和通用多轮交互，能够直接训练使用 AgentScope 等智能体框架开发的 Agent 应用。</p></li>
 </ul>
 <img src="https://img.alicdn.com/imgextra/i1/O1CN01z1i7kk1jlMEVa8ZHV_!!6000000004588-2-tps-1262-695.png" alt="智能体工作流" width="600" />
 </li>
-<li><p><strong>强大的数据流水线：</strong></p>
+<li><p><strong>全流程的数据流水线：</strong></p>
 <ul class="simple">
 <li><p>支持 rollout 和经验数据的流水线处理，贯穿 RFT 生命周期实现主动管理（优先级、清洗、增强等）。</p></li>
 </ul>
@@ -651,29 +650,8 @@ document.write(`
 </li>
 </ul>
 </section>
-<section id="id3">
-<h2>🛠️ Trinity-RFT 能做什么？<a class="headerlink" href="#id3" title="Link to this heading">#</a></h2>
-<ul class="simple">
-<li><p><strong>用 RL 训练智能体应用</strong></p>
-<ul>
-<li><p>在 Workflow 中实现智能体-环境交互逻辑  (<a class="reference internal" href="tutorial/example_multi_turn.html"><span class="std std-doc">示例1</span></a>，<a class="reference internal" href="tutorial/example_step_wise.html"><span class="std std-doc">示例2</span></a>)，</p></li>
-<li><p>或直接使用 Agent 框架（如 AgentScope）编写好的工作流 (<a class="reference internal" href="tutorial/example_react.html"><span class="std std-doc">示例</span></a>)。</p></li>
-</ul>
-</li>
-<li><p><strong>快速设计和验证 RL 算法</strong></p>
-<ul>
-<li><p>在简洁、可插拔的类中开发自定义 RL 算法（损失、采样及其他技巧） (<a class="reference internal" href="tutorial/trinity_programming_guide.html#algorithms-for-rl-algorithm-developers"><span class="std std-ref">教程</span></a>，<a class="reference internal" href="tutorial/example_mix_algo.html"><span class="std std-doc">示例</span></a>)。</p></li>
-</ul>
-</li>
-<li><p><strong>为 RFT 定制数据集和数据流水线</strong></p>
-<ul>
-<li><p>设计任务定制数据集，构建数据流水线以支持清洗、增强和人类参与场景 (<a class="reference internal" href="tutorial/trinity_programming_guide.html#operators-for-data-developers"><span class="std std-ref">教程</span></a>，<a class="reference internal" href="tutorial/example_data_functionalities.html"><span class="std std-doc">示例</span></a>)。</p></li>
-</ul>
-</li>
-</ul>
-</section>
-<section id="id4">
-<h2>致谢<a class="headerlink" href="#id4" title="Link to this heading">#</a></h2>
+<section id="id1">
+<h2>致谢<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
 <p>本项目基于许多优秀的开源项目构建，包括：</p>
 <ul class="simple">
 <li><p><a class="reference external" href="https://github.com/volcengine/verl">verl</a> 和 <a class="reference external" href="https://pytorch.org/docs/stable/fsdp.html">PyTorch's FSDP</a> 用于大模型训练；</p></li>
@@ -685,8 +663,8 @@ document.write(`
 <li><p>......</p></li>
 </ul>
 </section>
-<section id="id5">
-<h2>引用<a class="headerlink" href="#id5" title="Link to this heading">#</a></h2>
+<section id="id2">
+<h2>引用<a class="headerlink" href="#id2" title="Link to this heading">#</a></h2>
 <div class="highlight-bibtex notranslate"><div class="highlight"><pre><span></span><span class="nc">@misc</span><span class="p">{</span><span class="nl">trinity-rft</span><span class="p">,</span>
 <span class="w">      </span><span class="na">title</span><span class="p">=</span><span class="s">{Trinity-RFT: A General-Purpose and Unified Framework for Reinforcement Fine-Tuning of Large Language Models}</span><span class="p">,</span>
 <span class="w">      </span><span class="na">author</span><span class="p">=</span><span class="s">{Xuchen Pan and Yanxi Chen and Yushuo Chen and Yuchang Sun and Daoyuan Chen and Wenhao Zhang and Yuexiang Xie and Yilun Huang and Yilei Zhang and Dawei Gao and Yaliang Li and Bolin Ding and Jingren Zhou}</span><span class="p">,</span>
@@ -721,11 +699,11 @@ document.write(`
                   
 <div class="prev-next-area">
     <a class="right-next"
-       href="tutorial/example_reasoning_basic.html"
+       href="tutorial/trinity_installation.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">下一页</p>
-        <p class="prev-next-title">快速上手</p>
+        <p class="prev-next-title">安装指南</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -745,12 +723,9 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">🚀 新闻</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity-rft">💡 什么是 Trinity-RFT？</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">✨ 核心特性</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">🛠️ Trinity-RFT 能做什么？</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">致谢</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">引用</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">致谢</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">引用</a></li>
 </ul>
   </nav></div>
 

@@ -44,7 +44,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'tutorial/example_data_functionalities';</script>
     <link rel="index" title="索引" href="../genindex.html" />
     <link rel="search" title="搜索" href="../search.html" />
-    <link rel="next" title="开发者指南" href="trinity_programming_guide.html" />
+    <link rel="next" title="常见问题" href="faq.html" />
     <link rel="prev" title="Megatron-LM 支持" href="example_megatron.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="zh-CN"/>
@@ -177,6 +177,17 @@
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">教程</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="trinity_installation.html">安装指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop_overview.html">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop_workflow.html">Workflow 开发指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop_algorithm.html">Algorithm 开发指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_mix_algo.html">Algorithm 进阶开发</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop_operator.html">Operator 开发指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trinity_configs.html">参数配置指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="synchronizer.html">Synchronizer 介绍</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">样例</span></p>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="example_reasoning_basic.html">快速上手</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_reasoning_advanced.html">Off-Policy RFT</a></li>
@@ -188,13 +199,6 @@
 <li class="toctree-l1"><a class="reference internal" href="example_dpo.html">离线 DPO 和 SFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_megatron.html">Megatron-LM 支持</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">数据处理</a></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">帮助文档</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="trinity_programming_guide.html">开发者指南</a></li>
-<li class="toctree-l1"><a class="reference internal" href="trinity_configs.html">参数配置指南</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_mix_algo.html">集成新算法</a></li>
-<li class="toctree-l1"><a class="reference internal" href="synchronizer.html">Synchronizer 介绍</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">常见问题</span></p>
 <ul class="nav bd-sidenav">
@@ -613,7 +617,7 @@ document.write(`
 <li><p>对于任务，数据处理能力来源于 <a class="reference external" href="https://github.com/modelscope/data-juicer">Data-Juicer</a>。你可以使用 Data-Juicer 提供的数据处理算子。完整的 Data-Juicer 算子列表可在 <a class="reference external" href="https://modelscope.github.io/data-juicer/en/main/docs/Operators.html">此处</a> 查看。</p></li>
 <li><p>对于 experience 数据，除了 Data-Juicer 算子外，Trinity-RFT 还提供了若干与 RFT 相关的算子，并允许开发者实现自定义算子。</p></li>
 </ul>
-<p>如需实现自己的数据处理器，可参考<a class="reference internal" href="trinity_programming_guide.html#operators-for-data-developers"><span class="std std-ref">开发者指南</span></a>。</p>
+<p>如需实现自己的数据处理器，可参考<a class="reference internal" href="#trinity_programming_guide.md#operators-for-data-developers"><span class="xref myst">开发者指南</span></a>。</p>
 <p>为了支持 Data-Juicer 和 RFT 相关算子的数据处理功能，Trinity-RFT 将 Data-Juicer 算子封装为一个统一的服务，该服务可以自动启动。<code class="docutils literal notranslate"><span class="pre">DataJuicerOperator</span></code> 使用客户端向服务器发送任务或 experience 数据处理请求。</p>
 <p>数据处理器的整体架构如下图所示：</p>
 <div align="center">
@@ -867,11 +871,11 @@ trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w
       </div>
     </a>
     <a class="right-next"
-       href="trinity_programming_guide.html"
+       href="faq.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">下一页</p>
-        <p class="prev-next-title">开发者指南</p>
+        <p class="prev-next-title">常见问题</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

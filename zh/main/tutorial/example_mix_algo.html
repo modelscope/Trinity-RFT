@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>集成新算法 &#8212; Trinity-RFT 0.3.1.dev0 文档</title>
+    <title>Algorithm 进阶开发 &#8212; Trinity-RFT 0.3.1.dev0 文档</title>
   
   
   
@@ -46,8 +46,8 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'tutorial/example_mix_algo';</script>
     <link rel="index" title="索引" href="../genindex.html" />
     <link rel="search" title="搜索" href="../search.html" />
-    <link rel="next" title="Synchronizer 介绍" href="synchronizer.html" />
-    <link rel="prev" title="参数配置指南" href="trinity_configs.html" />
+    <link rel="next" title="Operator 开发指南" href="develop_operator.html" />
+    <link rel="prev" title="Algorithm 开发指南" href="develop_algorithm.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="zh-CN"/>
   </head>
@@ -179,6 +179,17 @@
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">教程</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="trinity_installation.html">安装指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop_overview.html">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop_workflow.html">Workflow 开发指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop_algorithm.html">Algorithm 开发指南</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Algorithm 进阶开发</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop_operator.html">Operator 开发指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trinity_configs.html">参数配置指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="synchronizer.html">Synchronizer 介绍</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">样例</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="example_reasoning_basic.html">快速上手</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_reasoning_advanced.html">Off-Policy RFT</a></li>
@@ -190,13 +201,6 @@
 <li class="toctree-l1"><a class="reference internal" href="example_dpo.html">离线 DPO 和 SFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_megatron.html">Megatron-LM 支持</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_data_functionalities.html">数据处理</a></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">帮助文档</span></p>
-<ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="trinity_programming_guide.html">开发者指南</a></li>
-<li class="toctree-l1"><a class="reference internal" href="trinity_configs.html">参数配置指南</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">集成新算法</a></li>
-<li class="toctree-l1"><a class="reference internal" href="synchronizer.html">Synchronizer 介绍</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">常见问题</span></p>
 <ul class="nav bd-sidenav">
@@ -568,7 +572,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>集成新算法</h1>
+    <h1>Algorithm 进阶开发</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -578,11 +582,11 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">步骤 0：准备专家数据</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">步骤 1：定义算法</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">步骤 2：定义采样策略</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">步骤 3：定义策略损失函数</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">步骤 4：运行实验</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">步骤 0：准备专家数据</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">步骤 1：定义算法</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">步骤 2：定义采样策略</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">步骤 3：定义策略损失函数</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">步骤 4：运行实验</a></li>
 </ul>
             </nav>
         </div>
@@ -594,13 +598,9 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="id1">
-<h1>集成新算法<a class="headerlink" href="#id1" title="Link to this heading">#</a></h1>
-<div class="admonition note">
-<p class="admonition-title">备注</p>
-<p>本指南是开发者指南中 <a class="reference internal" href="trinity_programming_guide.html#algorithms"><span class="std std-ref">算法模块</span></a> 部分的进阶版本。</p>
-</div>
-<p>本指南介绍了如何将新算法集成到 Trinity-RFT 中。
+  <section class="tex2jax_ignore mathjax_ignore" id="algorithm">
+<h1>Algorithm 进阶开发<a class="headerlink" href="#algorithm" title="Link to this heading">#</a></h1>
+<p>本指南将会介绍如何将相对复杂的 RL 算法集成到 Trinity-RFT 中。
 作为示例，我们引入了由更高级别的 LLM 生成的一些“专家”数据，并提出了一种名为 MIX 的算法，该算法优化以下策略目标：</p>
 <div class="math notranslate nohighlight">
 \[
@@ -616,8 +616,8 @@ document.write(`
 <p>第一项对应标准的 GRPO 目标，旨在最大化期望奖励。最后一项是在专家数据上定义的辅助目标，鼓励策略模型（policy model）模仿专家行为。<span class="math notranslate nohighlight">\(\mu\)</span> 是一个权重因子，用于控制两项之间的相对重要性。</p>
 <p>此流程的可视化如下所示：</p>
 <p><img alt="" src="../_images/trinity-mix.png" /></p>
-<section id="id2">
-<h2>步骤 0：准备专家数据<a class="headerlink" href="#id2" title="Link to this heading">#</a></h2>
+<section id="id1">
+<h2>步骤 0：准备专家数据<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
 <p>我们提示一个强大的 LLM 对一些预定义问题使用 CoT（思维链）过程生成回答。收集到的数据被视为来自专家的一些 experience。我们将它们以 <code class="docutils literal notranslate"><span class="pre">jsonl</span></code> 格式存储在文件 <code class="docutils literal notranslate"><span class="pre">expert_data.jsonl</span></code> 中，格式如下：</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;messages&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
@@ -630,8 +630,8 @@ document.write(`
 </div>
 <p>专家数据的路径通过 <code class="docutils literal notranslate"><span class="pre">buffer.trainer_input.auxiliary_buffers.sft_dataset</span></code> 传入，供后续使用。</p>
 </section>
-<section id="id3">
-<h2>步骤 1：定义算法<a class="headerlink" href="#id3" title="Link to this heading">#</a></h2>
+<section id="id2">
+<h2>步骤 1：定义算法<a class="headerlink" href="#id2" title="Link to this heading">#</a></h2>
 <p>在 <code class="docutils literal notranslate"><span class="pre">trinity/algorithm/algorithm.py</span></code> 中，我们引入一个新的算法类型 <code class="docutils literal notranslate"><span class="pre">MIX</span></code>。</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@ALGORITHM_TYPE</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;mix&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MIXAlgorithm</span><span class="p">(</span><span class="n">AlgorithmType</span><span class="p">):</span>
@@ -654,8 +654,8 @@ document.write(`
 </pre></div>
 </div>
 </section>
-<section id="id4">
-<h2>步骤 2：定义采样策略<a class="headerlink" href="#id4" title="Link to this heading">#</a></h2>
+<section id="id3">
+<h2>步骤 2：定义采样策略<a class="headerlink" href="#id3" title="Link to this heading">#</a></h2>
 <p>我们需要在每一步读取两种类型的 experience 数据：普通 experience 和专家 experience。为此，我们定义了一个新的 experience 采样策略，名为 <code class="docutils literal notranslate"><span class="pre">MixSampleStrategy</span></code>。</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MixSampleStrategy</span><span class="p">(</span><span class="n">SampleStrategy</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;The default sample strategy.&quot;&quot;&quot;</span>
@@ -737,8 +737,8 @@ document.write(`
 </div>
 <p>这里我们使用 <code class="docutils literal notranslate"><span class="pre">Experiences.gather_experiences</span></code> 的 <code class="docutils literal notranslate"><span class="pre">custom_fields</span></code> 参数来添加一个新字段 <code class="docutils literal notranslate"><span class="pre">expert_mask</span></code>，用以标识该 experience 是否来自专家。这个字段将在策略损失函数中被用来区分普通 experience 和专家 experience。</p>
 </section>
-<section id="id5">
-<h2>步骤 3：定义策略损失函数<a class="headerlink" href="#id5" title="Link to this heading">#</a></h2>
+<section id="id4">
+<h2>步骤 3：定义策略损失函数<a class="headerlink" href="#id4" title="Link to this heading">#</a></h2>
 <p>我们在 <code class="docutils literal notranslate"><span class="pre">trinity/algorithm/policy_loss_fn/mix_policy_loss.py</span></code> 中定义一个 <code class="docutils literal notranslate"><span class="pre">MixPolicyLoss</span></code> 类，它分别计算关于普通 experience 和专家 experience 的两个 losses 之和。</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@POLICY_LOSS_FN</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;mix&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MIXPolicyLossFn</span><span class="p">(</span><span class="n">PolicyLossFn</span><span class="p">):</span>
@@ -847,8 +847,8 @@ document.write(`
 </pre></div>
 </div>
 </section>
-<section id="id6">
-<h2>步骤 4：运行实验<a class="headerlink" href="#id6" title="Link to this heading">#</a></h2>
+<section id="id5">
+<h2>步骤 4：运行实验<a class="headerlink" href="#id5" title="Link to this heading">#</a></h2>
 <p>通过上述新定义的类和函数，我们可以无需修改其他流程即可运行实验。
 下面展示了一个包含关键配置的示例，包括权重因子 <span class="math notranslate nohighlight">\(\mu\)</span>（即 <code class="docutils literal notranslate"><span class="pre">algorithm.policy_loss_fn_args['mu']</span></code>）以及专家 experience 的批次大小 <span class="math notranslate nohighlight">\(B'\)</span>，其值等于 <code class="docutils literal notranslate"><span class="pre">buffer.batch_size</span></code>、<code class="docutils literal notranslate"><span class="pre">algorithm.sample_strategy_args['expert_data_ratio']</span></code> 和 <code class="docutils literal notranslate"><span class="pre">algorithm.repeat_times</span></code> 的乘积。完整配置请参考 <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/tree/main/examples/mix_math/mix_math.yaml"><code class="docutils literal notranslate"><span class="pre">mix_math.yaml</span></code></a>。</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">algorithm</span><span class="p">:</span>
@@ -888,20 +888,20 @@ document.write(`
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="trinity_configs.html"
+       href="develop_algorithm.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">上一页</p>
-        <p class="prev-next-title">参数配置指南</p>
+        <p class="prev-next-title">Algorithm 开发指南</p>
       </div>
     </a>
     <a class="right-next"
-       href="synchronizer.html"
+       href="develop_operator.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">下一页</p>
-        <p class="prev-next-title">Synchronizer 介绍</p>
+        <p class="prev-next-title">Operator 开发指南</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -921,11 +921,11 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">步骤 0：准备专家数据</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">步骤 1：定义算法</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">步骤 2：定义采样策略</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">步骤 3：定义策略损失函数</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">步骤 4：运行实验</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">步骤 0：准备专家数据</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">步骤 1：定义算法</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">步骤 2：定义采样策略</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">步骤 3：定义策略损失函数</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">步骤 4：运行实验</a></li>
 </ul>
   </nav></div>
 

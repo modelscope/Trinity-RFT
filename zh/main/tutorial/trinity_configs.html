@@ -44,8 +44,8 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'tutorial/trinity_configs';</script>
     <link rel="index" title="索引" href="../genindex.html" />
     <link rel="search" title="搜索" href="../search.html" />
-    <link rel="next" title="集成新算法" href="example_mix_algo.html" />
-    <link rel="prev" title="开发者指南" href="trinity_programming_guide.html" />
+    <link rel="next" title="Synchronizer 介绍" href="synchronizer.html" />
+    <link rel="prev" title="Operator 开发指南" href="develop_operator.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="zh-CN"/>
   </head>
@@ -177,6 +177,17 @@
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">教程</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="trinity_installation.html">安装指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop_overview.html">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop_workflow.html">Workflow 开发指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop_algorithm.html">Algorithm 开发指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_mix_algo.html">Algorithm 进阶开发</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop_operator.html">Operator 开发指南</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">参数配置指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="synchronizer.html">Synchronizer 介绍</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">样例</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="example_reasoning_basic.html">快速上手</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_reasoning_advanced.html">Off-Policy RFT</a></li>
@@ -188,13 +199,6 @@
 <li class="toctree-l1"><a class="reference internal" href="example_dpo.html">离线 DPO 和 SFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_megatron.html">Megatron-LM 支持</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_data_functionalities.html">数据处理</a></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">帮助文档</span></p>
-<ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="trinity_programming_guide.html">开发者指南</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">参数配置指南</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_mix_algo.html">集成新算法</a></li>
-<li class="toctree-l1"><a class="reference internal" href="synchronizer.html">Synchronizer 介绍</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">常见问题</span></p>
 <ul class="nav bd-sidenav">
@@ -590,11 +594,17 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">Explorer 配置</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#synchronizer">Synchronizer 配置</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">Trainer 配置</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">服务配置</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#service">Service 配置</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dataprocessor">DataProcessor 配置</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">日志配置</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id10">阶段配置</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#log">Log 配置</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#stage">Stage 配置</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#verl-trainer">veRL Trainer 配置（高级）</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">图形化配置生成器（高级）</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#streamlit">步骤 0：了解 Streamlit</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">步骤 1：实现新配置项</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#config-manager-py">步骤 2：将新参数集成到 <code class="docutils literal notranslate"><span class="pre">config_manager.py</span></code></a></li>
+</ul>
+</li>
 </ul>
             </nav>
         </div>
@@ -1054,8 +1064,8 @@ document.write(`
 </ul>
 </section>
 <hr class="docutils" />
-<section id="id8">
-<h2>服务配置<a class="headerlink" href="#id8" title="Link to this heading">#</a></h2>
+<section id="service">
+<h2>Service 配置<a class="headerlink" href="#service" title="Link to this heading">#</a></h2>
 <p>配置 Trinity-RFT 使用的服务。目前仅支持 Data Juicer 服务。</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">service</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">data_juicer</span><span class="p">:</span>
@@ -1102,8 +1112,8 @@ document.write(`
 </div>
 <p>--</p>
 </section>
-<section id="id9">
-<h2>日志配置<a class="headerlink" href="#id9" title="Link to this heading">#</a></h2>
+<section id="log">
+<h2>Log 配置<a class="headerlink" href="#log" title="Link to this heading">#</a></h2>
 <p>Ray actor 日志配置。</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">log</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">INFO</span>
@@ -1116,8 +1126,8 @@ document.write(`
 </ul>
 </section>
 <hr class="docutils" />
-<section id="id10">
-<h2>阶段配置<a class="headerlink" href="#id10" title="Link to this heading">#</a></h2>
+<section id="stage">
+<h2>Stage 配置<a class="headerlink" href="#stage" title="Link to this heading">#</a></h2>
 <p>对于多阶段训练，可以在 <code class="docutils literal notranslate"><span class="pre">stages</span></code> 字段中定义多个阶段。每个阶段可以有自己的 <code class="docutils literal notranslate"><span class="pre">algorithm</span></code>、<code class="docutils literal notranslate"><span class="pre">buffer</span></code> 和其他配置。如果某个参数未在阶段中指定，则继承自全局配置。多个阶段将按定义顺序依次执行。</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">stages</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">stage_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sft_warmup</span>
@@ -1287,6 +1297,125 @@ document.write(`
 <li><p><code class="docutils literal notranslate"><span class="pre">trainer.max_critic_ckpt_to_keep</span></code>: 最多保留的 critic 检查点数量。</p></li>
 </ul>
 </section>
+<section id="id8">
+<h2>图形化配置生成器（高级）<a class="headerlink" href="#id8" title="Link to this heading">#</a></h2>
+<p>本节将介绍如何为配置生成器页面添加新的配置参数。</p>
+<section id="streamlit">
+<h3>步骤 0：了解 Streamlit<a class="headerlink" href="#streamlit" title="Link to this heading">#</a></h3>
+<p>在为配置生成器页面添加新参数之前，需要先了解 <a class="reference external" href="https://docs.streamlit.io/develop/api-reference">Streamlit</a> 的相关 API 和机制。本项目主要使用 Streamlit 的各种输入组件，并利用 <code class="docutils literal notranslate"><span class="pre">st.session_state</span></code> 存储用户输入的参数。</p>
+</section>
+<section id="id9">
+<h3>步骤 1：实现新配置项<a class="headerlink" href="#id9" title="Link to this heading">#</a></h3>
+<p>为了说明如何为配置生成器页面创建新参数设置，我们以 <code class="docutils literal notranslate"><span class="pre">train_batch_size</span></code> 为例。</p>
+<ol class="arabic">
+<li><p>确定参数的合适作用域。目前参数分为四个文件：</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">trinity/manager/config_registry/buffer_config_manager.py</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trinity/manager/config_registry/explorer_config_manager.py</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trinity/manager/config_registry/model_config_manager.py</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trinity/manager/config_registry/trainer_config_manager.py</span></code></p></li>
+</ul>
+<p>本例中，<code class="docutils literal notranslate"><span class="pre">train_batch_size</span></code> 应放在 <code class="docutils literal notranslate"><span class="pre">buffer_config_manager.py</span></code> 文件中。</p>
+</li>
+<li><p>使用 Streamlit 创建参数设置函数。函数名必须以 'set_' 开头，其余部分成为配置名称。</p></li>
+<li><p>使用 <code class="docutils literal notranslate"><span class="pre">CONFIG_GENERATORS.register_config</span></code> 装饰器装饰参数设置函数。该装饰器需要以下信息：</p>
+<ul class="simple">
+<li><p>参数的默认值</p></li>
+<li><p>可见性条件（如适用）</p></li>
+<li><p>额外配置参数（如需要）</p></li>
+</ul>
+</li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p><code class="docutils literal notranslate"><span class="pre">CONFIG_GENERATORS.register_config</span></code> 装饰器会自动将 <code class="docutils literal notranslate"><span class="pre">key=config_name</span></code> 作为参数传递给注册的配置函数。确保你的函数接受此关键字参数。</p>
+</div>
+<p>对于 <code class="docutils literal notranslate"><span class="pre">train_batch_size</span></code>，我们将使用以下设置：</p>
+<ul class="simple">
+<li><p>默认值：96</p></li>
+<li><p>可见性条件：<code class="docutils literal notranslate"><span class="pre">lambda:</span> <span class="pre">st.session_state[&quot;trainer_gpu_num&quot;]</span> <span class="pre">&gt;</span> <span class="pre">0</span></code></p></li>
+<li><p>额外配置：<code class="docutils literal notranslate"><span class="pre">{&quot;_train_batch_size_per_gpu&quot;:</span> <span class="pre">16}</span></code></p></li>
+</ul>
+<p>以下是 <code class="docutils literal notranslate"><span class="pre">train_batch_size</span></code> 参数的完整代码：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@CONFIG_GENERATORS</span><span class="o">.</span><span class="n">register_config</span><span class="p">(</span>
+    <span class="n">default_value</span><span class="o">=</span><span class="mi">96</span><span class="p">,</span>
+    <span class="n">visible</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;trainer_gpu_num&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">other_configs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;_train_batch_size_per_gpu&quot;</span><span class="p">:</span> <span class="mi">16</span><span class="p">},</span>
+<span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">set_train_batch_size</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;key&quot;</span><span class="p">)</span>
+    <span class="n">trainer_gpu_num</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;trainer_gpu_num&quot;</span><span class="p">]</span>
+    <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;_train_batch_size_per_gpu&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;trainer_gpu_num&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_change</span><span class="p">():</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;_train_batch_size_per_gpu&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">//</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;trainer_gpu_num&quot;</span><span class="p">],</span> <span class="mi">1</span>
+        <span class="p">)</span>
+
+    <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span>
+        <span class="s2">&quot;Train Batch Size&quot;</span><span class="p">,</span>
+        <span class="n">min_value</span><span class="o">=</span><span class="n">trainer_gpu_num</span><span class="p">,</span>
+        <span class="n">step</span><span class="o">=</span><span class="n">trainer_gpu_num</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="n">_str_for_train_batch_size</span><span class="p">(),</span>
+        <span class="n">on_change</span><span class="o">=</span><span class="n">on_change</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p>如果参数需要验证，创建一个检查函数。对于 <code class="docutils literal notranslate"><span class="pre">train_batch_size</span></code>，我们需要确保它能被 <code class="docutils literal notranslate"><span class="pre">trainer_gpu_num</span></code> 整除。若不能，则显示警告，并将参数添加到 <code class="docutils literal notranslate"><span class="pre">unfinished_fields</span></code>。</p>
+<p>使用 <code class="docutils literal notranslate"><span class="pre">CONFIG_GENERATORS.register_check</span></code> 装饰器装饰检查函数：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@CONFIG_GENERATORS</span><span class="o">.</span><span class="n">register_check</span><span class="p">()</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_train_batch_size</span><span class="p">(</span><span class="n">unfinished_fields</span><span class="p">:</span> <span class="nb">set</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">%</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;trainer_gpu_num&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">unfinished_fields</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">_str_for_train_batch_size</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p><code class="docutils literal notranslate"><span class="pre">CONFIG_GENERATORS.register_check</span></code> 装饰器会自动接收 <code class="docutils literal notranslate"><span class="pre">key=config_name</span></code> 和 <code class="docutils literal notranslate"><span class="pre">unfinished_fields=self.unfinished_fields</span></code> 作为参数。确保你的函数接受这些关键字参数。</p>
+</div>
+</section>
+<section id="config-manager-py">
+<h3>步骤 2：将新参数集成到 <code class="docutils literal notranslate"><span class="pre">config_manager.py</span></code><a class="headerlink" href="#config-manager-py" title="Link to this heading">#</a></h3>
+<p>要成功将新参数集成到 <code class="docutils literal notranslate"><span class="pre">config_manager.py</span></code> 文件中，请遵循以下步骤：</p>
+<ol class="arabic">
+<li><p><strong>参数分类</strong>：
+根据其功能确定新参数的合适部分。配置生成器页面分为两种主要模式：</p>
+<ul class="simple">
+<li><p>初学者模式：包含“基本配置”和“重要配置”部分。</p></li>
+<li><p>专家模式：包含“模型”、“缓冲区”、“Explorer 和 Synchronizer”以及“Trainer”部分。</p></li>
+</ul>
+</li>
+<li><p><strong>添加参数</strong>：
+在 <code class="docutils literal notranslate"><span class="pre">ConfigManager</span></code> 类的 <code class="docutils literal notranslate"><span class="pre">self.get_configs</span></code> 方法中，将新参数添加到相应部分。</p>
+<p>示例：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ConfigManager</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_expert_buffer_part</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_configs</span><span class="p">(</span><span class="s2">&quot;total_epochs&quot;</span><span class="p">,</span> <span class="s2">&quot;train_batch_size&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>集成到 YAML 文件</strong>：
+在 YAML 文件结构中找到新参数的合适位置。应在 <code class="docutils literal notranslate"><span class="pre">generate_config</span></code> 函数及其关联子函数中完成。</p></li>
+<li><p><strong>赋值参数值</strong>：
+使用 <code class="docutils literal notranslate"><span class="pre">st.session_state</span></code> 从配置生成器页面获取参数值，并将其赋给 YAML 中的对应字段。</p>
+<p>示例：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ConfigManager</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_gen_buffer_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">buffer_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;batch_size&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;train_batch_size&quot;</span><span class="p">],</span>
+            <span class="c1"># Additional configuration parameters</span>
+        <span class="p">}</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<p>严格遵循这些步骤，你可以确保新参数成功添加到配置生成器页面，并正确集成到配置系统中。</p>
+</section>
+</section>
 </section>
 
 
@@ -1301,20 +1430,20 @@ document.write(`
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="trinity_programming_guide.html"
+       href="develop_operator.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">上一页</p>
-        <p class="prev-next-title">开发者指南</p>
+        <p class="prev-next-title">Operator 开发指南</p>
       </div>
     </a>
     <a class="right-next"
-       href="example_mix_algo.html"
+       href="synchronizer.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">下一页</p>
-        <p class="prev-next-title">集成新算法</p>
+        <p class="prev-next-title">Synchronizer 介绍</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -1348,11 +1477,17 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">Explorer 配置</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#synchronizer">Synchronizer 配置</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">Trainer 配置</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">服务配置</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#service">Service 配置</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dataprocessor">DataProcessor 配置</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">日志配置</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id10">阶段配置</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#log">Log 配置</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#stage">Stage 配置</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#verl-trainer">veRL Trainer 配置（高级）</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">图形化配置生成器（高级）</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#streamlit">步骤 0：了解 Streamlit</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">步骤 1：实现新配置项</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#config-manager-py">步骤 2：将新参数集成到 <code class="docutils literal notranslate"><span class="pre">config_manager.py</span></code></a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 

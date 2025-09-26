@@ -180,7 +180,18 @@
  </script></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
-        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples</span></p>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Guidelines</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="trinity_installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop_overview.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop_workflow.html">Workflow Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop_algorithm.html">Algorithms Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_mix_algo.html">Advanced Algorithm Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop_operator.html">Operator Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trinity_configs.html">Configuration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="synchronizer.html">Synchronizer in Trinity-RFT</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="example_reasoning_basic.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_reasoning_advanced.html">Off-Policy RFT</a></li>
@@ -192,13 +203,6 @@
 <li class="toctree-l1"><a class="reference internal" href="example_dpo.html">Offline DPO and SFT</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Megatron-LM Backend</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_data_functionalities.html">Data Processing</a></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Guidelines</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="trinity_programming_guide.html">Developer Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="trinity_configs.html">Configuration Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_mix_algo.html">Algorithm Development</a></li>
-<li class="toctree-l1"><a class="reference internal" href="synchronizer.html">Synchronizer in Trinity-RFT</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">FAQ</span></p>
 <ul class="nav bd-sidenav">
@@ -581,15 +585,7 @@ document.write(`
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-installation">Step 1: Installation</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#minimum-requirements">Minimum Requirements</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#install-dependencies">Install Dependencies</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#option-a-using-conda">Option A: Using Conda</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#option-b-using-venv">Option B: Using venv</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#install-the-package">Install the Package</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#install-flash-attention">Install Flash Attention</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#install-apex-from-nvidia">Install Apex (from NVIDIA)</a></li>
-</ul>
-</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#install-apex-from-nvidia">Install Apex (from NVIDIA)</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#alternative-use-docker">Alternative: Use Docker</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#build-the-docker-image">Build the Docker Image</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#run-the-container">Run the Container</a></li>
@@ -614,47 +610,15 @@ document.write(`
                 <article class="bd-article">
                   
   <section class="tex2jax_ignore mathjax_ignore" id="megatron-lm-backend">
-<h1>Megatron-LM Backend<a class="headerlink" href="#megatron-lm-backend" title="Link to this heading">#</a></h1>
+<span id="megatron-lm"></span><h1>Megatron-LM Backend<a class="headerlink" href="#megatron-lm-backend" title="Link to this heading">#</a></h1>
 <p>This guide walks you through how to train models using <strong>Megatron-LM</strong> in a clear way.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This guide assumes you have already set up your environment following <a class="reference internal" href="trinity_installation.html#installation"><span class="std std-ref">Installation</span></a>. If you haven’t done so, please refer to that guide first.</p>
+</div>
 <hr class="docutils" />
 <section id="step-1-installation">
 <h2>Step 1: Installation<a class="headerlink" href="#step-1-installation" title="Link to this heading">#</a></h2>
-<section id="minimum-requirements">
-<h3>Minimum Requirements<a class="headerlink" href="#minimum-requirements" title="Link to this heading">#</a></h3>
-<p>Before you begin, make sure your system meets these requirements:</p>
-<ul class="simple">
-<li><p><strong>GPUs</strong>: At least 2 GPUs (for distributed training)</p></li>
-<li><p><strong>CUDA</strong>: Version 12.4 or higher</p></li>
-<li><p><strong>Python</strong>: Version 3.10 or higher</p></li>
-</ul>
-</section>
-<hr class="docutils" />
-<section id="install-dependencies">
-<h3>Install Dependencies<a class="headerlink" href="#install-dependencies" title="Link to this heading">#</a></h3>
-<p>Start by cloning the repository and setting up a virtual environment:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Clone the repository</span>
-git<span class="w"> </span>clone<span class="w"> </span>https://github.com/modelscope/Trinity-RFT
-<span class="nb">cd</span><span class="w"> </span>Trinity-RFT
-</pre></div>
-</div>
-<section id="option-a-using-conda">
-<h4>Option A: Using Conda<a class="headerlink" href="#option-a-using-conda" title="Link to this heading">#</a></h4>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create and activate a new environment</span>
-conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>trinity<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.10
-conda<span class="w"> </span>activate<span class="w"> </span>trinity
-</pre></div>
-</div>
-</section>
-<section id="option-b-using-venv">
-<h4>Option B: Using venv<a class="headerlink" href="#option-b-using-venv" title="Link to this heading">#</a></h4>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create and activate a virtual environment</span>
-python3.10<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
-<span class="nb">source</span><span class="w"> </span>.venv/bin/activate
-</pre></div>
-</div>
-</section>
-<section id="install-the-package">
-<h4>Install the Package<a class="headerlink" href="#install-the-package" title="Link to this heading">#</a></h4>
 <p>Install the project in editable mode with Megatron support:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># For bash users</span>
 pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="o">[</span>megatron<span class="o">]</span>
@@ -663,20 +627,8 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
 pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="se">\[</span>megatron<span class="se">\]</span>
 </pre></div>
 </div>
-</section>
-<section id="install-flash-attention">
-<h4>Install Flash Attention<a class="headerlink" href="#install-flash-attention" title="Link to this heading">#</a></h4>
-<p>After installing the base dependencies, install <code class="docutils literal notranslate"><span class="pre">flash-attn</span></code>. This may take several minutes to compile — please be patient!</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>flash-attn<span class="o">==</span><span class="m">2</span>.8.1<span class="w"> </span>-v
-</pre></div>
-</div>
-<p>If you run into installation issues, try this alternative:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>flash-attn<span class="w"> </span>-v<span class="w"> </span>--no-build-isolation
-</pre></div>
-</div>
-</section>
 <section id="install-apex-from-nvidia">
-<h4>Install Apex (from NVIDIA)<a class="headerlink" href="#install-apex-from-nvidia" title="Link to this heading">#</a></h4>
+<h3>Install Apex (from NVIDIA)<a class="headerlink" href="#install-apex-from-nvidia" title="Link to this heading">#</a></h3>
 <p>Finally, install NVIDIA’s Apex library for mixed-precision training:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-v<span class="w"> </span>--disable-pip-version-check<span class="w"> </span>--no-cache-dir<span class="w"> </span>--no-build-isolation<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--config-settings<span class="w"> </span><span class="s2">&quot;--build-option=--cpp_ext&quot;</span><span class="w"> </span><span class="se">\</span>
@@ -684,7 +636,6 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
 <span class="w">    </span>--resume-retries<span class="w"> </span><span class="m">999</span><span class="w"> </span>git+https://github.com/NVIDIA/apex.git
 </pre></div>
 </div>
-</section>
 </section>
 <hr class="docutils" />
 <section id="alternative-use-docker">
@@ -858,15 +809,7 @@ If you prefer not to use MBridge, set <code class="docutils literal notranslate"
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-installation">Step 1: Installation</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#minimum-requirements">Minimum Requirements</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#install-dependencies">Install Dependencies</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#option-a-using-conda">Option A: Using Conda</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#option-b-using-venv">Option B: Using venv</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#install-the-package">Install the Package</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#install-flash-attention">Install Flash Attention</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#install-apex-from-nvidia">Install Apex (from NVIDIA)</a></li>
-</ul>
-</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#install-apex-from-nvidia">Install Apex (from NVIDIA)</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#alternative-use-docker">Alternative: Use Docker</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#build-the-docker-image">Build the Docker Image</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#run-the-container">Run the Container</a></li>

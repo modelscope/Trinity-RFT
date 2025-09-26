@@ -1,48 +1,17 @@
+(Megatron-LM)=
 # Megatron-LM Backend
 
 This guide walks you through how to train models using **Megatron-LM** in a clear way.
+
+```{note}
+This guide assumes you have already set up your environment following {ref}`Installation <Installation>`. If you haven't done so, please refer to that guide first.
+```
 
 ---
 
 ## Step 1: Installation
 
-### Minimum Requirements
 
-Before you begin, make sure your system meets these requirements:
-
-- **GPUs**: At least 2 GPUs (for distributed training)
-- **CUDA**: Version 12.4 or higher
-- **Python**: Version 3.10 or higher
-
----
-
-### Install Dependencies
-
-Start by cloning the repository and setting up a virtual environment:
-
-```bash
-# Clone the repository
-git clone https://github.com/modelscope/Trinity-RFT
-cd Trinity-RFT
-```
-
-#### Option A: Using Conda
-
-```bash
-# Create and activate a new environment
-conda create -n trinity python=3.10
-conda activate trinity
-```
-
-#### Option B: Using venv
-
-```bash
-# Create and activate a virtual environment
-python3.10 -m venv .venv
-source .venv/bin/activate
-```
-
-#### Install the Package
 
 Install the project in editable mode with Megatron support:
 
@@ -54,19 +23,6 @@ pip install -e .[megatron]
 pip install -e .\[megatron\]
 ```
 
-#### Install Flash Attention
-
-After installing the base dependencies, install `flash-attn`. This may take several minutes to compile — please be patient!
-
-```bash
-pip install flash-attn==2.8.1 -v
-```
-
-If you run into installation issues, try this alternative:
-
-```bash
-pip install flash-attn -v --no-build-isolation
-```
 
 #### Install Apex (from NVIDIA)
 

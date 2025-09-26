@@ -1,6 +1,11 @@
+(Megatron-LM)=
 # Megatron-LM 支持
 
 本指南将清晰地引导你如何使用 **Megatron-LM** 来训练模型。
+
+```{note}
+本指南假设你已经按照 {ref}`安装指南 <Installation>` 设置好了环境。如果还没有，请先参考该指南。
+```
 
 ---
 

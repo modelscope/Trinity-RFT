@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Algorithm Development &#8212; Trinity-RFT 0.3.1.dev0 documentation</title>
+    <title>Advanced Algorithm Development &#8212; Trinity-RFT 0.3.1.dev0 documentation</title>
   
   
   
@@ -45,8 +45,8 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'tutorial/example_mix_algo';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Synchronizer in Trinity-RFT" href="synchronizer.html" />
-    <link rel="prev" title="Configuration Guide" href="trinity_configs.html" />
+    <link rel="next" title="Operator Development Guide" href="develop_operator.html" />
+    <link rel="prev" title="Algorithms Development Guide" href="develop_algorithm.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -182,7 +182,18 @@
  </script></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
-        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples</span></p>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Guidelines</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="trinity_installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop_overview.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop_workflow.html">Workflow Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop_algorithm.html">Algorithms Development Guide</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Advanced Algorithm Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop_operator.html">Operator Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trinity_configs.html">Configuration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="synchronizer.html">Synchronizer in Trinity-RFT</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="example_reasoning_basic.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_reasoning_advanced.html">Off-Policy RFT</a></li>
@@ -194,13 +205,6 @@
 <li class="toctree-l1"><a class="reference internal" href="example_dpo.html">Offline DPO and SFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_megatron.html">Megatron-LM Backend</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_data_functionalities.html">Data Processing</a></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Guidelines</span></p>
-<ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="trinity_programming_guide.html">Developer Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="trinity_configs.html">Configuration Guide</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Algorithm Development</a></li>
-<li class="toctree-l1"><a class="reference internal" href="synchronizer.html">Synchronizer in Trinity-RFT</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">FAQ</span></p>
 <ul class="nav bd-sidenav">
@@ -572,7 +576,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Algorithm Development</h1>
+    <h1>Advanced Algorithm Development</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -598,11 +602,11 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="algorithm-development">
-<h1>Algorithm Development<a class="headerlink" href="#algorithm-development" title="Link to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="advanced-algorithm-development">
+<h1>Advanced Algorithm Development<a class="headerlink" href="#advanced-algorithm-development" title="Link to this heading">#</a></h1>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This guide is an advanced version of the <a class="reference internal" href="trinity_programming_guide.html#algorithms"><span class="std std-ref">Algorithms</span></a> section in the Developer Guide.</p>
+<p>This guide is an advanced version of the <a class="reference internal" href="develop_algorithm.html#algorithms"><span class="std std-ref">Algorithms</span></a> section in the Developer Guide.</p>
 </div>
 <p>This guide introduces how to integrate a new algorithm to Trinity-RFT.
 As an example, we incorporate some “expert” data generated by a more advanced LLM and propose an algorithm named MIX , which optimizes the following policy objective:</p>
@@ -893,20 +897,20 @@ For the full configuration, please refer to <a class="reference external" href="
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="trinity_configs.html"
+       href="develop_algorithm.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Configuration Guide</p>
+        <p class="prev-next-title">Algorithms Development Guide</p>
       </div>
     </a>
     <a class="right-next"
-       href="synchronizer.html"
+       href="develop_operator.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Synchronizer in Trinity-RFT</p>
+        <p class="prev-next-title">Operator Development Guide</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

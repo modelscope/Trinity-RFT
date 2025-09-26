@@ -418,7 +418,7 @@ trainer:
 
 ---
 
-## 服务配置
+## Service 配置
 
 配置 Trinity-RFT 使用的服务。目前仅支持 Data Juicer 服务。
 
@@ -469,7 +469,7 @@ data_processor:
 
 --
 
-## 日志配置
+## Log 配置
 
 Ray actor 日志配置。
 
@@ -484,7 +484,7 @@ log:
 
 ---
 
-## 阶段配置
+## Stage 配置
 
 对于多阶段训练，可以在 `stages` 字段中定义多个阶段。每个阶段可以有自己的 `algorithm`、`buffer` 和其他配置。如果某个参数未在阶段中指定，则继承自全局配置。多个阶段将按定义顺序依次执行。
 
@@ -657,3 +657,126 @@ trainer:
 - `trainer.del_local_ckpt_after_load`: 加载后是否删除本地检查点。
 - `trainer.max_actor_ckpt_to_keep`: 最多保留的 actor 检查点数量。
 - `trainer.max_critic_ckpt_to_keep`: 最多保留的 critic 检查点数量。
+
+
+## 图形化配置生成器（高级）
+
+本节将介绍如何为配置生成器页面添加新的配置参数。
+
+### 步骤 0：了解 Streamlit
+
+在为配置生成器页面添加新参数之前，需要先了解 [Streamlit](https://docs.streamlit.io/develop/api-reference) 的相关 API 和机制。本项目主要使用 Streamlit 的各种输入组件，并利用 `st.session_state` 存储用户输入的参数。
+
+### 步骤 1：实现新配置项
+
+为了说明如何为配置生成器页面创建新参数设置，我们以 `train_batch_size` 为例。
+
+1. 确定参数的合适作用域。目前参数分为四个文件：
+   - `trinity/manager/config_registry/buffer_config_manager.py`
+   - `trinity/manager/config_registry/explorer_config_manager.py`
+   - `trinity/manager/config_registry/model_config_manager.py`
+   - `trinity/manager/config_registry/trainer_config_manager.py`
+
+   本例中，`train_batch_size` 应放在 `buffer_config_manager.py` 文件中。
+
+2. 使用 Streamlit 创建参数设置函数。函数名必须以 'set_' 开头，其余部分成为配置名称。
+
+3. 使用 `CONFIG_GENERATORS.register_config` 装饰器装饰参数设置函数。该装饰器需要以下信息：
+   - 参数的默认值
+   - 可见性条件（如适用）
+   - 额外配置参数（如需要）
+
+```{note}
+`CONFIG_GENERATORS.register_config` 装饰器会自动将 `key=config_name` 作为参数传递给注册的配置函数。确保你的函数接受此关键字参数。
+```
+
+对于 `train_batch_size`，我们将使用以下设置：
+
+- 默认值：96
+- 可见性条件：`lambda: st.session_state["trainer_gpu_num"] > 0`
+- 额外配置：`{"_train_batch_size_per_gpu": 16}`
+
+以下是 `train_batch_size` 参数的完整代码：
+
+```python
+@CONFIG_GENERATORS.register_config(
+    default_value=96,
+    visible=lambda: st.session_state["trainer_gpu_num"] > 0,
+    other_configs={"_train_batch_size_per_gpu": 16},
+)
+def set_train_batch_size(**kwargs):
+    key = kwargs.get("key")
+    trainer_gpu_num = st.session_state["trainer_gpu_num"]
+    st.session_state[key] = (
+        st.session_state["_train_batch_size_per_gpu"] * st.session_state["trainer_gpu_num"]
+    )
+
+    def on_change():
+        st.session_state["_train_batch_size_per_gpu"] = max(
+            st.session_state[key] // st.session_state["trainer_gpu_num"], 1
+        )
+
+    st.number_input(
+        "Train Batch Size",
+        min_value=trainer_gpu_num,
+        step=trainer_gpu_num,
+        help=_str_for_train_batch_size(),
+        on_change=on_change,
+        **kwargs,
+    )
+```
+
+如果参数需要验证，创建一个检查函数。对于 `train_batch_size`，我们需要确保它能被 `trainer_gpu_num` 整除。若不能，则显示警告，并将参数添加到 `unfinished_fields`。
+
+使用 `CONFIG_GENERATORS.register_check` 装饰器装饰检查函数：
+
+```python
+@CONFIG_GENERATORS.register_check()
+def check_train_batch_size(unfinished_fields: set, key: str):
+    if st.session_state[key] % st.session_state["trainer_gpu_num"] != 0:
+        unfinished_fields.add(key)
+        st.warning(_str_for_train_batch_size())
+```
+
+```{note}
+`CONFIG_GENERATORS.register_check` 装饰器会自动接收 `key=config_name` 和 `unfinished_fields=self.unfinished_fields` 作为参数。确保你的函数接受这些关键字参数。
+```
+
+### 步骤 2：将新参数集成到 `config_manager.py`
+
+要成功将新参数集成到 `config_manager.py` 文件中，请遵循以下步骤：
+
+1. **参数分类**：
+   根据其功能确定新参数的合适部分。配置生成器页面分为两种主要模式：
+   - 初学者模式：包含“基本配置”和“重要配置”部分。
+   - 专家模式：包含“模型”、“缓冲区”、“Explorer 和 Synchronizer”以及“Trainer”部分。
+
+2. **添加参数**：
+   在 `ConfigManager` 类的 `self.get_configs` 方法中，将新参数添加到相应部分。
+
+   示例：
+
+   ```python
+   class ConfigManager:
+       def _expert_buffer_part(self):
+           self.get_configs("total_epochs", "train_batch_size")
+   ```
+
+3. **集成到 YAML 文件**：
+   在 YAML 文件结构中找到新参数的合适位置。应在 `generate_config` 函数及其关联子函数中完成。
+
+4. **赋值参数值**：
+   使用 `st.session_state` 从配置生成器页面获取参数值，并将其赋给 YAML 中的对应字段。
+
+   示例：
+
+   ```python
+   class ConfigManager:
+       def _gen_buffer_config(self):
+           buffer_config = {
+               "batch_size": st.session_state["train_batch_size"],
+               # Additional configuration parameters
+           }
+   ```
+
+严格遵循这些步骤，你可以确保新参数成功添加到配置生成器页面，并正确集成到配置系统中。

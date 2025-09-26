@@ -4,61 +4,7 @@
 
 ## 第 0 步：环境准备
 
-最低环境要求：
-
-- GPU：至少 2 块 GPU
-- CUDA：版本 >= 12.4
-- Python：版本 >= 3.10
-
-```shell
-# 从 GitHub 拉取源码
-git clone https://github.com/modelscope/Trinity-RFT
-cd Trinity-RFT
-
-# 使用 Conda 或 venv 创建新环境
-# 选项 1: Conda
-conda create -n trinity python=3.10
-conda activate trinity
-
-# 选项 2: venv
-python3.10 -m venv .venv
-source .venv/bin/activate
-
-# 以可编辑模式安装包
-# 对于 bash
-pip install -e .[dev]
-# 对于 zsh
-pip install -e .\[dev\]
-
-# 在所有依赖安装完成后安装 flash-attn
-# 注意：flash-attn 编译时间较长，请耐心等待。
-pip install flash-attn -v
-# 如果安装过程中遇到错误，可尝试以下命令
-# pip install flash-attn -v --no-build-isolation
-```
-
-使用 pip 安装：
-
-```shell
-pip install trinity-rft
-```
-
-通过 Docker 安装：
-
-我们为 Trinity-RFT 提供了 Dockerfile。
-
-```shell
-git clone https://github.com/modelscope/Trinity-RFT
-cd Trinity-RFT
-
-# 构建 Docker 镜像
-# 注意：你可以编辑 Dockerfile 来自定义环境
-# 例如，使用 pip 镜像或设置 API key
-docker build -f scripts/docker/Dockerfile -t trinity-rft:latest .
-
-# 运行 Docker 镜像
-docker run -it --gpus all --shm-size="64g" --rm -v $PWD:/workspace -v <root_path_of_data_and_checkpoints>:/data trinity-rft:latest
-```
+请按照[安装指南](./trinity_installation.md)中的说明进行环境设置。
 
 
 ## 第 1 步：模型和数据准备

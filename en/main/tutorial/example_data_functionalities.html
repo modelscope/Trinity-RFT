@@ -43,7 +43,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'tutorial/example_data_functionalities';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Developer Guide" href="trinity_programming_guide.html" />
+    <link rel="next" title="FAQ" href="faq.html" />
     <link rel="prev" title="Megatron-LM Backend" href="example_megatron.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -180,7 +180,18 @@
  </script></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
-        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples</span></p>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Guidelines</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="trinity_installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop_overview.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop_workflow.html">Workflow Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop_algorithm.html">Algorithms Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_mix_algo.html">Advanced Algorithm Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop_operator.html">Operator Development Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trinity_configs.html">Configuration Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="synchronizer.html">Synchronizer in Trinity-RFT</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="example_reasoning_basic.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_reasoning_advanced.html">Off-Policy RFT</a></li>
@@ -192,13 +203,6 @@
 <li class="toctree-l1"><a class="reference internal" href="example_dpo.html">Offline DPO and SFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_megatron.html">Megatron-LM Backend</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Data Processing</a></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Guidelines</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="trinity_programming_guide.html">Developer Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="trinity_configs.html">Configuration Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_mix_algo.html">Algorithm Development</a></li>
-<li class="toctree-l1"><a class="reference internal" href="synchronizer.html">Synchronizer in Trinity-RFT</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">FAQ</span></p>
 <ul class="nav bd-sidenav">
@@ -617,7 +621,7 @@ document.write(`
 <li><p>For tasks, the data processing capabilities come from <a class="reference external" href="https://github.com/modelscope/data-juicer">Data-Juicer</a>. You can use data processing operators from Data-Juicer. The full list of Data-Juicer operators can be found <a class="reference external" href="https://modelscope.github.io/data-juicer/en/main/docs/Operators.html">here</a></p></li>
 <li><p>For experiences, in addition to Data-Juicer operators, Trinity-RFT provides several RFT-related operators and allows developers to implement their own operators.</p></li>
 </ul>
-<p>For implementing your own data processor, you can refer to this <a class="reference internal" href="trinity_programming_guide.html#operators-for-data-developers"><span class="std std-ref">document</span></a>.</p>
+<p>For implementing your own data processor, you can refer to this <a class="reference internal" href="#trinity_programming_guide.md#operators-for-data-developers"><span class="xref myst">document</span></a>.</p>
 <p>To support the data processing of Data-Juicer and RFT-related operators, Trinity-RFT wraps the Data-Juicer operators into a unified service, which can be started automatically. The <code class="docutils literal notranslate"><span class="pre">DataJuicerOperator</span></code> uses a client to send requests of task or experience processing to the server.</p>
 <p>An overview of the data processor is shown in the following figure.</p>
 <div align="center">
@@ -880,11 +884,11 @@ It will watch the explorer output buffer. Once there is a new batch of experienc
       </div>
     </a>
     <a class="right-next"
-       href="trinity_programming_guide.html"
+       href="faq.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Developer Guide</p>
+        <p class="prev-next-title">FAQ</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

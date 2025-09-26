@@ -4,62 +4,7 @@ This tutorial shows a quick start guide for running RFT with Trinity-RFT.
 
 ## Step 0: Environment Preparation
 
-Minimal environment requirements:
-
-- GPUs: At least 2 GPUs
-- CUDA: Version >= 12.4
-- Python: Version >= 3.10
-
-```shell
-# Pull the source code from GitHub
-git clone https://github.com/modelscope/Trinity-RFT
-cd Trinity-RFT
-
-# Create a new environment using Conda or venv
-# Option 1: Conda
-conda create -n trinity python=3.10
-conda activate trinity
-
-# Option 2: venv
-python3.10 -m venv .venv
-source .venv/bin/activate
-
-# Install the package in editable mode
-# for bash
-pip install -e .[dev]
-# for zsh
-pip install -e .\[dev\]
-
-# Install flash-attn after all dependencies are installed
-# Note: flash-attn will take a long time to compile, please be patient.
-pip install flash-attn -v
-# Try the following command if you encounter errors during installation
-# pip install flash-attn -v --no-build-isolation
-```
-
-Installation using pip:
-
-```shell
-pip install trinity-rft
-```
-
-Installation from docker:
-
-We provided a dockerfile for Trinity-RFT.
-
-```shell
-git clone https://github.com/modelscope/Trinity-RFT
-cd Trinity-RFT
-
-# build the docker image
-# Note: you can edit the dockerfile to customize the environment
-# e.g., use pip mirrors or set api key
-docker build -f scripts/docker/Dockerfile -t trinity-rft:latest .
-
-# run the docker image
-docker run -it --gpus all --shm-size="64g" --rm -v $PWD:/workspace -v <root_path_of_data_and_checkpoints>:/data trinity-rft:latest
-```
-
+Please follow the instructions in [Installation](./trinity_installation.md) to set up the environment.
 
 ## Step 1: Model and Data Preparation
 

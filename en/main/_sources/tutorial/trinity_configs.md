@@ -658,3 +658,126 @@ trainer:
 - `trainer.del_local_ckpt_after_load`: Whether to delete local checkpoints after loading.
 - `trainer.max_actor_ckpt_to_keep`: Maximum number of actor checkpoints to keep.
 - `trainer.max_critic_ckpt_to_keep`: Maximum number of critic checkpoints to keep.
+
+
+## Adding New Config Entries for the Config Generator (Advanced)
+
+This section introduces how to add new configuration parameters to the Config Generator page of Trinity-RFT.
+
+### Step 0: Understanding Streamlit
+
+Before adding new parameters to the Config Generator page, it is essential to familiarize yourself with the relevant API and mechanisms of [Streamlit](https://docs.streamlit.io/develop/api-reference). This project primarily utilizes various input components from Streamlit and employs `st.session_state` to store user-input parameters.
+
+### Step 1: Implement New Config Entries
+
+To illustrate the process of creating a new parameter setting for the Config Generator page, we will use `train_batch_size` as an example.
+
+1. Determine the appropriate scope for the parameter. Currently, parameters are categorized into four files:
+   - `trinity/manager/config_registry/buffer_config_manager.py`
+   - `trinity/manager/config_registry/explorer_config_manager.py`
+   - `trinity/manager/config_registry/model_config_manager.py`
+   - `trinity/manager/config_registry/trainer_config_manager.py`
+
+   In this case, `train_batch_size` should be placed in the `buffer_config_manager.py` file.
+
+2. Create a parameter setting function using Streamlit. The function name must follow the convention of starting with 'set_', and the remainder of the name becomes the config name.
+
+3. Decorate the parameter setting function with the `CONFIG_GENERATORS.register_config` decorator. This decorator requires the following information:
+   - Default value of the parameter
+   - Visibility condition (if applicable)
+   - Additional config parameters (if needed)
+
+```{note}
+The `CONFIG_GENERATORS.register_config` decorator automatically passes `key=config_name` as an argument to the registered configuration function. Ensure that your function accepts this keyword argument.
+```
+
+For `train_batch_size`, we will use the following settings:
+
+- Default value: 96
+- Visibility condition: `lambda: st.session_state["trainer_gpu_num"] > 0`
+- Additional config: `{"_train_batch_size_per_gpu": 16}`
+
+Here's the complete code for the `train_batch_size` parameter:
+
+```python
+@CONFIG_GENERATORS.register_config(
+    default_value=96,
+    visible=lambda: st.session_state["trainer_gpu_num"] > 0,
+    other_configs={"_train_batch_size_per_gpu": 16},
+)
+def set_train_batch_size(**kwargs):
+    key = kwargs.get("key")
+    trainer_gpu_num = st.session_state["trainer_gpu_num"]
+    st.session_state[key] = (
+        st.session_state["_train_batch_size_per_gpu"] * st.session_state["trainer_gpu_num"]
+    )
+
+    def on_change():
+        st.session_state["_train_batch_size_per_gpu"] = max(
+            st.session_state[key] // st.session_state["trainer_gpu_num"], 1
+        )
+
+    st.number_input(
+        "Train Batch Size",
+        min_value=trainer_gpu_num,
+        step=trainer_gpu_num,
+        help=_str_for_train_batch_size(),
+        on_change=on_change,
+        **kwargs,
+    )
+```
+
+If the parameter requires validation, create a check function. For `train_batch_size`, we need to ensure it is divisible by `trainer_gpu_num`. If not, a warning should be displayed, and the parameter should be added to `unfinished_fields`.
+
+Decorate the check function with the `CONFIG_GENERATORS.register_check` decorator:
+
+```python
+@CONFIG_GENERATORS.register_check()
+def check_train_batch_size(unfinished_fields: set, key: str):
+    if st.session_state[key] % st.session_state["trainer_gpu_num"] != 0:
+        unfinished_fields.add(key)
+        st.warning(_str_for_train_batch_size())
+```
+
+```{note}
+The `CONFIG_GENERATORS.register_check` decorator automatically receives `key=config_name` and `unfinished_fields=self.unfinished_fields` as arguments. Ensure your function accepts these keyword arguments.
+```
+
+### Step 2: Integrating New Parameters into `config_manager.py`
+
+To successfully integrate new parameters into the `config_manager.py` file, please adhere to the following procedure:
+
+1. Parameter Categorization:
+   Determine the appropriate section for the new parameter based on its functionality. The config generator page is structured into two primary modes:
+   - Beginner Mode: Comprises "Essential Configs" and "Important Configs" sections.
+   - Expert Mode: Includes "Model", "Buffer", "Explorer and Synchronizer", and "Trainer" sections.
+
+2. Parameter Addition:
+   Incorporate the new parameter into the relevant section using the `self.get_configs` method within the `ConfigManager` class.
+
+   Example:
+
+   ```python
+   class ConfigManager:
+       def _expert_buffer_part(self):
+           self.get_configs("total_epochs", "train_batch_size")
+   ```
+
+3. YAML File Integration:
+   Locate the appropriate position for the new parameter within the YAML file structure. This should be done in the `generate_config` function and its associated sub-functions.
+
+4. Parameter Value Assignment:
+   Utilize `st.session_state` to retrieve the parameter value from the config generator page and assign it to the corresponding field in the YAML.
+
+   Example:
+
+   ```python
+   class ConfigManager:
+       def _gen_buffer_config(self):
+           buffer_config = {
+               "batch_size": st.session_state["train_batch_size"],
+               # Additional configuration parameters
+           }
+   ```
+
+By following these steps, you can successfully add new parameters to the Config Generator page and ensure they are properly integrated into the configuration management system.
