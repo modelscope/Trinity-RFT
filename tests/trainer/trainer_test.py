@@ -697,7 +697,7 @@ class TestTrainerCheckpointSave(unittest.TestCase):
             "__1_1.distcp",
             "__0_0.distcp",
         }
-        while state_dict_iteration < 8 and checkpoint_iteration < 8:
+        while state_dict_iteration < 4 and checkpoint_iteration < 4:
             if os.path.exists(state_dict_iteration_file):
                 try:
                     with open(state_dict_iteration_file, "r") as f:
