@@ -582,8 +582,8 @@ document.write(`
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">log_with_rank</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">SyncMethod</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.manager.synchronizer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Synchronizer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.trainer.verl_trainer</span><span class="w"> </span><span class="kn">import</span> <span class="n">CheckpointMonitor</span>
 
 
 <div class="viewcode-block" id="FSDPCheckpointManager">
@@ -600,37 +600,20 @@ document.write(`
 
 <div class="viewcode-block" id="FSDPCheckpointManager.__init__">
 <a class="viewcode-back" href="../../../../build_api/trinity.trainer.verl.fsdp_checkpoint_manager.html#trinity.trainer.verl.fsdp_checkpoint_manager.FSDPCheckpointManager.__init__">[文档]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">ray_namespace</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">config</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;config&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer_config</span> <span class="o">=</span> <span class="n">config</span>
-        <span class="k">if</span> <span class="n">config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># Retrieve the remote Synchronizer actor using the provided namespace</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span> <span class="o">=</span> <span class="n">Synchronizer</span><span class="o">.</span><span class="n">get_actor</span><span class="p">(</span><span class="n">namespace</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">ray_namespace</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span> <span class="o">=</span> <span class="n">Synchronizer</span><span class="o">.</span><span class="n">get_actor</span><span class="p">(</span><span class="n">namespace</span><span class="o">=</span><span class="n">ray_namespace</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_monitor</span> <span class="o">=</span> <span class="n">CheckpointMonitor</span><span class="o">.</span><span class="n">get_actor</span><span class="p">(</span>
+            <span class="n">namespace</span><span class="o">=</span><span class="n">ray_namespace</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="c1"># Threads for asynchronous saving of different components</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_model_state_dict_thread</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_optimizer_state_dict_thread</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_extra_state_dict_thread</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_save_model_thread</span> <span class="o">=</span> <span class="kc">None</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_save_model_thread</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">previous_state_dict_step</span> <span class="o">=</span> <span class="kc">None</span></div>
 
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_notify_synchronizer_with_step_num</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">global_step</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Notifies the Synchronizer actor about the current training step number,</span>
-<span class="sd">        used when SyncMethod is CHECKPOINT.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            global_step (int): The current global training step.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">synchronizer_config</span><span class="p">,</span> <span class="s2">&quot;sync_method&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="n">SyncMethod</span><span class="o">.</span><span class="n">CHECKPOINT</span><span class="p">:</span>
-            <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">set_model_state_dict_with_step_num</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span>
-                    <span class="n">global_step</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">world_size</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_upload_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">global_step</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -659,15 +642,106 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">_upload_state_dict</span><span class="p">(</span><span class="n">state_dict</span><span class="p">,</span> <span class="n">global_step</span><span class="p">)</span></div>
 
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_save_with_thread</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">obj</span><span class="p">,</span>
+        <span class="n">local_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">thread_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">global_step</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">is_state_dict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">local_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_world_size_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">world_size</span><span class="si">}</span><span class="s2">_rank_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="si">}</span><span class="s2">.pt&quot;</span>
+        <span class="p">)</span>
+        <span class="n">thread</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thread_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">thread</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">_save</span><span class="p">():</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+            <span class="n">log_with_rank</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Saved </span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">rank</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span>
+                <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_monitor</span><span class="o">.</span><span class="n">notify_finished</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">global_step</span><span class="p">,</span> <span class="n">is_state_dict</span><span class="p">))</span>
+
+        <span class="n">thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span>
+            <span class="n">target</span><span class="o">=</span><span class="n">_save</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thread_name</span><span class="p">,</span> <span class="n">thread</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_save_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">local_path</span><span class="p">,</span> <span class="n">global_step</span><span class="p">):</span>
+        <span class="n">model_state_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_save_with_thread</span><span class="p">(</span>
+            <span class="n">model_state_dict</span><span class="p">,</span> <span class="n">local_path</span><span class="p">,</span> <span class="s2">&quot;model&quot;</span><span class="p">,</span> <span class="s2">&quot;_model_state_dict_thread&quot;</span><span class="p">,</span> <span class="n">global_step</span><span class="p">,</span> <span class="kc">True</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">previous_state_dict_step</span> <span class="o">=</span> <span class="n">global_step</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_save_optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">local_path</span><span class="p">,</span> <span class="n">global_step</span><span class="p">):</span>
+        <span class="n">optimizer_state_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_save_with_thread</span><span class="p">(</span>
+            <span class="n">optimizer_state_dict</span><span class="p">,</span> <span class="n">local_path</span><span class="p">,</span> <span class="s2">&quot;optim&quot;</span><span class="p">,</span> <span class="s2">&quot;_optimizer_state_dict_thread&quot;</span><span class="p">,</span> <span class="n">global_step</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_save_extra_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">local_path</span><span class="p">,</span> <span class="n">global_step</span><span class="p">):</span>
+        <span class="n">lr_scheduler_state_dict</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lr_scheduler</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lr_scheduler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span>
+        <span class="n">extra_state_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;lr_scheduler&quot;</span><span class="p">:</span> <span class="n">lr_scheduler_state_dict</span><span class="p">,</span>
+            <span class="s2">&quot;rng&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_rng_state</span><span class="p">(),</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_save_with_thread</span><span class="p">(</span>
+            <span class="n">extra_state_dict</span><span class="p">,</span> <span class="n">local_path</span><span class="p">,</span> <span class="s2">&quot;extra_state&quot;</span><span class="p">,</span> <span class="s2">&quot;_extra_state_dict_thread&quot;</span><span class="p">,</span> <span class="n">global_step</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="FSDPCheckpointManager.save_state_dict">
+<a class="viewcode-back" href="../../../../build_api/trinity.trainer.verl.fsdp_checkpoint_manager.html#trinity.trainer.verl.fsdp_checkpoint_manager.FSDPCheckpointManager.save_state_dict">[文档]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_state_dict</span><span class="p">(</span>  <span class="c1"># noqa: C901</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">local_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">global_step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">previous_state_dict_step</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># First sync in trainer.prepare</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">previous_state_dict_step</span> <span class="o">=</span> <span class="n">global_step</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_upload_state_dict</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">global_step</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">previous_state_dict_step</span> <span class="o">==</span> <span class="n">global_step</span><span class="p">:</span>
+            <span class="c1"># No need to save for sync again</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">local_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">local_path</span> <span class="o">=</span> <span class="n">local_mkdir_safe</span><span class="p">(</span><span class="n">local_path</span><span class="p">)</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
+
+        <span class="n">state_dict_cfg</span> <span class="o">=</span> <span class="n">ShardedStateDictConfig</span><span class="p">(</span><span class="n">offload_to_cpu</span><span class="o">=</span><span class="kc">True</span> <span class="k">if</span> <span class="n">is_cuda_available</span> <span class="k">else</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="n">optim_cfg</span> <span class="o">=</span> <span class="n">ShardedOptimStateDictConfig</span><span class="p">(</span><span class="n">offload_to_cpu</span><span class="o">=</span><span class="kc">True</span> <span class="k">if</span> <span class="n">is_cuda_available</span> <span class="k">else</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+            <span class="k">with</span> <span class="n">get_fsdp_state_ctx</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">StateDictType</span><span class="o">.</span><span class="n">SHARDED_STATE_DICT</span><span class="p">,</span> <span class="n">state_dict_cfg</span><span class="p">,</span> <span class="n">optim_cfg</span>
+            <span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_save_model</span><span class="p">(</span><span class="n">local_path</span><span class="p">,</span> <span class="n">global_step</span><span class="p">)</span>
+        <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_monitor</span><span class="o">.</span><span class="n">register_thread_count</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span>
+                <span class="n">global_step</span><span class="p">,</span> <span class="n">state_dict_thread_count</span><span class="o">=</span><span class="mi">1</span>
+            <span class="p">)</span>
+        <span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="FSDPCheckpointManager.save_checkpoint">
 <a class="viewcode-back" href="../../../../build_api/trinity.trainer.verl.fsdp_checkpoint_manager.html#trinity.trainer.verl.fsdp_checkpoint_manager.FSDPCheckpointManager.save_checkpoint">[文档]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">save_checkpoint</span><span class="p">(</span>  <span class="c1"># noqa: C901</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">local_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">hdfs_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">global_step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
         <span class="n">max_ckpt_to_keep</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">model_state_dict_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">save_as_hf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -685,12 +759,8 @@ document.write(`
 <span class="sd">            hdfs_path (str, optional): HDFS path for saving the checkpoint (not implemented here).</span>
 <span class="sd">            global_step (int): Current training step.</span>
 <span class="sd">            max_ckpt_to_keep (int, optional): Maximum number of checkpoints to keep locally.</span>
-<span class="sd">            model_state_dict_only (bool): Whether to only save the model state dict (no optimizer, etc.).</span>
 <span class="sd">            save_as_hf (bool): Whether to force save the model in Hugging Face format.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">global_step</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">model_state_dict_only</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_upload_state_dict</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">global_step</span><span class="p">)</span>
-            <span class="k">return</span>
         <span class="k">if</span> <span class="n">local_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span>
 
@@ -722,6 +792,9 @@ document.write(`
                 <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
             <span class="p">),</span> <span class="s2">&quot;optimizer must be provided when checkpoint_contents.save includes [&#39;optimizer&#39;]&quot;</span>
 
+        <span class="n">state_dict_thread_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">checkpoint_thread_count</span> <span class="o">=</span> <span class="mi">0</span>
+
         <span class="c1"># every rank will save its own model and optim shard</span>
         <span class="n">state_dict_cfg</span> <span class="o">=</span> <span class="n">ShardedStateDictConfig</span><span class="p">(</span><span class="n">offload_to_cpu</span><span class="o">=</span><span class="kc">True</span> <span class="k">if</span> <span class="n">is_cuda_available</span> <span class="k">else</span> <span class="kc">False</span><span class="p">)</span>
         <span class="n">optim_cfg</span> <span class="o">=</span> <span class="n">ShardedOptimStateDictConfig</span><span class="p">(</span><span class="n">offload_to_cpu</span><span class="o">=</span><span class="kc">True</span> <span class="k">if</span> <span class="n">is_cuda_available</span> <span class="k">else</span> <span class="kc">False</span><span class="p">)</span>
@@ -730,81 +803,18 @@ document.write(`
             <span class="k">with</span> <span class="n">get_fsdp_state_ctx</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">StateDictType</span><span class="o">.</span><span class="n">SHARDED_STATE_DICT</span><span class="p">,</span> <span class="n">state_dict_cfg</span><span class="p">,</span> <span class="n">optim_cfg</span>
             <span class="p">):</span>
-                <span class="n">model_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                    <span class="n">local_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;model_world_size_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">world_size</span><span class="si">}</span><span class="s2">_rank_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="si">}</span><span class="s2">.pt&quot;</span>
-                <span class="p">)</span>
-                <span class="n">optim_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                    <span class="n">local_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;optim_world_size_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">world_size</span><span class="si">}</span><span class="s2">_rank_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="si">}</span><span class="s2">.pt&quot;</span>
-                <span class="p">)</span>
-                <span class="n">extra_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                    <span class="n">local_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;extra_state_world_size_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">world_size</span><span class="si">}</span><span class="s2">_rank_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="si">}</span><span class="s2">.pt&quot;</span>
-                <span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">should_save_model</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">previous_state_dict_step</span> <span class="o">!=</span> <span class="n">global_step</span><span class="p">:</span>
+                        <span class="n">state_dict_thread_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_save_model</span><span class="p">(</span><span class="n">local_path</span><span class="p">,</span> <span class="n">global_step</span><span class="p">)</span>
 
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">should_save_model</span> <span class="ow">or</span> <span class="n">model_state_dict_only</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">model_path</span><span class="p">):</span>
-                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_state_dict_thread</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                            <span class="c1"># If resuming from a checkpoint, notify synchronizer immediately</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">_notify_synchronizer_with_step_num</span><span class="p">(</span><span class="n">global_step</span><span class="p">)</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">model_state_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
-                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_state_dict_thread</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">_model_state_dict_thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">should_save_optimizer</span><span class="p">:</span>
+                    <span class="n">checkpoint_thread_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_save_optimizer</span><span class="p">(</span><span class="n">local_path</span><span class="p">,</span> <span class="n">global_step</span><span class="p">)</span>
 
-                        <span class="k">def</span><span class="w"> </span><span class="nf">_save_model_state_dict</span><span class="p">():</span>
-                            <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">model_state_dict</span><span class="p">,</span> <span class="n">model_path</span><span class="p">)</span>
-                            <span class="n">log_with_rank</span><span class="p">(</span>
-                                <span class="sa">f</span><span class="s2">&quot;Saved model to </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">model_path</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                                <span class="n">rank</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span>
-                                <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
-                            <span class="p">)</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">_notify_synchronizer_with_step_num</span><span class="p">(</span><span class="n">global_step</span><span class="p">)</span>
-
-                        <span class="bp">self</span><span class="o">.</span><span class="n">_model_state_dict_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span>
-                            <span class="n">target</span><span class="o">=</span><span class="n">_save_model_state_dict</span><span class="p">,</span>
-                        <span class="p">)</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">_model_state_dict_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
-
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">should_save_optimizer</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">model_state_dict_only</span><span class="p">:</span>
-                    <span class="n">optimizer_state_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_optimizer_state_dict_thread</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">_optimizer_state_dict_thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
-
-                    <span class="k">def</span><span class="w"> </span><span class="nf">_save_optimizer_state_dict</span><span class="p">():</span>
-                        <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">optimizer_state_dict</span><span class="p">,</span> <span class="n">optim_path</span><span class="p">)</span>
-                        <span class="n">log_with_rank</span><span class="p">(</span>
-                            <span class="sa">f</span><span class="s2">&quot;Saved optim to </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">optim_path</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                            <span class="n">rank</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span>
-                            <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
-                        <span class="p">)</span>
-
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_optimizer_state_dict_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span>
-                        <span class="n">target</span><span class="o">=</span><span class="n">_save_optimizer_state_dict</span><span class="p">,</span>
-                    <span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_optimizer_state_dict_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
-
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">should_save_extra</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">model_state_dict_only</span><span class="p">:</span>
-                    <span class="n">lr_scheduler_state_dict</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">lr_scheduler</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lr_scheduler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
-                    <span class="p">)</span>
-                    <span class="n">extra_state_dict</span> <span class="o">=</span> <span class="p">{</span>
-                        <span class="s2">&quot;lr_scheduler&quot;</span><span class="p">:</span> <span class="n">lr_scheduler_state_dict</span><span class="p">,</span>
-                        <span class="s2">&quot;rng&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_rng_state</span><span class="p">(),</span>
-                    <span class="p">}</span>
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extra_state_dict_thread</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">_extra_state_dict_thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
-
-                    <span class="k">def</span><span class="w"> </span><span class="nf">_save_extra_state_dict</span><span class="p">():</span>
-                        <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">extra_state_dict</span><span class="p">,</span> <span class="n">extra_path</span><span class="p">)</span>
-                        <span class="n">log_with_rank</span><span class="p">(</span>
-                            <span class="sa">f</span><span class="s2">&quot;Saved extra_state to </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">extra_path</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                            <span class="n">rank</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span>
-                            <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
-                        <span class="p">)</span>
-
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_extra_state_dict_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span>
-                        <span class="n">target</span><span class="o">=</span><span class="n">_save_extra_state_dict</span><span class="p">,</span>
-                    <span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_extra_state_dict_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">should_save_extra</span><span class="p">:</span>
+                    <span class="n">checkpoint_thread_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_save_extra_state</span><span class="p">(</span><span class="n">local_path</span><span class="p">,</span> <span class="n">global_step</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># Save HF tokenizer/processor and model config on rank 0 to huggingface/ directory, no matter whether</span>
@@ -851,12 +861,13 @@ document.write(`
         <span class="c1"># wait for everyone to dump to local</span>
         <span class="n">torch</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">should_save_hf_model</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">model_state_dict_only</span><span class="p">)</span> <span class="ow">or</span> <span class="n">save_as_hf</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">should_save_hf_model</span> <span class="ow">or</span> <span class="n">save_as_hf</span><span class="p">:</span>
             <span class="c1"># Only rank 0 will save hf model and,</span>
             <span class="c1"># offload to cpu to save LLMs which may be too large to fit in one GPU</span>
             <span class="n">state_dict</span> <span class="o">=</span> <span class="n">get_fsdp_full_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">offload_to_cpu</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">rank0_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">checkpoint_thread_count</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="n">hf_local_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">local_path</span><span class="p">,</span> <span class="s2">&quot;huggingface&quot;</span><span class="p">)</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">hf_local_path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
@@ -902,18 +913,24 @@ document.write(`
                         <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
                         <span class="n">log_only_rank_0</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                     <span class="p">)</span>
+                    <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_monitor</span><span class="o">.</span><span class="n">notify_finished</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">global_step</span><span class="p">))</span>
 
                 <span class="bp">self</span><span class="o">.</span><span class="n">_save_model_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span>
                     <span class="n">target</span><span class="o">=</span><span class="n">_save_model</span><span class="p">,</span>
                 <span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_save_model_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">processing_class</span><span class="o">.</span><span class="n">save_pretrained</span><span class="p">(</span><span class="n">hf_local_path</span><span class="p">)</span>
 
             <span class="c1"># wait for rank0 to dump hf_model to local</span>
             <span class="n">torch</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">model_state_dict_only</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">previous_saved_paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">local_path</span><span class="p">)</span></div>
+        <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_monitor</span><span class="o">.</span><span class="n">register_thread_count</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span>
+                <span class="n">global_step</span><span class="p">,</span>
+                <span class="n">state_dict_thread_count</span><span class="o">=</span><span class="n">state_dict_thread_count</span><span class="p">,</span>
+                <span class="n">checkpoint_thread_count</span><span class="o">=</span><span class="n">checkpoint_thread_count</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">previous_saved_paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">local_path</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="FSDPCheckpointManager.wait_on_save_thread">

@@ -681,6 +681,8 @@ document.write(`
 </li>
         <li><a href="build_api/trinity.trainer.verl.fsdp_workers.html#trinity.trainer.verl.fsdp_workers.CriticWorker.__init__">(trinity.trainer.verl.fsdp_workers.CriticWorker method)</a>
 </li>
+        <li><a href="build_api/trinity.trainer.verl_trainer.html#trinity.trainer.verl_trainer.CheckpointMonitor.__init__">(trinity.trainer.verl_trainer.CheckpointMonitor method)</a>
+</li>
         <li><a href="build_api/trinity.trainer.verl_trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.__init__">(trinity.trainer.verl_trainer.VerlPPOTrainerWrapper method)</a>
 </li>
         <li><a href="build_api/trinity.utils.dlc_utils.html#trinity.utils.dlc_utils.ClusterStatus.__init__">(trinity.utils.dlc_utils.ClusterStatus method)</a>
@@ -1005,6 +1007,8 @@ document.write(`
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.Config.checkpoint_root_dir">checkpoint_root_dir (trinity.common.config.Config attribute)</a>
 </li>
       <li><a href="build_api/trinity.manager.html#trinity.manager.Synchronizer.checkpoint_shard_counter">checkpoint_shard_counter (trinity.manager.Synchronizer attribute)</a>
+</li>
+      <li><a href="build_api/trinity.trainer.verl_trainer.html#trinity.trainer.verl_trainer.CheckpointMonitor">CheckpointMonitor (class in trinity.trainer.verl_trainer)</a>
 </li>
       <li><a href="build_api/trinity.common.experience.html#trinity.common.experience.Experience.chosen">chosen (trinity.common.experience.Experience attribute)</a>
 </li>
@@ -1565,6 +1569,8 @@ document.write(`
 </li>
         <li><a href="build_api/trinity.trainer.trainer.html#trinity.trainer.trainer.Trainer.get_actor">(trinity.trainer.trainer.Trainer class method)</a>
 </li>
+        <li><a href="build_api/trinity.trainer.verl_trainer.html#trinity.trainer.verl_trainer.CheckpointMonitor.get_actor">(trinity.trainer.verl_trainer.CheckpointMonitor class method)</a>
+</li>
       </ul></li>
       <li><a href="build_api/trinity.common.models.model.html#trinity.common.models.model.InferenceModel.get_api_server_url">get_api_server_url() (trinity.common.models.model.InferenceModel method)</a>
 
@@ -1590,10 +1596,10 @@ document.write(`
       </ul></li>
       <li><a href="build_api/trinity.manager.config_registry.config_registry.html#trinity.manager.config_registry.config_registry.ConfigRegistry.get_check_func">get_check_func() (trinity.manager.config_registry.config_registry.ConfigRegistry method)</a>
 </li>
-      <li><a href="build_api/trinity.common.models.utils.html#trinity.common.models.utils.get_checkpoint_dir_with_step_num">get_checkpoint_dir_with_step_num() (in module trinity.common.models.utils)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="build_api/trinity.common.models.utils.html#trinity.common.models.utils.get_checkpoint_dir_with_step_num">get_checkpoint_dir_with_step_num() (in module trinity.common.models.utils)</a>
+</li>
       <li><a href="build_api/trinity.manager.config_manager.html#trinity.manager.config_manager.ConfigManager.get_configs">get_configs() (trinity.manager.config_manager.ConfigManager method)</a>
 
       <ul>
@@ -2315,6 +2321,8 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.MonitorConfig.monitor_args">monitor_args (trinity.common.config.MonitorConfig attribute)</a>
 </li>
+      <li><a href="build_api/trinity.trainer.verl_trainer.html#trinity.trainer.verl_trainer.CheckpointMonitor.monitor_step">monitor_step() (trinity.trainer.verl_trainer.CheckpointMonitor method)</a>
+</li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.MonitorConfig.monitor_type">monitor_type (trinity.common.config.MonitorConfig attribute)</a>
 </li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.MonitorConfig">MonitorConfig (class in trinity.common.config)</a>
@@ -2365,14 +2373,14 @@ document.write(`
       </ul></li>
       <li><a href="build_api/trinity.common.constants.html#trinity.common.constants.SyncMethod.NCCL">NCCL (trinity.common.constants.SyncMethod attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.explorer.html#trinity.explorer.Explorer.need_eval">need_eval() (trinity.explorer.Explorer method)</a>
 
       <ul>
         <li><a href="build_api/trinity.explorer.explorer.html#trinity.explorer.explorer.Explorer.need_eval">(trinity.explorer.explorer.Explorer method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.trainer.html#trinity.trainer.Trainer.need_save">need_save() (trinity.trainer.Trainer method)</a>
 
       <ul>
@@ -2396,6 +2404,8 @@ document.write(`
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.ClusterConfig.node_num">node_num (trinity.common.config.ClusterConfig attribute)</a>
 </li>
       <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.Algorithm.norm_adv_by_std_in_grpo">norm_adv_by_std_in_grpo (trinity.common.verl_config.Algorithm attribute)</a>
+</li>
+      <li><a href="build_api/trinity.trainer.verl_trainer.html#trinity.trainer.verl_trainer.CheckpointMonitor.notify_finished">notify_finished() (trinity.trainer.verl_trainer.CheckpointMonitor method)</a>
 </li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.TaskPipelineConfig.num_process">num_process (trinity.common.config.TaskPipelineConfig attribute)</a>
 </li>
@@ -2622,6 +2632,8 @@ document.write(`
 </li>
         <li><a href="build_api/trinity.common.config.html#trinity.common.config.SynchronizerConfig.ray_namespace">(trinity.common.config.SynchronizerConfig attribute)</a>
 </li>
+        <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.Critic.ray_namespace">(trinity.common.verl_config.Critic attribute)</a>
+</li>
       </ul></li>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.RAFTReflectAlfworldWorkflow.re_explore_with_context">re_explore_with_context() (trinity.common.workflows.RAFTReflectAlfworldWorkflow method)</a>
 </li>
@@ -2672,6 +2684,8 @@ document.write(`
       <li><a href="build_api/trinity.manager.config_registry.config_registry.html#trinity.manager.config_registry.config_registry.ConfigRegistry.register_config">register_config() (trinity.manager.config_registry.config_registry.ConfigRegistry method)</a>
 </li>
       <li><a href="build_api/trinity.utils.registry.html#trinity.utils.registry.Registry.register_module">register_module() (trinity.utils.registry.Registry method)</a>
+</li>
+      <li><a href="build_api/trinity.trainer.verl_trainer.html#trinity.trainer.verl_trainer.CheckpointMonitor.register_thread_count">register_thread_count() (trinity.trainer.verl_trainer.CheckpointMonitor method)</a>
 </li>
       <li><a href="build_api/trinity.utils.registry.html#trinity.utils.registry.Registry">Registry (class in trinity.utils.registry)</a>
 </li>
@@ -3036,6 +3050,8 @@ document.write(`
       <ul>
         <li><a href="build_api/trinity.trainer.trainer.html#trinity.trainer.trainer.TrainEngineWrapper.save_state_dict">(trinity.trainer.trainer.TrainEngineWrapper method)</a>
 </li>
+        <li><a href="build_api/trinity.trainer.verl.fsdp_workers.html#trinity.trainer.verl.fsdp_workers.ActorRolloutRefWorker.save_state_dict">(trinity.trainer.verl.fsdp_workers.ActorRolloutRefWorker method)</a>
+</li>
         <li><a href="build_api/trinity.trainer.verl_trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.save_state_dict">(trinity.trainer.verl_trainer.VerlPPOTrainerWrapper method)</a>
 </li>
       </ul></li>
@@ -3243,10 +3259,10 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.manager.config_registry.model_config_manager.html#trinity.manager.config_registry.model_config_manager.set_project">set_project() (in module trinity.manager.config_registry.model_config_manager)</a>
 </li>
-      <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_reasoning_parser">set_reasoning_parser() (in module trinity.manager.config_registry.explorer_config_manager)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_reasoning_parser">set_reasoning_parser() (in module trinity.manager.config_registry.explorer_config_manager)</a>
+</li>
       <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_recompute_granularity">set_recompute_granularity() (in module trinity.manager.config_registry.trainer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.set_recompute_method">set_recompute_method() (in module trinity.manager.config_registry.trainer_config_manager)</a>
@@ -4197,6 +4213,10 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.trainer.verl.fsdp_workers.html#trinity.trainer.verl.fsdp_workers.CriticWorker.update_critic">update_critic() (trinity.trainer.verl.fsdp_workers.CriticWorker method)</a>
 </li>
+      <li><a href="build_api/trinity.trainer.verl_trainer.html#trinity.trainer.verl_trainer.CheckpointMonitor.update_latest_checkpoint_step">update_latest_checkpoint_step() (trinity.trainer.verl_trainer.CheckpointMonitor method)</a>
+</li>
+      <li><a href="build_api/trinity.trainer.verl_trainer.html#trinity.trainer.verl_trainer.CheckpointMonitor.update_latest_state_dict_step">update_latest_state_dict_step() (trinity.trainer.verl_trainer.CheckpointMonitor method)</a>
+</li>
       <li><a href="build_api/trinity.trainer.verl.dp_actor.html#trinity.trainer.verl.dp_actor.DataParallelPPOActor.update_policy">update_policy() (trinity.trainer.verl.dp_actor.DataParallelPPOActor method)</a>
 </li>
       <li><a href="build_api/trinity.common.models.vllm_worker.html#trinity.common.models.vllm_worker.WorkerExtension.update_weight">update_weight() (trinity.common.models.vllm_worker.WorkerExtension method)</a>
@@ -4211,10 +4231,10 @@ document.write(`
         <li><a href="build_api/trinity.trainer.verl_trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.upload_state_dict">(trinity.trainer.verl_trainer.VerlPPOTrainerWrapper method)</a>
 </li>
       </ul></li>
-      <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.Optim.use_checkpoint_opt_param_scheduler">use_checkpoint_opt_param_scheduler (trinity.common.verl_config.Optim attribute)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.Optim.use_checkpoint_opt_param_scheduler">use_checkpoint_opt_param_scheduler (trinity.common.verl_config.Optim attribute)</a>
+</li>
       <li><a href="build_api/trinity.manager.config_registry.trainer_config_manager.html#trinity.manager.config_registry.trainer_config_manager.use_critic">use_critic() (in module trinity.manager.config_registry.trainer_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.MegatronConfig.use_dist_checkpointing">use_dist_checkpointing (trinity.common.verl_config.MegatronConfig attribute)</a>

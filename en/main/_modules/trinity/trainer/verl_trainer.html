@@ -545,7 +545,8 @@ document.write(`
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">ray</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
@@ -576,6 +577,136 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.trainer.trainer</span><span class="w"> </span><span class="kn">import</span> <span class="n">TrainEngineWrapper</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.trainer.verl.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_data_metrics</span><span class="p">,</span> <span class="n">to_data_proto</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.utils.log</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
+
+
+<div class="viewcode-block" id="CheckpointMonitor">
+<a class="viewcode-back" href="../../../build_api/trinity.trainer.verl_trainer.html#trinity.trainer.verl_trainer.CheckpointMonitor">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CheckpointMonitor</span><span class="p">:</span>
+<div class="viewcode-block" id="CheckpointMonitor.__init__">
+<a class="viewcode-back" href="../../../build_api/trinity.trainer.verl_trainer.html#trinity.trainer.verl_trainer.CheckpointMonitor.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">default_local_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default_hdfs_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="s2">&quot;Checkpoint Monitor&quot;</span><span class="p">,</span> <span class="n">in_ray_actor</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_local_dir</span> <span class="o">=</span> <span class="n">default_local_dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_hdfs_dir</span> <span class="o">=</span> <span class="n">default_hdfs_dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">local_latest_checkpointed_iteration</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">default_local_dir</span><span class="p">,</span> <span class="s2">&quot;latest_checkpointed_iteration.txt&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">local_latest_state_dict_iteration</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">default_local_dir</span><span class="p">,</span> <span class="s2">&quot;latest_state_dict_iteration.txt&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_counter</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state_dict_counter</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_steps</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state_dict_steps</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">latest_checkpoint_step</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">latest_state_dict_step</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+
+<div class="viewcode-block" id="CheckpointMonitor.update_latest_checkpoint_step">
+<a class="viewcode-back" href="../../../build_api/trinity.trainer.verl_trainer.html#trinity.trainer.verl_trainer.CheckpointMonitor.update_latest_checkpoint_step">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_latest_checkpoint_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">step</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">latest_checkpoint_step</span>
+        <span class="k">if</span> <span class="n">step</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">latest_checkpoint_step</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">latest_checkpoint_step</span> <span class="o">=</span> <span class="n">step</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">local_latest_checkpointed_iteration</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">step</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">step</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_dict_counter</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_dict_counter</span><span class="p">[</span><span class="n">step</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_latest_state_dict_step</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
+
+        <span class="c1"># Upload checkpoint to hdfs</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_hdfs_dir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">local_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default_local_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;global_step_</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">hdfs_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default_hdfs_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;global_step_</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Uploading checkpoint to </span><span class="si">{</span><span class="n">hdfs_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">verl.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">hdfs_io</span>
+
+            <span class="n">hdfs_io</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">hdfs_path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">hdfs_io</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">src</span><span class="o">=</span><span class="n">local_path</span><span class="p">,</span> <span class="n">dst</span><span class="o">=</span><span class="n">hdfs_path</span><span class="p">,</span> <span class="n">dirs_exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Checkpoint at step </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2"> saved.&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CheckpointMonitor.update_latest_state_dict_step">
+<a class="viewcode-back" href="../../../build_api/trinity.trainer.verl_trainer.html#trinity.trainer.verl_trainer.CheckpointMonitor.update_latest_state_dict_step">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_latest_state_dict_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">step</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">latest_state_dict_step</span>
+        <span class="k">if</span> <span class="n">step</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">latest_state_dict_step</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">latest_state_dict_step</span> <span class="o">=</span> <span class="n">step</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">local_latest_state_dict_iteration</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">step</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="CheckpointMonitor.register_thread_count">
+<a class="viewcode-back" href="../../../build_api/trinity.trainer.verl_trainer.html#trinity.trainer.verl_trainer.CheckpointMonitor.register_thread_count">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">register_thread_count</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">state_dict_thread_count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">checkpoint_thread_count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">state_dict_thread_count</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state_dict_counter</span><span class="p">[</span><span class="n">step</span><span class="p">]</span> <span class="o">+=</span> <span class="n">state_dict_thread_count</span>
+        <span class="k">if</span> <span class="n">checkpoint_thread_count</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_counter</span><span class="p">[</span><span class="n">step</span><span class="p">]</span> <span class="o">+=</span> <span class="n">checkpoint_thread_count</span></div>
+
+
+<div class="viewcode-block" id="CheckpointMonitor.monitor_step">
+<a class="viewcode-back" href="../../../build_api/trinity.trainer.verl_trainer.html#trinity.trainer.verl_trainer.CheckpointMonitor.monitor_step">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">monitor_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">is_state_dict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">is_state_dict</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state_dict_steps</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_dict_counter</span><span class="p">[</span><span class="n">step</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">update_latest_state_dict_step</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_steps</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_counter</span><span class="p">[</span><span class="n">step</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_dict_counter</span><span class="p">[</span><span class="n">step</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">update_latest_checkpoint_step</span><span class="p">(</span><span class="n">step</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CheckpointMonitor.notify_finished">
+<a class="viewcode-back" href="../../../build_api/trinity.trainer.verl_trainer.html#trinity.trainer.verl_trainer.CheckpointMonitor.notify_finished">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">notify_finished</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">is_state_dict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">is_state_dict</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state_dict_counter</span><span class="p">[</span><span class="n">step</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">step</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_dict_steps</span> <span class="ow">or</span> <span class="n">step</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_steps</span>
+            <span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_dict_counter</span><span class="p">[</span><span class="n">step</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">update_latest_state_dict_step</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">step</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_steps</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_counter</span><span class="p">[</span><span class="n">step</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">update_latest_checkpoint_step</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_counter</span><span class="p">[</span><span class="n">step</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">step</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_steps</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_counter</span><span class="p">[</span><span class="n">step</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_dict_counter</span><span class="p">[</span><span class="n">step</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span>
+            <span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">update_latest_checkpoint_step</span><span class="p">(</span><span class="n">step</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CheckpointMonitor.get_actor">
+<a class="viewcode-back" href="../../../build_api/trinity.trainer.verl_trainer.html#trinity.trainer.verl_trainer.CheckpointMonitor.get_actor">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_actor</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">namespace</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">default_local_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">default_hdfs_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">ray</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">options</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;checkpoint_monitor&quot;</span><span class="p">,</span>
+                <span class="n">namespace</span><span class="o">=</span><span class="n">namespace</span><span class="p">,</span>
+                <span class="n">get_if_exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">default_local_dir</span><span class="o">=</span><span class="n">default_local_dir</span><span class="p">,</span> <span class="n">default_hdfs_dir</span><span class="o">=</span><span class="n">default_hdfs_dir</span><span class="p">)</span>
+        <span class="p">)</span></div>
+</div>
+
 
 
 <div class="viewcode-block" id="VerlPPOTrainerWrapper">
@@ -625,6 +756,12 @@ document.write(`
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_monitor</span> <span class="o">=</span> <span class="n">CheckpointMonitor</span><span class="o">.</span><span class="n">get_actor</span><span class="p">(</span>
+            <span class="n">namespace</span><span class="o">=</span><span class="n">global_config</span><span class="o">.</span><span class="n">synchronizer</span><span class="o">.</span><span class="n">ray_namespace</span><span class="p">,</span>
+            <span class="n">default_local_dir</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">default_local_dir</span><span class="p">,</span>
+            <span class="n">default_hdfs_dir</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">default_hdfs_dir</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="n">role_worker_mapping</span> <span class="o">=</span> <span class="p">{</span>
             <span class="n">Role</span><span class="o">.</span><span class="n">ActorRollout</span><span class="p">:</span> <span class="n">ray</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">ActorRolloutRefWorker</span><span class="p">),</span>
@@ -803,19 +940,14 @@ document.write(`
 <div class="viewcode-block" id="VerlPPOTrainerWrapper.save_state_dict">
 <a class="viewcode-back" href="../../../build_api/trinity.trainer.verl_trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.save_state_dict">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">save_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># checkpoint sync</span>
-        <span class="n">local_global_step_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">default_local_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;global_step_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">actor_local_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">default_local_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;global_step_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;actor&quot;</span>
         <span class="p">)</span>
-
-        <span class="n">actor_local_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">local_global_step_folder</span><span class="p">,</span> <span class="s2">&quot;actor&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">actor_local_path</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_wg</span><span class="o">.</span><span class="n">save_checkpoint</span><span class="p">(</span>
-                <span class="n">actor_local_path</span><span class="p">,</span>
-                <span class="kc">None</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="p">,</span>
-                <span class="n">max_ckpt_to_keep</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                <span class="n">model_state_dict_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_wg</span><span class="o">.</span><span class="n">save_state_dict</span><span class="p">(</span>
+            <span class="n">actor_local_path</span><span class="p">,</span>
+            <span class="n">global_step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_monitor</span><span class="o">.</span><span class="n">monitor_step</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="p">,</span> <span class="n">is_state_dict</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="VerlPPOTrainerWrapper.upload_state_dict">
@@ -917,14 +1049,6 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;local_global_step_folder: </span><span class="si">{</span><span class="n">local_global_step_folder</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">actor_local_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">local_global_step_folder</span><span class="p">,</span> <span class="s2">&quot;actor&quot;</span><span class="p">)</span>
 
-        <span class="n">actor_remote_path</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="kc">None</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">default_hdfs_dir</span> <span class="ow">is</span> <span class="kc">None</span>
-            <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">default_hdfs_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;global_step_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;actor&quot;</span>
-            <span class="p">)</span>
-        <span class="p">)</span>
-
         <span class="n">remove_previous_ckpt_in_save</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
             <span class="s2">&quot;remove_previous_ckpt_in_save&quot;</span><span class="p">,</span> <span class="kc">False</span>
         <span class="p">)</span>
@@ -946,7 +1070,6 @@ document.write(`
 
         <span class="bp">self</span><span class="o">.</span><span class="n">actor_rollout_wg</span><span class="o">.</span><span class="n">save_checkpoint</span><span class="p">(</span>
             <span class="n">actor_local_path</span><span class="p">,</span>
-            <span class="n">actor_remote_path</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="p">,</span>
             <span class="n">max_ckpt_to_keep</span><span class="o">=</span><span class="n">max_actor_ckpt_to_keep</span><span class="p">,</span>
             <span class="n">save_as_hf</span><span class="o">=</span><span class="n">save_as_hf</span><span class="p">,</span>
@@ -954,28 +1077,13 @@ document.write(`
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_critic</span><span class="p">:</span>
             <span class="n">critic_local_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">local_global_step_folder</span><span class="p">,</span> <span class="s2">&quot;critic&quot;</span><span class="p">)</span>
-            <span class="n">critic_remote_path</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="kc">None</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">default_hdfs_dir</span> <span class="ow">is</span> <span class="kc">None</span>
-                <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">default_hdfs_dir</span><span class="p">,</span>
-                    <span class="sa">f</span><span class="s2">&quot;global_step_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;critic&quot;</span><span class="p">,</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">critic_wg</span><span class="o">.</span><span class="n">save_checkpoint</span><span class="p">(</span>
                 <span class="n">critic_local_path</span><span class="p">,</span>
-                <span class="n">critic_remote_path</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="p">,</span>
                 <span class="n">max_ckpt_to_keep</span><span class="o">=</span><span class="n">max_critic_ckpt_to_keep</span><span class="p">,</span>
             <span class="p">)</span>
 
-        <span class="c1"># latest checkpointed iteration tracker (for atomic usage)</span>
-        <span class="n">local_latest_checkpointed_iteration</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">default_local_dir</span><span class="p">,</span> <span class="s2">&quot;latest_checkpointed_iteration.txt&quot;</span>
-        <span class="p">)</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">local_latest_checkpointed_iteration</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="p">))</span>
+        <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_monitor</span><span class="o">.</span><span class="n">monitor_step</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">global_steps</span><span class="p">))</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_load_checkpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">resume_mode</span> <span class="o">==</span> <span class="s2">&quot;disable&quot;</span><span class="p">:</span>
