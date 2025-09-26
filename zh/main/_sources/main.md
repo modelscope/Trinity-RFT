@@ -1,20 +1,20 @@
 ## 💡 什么是 Trinity-RFT？
 
-Trinity-RFT 是一个灵活、通用的大语言模型（LLM）强化微调（RFT）框架。其提供三个独立模块，满足不同用户的需求：
+Trinity-RFT 是一个灵活、通用的大语言模型（LLM）强化微调（RFT）框架。 其将 RFT 流程解耦为三个关键模块：**Explorer**、**Trainer** 和 **Buffer**，并面向不同背景和目标的用户提供相应功能：
 
-* 🤖 **Explorer**：面向智能体应用开发者。[[教程]](/tutorial/develop_workflow.md)
+* 🤖 面向智能体应用开发者。[[教程]](/tutorial/develop_workflow.md)
   - 训练智能体应用，以增强其在指定环境中完成任务的能力
   - 示例：[多轮交互](/tutorial/example_multi_turn.md)，[ReAct 智能体](/tutorial/example_react.md)
 
-* 🧠 **Trainer**：面向 RL 算法研究者。[[教程]](/tutorial/develop_algorithm.md)
+* 🧠 面向 RL 算法研究者。[[教程]](/tutorial/develop_algorithm.md)
   - 在简洁、可插拔的类中设计和验证新的 RL 算法
-  - 示例：[混合 RL 算法](/tutorial/example_mix_algo.md)
+  - 示例：[SFT/GRPO混合算法](/tutorial/example_mix_algo.md)
 
-* 🗄️ **Buffer**：面向数据工程师。[[教程]](/tutorial/develop_operator.md)
+* 📊 面向数据工程师。[[教程]](/tutorial/develop_operator.md)
   - 设计任务定制数据集，构建数据流水线以支持清洗、增强和人类参与场景
-  - 示例：[数据功能](/tutorial/example_data_functionalities.md)
+  - 示例：[数据处理](/tutorial/example_data_functionalities.md)
 
-Trinity-RFT 统一了上述三个模块，并提供以下核心特性：
+# 🌟 核心特性
 
 * **灵活的 RFT 模式：**
   - 支持同步/异步、on-policy/off-policy 以及在线/离线训练。采样与训练可分离运行，并可在多设备上独立扩展。

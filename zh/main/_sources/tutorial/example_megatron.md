@@ -4,84 +4,35 @@
 本指南将清晰地引导你如何使用 **Megatron-LM** 来训练模型。
 
 ```{note}
-本指南假设你已经按照 {ref}`安装指南 <Installation>` 设置好了环境。如果还没有，请先参考该指南。
+本指南假设你已经按照 {ref}`安装指南 <Installation>` 中的源码安装方式配置好了环境。如果还没有，请先参考该指南。
 ```
 
 ---
 
-## 步骤 1：安装
+## 步骤 1：安装 Megatron-LM 支持
 
-### 最低要求
-
-在开始之前，请确保你的系统满足以下要求：
-
-- **GPU**：至少 2 块 GPU（用于分布式训练）
-- **CUDA**：版本 12.4 或更高
-- **Python**：版本 3.10 或更高
-
----
-
-### 安装依赖项
-
-首先克隆仓库并创建虚拟环境：
+安装 Megatron-LM 相关依赖：
 
 ```bash
-# 克隆仓库
-git clone https://github.com/modelscope/Trinity-RFT
-cd Trinity-RFT
+pip install -e ".[megatron]"
+
+# for uv
+# uv sync -extra megatron
 ```
 
-#### 选项 A：使用 Conda
-
-```bash
-# 创建并激活新环境
-conda create -n trinity python=3.10
-conda activate trinity
-```
-
-#### 选项 B：使用 venv
-
-```bash
-# 创建并激活虚拟环境
-python3.10 -m venv .venv
-source .venv/bin/activate
-```
-
-#### 安装包
-
-以可编辑模式安装项目，并启用 Megatron 支持：
-
-```bash
-# 针对 bash 用户
-pip install -e .[megatron]
-
-# 针对 zsh 用户（需转义括号）
-pip install -e .\[megatron\]
-```
-
-#### 安装 Flash Attention
-
-安装基础依赖后，安装 `flash-attn`。编译过程可能需要几分钟，请耐心等待。
-
-```bash
-pip install flash-attn==2.8.1 -v
-```
-
-如果遇到安装问题，可尝试以下替代命令：
-
-```bash
-pip install flash-attn -v --no-build-isolation
-```
-
-#### 安装 Apex（来自 NVIDIA）
-
-最后，安装 NVIDIA 的 Apex 库以支持混合精度训练：
+另外还需要从源码安装 NVIDIA 的 Apex 库以支持混合精度训练：
 
 ```bash
 pip install -v --disable-pip-version-check --no-cache-dir --no-build-isolation \
     --config-settings "--build-option=--cpp_ext" \
     --config-settings "--build-option=--cuda_ext" \
-    --resume-retries 999 git+https://github.com/NVIDIA/apex.git
+    --resume-retries 10 git+https://github.com/NVIDIA/apex.git
+
+# for uv
+# uv pip install -v --disable-pip-version-check --no-cache-dir --no-build-isolation \
+#    --config-settings "--build-option=--cpp_ext" \
+#    --config-settings "--build-option=--cuda_ext" \
+#    --resume-retries 10 git+https://github.com/NVIDIA/apex.git
 ```
 
 ---
@@ -92,11 +43,10 @@ pip install -v --disable-pip-version-check --no-cache-dir --no-build-isolation \
 
 #### 构建 Docker 镜像
 
-```bash
-git clone https://github.com/modelscope/Trinity-RFT
-cd Trinity-RFT
+Trinity-RFT 提供了专门用于 Megatron-LM 的 Dockerfile，位于 `scripts/docker_for_megatron/Dockerfile`。
+可以使用以下命令构建镜像：
 
-# 构建镜像
+```bash
 docker build -f scripts/docker_for_megatron/Dockerfile -t trinity-rft-megatron:latest .
 ```
 

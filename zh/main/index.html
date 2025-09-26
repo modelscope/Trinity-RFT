@@ -584,8 +584,11 @@ document.write(`
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity-rft">💡 什么是 Trinity-RFT？</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">致谢</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">引用</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">🌟 核心特性</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">致谢</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">引用</a></li>
+</ul>
+</li>
 </ul>
             </nav>
         </div>
@@ -601,28 +604,30 @@ document.write(`
 <h1>欢迎来到 Trinity-RFT 的文档!<a class="headerlink" href="#trinity-rft" title="Link to this heading">#</a></h1>
 <section id="trinity-rft">
 <h2>💡 什么是 Trinity-RFT？<a class="headerlink" href="#trinity-rft" title="Link to this heading">#</a></h2>
-<p>Trinity-RFT 是一个灵活、通用的大语言模型（LLM）强化微调（RFT）框架。其提供三个独立模块，满足不同用户的需求：</p>
+<p>Trinity-RFT 是一个灵活、通用的大语言模型（LLM）强化微调（RFT）框架。 其将 RFT 流程解耦为三个关键模块：<strong>Explorer</strong>、<strong>Trainer</strong> 和 <strong>Buffer</strong>，并面向不同背景和目标的用户提供相应功能：</p>
 <ul class="simple">
-<li><p>🤖 <strong>Explorer</strong>：面向智能体应用开发者。<a class="reference internal" href="tutorial/develop_workflow.html"><span class="std std-doc">[教程]</span></a></p>
+<li><p>🤖 面向智能体应用开发者。<a class="reference internal" href="tutorial/develop_workflow.html"><span class="std std-doc">[教程]</span></a></p>
 <ul>
 <li><p>训练智能体应用，以增强其在指定环境中完成任务的能力</p></li>
 <li><p>示例：<a class="reference internal" href="tutorial/example_multi_turn.html"><span class="std std-doc">多轮交互</span></a>，<a class="reference internal" href="tutorial/example_react.html"><span class="std std-doc">ReAct 智能体</span></a></p></li>
 </ul>
 </li>
-<li><p>🧠 <strong>Trainer</strong>：面向 RL 算法研究者。<a class="reference internal" href="tutorial/develop_algorithm.html"><span class="std std-doc">[教程]</span></a></p>
+<li><p>🧠 面向 RL 算法研究者。<a class="reference internal" href="tutorial/develop_algorithm.html"><span class="std std-doc">[教程]</span></a></p>
 <ul>
 <li><p>在简洁、可插拔的类中设计和验证新的 RL 算法</p></li>
-<li><p>示例：<a class="reference internal" href="tutorial/example_mix_algo.html"><span class="std std-doc">混合 RL 算法</span></a></p></li>
+<li><p>示例：<a class="reference internal" href="tutorial/example_mix_algo.html"><span class="std std-doc">SFT/GRPO混合算法</span></a></p></li>
 </ul>
 </li>
-<li><p>🗄️ <strong>Buffer</strong>：面向数据工程师。<a class="reference internal" href="tutorial/develop_operator.html"><span class="std std-doc">[教程]</span></a></p>
+<li><p>📊 面向数据工程师。<a class="reference internal" href="tutorial/develop_operator.html"><span class="std std-doc">[教程]</span></a></p>
 <ul>
 <li><p>设计任务定制数据集，构建数据流水线以支持清洗、增强和人类参与场景</p></li>
-<li><p>示例：<a class="reference internal" href="tutorial/example_data_functionalities.html"><span class="std std-doc">数据功能</span></a></p></li>
+<li><p>示例：<a class="reference internal" href="tutorial/example_data_functionalities.html"><span class="std std-doc">数据处理</span></a></p></li>
 </ul>
 </li>
 </ul>
-<p>Trinity-RFT 统一了上述三个模块，并提供以下核心特性：</p>
+</section>
+<section class="tex2jax_ignore mathjax_ignore" id="id1">
+<h2>🌟 核心特性<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
 <ul>
 <li><p><strong>灵活的 RFT 模式：</strong></p>
 <ul class="simple">
@@ -649,9 +654,8 @@ document.write(`
 <img src="https://img.alicdn.com/imgextra/i1/O1CN01Ti0o4320RywoAuyhN_!!6000000006847-2-tps-3840-2134.png" alt="系统架构" width="600" />
 </li>
 </ul>
-</section>
-<section id="id1">
-<h2>致谢<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
+<section id="id2">
+<h3>致谢<a class="headerlink" href="#id2" title="Link to this heading">#</a></h3>
 <p>本项目基于许多优秀的开源项目构建，包括：</p>
 <ul class="simple">
 <li><p><a class="reference external" href="https://github.com/volcengine/verl">verl</a> 和 <a class="reference external" href="https://pytorch.org/docs/stable/fsdp.html">PyTorch's FSDP</a> 用于大模型训练；</p></li>
@@ -663,8 +667,8 @@ document.write(`
 <li><p>......</p></li>
 </ul>
 </section>
-<section id="id2">
-<h2>引用<a class="headerlink" href="#id2" title="Link to this heading">#</a></h2>
+<section id="id3">
+<h3>引用<a class="headerlink" href="#id3" title="Link to this heading">#</a></h3>
 <div class="highlight-bibtex notranslate"><div class="highlight"><pre><span></span><span class="nc">@misc</span><span class="p">{</span><span class="nl">trinity-rft</span><span class="p">,</span>
 <span class="w">      </span><span class="na">title</span><span class="p">=</span><span class="s">{Trinity-RFT: A General-Purpose and Unified Framework for Reinforcement Fine-Tuning of Large Language Models}</span><span class="p">,</span>
 <span class="w">      </span><span class="na">author</span><span class="p">=</span><span class="s">{Xuchen Pan and Yanxi Chen and Yushuo Chen and Yuchang Sun and Daoyuan Chen and Wenhao Zhang and Yuexiang Xie and Yilun Huang and Yilei Zhang and Dawei Gao and Yaliang Li and Bolin Ding and Jingren Zhou}</span><span class="p">,</span>
@@ -676,6 +680,7 @@ document.write(`
 <span class="p">}</span>
 </pre></div>
 </div>
+</section>
 </section>
 <div class="toctree-wrapper compound">
 </div>
@@ -724,8 +729,11 @@ document.write(`
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity-rft">💡 什么是 Trinity-RFT？</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">致谢</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">引用</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">🌟 核心特性</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">致谢</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">引用</a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 

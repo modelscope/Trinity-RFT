@@ -580,24 +580,15 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">步骤 1：安装</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">最低要求</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">安装依赖项</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#a-conda">选项 A：使用 Conda</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#b-venv">选项 B：使用 venv</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">安装包</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#flash-attention">安装 Flash Attention</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#apex-nvidia">安装 Apex（来自 NVIDIA）</a></li>
-</ul>
-</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">步骤 1：安装 Megatron-LM 支持</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#docker">替代方案：使用 Docker</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">构建 Docker 镜像</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">运行容器</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">构建 Docker 镜像</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">运行容器</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">步骤 2：配置并运行训练</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">步骤 2：配置并运行训练</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#megatron">Megatron 配置示例</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mixture-of-experts-moe">训练 Mixture-of-Experts (MoE) 模型</a></li>
 </ul>
@@ -618,97 +609,48 @@ document.write(`
 <p>本指南将清晰地引导你如何使用 <strong>Megatron-LM</strong> 来训练模型。</p>
 <div class="admonition note">
 <p class="admonition-title">备注</p>
-<p>本指南假设你已经按照 <a class="reference internal" href="trinity_installation.html#installation"><span class="std std-ref">安装指南</span></a> 设置好了环境。如果还没有，请先参考该指南。</p>
+<p>本指南假设你已经按照 <a class="reference internal" href="trinity_installation.html#installation"><span class="std std-ref">安装指南</span></a> 中的源码安装方式配置好了环境。如果还没有，请先参考该指南。</p>
 </div>
 <hr class="docutils" />
 <section id="id2">
-<h2>步骤 1：安装<a class="headerlink" href="#id2" title="Link to this heading">#</a></h2>
-<section id="id3">
-<h3>最低要求<a class="headerlink" href="#id3" title="Link to this heading">#</a></h3>
-<p>在开始之前，请确保你的系统满足以下要求：</p>
-<ul class="simple">
-<li><p><strong>GPU</strong>：至少 2 块 GPU（用于分布式训练）</p></li>
-<li><p><strong>CUDA</strong>：版本 12.4 或更高</p></li>
-<li><p><strong>Python</strong>：版本 3.10 或更高</p></li>
-</ul>
-</section>
-<hr class="docutils" />
-<section id="id4">
-<h3>安装依赖项<a class="headerlink" href="#id4" title="Link to this heading">#</a></h3>
-<p>首先克隆仓库并创建虚拟环境：</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># 克隆仓库</span>
-git<span class="w"> </span>clone<span class="w"> </span>https://github.com/modelscope/Trinity-RFT
-<span class="nb">cd</span><span class="w"> </span>Trinity-RFT
-</pre></div>
-</div>
-<section id="a-conda">
-<h4>选项 A：使用 Conda<a class="headerlink" href="#a-conda" title="Link to this heading">#</a></h4>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># 创建并激活新环境</span>
-conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>trinity<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.10
-conda<span class="w"> </span>activate<span class="w"> </span>trinity
-</pre></div>
-</div>
-</section>
-<section id="b-venv">
-<h4>选项 B：使用 venv<a class="headerlink" href="#b-venv" title="Link to this heading">#</a></h4>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># 创建并激活虚拟环境</span>
-python3.10<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
-<span class="nb">source</span><span class="w"> </span>.venv/bin/activate
-</pre></div>
-</div>
-</section>
-<section id="id5">
-<h4>安装包<a class="headerlink" href="#id5" title="Link to this heading">#</a></h4>
-<p>以可编辑模式安装项目，并启用 Megatron 支持：</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># 针对 bash 用户</span>
-pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="o">[</span>megatron<span class="o">]</span>
+<h2>步骤 1：安装 Megatron-LM 支持<a class="headerlink" href="#id2" title="Link to this heading">#</a></h2>
+<p>安装 Megatron-LM 相关依赖：</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[megatron]&quot;</span>
 
-<span class="c1"># 针对 zsh 用户（需转义括号）</span>
-pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="se">\[</span>megatron<span class="se">\]</span>
+<span class="c1"># for uv</span>
+<span class="c1"># uv sync -extra megatron</span>
 </pre></div>
 </div>
-</section>
-<section id="flash-attention">
-<h4>安装 Flash Attention<a class="headerlink" href="#flash-attention" title="Link to this heading">#</a></h4>
-<p>安装基础依赖后，安装 <code class="docutils literal notranslate"><span class="pre">flash-attn</span></code>。编译过程可能需要几分钟，请耐心等待。</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>flash-attn<span class="o">==</span><span class="m">2</span>.8.1<span class="w"> </span>-v
-</pre></div>
-</div>
-<p>如果遇到安装问题，可尝试以下替代命令：</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>flash-attn<span class="w"> </span>-v<span class="w"> </span>--no-build-isolation
-</pre></div>
-</div>
-</section>
-<section id="apex-nvidia">
-<h4>安装 Apex（来自 NVIDIA）<a class="headerlink" href="#apex-nvidia" title="Link to this heading">#</a></h4>
-<p>最后，安装 NVIDIA 的 Apex 库以支持混合精度训练：</p>
+<p>另外还需要从源码安装 NVIDIA 的 Apex 库以支持混合精度训练：</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-v<span class="w"> </span>--disable-pip-version-check<span class="w"> </span>--no-cache-dir<span class="w"> </span>--no-build-isolation<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--config-settings<span class="w"> </span><span class="s2">&quot;--build-option=--cpp_ext&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--config-settings<span class="w"> </span><span class="s2">&quot;--build-option=--cuda_ext&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--resume-retries<span class="w"> </span><span class="m">999</span><span class="w"> </span>git+https://github.com/NVIDIA/apex.git
+<span class="w">    </span>--resume-retries<span class="w"> </span><span class="m">10</span><span class="w"> </span>git+https://github.com/NVIDIA/apex.git
+
+<span class="c1"># for uv</span>
+<span class="c1"># uv pip install -v --disable-pip-version-check --no-cache-dir --no-build-isolation \</span>
+<span class="c1">#    --config-settings &quot;--build-option=--cpp_ext&quot; \</span>
+<span class="c1">#    --config-settings &quot;--build-option=--cuda_ext&quot; \</span>
+<span class="c1">#    --resume-retries 10 git+https://github.com/NVIDIA/apex.git</span>
 </pre></div>
 </div>
-</section>
-</section>
 <hr class="docutils" />
 <section id="docker">
 <h3>替代方案：使用 Docker<a class="headerlink" href="#docker" title="Link to this heading">#</a></h3>
 <p>我们提供了 Docker 配置以简化环境管理。</p>
-<section id="id6">
-<h4>构建 Docker 镜像<a class="headerlink" href="#id6" title="Link to this heading">#</a></h4>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/modelscope/Trinity-RFT
-<span class="nb">cd</span><span class="w"> </span>Trinity-RFT
-
-<span class="c1"># 构建镜像</span>
-docker<span class="w"> </span>build<span class="w"> </span>-f<span class="w"> </span>scripts/docker_for_megatron/Dockerfile<span class="w"> </span>-t<span class="w"> </span>trinity-rft-megatron:latest<span class="w"> </span>.
+<section id="id3">
+<h4>构建 Docker 镜像<a class="headerlink" href="#id3" title="Link to this heading">#</a></h4>
+<p>Trinity-RFT 提供了专门用于 Megatron-LM 的 Dockerfile，位于 <code class="docutils literal notranslate"><span class="pre">scripts/docker_for_megatron/Dockerfile</span></code>。
+可以使用以下命令构建镜像：</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>build<span class="w"> </span>-f<span class="w"> </span>scripts/docker_for_megatron/Dockerfile<span class="w"> </span>-t<span class="w"> </span>trinity-rft-megatron:latest<span class="w"> </span>.
 </pre></div>
 </div>
 <blockquote>
 <div><p>💡 你可以在构建前自定义 Dockerfile —— 例如添加 pip 镜像源或设置 API 密钥。</p>
 </div></blockquote>
 </section>
-<section id="id7">
-<h4>运行容器<a class="headerlink" href="#id7" title="Link to this heading">#</a></h4>
+<section id="id4">
+<h4>运行容器<a class="headerlink" href="#id4" title="Link to this heading">#</a></h4>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--gpus<span class="w"> </span>all<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--shm-size<span class="o">=</span><span class="s2">&quot;64g&quot;</span><span class="w"> </span><span class="se">\</span>
@@ -723,8 +665,8 @@ docker<span class="w"> </span>build<span class="w"> </span>-f<span class="w"> </
 </section>
 </section>
 <hr class="docutils" />
-<section id="id8">
-<h2>步骤 2：配置并运行训练<a class="headerlink" href="#id8" title="Link to this heading">#</a></h2>
+<section id="id5">
+<h2>步骤 2：配置并运行训练<a class="headerlink" href="#id5" title="Link to this heading">#</a></h2>
 <p>大多数配置设置已在 <a class="reference internal" href="example_reasoning_basic.html"><span class="std std-doc">快速入门指南</span></a> 中涵盖。此处我们仅关注 <strong>Megatron-LM 特有</strong> 的配置。</p>
 <section id="megatron">
 <h3>Megatron 配置示例<a class="headerlink" href="#megatron" title="Link to this heading">#</a></h3>
@@ -861,24 +803,15 @@ docker<span class="w"> </span>build<span class="w"> </span>-f<span class="w"> </
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">步骤 1：安装</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">最低要求</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">安装依赖项</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#a-conda">选项 A：使用 Conda</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#b-venv">选项 B：使用 venv</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">安装包</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#flash-attention">安装 Flash Attention</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#apex-nvidia">安装 Apex（来自 NVIDIA）</a></li>
-</ul>
-</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">步骤 1：安装 Megatron-LM 支持</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#docker">替代方案：使用 Docker</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">构建 Docker 镜像</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">运行容器</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">构建 Docker 镜像</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">运行容器</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">步骤 2：配置并运行训练</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">步骤 2：配置并运行训练</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#megatron">Megatron 配置示例</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mixture-of-experts-moe">训练 Mixture-of-Experts (MoE) 模型</a></li>
 </ul>

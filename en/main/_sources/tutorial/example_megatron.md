@@ -4,35 +4,29 @@
 This guide walks you through how to train models using **Megatron-LM** in a clear way.
 
 ```{note}
-This guide assumes you have already set up your environment following {ref}`Installation <Installation>`. If you haven't done so, please refer to that guide first.
+This guide assumes you have already set up your environment from source code following {ref}`Installation <Installation>`. If you haven't done so, please refer to that guide first.
 ```
 
 ---
 
-## Step 1: Installation
-
-
+## Step 1: Install Megatron-LM Support
 
 Install the project in editable mode with Megatron support:
 
 ```bash
-# For bash users
-pip install -e .[megatron]
+pip install -e ".[megatron]"
 
-# For zsh users (escape the brackets)
-pip install -e .\[megatron\]
+# for uv
+# uv sync -extra megatron
 ```
 
-
-#### Install Apex (from NVIDIA)
-
-Finally, install NVIDIA's Apex library for mixed-precision training:
+Then, install NVIDIA's Apex library for mixed-precision training:
 
 ```bash
 pip install -v --disable-pip-version-check --no-cache-dir --no-build-isolation \
     --config-settings "--build-option=--cpp_ext" \
     --config-settings "--build-option=--cuda_ext" \
-    --resume-retries 999 git+https://github.com/NVIDIA/apex.git
+    --resume-retries 10 git+https://github.com/NVIDIA/apex.git
 ```
 
 ---
@@ -43,11 +37,10 @@ We provide a Docker setup to simplify environment management.
 
 #### Build the Docker Image
 
-```bash
-git clone https://github.com/modelscope/Trinity-RFT
-cd Trinity-RFT
 
-# Build the image
+Trinity-RFT provides a dedicated Dockerfile for Megatron-LM located at `scripts/docker_for_megatron/Dockerfile`. You can build the image using the following command:
+
+```bash
 docker build -f scripts/docker_for_megatron/Dockerfile -t trinity-rft-megatron:latest .
 ```
 

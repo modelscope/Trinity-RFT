@@ -584,8 +584,7 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-installation">Step 1: Installation</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#install-apex-from-nvidia">Install Apex (from NVIDIA)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-install-megatron-lm-support">Step 1: Install Megatron-LM Support</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#alternative-use-docker">Alternative: Use Docker</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#build-the-docker-image">Build the Docker Image</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#run-the-container">Run the Container</a></li>
@@ -614,40 +613,33 @@ document.write(`
 <p>This guide walks you through how to train models using <strong>Megatron-LM</strong> in a clear way.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This guide assumes you have already set up your environment following <a class="reference internal" href="trinity_installation.html#installation"><span class="std std-ref">Installation</span></a>. If you haven’t done so, please refer to that guide first.</p>
+<p>This guide assumes you have already set up your environment from source code following <a class="reference internal" href="trinity_installation.html#installation"><span class="std std-ref">Installation</span></a>. If you haven’t done so, please refer to that guide first.</p>
 </div>
 <hr class="docutils" />
-<section id="step-1-installation">
-<h2>Step 1: Installation<a class="headerlink" href="#step-1-installation" title="Link to this heading">#</a></h2>
+<section id="step-1-install-megatron-lm-support">
+<h2>Step 1: Install Megatron-LM Support<a class="headerlink" href="#step-1-install-megatron-lm-support" title="Link to this heading">#</a></h2>
 <p>Install the project in editable mode with Megatron support:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># For bash users</span>
-pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="o">[</span>megatron<span class="o">]</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[megatron]&quot;</span>
 
-<span class="c1"># For zsh users (escape the brackets)</span>
-pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="se">\[</span>megatron<span class="se">\]</span>
+<span class="c1"># for uv</span>
+<span class="c1"># uv sync -extra megatron</span>
 </pre></div>
 </div>
-<section id="install-apex-from-nvidia">
-<h3>Install Apex (from NVIDIA)<a class="headerlink" href="#install-apex-from-nvidia" title="Link to this heading">#</a></h3>
-<p>Finally, install NVIDIA’s Apex library for mixed-precision training:</p>
+<p>Then, install NVIDIA’s Apex library for mixed-precision training:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-v<span class="w"> </span>--disable-pip-version-check<span class="w"> </span>--no-cache-dir<span class="w"> </span>--no-build-isolation<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--config-settings<span class="w"> </span><span class="s2">&quot;--build-option=--cpp_ext&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--config-settings<span class="w"> </span><span class="s2">&quot;--build-option=--cuda_ext&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--resume-retries<span class="w"> </span><span class="m">999</span><span class="w"> </span>git+https://github.com/NVIDIA/apex.git
+<span class="w">    </span>--resume-retries<span class="w"> </span><span class="m">10</span><span class="w"> </span>git+https://github.com/NVIDIA/apex.git
 </pre></div>
 </div>
-</section>
 <hr class="docutils" />
 <section id="alternative-use-docker">
 <h3>Alternative: Use Docker<a class="headerlink" href="#alternative-use-docker" title="Link to this heading">#</a></h3>
 <p>We provide a Docker setup to simplify environment management.</p>
 <section id="build-the-docker-image">
 <h4>Build the Docker Image<a class="headerlink" href="#build-the-docker-image" title="Link to this heading">#</a></h4>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/modelscope/Trinity-RFT
-<span class="nb">cd</span><span class="w"> </span>Trinity-RFT
-
-<span class="c1"># Build the image</span>
-docker<span class="w"> </span>build<span class="w"> </span>-f<span class="w"> </span>scripts/docker_for_megatron/Dockerfile<span class="w"> </span>-t<span class="w"> </span>trinity-rft-megatron:latest<span class="w"> </span>.
+<p>Trinity-RFT provides a dedicated Dockerfile for Megatron-LM located at <code class="docutils literal notranslate"><span class="pre">scripts/docker_for_megatron/Dockerfile</span></code>. You can build the image using the following command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>build<span class="w"> </span>-f<span class="w"> </span>scripts/docker_for_megatron/Dockerfile<span class="w"> </span>-t<span class="w"> </span>trinity-rft-megatron:latest<span class="w"> </span>.
 </pre></div>
 </div>
 <blockquote>
@@ -808,8 +800,7 @@ If you prefer not to use MBridge, set <code class="docutils literal notranslate"
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-installation">Step 1: Installation</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#install-apex-from-nvidia">Install Apex (from NVIDIA)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-install-megatron-lm-support">Step 1: Install Megatron-LM Support</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#alternative-use-docker">Alternative: Use Docker</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#build-the-docker-image">Build the Docker Image</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#run-the-container">Run the Container</a></li>
