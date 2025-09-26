@@ -85,7 +85,8 @@ class Synchronizer:
                 try:
                     with open(local_latest_state_dict_iteration, "r") as f:
                         latest_model_version = int(f.read().strip())
-                except Exception:
+                except (IOError, ValueError) as e:
+                    self.logger.warning(f"Failed to read or parse state dict iteration file: {e}")
                     continue
                 if latest_model_version > self.model_version:
                     self.logger.info(
@@ -98,7 +99,7 @@ class Synchronizer:
                         self.config.trainer,
                     )
                     self.logger.info(
-                        f"Synchronizer has loaded model state dict from checkpoint {self.model_version}."
+                        f"Synchronizer has loaded model state dict from checkpoint {latest_model_version}."
                     )
                     await self.set_model_state_dict(model_state_dict, latest_model_version)
             await asyncio.sleep(1)

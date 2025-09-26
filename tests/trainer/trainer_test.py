@@ -709,13 +709,13 @@ class TestTrainerCheckpointSave(unittest.TestCase):
                 try:
                     with open(state_dict_iteration_file, "r") as f:
                         state_dict_iteration = int(f.read().strip())
-                except Exception:
+                except (IOError, ValueError):
                     pass
             if os.path.exists(checkpoint_iteration_file):
                 try:
                     with open(checkpoint_iteration_file, "r") as f:
                         checkpoint_iteration = int(f.read().strip())
-                except Exception:
+                except (IOError, ValueError):
                     pass
 
             if state_dict_iteration > 0:
@@ -777,7 +777,7 @@ class TestTrainerCheckpointSave(unittest.TestCase):
                             "special_tokens_map.json",
                         },
                     )
-                print(f"Checkpoint check at {state_dict_iteration} iteration passed.")
+                print(f"Checkpoint check at {checkpoint_iteration} iteration passed.")
 
             time.sleep(1)
         trainer_process.join()
