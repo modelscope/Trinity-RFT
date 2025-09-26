@@ -238,6 +238,7 @@ class Critic:
     profile: ProfileConfig = field(default_factory=ProfileConfig)
     data_loader_seed: Optional[int] = None
     load_weight: bool = True
+    ray_namespace: str = ""  # automatically generated
 
 
 @dataclass
@@ -393,6 +394,7 @@ class veRLConfig:
         self.synchronizer = config.synchronizer
         self.actor_rollout_ref.synchronizer = config.synchronizer
         self.actor_rollout_ref.explorer_name = config.explorer.name
+        self.critic.ray_namespace = config.synchronizer.ray_namespace
 
         # Actor / Critic config
         self.actor_rollout_ref.model.path = config.model.model_path

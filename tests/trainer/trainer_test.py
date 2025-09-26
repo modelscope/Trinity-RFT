@@ -461,6 +461,19 @@ def run_explorer(config: Config) -> None:
     explore(config)
 
 
+def run_both(config: Config) -> None:
+    ray.init(
+        namespace=config.ray_namespace,
+        runtime_env={
+            "env_vars": {
+                LOG_DIR_ENV_VAR: config.log.save_dir,
+                LOG_LEVEL_ENV_VAR: "INFO",
+            }
+        },
+    )
+    both(config)
+
+
 @parameterized_class(
     ("use_priority_queue", "strategy"),
     [(False, "fsdp"), (True, "fsdp"), (True, "megatron")],
@@ -621,6 +634,157 @@ class TestFullyAsyncMode(unittest.TestCase):
     def tearDown(self):
         checkpoint_path = get_checkpoint_path()
         shutil.rmtree(os.path.join(checkpoint_path, "unittest"))
+
+
+@parameterized_class(
+    ("strategy",),
+    [
+        ("fsdp",),
+        ("megatron",),
+    ],
+)
+class TestTrainerCheckpointSave(unittest.TestCase):
+    def setUp(self):
+        if multiprocessing.get_start_method(allow_none=True) != "spawn":
+            multiprocessing.set_start_method("spawn", force=True)
+        self.config = get_template_config()
+        self.config.buffer.total_epochs = 2
+        self.config.buffer.batch_size = 4
+        self.config.model.model_path = get_model_path()
+        self.config.explorer.rollout_model.engine_type = "vllm_async"
+        self.config.algorithm.repeat_times = 3
+        self.config.project = "Trainer-unittest"
+        self.config.name = f"trainer-{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        self.config.monitor.monitor_type = "tensorboard"
+        self.config.checkpoint_root_dir = get_checkpoint_path()
+        self.config.synchronizer.sync_interval = 2
+        self.config.synchronizer.sync_method = SyncMethod.NCCL
+        self.config.explorer.eval_interval = 4
+
+    def test_trainer(self):
+        """Test the checkpoint saving."""
+        self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("countdown")
+        self.config.buffer.explorer_input.eval_tasksets.append(
+            get_unittest_dataset_config("countdown", "test")
+        )
+        self.config.buffer.explorer_input.eval_tasksets.append(
+            get_unittest_dataset_config("copy_countdown", "test")
+        )
+        self.config.trainer.save_interval = 4
+        self.config.synchronizer.sync_method = SyncMethod.CHECKPOINT
+        self.config.check_and_update()
+        _trainer_config = self.config.trainer.trainer_config
+        if self.strategy == "megatron":
+            _trainer_config.actor_rollout_ref.actor.strategy = "megatron"
+            _trainer_config.actor_rollout_ref.actor.megatron.tensor_model_parallel_size = 2
+            _trainer_config.actor_rollout_ref.ref.megatron.tensor_model_parallel_size = 2
+            _trainer_config.critic.strategy = "megatron"
+            _trainer_config.critic.megatron.tensor_model_parallel_size = 2
+        _trainer_config.trainer.max_actor_ckpt_to_keep = 2
+        _trainer_config.trainer.max_critic_ckpt_to_keep = 2
+
+        trainer_process = multiprocessing.Process(target=run_both, args=(self.config,))
+        trainer_process.start()
+
+        default_local_dir = _trainer_config.trainer.default_local_dir
+        state_dict_iteration = checkpoint_iteration = 0
+        state_dict_iteration_file = os.path.join(
+            default_local_dir, "latest_state_dict_iteration.txt"
+        )
+        checkpoint_iteration_file = os.path.join(
+            default_local_dir, "latest_checkpointed_iteration.txt"
+        )
+
+        megatron_dist_ckpt_items = {
+            "__0_1.distcp",
+            "__1_0.distcp",
+            "common.pt",
+            ".metadata",
+            "metadata.json",
+            "__1_1.distcp",
+            "__0_0.distcp",
+        }
+        while state_dict_iteration < 8 and checkpoint_iteration < 8:
+            if os.path.exists(state_dict_iteration_file):
+                try:
+                    with open(state_dict_iteration_file, "r") as f:
+                        state_dict_iteration = int(f.read().strip())
+                except Exception:
+                    pass
+            if os.path.exists(checkpoint_iteration_file):
+                try:
+                    with open(checkpoint_iteration_file, "r") as f:
+                        checkpoint_iteration = int(f.read().strip())
+                except Exception:
+                    pass
+
+            if state_dict_iteration > 0:
+                iteration_dir = os.path.join(
+                    default_local_dir, f"global_step_{state_dict_iteration}", "actor"
+                )
+                if self.strategy == "fsdp":
+                    items = os.listdir(iteration_dir)
+                    self.assertIn("model_world_size_2_rank_0.pt", items)
+                    self.assertIn("model_world_size_2_rank_1.pt", items)
+                else:  # megatron
+                    dist_ckpt_dir = os.path.join(iteration_dir, "dist_ckpt")
+                    self.assertEqual(
+                        set(os.listdir(dist_ckpt_dir)),
+                        megatron_dist_ckpt_items,
+                    )
+                    huggingface_dir = os.path.join(iteration_dir, "huggingface")
+                    items = os.listdir(huggingface_dir)
+                    self.assertIn("config.json", items)
+                    self.assertIn("generation_config.json", items)
+                print(f"State dict check at {state_dict_iteration} iteration passed.")
+
+            if checkpoint_iteration > 0:
+                for sub_dir_name in ["actor", "critic"]:
+                    iteration_dir = os.path.join(
+                        default_local_dir, f"global_step_{checkpoint_iteration}", sub_dir_name
+                    )
+                    if self.strategy == "fsdp":
+                        self.assertEqual(
+                            set(os.listdir(iteration_dir)),
+                            {
+                                "model_world_size_2_rank_0.pt",
+                                "model_world_size_2_rank_1.pt",
+                                "optim_world_size_2_rank_1.pt",
+                                "optim_world_size_2_rank_0.pt",
+                                "extra_state_world_size_2_rank_0.pt",
+                                "extra_state_world_size_2_rank_1.pt",
+                                "huggingface",
+                                "fsdp_config.json",
+                            },
+                        )
+                    else:  # megatron
+                        dist_ckpt_dir = os.path.join(iteration_dir, "dist_ckpt")
+                        self.assertEqual(
+                            set(os.listdir(dist_ckpt_dir)),
+                            megatron_dist_ckpt_items,
+                        )
+                    huggingface_dir = os.path.join(iteration_dir, "huggingface")
+                    self.assertEqual(
+                        set(os.listdir(huggingface_dir)) - {"generation_config.json"},
+                        {
+                            "vocab.json",
+                            "merges.txt",
+                            "added_tokens.json",
+                            "tokenizer.json",
+                            "config.json",
+                            "chat_template.jinja",
+                            "tokenizer_config.json",
+                            "special_tokens_map.json",
+                        },
+                    )
+                print(f"Checkpoint check at {state_dict_iteration} iteration passed.")
+
+            time.sleep(1)
+
+    def tearDown(self):
+        # remove dir only when the test passed
+        # shutil.rmtree(self.config.checkpoint_job_dir)
+        pass
 
 
 class TestTrainerMIX(BaseTrainerCase):

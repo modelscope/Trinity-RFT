@@ -82,8 +82,11 @@ class Synchronizer:
         )
         while True:
             if os.path.exists(local_latest_state_dict_iteration):
-                with open(local_latest_state_dict_iteration, "r") as f:
-                    latest_model_version = int(f.read().strip())
+                try:
+                    with open(local_latest_state_dict_iteration, "r") as f:
+                        latest_model_version = int(f.read().strip())
+                except Exception:
+                    continue
                 if latest_model_version > self.model_version:
                     self.logger.info(
                         f"Synchronizer has found a new model state dict at step {latest_model_version}."
