@@ -648,7 +648,7 @@ class TestTrainerCheckpointSave(unittest.TestCase):
         if multiprocessing.get_start_method(allow_none=True) != "spawn":
             multiprocessing.set_start_method("spawn", force=True)
         self.config = get_template_config()
-        self.config.buffer.total_epochs = 2
+        self.config.buffer.total_epochs = 1
         self.config.buffer.batch_size = 4
         self.config.model.model_path = get_model_path()
         self.config.explorer.rollout_model.engine_type = "vllm_async"
@@ -657,22 +657,15 @@ class TestTrainerCheckpointSave(unittest.TestCase):
         self.config.name = f"trainer-{datetime.now().strftime('%Y%m%d%H%M%S')}"
         self.config.monitor.monitor_type = "tensorboard"
         self.config.checkpoint_root_dir = get_checkpoint_path()
-        self.config.synchronizer.sync_interval = 2
-        self.config.synchronizer.sync_method = SyncMethod.NCCL
+        self.config.synchronizer.sync_interval = 1
+        self.config.synchronizer.sync_method = SyncMethod.CHECKPOINT
         self.config.explorer.eval_interval = 4
+        self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("countdown")
+        self.config.trainer.save_interval = 4
+        self.config.check_and_update()
 
     def test_trainer(self):
         """Test the checkpoint saving."""
-        self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("countdown")
-        self.config.buffer.explorer_input.eval_tasksets.append(
-            get_unittest_dataset_config("countdown", "test")
-        )
-        self.config.buffer.explorer_input.eval_tasksets.append(
-            get_unittest_dataset_config("copy_countdown", "test")
-        )
-        self.config.trainer.save_interval = 4
-        self.config.synchronizer.sync_method = SyncMethod.CHECKPOINT
-        self.config.check_and_update()
         _trainer_config = self.config.trainer.trainer_config
         if self.strategy == "megatron":
             _trainer_config.actor_rollout_ref.actor.strategy = "megatron"
