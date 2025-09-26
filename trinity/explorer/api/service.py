@@ -1,7 +1,7 @@
 import asyncio
 import time
 from collections import deque
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import torch
 
@@ -13,6 +13,8 @@ from trinity.utils.log import get_logger
 
 
 class ExplorerService:
+    """Manages the lifecycle and operations of the Explorer API service."""
+
     def __init__(self, explorer: Explorer, listen_address: str = "localhost", port: int = 8010):
         self.logger = get_logger(__name__)
         self.explorer = explorer
@@ -27,10 +29,13 @@ class ExplorerService:
         self.running_models: deque[int] = deque()  # indices of running models
         self.sync_task_map: Dict[asyncio.Future, int] = {}  # sync task -> model index
         self.latest_model_version = 0
-        self.experience_queue = asyncio.Queue()
+        self.experience_queue: deque[Experience] = deque()
+        self.session_level_experience_queue: Dict[int, deque[Experience]] = {}
+        self.queue_lock = asyncio.Lock()
         self.experience_count = 0
+        self.session_count = 0
 
-    async def serve(self):
+    async def serve(self) -> None:
         from trinity.explorer.api.api import run_app
 
         if self.running:
@@ -48,7 +53,7 @@ class ExplorerService:
         )
         self.sync_model_weights_task = asyncio.create_task(self.model_weights_sync_loop())
 
-    async def model_weights_sync_loop(self):
+    async def model_weights_sync_loop(self) -> None:
         self.logger.info("Starting model weights synchronization loop.")
         while self.running:
             for idx in list(self.running_models):
@@ -71,7 +76,7 @@ class ExplorerService:
             self.latest_model_version = version
             self.logger.info(f"Updated latest model version to {version}.")
 
-    async def _wait_for_sync_start(self, index: int):
+    async def _wait_for_sync_start(self, index: int) -> None:
         start_time = time.time()
         while time.time() - start_time < self.max_timeout:
             current_load = await self.models[index].get_current_load()
@@ -85,7 +90,7 @@ class ExplorerService:
             f"Timeout waiting for model {index} to be free for synchronization. Current load: {current_load}"
         )
 
-    async def _sync_model_weights(self, task: asyncio.Future):
+    async def _sync_model_weights(self, task: asyncio.Future) -> None:
         index = self.sync_task_map.pop(task)
         latest_version = self.latest_model_version  # capture the latest version
         if task.cancelled():
@@ -121,7 +126,7 @@ class ExplorerService:
             *[self._sync_model_weights(idx) for idx in list(self.requiring_sync_models)]
         )
 
-    async def record_experience(self, response):
+    async def record_experience(self, response, session_id: Optional[int] = None):
         experiences = []
         for choice in response["choices"]:
             exp = Experience(
@@ -135,16 +140,43 @@ class ExplorerService:
                 prompt_length=len(response["prompt_token_ids"]),
                 response_text=choice.get("message", {}).get("content", ""),
             )
+            if session_id is not None:
+                exp.eid.task = session_id
             experiences.append(exp)
         self.experience_count += len(experiences)
-        for exp in experiences:
-            await self.experience_queue.put(exp)
+
+        # Store experiences in session-level queue if session_id is provided
+        if session_id is not None:
+            async with self.queue_lock:
+                if session_id not in self.session_level_experience_queue:
+                    self.session_level_experience_queue[session_id] = deque()
+                self.session_level_experience_queue[session_id].extend(experiences)
+        else:
+            async with self.queue_lock:
+                self.experience_queue.extend(experiences)
 
     async def get_all_experiences(self) -> List:
-        experiences = []
-        while not self.experience_queue.empty():
-            experiences.append(await self.experience_queue.get())
-        return experiences
+        async with self.queue_lock:
+            experiences = list(self.experience_queue)
+            self.experience_queue.clear()
+            return experiences
+
+    def allocate_session(self) -> int:
+        self.session_count += 1
+        return self.session_count
+
+    async def record_feedback(self, session_id: int, reward: float):
+        exps = []
+        async with self.queue_lock:
+            if session_id in self.session_level_experience_queue:
+                exps = list(self.session_level_experience_queue.pop(session_id))
+        if not exps:
+            self.logger.warning(f"No experiences found for session_id {session_id}.")
+            return
+        for exp in exps:
+            exp.reward = reward
+        async with self.queue_lock:
+            self.experience_queue.extend(exps)
 
     async def shutdown(self):
         if not self.running:

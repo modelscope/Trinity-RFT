@@ -25,7 +25,9 @@ async def chat_completions(request: Request):
             content=f"Error forwarding request to model at {url}: {traceback.format_exc()}",
         )
     resp_data = resp.json()
-    await request.app.state.service.record_experience(resp_data)
+    await request.app.state.service.record_experience(
+        resp_data, session_id=body.get("session_id", None)
+    )
     return JSONResponse(content=resp_data)
 
 
@@ -50,6 +52,30 @@ async def metrics(request: Request):
     metrics = request.app.state.service.collect_metrics()
     metrics["explore_step_num"] = request.app.state.service.explorer.explore_step_num
     return JSONResponse(content=metrics)
+
+
+@app.get("/allocate")
+async def allocate(request: Request):
+    """Allocate a new session."""
+    return JSONResponse(content={"session_id": request.app.state.service.allocate_session()})
+
+
+@app.post("/feedback")
+async def feedback(request: Request):
+    """Receive feedback for the current session."""
+    body = await request.json()
+    session_id = body.get("session_id", None)
+    reward = body.get("reward", None)
+    if session_id is None or reward is None:
+        return JSONResponse(
+            status_code=400, content={"error": "session_id and reward are required"}
+        )
+    if not isinstance(session_id, int) or not isinstance(reward, (int, float)):
+        return JSONResponse(
+            status_code=400, content={"error": "session_id must be int and reward must be float"}
+        )
+    await request.app.state.service.record_feedback(session_id, reward)
+    return JSONResponse(content={"status": "success"})
 
 
 async def serve_http(app: FastAPI, host: str, port: int = None):
