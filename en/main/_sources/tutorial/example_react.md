@@ -1,142 +1,192 @@
-# Multi-Step ReAct
+# ReAct Agent Training
 
-This example serves as a demonstration for adapting the Trinity-RFT training workflow to your own agentic project, through our OpenAI-compatible `ModelWrapper` class.
+This section demonstrates how to train a ReAct Agent using Trinity-RFT. We use [AgentScope](https://github.com/agentscope-ai/agentscope) as an example and leverage its built-in ReAct agent to solve GSM8K math problems. Developers can refer to this example to adapt Trinity-RFT's training to their own agent projects.
 
-Here, we use the [AgentScope](https://github.com/modelscope/agentscope) framework as an example, but you can certainly use any other framework, as Trinity offers great flexibility. This example fine-tunes a model on the GSM8K math dataset by leveraging an agent that uses ReAct-style reasoning with native tool calls.
+## Key Features
 
-## Key Features Demonstrated
+Before diving into the example, let's review several important features of Trinity-RFT for Agentic-RL training.
 
-This example highlights several advanced capabilities of the Trinity-RFT framework:
+### Compatible with Various Agent Frameworks
 
-### Seamless Integration with External Agent Frameworks
-Trinity-RFT is designed to be highly modular. You can easily embed complex, pre-existing agent logic from external frameworks like AgentScope directly into a Trinity `Workflow`.
+There are many agent development frameworks, each with different model wrapping and invocation methods. To maximize compatibility, Trinity-RFT wraps the `openai.OpenAI` and `openai.AsyncOpenAI` interfaces. As long as your agent framework supports calling models via the OpenAI interface, you can train agents using Trinity-RFT's `OpenAI` or `AsyncOpenAI` instances. You can also implement your own agent directly using Trinity-RFT's OpenAI interface without any framework.
 
-- **No Need for Rewrites**: You don't have to re-implement the intricate logic of your agent (e.g., the ReAct loop, memory management, or tool invocation) within Trinity.
-- **Focus on High-Level Orchestration**: As shown in our `AgentScopeReactV2MathWorkflow`, the Trinity workflow simply initializes and calls the external agent's `reply` method. Trinity abstracts away the underlying complexity, allowing you to focus on the high-level task orchestration and reward design.
+### No Need to Modify Agent Code
 
-### General Multi-Step Training
-Modern agentic tasks often involve multiple steps of reasoning, tool use, and observation. Trinity-RFT natively supports training across these Multi-Step interactions.
+Training agents requires collecting dialogue history and other relevant information (such as `token_id`, `logprobs`) during agent execution, which often requires modifying source code of the agent application. Trinity-RFT avoids this by wrapping the `openai.OpenAI` or `openai.AsyncOpenAI` instances, automatically collecting all necessary training information during model calls, so that you don't need to change your agent code.
 
-- **Step-Wise Experience Generation**: Instead of only learning from the final answer, Trinity can treat each step within an agent's reasoning trajectory as a distinct learning opportunity.
-- **Credit Assignment**: The reward for solving a task is propagated back to all experiences within the successful trajectory, enabling the model to learn the entire reasoning chain, not just the final response. This is controlled by the `advantage_fn` in the config.
+### Supports Multi-Turn Interaction
 
-### Native Tool Calling Support
-Trinity-RFT's inference engine and training pipeline are built to support the native OpenAI `tool_calls` format.
+Agent tasks often involve multiple steps of reasoning and actioning. Trinity-RFT natively supports RL training for tasks with multi-turn interactions, without limiting the number of turns (just ensure each LLM call's sequence length does not exceed the model's maximum). This allows you to design dynamic-length interactions based on task complexity. Trinity-RFT's dynamic synchronization mechanism enables training to start as soon as enough samples are collected, improving efficiency.
 
-- **Direct Training on Tool Use**: The framework allows the model to be trained on deciding *when* to call a tool, *which* tool to call, and *what* arguments to use, all formatted in the standard `tool_calls` convention.
-- **Interoperability**: This native support ensures seamless integration with any service or environment that consumes the OpenAI API format, such as an `MCP_server` (Multi-Agent Collaboration Platform) or other tool-use evaluators.
+## Implementation
 
-## How It Works
+We will walk through how to train a ReAct agent implemented with AgentScope using Trinity-RFT.
 
-Below we show you how to perform this step-by-step.
+### 1. Change the OpenAI client of your Agent
 
-### The Workflow (`workflow.py`)
+The {class}`AgentScopeReActAgent <trinity.common.workflows.agentscope.react.react_agent.AgentScopeReActAgent>` wraps AgentScope's ReAct agent and injects Trinity-RFT's `openai.AsyncOpenAI` instance during initialization. The subsequent execution is handled by the AgentScope agent itself, with no code modification required.
 
-The core logic is encapsulated in the `AgentScopeReactMathWorkflow` class.
+```python
+# A simplified version of trinity.common.workflows.agentscope.react.react_agent.AgentScopeReActAgent
+class AgentScopeReActAgent:
+    def __init__(
+        self,
+        openai_client: openai.AsyncOpenAI,  # provided by Trinity-RFT
+        # some other params
+    ):
+        """Initialize the AgentScope ReAct agent with specified tools and model.
 
-1.  **Initialization (`__init__`)**:
-    - It first initializes the AgentScope environment and the desired agent (`ReActAgent`).
-    - The most critical integration step is injecting Trinity's model client into the AgentScope agent:
-      ```python
-      self.openai_client = model.get_openai_client()
-      # self.openai_client = get_openai_async_client() # or async client depend on whether you are using async openai client
-      # ...
-      self.agent.model.client = self.openai_client
-      ```
-      This ensures that all API calls made by the AgentScope agent are routed through Trinity's `ModelWrapper`, which records the entire conversation history.
+        Args:
+            openai_client (openai.AsyncOpenAI): An instance of AsyncOpenAI client.
+        """
+        self.agent_model = OpenAIChatModel(
+            api_key="EMPTY",
+            model_name=model_name,
+            generate_kwargs=generate_kwargs,
+            stream=False,
+        )
+        # patch the OpenAIChatModel to use the openai_client provided by Trinity-RFT
+        self.agent_model.client = openai_client
+        self.agent = ReActAgent(
+            name="react_agent",
+            model=self.agent_model,
+        )
 
-2.  **Execution (`run`)**:
-    - The `run` method is remarkably simple. It just passes the task description to the agent.
-      ```python
-      content = self.agent.reply(msg).content # your agent logic
-      ```
-    - After the agent completes its multi-step reasoning and produces a final answer, Trinity extracts all the intermediate turns from the model's history:
-      ```python
-      experiences = self.model.extract_experience_from_history(clear_history=True)
-      ```
-    - A reward is calculated based on the final answer and is applied to all `Experience` objects generated from the trajectory. These experiences are then sent to the buffer for training.
+    async def reply(self, query):
+        """Generate a response based on the query."""
+        # no need to modify your agent logic
+        return await self.agent.reply(
+            Msg("user", query, role="user")
+        )
+```
 
-### Configuration
+```{note}
+We encapsulate AgentScope's ReAct agent in a new class here to clearly demonstrate the process of replacing the OpenAI client.
+In practice, you can directly modify the OpenAI client of your existing agent without creating a new class.
+```
 
-The configuration file fine-tunes the behavior of the entire system. Here are the key parameters for this example:
 
-#### Native Tool Calling Settings
+### 2. Implement the Training Workflow
 
-These settings in the `explorer.rollout_model` section configure the vLLM-based engine to generate and parse OpenAI-compatible tool calls.
-We use the `Qwen3` model and host model with vLLM. The configuration for different model can be found in [vLLM Toolcalls](https://docs.vllm.ai/en/stable/features/tool_calling.html#qwen-models)
+The {class}`AgentScopeReActWorkflow <trinity.common.workflows.agentscope.react.react_workflow.AgentScopeReActWorkflow>` demonstrates the agent training workflow. Its core `run_async` method includes three steps:
 
+  1. Call the agent to complete the task and return the result.
+  2. Evaluate the result and calculate the reward.
+  3. Collect trainable data generated during task execution and combine it with the reward to create training samples (`Experience`).
+
+```python
+# A simplified version of trinity.common.workflows.agentscope.react.react_workflow.AgentScopeReActWorkflow
+class AgentScopeReActWorkflow(Workflow):
+    def __init__(
+        self,
+        *,
+        task: Task,
+        model: ModelWrapper,
+        auxiliary_models: Optional[List[openai.OpenAI]] = None,
+    ):
+        # initialize the agent
+        self.agent = AgentScopeReActAgent(
+            openai_client=model.get_openai_async_client(),
+            # some other params
+        )
+        # get query from the task
+        self.query = task.raw_task.get(task.format_args.prompt_key)  # type: ignore [index]
+
+    async def run_async(self):
+        """Run the workflow asynchronously."""
+        # Step 1: call the ReAct agent to solve the task
+        response = await self.agent.reply(self.query)
+        # Step 2: calculate the reward based on the response
+        reward = await self.calculate_reward(response)
+        # Step 3: construct experiences from the interaction history and return them
+        return self.construct_experiences(reward)
+
+    async def calculate_reward(self, response) -> float:
+        """Calculate the reward based on the response."""
+        # your reward logic
+
+    def construct_experiences(self, reward: float) -> List[Experience]:
+        """Construct experiences from the agent's interaction history.
+
+        Returns:
+            List: A list of Experience objects.
+        """
+        # Extract all interaction history generated by this task
+        exps = self.model.extract_experience_from_history()
+        # update the reward for each experience
+        for exp in exps:
+            exp.reward = reward
+        return exps
+
+```
+
+### 3. Training Configuration
+
+Trinity-RFT uses configuration files to control the training workflow. Below are key configuration parameters for this example.
+
+#### Inference Model Configuration
+
+The `explorer.rollout_model` section configures the model used by the agent application. Key parameters include:
 
 ```yaml
 explorer:
   rollout_model:
     # ...
-    enable_auto_tool_choice: true # Enables the model to generate `tool_calls`
-    tool_call_parser: hermes       # Specifies the parser for formatting tool call outputs
-    reasoning_parser: deepseek_r1  # Helps in parsing the model's thought process
-    enable_thinking: true          # Enables the model to generate intermediate "thoughts"
+    enable_openai_client: true     # Enable OpenAI Client
+    enable_history: true           # Enable automatic call history recording
+    enable_auto_tool_choice: true  # Allow model to generate `tool_calls`
+    tool_call_parser: hermes       # Specify parser for tool call outputs
+    reasoning_parser: deepseek_r1  # Helps parse model reasoning process
+    enable_thinking: true          # Enable thinking (mainly for Qwen3 series models)
 ```
 
-#### Multi-Step Training Strategy
+#### Multi-Step Training Algorithm
 
-This setting in the `algorithm` section defines how experiences from a Multi-Step rollout are processed.
+The `algorithm` section configures the training algorithm for the agent application. Key parameters include:
 
 ```yaml
 algorithm:
   algorithm_type: grpo
-  advantage_fn: step_wise_grpo # Key for Multi-Step training
+  advantage_fn: step_wise_grpo # The key for multi-step training. This strategy tells Trinity to create independent training samples for each step in the agent's execution path. The `grpo` algorithm then uses these samples to update the model.
 ```
--   `step_wise_grpo`: This strategy tells Trinity to create a distinct training sample for each step in the agent's execution path. The `grpo` algorithm then uses these samples to update the model.
 
-#### Asynchronous Synchronization for Efficiency
+#### Dynamic Synchronization Configuration
 
-Because Multi-Step rollouts produce a variable number of experiences, waiting for a fixed number of *rollouts* is inefficient. We use a dynamic synchronization strategy.
+Since agent applications may have variable interaction rounds and sample counts, we enable Trinity-RFT's dynamic synchronization to improve efficiency. Relevant configuration:
 
 ```yaml
 synchronizer:
-  sync_style: dynamic_by_explorer # Start training when enough experiences are ready
-  sync_interval: 2
+  sync_style: dynamic_by_explorer # Trainer starts training immediately when enough data is generated, rather than padding to a fixed size, improving efficiency
+  sync_interval: 2  # Check for model parameter updates after every two batches
 ```
--   `sync_style: dynamic_by_explorer`: The trainer starts a training job as soon as the buffer has collected enough *experiences* (i.e., individual turns), rather than waiting for a fixed number of full agent trajectories. This significantly improves GPU utilization and training throughput.
 
-## How to Run the Example
+## Running the Example
 
-1.  **Prerequisites**: Ensure you have Trinity installed, along with the dependencies for this example (e.g., `AgentScope`). Please refer to [Agentscope Github link](https://github.com/agentscope-ai/agentscope/tree/v0).
+1. Install dependencies: Follow the [Installation Guide](./trinity_installation.md) to install Trinity-RFT and AgentScope v1.0 or above.
 
-> **NOTE**: This example requires AgentScope from either:
->  - Commit: `ad13ed5dacecb79d20abf626769f8c7d7a7d2afb`
->  - Branch: [`v0`](https://github.com/agentscope-ai/agentscope/tree/v0)
+```bash
+pip install agentscope>=1.0.4
+```
 
-2. Download the model you want to use, and fill in the configuration files in `examples/agentscope_tool_react/agentscopev0_tool_react_gsm8k.yaml` or `examples/agentscope_tool_react/agentscopev0_tool_react_dapo.yaml`
+2. Download model and dataset:
 
-3.  **Launch the training job**: Run the following command from the root directory of the repository.
+```bash
+huggingface-cli download Qwen/Qwen3-8B
+huggingface-cli download openai/gsm8k --repo-type dataset
+```
 
-    ```bash
-    trinity run --config examples/agentscope_tool_react/agentscopev0_tool_react_gsm8k.yaml
-    ```
+3. Start the training task:
 
-    or
+  ```bash
+  # Navigate to the Trinity-RFT root directory
+  cd /path/to/Trinity-RFT
 
-    ```bash
-    trinity run --config examples/agentscope_tool_react/agentscopev0_tool_react_dapo.yaml
-    ```
+  # Run the training for GSM8k dataset:
+  trinity run --config examples/agentscope_react/gsm8k.yaml
+  ```
 
+## Results
 
-The example here for gsm8k dataset is really simple and it can converge in a few minutes on 8 H20 GPUs.
+Reward curve:
 
 ![](../../assets/agentscope_gsm8k_reward.png)
-
-The example here for dapo dataset take a little bit longer, but it also converges.
-
-![](../../assets/agentscope_dapo_reward.png)
-
-We can also see that the model generally start to use more tool calls to solve the problems.
-
-![](../../assets/agentscope_dapo_turns.png)
-
-We can also update the agentscope version to v1, and training on the qwen3-4b-instrcut-2507
-
-![](../../assets/agentscope_dapo_qwen3-4B_reward.png)
-
-## Summary
-
-This example is simple but demonstrates the power and flexibility of Trinity for training complex, Multi-Step agents that use tools. By seamlessly integrating external agentic logic and providing native support for Multi-Step training and tool calls, Trinity-RFT empowers you to fine-tune models on sophisticated, realistic tasks with high efficiency.

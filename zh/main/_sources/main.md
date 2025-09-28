@@ -44,7 +44,7 @@ Trinity-RFT 是一个灵活、通用的大语言模型（LLM）强化微调（RF
 + [verl](https://github.com/volcengine/verl) 和 [PyTorch's FSDP](https://pytorch.org/docs/stable/fsdp.html) 用于大模型训练；
 + [vLLM](https://github.com/vllm-project/vllm) 用于大模型推理；
 + [Data-Juicer](https://github.com/modelscope/data-juicer?tab=readme-ov-file) 用于数据处理管道；
-+ [AgentScope](https://github.com/modelscope/agentscope) 用于智能体工作流；
++ [AgentScope](https://github.com/agentscope-ai/agentscope) 用于智能体工作流；
 + [Ray](https://github.com/ray-project/ray) 用于分布式系统；
 + 我们也从 [OpenRLHF](https://github.com/OpenRLHF/OpenRLHF)、[TRL](https://github.com/huggingface/trl) 和 [ChatLearn](https://github.com/alibaba/ChatLearn) 等框架中汲取了灵感；
 + ......

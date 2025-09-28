@@ -1,6 +1,14 @@
 trinity.common.workflows package
 ================================
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   trinity.common.workflows.agentscope
+
 Submodules
 ----------
 

@@ -44,7 +44,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'build_api/trinity.common.workflows';</script>
     <link rel="index" title="索引" href="../genindex.html" />
     <link rel="search" title="搜索" href="../search.html" />
-    <link rel="next" title="trinity.common.workflows.customized_math_workflows module" href="trinity.common.workflows.customized_math_workflows.html" />
+    <link rel="next" title="trinity.common.workflows.agentscope package" href="trinity.common.workflows.agentscope.html" />
     <link rel="prev" title="trinity.common.rewards.utils module" href="trinity.common.rewards.utils.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="zh-CN"/>
@@ -194,7 +194,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_async_mode.html">异步 RFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_multi_turn.html">多轮对话拼接任务</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_step_wise.html">通用多轮 RFT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tutorial/example_react.html">ReAct 例子</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/example_react.html">ReAct Agent 训练</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_search_email.html">邮件搜索例子</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_dpo.html">离线 DPO 和 SFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial/example_megatron.html">Megatron-LM 支持</a></li>
@@ -363,6 +363,7 @@
 </ul>
 </details></li>
 <li class="toctree-l3 current active has-children"><a class="current reference internal" href="#">trinity.common.workflows package</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.workflows.agentscope.html">trinity.common.workflows.agentscope package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.workflows.customized_math_workflows.html">trinity.common.workflows.customized_math_workflows module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.workflows.customized_toolcall_workflows.html">trinity.common.workflows.customized_toolcall_workflows module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="trinity.common.workflows.eval_workflow.html">trinity.common.workflows.eval_workflow module</a></li>
@@ -580,6 +581,7 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#subpackages">Subpackages</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#submodules">Submodules</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-trinity.common.workflows">Module contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.Task"><code class="docutils literal notranslate"><span class="pre">Task</span></code></a><ul class="nav section-nav flex-column">
@@ -757,6 +759,15 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.AgentScopeV1ReactSearchWorkflow.run_async"><code class="docutils literal notranslate"><span class="pre">AgentScopeV1ReactSearchWorkflow.run_async()</span></code></a></li>
 </ul>
 </li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.AgentScopeReActWorkflow"><code class="docutils literal notranslate"><span class="pre">AgentScopeReActWorkflow</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.AgentScopeReActWorkflow.__init__"><code class="docutils literal notranslate"><span class="pre">AgentScopeReActWorkflow.__init__()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.AgentScopeReActWorkflow.run_async"><code class="docutils literal notranslate"><span class="pre">AgentScopeReActWorkflow.run_async()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.AgentScopeReActWorkflow.calculate_reward"><code class="docutils literal notranslate"><span class="pre">AgentScopeReActWorkflow.calculate_reward()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.AgentScopeReActWorkflow.construct_experiences"><code class="docutils literal notranslate"><span class="pre">AgentScopeReActWorkflow.construct_experiences()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.AgentScopeReActWorkflow.asynchronous"><code class="docutils literal notranslate"><span class="pre">AgentScopeReActWorkflow.asynchronous</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.AgentScopeReActWorkflow.repeatable"><code class="docutils literal notranslate"><span class="pre">AgentScopeReActWorkflow.repeatable</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.EmailSearchWorkflow"><code class="docutils literal notranslate"><span class="pre">EmailSearchWorkflow</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.EmailSearchWorkflow.__init__"><code class="docutils literal notranslate"><span class="pre">EmailSearchWorkflow.__init__()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.EmailSearchWorkflow.repeatable"><code class="docutils literal notranslate"><span class="pre">EmailSearchWorkflow.repeatable</span></code></a></li>
@@ -811,6 +822,25 @@ document.write(`
                   
   <section id="trinity-common-workflows-package">
 <h1>trinity.common.workflows package<a class="headerlink" href="#trinity-common-workflows-package" title="Link to this heading">#</a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading">#</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="trinity.common.workflows.agentscope.html">trinity.common.workflows.agentscope package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="trinity.common.workflows.agentscope.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trinity.common.workflows.agentscope.react.html">trinity.common.workflows.agentscope.react package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.workflows.agentscope.react.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="trinity.common.workflows.agentscope.react.html#module-trinity.common.workflows.agentscope.react">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trinity.common.workflows.agentscope.html#module-trinity.common.workflows.agentscope">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">#</a></h2>
 <div class="toctree-wrapper compound">
@@ -1847,6 +1877,66 @@ We use the AgentScope V1 version here.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="trinity.common.workflows.AgentScopeReActWorkflow">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.common.workflows.</span></span><span class="sig-name descname"><span class="pre">AgentScopeReActWorkflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.workflows.workflow.html#trinity.common.workflows.workflow.Task" title="trinity.common.workflows.workflow.Task"><span class="pre">Task</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.ModelWrapper" title="trinity.common.models.model.ModelWrapper"><span class="pre">ModelWrapper</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">OpenAI</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/agentscope/react/react_workflow.html#AgentScopeReActWorkflow"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.common.workflows.AgentScopeReActWorkflow" title="Link to this definition">#</a></dt>
+<dd><p>基类：<a class="reference internal" href="trinity.common.workflows.workflow.html#trinity.common.workflows.workflow.Workflow" title="trinity.common.workflows.workflow.Workflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">Workflow</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.workflows.AgentScopeReActWorkflow.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.workflows.workflow.html#trinity.common.workflows.workflow.Task" title="trinity.common.workflows.workflow.Task"><span class="pre">Task</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.ModelWrapper" title="trinity.common.models.model.ModelWrapper"><span class="pre">ModelWrapper</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">OpenAI</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/agentscope/react/react_workflow.html#AgentScopeReActWorkflow.__init__"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.common.workflows.AgentScopeReActWorkflow.__init__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.workflows.AgentScopeReActWorkflow.run_async">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run_async</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/agentscope/react/react_workflow.html#AgentScopeReActWorkflow.run_async"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.common.workflows.AgentScopeReActWorkflow.run_async" title="Link to this definition">#</a></dt>
+<dd><p>Run the workflow asynchronously.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.workflows.AgentScopeReActWorkflow.calculate_reward">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">calculate_reward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/workflows/agentscope/react/react_workflow.html#AgentScopeReActWorkflow.calculate_reward"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.common.workflows.AgentScopeReActWorkflow.calculate_reward" title="Link to this definition">#</a></dt>
+<dd><p>Calculate the reward for the workflow.</p>
+<dl class="field-list simple">
+<dt class="field-odd">返回<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The reward value or a dictionary of reward value.</p>
+</dd>
+<dt class="field-even">返回类型<span class="colon">:</span></dt>
+<dd class="field-even"><p>Union[float, Dict[str, float]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trinity.common.workflows.AgentScopeReActWorkflow.construct_experiences">
+<span class="sig-name descname"><span class="pre">construct_experiences</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reward</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><span class="pre">Experience</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/trinity/common/workflows/agentscope/react/react_workflow.html#AgentScopeReActWorkflow.construct_experiences"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.common.workflows.AgentScopeReActWorkflow.construct_experiences" title="Link to this definition">#</a></dt>
+<dd><p>Construct experiences from the agent's interaction history.</p>
+<dl class="field-list simple">
+<dt class="field-odd">参数<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>reward</strong> (<em>Union</em><em>[</em><em>float</em><em>, </em><em>Dict</em><em>[</em><em>str</em><em>, </em><em>float</em><em>]</em><em>]</em>) -- The reward value to assign to each experience.</p>
+</dd>
+<dt class="field-even">返回<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of Experience objects.</p>
+</dd>
+<dt class="field-odd">返回类型<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="trinity.common.workflows.AgentScopeReActWorkflow.asynchronous">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">asynchronous</span></span><a class="headerlink" href="#trinity.common.workflows.AgentScopeReActWorkflow.asynchronous" title="Link to this definition">#</a></dt>
+<dd><p>AgentScope's ReAct agent only supports asynchronous calls, so we set this to True.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="trinity.common.workflows.AgentScopeReActWorkflow.repeatable">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">repeatable</span></span><a class="headerlink" href="#trinity.common.workflows.AgentScopeReActWorkflow.repeatable" title="Link to this definition">#</a></dt>
+<dd><p>This workflow is not repeatable.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="trinity.common.workflows.EmailSearchWorkflow">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trinity.common.workflows.</span></span><span class="sig-name descname"><span class="pre">EmailSearchWorkflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.workflows.workflow.html#trinity.common.workflows.workflow.Task" title="trinity.common.workflows.workflow.Task"><span class="pre">Task</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.ModelWrapper" title="trinity.common.models.model.ModelWrapper"><span class="pre">ModelWrapper</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">OpenAI</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/email_searcher/workflow.html#EmailSearchWorkflow"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.common.workflows.EmailSearchWorkflow" title="Link to this definition">#</a></dt>
 <dd><p>基类：<a class="reference internal" href="trinity.common.workflows.workflow.html#trinity.common.workflows.workflow.Workflow" title="trinity.common.workflows.workflow.Workflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">Workflow</span></code></a></p>
@@ -2046,11 +2136,11 @@ ruler_scores: List[float]</p>
       </div>
     </a>
     <a class="right-next"
-       href="trinity.common.workflows.customized_math_workflows.html"
+       href="trinity.common.workflows.agentscope.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">下一页</p>
-        <p class="prev-next-title">trinity.common.workflows.customized_math_workflows module</p>
+        <p class="prev-next-title">trinity.common.workflows.agentscope package</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -2070,6 +2160,7 @@ ruler_scores: List[float]</p>
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#subpackages">Subpackages</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#submodules">Submodules</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-trinity.common.workflows">Module contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.Task"><code class="docutils literal notranslate"><span class="pre">Task</span></code></a><ul class="nav section-nav flex-column">
@@ -2245,6 +2336,15 @@ ruler_scores: List[float]</p>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.AgentScopeV1ReactSearchWorkflow.reset"><code class="docutils literal notranslate"><span class="pre">AgentScopeV1ReactSearchWorkflow.reset()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.AgentScopeV1ReactSearchWorkflow.judge_result"><code class="docutils literal notranslate"><span class="pre">AgentScopeV1ReactSearchWorkflow.judge_result()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.AgentScopeV1ReactSearchWorkflow.run_async"><code class="docutils literal notranslate"><span class="pre">AgentScopeV1ReactSearchWorkflow.run_async()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.AgentScopeReActWorkflow"><code class="docutils literal notranslate"><span class="pre">AgentScopeReActWorkflow</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.AgentScopeReActWorkflow.__init__"><code class="docutils literal notranslate"><span class="pre">AgentScopeReActWorkflow.__init__()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.AgentScopeReActWorkflow.run_async"><code class="docutils literal notranslate"><span class="pre">AgentScopeReActWorkflow.run_async()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.AgentScopeReActWorkflow.calculate_reward"><code class="docutils literal notranslate"><span class="pre">AgentScopeReActWorkflow.calculate_reward()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.AgentScopeReActWorkflow.construct_experiences"><code class="docutils literal notranslate"><span class="pre">AgentScopeReActWorkflow.construct_experiences()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.AgentScopeReActWorkflow.asynchronous"><code class="docutils literal notranslate"><span class="pre">AgentScopeReActWorkflow.asynchronous</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.AgentScopeReActWorkflow.repeatable"><code class="docutils literal notranslate"><span class="pre">AgentScopeReActWorkflow.repeatable</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.EmailSearchWorkflow"><code class="docutils literal notranslate"><span class="pre">EmailSearchWorkflow</span></code></a><ul class="nav section-nav flex-column">

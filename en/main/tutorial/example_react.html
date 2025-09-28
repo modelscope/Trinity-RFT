@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Multi-Step ReAct &#8212; Trinity-RFT 0.3.1.dev0 documentation</title>
+    <title>ReAct Agent Training &#8212; Trinity-RFT 0.3.1.dev0 documentation</title>
   
   
   
@@ -198,7 +198,7 @@
 <li class="toctree-l1"><a class="reference internal" href="example_async_mode.html">Asynchronous RFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_multi_turn.html">Concatenated Multi-Turn RFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_step_wise.html">General Multi-Step RFT</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Multi-Step ReAct</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">ReAct Agent Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_search_email.html">Email Search Workflow</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_dpo.html">Offline DPO and SFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_megatron.html">Megatron-LM Backend</a></li>
@@ -367,6 +367,7 @@
 </ul>
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../build_api/trinity.common.workflows.html">trinity.common.workflows package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.workflows.agentscope.html">trinity.common.workflows.agentscope package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.workflows.customized_math_workflows.html">trinity.common.workflows.customized_math_workflows module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.workflows.customized_toolcall_workflows.html">trinity.common.workflows.customized_toolcall_workflows module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../build_api/trinity.common.workflows.eval_workflow.html">trinity.common.workflows.eval_workflow module</a></li>
@@ -574,7 +575,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Multi-Step ReAct</h1>
+    <h1>ReAct Agent Training</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -584,24 +585,25 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#key-features-demonstrated">Key Features Demonstrated</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#seamless-integration-with-external-agent-frameworks">Seamless Integration with External Agent Frameworks</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#general-multi-step-training">General Multi-Step Training</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#native-tool-calling-support">Native Tool Calling Support</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#key-features">Key Features</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compatible-with-various-agent-frameworks">Compatible with Various Agent Frameworks</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#no-need-to-modify-agent-code">No Need to Modify Agent Code</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#supports-multi-turn-interaction">Supports Multi-Turn Interaction</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-it-works">How It Works</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-workflow-workflow-py">The Workflow (<code class="docutils literal notranslate"><span class="pre">workflow.py</span></code>)</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#configuration">Configuration</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#native-tool-calling-settings">Native Tool Calling Settings</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#multi-step-training-strategy">Multi-Step Training Strategy</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#asynchronous-synchronization-for-efficiency">Asynchronous Synchronization for Efficiency</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implementation">Implementation</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#change-the-openai-client-of-your-agent">1. Change the OpenAI client of your Agent</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#implement-the-training-workflow">2. Implement the Training Workflow</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#training-configuration">3. Training Configuration</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#inference-model-configuration">Inference Model Configuration</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#multi-step-training-algorithm">Multi-Step Training Algorithm</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#dynamic-synchronization-configuration">Dynamic Synchronization Configuration</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-run-the-example">How to Run the Example</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#summary">Summary</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#running-the-example">Running the Example</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#results">Results</a></li>
 </ul>
             </nav>
         </div>
@@ -613,155 +615,192 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="multi-step-react">
-<h1>Multi-Step ReAct<a class="headerlink" href="#multi-step-react" title="Link to this heading">#</a></h1>
-<p>This example serves as a demonstration for adapting the Trinity-RFT training workflow to your own agentic project, through our OpenAI-compatible <code class="docutils literal notranslate"><span class="pre">ModelWrapper</span></code> class.</p>
-<p>Here, we use the <a class="reference external" href="https://github.com/modelscope/agentscope">AgentScope</a> framework as an example, but you can certainly use any other framework, as Trinity offers great flexibility. This example fine-tunes a model on the GSM8K math dataset by leveraging an agent that uses ReAct-style reasoning with native tool calls.</p>
-<section id="key-features-demonstrated">
-<h2>Key Features Demonstrated<a class="headerlink" href="#key-features-demonstrated" title="Link to this heading">#</a></h2>
-<p>This example highlights several advanced capabilities of the Trinity-RFT framework:</p>
-<section id="seamless-integration-with-external-agent-frameworks">
-<h3>Seamless Integration with External Agent Frameworks<a class="headerlink" href="#seamless-integration-with-external-agent-frameworks" title="Link to this heading">#</a></h3>
-<p>Trinity-RFT is designed to be highly modular. You can easily embed complex, pre-existing agent logic from external frameworks like AgentScope directly into a Trinity <code class="docutils literal notranslate"><span class="pre">Workflow</span></code>.</p>
-<ul class="simple">
-<li><p><strong>No Need for Rewrites</strong>: You don’t have to re-implement the intricate logic of your agent (e.g., the ReAct loop, memory management, or tool invocation) within Trinity.</p></li>
-<li><p><strong>Focus on High-Level Orchestration</strong>: As shown in our <code class="docutils literal notranslate"><span class="pre">AgentScopeReactV2MathWorkflow</span></code>, the Trinity workflow simply initializes and calls the external agent’s <code class="docutils literal notranslate"><span class="pre">reply</span></code> method. Trinity abstracts away the underlying complexity, allowing you to focus on the high-level task orchestration and reward design.</p></li>
-</ul>
+  <section class="tex2jax_ignore mathjax_ignore" id="react-agent-training">
+<h1>ReAct Agent Training<a class="headerlink" href="#react-agent-training" title="Link to this heading">#</a></h1>
+<p>This section demonstrates how to train a ReAct Agent using Trinity-RFT. We use <a class="reference external" href="https://github.com/agentscope-ai/agentscope">AgentScope</a> as an example and leverage its built-in ReAct agent to solve GSM8K math problems. Developers can refer to this example to adapt Trinity-RFT’s training to their own agent projects.</p>
+<section id="key-features">
+<h2>Key Features<a class="headerlink" href="#key-features" title="Link to this heading">#</a></h2>
+<p>Before diving into the example, let’s review several important features of Trinity-RFT for Agentic-RL training.</p>
+<section id="compatible-with-various-agent-frameworks">
+<h3>Compatible with Various Agent Frameworks<a class="headerlink" href="#compatible-with-various-agent-frameworks" title="Link to this heading">#</a></h3>
+<p>There are many agent development frameworks, each with different model wrapping and invocation methods. To maximize compatibility, Trinity-RFT wraps the <code class="docutils literal notranslate"><span class="pre">openai.OpenAI</span></code> and <code class="docutils literal notranslate"><span class="pre">openai.AsyncOpenAI</span></code> interfaces. As long as your agent framework supports calling models via the OpenAI interface, you can train agents using Trinity-RFT’s <code class="docutils literal notranslate"><span class="pre">OpenAI</span></code> or <code class="docutils literal notranslate"><span class="pre">AsyncOpenAI</span></code> instances. You can also implement your own agent directly using Trinity-RFT’s OpenAI interface without any framework.</p>
 </section>
-<section id="general-multi-step-training">
-<h3>General Multi-Step Training<a class="headerlink" href="#general-multi-step-training" title="Link to this heading">#</a></h3>
-<p>Modern agentic tasks often involve multiple steps of reasoning, tool use, and observation. Trinity-RFT natively supports training across these Multi-Step interactions.</p>
-<ul class="simple">
-<li><p><strong>Step-Wise Experience Generation</strong>: Instead of only learning from the final answer, Trinity can treat each step within an agent’s reasoning trajectory as a distinct learning opportunity.</p></li>
-<li><p><strong>Credit Assignment</strong>: The reward for solving a task is propagated back to all experiences within the successful trajectory, enabling the model to learn the entire reasoning chain, not just the final response. This is controlled by the <code class="docutils literal notranslate"><span class="pre">advantage_fn</span></code> in the config.</p></li>
-</ul>
+<section id="no-need-to-modify-agent-code">
+<h3>No Need to Modify Agent Code<a class="headerlink" href="#no-need-to-modify-agent-code" title="Link to this heading">#</a></h3>
+<p>Training agents requires collecting dialogue history and other relevant information (such as <code class="docutils literal notranslate"><span class="pre">token_id</span></code>, <code class="docutils literal notranslate"><span class="pre">logprobs</span></code>) during agent execution, which often requires modifying source code of the agent application. Trinity-RFT avoids this by wrapping the <code class="docutils literal notranslate"><span class="pre">openai.OpenAI</span></code> or <code class="docutils literal notranslate"><span class="pre">openai.AsyncOpenAI</span></code> instances, automatically collecting all necessary training information during model calls, so that you don’t need to change your agent code.</p>
 </section>
-<section id="native-tool-calling-support">
-<h3>Native Tool Calling Support<a class="headerlink" href="#native-tool-calling-support" title="Link to this heading">#</a></h3>
-<p>Trinity-RFT’s inference engine and training pipeline are built to support the native OpenAI <code class="docutils literal notranslate"><span class="pre">tool_calls</span></code> format.</p>
-<ul class="simple">
-<li><p><strong>Direct Training on Tool Use</strong>: The framework allows the model to be trained on deciding <em>when</em> to call a tool, <em>which</em> tool to call, and <em>what</em> arguments to use, all formatted in the standard <code class="docutils literal notranslate"><span class="pre">tool_calls</span></code> convention.</p></li>
-<li><p><strong>Interoperability</strong>: This native support ensures seamless integration with any service or environment that consumes the OpenAI API format, such as an <code class="docutils literal notranslate"><span class="pre">MCP_server</span></code> (Multi-Agent Collaboration Platform) or other tool-use evaluators.</p></li>
-</ul>
+<section id="supports-multi-turn-interaction">
+<h3>Supports Multi-Turn Interaction<a class="headerlink" href="#supports-multi-turn-interaction" title="Link to this heading">#</a></h3>
+<p>Agent tasks often involve multiple steps of reasoning and actioning. Trinity-RFT natively supports RL training for tasks with multi-turn interactions, without limiting the number of turns (just ensure each LLM call’s sequence length does not exceed the model’s maximum). This allows you to design dynamic-length interactions based on task complexity. Trinity-RFT’s dynamic synchronization mechanism enables training to start as soon as enough samples are collected, improving efficiency.</p>
 </section>
 </section>
-<section id="how-it-works">
-<h2>How It Works<a class="headerlink" href="#how-it-works" title="Link to this heading">#</a></h2>
-<p>Below we show you how to perform this step-by-step.</p>
-<section id="the-workflow-workflow-py">
-<h3>The Workflow (<code class="docutils literal notranslate"><span class="pre">workflow.py</span></code>)<a class="headerlink" href="#the-workflow-workflow-py" title="Link to this heading">#</a></h3>
-<p>The core logic is encapsulated in the <code class="docutils literal notranslate"><span class="pre">AgentScopeReactMathWorkflow</span></code> class.</p>
-<ol class="arabic">
-<li><p><strong>Initialization (<code class="docutils literal notranslate"><span class="pre">__init__</span></code>)</strong>:</p>
-<ul>
-<li><p>It first initializes the AgentScope environment and the desired agent (<code class="docutils literal notranslate"><span class="pre">ReActAgent</span></code>).</p></li>
-<li><p>The most critical integration step is injecting Trinity’s model client into the AgentScope agent:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">openai_client</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_openai_client</span><span class="p">()</span>
-<span class="c1"># self.openai_client = get_openai_async_client() # or async client depend on whether you are using async openai client</span>
-<span class="c1"># ...</span>
-<span class="bp">self</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">openai_client</span>
+<section id="implementation">
+<h2>Implementation<a class="headerlink" href="#implementation" title="Link to this heading">#</a></h2>
+<p>We will walk through how to train a ReAct agent implemented with AgentScope using Trinity-RFT.</p>
+<section id="change-the-openai-client-of-your-agent">
+<h3>1. Change the OpenAI client of your Agent<a class="headerlink" href="#change-the-openai-client-of-your-agent" title="Link to this heading">#</a></h3>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">AgentScopeReActAgent</span></code> wraps AgentScope’s ReAct agent and injects Trinity-RFT’s <code class="docutils literal notranslate"><span class="pre">openai.AsyncOpenAI</span></code> instance during initialization. The subsequent execution is handled by the AgentScope agent itself, with no code modification required.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># A simplified version of trinity.common.workflows.agentscope.react.react_agent.AgentScopeReActAgent</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AgentScopeReActAgent</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">openai_client</span><span class="p">:</span> <span class="n">openai</span><span class="o">.</span><span class="n">AsyncOpenAI</span><span class="p">,</span>  <span class="c1"># provided by Trinity-RFT</span>
+        <span class="c1"># some other params</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the AgentScope ReAct agent with specified tools and model.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            openai_client (openai.AsyncOpenAI): An instance of AsyncOpenAI client.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">agent_model</span> <span class="o">=</span> <span class="n">OpenAIChatModel</span><span class="p">(</span>
+            <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;EMPTY&quot;</span><span class="p">,</span>
+            <span class="n">model_name</span><span class="o">=</span><span class="n">model_name</span><span class="p">,</span>
+            <span class="n">generate_kwargs</span><span class="o">=</span><span class="n">generate_kwargs</span><span class="p">,</span>
+            <span class="n">stream</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># patch the OpenAIChatModel to use the openai_client provided by Trinity-RFT</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">agent_model</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">openai_client</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">agent</span> <span class="o">=</span> <span class="n">ReActAgent</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;react_agent&quot;</span><span class="p">,</span>
+            <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">agent_model</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">reply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate a response based on the query.&quot;&quot;&quot;</span>
+        <span class="c1"># no need to modify your agent logic</span>
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span>
+            <span class="n">Msg</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="s2">&quot;user&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
 </pre></div>
 </div>
-<p>This ensures that all API calls made by the AgentScope agent are routed through Trinity’s <code class="docutils literal notranslate"><span class="pre">ModelWrapper</span></code>, which records the entire conversation history.</p>
-</li>
-</ul>
-</li>
-<li><p><strong>Execution (<code class="docutils literal notranslate"><span class="pre">run</span></code>)</strong>:</p>
-<ul>
-<li><p>The <code class="docutils literal notranslate"><span class="pre">run</span></code> method is remarkably simple. It just passes the task description to the agent.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span><span class="o">.</span><span class="n">content</span> <span class="c1"># your agent logic</span>
-</pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>We encapsulate AgentScope’s ReAct agent in a new class here to clearly demonstrate the process of replacing the OpenAI client.
+In practice, you can directly modify the OpenAI client of your existing agent without creating a new class.</p>
 </div>
-</li>
-<li><p>After the agent completes its multi-step reasoning and produces a final answer, Trinity extracts all the intermediate turns from the model’s history:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">experiences</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">extract_experience_from_history</span><span class="p">(</span><span class="n">clear_history</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-</div>
-</li>
-<li><p>A reward is calculated based on the final answer and is applied to all <code class="docutils literal notranslate"><span class="pre">Experience</span></code> objects generated from the trajectory. These experiences are then sent to the buffer for training.</p></li>
-</ul>
-</li>
+</section>
+<section id="implement-the-training-workflow">
+<h3>2. Implement the Training Workflow<a class="headerlink" href="#implement-the-training-workflow" title="Link to this heading">#</a></h3>
+<p>The <a class="reference internal" href="../build_api/trinity.common.workflows.agentscope.react.react_workflow.html#trinity.common.workflows.agentscope.react.react_workflow.AgentScopeReActWorkflow" title="trinity.common.workflows.agentscope.react.react_workflow.AgentScopeReActWorkflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">AgentScopeReActWorkflow</span></code></a> demonstrates the agent training workflow. Its core <code class="docutils literal notranslate"><span class="pre">run_async</span></code> method includes three steps:</p>
+<ol class="arabic simple">
+<li><p>Call the agent to complete the task and return the result.</p></li>
+<li><p>Evaluate the result and calculate the reward.</p></li>
+<li><p>Collect trainable data generated during task execution and combine it with the reward to create training samples (<code class="docutils literal notranslate"><span class="pre">Experience</span></code>).</p></li>
 </ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># A simplified version of trinity.common.workflows.agentscope.react.react_workflow.AgentScopeReActWorkflow</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AgentScopeReActWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">ModelWrapper</span><span class="p">,</span>
+        <span class="n">auxiliary_models</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">openai</span><span class="o">.</span><span class="n">OpenAI</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="c1"># initialize the agent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">agent</span> <span class="o">=</span> <span class="n">AgentScopeReActAgent</span><span class="p">(</span>
+            <span class="n">openai_client</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">get_openai_async_client</span><span class="p">(),</span>
+            <span class="c1"># some other params</span>
+        <span class="p">)</span>
+        <span class="c1"># get query from the task</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">raw_task</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">format_args</span><span class="o">.</span><span class="n">prompt_key</span><span class="p">)</span>  <span class="c1"># type: ignore [index]</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_async</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run the workflow asynchronously.&quot;&quot;&quot;</span>
+        <span class="c1"># Step 1: call the ReAct agent to solve the task</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">)</span>
+        <span class="c1"># Step 2: calculate the reward based on the response</span>
+        <span class="n">reward</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_reward</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        <span class="c1"># Step 3: construct experiences from the interaction history and return them</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">construct_experiences</span><span class="p">(</span><span class="n">reward</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">calculate_reward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the reward based on the response.&quot;&quot;&quot;</span>
+        <span class="c1"># your reward logic</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">construct_experiences</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reward</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Construct experiences from the agent&#39;s interaction history.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List: A list of Experience objects.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Extract all interaction history generated by this task</span>
+        <span class="n">exps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">extract_experience_from_history</span><span class="p">()</span>
+        <span class="c1"># update the reward for each experience</span>
+        <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">exps</span><span class="p">:</span>
+            <span class="n">exp</span><span class="o">.</span><span class="n">reward</span> <span class="o">=</span> <span class="n">reward</span>
+        <span class="k">return</span> <span class="n">exps</span>
+
+</pre></div>
+</div>
 </section>
-<section id="configuration">
-<h3>Configuration<a class="headerlink" href="#configuration" title="Link to this heading">#</a></h3>
-<p>The configuration file fine-tunes the behavior of the entire system. Here are the key parameters for this example:</p>
-<section id="native-tool-calling-settings">
-<h4>Native Tool Calling Settings<a class="headerlink" href="#native-tool-calling-settings" title="Link to this heading">#</a></h4>
-<p>These settings in the <code class="docutils literal notranslate"><span class="pre">explorer.rollout_model</span></code> section configure the vLLM-based engine to generate and parse OpenAI-compatible tool calls.
-We use the <code class="docutils literal notranslate"><span class="pre">Qwen3</span></code> model and host model with vLLM. The configuration for different model can be found in <a class="reference external" href="https://docs.vllm.ai/en/stable/features/tool_calling.html#qwen-models">vLLM Toolcalls</a></p>
+<section id="training-configuration">
+<h3>3. Training Configuration<a class="headerlink" href="#training-configuration" title="Link to this heading">#</a></h3>
+<p>Trinity-RFT uses configuration files to control the training workflow. Below are key configuration parameters for this example.</p>
+<section id="inference-model-configuration">
+<h4>Inference Model Configuration<a class="headerlink" href="#inference-model-configuration" title="Link to this heading">#</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">explorer.rollout_model</span></code> section configures the model used by the agent application. Key parameters include:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">explorer</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">rollout_model</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># ...</span>
-<span class="w">    </span><span class="nt">enable_auto_tool_choice</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"> </span><span class="c1"># Enables the model to generate `tool_calls`</span>
-<span class="w">    </span><span class="nt">tool_call_parser</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hermes</span><span class="w">       </span><span class="c1"># Specifies the parser for formatting tool call outputs</span>
-<span class="w">    </span><span class="nt">reasoning_parser</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">deepseek_r1</span><span class="w">  </span><span class="c1"># Helps in parsing the model&#39;s thought process</span>
-<span class="w">    </span><span class="nt">enable_thinking</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">          </span><span class="c1"># Enables the model to generate intermediate &quot;thoughts&quot;</span>
+<span class="w">    </span><span class="nt">enable_openai_client</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">     </span><span class="c1"># Enable OpenAI Client</span>
+<span class="w">    </span><span class="nt">enable_history</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">           </span><span class="c1"># Enable automatic call history recording</span>
+<span class="w">    </span><span class="nt">enable_auto_tool_choice</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">  </span><span class="c1"># Allow model to generate `tool_calls`</span>
+<span class="w">    </span><span class="nt">tool_call_parser</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hermes</span><span class="w">       </span><span class="c1"># Specify parser for tool call outputs</span>
+<span class="w">    </span><span class="nt">reasoning_parser</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">deepseek_r1</span><span class="w">  </span><span class="c1"># Helps parse model reasoning process</span>
+<span class="w">    </span><span class="nt">enable_thinking</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">          </span><span class="c1"># Enable thinking (mainly for Qwen3 series models)</span>
 </pre></div>
 </div>
 </section>
-<section id="multi-step-training-strategy">
-<h4>Multi-Step Training Strategy<a class="headerlink" href="#multi-step-training-strategy" title="Link to this heading">#</a></h4>
-<p>This setting in the <code class="docutils literal notranslate"><span class="pre">algorithm</span></code> section defines how experiences from a Multi-Step rollout are processed.</p>
+<section id="multi-step-training-algorithm">
+<h4>Multi-Step Training Algorithm<a class="headerlink" href="#multi-step-training-algorithm" title="Link to this heading">#</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">algorithm</span></code> section configures the training algorithm for the agent application. Key parameters include:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">algorithm</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">algorithm_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">grpo</span>
-<span class="w">  </span><span class="nt">advantage_fn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">step_wise_grpo</span><span class="w"> </span><span class="c1"># Key for Multi-Step training</span>
+<span class="w">  </span><span class="nt">advantage_fn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">step_wise_grpo</span><span class="w"> </span><span class="c1"># The key for multi-step training. This strategy tells Trinity to create independent training samples for each step in the agent&#39;s execution path. The `grpo` algorithm then uses these samples to update the model.</span>
 </pre></div>
 </div>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">step_wise_grpo</span></code>: This strategy tells Trinity to create a distinct training sample for each step in the agent’s execution path. The <code class="docutils literal notranslate"><span class="pre">grpo</span></code> algorithm then uses these samples to update the model.</p></li>
-</ul>
 </section>
-<section id="asynchronous-synchronization-for-efficiency">
-<h4>Asynchronous Synchronization for Efficiency<a class="headerlink" href="#asynchronous-synchronization-for-efficiency" title="Link to this heading">#</a></h4>
-<p>Because Multi-Step rollouts produce a variable number of experiences, waiting for a fixed number of <em>rollouts</em> is inefficient. We use a dynamic synchronization strategy.</p>
+<section id="dynamic-synchronization-configuration">
+<h4>Dynamic Synchronization Configuration<a class="headerlink" href="#dynamic-synchronization-configuration" title="Link to this heading">#</a></h4>
+<p>Since agent applications may have variable interaction rounds and sample counts, we enable Trinity-RFT’s dynamic synchronization to improve efficiency. Relevant configuration:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">synchronizer</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">sync_style</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dynamic_by_explorer</span><span class="w"> </span><span class="c1"># Start training when enough experiences are ready</span>
-<span class="w">  </span><span class="nt">sync_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">  </span><span class="nt">sync_style</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dynamic_by_explorer</span><span class="w"> </span><span class="c1"># Trainer starts training immediately when enough data is generated, rather than padding to a fixed size, improving efficiency</span>
+<span class="w">  </span><span class="nt">sync_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w">  </span><span class="c1"># Check for model parameter updates after every two batches</span>
 </pre></div>
 </div>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">sync_style:</span> <span class="pre">dynamic_by_explorer</span></code>: The trainer starts a training job as soon as the buffer has collected enough <em>experiences</em> (i.e., individual turns), rather than waiting for a fixed number of full agent trajectories. This significantly improves GPU utilization and training throughput.</p></li>
-</ul>
 </section>
 </section>
 </section>
-<section id="how-to-run-the-example">
-<h2>How to Run the Example<a class="headerlink" href="#how-to-run-the-example" title="Link to this heading">#</a></h2>
+<section id="running-the-example">
+<h2>Running the Example<a class="headerlink" href="#running-the-example" title="Link to this heading">#</a></h2>
 <ol class="arabic simple">
-<li><p><strong>Prerequisites</strong>: Ensure you have Trinity installed, along with the dependencies for this example (e.g., <code class="docutils literal notranslate"><span class="pre">AgentScope</span></code>). Please refer to <a class="reference external" href="https://github.com/agentscope-ai/agentscope/tree/v0">Agentscope Github link</a>.</p></li>
+<li><p>Install dependencies: Follow the <a class="reference internal" href="trinity_installation.html"><span class="std std-doc">Installation Guide</span></a> to install Trinity-RFT and AgentScope v1.0 or above.</p></li>
 </ol>
-<blockquote>
-<div><p><strong>NOTE</strong>: This example requires AgentScope from either:</p>
-<ul class="simple">
-<li><p>Commit: <code class="docutils literal notranslate"><span class="pre">ad13ed5dacecb79d20abf626769f8c7d7a7d2afb</span></code></p></li>
-<li><p>Branch: <a class="reference external" href="https://github.com/agentscope-ai/agentscope/tree/v0"><code class="docutils literal notranslate"><span class="pre">v0</span></code></a></p></li>
-</ul>
-</div></blockquote>
-<ol class="arabic" start="2">
-<li><p>Download the model you want to use, and fill in the configuration files in <code class="docutils literal notranslate"><span class="pre">examples/agentscope_tool_react/agentscopev0_tool_react_gsm8k.yaml</span></code> or <code class="docutils literal notranslate"><span class="pre">examples/agentscope_tool_react/agentscopev0_tool_react_dapo.yaml</span></code></p></li>
-<li><p><strong>Launch the training job</strong>: Run the following command from the root directory of the repository.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>examples/agentscope_tool_react/agentscopev0_tool_react_gsm8k.yaml
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>agentscope&gt;<span class="o">=</span><span class="m">1</span>.0.4
 </pre></div>
 </div>
-<p>or</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>examples/agentscope_tool_react/agentscopev0_tool_react_dapo.yaml
+<ol class="arabic simple" start="2">
+<li><p>Download model and dataset:</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>huggingface-cli<span class="w"> </span>download<span class="w"> </span>Qwen/Qwen3-8B
+huggingface-cli<span class="w"> </span>download<span class="w"> </span>openai/gsm8k<span class="w"> </span>--repo-type<span class="w"> </span>dataset
 </pre></div>
 </div>
-</li>
+<ol class="arabic simple" start="3">
+<li><p>Start the training task:</p></li>
 </ol>
-<p>The example here for gsm8k dataset is really simple and it can converge in a few minutes on 8 H20 GPUs.</p>
-<p><img alt="" src="../_images/agentscope_gsm8k_reward.png" /></p>
-<p>The example here for dapo dataset take a little bit longer, but it also converges.</p>
-<p><img alt="" src="../_images/agentscope_dapo_reward.png" /></p>
-<p>We can also see that the model generally start to use more tool calls to solve the problems.</p>
-<p><img alt="" src="../_images/agentscope_dapo_turns.png" /></p>
-<p>We can also update the agentscope version to v1, and training on the qwen3-4b-instrcut-2507</p>
-<p><img alt="" src="../_images/agentscope_dapo_qwen3-4B_reward.png" /></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Navigate to the Trinity-RFT root directory</span>
+<span class="nb">cd</span><span class="w"> </span>/path/to/Trinity-RFT
+
+<span class="c1"># Run the training for GSM8k dataset:</span>
+trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>examples/agentscope_react/gsm8k.yaml
+</pre></div>
+</div>
 </section>
-<section id="summary">
-<h2>Summary<a class="headerlink" href="#summary" title="Link to this heading">#</a></h2>
-<p>This example is simple but demonstrates the power and flexibility of Trinity for training complex, Multi-Step agents that use tools. By seamlessly integrating external agentic logic and providing native support for Multi-Step training and tool calls, Trinity-RFT empowers you to fine-tune models on sophisticated, realistic tasks with high efficiency.</p>
+<section id="results">
+<h2>Results<a class="headerlink" href="#results" title="Link to this heading">#</a></h2>
+<p>Reward curve:</p>
+<p><img alt="" src="../_images/agentscope_gsm8k_reward.png" /></p>
 </section>
 </section>
 
@@ -810,24 +849,25 @@ We use the <code class="docutils literal notranslate"><span class="pre">Qwen3</s
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#key-features-demonstrated">Key Features Demonstrated</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#seamless-integration-with-external-agent-frameworks">Seamless Integration with External Agent Frameworks</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#general-multi-step-training">General Multi-Step Training</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#native-tool-calling-support">Native Tool Calling Support</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#key-features">Key Features</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compatible-with-various-agent-frameworks">Compatible with Various Agent Frameworks</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#no-need-to-modify-agent-code">No Need to Modify Agent Code</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#supports-multi-turn-interaction">Supports Multi-Turn Interaction</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-it-works">How It Works</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-workflow-workflow-py">The Workflow (<code class="docutils literal notranslate"><span class="pre">workflow.py</span></code>)</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#configuration">Configuration</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#native-tool-calling-settings">Native Tool Calling Settings</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#multi-step-training-strategy">Multi-Step Training Strategy</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#asynchronous-synchronization-for-efficiency">Asynchronous Synchronization for Efficiency</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implementation">Implementation</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#change-the-openai-client-of-your-agent">1. Change the OpenAI client of your Agent</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#implement-the-training-workflow">2. Implement the Training Workflow</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#training-configuration">3. Training Configuration</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#inference-model-configuration">Inference Model Configuration</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#multi-step-training-algorithm">Multi-Step Training Algorithm</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#dynamic-synchronization-configuration">Dynamic Synchronization Configuration</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-run-the-example">How to Run the Example</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#summary">Summary</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#running-the-example">Running the Example</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#results">Results</a></li>
 </ul>
   </nav></div>
 

@@ -197,7 +197,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tutorial/example_async_mode.html">Asynchronous RFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial/example_multi_turn.html">Concatenated Multi-Turn RFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial/example_step_wise.html">General Multi-Step RFT</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial/example_react.html">Multi-Step ReAct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial/example_react.html">ReAct Agent Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial/example_search_email.html">Email Search Workflow</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial/example_dpo.html">Offline DPO and SFT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial/example_megatron.html">Megatron-LM Backend</a></li>
@@ -366,6 +366,7 @@
 </ul>
 </details></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="build_api/trinity.common.workflows.html">trinity.common.workflows package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="build_api/trinity.common.workflows.agentscope.html">trinity.common.workflows.agentscope package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="build_api/trinity.common.workflows.customized_math_workflows.html">trinity.common.workflows.customized_math_workflows module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="build_api/trinity.common.workflows.customized_toolcall_workflows.html">trinity.common.workflows.customized_toolcall_workflows module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="build_api/trinity.common.workflows.eval_workflow.html">trinity.common.workflows.eval_workflow module</a></li>
@@ -903,7 +904,13 @@ document.write(`
 </li>
         <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.WrapPolicy.__init__">(trinity.common.verl_config.WrapPolicy method)</a>
 </li>
+        <li><a href="build_api/trinity.common.workflows.agentscope.react.react_workflow.html#trinity.common.workflows.agentscope.react.react_workflow.AgentScopeReActWorkflow.__init__">(trinity.common.workflows.agentscope.react.react_workflow.AgentScopeReActWorkflow method)</a>
+</li>
+        <li><a href="build_api/trinity.common.workflows.agentscope.react.templates.html#trinity.common.workflows.agentscope.react.templates.Template.__init__">(trinity.common.workflows.agentscope.react.templates.Template method)</a>
+</li>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeReactMathWorkflow.__init__">(trinity.common.workflows.AgentScopeReactMathWorkflow method)</a>
+</li>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeReActWorkflow.__init__">(trinity.common.workflows.AgentScopeReActWorkflow method)</a>
 </li>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeV0ReactMathWorkflow.__init__">(trinity.common.workflows.AgentScopeV0ReactMathWorkflow method)</a>
 </li>
@@ -1120,6 +1127,12 @@ document.write(`
       </ul></li>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeReactMathWorkflow">AgentScopeReactMathWorkflow (class in trinity.common.workflows)</a>
 </li>
+      <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeReActWorkflow">AgentScopeReActWorkflow (class in trinity.common.workflows)</a>
+
+      <ul>
+        <li><a href="build_api/trinity.common.workflows.agentscope.react.react_workflow.html#trinity.common.workflows.agentscope.react.react_workflow.AgentScopeReActWorkflow">(class in trinity.common.workflows.agentscope.react.react_workflow)</a>
+</li>
+      </ul></li>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeV0ReactMathWorkflow">AgentScopeV0ReactMathWorkflow (class in trinity.common.workflows)</a>
 </li>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeV1ReactSearchWorkflow">AgentScopeV1ReactSearchWorkflow (class in trinity.common.workflows)</a>
@@ -1176,9 +1189,13 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.Checkpoint.async_save">async_save (trinity.common.verl_config.Checkpoint attribute)</a>
 </li>
-      <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeReactMathWorkflow.asynchronous">asynchronous (trinity.common.workflows.AgentScopeReactMathWorkflow property)</a>
+      <li><a href="build_api/trinity.common.workflows.agentscope.react.react_workflow.html#trinity.common.workflows.agentscope.react.react_workflow.AgentScopeReActWorkflow.asynchronous">asynchronous (trinity.common.workflows.agentscope.react.react_workflow.AgentScopeReActWorkflow property)</a>
 
       <ul>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeReactMathWorkflow.asynchronous">(trinity.common.workflows.AgentScopeReactMathWorkflow property)</a>
+</li>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeReActWorkflow.asynchronous">(trinity.common.workflows.AgentScopeReActWorkflow property)</a>
+</li>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeV1ReactSearchWorkflow.asynchronous">(trinity.common.workflows.AgentScopeV1ReactSearchWorkflow property)</a>
 </li>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.AlfworldWorkflow.asynchronous">(trinity.common.workflows.AlfworldWorkflow property)</a>
@@ -1430,8 +1447,14 @@ document.write(`
       </ul></li>
       <li><a href="build_api/trinity.utils.monitor.html#trinity.utils.monitor.Monitor.calculate_metrics">calculate_metrics() (trinity.utils.monitor.Monitor method)</a>
 </li>
-      <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.EmailSearchWorkflow.calculate_reward">calculate_reward() (trinity.common.workflows.EmailSearchWorkflow method)</a>
+      <li><a href="build_api/trinity.common.workflows.agentscope.react.react_workflow.html#trinity.common.workflows.agentscope.react.react_workflow.AgentScopeReActWorkflow.calculate_reward">calculate_reward() (trinity.common.workflows.agentscope.react.react_workflow.AgentScopeReActWorkflow method)</a>
+
+      <ul>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeReActWorkflow.calculate_reward">(trinity.common.workflows.AgentScopeReActWorkflow method)</a>
 </li>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.EmailSearchWorkflow.calculate_reward">(trinity.common.workflows.EmailSearchWorkflow method)</a>
+</li>
+      </ul></li>
       <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.AlgorithmType.can_balance_batch">can_balance_batch (trinity.algorithm.algorithm.AlgorithmType attribute)</a>
 
       <ul>
@@ -1716,6 +1739,12 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.ConstantMeta">ConstantMeta (class in trinity.algorithm.algorithm)</a>
 </li>
+      <li><a href="build_api/trinity.common.workflows.agentscope.react.react_workflow.html#trinity.common.workflows.agentscope.react.react_workflow.AgentScopeReActWorkflow.construct_experiences">construct_experiences() (trinity.common.workflows.agentscope.react.react_workflow.AgentScopeReActWorkflow method)</a>
+
+      <ul>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeReActWorkflow.construct_experiences">(trinity.common.workflows.AgentScopeReActWorkflow method)</a>
+</li>
+      </ul></li>
       <li><a href="build_api/trinity.common.workflows.customized_toolcall_workflows.html#trinity.common.workflows.customized_toolcall_workflows.construct_prompt">construct_prompt() (in module trinity.common.workflows.customized_toolcall_workflows)</a>
 </li>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.RAFTReflectAlfworldWorkflow.construct_sft_data">construct_sft_data() (trinity.common.workflows.RAFTReflectAlfworldWorkflow method)</a>
@@ -2594,6 +2623,12 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.common.models.utils.html#trinity.common.models.utils.get_megatron_converter">get_megatron_converter() (in module trinity.common.models.utils)</a>
 </li>
+      <li><a href="build_api/trinity.common.models.model.html#trinity.common.models.model.InferenceModel.get_model_path">get_model_path() (trinity.common.models.model.InferenceModel method)</a>
+
+      <ul>
+        <li><a href="build_api/trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.get_model_path">(trinity.common.models.vllm_model.vLLMRolloutModel method)</a>
+</li>
+      </ul></li>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.AlfworldWorkflow.get_model_response">get_model_response() (trinity.common.workflows.AlfworldWorkflow method)</a>
 
       <ul>
@@ -2754,6 +2789,10 @@ document.write(`
         <li><a href="build_api/trinity.algorithm.advantage_fn.grpo_advantage.html#trinity.algorithm.advantage_fn.grpo_advantage.GRPOGroupedAdvantage">(class in trinity.algorithm.advantage_fn.grpo_advantage)</a>
 </li>
       </ul></li>
+      <li><a href="build_api/trinity.common.workflows.agentscope.react.templates.html#trinity.common.workflows.agentscope.react.templates.GSM8KResponseStructure">GSM8KResponseStructure (class in trinity.common.workflows.agentscope.react.templates)</a>
+</li>
+      <li><a href="build_api/trinity.common.workflows.agentscope.react.templates.html#trinity.common.workflows.agentscope.react.templates.GSM8KRewardFn">GSM8KRewardFn (class in trinity.common.workflows.agentscope.react.templates)</a>
+</li>
       <li><a href="build_api/trinity.algorithm.policy_loss_fn.html#trinity.algorithm.policy_loss_fn.GSPOLossFn">GSPOLossFn (class in trinity.algorithm.policy_loss_fn)</a>
 
       <ul>
@@ -3358,12 +3397,18 @@ document.write(`
         <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.RewardModel.model">(trinity.common.verl_config.RewardModel attribute)</a>
 </li>
       </ul></li>
+      <li><a href="build_api/trinity.common.workflows.agentscope.react.templates.html#trinity.common.workflows.agentscope.react.templates.GSM8KResponseStructure.model_config">model_config (trinity.common.workflows.agentscope.react.templates.GSM8KResponseStructure attribute)</a>
+</li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.InferenceModelConfig.model_path">model_path (trinity.common.config.InferenceModelConfig attribute)</a>
 
       <ul>
         <li><a href="build_api/trinity.common.config.html#trinity.common.config.ModelConfig.model_path">(trinity.common.config.ModelConfig attribute)</a>
 </li>
+        <li><a href="build_api/trinity.common.models.model.html#trinity.common.models.model.ModelWrapper.model_path">(trinity.common.models.model.ModelWrapper property)</a>
+</li>
       </ul></li>
+      <li><a href="build_api/trinity.common.models.model.html#trinity.common.models.model.ModelWrapper.model_path_async">model_path_async (trinity.common.models.model.ModelWrapper property)</a>
+</li>
       <li><a href="build_api/trinity.manager.html#trinity.manager.Synchronizer.model_state_dict">model_state_dict (trinity.manager.Synchronizer attribute)</a>
 
       <ul>
@@ -3571,6 +3616,14 @@ document.write(`
         <li><a href="build_api/trinity.common.verl_config.html#module-trinity.common.verl_config">trinity.common.verl_config</a>
 </li>
         <li><a href="build_api/trinity.common.workflows.html#module-trinity.common.workflows">trinity.common.workflows</a>
+</li>
+        <li><a href="build_api/trinity.common.workflows.agentscope.html#module-trinity.common.workflows.agentscope">trinity.common.workflows.agentscope</a>
+</li>
+        <li><a href="build_api/trinity.common.workflows.agentscope.react.html#module-trinity.common.workflows.agentscope.react">trinity.common.workflows.agentscope.react</a>
+</li>
+        <li><a href="build_api/trinity.common.workflows.agentscope.react.react_workflow.html#module-trinity.common.workflows.agentscope.react.react_workflow">trinity.common.workflows.agentscope.react.react_workflow</a>
+</li>
+        <li><a href="build_api/trinity.common.workflows.agentscope.react.templates.html#module-trinity.common.workflows.agentscope.react.templates">trinity.common.workflows.agentscope.react.templates</a>
 </li>
         <li><a href="build_api/trinity.common.workflows.customized_math_workflows.html#module-trinity.common.workflows.customized_math_workflows">trinity.common.workflows.customized_math_workflows</a>
 </li>
@@ -4289,9 +4342,13 @@ document.write(`
         <li><a href="build_api/trinity.explorer.scheduler.html#trinity.explorer.scheduler.TaskWrapper.repeat_times">(trinity.explorer.scheduler.TaskWrapper attribute)</a>
 </li>
       </ul></li>
-      <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeReactMathWorkflow.repeatable">repeatable (trinity.common.workflows.AgentScopeReactMathWorkflow property)</a>
+      <li><a href="build_api/trinity.common.workflows.agentscope.react.react_workflow.html#trinity.common.workflows.agentscope.react.react_workflow.AgentScopeReActWorkflow.repeatable">repeatable (trinity.common.workflows.agentscope.react.react_workflow.AgentScopeReActWorkflow property)</a>
 
       <ul>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeReactMathWorkflow.repeatable">(trinity.common.workflows.AgentScopeReactMathWorkflow property)</a>
+</li>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeReActWorkflow.repeatable">(trinity.common.workflows.AgentScopeReActWorkflow property)</a>
+</li>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeV0ReactMathWorkflow.repeatable">(trinity.common.workflows.AgentScopeV0ReactMathWorkflow property)</a>
 </li>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeV1ReactSearchWorkflow.repeatable">(trinity.common.workflows.AgentScopeV1ReactSearchWorkflow property)</a>
@@ -4407,9 +4464,13 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.FormatConfig.response_key">response_key (trinity.common.config.FormatConfig attribute)</a>
 </li>
+      <li><a href="build_api/trinity.common.workflows.agentscope.react.templates.html#trinity.common.workflows.agentscope.react.templates.Template.response_structure">response_structure (trinity.common.workflows.agentscope.react.templates.Template attribute)</a>
+</li>
       <li><a href="build_api/trinity.common.experience.html#trinity.common.experience.Experience.response_text">response_text (trinity.common.experience.Experience attribute)</a>
 </li>
       <li><a href="build_api/trinity.explorer.scheduler.html#trinity.explorer.scheduler.RunnerWrapper.restart_runner">restart_runner() (trinity.explorer.scheduler.RunnerWrapper method)</a>
+</li>
+      <li><a href="build_api/trinity.common.workflows.agentscope.react.templates.html#trinity.common.workflows.agentscope.react.templates.GSM8KResponseStructure.result">result (trinity.common.workflows.agentscope.react.templates.GSM8KResponseStructure attribute)</a>
 </li>
       <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.Trainer.resume_from_path">resume_from_path (trinity.common.verl_config.Trainer attribute)</a>
 </li>
@@ -4463,6 +4524,8 @@ document.write(`
         <li><a href="build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.workflow.Task.reward_fn_args">(trinity.common.workflows.workflow.Task attribute)</a>
 </li>
       </ul></li>
+      <li><a href="build_api/trinity.common.workflows.agentscope.react.templates.html#trinity.common.workflows.agentscope.react.templates.Template.reward_fn_cls">reward_fn_cls (trinity.common.workflows.agentscope.react.templates.Template attribute)</a>
+</li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.FormatConfig.reward_fn_key">reward_fn_key (trinity.common.config.FormatConfig attribute)</a>
 </li>
       <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.RewardModel.reward_manager">reward_manager (trinity.common.verl_config.RewardModel attribute)</a>
@@ -4583,9 +4646,13 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.explorer.api.api.html#trinity.explorer.api.api.run_app">run_app() (in module trinity.explorer.api.api)</a>
 </li>
-      <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeReactMathWorkflow.run_async">run_async() (trinity.common.workflows.AgentScopeReactMathWorkflow method)</a>
+      <li><a href="build_api/trinity.common.workflows.agentscope.react.react_workflow.html#trinity.common.workflows.agentscope.react.react_workflow.AgentScopeReActWorkflow.run_async">run_async() (trinity.common.workflows.agentscope.react.react_workflow.AgentScopeReActWorkflow method)</a>
 
       <ul>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeReactMathWorkflow.run_async">(trinity.common.workflows.AgentScopeReactMathWorkflow method)</a>
+</li>
+        <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeReActWorkflow.run_async">(trinity.common.workflows.AgentScopeReActWorkflow method)</a>
+</li>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeV1ReactSearchWorkflow.run_async">(trinity.common.workflows.AgentScopeV1ReactSearchWorkflow method)</a>
 </li>
         <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.AlfworldWorkflow.run_async">(trinity.common.workflows.AlfworldWorkflow method)</a>
@@ -5492,6 +5559,8 @@ document.write(`
       <ul>
         <li><a href="build_api/trinity.common.config.html#trinity.common.config.FormatConfig.system_prompt">(trinity.common.config.FormatConfig attribute)</a>
 </li>
+        <li><a href="build_api/trinity.common.workflows.agentscope.react.templates.html#trinity.common.workflows.agentscope.react.templates.Template.system_prompt">(trinity.common.workflows.agentscope.react.templates.Template attribute)</a>
+</li>
       </ul></li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.FormatConfig.system_prompt_key">system_prompt_key (trinity.common.config.FormatConfig attribute)</a>
 </li>
@@ -5563,6 +5632,8 @@ document.write(`
         <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.Rollout.temperature">(trinity.common.verl_config.Rollout attribute)</a>
 </li>
       </ul></li>
+      <li><a href="build_api/trinity.common.workflows.agentscope.react.templates.html#trinity.common.workflows.agentscope.react.templates.Template">Template (class in trinity.common.workflows.agentscope.react.templates)</a>
+</li>
       <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.MegatronConfig.tensor_model_parallel_size">tensor_model_parallel_size (trinity.common.verl_config.MegatronConfig attribute)</a>
 </li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.InferenceModelConfig.tensor_parallel_size">tensor_parallel_size (trinity.common.config.InferenceModelConfig attribute)</a>
@@ -6087,8 +6158,6 @@ document.write(`
         <li><a href="build_api/trinity.buffer.operators.mappers.html#module-trinity.buffer.operators.mappers">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     trinity.buffer.operators.mappers.reward_shaping_mapper
 
@@ -6103,6 +6172,8 @@ document.write(`
         <li><a href="build_api/trinity.buffer.pipelines.html#module-trinity.buffer.pipelines">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     trinity.buffer.pipelines.experience_pipeline
 
@@ -6388,6 +6459,34 @@ document.write(`
 
       <ul>
         <li><a href="build_api/trinity.common.workflows.html#module-trinity.common.workflows">module</a>
+</li>
+      </ul></li>
+      <li>
+    trinity.common.workflows.agentscope
+
+      <ul>
+        <li><a href="build_api/trinity.common.workflows.agentscope.html#module-trinity.common.workflows.agentscope">module</a>
+</li>
+      </ul></li>
+      <li>
+    trinity.common.workflows.agentscope.react
+
+      <ul>
+        <li><a href="build_api/trinity.common.workflows.agentscope.react.html#module-trinity.common.workflows.agentscope.react">module</a>
+</li>
+      </ul></li>
+      <li>
+    trinity.common.workflows.agentscope.react.react_workflow
+
+      <ul>
+        <li><a href="build_api/trinity.common.workflows.agentscope.react.react_workflow.html#module-trinity.common.workflows.agentscope.react.react_workflow">module</a>
+</li>
+      </ul></li>
+      <li>
+    trinity.common.workflows.agentscope.react.templates
+
+      <ul>
+        <li><a href="build_api/trinity.common.workflows.agentscope.react.templates.html#module-trinity.common.workflows.agentscope.react.templates">module</a>
 </li>
       </ul></li>
       <li>
