@@ -110,6 +110,7 @@ class Trainer:
         with Timer(metrics, "time/train_step"):
             train_metrics = self.engine.train_step(exps)
         self.logger.info(f"Training at step {self.train_step_num} finished.")
+        metrics.update({"task_count": len(set(eid.task for eid in exps.eids))})
         metrics.update(train_metrics)
         return metrics
 
