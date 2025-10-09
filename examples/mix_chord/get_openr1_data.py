@@ -1,5 +1,21 @@
 """
-We provide scripts for generating the SFT and RL dataset.
+Below we provide a script for processing the dataset into our required format for OpenR1 math tasks. Before running the dataset processing script, you need to fill in the tokenizer path in the script for filtering SFT data that is too long.
+You can also change the sample size if you want.
+
+```python
+TOKENIZER_MODEL_PATH = "YOUR MODEL TOKENIZER PATH"
+MAX_TOKEN_LENGTH = 8196
+SFT_SAMPLE_SIZE = 5000
+PREFERENCE_SAMPLE_SIZE = 20000
+```
+
+Then just run the script:
+```bash
+python examples/mix_chord/get_openr1_data.py
+```
+This may take a while to run.
+
+> **Note**: Here we provide scripts for sampling SFT and RL data from the OpenR1 dataset, but unfortunately, since our original experiments did not use a fixed random seed, the data selection and ordering may differ from the paper.
 """
 
 import json
