@@ -16,7 +16,7 @@ class REINFORCEGroupAdvantage(GroupAdvantage):
         return group_by(exps, id_type="task")
 
     def calculate_group_advantage(
-        self, group_id: str, exps: List[Experience]
+        self, group_id: str, exps: List[Experience], **kwargs
     ) -> Tuple[List[Experience], Dict]:
         with torch.no_grad():
             rewards = torch.tensor([exp.reward for exp in exps], dtype=torch.float32)

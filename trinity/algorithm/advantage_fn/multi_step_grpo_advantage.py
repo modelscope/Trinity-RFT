@@ -21,23 +21,38 @@ class StepWiseGRPOAdvantageFn(AdvantageFn, ExperienceOperator):
         self,
         epsilon: float = 1e-6,
         enable_step_norm: bool = False,
+        std_cal_level: str = "group",  # 'group' (task-level) or 'batch'
         **kwargs,
     ) -> None:
+        """Initialize the Step-wise GRPO advantage function.
+
+        Args:
+            epsilon (float): A small value to avoid division by zero.
+            enable_step_norm (bool): If True, normalize advantages by trajectory length.
+            std_cal_level (str): The scope for calculating reward standard deviation.
+                'group' (default): Std is calculated per task group.
+                'batch': Std is calculated across all last-step rewards in the entire batch.
+                The mean is always calculated per task group.
+        """
         self.epsilon = epsilon
         self.enable_step_norm = enable_step_norm
+        self.std_cal_level = std_cal_level
+        if self.std_cal_level not in ["group", "batch"]:
+            raise ValueError("std_cal_level must be either 'group' or 'batch'")
 
     def calculate_last_step_advantage(
-        self, exps: Dict[str, Experience]
+        self, exps: Dict[str, Experience], **kwargs
     ) -> Tuple[Dict[str, float], Dict[str, float]]:
         """Calculate group advantage for a given group of experiences.
 
         Args:
             exps (Dict[str, Experience]): One experience per run, keyed by run ID.
-
+            **kwargs: Additional arguments, e.g., precomputed_std for batch-level std.
         Returns:
             Dict[str, float]: A tuple containing the scores for each run.
             Dict[str, float]: Metrics for logging.
         """
+        precomputed_std = kwargs.get("precomputed_std", None)
         with torch.no_grad():
             if len(exps) == 1:
                 group_reward_mean = torch.tensor(0.0)
@@ -48,7 +63,10 @@ class StepWiseGRPOAdvantageFn(AdvantageFn, ExperienceOperator):
                 group_reward_std = torch.std(rewards)
             scores = {}
             for rid, exp in exps.items():
-                score = (exp.reward - group_reward_mean) / (group_reward_std + self.epsilon)
+                if self.std_cal_level == "batch" and precomputed_std is not None:
+                    score = (exp.reward - group_reward_mean) / (precomputed_std + self.epsilon)
+                else:
+                    score = (exp.reward - group_reward_mean) / (group_reward_std + self.epsilon)
                 scores[rid] = score.item()
             metrics = {
                 "reward_mean": group_reward_mean.item(),
@@ -85,6 +103,28 @@ class StepWiseGRPOAdvantageFn(AdvantageFn, ExperienceOperator):
         metric_list = []
         # Step 1: split the experiences into sub-groups by task
         task_exps = group_by(exps, "task")
+
+        # --- Pre-computation step for batch-level standard deviation ---
+        calc_kwargs = {}
+        if self.std_cal_level == "batch":
+            all_laststep_rewards = []
+            for task_exp in task_exps.values():
+                # First, group all experiences by run to find the last step of each run
+                task_run_exps = group_by(task_exp, "run")
+                # Collect rewards from the last step of every run in the entire batch
+                last_step_rewards = [
+                    run_steps[-1].reward for run_steps in task_run_exps.values() if run_steps
+                ]
+                all_laststep_rewards.extend(last_step_rewards)
+
+            if len(all_laststep_rewards) <= 1:
+                precomputed_std = torch.tensor(1.0)
+            else:
+                precomputed_std = torch.std(torch.tensor(all_laststep_rewards, dtype=torch.float32))
+
+            calc_kwargs["precomputed_std"] = precomputed_std
+        # --- End of pre-computation ---
+
         # Step 2: further split each task's experiences into sub-groups by run
         result_exps = []
         for task_exp in task_exps.values():
@@ -92,7 +132,7 @@ class StepWiseGRPOAdvantageFn(AdvantageFn, ExperienceOperator):
 
             # Step3: extract the last experience (last step) from each run and calculate scores
             last_step_exps = {run_id: step_exps[-1] for run_id, step_exps in run_exps.items()}
-            scores, metrics = self.calculate_last_step_advantage(last_step_exps)
+            scores, metrics = self.calculate_last_step_advantage(last_step_exps, **calc_kwargs)
             metric_list.append(metrics)
 
             # Step 4: broadcast the advantages to all previous steps

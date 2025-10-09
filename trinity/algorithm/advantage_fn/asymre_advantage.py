@@ -99,7 +99,7 @@ class ASYMREGroupAdvantage(GroupAdvantage):
         return group_by(exps, id_type="task")
 
     def calculate_group_advantage(
-        self, group_id: str, exps: List[Experience]
+        self, group_id: str, exps: List[Experience], **kwargs
     ) -> Tuple[List[Experience], Dict]:
         with torch.no_grad():
             if len(exps) == 1:
