@@ -1,6 +1,6 @@
 """GRPO advantage computation for multi-step scenarios
 """
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import torch
 
@@ -41,18 +41,19 @@ class StepWiseGRPOAdvantageFn(AdvantageFn, ExperienceOperator):
             raise ValueError("std_cal_level must be either 'group' or 'batch'")
 
     def calculate_last_step_advantage(
-        self, exps: Dict[str, Experience], **kwargs
+        self,
+        exps: Dict[str, Experience],
+        precomputed_std: Optional[torch.Tensor] = None,
     ) -> Tuple[Dict[str, float], Dict[str, float]]:
         """Calculate group advantage for a given group of experiences.
 
         Args:
             exps (Dict[str, Experience]): One experience per run, keyed by run ID.
-            **kwargs: Additional arguments, e.g., precomputed_std for batch-level std.
+
         Returns:
             Dict[str, float]: A tuple containing the scores for each run.
             Dict[str, float]: Metrics for logging.
         """
-        precomputed_std = kwargs.get("precomputed_std", None)
         with torch.no_grad():
             if len(exps) == 1:
                 group_reward_mean = torch.tensor(0.0)
@@ -105,7 +106,6 @@ class StepWiseGRPOAdvantageFn(AdvantageFn, ExperienceOperator):
         task_exps = group_by(exps, "task")
 
         # --- Pre-computation step for batch-level standard deviation ---
-        calc_kwargs = {}
         if self.std_cal_level == "batch":
             all_laststep_rewards = []
             for task_exp in task_exps.values():
@@ -121,8 +121,6 @@ class StepWiseGRPOAdvantageFn(AdvantageFn, ExperienceOperator):
                 precomputed_std = torch.tensor(1.0)
             else:
                 precomputed_std = torch.std(torch.tensor(all_laststep_rewards, dtype=torch.float32))
-
-            calc_kwargs["precomputed_std"] = precomputed_std
         # --- End of pre-computation ---
 
         # Step 2: further split each task's experiences into sub-groups by run
@@ -132,7 +130,9 @@ class StepWiseGRPOAdvantageFn(AdvantageFn, ExperienceOperator):
 
             # Step3: extract the last experience (last step) from each run and calculate scores
             last_step_exps = {run_id: step_exps[-1] for run_id, step_exps in run_exps.items()}
-            scores, metrics = self.calculate_last_step_advantage(last_step_exps, **calc_kwargs)
+            scores, metrics = self.calculate_last_step_advantage(
+                last_step_exps, precomputed_std=precomputed_std
+            )
             metric_list.append(metrics)
 
             # Step 4: broadcast the advantages to all previous steps

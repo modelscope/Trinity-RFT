@@ -35,7 +35,7 @@ class RECGroupedAdvantage(GroupAdvantage):
         return group_by(exps, id_type="task")
 
     def calculate_group_advantage(
-        self, group_id: str, exps: List[Experience], **kwargs
+        self, group_id: str, exps: List[Experience]
     ) -> Tuple[List[Experience], Dict]:
         # Initialize masks and metrics
         N = len(exps)

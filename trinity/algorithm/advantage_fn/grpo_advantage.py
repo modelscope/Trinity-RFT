@@ -131,9 +131,11 @@ class GRPOGroupedAdvantage(GroupAdvantage):
         return group_by(exps, id_type="task")
 
     def calculate_group_advantage(
-        self, group_id: str, exps: List[Experience], **kwargs
+        self,
+        group_id: str,
+        exps: List[Experience],
+        precomputed_std: Optional[torch.Tensor] = None,
     ) -> Tuple[List[Experience], Dict]:
-        precomputed_std = kwargs.get("precomputed_std", None)
         metrics = {}
         with torch.no_grad():
             if len(exps) == 1:
@@ -198,7 +200,7 @@ class GRPOGroupedAdvantage(GroupAdvantage):
     def process(self, exps):
         exp_groups = self.group_experiences(exps)
         metric_list = []
-        process_kwargs = {}
+        precomputed_std = None
         if self.std_cal_level == "batch":
             all_rewards = torch.tensor(
                 [exp.reward for exp in exps], dtype=torch.float32
@@ -207,10 +209,9 @@ class GRPOGroupedAdvantage(GroupAdvantage):
                 precomputed_std = torch.tensor(1.0)
             else:
                 precomputed_std = torch.std(all_rewards)
-            process_kwargs["precomputed_std"] = precomputed_std
         for group_id, group_exps in exp_groups.items():
             group_exps, group_metrics = self.calculate_group_advantage(
-                group_id, group_exps, **process_kwargs
+                group_id, group_exps, precomputed_std=precomputed_std
             )
             metric_list.append(group_metrics)
         try:

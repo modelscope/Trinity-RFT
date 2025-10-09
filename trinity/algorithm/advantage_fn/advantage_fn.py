@@ -56,7 +56,7 @@ class GroupAdvantage(AdvantageFn, ExperienceOperator):
 
     @abstractmethod
     def calculate_group_advantage(
-        self, group_id: str, exps: List[Experience], **kwargs
+        self, group_id: str, exps: List[Experience]
     ) -> Tuple[List[Experience], Dict]:
         """Calculate advantages for a group of experiences.
 

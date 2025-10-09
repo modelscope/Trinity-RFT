@@ -116,7 +116,7 @@ class OPMDGroupAdvantage(GroupAdvantage):
         return group_by(exps, id_type="task")
 
     def calculate_group_advantage(
-        self, group_id: str, exps: List[Experience], **kwargs
+        self, group_id: str, exps: List[Experience]
     ) -> Tuple[List[Experience], Dict]:
         with torch.no_grad():
             if len(exps) == 1:
