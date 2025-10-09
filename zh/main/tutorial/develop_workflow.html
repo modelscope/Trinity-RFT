@@ -41,6 +41,14 @@
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
     <script src="../_static/translations.js?v=beaddf03"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs"></script>
+    <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";import elkLayouts from "https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs";mermaid.registerLayoutLoaders(elkLayouts);mermaid.initialize({startOnLoad:false});</script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+    <script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";
+window.addEventListener("load", () => mermaid.run());
+</script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'tutorial/develop_workflow';</script>
     <link rel="index" title="索引" href="../genindex.html" />
     <link rel="search" title="搜索" href="../search.html" />
@@ -583,15 +591,24 @@ document.write(`
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">步骤 0：基本概念</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">步骤 1：准备任务数据集</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">步骤 2：实现新的工作流</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">步骤 2：实现工作流</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">初始化你的工作流</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#run">实现 <code class="docutils literal notranslate"><span class="pre">run</span></code> 方法</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">注册你的工作流</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">避免重复初始化</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">完整代码示例</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">性能调优</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">避免重复初始化</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">批量运行推理任务</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">步骤 3：使用你的工作流</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">完整代码示例</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id10">步骤 3：使用你的工作流</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id11">其他进阶特性</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#async">async 支持</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openai-api">使用 OpenAI API</a></li>
+</ul>
+</li>
 </ul>
             </nav>
         </div>
@@ -606,26 +623,31 @@ document.write(`
   <section id="workflow">
 <span id="workflows"></span><h1>Workflow 开发指南<a class="headerlink" href="#workflow" title="Link to this heading">#</a></h1>
 <p>在 Trinity-RFT 中，工作流（Workflow）是定义 Agent 与 Environment 之间交互的核心组件。
-一个合格的工作流需要使用训练好的模型完成指定任务，并从环境中获取反馈信息（奖励）。以下是创建新工作流的步骤：</p>
+一个合格的工作流需要使用被训练模型完成指定任务，并从环境中获取反馈信息（奖励）。本节将会介绍如何开发一个新的工作流。</p>
 <hr class="docutils" />
 <section id="id1">
 <h2>步骤 0：基本概念<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
-<p>在开始开发之前，理解以下几个核心概念非常重要：</p>
-<ul class="simple">
-<li><p><strong>任务（Task）</strong> (<a class="reference internal" href="../build_api/trinity.common.workflows.html#trinity.common.workflows.Task" title="trinity.common.workflows.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.workflows.Task</span></code></a>)：表示可转换为 <code class="docutils literal notranslate"><span class="pre">Workflow</span></code> 的数据结构。<code class="docutils literal notranslate"><span class="pre">Task</span></code> 的内容根据任务类型而异：</p>
+<p>在开发之前，理解以下几个核心概念非常重要：</p>
+<pre  class="mermaid">
+        flowchart LR
+    A([Task]) &amp; B([Model]) --&gt; C[Workflow]
+    C --&gt; D([Experience])
+    </pre><ul class="simple">
+<li><p><strong>任务（Task）</strong> (<a class="reference internal" href="../build_api/trinity.common.workflows.html#trinity.common.workflows.Task" title="trinity.common.workflows.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.workflows.Task</span></code></a>)：结构化的数据实例，包含了工作流一次运行所需的各种信息。一般情况下由训练数据集提供，数据集中的每个样本都会被转化为一个 <code class="docutils literal notranslate"><span class="pre">Task</span></code> 实例。<code class="docutils literal notranslate"><span class="pre">Task</span></code> 的内容根据任务类型而异：</p>
 <ul>
-<li><p><strong>数学问题</strong>：<code class="docutils literal notranslate"><span class="pre">Task</span></code> 包含问题描述和标准答案。</p></li>
-<li><p><strong>编程场景</strong>：<code class="docutils literal notranslate"><span class="pre">Task</span></code> 包括问题描述、测试用例、运行环境等复杂信息。</p></li>
+<li><p><strong>数学问题</strong>：包含问题和答案。</p></li>
+<li><p><strong>编程场景</strong>：包含题目的描述、测试用例、运行环境等复杂信息。</p></li>
 </ul>
 </li>
-<li><p><strong>工作流（Workflow）</strong> (<a class="reference internal" href="../build_api/trinity.common.workflows.html#trinity.common.workflows.Workflow" title="trinity.common.workflows.Workflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.workflows.Workflow</span></code></a>)：描述 <code class="docutils literal notranslate"><span class="pre">Task</span></code> 如何执行。它定义了 Agent 与 Environment 的交互流程，包括类似其他框架中的 <em>Rollout</em> 和 <em>Reward</em> 计算逻辑。执行后生成一组 <code class="docutils literal notranslate"><span class="pre">Experience</span></code>。Trinity-RFT 包含多个内置工作流：</p>
+<li><p><strong>模型（Model）</strong> (<a class="reference internal" href="../build_api/trinity.common.models.model.html#trinity.common.models.model.ModelWrapper" title="trinity.common.models.model.ModelWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.models.model.ModelWrapper</span></code></a>)：被训练的模型，工作流内需要使用该模型来执行推理。该实例由 Trinity-RFT 自动提供，支持同步以及异步的 <code class="docutils literal notranslate"><span class="pre">generate</span></code> 以及 <code class="docutils literal notranslate"><span class="pre">chat</span></code> 等方法，同时也提供了 OpenAI API 接口，能够兼容大部分 Agent 框架。</p></li>
+<li><p><strong>工作流（Workflow）</strong> (<a class="reference internal" href="../build_api/trinity.common.workflows.html#trinity.common.workflows.Workflow" title="trinity.common.workflows.Workflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.workflows.Workflow</span></code></a>)：定义了 Agent 与 Environment 的交互流程。<code class="docutils literal notranslate"><span class="pre">Workflow</span></code> 通过 <code class="docutils literal notranslate"><span class="pre">Task</span></code> 中提供的信息初始化自身，并借助 <code class="docutils literal notranslate"><span class="pre">Model</span></code> 来执行其中定义好的交互流程。与常规 Agent 应用不同的是，工作流内部还需要计算奖励信号（reward）以指导训练过程。Trinity-RFT 包含多个内置工作流：</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">MathWorkflow</span></code> (<a class="reference internal" href="../build_api/trinity.common.workflows.html#trinity.common.workflows.MathWorkflow" title="trinity.common.workflows.MathWorkflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.workflows.MathWorkflow</span></code></a>)：用于数学场景，将问题提交给 LLM，解析 LLM 响应，并计算分数（奖励）。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">WebShopWorkflow</span></code> (<a class="reference internal" href="../build_api/trinity.common.workflows.html#trinity.common.workflows.WebShopWorkflow" title="trinity.common.workflows.WebShopWorkflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.workflows.WebShopWorkflow</span></code></a>)：用于 webshop 场景，包含与环境的多轮交互。</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AgentScopeReactMathWorkflow</span></code> (<a class="reference internal" href="../build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeReactMathWorkflow" title="trinity.common.workflows.AgentScopeReactMathWorkflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.workflows.AgentScopeReactMathWorkflow</span></code></a>)：用于数学场景，直接使用现有的 ReActAgent（基于 AgentScope）来解决数学问题。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AgentScopeReActWorkflow</span></code> (<a class="reference internal" href="../build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeReActWorkflow" title="trinity.common.workflows.AgentScopeReActWorkflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.workflows.AgentScopeReActWorkflow</span></code></a>)：直接使用现有的 ReActAgent（基于 AgentScope）来解决问题。</p></li>
 </ul>
 </li>
-<li><p><strong>经验（Experience）</strong> (<a class="reference internal" href="../build_api/trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.experience.Experience</span></code></a>)：运行 <code class="docutils literal notranslate"><span class="pre">Workflow</span></code> 的输出。内部数据格式取决于所使用的训练算法。例如，对于常见的 PPO/GRPO 算法，<code class="docutils literal notranslate"><span class="pre">Experience</span></code> 包含 token ID 列表、动作掩码（标识哪些 token 是由 LLM 生成的）、对数概率、奖励等。</p></li>
+<li><p><strong>经验（Experience）</strong> (<a class="reference internal" href="../build_api/trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.experience.Experience</span></code></a>)：<code class="docutils literal notranslate"><span class="pre">Workflow</span></code> 的运行产出。产出的数量以及内部数据格式取决于所使用的训练算法。例如，对于常见的 PPO/GRPO 算法，<code class="docutils literal notranslate"><span class="pre">Experience</span></code> 包含 token ID 列表、动作掩码（标识哪些 token 是由 LLM 生成的）、每个 token 的对数概率（logprobs）、奖励信号（reward）等。</p></li>
 </ul>
 </section>
 <hr class="docutils" />
@@ -675,7 +697,7 @@ document.write(`
 </section>
 <hr class="docutils" />
 <section id="id3">
-<h2>步骤 2：实现新的工作流<a class="headerlink" href="#id3" title="Link to this heading">#</a></h2>
+<h2>步骤 2：实现工作流<a class="headerlink" href="#id3" title="Link to this heading">#</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">Workflow</span></code> 基类接口如下：</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Workflow</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 
@@ -684,7 +706,7 @@ document.write(`
         <span class="o">*</span><span class="p">,</span>
         <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">,</span>
         <span class="n">model</span><span class="p">:</span> <span class="n">ModelWrapper</span><span class="p">,</span>
-        <span class="n">auxiliary_models</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">openai</span><span class="o">.</span><span class="n">OpenAI</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">auxiliary_models</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">openai</span><span class="o">.</span><span class="n">OpenAI</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># 主要用于 LLM-as-a-judge 场景，这里可以忽略</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">=</span> <span class="n">task</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
@@ -701,13 +723,8 @@ document.write(`
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">task</span></code>(<a class="reference internal" href="../build_api/trinity.common.workflows.html#trinity.common.workflows.Task" title="trinity.common.workflows.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.workflows.Task</span></code></a>)：数据集中的单个任务。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">model</span></code>(<a class="reference internal" href="../build_api/trinity.common.models.model.html#trinity.common.models.model.ModelWrapper" title="trinity.common.models.model.ModelWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.models.model.ModelWrapper</span></code></a>)：正在训练的模型，提供类似于 OpenAI 的接口，能够接收对话消息列表并返回 LLM 生成的内容（包括回复文本 <code class="docutils literal notranslate"><span class="pre">response_text</span></code>、完整序列 token id <code class="docutils literal notranslate"><span class="pre">tokens</span></code>、prompt 部分 token 长度 <code class="docutils literal notranslate"><span class="pre">prompt_length</span></code>，以及输出 token 对数概率列表 <code class="docutils literal notranslate"><span class="pre">logprobs</span></code>）。</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">auxiliary_models</span></code>(<code class="docutils literal notranslate"><span class="pre">List[openai.OpenAI]</span></code>)：未参与训练的辅助模型列表。所有模型均通过兼容 OpenAI 的 API 提供。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">auxiliary_models</span></code>(<code class="docutils literal notranslate"><span class="pre">List[openai.OpenAI]</span></code>)：未参与训练的辅助模型列表。所有模型均通过兼容 OpenAI 的 API 提供，主要用于 LLM-as-a-judge 场景。</p></li>
 </ul>
-<div class="admonition tip">
-<p class="admonition-title">小技巧</p>
-<p>你可以在配置文件中将 <code class="docutils literal notranslate"><span class="pre">explorer.rollout_model.enable_openai_api</span></code> 设置为 <code class="docutils literal notranslate"><span class="pre">true</span></code>，并在工作流中调用 <code class="docutils literal notranslate"><span class="pre">model.get_openai_client()</span></code> 获取 <code class="docutils literal notranslate"><span class="pre">openai.OpenAI</span></code> 实例，从而切换为使用 OpenAI API。
-调用 OpenAI API 时，<code class="docutils literal notranslate"><span class="pre">model</span></code> 字段可通过 <code class="docutils literal notranslate"><span class="pre">openai_client.models.list().data[0].id</span></code> 或 <code class="docutils literal notranslate"><span class="pre">openai_client.model_path</span></code> 获取。</p>
-</div>
 <p>以下是一个仅使用 <code class="docutils literal notranslate"><span class="pre">raw_task</span></code> 和 <code class="docutils literal notranslate"><span class="pre">rollout_args</span></code> 初始化简单工作流的示例。在更复杂的情况下，你可以使用 <code class="docutils literal notranslate"><span class="pre">format_args</span></code> 进行进一步自定义。</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
 
@@ -723,11 +740,11 @@ document.write(`
 </section>
 <section id="run">
 <h3>实现 <code class="docutils literal notranslate"><span class="pre">run</span></code> 方法<a class="headerlink" href="#run" title="Link to this heading">#</a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">run</span></code> 方法是工作流的核心方法。它返回一个 <code class="docutils literal notranslate"><span class="pre">Experience</span></code> 列表。
+<p><code class="docutils literal notranslate"><span class="pre">run</span></code> 方法是工作流的核心方法。该方法没有输入参数，返回一个 <code class="docutils literal notranslate"><span class="pre">Experience</span></code> 列表。
 以下是一个数学工作流的简单实现。</p>
-<p>我们首先调用模型，使用给定的问题和 rollout 参数生成多个响应。
-然后使用 <code class="docutils literal notranslate"><span class="pre">calculate_reward</span></code> 函数计算每个响应的奖励。
-最后，我们构建一个包含响应和奖励的 <code class="docutils literal notranslate"><span class="pre">Experience</span></code> 列表并返回。</p>
+<p>我们首先调用模型，使用给定的问题和 rollout 参数生成答案。
+然后使用 <code class="docutils literal notranslate"><span class="pre">calculate_reward</span></code> 函数计算答案的奖励。
+最后，我们将生成的答案和奖励封装为<code class="docutils literal notranslate"><span class="pre">Experience</span></code> 实例并返回。</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
 
     <span class="c1"># the __init__ function</span>
@@ -747,12 +764,100 @@ document.write(`
                     <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Question:</span><span class="se">\n</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">question</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
                 <span class="p">}</span>
             <span class="p">],</span>
-            <span class="n">n</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rollout_args</span><span class="o">.</span><span class="n">n</span><span class="p">,</span>
+            <span class="n">temperature</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rollout_args</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">responses</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># there is only one response</span>
+        <span class="n">reward</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_reward</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">response_text</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">answer</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="n">Experience</span><span class="p">(</span>
+                <span class="n">tokens</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">tokens</span><span class="p">,</span>
+                <span class="n">prompt_length</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">prompt_length</span><span class="p">,</span>
+                <span class="n">reward</span><span class="o">=</span><span class="n">reward</span><span class="p">,</span>
+                <span class="n">logprobs</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">logprobs</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="id5">
+<h3>注册你的工作流<a class="headerlink" href="#id5" title="Link to this heading">#</a></h3>
+<p>为了让 Trinity-RFT 能够通过配置文件中的名称自动找到你的工作流，你需要使用 <code class="docutils literal notranslate"><span class="pre">WORKFLOWS.register_module</span></code> 装饰器注册。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># import some packages</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">WORKFLOWS</span>
+
+<span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;example_workflow&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p>对于准备贡献给 Trinity-RFT 项目的模块，你需要将上述代码放入 <code class="docutils literal notranslate"><span class="pre">trinity/common/workflows</span></code> 文件夹中，例如 <code class="docutils literal notranslate"><span class="pre">trinity/common/workflows/example_workflow.py</span></code>。并在 <code class="docutils literal notranslate"><span class="pre">trinity/common/workflows/__init__.py</span></code> 中添加以下行：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># existing import lines</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows.example_workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExampleWorkflow</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="c1"># existing __all__ lines</span>
+    <span class="s2">&quot;ExampleWorkflow&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="id6">
+<h3>性能调优<a class="headerlink" href="#id6" title="Link to this heading">#</a></h3>
+<p>以下是一些可选的性能调优方法，能够提升工作流的运行效率。当然，这些方法并非所有工作流都需要实现，具体取决于你的工作流设计。</p>
+<section id="id7">
+<h4>避免重复初始化<a class="headerlink" href="#id7" title="Link to this heading">#</a></h4>
+<p>对于较为复杂的工作流，每次重新初始化会带来额外计算开销。
+此时，你可以实现 <code class="docutils literal notranslate"><span class="pre">resettable</span></code> 和 <code class="docutils literal notranslate"><span class="pre">reset</span></code> 方法以避免重复初始化。</p>
+<p><code class="docutils literal notranslate"><span class="pre">resettable</span></code> 方法返回一个布尔值，指示工作流是否支持轻量化重置。</p>
+<p><code class="docutils literal notranslate"><span class="pre">reset</span></code> 方法接受一个新的 <code class="docutils literal notranslate"><span class="pre">Task</span></code> 实例，并使用该实例更新工作流的状态。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;example_workflow&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+    <span class="c1"># some code</span>
+    <span class="c1"># ...</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">resettable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">question</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">raw_task</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;question&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">answer</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">raw_task</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;answer&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="id8">
+<h4>批量运行推理任务<a class="headerlink" href="#id8" title="Link to this heading">#</a></h4>
+<p>当前流行的很多 RL 算法需要多次运行同一个任务(例如 GRPO)。该场景下一些简单任务可以直接通过模型批量推理来获得一个问题的多个回复以提升效率。
+针对该情况，你可以实现 <code class="docutils literal notranslate"><span class="pre">repeatable</span></code> 属性以及 <code class="docutils literal notranslate"><span class="pre">set_repeat_times</span></code> 方法。</p>
+<p><code class="docutils literal notranslate"><span class="pre">repeatable</span></code> 属性返回一个布尔值，指示工作流是否支持在 <code class="docutils literal notranslate"><span class="pre">run</span></code> 方法内多次执行。</p>
+<p><code class="docutils literal notranslate"><span class="pre">set_repeat_times</span></code> 方法接受两个参数：<code class="docutils literal notranslate"><span class="pre">repeat_times</span></code> 指定了在 <code class="docutils literal notranslate"><span class="pre">run</span></code> 方法内需要执行的次数，<code class="docutils literal notranslate"><span class="pre">run_id_base</span></code> 是一个整数，用于标识多次运行中第一次的运行 ID，之后各次的 ID 基于此递增（该参数用于多轮交互场景，单次模型调用即可完成的任务可以忽略该项）。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;example_workflow&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+    <span class="c1"># some code</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">repeatable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_repeat_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">repeat_times</span><span class="p">,</span> <span class="n">run_id_base</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">repeat_times</span> <span class="o">=</span> <span class="n">repeat_times</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_id_base</span> <span class="o">=</span> <span class="n">run_id_base</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+        <span class="c1"># call the model to generate multiple responses</span>
+        <span class="n">responses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">chat</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Question:</span><span class="se">\n</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">question</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">],</span>
+            <span class="n">n</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">repeat_times</span><span class="p">,</span>  <span class="c1"># run multiple times in one call</span>
             <span class="n">temperature</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rollout_args</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">experiences</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">response</span> <span class="ow">in</span> <span class="n">responses</span><span class="p">:</span>
-            <span class="c1"># calulcate reward</span>
+            <span class="c1"># calculate reward</span>
             <span class="n">reward</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_reward</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">response_text</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">answer</span><span class="p">)</span>
             <span class="c1"># construct Experience</span>
             <span class="n">experiences</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
@@ -767,49 +872,9 @@ document.write(`
 </pre></div>
 </div>
 </section>
-<section id="id5">
-<h3>注册你的工作流<a class="headerlink" href="#id5" title="Link to this heading">#</a></h3>
-<p>使用 <code class="docutils literal notranslate"><span class="pre">WORKFLOWS.register_module</span></code> 装饰器注册你的工作流。
-确保名称不与现有工作流冲突。</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># import some packages</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">WORKFLOWS</span>
-
-<span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;example_workflow&quot;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
-    <span class="k">pass</span>
-</pre></div>
-</div>
-<p>对于准备贡献给 Trinity-RFT 项目的模块，你需要将上述代码放入 <code class="docutils literal notranslate"><span class="pre">trinity/common/workflows</span></code> 文件夹中，例如 <code class="docutils literal notranslate"><span class="pre">trinity/common/workflows/example_workflow.py</span></code>。并在 <code class="docutils literal notranslate"><span class="pre">trinity/common/workflows/__init__.py</span></code> 中添加以下行：</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># existing import lines</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.example_workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExampleWorkflow</span>
-
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="c1"># existing __all__ lines</span>
-    <span class="s2">&quot;ExampleWorkflow&quot;</span><span class="p">,</span>
-<span class="p">]</span>
-</pre></div>
-</div>
 </section>
-<section id="id6">
-<h3>避免重复初始化<a class="headerlink" href="#id6" title="Link to this heading">#</a></h3>
-<p>对于重型工作流，每次重新初始化会带来额外计算开销。
-此时，你可以实现 <code class="docutils literal notranslate"><span class="pre">resettable</span></code> 和 <code class="docutils literal notranslate"><span class="pre">reset</span></code> 方法以避免重复初始化。</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;example_workflow&quot;</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
-    <span class="c1"># some code</span>
-    <span class="c1"># ...</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">resettable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">True</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">question</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">raw_task</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;question&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">answer</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">raw_task</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;answer&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</section>
-<section id="id7">
-<h3>完整代码示例<a class="headerlink" href="#id7" title="Link to this heading">#</a></h3>
+<section id="id9">
+<h3>完整代码示例<a class="headerlink" href="#id9" title="Link to this heading">#</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;example_workflow&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
 
@@ -852,20 +917,29 @@ document.write(`
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">experiences</span>
 
+    <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">resettable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">True</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">question</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">raw_task</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;question&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">answer</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">raw_task</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;answer&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">repeatable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_repeat_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">repeat_times</span><span class="p">,</span> <span class="n">run_id_base</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">repeat_times</span> <span class="o">=</span> <span class="n">repeat_times</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_id_base</span> <span class="o">=</span> <span class="n">run_id_base</span>
 </pre></div>
 </div>
 </section>
 </section>
 <hr class="docutils" />
-<section id="id8">
-<h2>步骤 3：使用你的工作流<a class="headerlink" href="#id8" title="Link to this heading">#</a></h2>
-<p>实现并注册工作流后，你需要更新配置文件，将 <code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.taskset</span></code> 域中的 <code class="docutils literal notranslate"><span class="pre">default_workflow_type</span></code> 设置为新注册的 <code class="docutils literal notranslate"><span class="pre">Workflow</span></code> 名称。</p>
+<section id="id10">
+<h2>步骤 3：使用你的工作流<a class="headerlink" href="#id10" title="Link to this heading">#</a></h2>
+<p>实现并注册工作流后，就可以通过将配置文件中 <code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.taskset</span></code> 的 <code class="docutils literal notranslate"><span class="pre">default_workflow_type</span></code> 域设置为你的工作流名称来使用它。例如：</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">buffer</span><span class="p">:</span>
 <span class="w">  </span><span class="c1"># Other fields</span>
 <span class="w">  </span><span class="nt">explorer_input</span><span class="p">:</span>
@@ -876,9 +950,78 @@ document.write(`
 </pre></div>
 </div>
 <p>现在你可以使用以下命令在 Trinity-RFT 中运行你的工作流：</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">trinity</span> <span class="n">run</span> <span class="o">--</span><span class="n">config</span> <span class="o">&lt;</span><span class="n">your_yaml_file</span><span class="o">&gt;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>&lt;your_yaml_file&gt;
 </pre></div>
 </div>
+</section>
+<hr class="docutils" />
+<section id="id11">
+<h2>其他进阶特性<a class="headerlink" href="#id11" title="Link to this heading">#</a></h2>
+<section id="async">
+<h3>async 支持<a class="headerlink" href="#async" title="Link to this heading">#</a></h3>
+<p>本节样例主要针对同步模式，如果你的工作流需要使用异步方法（例如异步 API）,你可以实现 <code class="docutils literal notranslate"><span class="pre">asynchronous</span></code> 属性并将其设置为 <code class="docutils literal notranslate"><span class="pre">True</span></code>，然后实现 <code class="docutils literal notranslate"><span class="pre">run_async</span></code> 方法，在这种情况下不再需要实现 <code class="docutils literal notranslate"><span class="pre">run</span></code> 方法，其余方法和属性不受影响。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;example_workflow_async&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflowAsync</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">asynchronous</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+        <span class="c1"># your async code here</span>
+
+    <span class="c1"># no need to implement run() method</span>
+</pre></div>
+</div>
+</section>
+<section id="openai-api">
+<h3>使用 OpenAI API<a class="headerlink" href="#openai-api" title="Link to this heading">#</a></h3>
+<p>Trinity-RFT 的 Model 提供了 OpenAI API 接口，能够降低模型推理部分的学习成本并简化工作流的实现。</p>
+<p>为了激活 OpenAI API 服务，你需要将配置文件中 <code class="docutils literal notranslate"><span class="pre">explorer.rollout_model.enable_openai_api</span></code> 设置为 <code class="docutils literal notranslate"><span class="pre">true</span></code> 。这样就可以通过 <code class="docutils literal notranslate"><span class="pre">Model</span></code> 实例的 <code class="docutils literal notranslate"><span class="pre">get_openai_client</span></code> 方法获取 <code class="docutils literal notranslate"><span class="pre">openai.OpenAI</span></code> 实例。</p>
+<p>另外，由于 OpenAI API 无法提供训练所需的各项数据，你还需要将 <code class="docutils literal notranslate"><span class="pre">explorer.rollout_model.enable_history</span></code> 设置为 <code class="docutils literal notranslate"><span class="pre">true</span></code>，让框架自动记录可用于训练的数据并转化为 <code class="docutils literal notranslate"><span class="pre">Experience</span></code> 列表。你可以通过 <code class="docutils literal notranslate"><span class="pre">extract_experience_from_history</span></code> 方法来提取这些可用于训练的数据。</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># example config snippet</span>
+<span class="nt">explorer</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">rollout_model</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">enable_openai_api</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">enable_history</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="c1"># Other fields</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;example_workflow&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">ModelWrapper</span><span class="p">,</span> <span class="n">auxiliary_models</span><span class="p">:</span> <span class="n">List</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">auxiliary_models</span><span class="o">=</span><span class="n">auxiliary_models</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">:</span> <span class="n">openai</span><span class="o">.</span><span class="n">OpenAI</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_openai_client</span><span class="p">()</span>
+        <span class="c1"># or async client</span>
+        <span class="c1"># self.client: openai.AsyncOpenAI = self.model.get_openai_async_client()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">agent</span> <span class="o">=</span> <span class="n">MyAgent</span><span class="p">(</span><span class="n">openai_client</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_reward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="c1"># your reward calculation logic</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+        <span class="c1"># run your agent</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+        <span class="c1"># calculate reward</span>
+        <span class="n">reward</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_reward</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        <span class="c1"># extract experiences from history recorded in self.model</span>
+        <span class="n">experiences</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">extract_experience_from_history</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiences</span><span class="p">:</span>
+            <span class="n">exp</span><span class="o">.</span><span class="n">reward</span> <span class="o">=</span> <span class="n">reward</span>
+        <span class="k">return</span> <span class="n">experiences</span>
+</pre></div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">小技巧</p>
+<ol class="arabic simple">
+<li><p>当前的 OpenAI API 仅会自动记录 <code class="docutils literal notranslate"><span class="pre">openai.OpenAI.chat.completions.create</span></code> 以及 <code class="docutils literal notranslate"><span class="pre">openai.AsyncOpenAI.chat.completions.create</span></code> 方法的调用历史并转化为 <code class="docutils literal notranslate"><span class="pre">Experience</span></code> 结构，且不支持流式输出。</p></li>
+<li><p>调用 <code class="docutils literal notranslate"><span class="pre">chat.completions.create</span></code> 时，其中的 <code class="docutils literal notranslate"><span class="pre">model</span></code> 字段可通过 <code class="docutils literal notranslate"><span class="pre">openai_client.models.list().data[0].id</span></code> 或 <code class="docutils literal notranslate"><span class="pre">openai_client.model_path</span></code> 获取。</p></li>
+<li><p>更复杂的使用 OpenAI API 的工作流实例可参考 <a class="reference internal" href="example_react.html"><span class="std std-doc">ReAct Agent 训练</span></a>。</p></li>
+</ol>
+</div>
+</section>
 </section>
 </section>
 
@@ -929,15 +1072,24 @@ document.write(`
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">步骤 0：基本概念</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">步骤 1：准备任务数据集</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">步骤 2：实现新的工作流</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">步骤 2：实现工作流</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">初始化你的工作流</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#run">实现 <code class="docutils literal notranslate"><span class="pre">run</span></code> 方法</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">注册你的工作流</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">避免重复初始化</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">完整代码示例</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">性能调优</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">避免重复初始化</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">批量运行推理任务</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">步骤 3：使用你的工作流</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">完整代码示例</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id10">步骤 3：使用你的工作流</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id11">其他进阶特性</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#async">async 支持</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#openai-api">使用 OpenAI API</a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 

@@ -614,6 +614,7 @@ document.write(`
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.workflow.MultiTurnWorkflow"><code class="docutils literal notranslate"><span class="pre">MultiTurnWorkflow</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.workflow.MultiTurnWorkflow.__init__"><code class="docutils literal notranslate"><span class="pre">MultiTurnWorkflow.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.workflow.MultiTurnWorkflow.repeatable"><code class="docutils literal notranslate"><span class="pre">MultiTurnWorkflow.repeatable</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.workflow.MultiTurnWorkflow.set_repeat_times"><code class="docutils literal notranslate"><span class="pre">MultiTurnWorkflow.set_repeat_times()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.workflow.MultiTurnWorkflow.process_messages_to_experience"><code class="docutils literal notranslate"><span class="pre">MultiTurnWorkflow.process_messages_to_experience()</span></code></a></li>
 </ul>
@@ -622,6 +623,7 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.workflow.SimpleWorkflow.__init__"><code class="docutils literal notranslate"><span class="pre">SimpleWorkflow.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.workflow.SimpleWorkflow.resettable"><code class="docutils literal notranslate"><span class="pre">SimpleWorkflow.resettable</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.workflow.SimpleWorkflow.reset"><code class="docutils literal notranslate"><span class="pre">SimpleWorkflow.reset()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.workflow.SimpleWorkflow.repeatable"><code class="docutils literal notranslate"><span class="pre">SimpleWorkflow.repeatable</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.workflow.SimpleWorkflow.set_repeat_times"><code class="docutils literal notranslate"><span class="pre">SimpleWorkflow.set_repeat_times()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.workflow.SimpleWorkflow.format_messages"><code class="docutils literal notranslate"><span class="pre">SimpleWorkflow.format_messages()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.workflow.SimpleWorkflow.run"><code class="docutils literal notranslate"><span class="pre">SimpleWorkflow.run()</span></code></a></li>
@@ -833,6 +835,12 @@ document.write(`
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#trinity.common.workflows.workflow.Task" title="trinity.common.workflows.workflow.Task"><span class="pre">Task</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.models.model.html#trinity.common.models.model.ModelWrapper" title="trinity.common.models.model.ModelWrapper"><span class="pre">ModelWrapper</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">OpenAI</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/workflow.html#MultiTurnWorkflow.__init__"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.common.workflows.workflow.MultiTurnWorkflow.__init__" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="trinity.common.workflows.workflow.MultiTurnWorkflow.repeatable">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">repeatable</span></span><a class="headerlink" href="#trinity.common.workflows.workflow.MultiTurnWorkflow.repeatable" title="Link to this definition">#</a></dt>
+<dd><p>A workflow is repeatable if it can be run multiple times within the run() or run_async() method.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.common.workflows.workflow.MultiTurnWorkflow.set_repeat_times">
 <span class="sig-name descname"><span class="pre">set_repeat_times</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repeat_times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_id_base</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/workflow.html#MultiTurnWorkflow.set_repeat_times"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.common.workflows.workflow.MultiTurnWorkflow.set_repeat_times" title="Link to this definition">#</a></dt>
@@ -869,6 +877,12 @@ document.write(`
 <dt class="sig sig-object py" id="trinity.common.workflows.workflow.SimpleWorkflow.reset">
 <span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#trinity.common.workflows.workflow.Task" title="trinity.common.workflows.workflow.Task"><span class="pre">Task</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/workflow.html#SimpleWorkflow.reset"><span class="viewcode-link"><span class="pre">[源代码]</span></span></a><a class="headerlink" href="#trinity.common.workflows.workflow.SimpleWorkflow.reset" title="Link to this definition">#</a></dt>
 <dd><p>Reset the workflow.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="trinity.common.workflows.workflow.SimpleWorkflow.repeatable">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">repeatable</span></span><a class="headerlink" href="#trinity.common.workflows.workflow.SimpleWorkflow.repeatable" title="Link to this definition">#</a></dt>
+<dd><p>A workflow is repeatable if it can be run multiple times within the run() or run_async() method.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1017,6 +1031,7 @@ document.write(`
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.workflow.MultiTurnWorkflow"><code class="docutils literal notranslate"><span class="pre">MultiTurnWorkflow</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.workflow.MultiTurnWorkflow.__init__"><code class="docutils literal notranslate"><span class="pre">MultiTurnWorkflow.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.workflow.MultiTurnWorkflow.repeatable"><code class="docutils literal notranslate"><span class="pre">MultiTurnWorkflow.repeatable</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.workflow.MultiTurnWorkflow.set_repeat_times"><code class="docutils literal notranslate"><span class="pre">MultiTurnWorkflow.set_repeat_times()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.workflow.MultiTurnWorkflow.process_messages_to_experience"><code class="docutils literal notranslate"><span class="pre">MultiTurnWorkflow.process_messages_to_experience()</span></code></a></li>
 </ul>
@@ -1025,6 +1040,7 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.workflow.SimpleWorkflow.__init__"><code class="docutils literal notranslate"><span class="pre">SimpleWorkflow.__init__()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.workflow.SimpleWorkflow.resettable"><code class="docutils literal notranslate"><span class="pre">SimpleWorkflow.resettable</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.workflow.SimpleWorkflow.reset"><code class="docutils literal notranslate"><span class="pre">SimpleWorkflow.reset()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.workflow.SimpleWorkflow.repeatable"><code class="docutils literal notranslate"><span class="pre">SimpleWorkflow.repeatable</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.workflow.SimpleWorkflow.set_repeat_times"><code class="docutils literal notranslate"><span class="pre">SimpleWorkflow.set_repeat_times()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.workflow.SimpleWorkflow.format_messages"><code class="docutils literal notranslate"><span class="pre">SimpleWorkflow.format_messages()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.workflow.SimpleWorkflow.run"><code class="docutils literal notranslate"><span class="pre">SimpleWorkflow.run()</span></code></a></li>

@@ -40,6 +40,14 @@
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
     <script src="../../../_static/translations.js?v=beaddf03"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs"></script>
+    <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";import elkLayouts from "https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs";mermaid.registerLayoutLoaders(elkLayouts);mermaid.initialize({startOnLoad:false});</script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+    <script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";
+window.addEventListener("load", () => mermaid.run());
+</script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/trinity/manager/synchronizer';</script>
     <link rel="index" title="索引" href="../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../search.html" />
@@ -638,11 +646,15 @@ document.write(`
                     <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s2">&quot;Synchronizer has found a new model state dict at step </span><span class="si">{</span><span class="n">latest_model_version</span><span class="si">}</span><span class="s2">.&quot;</span>
                     <span class="p">)</span>
-                    <span class="n">model_state_dict</span> <span class="o">=</span> <span class="n">load_state_dict</span><span class="p">(</span>
-                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                            <span class="n">default_local_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;global_step_</span><span class="si">{</span><span class="n">latest_model_version</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;actor&quot;</span>
-                        <span class="p">),</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="p">,</span>
+                    <span class="n">model_state_dict</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">load_state_dict</span><span class="p">(</span>
+                            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                                <span class="n">default_local_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;global_step_</span><span class="si">{</span><span class="n">latest_model_version</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;actor&quot;</span>
+                            <span class="p">),</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="p">,</span>
+                        <span class="p">)</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">enable_lora</span>
+                        <span class="k">else</span> <span class="p">{}</span>
                     <span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s2">&quot;Synchronizer has loaded model state dict from checkpoint </span><span class="si">{</span><span class="n">latest_model_version</span><span class="si">}</span><span class="s2">.&quot;</span>
@@ -731,10 +743,15 @@ document.write(`
             <span class="n">step_num</span><span class="o">=</span><span class="n">step_num</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">checkpoint_step_num</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_version</span><span class="p">:</span>
-            <span class="n">model_state_dict</span> <span class="o">=</span> <span class="n">load_state_dict</span><span class="p">(</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">checkpoint_dir</span><span class="p">,</span> <span class="s2">&quot;actor&quot;</span><span class="p">),</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="p">,</span>
+            <span class="n">model_state_dict</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">load_state_dict</span><span class="p">(</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">checkpoint_dir</span><span class="p">,</span> <span class="s2">&quot;actor&quot;</span><span class="p">),</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">trainer</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">enable_lora</span>
+                <span class="k">else</span> <span class="p">{}</span>
             <span class="p">)</span>
+            <span class="c1"># lora weights are stored in &#39;lora_adapter&#39; subfolder and cannot be loaded directly</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_model_state_dict</span><span class="p">(</span><span class="n">model_state_dict</span><span class="p">,</span> <span class="n">checkpoint_step_num</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">checkpoint_step_num</span></div>
 

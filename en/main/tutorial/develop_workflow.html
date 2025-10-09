@@ -40,6 +40,14 @@
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs"></script>
+    <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";import elkLayouts from "https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs";mermaid.registerLayoutLoaders(elkLayouts);mermaid.initialize({startOnLoad:false});</script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+    <script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";
+window.addEventListener("load", () => mermaid.run());
+</script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'tutorial/develop_workflow';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -591,11 +599,20 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#initialize-your-workflow">Initialize Your Workflow</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#implementing-the-run-method">Implementing the <code class="docutils literal notranslate"><span class="pre">run</span></code> method</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#registering-your-workflow">Registering Your Workflow</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#avoid-re-initialization">Avoid Re-initialization</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#performance-optimization">Performance Optimization</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#avoid-re-initialization">Avoid Re-initialization</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#support-batch-inference">Support Batch Inference</a></li>
+</ul>
+</li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#full-code-example">Full Code Example</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-use-your-workflow">Step 3: Use Your Workflow</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-features">Advanced Features</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#async-support">Async Support</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#using-openai-api">Using OpenAI API</a></li>
+</ul>
+</li>
 </ul>
             </nav>
         </div>
@@ -610,26 +627,31 @@ document.write(`
   <section id="workflow-development-guide">
 <span id="workflows"></span><h1>Workflow Development Guide<a class="headerlink" href="#workflow-development-guide" title="Link to this heading">#</a></h1>
 <p>In Trinity-RFT, workflows are the core components that define the interaction between Agents and Environments.
-A qualified workflow needs to use the trained model to complete the specified task and obtain feedback information (reward) from the environment. Below are the steps to create a new workflow:</p>
+A qualified workflow needs to use a model to complete the specified task and obtain feedback information (reward) from the environment. Below are the steps to create a new workflow:</p>
 <hr class="docutils" />
 <section id="step-0-basic-concepts">
 <h2>Step 0: Basic Concepts<a class="headerlink" href="#step-0-basic-concepts" title="Link to this heading">#</a></h2>
 <p>Before starting development, it’s important to understand several core concepts:</p>
-<ul class="simple">
-<li><p><strong>Task</strong> (<a class="reference internal" href="../build_api/trinity.common.workflows.html#trinity.common.workflows.Task" title="trinity.common.workflows.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.workflows.Task</span></code></a>): Represents a data structure that can be converted into a <code class="docutils literal notranslate"><span class="pre">Workflow</span></code>. The content of the <code class="docutils literal notranslate"><span class="pre">Task</span></code> varies depending on the task type:</p>
+<pre  class="mermaid">
+        flowchart LR
+    A([Task]) &amp; B([Model]) --&gt; C[Workflow]
+    C --&gt; D([Experience])
+    </pre><ul class="simple">
+<li><p><strong>Task</strong> (<a class="reference internal" href="../build_api/trinity.common.workflows.html#trinity.common.workflows.Task" title="trinity.common.workflows.Task"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.workflows.Task</span></code></a>): Represents a data structure that contains all the information needed for a single run of the workflow. Commonly provided by the training dataset, each sample in the dataset is converted into a <code class="docutils literal notranslate"><span class="pre">Task</span></code> instance. The content of the <code class="docutils literal notranslate"><span class="pre">Task</span></code> varies depending on the task type:</p>
 <ul>
 <li><p><strong>Math problems</strong>: A <code class="docutils literal notranslate"><span class="pre">Task</span></code> contains the problem description and the golden answer.</p></li>
 <li><p><strong>Programming scenarios</strong>: A <code class="docutils literal notranslate"><span class="pre">Task</span></code> includes the problem description, test cases, runtime environment, and other complex information.</p></li>
 </ul>
 </li>
-<li><p><strong>Workflow</strong> (<a class="reference internal" href="../build_api/trinity.common.workflows.html#trinity.common.workflows.Workflow" title="trinity.common.workflows.Workflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.workflows.Workflow</span></code></a>): Describes how a <code class="docutils literal notranslate"><span class="pre">Task</span></code> is executed. It defines the interaction flow between Agents and Environments, including logic similar to <em>Rollout</em> and <em>Reward</em> calculations in other frameworks. After execution, it generates a list of <code class="docutils literal notranslate"><span class="pre">Experience</span></code>. Trinity-RFT includes several built-in workflows:</p>
+<li><p><strong>Model</strong> (<a class="reference internal" href="../build_api/trinity.common.models.model.html#trinity.common.models.model.ModelWrapper" title="trinity.common.models.model.ModelWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.models.model.ModelWrapper</span></code></a>): The model being trained. The workflow uses this model to generate responses based on the task. Trinity-RFT will provide the model instance to initialize the workflow.</p></li>
+<li><p><strong>Workflow</strong> (<a class="reference internal" href="../build_api/trinity.common.workflows.html#trinity.common.workflows.Workflow" title="trinity.common.workflows.Workflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.workflows.Workflow</span></code></a>): It defines the interaction flow between Agents and Environments. It uses the <code class="docutils literal notranslate"><span class="pre">Task</span></code> to initialize itself and uses the <code class="docutils literal notranslate"><span class="pre">Model</span></code> to generate responses. Different from general Agent Applications, a <code class="docutils literal notranslate"><span class="pre">Workflow</span></code> also needs to calculate rewards based on the environment’s feedback. Trinity-RFT provides several built-in workflows, including:</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">MathWorkflow</span></code> (<a class="reference internal" href="../build_api/trinity.common.workflows.html#trinity.common.workflows.MathWorkflow" title="trinity.common.workflows.MathWorkflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.workflows.MathWorkflow</span></code></a>): For math scenarios, submits problems to LLM, parses LLM responses, and calculates scores (rewards).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">WebShopWorkflow</span></code> (<a class="reference internal" href="../build_api/trinity.common.workflows.html#trinity.common.workflows.WebShopWorkflow" title="trinity.common.workflows.WebShopWorkflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.workflows.WebShopWorkflow</span></code></a>): For webshop scenarios, it contains multi-turn interaction with environment.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AgentScopeReactMathWorkflow</span></code> (<a class="reference internal" href="../build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeReactMathWorkflow" title="trinity.common.workflows.AgentScopeReactMathWorkflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.workflows.AgentScopeReactMathWorkflow</span></code></a>): For math scenarios, it directly uses a pre-implemented ReActAgent (based on AgentScope) to solve math problems.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AgentScopeReActWorkflow</span></code> (<a class="reference internal" href="../build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeReActWorkflow" title="trinity.common.workflows.AgentScopeReActWorkflow"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.workflows.AgentScopeReActWorkflow</span></code></a>): It directly uses a pre-implemented ReActAgent (based on AgentScope) to solve tasks.</p></li>
 </ul>
 </li>
-<li><p><strong>Experience</strong> (<a class="reference internal" href="../build_api/trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.experience.Experience</span></code></a>): The output of running a <code class="docutils literal notranslate"><span class="pre">Workflow</span></code>.  The internal data format depends on the training algorithm used. For example, for common PPO/GRPO algorithms, <code class="docutils literal notranslate"><span class="pre">Experience</span></code> includes lists of token IDs, action masks (identifying which tokens were generated by the LLM), log probabilities, rewards, etc.</p></li>
+<li><p><strong>Experience</strong> (<a class="reference internal" href="../build_api/trinity.common.experience.html#trinity.common.experience.Experience" title="trinity.common.experience.Experience"><code class="xref py py-class docutils literal notranslate"><span class="pre">trinity.common.experience.Experience</span></code></a>): The output of running a <code class="docutils literal notranslate"><span class="pre">Workflow</span></code>. The number and structure of <code class="docutils literal notranslate"><span class="pre">Experience</span></code> depend on the specific workflow. For example, for common PPO/GRPO algorithms, <code class="docutils literal notranslate"><span class="pre">Experience</span></code> includes lists of token IDs, action masks (identifying which tokens were generated by the LLM), log probabilities, rewards, etc.</p></li>
 </ul>
 </section>
 <hr class="docutils" />
@@ -729,7 +751,7 @@ And the <code class="docutils literal notranslate"><span class="pre">model</span
 <h3>Implementing the <code class="docutils literal notranslate"><span class="pre">run</span></code> method<a class="headerlink" href="#implementing-the-run-method" title="Link to this heading">#</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">run</span></code> method is the core of your workflow. It returns a list of <code class="docutils literal notranslate"><span class="pre">Experience</span></code>.
 Below is a simple implementation for a math workflow.</p>
-<p>We first call the model to generate multiple response using the provided question and rollout arguments.
+<p>We first call the model to generate a response using the provided question and rollout arguments.
 Then we calculate the reward for each response using the <code class="docutils literal notranslate"><span class="pre">calculate_reward</span></code> function.
 Finally, we construct a list of <code class="docutils literal notranslate"><span class="pre">Experience</span></code> with the responses and rewards and return it.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
@@ -751,23 +773,18 @@ Finally, we construct a list of <code class="docutils literal notranslate"><span
                     <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Question:</span><span class="se">\n</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">question</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
                 <span class="p">}</span>
             <span class="p">],</span>
-            <span class="n">n</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rollout_args</span><span class="o">.</span><span class="n">n</span><span class="p">,</span>
             <span class="n">temperature</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rollout_args</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">experiences</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">response</span> <span class="ow">in</span> <span class="n">responses</span><span class="p">:</span>
-            <span class="c1"># calulcate reward</span>
-            <span class="n">reward</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_reward</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">response_text</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">answer</span><span class="p">)</span>
-            <span class="c1"># construct Experience</span>
-            <span class="n">experiences</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="n">Experience</span><span class="p">(</span>
-                    <span class="n">tokens</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">tokens</span><span class="p">,</span>
-                    <span class="n">prompt_length</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">prompt_length</span><span class="p">,</span>
-                    <span class="n">reward</span><span class="o">=</span><span class="n">reward</span><span class="p">,</span>
-                    <span class="n">logprobs</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">logprobs</span><span class="p">,</span>
-                <span class="p">)</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">responses</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># there is only one response</span>
+        <span class="n">reward</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_reward</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">response_text</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">answer</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="n">Experience</span><span class="p">(</span>
+                <span class="n">tokens</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">tokens</span><span class="p">,</span>
+                <span class="n">prompt_length</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">prompt_length</span><span class="p">,</span>
+                <span class="n">reward</span><span class="o">=</span><span class="n">reward</span><span class="p">,</span>
+                <span class="n">logprobs</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">logprobs</span><span class="p">,</span>
             <span class="p">)</span>
-        <span class="k">return</span> <span class="n">experiences</span>
+        <span class="p">]</span>
 </pre></div>
 </div>
 </section>
@@ -794,10 +811,14 @@ Ensure the name does not conflict with existing workflows.</p>
 </pre></div>
 </div>
 </section>
+<section id="performance-optimization">
+<h3>Performance Optimization<a class="headerlink" href="#performance-optimization" title="Link to this heading">#</a></h3>
 <section id="avoid-re-initialization">
-<h3>Avoid Re-initialization<a class="headerlink" href="#avoid-re-initialization" title="Link to this heading">#</a></h3>
+<h4>Avoid Re-initialization<a class="headerlink" href="#avoid-re-initialization" title="Link to this heading">#</a></h4>
 <p>For heavy workflows, re-initializing every time can incurs extra computational costs.
-In this case, you can implement the <code class="docutils literal notranslate"><span class="pre">resettable</span></code> and <code class="docutils literal notranslate"><span class="pre">reset</span></code> methods to avoid re-initialization.</p>
+In this case, you can implement the <code class="docutils literal notranslate"><span class="pre">resettable</span></code> property and <code class="docutils literal notranslate"><span class="pre">reset</span></code> method to avoid re-initialization.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">resettable</span></code> property returns a boolean indicating whether the workflow supports resetting.
+The <code class="docutils literal notranslate"><span class="pre">reset</span></code> method accepts a <code class="docutils literal notranslate"><span class="pre">Task</span></code> parameter and resets the workflow’s internal state based on the new task.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;example_workflow&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
     <span class="c1"># some code</span>
@@ -811,6 +832,54 @@ In this case, you can implement the <code class="docutils literal notranslate"><
         <span class="bp">self</span><span class="o">.</span><span class="n">answer</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">raw_task</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;answer&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+</section>
+<section id="support-batch-inference">
+<h4>Support Batch Inference<a class="headerlink" href="#support-batch-inference" title="Link to this heading">#</a></h4>
+<p>In many popular RL algorithms, multiple runs of the same task are required (e.g., GRPO). In such scenarios, you can directly use batch inference to obtain multiple responses for a single question to improve efficiency.
+For this case, you can implement the <code class="docutils literal notranslate"><span class="pre">repeatable</span></code> property and <code class="docutils literal notranslate"><span class="pre">set_repeat_times</span></code> method.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">repeatable</span></code> property returns a boolean indicating whether the workflow supports multiple executions within the <code class="docutils literal notranslate"><span class="pre">run</span></code> method.
+The <code class="docutils literal notranslate"><span class="pre">set_repeat_times</span></code> method accepts two parameters: <code class="docutils literal notranslate"><span class="pre">repeat_times</span></code> specifies the number of times to execute within the <code class="docutils literal notranslate"><span class="pre">run</span></code> method, and <code class="docutils literal notranslate"><span class="pre">run_id_base</span></code> is an integer used to identify the first run ID in multiple runs (this parameter is used in multi-turn interaction scenarios; for tasks that can be completed with a single model call, this can be ignored).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;example_workflow&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+    <span class="c1"># some code</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">repeatable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_repeat_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">repeat_times</span><span class="p">,</span> <span class="n">run_id_base</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">repeat_times</span> <span class="o">=</span> <span class="n">repeat_times</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_id_base</span> <span class="o">=</span> <span class="n">run_id_base</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+        <span class="c1"># call the model to generate multiple responses</span>
+        <span class="n">responses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">chat</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Question:</span><span class="se">\n</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">question</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">],</span>
+            <span class="n">n</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">repeat_times</span><span class="p">,</span>  <span class="c1"># run multiple times in one call</span>
+            <span class="n">temperature</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rollout_args</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">experiences</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">response</span> <span class="ow">in</span> <span class="n">responses</span><span class="p">:</span>
+            <span class="c1"># calculate reward</span>
+            <span class="n">reward</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_reward</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">response_text</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">answer</span><span class="p">)</span>
+            <span class="c1"># construct Experience</span>
+            <span class="n">experiences</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">Experience</span><span class="p">(</span>
+                    <span class="n">tokens</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">tokens</span><span class="p">,</span>
+                    <span class="n">prompt_length</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">prompt_length</span><span class="p">,</span>
+                    <span class="n">reward</span><span class="o">=</span><span class="n">reward</span><span class="p">,</span>
+                    <span class="n">logprobs</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">logprobs</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">experiences</span>
+</pre></div>
+</div>
+</section>
 </section>
 <section id="full-code-example">
 <h3>Full Code Example<a class="headerlink" href="#full-code-example" title="Link to this heading">#</a></h3>
@@ -856,12 +925,21 @@ In this case, you can implement the <code class="docutils literal notranslate"><
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">experiences</span>
 
+    <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">resettable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">True</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">question</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">raw_task</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;question&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">answer</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">raw_task</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;answer&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">repeatable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_repeat_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">repeat_times</span><span class="p">,</span> <span class="n">run_id_base</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">repeat_times</span> <span class="o">=</span> <span class="n">repeat_times</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_id_base</span> <span class="o">=</span> <span class="n">run_id_base</span>
 </pre></div>
 </div>
 </section>
@@ -883,6 +961,74 @@ In this case, you can implement the <code class="docutils literal notranslate"><
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">trinity</span> <span class="n">run</span> <span class="o">--</span><span class="n">config</span> <span class="o">&lt;</span><span class="n">your_yaml_file</span><span class="o">&gt;</span>
 </pre></div>
 </div>
+</section>
+<hr class="docutils" />
+<section id="advanced-features">
+<h2>Advanced Features<a class="headerlink" href="#advanced-features" title="Link to this heading">#</a></h2>
+<section id="async-support">
+<h3>Async Support<a class="headerlink" href="#async-support" title="Link to this heading">#</a></h3>
+<p>The example above mainly targets synchronous mode. If your workflow needs to use asynchronous methods (e.g., asynchronous API), you can implement the <code class="docutils literal notranslate"><span class="pre">asynchronous</span></code> property and set it to <code class="docutils literal notranslate"><span class="pre">True</span></code>, then implement the <code class="docutils literal notranslate"><span class="pre">run_async</span></code> method. In this case, you no longer need to implement the <code class="docutils literal notranslate"><span class="pre">run</span></code> method, while other methods and properties remain unaffected.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;example_workflow_async&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflowAsync</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">asynchronous</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+        <span class="c1"># your async code here</span>
+
+    <span class="c1"># no need to implement run() method</span>
+</pre></div>
+</div>
+</section>
+<section id="using-openai-api">
+<h3>Using OpenAI API<a class="headerlink" href="#using-openai-api" title="Link to this heading">#</a></h3>
+<p>Trinity-RFT provides an option to use the OpenAI API for model inference. You can enable this feature by setting <code class="docutils literal notranslate"><span class="pre">explorer.rollout_model.enable_openai_api</span></code> to <code class="docutils literal notranslate"><span class="pre">true</span></code> in your configuration file.  This allows you to obtain an <code class="docutils literal notranslate"><span class="pre">openai.OpenAI</span></code> instance via the <code class="docutils literal notranslate"><span class="pre">get_openai_client</span></code> method of the model instance provided by Trinity-RFT.</p>
+<p>Additionally, since the OpenAI API does not provide all the data required for training, you also need to set <code class="docutils literal notranslate"><span class="pre">explorer.rollout_model.enable_history</span></code> to <code class="docutils literal notranslate"><span class="pre">true</span></code>. This lets the framework automatically record data that can be used for training and convert it into a list of <code class="docutils literal notranslate"><span class="pre">Experience</span></code>. You can extract these experiences using the <code class="docutils literal notranslate"><span class="pre">extract_experience_from_history</span></code> method.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># example config snippet</span>
+<span class="nt">explorer</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">rollout_model</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">enable_openai_api</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">enable_history</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="c1"># Other fields</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;example_workflow&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">ModelWrapper</span><span class="p">,</span> <span class="n">auxiliary_models</span><span class="p">:</span> <span class="n">List</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">auxiliary_models</span><span class="o">=</span><span class="n">auxiliary_models</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">:</span> <span class="n">openai</span><span class="o">.</span><span class="n">OpenAI</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_openai_client</span><span class="p">()</span>
+        <span class="c1"># or async client</span>
+        <span class="c1"># self.client: openai.AsyncOpenAI = self.model.get_openai_async_client()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">agent</span> <span class="o">=</span> <span class="n">MyAgent</span><span class="p">(</span><span class="n">openai_client</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_reward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="c1"># your reward calculation logic</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
+        <span class="c1"># run your agent</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+        <span class="c1"># calculate reward</span>
+        <span class="n">reward</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_reward</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        <span class="c1"># extract experiences from history recorded in self.model</span>
+        <span class="n">experiences</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">extract_experience_from_history</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">experiences</span><span class="p">:</span>
+            <span class="n">exp</span><span class="o">.</span><span class="n">reward</span> <span class="o">=</span> <span class="n">reward</span>
+        <span class="k">return</span> <span class="n">experiences</span>
+</pre></div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<ol class="arabic simple">
+<li><p>Currently, the OpenAI API will only automatically record calls to <code class="docutils literal notranslate"><span class="pre">openai.OpenAI.chat.completions.create</span></code> and <code class="docutils literal notranslate"><span class="pre">openai.AsyncOpenAI.chat.completions.create</span></code>, and convert them into <code class="docutils literal notranslate"><span class="pre">Experience</span></code> objects. Streaming output is not supported.</p></li>
+<li><p>When calling <code class="docutils literal notranslate"><span class="pre">chat.completions.create</span></code>, the <code class="docutils literal notranslate"><span class="pre">model</span></code> field can be obtained via <code class="docutils literal notranslate"><span class="pre">openai_client.models.list().data[0].id</span></code> or <code class="docutils literal notranslate"><span class="pre">openai_client.model_path</span></code>.</p></li>
+<li><p>For more complex workflow examples using the OpenAI API, refer to <a class="reference internal" href="example_react.html"><span class="std std-doc">ReAct Agent Training</span></a>.</p></li>
+</ol>
+</div>
+</section>
 </section>
 </section>
 
@@ -937,11 +1083,20 @@ In this case, you can implement the <code class="docutils literal notranslate"><
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#initialize-your-workflow">Initialize Your Workflow</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#implementing-the-run-method">Implementing the <code class="docutils literal notranslate"><span class="pre">run</span></code> method</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#registering-your-workflow">Registering Your Workflow</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#avoid-re-initialization">Avoid Re-initialization</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#performance-optimization">Performance Optimization</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#avoid-re-initialization">Avoid Re-initialization</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#support-batch-inference">Support Batch Inference</a></li>
+</ul>
+</li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#full-code-example">Full Code Example</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-use-your-workflow">Step 3: Use Your Workflow</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-features">Advanced Features</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#async-support">Async Support</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#using-openai-api">Using OpenAI API</a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 
