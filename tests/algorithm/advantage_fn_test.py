@@ -287,9 +287,9 @@ class TestGroupedAdvantageFn(unittest.TestCase):
         all_rewards_list = []
         for j in range(task_num):  # task
             for i in range(repeat_times):  # run
+                reward_val = float(j * 10 + i * 1)
+                all_rewards_list.append(reward_val)
                 for k in range(step_num):  # step
-                    reward_val = float(j * 10 + i * 1 + k * 0.1)
-                    all_rewards_list.append(reward_val)
                     exps.append(
                         Experience(
                             eid=EID(batch=0, task=j, run=i, step=k),
@@ -303,10 +303,10 @@ class TestGroupedAdvantageFn(unittest.TestCase):
         all_rewards = torch.tensor(all_rewards_list, dtype=torch.float32)
         batch_std = torch.std(all_rewards)
 
-        # For a specific group (e.g., task=0, run=1)
+        # For a specific group (e.g., task = 9)
         group_rewards = [
-            float(0 * 10 + 1 * 1 + k * 0.1) for k in range(step_num)
-        ]  # [1.0, 1.1, 1.2, 1.3]
+            float(0 * 10 + 1 * k) for k in range(repeat_times)
+        ]  # [0.0, 1.0, 2.0] for task = 0
         group_mean = torch.mean(torch.tensor(group_rewards, dtype=torch.float32))
 
         processed_exps, metrics = advantage_fn(exps)
@@ -318,7 +318,7 @@ class TestGroupedAdvantageFn(unittest.TestCase):
         target_exp = next(
             exp
             for exp in processed_exps
-            if exp.eid.task == 0 and exp.eid.run == 1 and exp.eid.step == 2
+            if exp.eid.task == 0 and exp.eid.run == 1 and exp.eid.step == 0
         )
         expected_advantage_value = (target_exp.reward - group_mean) / (
             batch_std + advantage_fn.epsilon
