@@ -106,6 +106,7 @@ class StepWiseGRPOAdvantageFn(AdvantageFn, ExperienceOperator):
         task_exps = group_by(exps, "task")
 
         # --- Pre-computation step for batch-level standard deviation ---
+        precomputed_std = None
         if self.std_cal_level == "batch":
             all_laststep_rewards = []
             for task_exp in task_exps.values():
