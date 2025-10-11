@@ -41,7 +41,7 @@ from trinity.utils.log import get_logger
 
 class CheckpointMonitor:
     def __init__(self, default_local_dir: str, default_hdfs_dir: str = None):
-        self.logger = get_logger("Checkpoint Monitor", in_ray_actor=True)
+        self.logger = get_logger("checkpoint_monitor", in_ray_actor=True)
         self.default_local_dir = default_local_dir
         self.default_hdfs_dir = default_hdfs_dir
         self.local_latest_checkpointed_iteration = os.path.join(
