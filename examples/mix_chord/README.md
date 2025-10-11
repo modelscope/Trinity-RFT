@@ -28,15 +28,6 @@ To download the `llama3.2-3b-instruct` model, you can run the following command:
 modelscope download --model LLM-Research/Llama-3.2-3B-Instruct --local_dir $MODEL_PATH/{model_name}
 ```
 
-Feel free to download other models you want from Hugging Face or ModelScope, for example:
-```bash
-# Using Hugging Face
-huggingface-cli download Qwen/Qwen2.5-1.5B-Instruct --local-dir $MODEL_PATH/Qwen/Qwen2.5-1.5B-Instruct
-
-# Using ModelScope
-modelscope download {model_name} --local_dir $MODEL_PATH/{model_name}
-```
-
 #### Prepare Dataset
 
 You need to prepare both the SFT and RL datasets.
@@ -126,13 +117,13 @@ The [patch](./eval_bfcl/bfcl_reason_support.patch) is created based on a specifi
 git checkout cd9429ccf3d4d04156affe883c495b3b047e6b64
 ```
 
-Copy the [`bfcl_qwen_reason_support.patch` file](./eval_bfcl/bfcl_reason_support.patch) into the `gorilla` directory you are currently in.
+Copy the [`bfcl_qwen_reason_support.patch`](./eval_bfcl/bfcl_reason_support.patch) file into the `gorilla` directory you are currently in.
 
 ```bash
 cp ../eval_bfcl/bfcl_reason_support.patch .
 ```
 
-Now, apply the patch directly from the `gorilla` root directory:
+Then, apply the patch directly from the `gorilla` root directory:
 ```bash
 # (Optional but recommended) Check if the patch can be applied without errors
 git apply --check bfcl_reason_support.patch
