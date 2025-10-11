@@ -5,6 +5,7 @@ from agentscope.agent import ReActAgent
 from agentscope.formatter import OpenAIChatFormatter
 from agentscope.message import Msg
 from agentscope.model import OpenAIChatModel
+from agentscope.tool import Toolkit
 from pydantic import BaseModel
 
 
@@ -16,6 +17,7 @@ class AgentScopeReActAgent:
         system_prompt: str,
         generate_kwargs: dict,
         response_structure: Type[BaseModel],
+        toolkit: Toolkit | None = None,
     ):
         """Initialize the AgentScope ReAct agent with specified tools and model.
 
@@ -41,6 +43,7 @@ class AgentScopeReActAgent:
             formatter=OpenAIChatFormatter(),
             # we enable agentscope's meta tool to allow agent to call tools dynamically without pre-registration
             enable_meta_tool=True,
+            toolkit=toolkit,
         )
         self.response_structure = response_structure
 

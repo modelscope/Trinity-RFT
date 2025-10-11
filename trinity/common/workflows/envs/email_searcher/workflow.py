@@ -5,7 +5,6 @@ from typing import Dict, List, Optional
 import openai
 
 from trinity.common.models.model import ModelWrapper
-from trinity.common.workflows.envs.email_searcher.react_agent import EmailSearchAgent
 from trinity.common.workflows.envs.email_searcher.utils import (
     AnswerModel,
     FinalRubric,
@@ -35,16 +34,8 @@ class EmailSearchWorkflow(Workflow):
         model: ModelWrapper,
         auxiliary_models: Optional[List[openai.OpenAI]] = None,
     ):
-        try:
-            import agentscope
-            from agentscope.service import ServiceToolkit
-        except ImportError as e:
-            error_message = f"AgentScope is not installed. Please install the agentscope framework first before running the workflow. Error: {str(e)}"
-            self.logger.error(error_message)
-            raise ImportError(error_message)
-
         # get openai client from model
-        self.openai_client = model.get_openai_client()
+        self.openai_client = model.get_openai_async_client()
         self.model_name = self.openai_client.model_path
         super().__init__(
             task=task,
@@ -52,27 +43,6 @@ class EmailSearchWorkflow(Workflow):
             auxiliary_models=auxiliary_models,
         )
 
-        temperature = self.rollout_args.get("temperature", 1.0)
-        max_tokens = 4096
-
-        agentscope.init(
-            model_configs=[
-                {
-                    "model_type": "openai_chat",
-                    "config_name": "react_model",
-                    "model_name": self.model_name,
-                    "api_key": "EMPTY",
-                    "generate_args": {
-                        "temperature": temperature,
-                        "max_tokens": max_tokens,
-                    },
-                    "use_openai_formatter": True,
-                }
-            ],
-            disable_saving=True,
-        )
-
-        self.toolkit = ServiceToolkit()
         self.reset(task)
 
     @property
@@ -81,6 +51,10 @@ class EmailSearchWorkflow(Workflow):
 
     @property
     def resettable(self):
+        return True
+
+    @property
+    def asynchronous(self):
         return True
 
     def reset(self, task: Task):
@@ -99,39 +73,34 @@ class EmailSearchWorkflow(Workflow):
             query_date=self.query.query_date,
         )
 
-        self.agent = EmailSearchAgent(
-            name="react_agent",
-            sys_prompt=self.system_prompt,
-            model_config_name="react_model",
-            service_toolkit=self.toolkit,
-            max_iters=self.max_turns,
-            verbose=False,
-        )
-        # we set the openai client to the agent's model
-        self.agent.model.client = self.openai_client
-        self.agent.message_id_list = []
-        self.agent.ever_read_message_ids = []
-
-    def run(self):
-        # make sure that we have the correct import
         try:
-            from agentscope.message import Msg
+            from trinity.common.workflows.envs.email_searcher.react_agent import (
+                EmailSearchAgent,
+            )
         except ImportError as e:
             error_message = f"AgentScope is not installed. Please install the agentscope framework first before running the workflow. Error: {str(e)}"
             self.logger.error(error_message)
             raise ImportError(error_message)
 
-        # provide the task to the react agent
-        msg = Msg("user", self.task_desc, role="user")
-
-        response = self.agent.reply(
-            msg,
-            structured_model=AnswerModel,
+        self.agent = EmailSearchAgent(
+            model_name=self.openai_client.model_path,
+            openai_client=self.openai_client,
+            system_prompt=self.system_prompt,
+            generate_kwargs={
+                "temperature": self.rollout_args.get("temperature", 1.0),
+                "max_tokens": self.rollout_args.get("max_tokens", 4096),
+            },
+            response_structure=AnswerModel,
         )
-        if response.metadata is None:
-            answer_and_sources = {"answer": response.content, "sources": []}
+
+    async def run_async(self):
+        response = await self.agent.reply(
+            self.task_desc,
+        )
+        if response is None:
+            answer_and_sources = {"answer": "", "sources": []}
         else:
-            answer_and_sources = response.metadata
+            answer_and_sources = response
 
         experiences = self.model.extract_experience_from_history(clear_history=True)
         self.actual_turns = len(
