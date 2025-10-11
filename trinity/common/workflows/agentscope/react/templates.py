@@ -29,7 +29,7 @@ class GSM8KRewardFn(MathBoxedRewardFn):
         else:
             truth = str(truth)
         return super().__call__(
-            response=response["result"],
+            response=response.get("result", ""),
             truth=truth,
             with_think=False,
             format_score_coef=format_score_coef,

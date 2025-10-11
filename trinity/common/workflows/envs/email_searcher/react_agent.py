@@ -1,4 +1,5 @@
 import json
+import traceback
 from dataclasses import asdict
 from datetime import datetime, timedelta
 from typing import Any
@@ -11,6 +12,7 @@ from trinity.common.workflows.envs.email_searcher.utils import (
     read_email_tool,
     search_emails_tool,
 )
+from trinity.utils.log import get_logger
 
 
 class EmailSearchAgent(AgentScopeReActAgent):
@@ -20,8 +22,9 @@ class EmailSearchAgent(AgentScopeReActAgent):
     """
 
     def __init__(self, *args, **kwargs):
-        self.message_id_list = []
-        self.ever_read_message_ids = []
+        self.logger = get_logger(__name__)
+        self.message_id_list = []  # List to store message IDs found during search
+        self.ever_read_message_ids = []  # List to store message IDs that have been read
         toolkit = Toolkit()
         toolkit.register_tool_function(self.search_emails)
         toolkit.register_tool_function(self.read_email)
@@ -43,9 +46,12 @@ class EmailSearchAgent(AgentScopeReActAgent):
             keywords (list[str]): A list of keywords to search for in the user's email inbox.
 
         Returns:
-            ServiceResponse:
-                The status field indicates whether the tool call was successful.
-                The content field contains a list of SearchResult objects with message_id and snippet. If no emails are found, it returns an empty list.
+            ToolResponse:
+                A ToolResponse object containing a list of TextBlock objects in the `content` field.
+                On success, the text field of the TextBlock contains a JSON string representing
+                a list of email summaries (e.g., message_id, snippet) matching
+                the search criteria. Each email summary is converted to a dictionary via `asdict`.
+                On failure, the text indicates an error message.
         """
 
         try:
@@ -65,29 +71,25 @@ class EmailSearchAgent(AgentScopeReActAgent):
                 ],
             )
         except Exception as e:
-            print(f"Error in tool: {e}")
-            import traceback
-
-            traceback.print_exc()
+            self.logger.info(f"Error in tool: {e}, traceback: {traceback.format_exc()}")
             return ToolResponse(
                 content=[
                     TextBlock(
                         type="text",
-                        text="Error: Failed to search emails.",
+                        text=f"Error: Failed to search emails.\nError message: {e}",
                     ),
                 ],
             )
 
-    def read_email(self, message_id: str, **kwargs: Any):
+    def read_email(self, message_id: str, **kwargs: Any) -> ToolResponse:
         """
         Read the content of an email from the user's email inbox. Returns the email content.
         Args:
             message_id (str): The unique identifier of the email to read.
 
         Returns:
-            ServiceResponse:
-                The status field indicates whether the tool call was successful.
-                The content field contains the email content or an error message if the email is not found.
+            ToolResponse:
+                A ToolResponse object containing the email content or an error message if the email is not found.
         """
 
         try:
@@ -100,7 +102,7 @@ class EmailSearchAgent(AgentScopeReActAgent):
                     content=[
                         TextBlock(
                             type="text",
-                            text="Error: Email not found.",
+                            text=f"Error: Email (message_id = {message_id}) not found.",
                         ),
                     ],
                 )

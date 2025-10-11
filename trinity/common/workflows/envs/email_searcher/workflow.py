@@ -94,13 +94,7 @@ class EmailSearchWorkflow(Workflow):
         )
 
     async def run_async(self):
-        response = await self.agent.reply(
-            self.task_desc,
-        )
-        if response is None:
-            answer_and_sources = {"answer": "", "sources": []}
-        else:
-            answer_and_sources = response
+        answer_and_sources = await self.agent.reply(self.task_desc)
 
         experiences = self.model.extract_experience_from_history(clear_history=True)
         self.actual_turns = len(

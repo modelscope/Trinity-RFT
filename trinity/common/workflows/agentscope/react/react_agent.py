@@ -60,4 +60,4 @@ class AgentScopeReActAgent:
         response = await self.agent.reply(
             Msg("user", query, role="user"), structured_model=self.response_structure
         )
-        return response.metadata
+        return response.metadata or {}
