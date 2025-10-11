@@ -354,6 +354,7 @@ class vLLMRolloutModel(InferenceModel):
             messages=messages,
             tools=tools,
             chat_template=self.chat_template,
+            enable_thinking=self.enable_thinking,
         )  # (seq_length, ), (seq_length, )
         logprobs = await self.logprobs(token_ids=token_ids.tolist())  # (seq_length - 1,)
         return Experience(

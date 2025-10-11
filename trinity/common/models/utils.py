@@ -16,6 +16,7 @@ def tokenize_and_mask_messages_hf(
     messages: List[dict],
     tools: Optional[List[dict]] = None,
     chat_template: Optional[str] = None,
+    enable_thinking: Optional[bool] = None,
 ) -> Tuple[torch.Tensor, torch.Tensor, int]:
     """Calculate the assistant token mask with `chat_template`.
 
@@ -35,6 +36,7 @@ def tokenize_and_mask_messages_hf(
         tools=tools,
         chat_template=chat_template,
         add_generation_prompt=False,
+        enable_thinking=enable_thinking,
         padding=False,
         truncation=True,
         return_tensors="pt",
@@ -52,6 +54,7 @@ def tokenize_and_mask_messages_default(
     messages: List[dict],
     tools: Optional[List[dict]] = None,
     chat_template: Optional[str] = None,
+    enable_thinking: Optional[bool] = None,
 ) -> Tuple[torch.Tensor, torch.Tensor, int]:
     """Calculate the assistant token mask.
 
@@ -78,6 +81,7 @@ def tokenize_and_mask_messages_default(
         tools=tools,
         chat_template=chat_template,
         add_generation_prompt=False,
+        enable_thinking=enable_thinking,
         padding=False,
         truncation=True,
         return_tensors="pt",
@@ -91,6 +95,7 @@ def tokenize_and_mask_messages_default(
                 tools=tools,
                 chat_template=chat_template,
                 add_generation_prompt=True,
+                enable_thinking=enable_thinking,
                 padding=False,
                 truncation=True,
                 return_tensors="pt",
@@ -102,6 +107,7 @@ def tokenize_and_mask_messages_default(
                 tools=tools,
                 chat_template=chat_template,
                 add_generation_prompt=False,
+                enable_thinking=enable_thinking,
                 padding=False,
                 truncation=True,
                 return_tensors="pt",
