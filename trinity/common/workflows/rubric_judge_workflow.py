@@ -1,22 +1,20 @@
 # -*- coding: utf-8 -*-
-"""A workflow for non-verifiable domain with RULER."""
-import ast
+"""A workflow with LLM-as-a-judge."""
+import json
 from typing import List, Optional, Tuple
 
 import openai
 
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
-from trinity.common.rewards.math_reward import MathRewardFn
 from trinity.common.workflows.workflow import WORKFLOWS, SimpleWorkflow, Task
 
 
 @WORKFLOWS.register_module("rubric_judge_workflow")
-class MedicineRULERWorkflow(SimpleWorkflow):
-    """A workflow for medicine dataset with RULER reward function.
+class RubricJudgeWorkflow(SimpleWorkflow):
+    """A workflow using LLM-as-a-judge and rubrics to get the reward.
 
-    Modified from `MathRULERWorkflow`.
-    Adapted from https://github.com/OpenPipe/ART/blob/main/src/art/rewards/ruler.py
+    Adapted from https://arxiv.org/pdf/2507.17746
     """
 
     def __init__(
@@ -33,20 +31,18 @@ class MedicineRULERWorkflow(SimpleWorkflow):
         )
 
     def reset(self, task: Task):
-        """
-        Note that in this workflow, MathRewardFn is a placeholder
-        whereas the rewards used by RL training are calculated by RULER.
-        """
+        """Modified from SimpleWorkflow.reset"""
+        self.format_args = task.format_args
+        self.system_prompt = task.format_args.system_prompt
+        self.reply_prefix = task.format_args.reply_prefix
 
-        if task.reward_fn is None:
-            task.reward_fn = MathRewardFn
-        if task.reward_fn == MathRewardFn and task.format_args.system_prompt is None:
-            task.format_args.system_prompt = """A conversation between User and Assistant. The user asks a question, and the Assistant solves it. The assistant first thinks about the reasoning process in the mind and then provides the user with the answer. The reasoning process and answer are enclosed within <think> </think> and <answer> </answer> tags, respectively, i.e.,
-<think> reasoning process here </think>
-<answer> answer here </answer>.
-"""
-        # call the SimpleWorkflow.reset
-        super().reset(task)
+        if self.system_prompt is None:
+            self.system_prompt = """A conversation between User and Assistant. The user asks a question, and the Assistant solves it. The assistant first thinks about the reasoning process in the mind and then provides the user with the answer.
+    """
+
+        self.raw_task = task.raw_task
+        self.task_desc = task.task_desc
+        self.truth = task.truth
         self.rubric = self.raw_task.get("rubric", [])
 
     def run(self) -> List[Experience]:
@@ -61,68 +57,69 @@ class MedicineRULERWorkflow(SimpleWorkflow):
         assert (
             self.auxiliary_models is not None
         ), "Current implementation of RULER requires that auxiliary_models is not None."
-        judge_success, ruler_scores = self.get_ruler_scores(
-            responses=responses, judger=self.auxiliary_models[0]
-        )
-        for i, response in enumerate(responses):
-            response.reward = ruler_scores[i]
-            if response.metrics is None:
-                response.metrics = {}
-            response.metrics.update({"judge_success": float(judge_success)})
 
+        judge_success_list = []
+        for i, response in enumerate(responses):
+            judge_success, reward = self.get_judge_reward(
+                response=response, judger=self.auxiliary_models[0]
+            )
+            response.reward = reward
             response.eid.run = i + self.run_id_base
+
+            judge_success_list.append(judge_success)
 
             if i == 0:
                 self.logger.debug(
                     f"self.task_desc: {self.task_desc}, messages: {messages}, response: {response.response_text}, reward: {response.reward}"
                 )
 
+        # record judge success
+        judge_success_rate = sum(judge_success_list) / len(judge_success_list)
+        for response in responses:
+            if response.metrics is None:
+                response.metrics = {}
+            response.metrics.update({"judge_success": float(judge_success_rate)})
+
         return responses
 
-    def get_ruler_scores(
-        self, responses: List[Experience], judger: openai.OpenAI
-    ) -> Tuple[bool, List[float]]:
-        """Get RULER scores"""
-
-        num_responses = len(responses)
-
-        # Step 1: format prompt for judge
-        ruler_system_prompt = f"You are a fair judge. The user will provide a question, {num_responses} candidate solutions, and some rubrics with weights. Your task is to compare the solutions, see how well they resolve the question, and assign a score according to the rubrics within the range [0, 1] for each solution."
-
-        question_prompt = (
-            f"Question: {self.task_desc}\n\n"
-            f"""Solution format requirement: first thinks about the reasoning process in the mind and then provides the final answer. The reasoning process and answer are enclosed within <think> </think> and <answer> </answer> tags, respectively, i.e.,
-<think> reasoning process here </think>
-<answer> answer here </answer>."""
-        )
-
-        solutions_prompt_parts = [
-            f"Candidate solution {i + 1}: {response.response_text}"
-            for i, response in enumerate(responses)
-        ]
-        solutions_prompt = "\n\n".join(solutions_prompt_parts)
-
-        # Compared with MathRULERWorkflow, we provide rubrics for scoring solutions
+    def get_judge_reward(self, response: Experience, judger: openai.OpenAI) -> Tuple[bool, float]:
+        """Get rewards with LLM-as-a-judge
+        The prompts are adapted from RAR-IMPLICIT method in https://arxiv.org/pdf/2507.17746
+        """
+        # Step 1: format prompts
+        # system prompt
+        ruler_system_prompt = """You are an expert evaluator. Given a user prompt, a generated response, and a list of quality rubrics, please rate the overall quality of the response on a scale of 1 to 10 based on how well it satisfies the rubrics.
+Consider all rubrics holistically when determining your score. A response that violates multiple rubrics should receive a lower score, while a response that satisfies all rubrics should receive a higher score.
+Start your response with a valid JSON object that starts with "```json" and ends with "```". The JSON object should contain
+a single key "rating" and the value should be an integer between 1 and 10.
+Example response:
+```json
+{
+"rating": 7
+}```"""
+        # user prompt
         if len(self.rubric) > 0:
             rubric_prompt_parts = [
                 f"Rubric {i} (weight: {single_rubric['weight']}): {single_rubric['description']}"
                 for i, single_rubric in enumerate(self.rubric)
             ]
-            rubric_prompt = "Rubric (checklist and weights):\n" + "\n".join(rubric_prompt_parts)
+            rubric_list_string = "\n".join(rubric_prompt_parts)
         else:
             self.logger.warning("No rubric is provided!")
-            rubric_prompt = "Rubrics are not provided."
+            rubric_list_string = "Rubrics are not provided."
 
-        ruler_user_prompt = f"""
-Below is a question, candidate solutions, and rubrics with weights.
-
-{question_prompt}
-{solutions_prompt}
-{rubric_prompt}
-
-Please assign a score within the range [0, 1] for each of them, reflecting how well they solve the question according to the rubrics.
-You may compare them against each other and think step by step before returning your final scores, but keep your reasoning process brief and concise when possible.
-Conclude your response with a list of scores, in the following format: [score for solution 1, score for solution 2, ..., score for solution {num_responses}]
+        ruler_user_prompt = f"""Given the following prompt, response, and rubrics, please rate the overall quality of the response on a scale of 1 to 10 based
+on how well it satisfies the rubrics.
+<prompt>
+{self.task_desc}
+</prompt>
+<response>
+{response}
+</response>
+<rubrics>
+{rubric_list_string}
+</rubrics>
+Your JSON Evaluation:
 """.strip()
 
         # Step 2: invoke judger LLM
@@ -136,25 +133,40 @@ Conclude your response with a list of scores, in the following format: [score fo
         judger_response = completion.choices[0].message.content
         self.logger.debug(f"LLM judge response: {judger_response}")
 
-        # Step 3: extract scores from judger's response
-        idx1, idx2 = judger_response.rfind("["), judger_response.rfind("]")
-        if (idx1 == -1) or (idx2 == -1) or (idx1 > idx2):
-            self.logger.warning(
-                "Unable to extract a list from judger response, set scores to all zero."
-            )
-            return False, [0.0 for _ in range(num_responses)]
-        lst_as_str = judger_response[idx1 : (idx2 + 1)]
+        # Step 3: extract score from judger's response (expecting a JSON block with "rating")
         try:
-            scores = ast.literal_eval(lst_as_str)
-            scores = [max(0.0, min(1.0, score)) for score in scores]  # clip to range [0, 1]
-            if len(scores) != num_responses:
-                self.logger.warning(
-                    "The length of list in judger response does not match num_responses."
-                )
-                return False, [0.0 for _ in range(num_responses)]
-            return True, scores
-        except Exception:
-            self.logger.warning(
-                "Unable to parse the list in judger response, set scores to all zero."
-            )
-            return False, [0.0 for _ in range(num_responses)]
+            # Extract content between ```json and ```
+            json_start = judger_response.find("```json")
+            if json_start == -1:
+                json_start = judger_response.find("```")
+            json_end = judger_response.find("```", json_start + 3)
+
+            if json_start == -1 or json_end == -1:
+                self.logger.warning("No JSON code block found in judger response.")
+                return False, 0.0
+
+            json_str = judger_response[json_start:json_end].strip()
+            # Remove the opening marker
+            if "```json" in json_str:
+                json_str = json_str.replace("```json", "", 1)
+            elif "```" in json_str:
+                json_str = json_str.replace("```", "", 1)
+            json_str = json_str.strip()
+
+            # Parse JSON
+            parsed = json.loads(json_str)
+            rating = parsed.get("rating")
+
+            if not isinstance(rating, (int, float)) or not (1 <= rating <= 10):
+                self.logger.warning(f"Invalid or out-of-range rating: {rating}")
+                return False, 0.0
+
+            normalized_score = (rating - 1) / 9  # Normalize 1-10 to 0-1 scale
+            return True, normalized_score
+
+        except json.JSONDecodeError as e:
+            self.logger.warning(f"Failed to parse JSON from judger response: {e}")
+            return False, 0.0
+        except Exception as e:
+            self.logger.warning(f"Unexpected error when processing judger response: {e}")
+            return False, 0.0

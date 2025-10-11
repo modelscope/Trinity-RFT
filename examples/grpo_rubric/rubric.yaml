@@ -1,5 +1,5 @@
-project: "Trinity-RFT-ruler"
-name: "qwen2.5-1.5B-medicine-ruler"
+project: "Trinity-RFT-Example"
+name: "medicine_grpo_rubric"
 checkpoint_root_dir: ${oc.env:TRINITY_CHECKPOINT_ROOT_DIR,./checkpoints}
 algorithm:
   algorithm_type: grpo
@@ -14,7 +14,7 @@ cluster:
   node_num: 1
   gpu_per_node: 8
 buffer:
-  total_epochs: 10
+  total_epochs: 2
   batch_size: 96
   train_batch_size: 768 # 8*96
   explorer_input:
@@ -29,7 +29,7 @@ buffer:
       rollout_args:
         temperature: 1.0
       enable_progress_bar: false
-    default_workflow_type: 'medicine_ruler_workflow'
+    default_workflow_type: 'rubric_judge_workflow'
   trainer_input:
     experience_buffer:
       name: experience_buffer
@@ -50,9 +50,9 @@ explorer:
       engine_num: 1
       tensor_parallel_size: 2
       enable_thinking: false
-      max_prompt_tokens: 12288
-      max_response_tokens: 12288
-      max_model_len: 16384
+      max_prompt_tokens: 19456
+      max_response_tokens: 1024
+      max_model_len: 20480
 synchronizer:
   sync_style: dynamic_by_explorer
   sync_method: 'nccl'

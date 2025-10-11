@@ -45,7 +45,7 @@ from trinity.common.workflows.math_ruler_workflow import (
 from trinity.common.workflows.math_trainable_ruler_workflow import (
     MathTrainableRULERWorkflow,
 )
-from trinity.common.workflows.rubric_judge_workflow import MedicineRULERWorkflow
+from trinity.common.workflows.rubric_judge_workflow import RubricJudgeWorkflow
 from trinity.common.workflows.simple_mm_workflow import (
     AsyncSimpleMMWorkflow,
     SimpleMMWorkflow,
@@ -91,5 +91,5 @@ __all__ = [
     "MathTrainableRULERWorkflow",
     "AsyncSimpleMMWorkflow",
     "SimpleMMWorkflow",
-    "MedicineRULERWorkflow",
+    "RubricJudgeWorkflow",
 ]

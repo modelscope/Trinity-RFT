@@ -1,7 +1,6 @@
-# RULER for Non-Verifiable Medicine QA
+# Non-Verifiable Medicine QA
 
-This example shows how to use [RULER](https://art.openpipe.ai/fundamentals/ruler) to fine-tune a model for a non-verifiable medicine QA task.
-
+This example shows how to use LLM judge and rubrics to compute reward for a non-verifiable medicine QA task. This is inspired by the [RaR-Implicit](https://arxiv.org/pdf/2507.17746) method.
 
 Before running this example, please make sure you have prepared the environment and the dataset [anisha2102/RaR-Medicine](https://huggingface.co/datasets/anisha2102/RaR-Medicine).
 
@@ -24,8 +23,8 @@ The RaR-Medicine dataset contains around 20k QA pairs with rubrics in medicine d
 RULER scores a group of responses by evaluating them against the provided rubrics and outputs the score in the range of [0, 1] for each response. The higher the score, the better the response is according to the rubric.
 
 
-The config file is located in [`medicine_ruler.yaml`](./medicine_ruler.yaml).
+The config file is located in [`rubric.yaml`](./rubric.yaml).
 To run this example, you can run the following command:
 ```bash
-trinity run --config examples/grpo_medicine_ruler/medicine_ruler.yaml
+trinity run --config examples/grpo_rubric/rubric.yaml
 ```
