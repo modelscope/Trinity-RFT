@@ -680,10 +680,8 @@ document.write(`
 <span class="sd">            Dict: Metrics of the sampling step.</span>
 <span class="sd">            List[Dict]: A list of representative samples for logging.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">with</span> <span class="n">Timer</span><span class="p">({},</span> <span class="s2">&quot;time/sample_data&quot;</span><span class="p">):</span>
-            <span class="n">batch</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">repr_samples</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_strategy</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">train_step_num</span> <span class="o">+</span> <span class="mi">1</span>
-            <span class="p">)</span>
+        <span class="n">batch</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">repr_samples</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_strategy</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train_step_num</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;sample/task_count&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">eid</span><span class="o">.</span><span class="n">task</span> <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">batch</span><span class="o">.</span><span class="n">eids</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">batch</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">repr_samples</span>
 
 <div class="viewcode-block" id="Trainer.need_sync">
