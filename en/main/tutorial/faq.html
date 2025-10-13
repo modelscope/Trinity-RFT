@@ -587,7 +587,10 @@ document.write(`
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#part-1-configurations">Part 1: Configurations</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#part-2-common-errors">Part 2: Common Errors</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#part-3-debugging-methods">Part 3: Debugging Methods</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#part-3-debugging-methods">Part 3: Debugging Methods</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#debugging-the-workflow">Debugging the Workflow</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#part-4-other-questions">Part 4: Other Questions</a></li>
 </ul>
             </nav>
@@ -691,6 +694,15 @@ ray<span class="w"> </span>start<span class="w"> </span>--head
 trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>grpo_gsm8k/gsm8k.yaml<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tee<span class="w"> </span>debug.log
 </pre></div>
 </div>
+<section id="debugging-the-workflow">
+<h3>Debugging the Workflow<a class="headerlink" href="#debugging-the-workflow" title="Link to this heading">#</a></h3>
+<p>To debug a new workflow, use Trinity-RFT’s debug mode with the following steps:</p>
+<ol class="arabic simple">
+<li><p>Launch the inference model via <code class="docutils literal notranslate"><span class="pre">trinity</span> <span class="pre">debug</span> <span class="pre">--config</span> <span class="pre">&lt;config_file_path&gt;</span> <span class="pre">--module</span> <span class="pre">inference_model</span></code></p></li>
+<li><p>Debug the workflow in another terminal via <code class="docutils literal notranslate"><span class="pre">trinity</span> <span class="pre">debug</span> <span class="pre">--config</span> <span class="pre">&lt;config_file_path&gt;</span> <span class="pre">--module</span> <span class="pre">workflow</span> <span class="pre">--output_file</span> <span class="pre">&lt;output_file_path&gt;</span> <span class="pre">--plugin_dir</span> <span class="pre">&lt;plugin_dir&gt;</span></code></p></li>
+</ol>
+<p>Please refer to <a class="reference internal" href="develop_workflow.html#workflows"><span class="std std-ref">Workflow Development Guide</span></a> section for details.</p>
+</section>
 </section>
 <section id="part-4-other-questions">
 <h2>Part 4: Other Questions<a class="headerlink" href="#part-4-other-questions" title="Link to this heading">#</a></h2>
@@ -788,7 +800,10 @@ trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#part-1-configurations">Part 1: Configurations</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#part-2-common-errors">Part 2: Common Errors</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#part-3-debugging-methods">Part 3: Debugging Methods</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#part-3-debugging-methods">Part 3: Debugging Methods</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#debugging-the-workflow">Debugging the Workflow</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#part-4-other-questions">Part 4: Other Questions</a></li>
 </ul>
   </nav></div>

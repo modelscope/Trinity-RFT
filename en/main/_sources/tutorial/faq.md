@@ -107,6 +107,16 @@ export RAY_DEDUP_LOGS=0
 trinity run --config grpo_gsm8k/gsm8k.yaml 2>&1 | tee debug.log
 ```
 
+### Debugging the Workflow
+
+To debug a new workflow, use Trinity-RFT's debug mode with the following steps:
+
+1. Launch the inference model via `trinity debug --config <config_file_path> --module inference_model`
+
+2. Debug the workflow in another terminal via `trinity debug --config <config_file_path> --module workflow --output_file <output_file_path> --plugin_dir <plugin_dir>`
+
+Please refer to {ref}`Workflow Development Guide <Workflows>` section for details.
+
 
 ## Part 4: Other Questions
 **Q:** What's the purpose of `buffer.trainer_input.experience_buffer.path`?

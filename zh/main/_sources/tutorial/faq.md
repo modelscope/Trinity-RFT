@@ -106,6 +106,18 @@ export RAY_DEDUP_LOGS=0
 trinity run --config grpo_gsm8k/gsm8k.yaml 2>&1 | tee debug.log
 ```
 
+### 调试工作流（Workflow）
+
+
+实现新工作流后，可使用 Trinity-RFT 的调试模式进行调试，步骤如下：
+
+1. 启动推理模型： `trinity debug --config <config_file_path> --module inference_model`
+
+2. 在另一个终端中进行工作流的调试：`trinity debug --config <config_file_path> --module workflow --output_file <output_file_path> --plugin_dir <plugin_dir>`
+
+更多详细信息，请参阅{ref}`工作流开发指南 <Workflows>`章节。
+
+
 ## 第四部分：其他问题
 **Q:** `buffer.trainer_input.experience_buffer.path` 的作用是什么？
 

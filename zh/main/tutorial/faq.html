@@ -583,7 +583,10 @@ document.write(`
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">第一部分：参数配置</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">第二部分：常见报错</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">第三部分：调试方法</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">第三部分：调试方法</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#workflow">调试工作流（Workflow）</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">第四部分：其他问题</a></li>
 </ul>
             </nav>
@@ -687,6 +690,15 @@ ray<span class="w"> </span>start<span class="w"> </span>--head
 trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>grpo_gsm8k/gsm8k.yaml<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tee<span class="w"> </span>debug.log
 </pre></div>
 </div>
+<section id="workflow">
+<h3>调试工作流（Workflow）<a class="headerlink" href="#workflow" title="Link to this heading">#</a></h3>
+<p>实现新工作流后，可使用 Trinity-RFT 的调试模式进行调试，步骤如下：</p>
+<ol class="arabic simple">
+<li><p>启动推理模型： <code class="docutils literal notranslate"><span class="pre">trinity</span> <span class="pre">debug</span> <span class="pre">--config</span> <span class="pre">&lt;config_file_path&gt;</span> <span class="pre">--module</span> <span class="pre">inference_model</span></code></p></li>
+<li><p>在另一个终端中进行工作流的调试：<code class="docutils literal notranslate"><span class="pre">trinity</span> <span class="pre">debug</span> <span class="pre">--config</span> <span class="pre">&lt;config_file_path&gt;</span> <span class="pre">--module</span> <span class="pre">workflow</span> <span class="pre">--output_file</span> <span class="pre">&lt;output_file_path&gt;</span> <span class="pre">--plugin_dir</span> <span class="pre">&lt;plugin_dir&gt;</span></code></p></li>
+</ol>
+<p>更多详细信息，请参阅<a class="reference internal" href="develop_workflow.html#workflows"><span class="std std-ref">工作流开发指南</span></a>章节。</p>
+</section>
 </section>
 <section id="id5">
 <h2>第四部分：其他问题<a class="headerlink" href="#id5" title="Link to this heading">#</a></h2>
@@ -784,7 +796,10 @@ trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">第一部分：参数配置</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">第二部分：常见报错</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">第三部分：调试方法</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">第三部分：调试方法</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#workflow">调试工作流（Workflow）</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">第四部分：其他问题</a></li>
 </ul>
   </nav></div>
