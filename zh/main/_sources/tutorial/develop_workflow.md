@@ -428,3 +428,107 @@ class ExampleWorkflow(Workflow):
 2. 调用 `chat.completions.create` 时，其中的 `model` 字段可通过 `openai_client.models.list().data[0].id` 或 `openai_client.model_path` 获取。
 3. 更复杂的使用 OpenAI API 的工作流实例可参考 [ReAct Agent 训练](./example_react.md)。
 ```
+
+#### LLM-as-a-judge 支持
+
+LLM-as-a-judge 是一种常见的奖励计算方法，尤其适用于开放式任务（如编程、写作等）。在这类场景下，Workflow 需要借助额外的 LLM 来评估答案质量并计算奖励信号（reward）。
+
+为此，Trinity-RFT 提供了 Auxiliary Models（辅助模型）机制。辅助模型是一组未参与训练的模型，Workflow 可利用这些模型辅助完成任务，例如作为评判者（judge）计算奖励。
+
+你可以在配置文件中通过 `explorer.auxiliary_models` 字段指定一个或多个辅助模型。例如：
+
+```yaml
+explorer:
+  auxiliary_models:
+    - model_path: Qwen/Qwen2.5-32B-Instruct
+      engine_num: 1
+      tensor_parallel_size: 2
+      enable_thinking: false
+      max_prompt_tokens: 12288
+      max_response_tokens: 12288
+      max_model_len: 16384
+    - model_path: Qwen/Qwen3-8B
+      engine_num: 1
+      tensor_parallel_size: 2
+      enable_thinking: false
+      max_prompt_tokens: 12288
+      max_response_tokens: 12288
+      max_model_len: 16384
+```
+
+请注意，每个辅助模型会独立占用 `tensor_parallel_size * engine_num` 个 GPU，请根据硬件资源合理配置。在启用辅助模型后，Trainer 可用的 GPU 数量为总 GPU 数量减去所有辅助模型及被训练的推理模型（`rollout_model`）所占用的 GPU 数量。
+
+配置文件中指定的辅助模型会自动激活 OpenAI API，并将对应的 `openai.OpenAI` 实例传递给 `Workflow` 初始化方法的 `auxiliary_models` 参数。例如：
+
+```python
+class MyWorkflow(Workflow):
+    def __init__(
+        self,
+        *,
+        task: Task,
+        model: ModelWrapper,
+        auxiliary_models: Optional[List[openai.OpenAI]] = None,
+    ):
+        super().__init__(task=task, model=model, auxiliary_models=auxiliary_models)
+        self.judge_model = self.auxiliary_models[0]  # 使用第一个辅助模型作为评判者
+
+    def run(self) -> List[Experience]:
+        response = self.do_something()
+        reward_response = self.judge_model.chat.completions.create(
+            model=self.judge_model.model_path,
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a judge. You need to give a score from 0 to 1 based on the quality of the answer.",
+                },
+                {
+                    "role": "user",
+                    "content": f"Question:\n{self.task.raw_task['question']}\nAnswer:\n{response.response_text}\nPlease give a score from 0 to 1.",
+                },
+            ],
+            temperature=0.0,
+            max_tokens=10,
+        )
+        # 解析奖励分数
+        reward = float(reward_response.choices[0].message.content.strip())
+        return [
+            Experience(
+                tokens=response.tokens,
+                prompt_length=response.prompt_length,
+                reward=reward,
+                logprobs=response.logprobs,
+            )
+        ]
+```
+
+#### 调试模式（Debug Mode）
+
+在 Workflow 开发过程中，频繁启动完整训练流程进行测试既耗时又低效。为此，Trinity-RFT 为开发者提供了调试模式。该模式通过预先启动推理模型，能够快速运行指定的工作流并获取结果，避免因模型加载和初始化带来的重复等待，大幅提升开发效率。流程如下：
+
+```{mermaid}
+flowchart LR
+    A[启动推理模型] --> B[调试 Workflow]
+    B --> B
+```
+
+启动推理模型的命令如下：
+
+```bash
+trinity debug --config <config_file_path> --module inference_model
+```
+
+其中，`config_file_path` 为 YAML 格式的配置文件路径，格式与 `trinity run` 命令所用配置文件一致。配置文件中的 `explorer.rollout_model` 和 `explorer.auxiliary_models` 字段会被加载，用于初始化推理模型。
+
+模型启动后会持续运行并等待调试指令，不会自动退出。此时，你可在另一个终端执行如下命令进行 Workflow 调试：
+
+```bash
+trinity debug --config <config_file_path> --module workflow --output_file <output_file_path> --plugin_dir <plugin_dir>
+```
+
+- `config_file_path`：YAML 配置文件路径，通常与启动推理模型时使用的配置文件相同。
+- `output_file_path`：性能分析结果输出路径。调试模式会使用 [viztracer](https://github.com/gaogaotiantian/viztracer) 对 Workflow 运行过程进行性能分析，并将结果保存为 HTML 文件，便于在浏览器中查看。
+- `plugin_dir`（可选）：插件目录路径。如果你的 Workflow 或奖励函数等模块未内置于 Trinity-RFT，可通过该参数加载自定义模块。
+
+调试过程中，配置文件中的 `buffer.explorer_input.taskset` 字段会被加载，用于初始化 Workflow 所需的任务数据集和实例。需注意，调试模式仅会读取数据集中的第一条数据进行测试。运行上述命令后，Workflow 的返回值会自动格式化并打印在终端，方便查看运行结果。
+
+调试完成后，可在推理模型终端输入 `Ctrl+C` 以终止模型运行。
