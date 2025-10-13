@@ -69,6 +69,7 @@ dev = [
     "pytest-json-ctrf",
     "parameterized",
     "matplotlib",
+    "viztracer",
 ]
 megatron = [
     "megatron-core[mlm]==0.13.1",

@@ -7,8 +7,10 @@ from collections import defaultdict
 from dataclasses import dataclass
 from typing import List, Optional, Tuple
 
+from trinity.buffer import get_buffer_reader
 from trinity.common.config import Config
 from trinity.common.experience import Experience
+from trinity.common.models import get_debug_inference_model
 from trinity.common.models.model import InferenceModel, ModelWrapper
 from trinity.common.workflows import Task, Workflow
 from trinity.utils.log import get_logger
@@ -149,3 +151,35 @@ class WorkflowRunner:
             error_trace_back = traceback.format_exc()
             self.logger.error(f"WorkflowRunner run task error: {e}\nTraceback:\n{error_trace_back}")
             return Status(False, metric={"time_per_task": time.time() - st}, message=str(e)), []
+
+
+class DebugWorkflowRunner(WorkflowRunner):
+    """A WorkflowRunner for debugging."""
+
+    def __init__(
+        self,
+        config: Config,
+        output_file: str,
+    ) -> None:
+        model, auxiliary_models = get_debug_inference_model(config)
+        super().__init__(config, model, auxiliary_models, 0)
+        self.taskset = get_buffer_reader(config.buffer.explorer_input.taskset, config.buffer)
+        self.output_file = output_file
+
+    async def debug(self) -> None:
+        """Run the debug workflow."""
+        from viztracer import VizTracer
+
+        await self.prepare()
+        tasks = await self.taskset.read_async(batch_size=1)
+        task = tasks[0]
+        self.logger.info(f"Read task: {task.task_id}, repeat_times: {task.repeat_times}")
+        with VizTracer(output_file=self.output_file):
+            status, exps = await self.run_task(task, task.repeat_times, 0)
+        if status.ok:
+            print(f"Task {task.task_id} completed successfully with metrics:\n{status.metric}")
+            for exp in exps:
+                print(f"Generated experience:\n{exp}")
+        else:
+            self.logger.error(f"Task {task.task_id} failed with message: {status.message}")
+        self.logger.info("Debugging completed.")

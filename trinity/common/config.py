@@ -13,7 +13,11 @@ from omegaconf import OmegaConf
 
 from trinity.common.constants import (
     EXPLORER_NAME,
+    LOG_DIR_ENV_VAR,
+    LOG_LEVEL_ENV_VAR,
+    LOG_NODE_IP_ENV_VAR,
     MAX_MODEL_LEN,
+    PLUGIN_DIRS_ENV_VAR,
     TRAINER_NAME,
     PromptType,
     StorageType,
@@ -1089,6 +1093,15 @@ class Config:
             return items
 
         return _flatten(self)
+
+    def get_envs(self) -> Dict[str, str]:
+        """Get the environment variables from the config."""
+        return {
+            PLUGIN_DIRS_ENV_VAR: os.getenv(PLUGIN_DIRS_ENV_VAR, ""),
+            LOG_LEVEL_ENV_VAR: self.log.level,
+            LOG_DIR_ENV_VAR: self.log.save_dir,
+            LOG_NODE_IP_ENV_VAR: "1" if self.log.group_by_node else "0",
+        }
 
 
 def load_config(config_path: str) -> Config:

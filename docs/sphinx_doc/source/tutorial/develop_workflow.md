@@ -428,3 +428,108 @@ class ExampleWorkflow(Workflow):
 2. When calling `chat.completions.create`, the `model` field can be obtained via `openai_client.models.list().data[0].id` or `openai_client.model_path`.
 3. For more complex workflow examples using the OpenAI API, refer to [ReAct Agent Training](./example_react.md).
 ```
+
+#### LLM-as-a-judge Support
+
+LLM-as-a-judge is a common reward calculation method, especially suitable for open-ended tasks (such as programming, writing, etc.). In these scenarios, the Workflow needs to leverage an additional LLM to evaluate the answer quality and compute the reward signal.
+
+To support this, Trinity-RFT provides an Auxiliary Models mechanism. Auxiliary models are a set of models not involved in training; the Workflow can use these models to assist with tasks, such as acting as a judge to calculate rewards.
+
+You can specify one or more auxiliary models in the configuration file via the `explorer.auxiliary_models` field. For example:
+
+```yaml
+explorer:
+  auxiliary_models:
+    - model_path: Qwen/Qwen2.5-32B-Instruct
+      engine_num: 1
+      tensor_parallel_size: 2
+      enable_thinking: false
+      max_prompt_tokens: 12288
+      max_response_tokens: 12288
+      max_model_len: 16384
+    - model_path: Qwen/Qwen3-8B
+      engine_num: 1
+      tensor_parallel_size: 2
+      enable_thinking: false
+      max_prompt_tokens: 12288
+      max_response_tokens: 12288
+      max_model_len: 16384
+```
+
+Note that each auxiliary model will independently occupy `tensor_parallel_size * engine_num` GPUs. Please configure according to your hardware resources. After enabling auxiliary models, the number of GPUs available to the Trainer is the total GPU count minus those occupied by all auxiliary models and the inference model being trained (`rollout_model`).
+
+The auxiliary models specified in the configuration file will automatically activate the OpenAI API and pass the corresponding `openai.OpenAI` instances to the `auxiliary_models` parameter of the `Workflow` initialization method. For example:
+
+```python
+class MyWorkflow(Workflow):
+    def __init__(
+        self,
+        *,
+        task: Task,
+        model: ModelWrapper,
+        auxiliary_models: Optional[List[openai.OpenAI]] = None,
+    ):
+        super().__init__(task=task, model=model, auxiliary_models=auxiliary_models)
+        self.judge_model = self.auxiliary_models[0]  # Use the first auxiliary model as the judge
+
+    def run(self) -> List[Experience]:
+        response = self.do_something()
+        reward_response = self.judge_model.chat.completions.create(
+            model=self.judge_model.model_path,
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a judge. You need to give a score from 0 to 1 based on the quality of the answer.",
+                },
+                {
+                    "role": "user",
+                    "content": f"Question:\n{self.task.raw_task['question']}\nAnswer:\n{response.response_text}\nPlease give a score from 0 to 1.",
+                },
+            ],
+            temperature=0.0,
+            max_tokens=10,
+        )
+        # Parse the reward score
+        reward = float(reward_response.choices[0].message.content.strip())
+        return [
+            Experience(
+                tokens=response.tokens,
+                prompt_length=response.prompt_length,
+                reward=reward,
+                logprobs=response.logprobs,
+            )
+        ]
+```
+
+
+#### Debug Mode
+
+During Workflow development, repeatedly launching the full training process for testing is time-consuming and inefficient. To address this, Trinity-RFT provides a Debug Mode for developers. This mode leverages a pre-launched inference model to quickly run specified workflows and obtain results, avoiding repeated model loading and initialization delays, and significantly improving development efficiency. The process is illustrated below:
+
+```{mermaid}
+flowchart LR
+    A[Start Inference Model] --> B[Debug Workflow]
+    B --> B
+```
+
+To start the inference model, use the following command:
+
+```bash
+trinity debug --config <config_file_path> --module inference_model
+```
+
+Here, `<config_file_path>` is the path to a YAML configuration file, which should follow the same format as the one used by the `trinity run` command. The `explorer.rollout_model` and `explorer.auxiliary_models` fields in the config will be loaded to initialize the inference model.
+
+Once started, the model will keep running and wait for debug instructions; it will not exit automatically. You can then run the following command in another terminal to debug your workflow:
+
+```bash
+trinity debug --config <config_file_path> --module workflow --output_file <output_file_path> --plugin_dir <plugin_dir>
+```
+
+- `<config_file_path>`: Path to the YAML configuration file, usually the same as used for starting the inference model.
+- `<output_file_path>`: Path to save the performance profiling results. Debug Mode uses [viztracer](https://github.com/gaogaotiantian/viztracer) to profile the workflow execution and saves the results as an HTML file for easy viewing in a browser.
+- `<plugin_dir>` (optional): Path to the plugin directory. If your workflow or reward function modules are not built into Trinity-RFT, you can specify this parameter to load custom modules.
+
+During debugging, the `buffer.explorer_input.taskset` field in the config will be loaded to initialize the workflow's required task dataset and instance. Note that Debug Mode only reads the first sample in the dataset for testing. After running the above command, the workflow's return value will be automatically formatted and printed in the terminal for easy inspection.
+
+When debugging is complete, you can terminate the inference model by pressing `Ctrl+C` in its terminal.
