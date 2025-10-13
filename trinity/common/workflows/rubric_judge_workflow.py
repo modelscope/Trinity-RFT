@@ -74,7 +74,9 @@ class RubricJudgeWorkflow(SimpleWorkflow):
                 )
 
         # record judge success
-        judge_success_rate = sum(judge_success_list) / len(judge_success_list)
+        judge_success_rate = (
+            sum(judge_success_list) / len(judge_success_list) if judge_success_list else 0.0
+        )
         for response in responses:
             if response.metrics is None:
                 response.metrics = {}
@@ -136,24 +138,22 @@ Your JSON Evaluation:
         # Step 3: extract score from judger's response (expecting a JSON block with "rating")
         try:
             # Extract content between ```json and ```
-            json_start = judger_response.find("```json")
-            if json_start == -1:
-                json_start = judger_response.find("```")
-            json_end = judger_response.find("```", json_start + 3)
+            start_tag = "```json"
+            start_index = judger_response.find(start_tag)
+            if start_index == -1:
+                start_tag = "```"
+                start_index = judger_response.find(start_tag)
 
-            if json_start == -1 or json_end == -1:
+            if start_index == -1:
                 self.logger.warning("No JSON code block found in judger response.")
                 return False, 0.0
 
-            json_str = judger_response[json_start:json_end].strip()
-            # Remove the opening marker
-            if "```json" in json_str:
-                json_str = json_str.replace("```json", "", 1)
-            elif "```" in json_str:
-                json_str = json_str.replace("```", "", 1)
-            json_str = json_str.strip()
+            end_index = judger_response.find("```", start_index + len(start_tag))
+            if end_index == -1:
+                self.logger.warning("Malformed JSON code block in judger response.")
+                return False, 0.0
 
-            # Parse JSON
+            json_str = judger_response[start_index + len(start_tag) : end_index].strip()
             parsed = json.loads(json_str)
             rating = parsed.get("rating")
 
@@ -161,7 +161,7 @@ Your JSON Evaluation:
                 self.logger.warning(f"Invalid or out-of-range rating: {rating}")
                 return False, 0.0
 
-            normalized_score = (rating - 1) / 9  # Normalize 1-10 to 0-1 scale
+            normalized_score = rating * 0.1  # Normalize 1-10 to 0-1 scale
             return True, normalized_score
 
         except json.JSONDecodeError as e:

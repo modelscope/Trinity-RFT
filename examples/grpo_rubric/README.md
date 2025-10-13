@@ -4,7 +4,7 @@ This example shows how to use LLM judge and rubrics to compute reward for a non-
 
 Before running this example, please make sure you have prepared the environment and the dataset [anisha2102/RaR-Medicine](https://huggingface.co/datasets/anisha2102/RaR-Medicine).
 
-The RaR-Medicine dataset contains around 20k QA pairs with rubrics in medicine domain. Unlike the math datasets, this dataset does NOT have groud-truth answers for questions. Below is an example:
+The RaR-Medicine dataset contains around 20k QA pairs with rubrics in medicine domain. Unlike the math datasets, this dataset does NOT have ground-truth answers for questions. Below is an example:
 ```json
 {
     "question": "What is the most sensitive imaging modality for diagnosing a ureteric stone in a patient presenting with acute renal colic?",
@@ -20,7 +20,7 @@ The RaR-Medicine dataset contains around 20k QA pairs with rubrics in medicine d
 }
 ```
 
-RULER scores a group of responses by evaluating them against the provided rubrics and outputs the score in the range of [0, 1] for each response. The higher the score, the better the response is according to the rubric.
+The LLM judge scores a group of responses by evaluating them against the provided rubrics and outputs the score in the range of [0, 1] for each response. The higher the score, the better the response is according to the rubric.
 
 
 The config file is located in [`rubric.yaml`](./rubric.yaml).
