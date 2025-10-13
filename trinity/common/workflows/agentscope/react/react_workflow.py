@@ -11,8 +11,6 @@ from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
 from trinity.common.workflows.workflow import WORKFLOWS, Task, Workflow
 
-from .templates import TEMPLATE_MAP
-
 
 @WORKFLOWS.register_module("as_react_workflow")
 class AgentScopeReActWorkflow(Workflow):
@@ -29,8 +27,13 @@ class AgentScopeReActWorkflow(Workflow):
             auxiliary_models=auxiliary_models,
         )
         self.model_client = model.get_openai_async_client()
+        self.reset(task)
+
+    def reset(self, task: Task):
+        from trinity.common.workflows.agentscope.react.templates import TEMPLATE_MAP
 
         task_type = task.workflow_args.get("type", "gsm8k")
+        self.logger.info(f"task_type: {task_type}")
         template = TEMPLATE_MAP.get(task_type, None)
         if template is None:
             raise ValueError(
@@ -40,6 +43,13 @@ class AgentScopeReActWorkflow(Workflow):
         self.query = task.raw_task.get(task.format_args.prompt_key)  # type: ignore [index]
         self.answer = task.raw_task.get(task.format_args.response_key)  # type: ignore [index]
         self.reward_fn = template.reward_fn_cls(**task.reward_fn_args)
+        self.toolkit_manager = template.toolkit_manager(task=task)
+
+        system_prompt = (
+            template.system_prompt
+            if isinstance(template.system_prompt, str)
+            else template.system_prompt(task)
+        )
 
         # import here to avoid the import error if agentscope is not installed and this workflow is not used
         try:
@@ -53,32 +63,43 @@ class AgentScopeReActWorkflow(Workflow):
         self.agent = AgentScopeReActAgent(
             model_name=self.model_client.model_path,
             openai_client=self.model_client,
-            system_prompt=template.system_prompt,
+            system_prompt=system_prompt,
             generate_kwargs={
                 "temperature": self.rollout_args.get("temperature", 1.0),
                 "max_tokens": self.rollout_args.get("max_tokens", 4096),
             },
             response_structure=template.response_structure,
+            toolkit=self.toolkit_manager.toolkit,
         )
 
     async def run_async(self):
         """Run the workflow asynchronously."""
         # Step 1: call the react agent to solve the task
         response = await self.agent.reply(self.query)
-        # Step 2: calculate the reward based on the response
-        reward = await self.calculate_reward(response)
-        # Step 3: construct experiences from the interaction history and return them
-        return self.construct_experiences(reward)
+        # Step 2: extract the experience
+        exps = self.model.extract_experience_from_history()
+        # Step 3: calculate the reward based on the response
+        reward = await self.calculate_reward(response, exps)
+        # Step 4: construct experiences from the interaction history and return them
+        return self.construct_experiences(reward, exps)
 
-    async def calculate_reward(self, response) -> Union[float, Dict[str, float]]:
+    async def calculate_reward(self, response, exps) -> Union[float, Dict[str, float]]:
         """Calculate the reward for the workflow.
 
         Returns:
             Union[float, Dict[str, float]]: The reward value or a dictionary of reward value.
         """
-        return self.reward_fn(response=response, truth=self.answer)
+        return self.reward_fn(
+            response=response,
+            truth=self.answer,
+            auxiliary_models=self.auxiliary_models,
+            num_turns=len(exps),
+            **self.toolkit_manager.get_status(),
+        )
 
-    def construct_experiences(self, reward: Union[float, Dict[str, float]]) -> List[Experience]:
+    def construct_experiences(
+        self, reward: Union[float, Dict[str, float]], exps
+    ) -> List[Experience]:
         """Construct experiences from the agent's interaction history.
 
         Args:
@@ -87,10 +108,16 @@ class AgentScopeReActWorkflow(Workflow):
         Returns:
             List: A list of Experience objects.
         """
-        exps = self.model.extract_experience_from_history()
-        for exp in exps:
-            exp.reward = reward if isinstance(reward, float) else sum(reward.values())
-            exp.metrics = {"react_memory_length": len(self.agent.agent.memory.content)}
+        reward_value = reward if isinstance(reward, float) else sum(reward.values())
+        react_memory_length = len(self.agent.agent.memory.content)
+        num_turns = len(exps)
+        for i, exp in enumerate(exps):
+            exp.eid.step = i
+            exp.reward = reward_value
+            if exp.metrics is None:
+                exp.metrics = {}
+            exp.metrics["react_memory_length"] = react_memory_length
+            exp.metrics["num_turns"] = num_turns
             # record detailed reward if available
             if isinstance(reward, dict):
                 exp.metrics.update(reward)
@@ -105,3 +132,7 @@ class AgentScopeReActWorkflow(Workflow):
     def repeatable(self):
         """This workflow is not repeatable."""
         return False
+
+    @property
+    def resettable(self):
+        return True

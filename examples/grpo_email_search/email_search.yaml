@@ -26,6 +26,7 @@ buffer:
         prompt_key: 'question'
         response_key: 'answer'
       workflow_args:
+        type: email_search
         max_turns: 10
       reward_fn_args:
         llm_as_a_judge: true
@@ -42,13 +43,14 @@ buffer:
         response_key: 'answer'
       enable_progress_bar: false
       workflow_args:
+        type: email_search
         max_turns: 10
       reward_fn_args:
         llm_as_a_judge: true
       rollout_args:
         temperature: 0.6
         # max_tokens: 4096
-    default_workflow_type: 'email_search_workflow'
+    default_workflow_type: 'as_react_workflow'
   trainer_input:
     experience_buffer:
       name: experience_buffer
