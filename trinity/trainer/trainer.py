@@ -110,7 +110,6 @@ class Trainer:
         with Timer(metrics, "time/train_step"):
             train_metrics = self.engine.train_step(exps)
         self.logger.info(f"Training at step {self.train_step_num} finished.")
-        metrics.update({"task_count": len(set(eid.task for eid in exps.eids))})
         metrics.update(train_metrics)
         return metrics
 
@@ -122,10 +121,8 @@ class Trainer:
             Dict: Metrics of the sampling step.
             List[Dict]: A list of representative samples for logging.
         """
-        with Timer({}, "time/sample_data"):
-            batch, metrics, repr_samples = await self.sample_strategy.sample(
-                self.train_step_num + 1
-            )
+        batch, metrics, repr_samples = await self.sample_strategy.sample(self.train_step_num + 1)
+        metrics["sample/task_count"] = len(set(eid.task for eid in batch.eids))
         return batch, metrics, repr_samples
 
     async def need_sync(self) -> bool:
