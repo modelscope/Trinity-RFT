@@ -69,6 +69,7 @@ dev = [
     "pytest-json-ctrf",
     "parameterized",
     "matplotlib",
+    "viztracer",
 ]
 megatron = [
     "megatron-core[mlm]==0.13.1",
@@ -83,6 +84,7 @@ doc = [
     "myst-parser",
     "sphinxcontrib-apidoc",
     "sphinx-multiversion",
+    "sphinxcontrib-mermaid",
 ]
 
 flash_attn = [

@@ -1,5 +1,6 @@
 """Launch the trainer"""
 import argparse
+import asyncio
 import os
 import sys
 import traceback
@@ -10,12 +11,7 @@ import ray
 
 from trinity.buffer.pipelines.task_pipeline import check_and_run_task_pipeline
 from trinity.common.config import Config, load_config
-from trinity.common.constants import (
-    LOG_DIR_ENV_VAR,
-    LOG_LEVEL_ENV_VAR,
-    LOG_NODE_IP_ENV_VAR,
-    PLUGIN_DIRS_ENV_VAR,
-)
+from trinity.common.constants import DEBUG_NAMESPACE, PLUGIN_DIRS_ENV_VAR
 from trinity.explorer.explorer import Explorer
 from trinity.manager.state_manager import StateManager
 from trinity.trainer.trainer import Trainer
@@ -147,17 +143,11 @@ MODE_MAP = {
 
 
 def run_stage(config: Config, ray_address: str) -> None:
-    envs = {
-        PLUGIN_DIRS_ENV_VAR: os.environ.get(PLUGIN_DIRS_ENV_VAR, ""),
-        LOG_DIR_ENV_VAR: config.log.save_dir,
-        LOG_LEVEL_ENV_VAR: config.log.level,
-        LOG_NODE_IP_ENV_VAR: "1" if config.log.group_by_node else "0",
-    }
     ray.init(
         address=ray_address,
         ignore_reinit_error=True,
         namespace=config.ray_namespace,
-        runtime_env={"env_vars": envs},
+        runtime_env={"env_vars": config.get_envs()},
     )
     pprint(config)
     try:
@@ -247,6 +237,40 @@ def studio(port: int = 8501):
     sys.exit(stcli.main())
 
 
+def debug(
+    config_path: str,
+    module: str,
+    output_file: str = "debug_workflow_runner.html",
+    plugin_dir: str = None,
+):
+    """Debug a module."""
+    if plugin_dir:
+        os.environ[PLUGIN_DIRS_ENV_VAR] = plugin_dir
+    load_plugins()
+    config = load_config(config_path)
+    config.check_and_update()
+    config.ray_namespace = DEBUG_NAMESPACE
+    ray.init(
+        namespace=config.ray_namespace,
+        runtime_env={"env_vars": config.get_envs()},
+        ignore_reinit_error=True,
+    )
+    from trinity.common.models import create_debug_inference_model
+
+    if module == "inference_model":
+        create_debug_inference_model(config)
+
+    elif module == "workflow":
+        from trinity.explorer.workflow_runner import DebugWorkflowRunner
+
+        runner = DebugWorkflowRunner(config, output_file)
+        asyncio.run(runner.debug())
+    else:
+        raise ValueError(
+            f"Only support 'inference_model' and 'workflow' for debugging, got {module}"
+        )
+
+
 def main() -> None:
     """The main entrypoint."""
     parser = argparse.ArgumentParser()
@@ -271,12 +295,36 @@ def main() -> None:
         "--port", type=int, default=8501, help="The port for Trinity-Studio."
     )
 
+    # debug command
+    debug_parser = subparsers.add_parser("debug", help="Debug the code.")
+    debug_parser.add_argument("--config", type=str, help="Path to the config file.")
+    debug_parser.add_argument(
+        "--module",
+        type=str,
+        choices=["inference_model", "workflow"],
+        help="The module to start debugging, only support 'inference_model' and 'workflow' for now.",
+    )
+    debug_parser.add_argument(
+        "--plugin-dir",
+        type=str,
+        default=None,
+        help="Path to the directory containing plugin modules.",
+    )
+    debug_parser.add_argument(
+        "--output-file",
+        type=str,
+        default="debug_workflow_runner.html",
+        help="The output file for viztracer.",
+    )
+
     args = parser.parse_args()
     if args.command == "run":
         # TODO: support parse all args from command line
         run(args.config, args.dlc, args.plugin_dir)
     elif args.command == "studio":
         studio(args.port)
+    elif args.command == "debug":
+        debug(args.config, args.module, args.output_file, args.plugin_dir)
 
 
 if __name__ == "__main__":

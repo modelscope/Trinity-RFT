@@ -93,11 +93,15 @@ class Synchronizer:
                     self.logger.info(
                         f"Synchronizer has found a new model state dict at step {latest_model_version}."
                     )
-                    model_state_dict = load_state_dict(
-                        os.path.join(
-                            default_local_dir, f"global_step_{latest_model_version}", "actor"
-                        ),
-                        self.config.trainer,
+                    model_state_dict = (
+                        load_state_dict(
+                            os.path.join(
+                                default_local_dir, f"global_step_{latest_model_version}", "actor"
+                            ),
+                            self.config.trainer,
+                        )
+                        if not self.enable_lora
+                        else {}
                     )
                     self.logger.info(
                         f"Synchronizer has loaded model state dict from checkpoint {latest_model_version}."
@@ -172,10 +176,15 @@ class Synchronizer:
             step_num=step_num,
         )
         if checkpoint_step_num != self.model_version:
-            model_state_dict = load_state_dict(
-                os.path.join(checkpoint_dir, "actor"),
-                self.config.trainer,
+            model_state_dict = (
+                load_state_dict(
+                    os.path.join(checkpoint_dir, "actor"),
+                    self.config.trainer,
+                )
+                if not self.enable_lora
+                else {}
             )
+            # lora weights are stored in 'lora_adapter' subfolder and cannot be loaded directly
             await self.set_model_state_dict(model_state_dict, checkpoint_step_num)
         return checkpoint_step_num
 

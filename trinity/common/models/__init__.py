@@ -1,7 +1,9 @@
+import time
 from collections import defaultdict
 from typing import List, Tuple
 
 from trinity.common.config import Config
+from trinity.common.constants import DEBUG_NAMESPACE
 from trinity.common.models.model import InferenceModel
 from trinity.utils.log import get_logger
 
@@ -82,7 +84,7 @@ def create_inference_models(
     allocator = _BundleAllocator(node_bundle_map)
     namespace = ray.get_runtime_context().namespace
     # create rollout models
-    for _ in range(config.explorer.rollout_model.engine_num):
+    for i in range(config.explorer.rollout_model.engine_num):
         bundles_for_engine = allocator.allocate(config.explorer.rollout_model.tensor_parallel_size)
         config.explorer.rollout_model.bundle_indices = ",".join(
             [str(bid) for bid in bundles_for_engine]
@@ -90,6 +92,7 @@ def create_inference_models(
         rollout_engines.append(
             ray.remote(engine_cls)
             .options(
+                name=f"{config.explorer.name}_rollout_model_{i}",
                 num_cpus=0,
                 num_gpus=0 if config.explorer.rollout_model.tensor_parallel_size > 1 else 1,
                 namespace=namespace,
@@ -112,9 +115,9 @@ def create_inference_models(
             "history via `extract_experience_from_history` to avoid out-of-memory issues."
         )
     # create auxiliary models
-    for model_config in config.explorer.auxiliary_models:
+    for i, model_config in enumerate(config.explorer.auxiliary_models):
         engines = []
-        for _ in range(model_config.engine_num):
+        for j in range(model_config.engine_num):
             bundles_for_engine = allocator.allocate(model_config.tensor_parallel_size)
             model_config.enable_openai_api = True
             model_config.engine_type = "vllm"
@@ -122,6 +125,7 @@ def create_inference_models(
             engines.append(
                 ray.remote(vLLMRolloutModel)
                 .options(
+                    name=f"{config.explorer.name}_auxiliary_model_{i}_{j}",
                     num_cpus=0,
                     num_gpus=0 if model_config.tensor_parallel_size > 1 else 1,
                     namespace=namespace,
@@ -140,3 +144,52 @@ def create_inference_models(
             engine.run_api_server.remote()
 
     return rollout_engines, auxiliary_engines
+
+
+def create_debug_inference_model(config: Config) -> None:
+    """Create inference models for debugging."""
+    import ray
+
+    logger = get_logger(__name__)
+    logger.info("Creating inference models for debugging...")
+    # only create one engine for each model
+    config.explorer.rollout_model.engine_num = 1
+    for model in config.explorer.auxiliary_models:
+        model.engine_num = 1
+    rollout_models, auxiliary_models = create_inference_models(config)
+    # make sure models are started
+    for m in rollout_models:
+        ray.get(m.get_model_path.remote())
+    for models in auxiliary_models:
+        for m in models:
+            ray.get(m.get_model_path.remote())
+    logger.info(
+        "----------------------------------------------------\n"
+        "Inference models started successfully for debugging.\n"
+        "Press Ctrl+C to exit.\n"
+        "----------------------------------------------------"
+    )
+
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        logger.info("Exiting...")
+
+
+def get_debug_inference_model(config: Config) -> Tuple[InferenceModel, List[InferenceModel]]:
+    """Get the inference models for debugging.
+    The models must be created by `create_debug_inference_model` in another process first.
+    """
+    import ray
+
+    rollout_model = ray.get_actor(
+        f"{config.explorer.name}_rollout_model_0", namespace=DEBUG_NAMESPACE
+    )
+    auxiliary_models = []
+    for i in range(len(config.explorer.auxiliary_models)):
+        model = ray.get_actor(
+            f"{config.explorer.name}_auxiliary_model_{i}_0", namespace=DEBUG_NAMESPACE
+        )
+        auxiliary_models.append(model)
+    return rollout_model, auxiliary_models

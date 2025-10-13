@@ -100,7 +100,7 @@ class Workflow:
     @property
     def repeatable(self):
         """A workflow is repeatable if it can be run multiple times within the run() or run_async() method."""
-        return True
+        return False
 
     @property
     def asynchronous(self):
@@ -152,6 +152,10 @@ class MultiTurnWorkflow(Workflow):
             model=model,
             auxiliary_models=auxiliary_models,
         )
+
+    @property
+    def repeatable(self):
+        return True
 
     def set_repeat_times(self, repeat_times, run_id_base):
         self.repeat_times = repeat_times
@@ -219,6 +223,10 @@ class SimpleWorkflow(Workflow):
             self.reward_fn: RewardFn = reward_fn(**self.reward_fn_args)
         else:
             raise ValueError("`reward_fn` must be a subclass of `RewardFn`")
+
+    @property
+    def repeatable(self):
+        return True
 
     def set_repeat_times(self, repeat_times, run_id_base):
         self.repeat_times = repeat_times

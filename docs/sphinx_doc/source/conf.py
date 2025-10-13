@@ -24,6 +24,7 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
     "sphinx.ext.autosectionlabel",
+    "sphinxcontrib.mermaid",
     "sphinx_multiversion",
     "myst_parser",
     "sphinx.ext.mathjax",

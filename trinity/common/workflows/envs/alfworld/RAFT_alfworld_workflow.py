@@ -224,6 +224,10 @@ class RAFTAlfworldWorkflow(Workflow):
         """Indicate that this workflow can be reset to avoid re-initialization"""
         return True
 
+    @property
+    def repeatable(self) -> bool:
+        return True
+
     def set_repeat_times(self, repeat_times, run_id_base):
         self.repeat_times = repeat_times
         self.run_id_base = run_id_base
