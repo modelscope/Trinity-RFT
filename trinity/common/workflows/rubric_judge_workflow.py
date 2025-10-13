@@ -61,7 +61,7 @@ class RubricJudgeWorkflow(SimpleWorkflow):
         judge_success_list = []
         for i, response in enumerate(responses):
             judge_success, reward = self.get_judge_reward(
-                response=response, judger=self.auxiliary_models[0]
+                response=response.response_text, judger=self.auxiliary_models[0]
             )
             response.reward = reward
             response.eid.run = i + self.run_id_base
@@ -82,7 +82,7 @@ class RubricJudgeWorkflow(SimpleWorkflow):
 
         return responses
 
-    def get_judge_reward(self, response: Experience, judger: openai.OpenAI) -> Tuple[bool, float]:
+    def get_judge_reward(self, response: str, judger: openai.OpenAI) -> Tuple[bool, float]:
         """Get rewards with LLM-as-a-judge
         The prompts are adapted from RAR-IMPLICIT method in https://arxiv.org/pdf/2507.17746
         """
