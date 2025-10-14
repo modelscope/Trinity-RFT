@@ -30,6 +30,8 @@ from trinity.common.models import get_debug_inference_model
 
 class TestLauncherMain(unittest.TestCase):
     def setUp(self):
+        if multiprocessing.get_start_method(allow_none=True) != "spawn":
+            multiprocessing.set_start_method("spawn", force=True)
         self._orig_argv = sys.argv.copy()
         self.config = get_template_config()
         self.config.checkpoint_root_dir = get_checkpoint_path()

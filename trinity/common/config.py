@@ -16,7 +16,6 @@ from trinity.common.constants import (
     LOG_DIR_ENV_VAR,
     LOG_LEVEL_ENV_VAR,
     LOG_NODE_IP_ENV_VAR,
-    MAX_MODEL_LEN,
     PLUGIN_DIRS_ENV_VAR,
     TRAINER_NAME,
     PromptType,
