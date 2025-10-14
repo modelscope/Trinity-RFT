@@ -13,8 +13,8 @@ The RaR-Medicine dataset contains around 20k QA pairs with rubrics in medicine d
     "rubric": [
         {
             "description": "Essential Criteria: Identifies non-contrast helical CT scan as the most sensitive modality for ureteric stones.",
-                "title": "Identify Most Sensitive Modality",
-                "weight": 5
+            "title": "Identify Most Sensitive Modality",
+            "weight": 5
         },
         ...
     ]
