@@ -71,7 +71,7 @@ class EmailSearchAgent(AgentScopeReActAgent):
                 ],
             )
         except Exception as e:
-            self.logger.info(f"Error in tool: {e}, traceback: {traceback.format_exc()}")
+            self.logger.info(f"Error in search_emails: {e}, traceback: {traceback.format_exc()}")
             return ToolResponse(
                 content=[
                     TextBlock(
@@ -115,12 +115,13 @@ class EmailSearchAgent(AgentScopeReActAgent):
                         ),
                     ],
                 )
-        except Exception:
+        except Exception as e:
+            self.logger.info(f"Error in read_email: {e}, traceback: {traceback.format_exc()}")
             return ToolResponse(
                 content=[
                     TextBlock(
                         type="text",
-                        text="Error: Timeout to read email.",
+                        text=f"Error: Failed to read email.\nError message: {e}",
                     ),
                 ],
             )
