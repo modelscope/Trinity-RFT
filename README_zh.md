@@ -1,4 +1,4 @@
-[**English Homepage**](https://github.com/modelscope/Trinity-RFT/blob/main/README.md) | [**中文文档**](https://modelscope.github.io/Trinity-RFT/zh/) | [**常见问题**](./docs/sphinx_doc/source/zh/tutorial/faq.md)
+[**English Homepage**](https://github.com/modelscope/Trinity-RFT/blob/main/README.md) | [**中文文档**](https://modelscope.github.io/Trinity-RFT/zh/) | [**常见问题**](https://modelscope.github.io/Trinity-RFT/zh/main/tutorial/faq.html)
 
 <div align="center">
   <img src="https://img.alicdn.com/imgextra/i1/O1CN01lvLpfw25Pl4ohGZnU_!!6000000007519-2-tps-1628-490.png" alt="Trinity-RFT" style="height: 120px;">
