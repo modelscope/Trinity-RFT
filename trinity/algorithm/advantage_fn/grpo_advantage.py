@@ -227,4 +227,10 @@ class GRPOGroupedAdvantage(GroupAdvantage):
 
     @classmethod
     def default_args(cls) -> dict:
-        return {"epsilon": 1e-6}
+        return {
+            "epsilon": 1e-6,
+            "std_threshold": None,
+            "duplicate_experiences": False,
+            "rank_penalty": None,
+            "std_cal_level": "group",
+        }
