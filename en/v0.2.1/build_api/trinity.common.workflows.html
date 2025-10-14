@@ -738,8 +738,9 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.EmailSearchWorkflow.__init__"><code class="docutils literal notranslate"><span class="pre">EmailSearchWorkflow.__init__()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.EmailSearchWorkflow.repeatable"><code class="docutils literal notranslate"><span class="pre">EmailSearchWorkflow.repeatable</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.EmailSearchWorkflow.resettable"><code class="docutils literal notranslate"><span class="pre">EmailSearchWorkflow.resettable</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.EmailSearchWorkflow.asynchronous"><code class="docutils literal notranslate"><span class="pre">EmailSearchWorkflow.asynchronous</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.EmailSearchWorkflow.reset"><code class="docutils literal notranslate"><span class="pre">EmailSearchWorkflow.reset()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.EmailSearchWorkflow.run"><code class="docutils literal notranslate"><span class="pre">EmailSearchWorkflow.run()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.EmailSearchWorkflow.run_async"><code class="docutils literal notranslate"><span class="pre">EmailSearchWorkflow.run_async()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.EmailSearchWorkflow.calculate_reward"><code class="docutils literal notranslate"><span class="pre">EmailSearchWorkflow.calculate_reward()</span></code></a></li>
 </ul>
 </li>
@@ -1879,6 +1880,12 @@ We use the AgentScope V1 version here.</p>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">resettable</span></span><a class="headerlink" href="#trinity.common.workflows.EmailSearchWorkflow.resettable" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="trinity.common.workflows.EmailSearchWorkflow.asynchronous">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">asynchronous</span></span><a class="headerlink" href="#trinity.common.workflows.EmailSearchWorkflow.asynchronous" title="Link to this definition">#</a></dt>
+<dd><p>Whether the workflow runs in async mode.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="trinity.common.workflows.EmailSearchWorkflow.reset">
 <span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="trinity.common.workflows.workflow.html#trinity.common.workflows.workflow.Task" title="trinity.common.workflows.workflow.Task"><span class="pre">Task</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/email_searcher/workflow.html#EmailSearchWorkflow.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.EmailSearchWorkflow.reset" title="Link to this definition">#</a></dt>
@@ -1886,9 +1893,9 @@ We use the AgentScope V1 version here.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="trinity.common.workflows.EmailSearchWorkflow.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/email_searcher/workflow.html#EmailSearchWorkflow.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.EmailSearchWorkflow.run" title="Link to this definition">#</a></dt>
-<dd><p>Run workflow and return a list of experiences.</p>
+<dt class="sig sig-object py" id="trinity.common.workflows.EmailSearchWorkflow.run_async">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run_async</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trinity/common/workflows/envs/email_searcher/workflow.html#EmailSearchWorkflow.run_async"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trinity.common.workflows.EmailSearchWorkflow.run_async" title="Link to this definition">#</a></dt>
+<dd><p>Run workflow in async and return a list of experiences.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -2274,8 +2281,9 @@ ruler_scores: List[float]</p>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.EmailSearchWorkflow.__init__"><code class="docutils literal notranslate"><span class="pre">EmailSearchWorkflow.__init__()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.EmailSearchWorkflow.repeatable"><code class="docutils literal notranslate"><span class="pre">EmailSearchWorkflow.repeatable</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.EmailSearchWorkflow.resettable"><code class="docutils literal notranslate"><span class="pre">EmailSearchWorkflow.resettable</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.EmailSearchWorkflow.asynchronous"><code class="docutils literal notranslate"><span class="pre">EmailSearchWorkflow.asynchronous</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.EmailSearchWorkflow.reset"><code class="docutils literal notranslate"><span class="pre">EmailSearchWorkflow.reset()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.EmailSearchWorkflow.run"><code class="docutils literal notranslate"><span class="pre">EmailSearchWorkflow.run()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.EmailSearchWorkflow.run_async"><code class="docutils literal notranslate"><span class="pre">EmailSearchWorkflow.run_async()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#trinity.common.workflows.EmailSearchWorkflow.calculate_reward"><code class="docutils literal notranslate"><span class="pre">EmailSearchWorkflow.calculate_reward()</span></code></a></li>
 </ul>
 </li>

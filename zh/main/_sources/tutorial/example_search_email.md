@@ -1,6 +1,6 @@
 # 邮件搜索例子
 
-这个示例展示了一个多轮邮件搜索工作流，内容参考自 [ART](https://openpipe.ai/blog/art-e-mail-agent?refresh=1756431423904)。我们实现了一个 ReAct Agent，并定义了用于邮件搜索的工具。注意：此示例需要安装 `AgentScope==0.1.6`。
+这个示例展示了一个多轮邮件搜索工作流，内容参考自 [ART](https://openpipe.ai/blog/art-e-mail-agent?refresh=1756431423904)。我们实现了一个 ReAct Agent，并定义了用于邮件搜索的工具。注意：此示例需要安装 [AgentScope](https://github.com/agentscope-ai/agentscope?tab=readme-ov-file#-installation)。
 
 ## 核心组件
 

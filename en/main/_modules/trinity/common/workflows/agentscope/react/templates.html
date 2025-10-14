@@ -583,7 +583,7 @@ document.write(`
         <span class="k">else</span><span class="p">:</span>
             <span class="n">truth</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">truth</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span>
-            <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">],</span>
+            <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;result&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
             <span class="n">truth</span><span class="o">=</span><span class="n">truth</span><span class="p">,</span>
             <span class="n">with_think</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">format_score_coef</span><span class="o">=</span><span class="n">format_score_coef</span><span class="p">,</span>

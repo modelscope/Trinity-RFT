@@ -554,7 +554,6 @@ document.write(`
 <span class="kn">import</span><span class="w"> </span><span class="nn">openai</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.models.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelWrapper</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows.envs.email_searcher.react_agent</span><span class="w"> </span><span class="kn">import</span> <span class="n">EmailSearchAgent</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows.envs.email_searcher.utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">AnswerModel</span><span class="p">,</span>
     <span class="n">FinalRubric</span><span class="p">,</span>
@@ -588,16 +587,8 @@ document.write(`
         <span class="n">model</span><span class="p">:</span> <span class="n">ModelWrapper</span><span class="p">,</span>
         <span class="n">auxiliary_models</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">openai</span><span class="o">.</span><span class="n">OpenAI</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="kn">import</span><span class="w"> </span><span class="nn">agentscope</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">agentscope.service</span><span class="w"> </span><span class="kn">import</span> <span class="n">ServiceToolkit</span>
-        <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">error_message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;AgentScope is not installed. Please install the agentscope framework first before running the workflow. Error: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
-            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
-
         <span class="c1"># get openai client from model</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">openai_client</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_openai_client</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">openai_client</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_openai_async_client</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">openai_client</span><span class="o">.</span><span class="n">model_path</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span>
@@ -605,27 +596,6 @@ document.write(`
             <span class="n">auxiliary_models</span><span class="o">=</span><span class="n">auxiliary_models</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="n">temperature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rollout_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;temperature&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
-        <span class="n">max_tokens</span> <span class="o">=</span> <span class="mi">4096</span>
-
-        <span class="n">agentscope</span><span class="o">.</span><span class="n">init</span><span class="p">(</span>
-            <span class="n">model_configs</span><span class="o">=</span><span class="p">[</span>
-                <span class="p">{</span>
-                    <span class="s2">&quot;model_type&quot;</span><span class="p">:</span> <span class="s2">&quot;openai_chat&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;config_name&quot;</span><span class="p">:</span> <span class="s2">&quot;react_model&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;model_name&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_name</span><span class="p">,</span>
-                    <span class="s2">&quot;api_key&quot;</span><span class="p">:</span> <span class="s2">&quot;EMPTY&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;generate_args&quot;</span><span class="p">:</span> <span class="p">{</span>
-                        <span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="n">temperature</span><span class="p">,</span>
-                        <span class="s2">&quot;max_tokens&quot;</span><span class="p">:</span> <span class="n">max_tokens</span><span class="p">,</span>
-                    <span class="p">},</span>
-                    <span class="s2">&quot;use_openai_formatter&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="p">}</span>
-            <span class="p">],</span>
-            <span class="n">disable_saving</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">toolkit</span> <span class="o">=</span> <span class="n">ServiceToolkit</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">task</span><span class="p">)</span></div>
 
 
@@ -635,6 +605,10 @@ document.write(`
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">resettable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">asynchronous</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="EmailSearchWorkflow.reset">
@@ -655,42 +629,31 @@ document.write(`
             <span class="n">query_date</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">query_date</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">agent</span> <span class="o">=</span> <span class="n">EmailSearchAgent</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;react_agent&quot;</span><span class="p">,</span>
-            <span class="n">sys_prompt</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">system_prompt</span><span class="p">,</span>
-            <span class="n">model_config_name</span><span class="o">=</span><span class="s2">&quot;react_model&quot;</span><span class="p">,</span>
-            <span class="n">service_toolkit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">toolkit</span><span class="p">,</span>
-            <span class="n">max_iters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_turns</span><span class="p">,</span>
-            <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="c1"># we set the openai client to the agent&#39;s model</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">openai_client</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">message_id_list</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">ever_read_message_ids</span> <span class="o">=</span> <span class="p">[]</span></div>
-
-
-<div class="viewcode-block" id="EmailSearchWorkflow.run">
-<a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.EmailSearchWorkflow.run">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># make sure that we have the correct import</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">agentscope.message</span><span class="w"> </span><span class="kn">import</span> <span class="n">Msg</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.workflows.envs.email_searcher.react_agent</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+                <span class="n">EmailSearchAgent</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">error_message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;AgentScope is not installed. Please install the agentscope framework first before running the workflow. Error: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
 
-        <span class="c1"># provide the task to the react agent</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="n">Msg</span><span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">task_desc</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="s2">&quot;user&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">agent</span> <span class="o">=</span> <span class="n">EmailSearchAgent</span><span class="p">(</span>
+            <span class="n">model_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">openai_client</span><span class="o">.</span><span class="n">model_path</span><span class="p">,</span>
+            <span class="n">openai_client</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">openai_client</span><span class="p">,</span>
+            <span class="n">system_prompt</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">system_prompt</span><span class="p">,</span>
+            <span class="n">generate_kwargs</span><span class="o">=</span><span class="p">{</span>
+                <span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rollout_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;temperature&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+                <span class="s2">&quot;max_tokens&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rollout_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;max_tokens&quot;</span><span class="p">,</span> <span class="mi">4096</span><span class="p">),</span>
+            <span class="p">},</span>
+            <span class="n">response_structure</span><span class="o">=</span><span class="n">AnswerModel</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
-        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span>
-            <span class="n">msg</span><span class="p">,</span>
-            <span class="n">structured_model</span><span class="o">=</span><span class="n">AnswerModel</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">metadata</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">answer_and_sources</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;answer&quot;</span><span class="p">:</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">,</span> <span class="s2">&quot;sources&quot;</span><span class="p">:</span> <span class="p">[]}</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">answer_and_sources</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">metadata</span>
+
+<div class="viewcode-block" id="EmailSearchWorkflow.run_async">
+<a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.EmailSearchWorkflow.run_async">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_async</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">answer_and_sources</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">task_desc</span><span class="p">)</span>
 
         <span class="n">experiences</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">extract_experience_from_history</span><span class="p">(</span><span class="n">clear_history</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actual_turns</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span>
