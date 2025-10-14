@@ -377,6 +377,7 @@ window.addEventListener("load", () => mermaid.run());
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.common.workflows.math_rm_workflow.html">trinity.common.workflows.math_rm_workflow module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.common.workflows.math_ruler_workflow.html">trinity.common.workflows.math_ruler_workflow module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.common.workflows.math_trainable_ruler_workflow.html">trinity.common.workflows.math_trainable_ruler_workflow module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.common.workflows.rubric_judge_workflow.html">trinity.common.workflows.rubric_judge_workflow module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.common.workflows.simple_mm_workflow.html">trinity.common.workflows.simple_mm_workflow module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.common.workflows.step_wise_workflow.html">trinity.common.workflows.step_wise_workflow module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../build_api/trinity.common.workflows.workflow.html">trinity.common.workflows.workflow module</a></li>
@@ -632,6 +633,7 @@ document.write(`
             <span class="n">gpu_memory_utilization</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">gpu_memory_utilization</span><span class="p">,</span>
             <span class="n">enable_chunked_prefill</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">enable_chunked_prefill</span><span class="p">,</span>
             <span class="c1"># max_num_batched_tokens=256, # you can further set this parameter to reduce the vllm peak memory usage</span>
+            <span class="n">disable_log_stats</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">enable_lora</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">enable_lora</span><span class="p">,</span>
             <span class="o">**</span><span class="n">config</span><span class="o">.</span><span class="n">lora_kwargs</span><span class="p">,</span>
         <span class="p">)</span>

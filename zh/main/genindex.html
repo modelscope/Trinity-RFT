@@ -377,6 +377,7 @@ window.addEventListener("load", () => mermaid.run());
 <li class="toctree-l4"><a class="reference internal" href="build_api/trinity.common.workflows.math_rm_workflow.html">trinity.common.workflows.math_rm_workflow module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="build_api/trinity.common.workflows.math_ruler_workflow.html">trinity.common.workflows.math_ruler_workflow module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="build_api/trinity.common.workflows.math_trainable_ruler_workflow.html">trinity.common.workflows.math_trainable_ruler_workflow module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="build_api/trinity.common.workflows.rubric_judge_workflow.html">trinity.common.workflows.rubric_judge_workflow module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="build_api/trinity.common.workflows.simple_mm_workflow.html">trinity.common.workflows.simple_mm_workflow module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="build_api/trinity.common.workflows.step_wise_workflow.html">trinity.common.workflows.step_wise_workflow module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="build_api/trinity.common.workflows.workflow.html">trinity.common.workflows.workflow module</a></li>
@@ -811,10 +812,10 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.StorageConfig.__init__">__init__() （trinity.common.config.StorageConfig 方法）</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.SynchronizerConfig.__init__">__init__() （trinity.common.config.SynchronizerConfig 方法）</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.TaskPipelineConfig.__init__">__init__() （trinity.common.config.TaskPipelineConfig 方法）</a>
 </li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.TrainerConfig.__init__">__init__() （trinity.common.config.TrainerConfig 方法）</a>
@@ -946,6 +947,10 @@ document.write(`
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.RAFTAlfworldWorkflow.__init__">__init__() （trinity.common.workflows.RAFTAlfworldWorkflow 方法）</a>
 </li>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.RAFTReflectAlfworldWorkflow.__init__">__init__() （trinity.common.workflows.RAFTReflectAlfworldWorkflow 方法）</a>
+</li>
+      <li><a href="build_api/trinity.common.workflows.rubric_judge_workflow.html#trinity.common.workflows.rubric_judge_workflow.RubricJudgeWorkflow.__init__">__init__() （trinity.common.workflows.rubric_judge_workflow.RubricJudgeWorkflow 方法）</a>
+</li>
+      <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.RubricJudgeWorkflow.__init__">__init__() （trinity.common.workflows.RubricJudgeWorkflow 方法）</a>
 </li>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.SciWorldWorkflow.__init__">__init__() （trinity.common.workflows.SciWorldWorkflow 方法）</a>
 </li>
@@ -2427,6 +2432,10 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.buffer.pipelines.experience_pipeline.html#trinity.buffer.pipelines.experience_pipeline.get_input_buffers">get_input_buffers()（在 trinity.buffer.pipelines.experience_pipeline 模块中）</a>
 </li>
+      <li><a href="build_api/trinity.common.workflows.rubric_judge_workflow.html#trinity.common.workflows.rubric_judge_workflow.RubricJudgeWorkflow.get_judge_reward">get_judge_reward() （trinity.common.workflows.rubric_judge_workflow.RubricJudgeWorkflow 方法）</a>
+</li>
+      <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.RubricJudgeWorkflow.get_judge_reward">get_judge_reward() （trinity.common.workflows.RubricJudgeWorkflow 方法）</a>
+</li>
       <li><a href="build_api/trinity.trainer.verl.utils.html#trinity.trainer.verl.utils.get_latest_hf_checkpoint_path">get_latest_hf_checkpoint_path()（在 trinity.trainer.verl.utils 模块中）</a>
 </li>
       <li><a href="build_api/trinity.utils.log.html#trinity.utils.log.get_logger">get_logger()（在 trinity.utils.log 模块中）</a>
@@ -2441,10 +2450,10 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.common.models.model.html#trinity.common.models.model.InferenceModel.get_model_path">get_model_path() （trinity.common.models.model.InferenceModel 方法）</a>
 </li>
-      <li><a href="build_api/trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.get_model_path">get_model_path() （trinity.common.models.vllm_model.vLLMRolloutModel 方法）</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="build_api/trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.get_model_path">get_model_path() （trinity.common.models.vllm_model.vLLMRolloutModel 方法）</a>
+</li>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.AlfworldWorkflow.get_model_response">get_model_response() （trinity.common.workflows.AlfworldWorkflow 方法）</a>
 </li>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.SciWorldWorkflow.get_model_response">get_model_response() （trinity.common.workflows.SciWorldWorkflow 方法）</a>
@@ -3305,6 +3314,8 @@ document.write(`
 </li>
         <li><a href="build_api/trinity.common.workflows.math_trainable_ruler_workflow.html#module-trinity.common.workflows.math_trainable_ruler_workflow">trinity.common.workflows.math_trainable_ruler_workflow</a>
 </li>
+        <li><a href="build_api/trinity.common.workflows.rubric_judge_workflow.html#module-trinity.common.workflows.rubric_judge_workflow">trinity.common.workflows.rubric_judge_workflow</a>
+</li>
         <li><a href="build_api/trinity.common.workflows.simple_mm_workflow.html#module-trinity.common.workflows.simple_mm_workflow">trinity.common.workflows.simple_mm_workflow</a>
 </li>
         <li><a href="build_api/trinity.common.workflows.step_wise_workflow.html#module-trinity.common.workflows.step_wise_workflow">trinity.common.workflows.step_wise_workflow</a>
@@ -3988,6 +3999,10 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.RAFTAlfworldWorkflow.reset">reset() （trinity.common.workflows.RAFTAlfworldWorkflow 方法）</a>
 </li>
+      <li><a href="build_api/trinity.common.workflows.rubric_judge_workflow.html#trinity.common.workflows.rubric_judge_workflow.RubricJudgeWorkflow.reset">reset() （trinity.common.workflows.rubric_judge_workflow.RubricJudgeWorkflow 方法）</a>
+</li>
+      <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.RubricJudgeWorkflow.reset">reset() （trinity.common.workflows.RubricJudgeWorkflow 方法）</a>
+</li>
       <li><a href="build_api/trinity.common.workflows.simple_mm_workflow.html#trinity.common.workflows.simple_mm_workflow.SimpleMMWorkflow.reset">reset() （trinity.common.workflows.simple_mm_workflow.SimpleMMWorkflow 方法）</a>
 </li>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.SimpleMMWorkflow.reset">reset() （trinity.common.workflows.SimpleMMWorkflow 方法）</a>
@@ -4022,10 +4037,10 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.common.workflows.eval_workflow.html#trinity.common.workflows.eval_workflow.MathEvalWorkflow.resettable">resettable（trinity.common.workflows.eval_workflow.MathEvalWorkflow 属性）</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.MathEvalWorkflow.resettable">resettable（trinity.common.workflows.MathEvalWorkflow 属性）</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.SimpleWorkflow.resettable">resettable（trinity.common.workflows.SimpleWorkflow 属性）</a>
 </li>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.WebShopWorkflow.resettable">resettable（trinity.common.workflows.WebShopWorkflow 属性）</a>
@@ -4146,6 +4161,10 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.ActorRolloutRef.rollout">rollout（trinity.common.verl_config.ActorRolloutRef 属性）</a>
 </li>
+      <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.RubricJudgeWorkflow">RubricJudgeWorkflow（trinity.common.workflows 中的类）</a>
+</li>
+      <li><a href="build_api/trinity.common.workflows.rubric_judge_workflow.html#trinity.common.workflows.rubric_judge_workflow.RubricJudgeWorkflow">RubricJudgeWorkflow（trinity.common.workflows.rubric_judge_workflow 中的类）</a>
+</li>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeV0ReactMathWorkflow.run">run() （trinity.common.workflows.AgentScopeV0ReactMathWorkflow 方法）</a>
 </li>
       <li><a href="build_api/trinity.common.workflows.customized_math_workflows.html#trinity.common.workflows.customized_math_workflows.MathBoxedWorkflow.run">run() （trinity.common.workflows.customized_math_workflows.MathBoxedWorkflow 方法）</a>
@@ -4167,6 +4186,10 @@ document.write(`
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.MathRULERWorkflow.run">run() （trinity.common.workflows.MathRULERWorkflow 方法）</a>
 </li>
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.MathTrainableRULERWorkflow.run">run() （trinity.common.workflows.MathTrainableRULERWorkflow 方法）</a>
+</li>
+      <li><a href="build_api/trinity.common.workflows.rubric_judge_workflow.html#trinity.common.workflows.rubric_judge_workflow.RubricJudgeWorkflow.run">run() （trinity.common.workflows.rubric_judge_workflow.RubricJudgeWorkflow 方法）</a>
+</li>
+      <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.RubricJudgeWorkflow.run">run() （trinity.common.workflows.RubricJudgeWorkflow 方法）</a>
 </li>
       <li><a href="build_api/trinity.common.workflows.simple_mm_workflow.html#trinity.common.workflows.simple_mm_workflow.SimpleMMWorkflow.run">run() （trinity.common.workflows.simple_mm_workflow.SimpleMMWorkflow 方法）</a>
 </li>
@@ -5949,6 +5972,13 @@ document.write(`
 
       <ul>
         <li><a href="build_api/trinity.common.workflows.math_trainable_ruler_workflow.html#module-trinity.common.workflows.math_trainable_ruler_workflow">module</a>
+</li>
+      </ul></li>
+      <li>
+    trinity.common.workflows.rubric_judge_workflow
+
+      <ul>
+        <li><a href="build_api/trinity.common.workflows.rubric_judge_workflow.html#module-trinity.common.workflows.rubric_judge_workflow">module</a>
 </li>
       </ul></li>
       <li>

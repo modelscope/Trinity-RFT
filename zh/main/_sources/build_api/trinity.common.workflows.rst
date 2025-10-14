@@ -21,6 +21,7 @@ Submodules
    trinity.common.workflows.math_rm_workflow
    trinity.common.workflows.math_ruler_workflow
    trinity.common.workflows.math_trainable_ruler_workflow
+   trinity.common.workflows.rubric_judge_workflow
    trinity.common.workflows.simple_mm_workflow
    trinity.common.workflows.step_wise_workflow
    trinity.common.workflows.workflow
