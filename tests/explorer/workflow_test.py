@@ -466,7 +466,6 @@ class MultiTurnWorkflowTest(unittest.TestCase):
         self.config = get_template_config()
         self.config.mode = "explore"
         self.config.model.model_path = get_model_path()
-        self.config.model.max_model_len = None  # self.max_model_len
         self.config.explorer.rollout_model.engine_num = 1  # self.engine_num
         self.config.explorer.rollout_model.tensor_parallel_size = 1  # self.tensor_parallel_size
         self.config.explorer.rollout_model.chat_template = CHAT_TEMPLATE
