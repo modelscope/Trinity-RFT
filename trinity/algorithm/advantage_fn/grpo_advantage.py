@@ -105,19 +105,19 @@ class GRPOGroupedAdvantage(GroupAdvantage):
     ) -> None:
         """Initialize the GRPO advantage function.
 
-                Args:
-                    epsilon (float): A small value to avoid division by zero.
-                    std_threshold (Optional[float]): If provided, groups with a reward standard deviation equal
-                        or below this threshold will be skipped.
-                    duplicate_experiences (bool): If True, allows duplicate experiences to keep the original experience
-                        count. Only used when `std_threshold` is not None (https://hkunlp.github.io/blog/2025/Polaris).
-                    rank_penalty (Optional[float]): A penalty applied to the rank of rewards to correct for bias
-                        (https://arxiv.org/pdf/2506.02355).
-                    std_cal_level (str): The scope for calculating the reward standard deviation for normalization.
-                        Can be 'group' (default, std is calculated per group) or 'batch' (std is calculated
-                        across the entire batch). The mean is always calculated per group.
-                        Calculating the mean at the local (group) level and the standard deviation at the global (batch)
-        level enables more robust reward shaping(https://arxiv.org/pdf/2508.08221v1).
+        Args:
+            epsilon (float): A small value to avoid division by zero.
+            std_threshold (Optional[float]): If provided, groups with a reward standard deviation equal
+                or below this threshold will be skipped.
+            duplicate_experiences (bool): If True, allows duplicate experiences to keep the original experience
+                count. Only used when `std_threshold` is not None (https://hkunlp.github.io/blog/2025/Polaris).
+            rank_penalty (Optional[float]): A penalty applied to the rank of rewards to correct for bias
+                (https://arxiv.org/pdf/2506.02355).
+            std_cal_level (str): The scope for calculating the reward standard deviation for normalization.
+                Can be 'group' (default, std is calculated per group) or 'batch' (std is calculated
+                across the entire batch). The mean is always calculated per group.
+                Calculating the mean at the local (group) level and the standard deviation at the global (batch)
+                level enables more robust reward shaping(https://arxiv.org/pdf/2508.08221v1).
         """
         self.epsilon = epsilon
         self.std_threshold = std_threshold
@@ -219,7 +219,7 @@ class GRPOGroupedAdvantage(GroupAdvantage):
             metrics = gather_metrics(metric_list, "group_advantages")
         except ValueError:
             metrics = {}  # empty metric list causes ValueError, ignore it
-        if self.duplicate_experiences:
+        if self.duplicate_experiences and self.std_threshold is not None:
             exps = self._duplicate_experiences(exp_groups)
         else:
             exps = [exp for group in exp_groups.values() for exp in group]  # Flatten the list
