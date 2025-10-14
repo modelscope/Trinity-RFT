@@ -3,6 +3,7 @@
 
 Modified from verl/trainer/ppo/ray_trainer.py
 """
+import asyncio
 import os
 import sys
 from collections import defaultdict
@@ -57,6 +58,9 @@ class CheckpointMonitor:
         self.latest_checkpoint_step = 0
         self.latest_state_dict_step = 0
 
+        self.condition = asyncio.Condition()
+        self.saving_count = 0
+
     def update_latest_checkpoint_step(self, step: int):
         assert step >= self.latest_checkpoint_step
         if step == self.latest_checkpoint_step:
@@ -87,7 +91,7 @@ class CheckpointMonitor:
         with open(self.local_latest_state_dict_iteration, "w") as f:
             f.write(str(step))
 
-    def register_thread_count(
+    async def register_thread_count(
         self,
         step: int,
         *,
@@ -99,7 +103,7 @@ class CheckpointMonitor:
         if checkpoint_thread_count != 0:
             self.checkpoint_counter[step] += checkpoint_thread_count
 
-    def monitor_step(self, step: int, is_state_dict: bool = False):
+    async def monitor_step(self, step: int, is_state_dict: bool = False):
         if is_state_dict:
             self.state_dict_steps.add(step)
             if self.state_dict_counter[step] == 0:
@@ -109,7 +113,16 @@ class CheckpointMonitor:
             if self.checkpoint_counter[step] == 0 and self.state_dict_counter[step] == 0:
                 self.update_latest_checkpoint_step(step)
 
-    def notify_finished(self, step: int, is_state_dict: bool = False):
+    async def notify_started(self):
+        async with self.condition:
+            while self.saving_count > 0:
+                await self.condition.wait_for(lambda: self.saving_count == 0)
+            self.saving_count += 1
+
+    async def notify_finished(self, step: int, is_state_dict: bool = False):
+        async with self.condition:
+            self.saving_count -= 1
+            self.condition.notify()
         if is_state_dict:
             self.state_dict_counter[step] -= 1
             if (
