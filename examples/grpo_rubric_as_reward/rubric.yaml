@@ -1,5 +1,5 @@
 project: "Trinity-RFT-Example"
-name: "medicine_grpo_rubric"
+name: "MedicineQA_grpo_rubric_as_reward"
 checkpoint_root_dir: ${oc.env:TRINITY_CHECKPOINT_ROOT_DIR,./checkpoints}
 algorithm:
   algorithm_type: grpo

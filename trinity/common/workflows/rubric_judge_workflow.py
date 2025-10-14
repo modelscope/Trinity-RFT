@@ -53,10 +53,10 @@ class RubricJudgeWorkflow(SimpleWorkflow):
         self.logger.debug("start chat")
         responses = self.model.chat(messages, **self.rollout_args)
 
-        # === RULER scores as rewards ===
+        # === Calculate rubric-based rewards ===
         assert (
             self.auxiliary_models is not None
-        ), "Current implementation of RULER requires that auxiliary_models is not None."
+        ), "Current implementation of rubric-based rewards requires that auxiliary_models is not None."
 
         judge_success_list = []
         for i, response in enumerate(responses):
