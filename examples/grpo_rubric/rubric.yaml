@@ -7,7 +7,7 @@ algorithm:
     std_threshold: 0.0001  # effectively zero
   repeat_times: 8
 model:
-  model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen3-4B}
+  model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen3-4B-Instruct-2507}
   max_response_tokens: 1024
   max_model_len: 10240
 cluster:
@@ -46,7 +46,7 @@ explorer:
     dtype: bfloat16
     seed: 42
   auxiliary_models:
-    - model_path: Qwen/Qwen2.5-32B-Instruct
+    - model_path: Qwen/Qwen3-30B-A3B-Instruct-2507
       engine_num: 1
       tensor_parallel_size: 2
       enable_thinking: false

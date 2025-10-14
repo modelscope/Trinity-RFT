@@ -28,3 +28,7 @@ To run this example, you can run the following command:
 ```bash
 trinity run --config examples/grpo_rubric/rubric.yaml
 ```
+
+With the provided configurations, we can see the reward is increasing over the training steps:
+
+![reward](../../docs/sphinx_doc/assets/grpo_rubric_reward.png)
