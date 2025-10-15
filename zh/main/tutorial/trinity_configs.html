@@ -786,7 +786,7 @@ document.write(`
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">model_path</span></code>: 被训练模型的路径。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">critic_model_path</span></code>: 可选的独立 critic 模型路径。若为空，则默认为 <code class="docutils literal notranslate"><span class="pre">model_path</span></code>。</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">max_model_len</span></code>: 该模型所支持的单个序列最大 token 数。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_model_len</span></code>: 表示模型所支持的单个序列最大 token 数。如未指定，系统会尝试将其设为 <code class="docutils literal notranslate"><span class="pre">max_prompt_tokens</span></code> + <code class="docutils literal notranslate"><span class="pre">max_response_tokens</span></code>。但前提是这两个值都必须已设置，否则将引发错误。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">max_prompt_tokens</span></code>: 输入 prompt 中允许的最大 token 数。仅对 <code class="docutils literal notranslate"><span class="pre">InferenceModel</span></code> 中的 <code class="docutils literal notranslate"><span class="pre">chat</span></code> 和 <code class="docutils literal notranslate"><span class="pre">generate</span></code> 方法生效。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">max_response_tokens</span></code>: 模型生成的回复中允许的最大 token 数。仅对 <code class="docutils literal notranslate"><span class="pre">InferenceModel</span></code> 中的 <code class="docutils literal notranslate"><span class="pre">chat</span></code> 和 <code class="docutils literal notranslate"><span class="pre">generate</span></code> 方法生效。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">min_response_tokens</span></code>: 模型生成的回复中允许的最小 token 数。仅对 <code class="docutils literal notranslate"><span class="pre">InferenceModel</span></code> 中的 <code class="docutils literal notranslate"><span class="pre">chat</span></code> 和 <code class="docutils literal notranslate"><span class="pre">generate</span></code> 方法生效。</p></li>
@@ -1052,6 +1052,7 @@ document.write(`
 <span class="w">  </span><span class="nt">trainer_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;verl&#39;</span>
 <span class="w">  </span><span class="nt">save_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
 <span class="w">  </span><span class="nt">total_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+<span class="w">  </span><span class="nt">save_strategy</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unrestricted&quot;</span>
 <span class="w">  </span><span class="nt">trainer_config</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
 <span class="w">  </span><span class="nt">trainer_config_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;&#39;</span>
 </pre></div>
@@ -1061,6 +1062,14 @@ document.write(`
 <li><p><code class="docutils literal notranslate"><span class="pre">trainer_type</span></code>: trainer 后端实现。目前仅支持 <code class="docutils literal notranslate"><span class="pre">verl</span></code>。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">save_interval</span></code>: 保存模型检查点的频率（步）。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">total_steps</span></code>: 总训练步数。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">save_strategy</span></code>: 模型保存时的并行策略。默认值为<code class="docutils literal notranslate"><span class="pre">unrestricted</span></code>。可选值如下：</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">single_thread</span></code>：整个系统中，仅允许一个线程进行模型保存，不同保存线程之间串行执行。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">single_process</span></code>：整个系统中，仅允许一个进程执行保存，该进程内的多个线程可以并行处理保存任务，不同进程之间串行执行。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">single_node</span></code>：整个系统中，仅允许一个计算节点执行保存，该节点内的进程和线程可并行工作，不同节点的保存串行执行。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">unrestricted</span></code>：不限制保存操作，允许多个节点、进程或线程同时保存模型。</p></li>
+</ul>
+</li>
 <li><p><code class="docutils literal notranslate"><span class="pre">trainer_config</span></code>: 内联提供的 trainer 配置。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">trainer_config_path</span></code>: trainer 配置文件的路径。<code class="docutils literal notranslate"><span class="pre">trainer_config_path</span></code> 和 <code class="docutils literal notranslate"><span class="pre">trainer_config</span></code> 只能指定其一。</p></li>
 </ul>

@@ -3706,14 +3706,14 @@ document.write(`
       </ul></li>
       <li><a href="build_api/trinity.common.constants.html#trinity.common.constants.SyncMethod.NCCL">NCCL (trinity.common.constants.SyncMethod attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.explorer.html#trinity.explorer.Explorer.need_eval">need_eval() (trinity.explorer.Explorer method)</a>
 
       <ul>
         <li><a href="build_api/trinity.explorer.explorer.html#trinity.explorer.explorer.Explorer.need_eval">(trinity.explorer.explorer.Explorer method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.trainer.html#trinity.trainer.Trainer.need_save">need_save() (trinity.trainer.Trainer method)</a>
 
       <ul>
@@ -3739,6 +3739,8 @@ document.write(`
       <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.Algorithm.norm_adv_by_std_in_grpo">norm_adv_by_std_in_grpo (trinity.common.verl_config.Algorithm attribute)</a>
 </li>
       <li><a href="build_api/trinity.trainer.verl_trainer.html#trinity.trainer.verl_trainer.CheckpointMonitor.notify_finished">notify_finished() (trinity.trainer.verl_trainer.CheckpointMonitor method)</a>
+</li>
+      <li><a href="build_api/trinity.trainer.verl_trainer.html#trinity.trainer.verl_trainer.CheckpointMonitor.notify_started">notify_started() (trinity.trainer.verl_trainer.CheckpointMonitor method)</a>
 </li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.TaskPipelineConfig.num_process">num_process (trinity.common.config.TaskPipelineConfig attribute)</a>
 </li>
@@ -4716,12 +4718,16 @@ document.write(`
         <li><a href="build_api/trinity.trainer.verl_trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.save_state_dict">(trinity.trainer.verl_trainer.VerlPPOTrainerWrapper method)</a>
 </li>
       </ul></li>
+      <li><a href="build_api/trinity.common.config.html#trinity.common.config.TrainerConfig.save_strategy">save_strategy (trinity.common.config.TrainerConfig attribute)</a>
+</li>
       <li><a href="build_api/trinity.manager.state_manager.html#trinity.manager.state_manager.StateManager.save_trainer">save_trainer() (trinity.manager.state_manager.StateManager method)</a>
 
       <ul>
         <li><a href="build_api/trinity.manager.html#trinity.manager.StateManager.save_trainer">(trinity.manager.StateManager method)</a>
 </li>
       </ul></li>
+      <li><a href="build_api/trinity.common.constants.html#trinity.common.constants.SaveStrategy">SaveStrategy (class in trinity.common.constants)</a>
+</li>
       <li><a href="build_api/trinity.explorer.scheduler.html#trinity.explorer.scheduler.Scheduler.schedule">schedule() (trinity.explorer.scheduler.Scheduler method)</a>
 </li>
       <li><a href="build_api/trinity.explorer.scheduler.html#trinity.explorer.scheduler.Scheduler">Scheduler (class in trinity.explorer.scheduler)</a>
@@ -5262,6 +5268,12 @@ document.write(`
         <li><a href="build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.workflow.SimpleWorkflow">(class in trinity.common.workflows.workflow)</a>
 </li>
       </ul></li>
+      <li><a href="build_api/trinity.common.constants.html#trinity.common.constants.SaveStrategy.SINGLE_NODE">SINGLE_NODE (trinity.common.constants.SaveStrategy attribute)</a>
+</li>
+      <li><a href="build_api/trinity.common.constants.html#trinity.common.constants.SaveStrategy.SINGLE_PROCESS">SINGLE_PROCESS (trinity.common.constants.SaveStrategy attribute)</a>
+</li>
+      <li><a href="build_api/trinity.common.constants.html#trinity.common.constants.SaveStrategy.SINGLE_THREAD">SINGLE_THREAD (trinity.common.constants.SaveStrategy attribute)</a>
+</li>
       <li><a href="build_api/trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.sleep">sleep() (trinity.common.models.vllm_model.vLLMRolloutModel method)</a>
 </li>
       <li><a href="build_api/trinity.explorer.scheduler.html#trinity.explorer.scheduler.sort_batch_id">sort_batch_id() (in module trinity.explorer.scheduler)</a>
@@ -6678,6 +6690,8 @@ document.write(`
         <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.RewardModel.ulysses_sequence_parallel_size">(trinity.common.verl_config.RewardModel attribute)</a>
 </li>
       </ul></li>
+      <li><a href="build_api/trinity.common.constants.html#trinity.common.constants.SaveStrategy.UNRESTRICTED">UNRESTRICTED (trinity.common.constants.SaveStrategy attribute)</a>
+</li>
       <li><a href="build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.DummyProgressBar.update">update() (trinity.buffer.reader.file_reader.DummyProgressBar method)</a>
 </li>
       <li><a href="build_api/trinity.trainer.verl.fsdp_workers.html#trinity.trainer.verl.fsdp_workers.ActorRolloutRefWorker.update_actor">update_actor() (trinity.trainer.verl.fsdp_workers.ActorRolloutRefWorker method)</a>

@@ -673,6 +673,10 @@ document.write(`
             <span class="n">thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">_save</span><span class="p">():</span>
+            <span class="n">runtime_context</span> <span class="o">=</span> <span class="n">ray</span><span class="o">.</span><span class="n">get_runtime_context</span><span class="p">()</span>
+            <span class="n">node_id</span> <span class="o">=</span> <span class="n">runtime_context</span><span class="o">.</span><span class="n">get_node_id</span><span class="p">()</span>
+            <span class="n">job_id</span> <span class="o">=</span> <span class="n">runtime_context</span><span class="o">.</span><span class="n">get_job_id</span><span class="p">()</span>
+            <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_monitor</span><span class="o">.</span><span class="n">notify_started</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">node_id</span><span class="o">=</span><span class="n">node_id</span><span class="p">,</span> <span class="n">job_id</span><span class="o">=</span><span class="n">job_id</span><span class="p">))</span>
             <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
             <span class="n">log_with_rank</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Saved </span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
@@ -920,6 +924,14 @@ document.write(`
                     <span class="bp">self</span><span class="o">.</span><span class="n">_save_model_thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
 
                 <span class="k">def</span><span class="w"> </span><span class="nf">_save_model</span><span class="p">():</span>
+                    <span class="n">runtime_context</span> <span class="o">=</span> <span class="n">ray</span><span class="o">.</span><span class="n">get_runtime_context</span><span class="p">()</span>
+                    <span class="n">node_id</span> <span class="o">=</span> <span class="n">runtime_context</span><span class="o">.</span><span class="n">get_node_id</span><span class="p">()</span>
+                    <span class="n">job_id</span> <span class="o">=</span> <span class="n">runtime_context</span><span class="o">.</span><span class="n">get_job_id</span><span class="p">()</span>
+                    <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint_monitor</span><span class="o">.</span><span class="n">notify_started</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span>
+                            <span class="n">node_id</span><span class="o">=</span><span class="n">node_id</span><span class="p">,</span> <span class="n">job_id</span><span class="o">=</span><span class="n">job_id</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
                     <span class="n">save_model</span><span class="o">.</span><span class="n">save_pretrained</span><span class="p">(</span><span class="n">hf_local_path</span><span class="p">,</span> <span class="n">state_dict</span><span class="o">=</span><span class="n">state_dict</span><span class="p">)</span>
                     <span class="n">log_with_rank</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s2">&quot;Saved hf_model to </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">hf_local_path</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>

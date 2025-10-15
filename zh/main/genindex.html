@@ -3473,10 +3473,10 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.explorer.explorer.html#trinity.explorer.explorer.Explorer.need_eval">need_eval() （trinity.explorer.explorer.Explorer 方法）</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.trainer.html#trinity.trainer.Trainer.need_save">need_save() （trinity.trainer.Trainer 方法）</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.trainer.trainer.html#trinity.trainer.trainer.Trainer.need_save">need_save() （trinity.trainer.trainer.Trainer 方法）</a>
 </li>
       <li><a href="build_api/trinity.explorer.html#trinity.explorer.Explorer.need_sync">need_sync() （trinity.explorer.Explorer 方法）</a>
@@ -3496,6 +3496,8 @@ document.write(`
       <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.Algorithm.norm_adv_by_std_in_grpo">norm_adv_by_std_in_grpo（trinity.common.verl_config.Algorithm 属性）</a>
 </li>
       <li><a href="build_api/trinity.trainer.verl_trainer.html#trinity.trainer.verl_trainer.CheckpointMonitor.notify_finished">notify_finished() （trinity.trainer.verl_trainer.CheckpointMonitor 方法）</a>
+</li>
+      <li><a href="build_api/trinity.trainer.verl_trainer.html#trinity.trainer.verl_trainer.CheckpointMonitor.notify_started">notify_started() （trinity.trainer.verl_trainer.CheckpointMonitor 方法）</a>
 </li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.TaskPipelineConfig.num_process">num_process（trinity.common.config.TaskPipelineConfig 属性）</a>
 </li>
@@ -4379,9 +4381,13 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.trainer.verl_trainer.html#trinity.trainer.verl_trainer.VerlPPOTrainerWrapper.save_state_dict">save_state_dict() （trinity.trainer.verl_trainer.VerlPPOTrainerWrapper 方法）</a>
 </li>
+      <li><a href="build_api/trinity.common.config.html#trinity.common.config.TrainerConfig.save_strategy">save_strategy（trinity.common.config.TrainerConfig 属性）</a>
+</li>
       <li><a href="build_api/trinity.manager.state_manager.html#trinity.manager.state_manager.StateManager.save_trainer">save_trainer() （trinity.manager.state_manager.StateManager 方法）</a>
 </li>
       <li><a href="build_api/trinity.manager.html#trinity.manager.StateManager.save_trainer">save_trainer() （trinity.manager.StateManager 方法）</a>
+</li>
+      <li><a href="build_api/trinity.common.constants.html#trinity.common.constants.SaveStrategy">SaveStrategy（trinity.common.constants 中的类）</a>
 </li>
       <li><a href="build_api/trinity.explorer.scheduler.html#trinity.explorer.scheduler.Scheduler.schedule">schedule() （trinity.explorer.scheduler.Scheduler 方法）</a>
 </li>
@@ -4677,10 +4683,10 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.manager.config_registry.model_config_manager.html#trinity.manager.config_registry.model_config_manager.set_max_prompt_tokens">set_max_prompt_tokens()（在 trinity.manager.config_registry.model_config_manager 模块中）</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.manager.config_registry.model_config_manager.html#trinity.manager.config_registry.model_config_manager.set_max_response_tokens">set_max_response_tokens()（在 trinity.manager.config_registry.model_config_manager 模块中）</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.manager.config_registry.buffer_config_manager.html#trinity.manager.config_registry.buffer_config_manager.set_max_retry_interval">set_max_retry_interval()（在 trinity.manager.config_registry.buffer_config_manager 模块中）</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.explorer_config_manager.html#trinity.manager.config_registry.explorer_config_manager.set_max_timeout">set_max_timeout()（在 trinity.manager.config_registry.explorer_config_manager 模块中）</a>
@@ -4898,6 +4904,12 @@ document.write(`
       <li><a href="build_api/trinity.common.workflows.html#trinity.common.workflows.SimpleWorkflow">SimpleWorkflow（trinity.common.workflows 中的类）</a>
 </li>
       <li><a href="build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.workflow.SimpleWorkflow">SimpleWorkflow（trinity.common.workflows.workflow 中的类）</a>
+</li>
+      <li><a href="build_api/trinity.common.constants.html#trinity.common.constants.SaveStrategy.SINGLE_NODE">SINGLE_NODE（trinity.common.constants.SaveStrategy 属性）</a>
+</li>
+      <li><a href="build_api/trinity.common.constants.html#trinity.common.constants.SaveStrategy.SINGLE_PROCESS">SINGLE_PROCESS（trinity.common.constants.SaveStrategy 属性）</a>
+</li>
+      <li><a href="build_api/trinity.common.constants.html#trinity.common.constants.SaveStrategy.SINGLE_THREAD">SINGLE_THREAD（trinity.common.constants.SaveStrategy 属性）</a>
 </li>
       <li><a href="build_api/trinity.common.models.vllm_model.html#trinity.common.models.vllm_model.vLLMRolloutModel.sleep">sleep() （trinity.common.models.vllm_model.vLLMRolloutModel 方法）</a>
 </li>
@@ -6331,6 +6343,8 @@ document.write(`
       <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.Ref.ulysses_sequence_parallel_size">ulysses_sequence_parallel_size（trinity.common.verl_config.Ref 属性）</a>
 </li>
       <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.RewardModel.ulysses_sequence_parallel_size">ulysses_sequence_parallel_size（trinity.common.verl_config.RewardModel 属性）</a>
+</li>
+      <li><a href="build_api/trinity.common.constants.html#trinity.common.constants.SaveStrategy.UNRESTRICTED">UNRESTRICTED（trinity.common.constants.SaveStrategy 属性）</a>
 </li>
       <li><a href="build_api/trinity.buffer.reader.file_reader.html#trinity.buffer.reader.file_reader.DummyProgressBar.update">update() （trinity.buffer.reader.file_reader.DummyProgressBar 方法）</a>
 </li>

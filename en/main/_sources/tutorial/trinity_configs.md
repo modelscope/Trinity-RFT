@@ -160,7 +160,7 @@ model:
 
 - `model_path`: Path to the model being trained.
 - `critic_model_path`: Optional path to a separate critic model. If empty, defaults to `model_path`.
-- `max_model_len`: Maximum number of tokens in a sequence. It is recommended to set this value manually. If not set, it will be inferred from the model configuration.
+- `max_model_len`: Maximum number of tokens in a sequence. It is recommended to set this value manually. If not specified, the system will attempt to set it to `max_prompt_tokens` + `max_response_tokens`. However, this requires both values to be already set; otherwise, an error will be raised.
 - `max_response_tokens`: Maximum number of tokens allowed in generated responses. Only for `chat` and `generate` methods in `InferenceModel`.
 - `max_prompt_tokens`: Maximum number of tokens allowed in prompts. Only for `chat` and `generate` methods in `InferenceModel`.
 - `min_response_tokens`: Minimum number of tokens allowed in generated responses. Only for `chat` and `generate` methods in `InferenceModel`. Default is `1`. It must be less than `max_response_tokens`.
@@ -405,6 +405,7 @@ trainer:
   trainer_type: 'verl'
   save_interval: 100
   total_steps: 1000
+  save_strategy: "unrestricted"
   trainer_config: null
   trainer_config_path: ''
 ```
@@ -413,6 +414,11 @@ trainer:
 - `trainer_type`: Trainer backend implementation. Currently only supports `verl`.
 - `save_interval`: Frequency (in steps) at which to save model checkpoints.
 - `total_steps`: Total number of training steps.
+- `save_strategy`: The parallel strategy used when saving the model. Defaults to `unrestricted`. The available options are as follows:
+  - `single_thread`: Only one thread across the entire system is allowed to save the model; saving tasks from different threads are executed sequentially.
+  - `single_process`: Only one process across the entire system is allowed to perform saving; multiple threads within that process can handle saving tasks in parallel, while saving operations across different processes are executed sequentially.
+  - `single_node`: Only one compute node across the entire system is allowed to perform saving; processes and threads within that node can work in parallel, while saving operations across different nodes are executed sequentially.
+  - `unrestricted`: No restrictions on saving operations; multiple nodes, processes, or threads are allowed to save the model simultaneously.
 - `trainer_config`: The trainer configuration provided inline.
 - `trainer_config_path`: The path to the trainer configuration file. Only one of `trainer_config_path` and `trainer_config` should be specified.
 
