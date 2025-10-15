@@ -685,7 +685,7 @@ document.write(`
     <span class="n">use_priority_queue</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">reuse_cooldown_time</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">replay_buffer_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
-        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;priority_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;linear_decay&quot;</span><span class="p">,</span> <span class="s2">&quot;decay&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">}</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;priority_fn&quot;</span><span class="p">:</span> <span class="s2">&quot;linear_decay&quot;</span><span class="p">,</span> <span class="s2">&quot;decay&quot;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">}</span>
     <span class="p">)</span>
 
     <span class="c1"># used for StorageType.SQL</span>
