@@ -535,7 +535,7 @@ document.write(`
   <h1>Source code for trinity.algorithm.advantage_fn.multi_step_grpo_advantage</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;GRPO advantage computation for multi-step scenarios</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
@@ -560,16 +560,32 @@ document.write(`
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">epsilon</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span>
         <span class="n">enable_step_norm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">std_cal_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;group&quot;</span><span class="p">,</span>  <span class="c1"># &#39;group&#39; (task-level) or &#39;batch&#39;</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the Step-wise GRPO advantage function.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            epsilon (float): A small value to avoid division by zero.</span>
+<span class="sd">            enable_step_norm (bool): If True, normalize advantages by trajectory length.</span>
+<span class="sd">            std_cal_level (str): The scope for calculating reward standard deviation.</span>
+<span class="sd">                &#39;group&#39; (default): Std is calculated per task group.</span>
+<span class="sd">                &#39;batch&#39;: Std is calculated across all last-step rewards in the entire batch.</span>
+<span class="sd">                The mean is always calculated per task group.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span> <span class="o">=</span> <span class="n">epsilon</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">enable_step_norm</span> <span class="o">=</span> <span class="n">enable_step_norm</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enable_step_norm</span> <span class="o">=</span> <span class="n">enable_step_norm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">std_cal_level</span> <span class="o">=</span> <span class="n">std_cal_level</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">std_cal_level</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;group&quot;</span><span class="p">,</span> <span class="s2">&quot;batch&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;std_cal_level must be either &#39;group&#39; or &#39;batch&#39;&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="StepWiseGRPOAdvantageFn.calculate_last_step_advantage">
 <a class="viewcode-back" href="../../../../build_api/trinity.algorithm.advantage_fn.multi_step_grpo_advantage.html#trinity.algorithm.advantage_fn.StepWiseGRPOAdvantageFn.calculate_last_step_advantage">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">calculate_last_step_advantage</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">exps</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Experience</span><span class="p">]</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">exps</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Experience</span><span class="p">],</span>
+        <span class="n">precomputed_std</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate group advantage for a given group of experiences.</span>
 
@@ -590,7 +606,10 @@ document.write(`
                 <span class="n">group_reward_std</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">rewards</span><span class="p">)</span>
             <span class="n">scores</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">for</span> <span class="n">rid</span><span class="p">,</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">exps</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="n">score</span> <span class="o">=</span> <span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">reward</span> <span class="o">-</span> <span class="n">group_reward_mean</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">group_reward_std</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">std_cal_level</span> <span class="o">==</span> <span class="s2">&quot;batch&quot;</span> <span class="ow">and</span> <span class="n">precomputed_std</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">score</span> <span class="o">=</span> <span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">reward</span> <span class="o">-</span> <span class="n">group_reward_mean</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">precomputed_std</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">score</span> <span class="o">=</span> <span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">reward</span> <span class="o">-</span> <span class="n">group_reward_mean</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">group_reward_std</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">)</span>
                 <span class="n">scores</span><span class="p">[</span><span class="n">rid</span><span class="p">]</span> <span class="o">=</span> <span class="n">score</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
             <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="s2">&quot;reward_mean&quot;</span><span class="p">:</span> <span class="n">group_reward_mean</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span>
@@ -633,6 +652,26 @@ document.write(`
         <span class="n">metric_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="c1"># Step 1: split the experiences into sub-groups by task</span>
         <span class="n">task_exps</span> <span class="o">=</span> <span class="n">group_by</span><span class="p">(</span><span class="n">exps</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">)</span>
+
+        <span class="c1"># --- Pre-computation step for batch-level standard deviation ---</span>
+        <span class="n">precomputed_std</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">std_cal_level</span> <span class="o">==</span> <span class="s2">&quot;batch&quot;</span><span class="p">:</span>
+            <span class="n">all_laststep_rewards</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">task_exp</span> <span class="ow">in</span> <span class="n">task_exps</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="c1"># First, group all experiences by run to find the last step of each run</span>
+                <span class="n">task_run_exps</span> <span class="o">=</span> <span class="n">group_by</span><span class="p">(</span><span class="n">task_exp</span><span class="p">,</span> <span class="s2">&quot;run&quot;</span><span class="p">)</span>
+                <span class="c1"># Collect rewards from the last step of every run in the entire batch</span>
+                <span class="n">last_step_rewards</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">run_steps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">reward</span> <span class="k">for</span> <span class="n">run_steps</span> <span class="ow">in</span> <span class="n">task_run_exps</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">run_steps</span>
+                <span class="p">]</span>
+                <span class="n">all_laststep_rewards</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">last_step_rewards</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_laststep_rewards</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">precomputed_std</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">precomputed_std</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">all_laststep_rewards</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">))</span>
+        <span class="c1"># --- End of pre-computation ---</span>
+
         <span class="c1"># Step 2: further split each task&#39;s experiences into sub-groups by run</span>
         <span class="n">result_exps</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">task_exp</span> <span class="ow">in</span> <span class="n">task_exps</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
@@ -640,7 +679,9 @@ document.write(`
 
             <span class="c1"># Step3: extract the last experience (last step) from each run and calculate scores</span>
             <span class="n">last_step_exps</span> <span class="o">=</span> <span class="p">{</span><span class="n">run_id</span><span class="p">:</span> <span class="n">step_exps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">run_id</span><span class="p">,</span> <span class="n">step_exps</span> <span class="ow">in</span> <span class="n">run_exps</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-            <span class="n">scores</span><span class="p">,</span> <span class="n">metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_last_step_advantage</span><span class="p">(</span><span class="n">last_step_exps</span><span class="p">)</span>
+            <span class="n">scores</span><span class="p">,</span> <span class="n">metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_last_step_advantage</span><span class="p">(</span>
+                <span class="n">last_step_exps</span><span class="p">,</span> <span class="n">precomputed_std</span><span class="o">=</span><span class="n">precomputed_std</span>
+            <span class="p">)</span>
             <span class="n">metric_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
 
             <span class="c1"># Step 4: broadcast the advantages to all previous steps</span>
