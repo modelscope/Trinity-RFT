@@ -187,12 +187,7 @@ class ModelWrapperTest(RayUnittestBaseAysnc):
                 "content": results[0].response_text,
             }
         )
-        if self.max_model_len is not None:
-            with self.assertRaises(ValueError):
-                exp = self.model_wrapper.convert_messages_to_experience(messages)
-            return
-        else:
-            exp = self.model_wrapper.convert_messages_to_experience(messages)
+        exp = self.model_wrapper.convert_messages_to_experience(messages)
         tokenizer = AutoTokenizer.from_pretrained(self.config.model.model_path)
         result_dict = tokenizer.apply_chat_template(
             messages,
