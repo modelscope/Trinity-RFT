@@ -160,7 +160,7 @@ model:
 
 - `model_path`: 被训练模型的路径。
 - `critic_model_path`: 可选的独立 critic 模型路径。若为空，则默认为 `model_path`。
-- `max_model_len`: 该模型所支持的单个序列最大 token 数。
+- `max_model_len`: 表示模型所支持的单个序列最大 token 数。如果未设置该值，则会尝试将其默认设为 `max_prompt_tokens + max_response_tokens`。但如果 `max_prompt_tokens` 或 `max_response_tokens` 中有任何一个未设置，代码将会报错。
 - `max_prompt_tokens`: 输入 prompt 中允许的最大 token 数。仅对 `InferenceModel` 中的 `chat` 和 `generate` 方法生效。
 - `max_response_tokens`: 模型生成的回复中允许的最大 token 数。仅对 `InferenceModel` 中的 `chat` 和 `generate` 方法生效。
 - `min_response_tokens`: 模型生成的回复中允许的最小 token 数。仅对 `InferenceModel` 中的 `chat` 和 `generate` 方法生效。

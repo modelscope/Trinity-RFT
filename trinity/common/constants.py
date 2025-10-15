@@ -104,3 +104,10 @@ class SyncStyle(CaseInsensitiveEnum):
     FIXED = "fixed"
     DYNAMIC_BY_TRAINER = "dynamic_by_trainer"
     DYNAMIC_BY_EXPLORER = "dynamic_by_explorer"
+
+
+class SaveStrategy(CaseInsensitiveEnum):
+    SINGLE_THREAD = "single_thread"
+    SINGLE_PROCESS = "single_process"
+    SINGLE_NODE = "single_node"
+    UNRESTRICTED = "unrestricted"

@@ -34,6 +34,7 @@ from trinity.algorithm import ADVANTAGE_FN, KL_FN, SAMPLE_STRATEGY
 from trinity.algorithm.algorithm import ALGORITHM_TYPE
 from trinity.algorithm.utils import prefix_metrics
 from trinity.common.config import Config
+from trinity.common.constants import SaveStrategy
 from trinity.common.experience import Experiences
 from trinity.trainer.trainer import TrainEngineWrapper
 from trinity.trainer.verl.utils import compute_data_metrics, to_data_proto
@@ -41,7 +42,9 @@ from trinity.utils.log import get_logger
 
 
 class CheckpointMonitor:
-    def __init__(self, default_local_dir: str, default_hdfs_dir: str = None):
+    def __init__(
+        self, save_strategy: SaveStrategy, default_local_dir: str, default_hdfs_dir: str = None
+    ):
         self.logger = get_logger("checkpoint_monitor", in_ray_actor=True)
         self.default_local_dir = default_local_dir
         self.default_hdfs_dir = default_hdfs_dir
@@ -58,7 +61,9 @@ class CheckpointMonitor:
         self.latest_checkpoint_step = 0
         self.latest_state_dict_step = 0
 
+        self.save_strategy = save_strategy
         self.condition = asyncio.Condition()
+        self.current_identifier = 0
         self.saving_count = 0
 
     def update_latest_checkpoint_step(self, step: int):
@@ -113,16 +118,28 @@ class CheckpointMonitor:
             if self.checkpoint_counter[step] == 0 and self.state_dict_counter[step] == 0:
                 self.update_latest_checkpoint_step(step)
 
-    async def notify_started(self):
+    async def notify_started(self, node_id: str, job_id: str):
+        if self.save_strategy == SaveStrategy.SINGLE_THREAD:
+            identifier = self.current_identifier + 1
+        elif self.save_strategy == SaveStrategy.SINGLE_PROCESS:
+            identifier = f"{node_id}_{job_id}"
+        elif self.save_strategy == SaveStrategy.SINGLE_NODE:
+            identifier = node_id
+        elif self.save_strategy == SaveStrategy.UNRESTRICTED:
+            return
+        else:
+            raise ValueError(f"Invalid save strategy: {self.save_strategy}")
+
         async with self.condition:
-            while self.saving_count > 0:
+            if identifier != self.current_identifier and self.saving_count > 0:
                 await self.condition.wait_for(lambda: self.saving_count == 0)
+            self.current_identifier = identifier
             self.saving_count += 1
 
     async def notify_finished(self, step: int, is_state_dict: bool = False):
         async with self.condition:
             self.saving_count -= 1
-            self.condition.notify()
+            self.condition.notify_all()
         if is_state_dict:
             self.state_dict_counter[step] -= 1
             if (
@@ -144,6 +161,7 @@ class CheckpointMonitor:
     def get_actor(
         cls,
         namespace: str,
+        save_strategy: Optional[SaveStrategy] = None,
         default_local_dir: Optional[str] = None,
         default_hdfs_dir: Optional[str] = None,
     ):
@@ -154,7 +172,11 @@ class CheckpointMonitor:
                 namespace=namespace,
                 get_if_exists=True,
             )
-            .remote(default_local_dir=default_local_dir, default_hdfs_dir=default_hdfs_dir)
+            .remote(
+                save_strategy=save_strategy,
+                default_local_dir=default_local_dir,
+                default_hdfs_dir=default_hdfs_dir,
+            )
         )
 
 
@@ -204,6 +226,7 @@ class VerlPPOTrainerWrapper(RayPPOTrainer, TrainEngineWrapper):
 
         self.checkpoint_monitor = CheckpointMonitor.get_actor(
             namespace=global_config.synchronizer.ray_namespace,
+            save_strategy=global_config.trainer.save_strategy,
             default_local_dir=config.trainer.default_local_dir,
             default_hdfs_dir=config.trainer.default_hdfs_dir,
         )

@@ -125,7 +125,10 @@ class MegatronCheckpointManager(OldMegatronCheckpointManager):
 
         def finalize_save_fn():
             # Rank 0 uploads checkpoint to HDFS if hdfs_path is provided
-            ray.get(self.checkpoint_monitor.notify_started.remote())
+            runtime_context = ray.get_runtime_context()
+            node_id = runtime_context.get_node_id()
+            job_id = runtime_context.get_job_id()
+            ray.get(self.checkpoint_monitor.notify_started.remote(node_id=node_id, job_id=job_id))
             log_with_rank(
                 f"Dist checkpointing save completed for {dist_checkpoint_path}",
                 rank=self.rank,

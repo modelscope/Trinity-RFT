@@ -19,6 +19,7 @@ from trinity.common.constants import (
     PLUGIN_DIRS_ENV_VAR,
     TRAINER_NAME,
     PromptType,
+    SaveStrategy,
     StorageType,
     SyncMethod,
     SyncStyle,
@@ -469,6 +470,8 @@ class TrainerConfig:
     # trainer configs
     actor_grad_clip: Optional[float] = None
     # TODO: extract more train-related params from underlying trainer engine
+
+    save_strategy: SaveStrategy = SaveStrategy.UNRESTRICTED
 
     # Only one needs to be set for `trainer_config` and `trainer_config_path`
     trainer_config: Any = field(default_factory=dict)
