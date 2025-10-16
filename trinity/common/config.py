@@ -7,7 +7,7 @@ from copy import deepcopy
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from omegaconf import OmegaConf
 
@@ -107,6 +107,10 @@ class StorageConfig:
     storage_type: StorageType = StorageType.FILE
     path: Optional[str] = None
     repeat_times: Optional[int] = None
+
+    # For shuffle
+    shuffle: bool = False
+    seed: int = 42
 
     # For continuing training
     index: int = 0
@@ -369,7 +373,8 @@ class ClusterConfig:
 class ExplorerInput:
     """Config for explorer input."""
 
-    taskset: StorageConfig = field(default_factory=StorageConfig)
+    taskset: Optional[StorageConfig] = None
+    tasksets: List[StorageConfig] = field(default_factory=list)
     eval_tasksets: List[StorageConfig] = field(default_factory=list)
     # The following args provide default values for the corresponding args in `taskset` and `eval_tasksets`
     default_workflow_type: Optional[str] = None
@@ -630,40 +635,44 @@ class Config:
         trainer_input = self.buffer.trainer_input
         experience_buffer = trainer_input.experience_buffer
         explorer_input = self.buffer.explorer_input
-        taskset = explorer_input.taskset
 
-        if self.mode != "train" and not taskset.path:
-            raise ValueError(
-                "`buffer.explorer_input.taskset.path` is required, please set it to the path of the taskset."
-            )
-        if not taskset.name:
-            taskset.name = "taskset"
-        if taskset.repeat_times is None or taskset.repeat_times != self.algorithm.repeat_times:
-            taskset.repeat_times = self.algorithm.repeat_times
-            logger.info(
-                "`buffer.explorer_input.taskset.repeat_times` is set to `algorithm.repeat_times`"
-                f" (={self.algorithm.repeat_times})."
-            )
-        if self.mode == "train":
-            assert (
-                experience_buffer is not None
-            ), "`buffer.trainer_input.experience_buffer` is required when `mode` is `train`."
-            experience_buffer.total_epochs = self.buffer.total_epochs
-            experience_buffer.total_steps = self.buffer.total_steps
-        else:
-            taskset.is_eval = False
-            taskset.total_epochs = self.buffer.total_epochs
-            taskset.total_steps = self.buffer.total_steps
+        if len(explorer_input.tasksets) == 0 and explorer_input.taskset:
+            explorer_input.tasksets.append(explorer_input.taskset)
+        tasksets = explorer_input.tasksets
 
-        set_if_none(taskset, "default_workflow_type", explorer_input.default_workflow_type)
-        set_if_none(
-            taskset, "default_eval_workflow_type", explorer_input.default_eval_workflow_type
-        )
-        set_if_none(taskset, "default_reward_fn_type", explorer_input.default_reward_fn_type)
-        set_if_none(taskset.format, "system_prompt", explorer_input.system_prompt)
-        set_if_none(taskset.format, "reply_prefix", explorer_input.reply_prefix)
-        set_if_none(taskset, "ray_namespace", self.ray_namespace)
-        set_if_none(taskset.rollout_args, "max_tokens", self.model.max_response_tokens)
+        for taskset in tasksets:
+            if self.mode != "train" and not taskset.path:
+                raise ValueError(
+                    "`buffer.explorer_input.taskset.path` is required, please set it to the path of the taskset."
+                )
+            if not taskset.name:
+                taskset.name = "taskset"
+            if taskset.repeat_times is None or taskset.repeat_times != self.algorithm.repeat_times:
+                taskset.repeat_times = self.algorithm.repeat_times
+                logger.info(
+                    "`buffer.explorer_input.taskset.repeat_times` is set to `algorithm.repeat_times`"
+                    f" (={self.algorithm.repeat_times})."
+                )
+            if self.mode == "train":
+                assert (
+                    experience_buffer is not None
+                ), "`buffer.trainer_input.experience_buffer` is required when `mode` is `train`."
+                experience_buffer.total_epochs = self.buffer.total_epochs
+                experience_buffer.total_steps = self.buffer.total_steps
+            else:
+                taskset.is_eval = False
+                taskset.total_epochs = self.buffer.total_epochs
+                taskset.total_steps = self.buffer.total_steps
+
+            set_if_none(taskset, "default_workflow_type", explorer_input.default_workflow_type)
+            set_if_none(
+                taskset, "default_eval_workflow_type", explorer_input.default_eval_workflow_type
+            )
+            set_if_none(taskset, "default_reward_fn_type", explorer_input.default_reward_fn_type)
+            set_if_none(taskset.format, "system_prompt", explorer_input.system_prompt)
+            set_if_none(taskset.format, "reply_prefix", explorer_input.reply_prefix)
+            set_if_none(taskset, "ray_namespace", self.ray_namespace)
+            set_if_none(taskset.rollout_args, "max_tokens", self.model.max_response_tokens)
 
         remained_tasksets = []
         for idx, dataset in enumerate(explorer_input.eval_tasksets):
@@ -730,8 +739,8 @@ class Config:
         task_pipeline = self.data_processor.task_pipeline
         if task_pipeline is not None:
             if task_pipeline.output is None:
-                if taskset.path is not None:
-                    task_pipeline.output = taskset
+                if tasksets[0].path is not None:
+                    task_pipeline.output = tasksets[0]
                 elif (
                     experience_buffer.schema_type in {"dpo", "sft"}
                     and experience_buffer.path is not None
@@ -740,7 +749,7 @@ class Config:
                 else:
                     raise ValueError(
                         "`data_processor.task_pipeline.output` is required when both "
-                        "`buffer.explorer_input.taskset.path` and `buffer.trainer_input.experience_buffer.path` are "
+                        "`buffer.explorer_input.tasksets[0].path` and `buffer.trainer_input.experience_buffer.path` are "
                         "None"
                     )
             if task_pipeline.output.path and os.path.exists(task_pipeline.output.path):
