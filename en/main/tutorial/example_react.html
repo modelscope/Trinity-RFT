@@ -756,8 +756,7 @@ In practice, you can directly modify the OpenAI client of your existing agent wi
 <h4>Multi-Step Training Algorithm<a class="headerlink" href="#multi-step-training-algorithm" title="Link to this heading">#</a></h4>
 <p>The <code class="docutils literal notranslate"><span class="pre">algorithm</span></code> section configures the training algorithm for the agent application. Key parameters include:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">algorithm</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">algorithm_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">grpo</span>
-<span class="w">  </span><span class="nt">advantage_fn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">step_wise_grpo</span><span class="w"> </span><span class="c1"># The key for multi-step training. This strategy tells Trinity to create independent training samples for each step in the agent&#39;s execution path. The `grpo` algorithm then uses these samples to update the model.</span>
+<span class="w">  </span><span class="nt">algorithm_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">multi_step_grpo</span><span class="w"> </span><span class="c1"># Specify multi-step GRPO training algorithm</span>
 </pre></div>
 </div>
 </section>

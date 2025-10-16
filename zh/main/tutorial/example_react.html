@@ -752,8 +752,7 @@ document.write(`
 <h4>多步训练算法<a class="headerlink" href="#id9" title="Link to this heading">#</a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">algorithm</span></code> 部分负责配置智能体应用所使用的训练算法，其中的关键参数如下：</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">algorithm</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">algorithm_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">grpo</span>
-<span class="w">  </span><span class="nt">advantage_fn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">step_wise_grpo</span><span class="w"> </span><span class="c1"># 多步训练的关键，该策略告诉 Trinity 为智能体执行路径中的每一步创建独立的训练样本。`grpo` 算法随后使用这些样本来更新模型。</span>
+<span class="w">  </span><span class="nt">algorithm_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">multi_step_grpo</span><span class="w"> </span><span class="c1"># 指定多步 GRPO 训练算法</span>
 </pre></div>
 </div>
 </section>

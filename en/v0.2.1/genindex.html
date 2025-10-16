@@ -1192,14 +1192,14 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.ExplorerConfig.bench_on_latest_checkpoint">bench_on_latest_checkpoint (trinity.common.config.ExplorerConfig attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.explorer.html#trinity.explorer.Explorer.benchmark">benchmark() (trinity.explorer.Explorer method)</a>
 
       <ul>
         <li><a href="build_api/trinity.explorer.explorer.html#trinity.explorer.explorer.Explorer.benchmark">(trinity.explorer.explorer.Explorer method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.Optim.betas">betas (trinity.common.verl_config.Optim attribute)</a>
 </li>
       <li><a href="build_api/trinity.algorithm.advantage_fn.html#trinity.algorithm.advantage_fn.StepWiseGRPOAdvantageFn.broadcast_advantages">broadcast_advantages() (trinity.algorithm.advantage_fn.StepWiseGRPOAdvantageFn method)</a>
@@ -1208,8 +1208,6 @@ document.write(`
 
       <ul>
         <li><a href="build_api/trinity.common.config.html#trinity.common.config.StageConfig.buffer">(trinity.common.config.StageConfig attribute)</a>
-</li>
-        <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.veRLConfig.buffer">(trinity.common.verl_config.veRLConfig attribute)</a>
 </li>
       </ul></li>
       <li><a href="build_api/trinity.common.config.html#trinity.common.config.BufferConfig">BufferConfig (class in trinity.common.config)</a>
@@ -1310,6 +1308,8 @@ document.write(`
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.MIXAlgorithm.can_balance_batch">(trinity.algorithm.algorithm.MIXAlgorithm attribute)</a>
 </li>
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.MIXCHORDAlgorithm.can_balance_batch">(trinity.algorithm.algorithm.MIXCHORDAlgorithm attribute)</a>
+</li>
+        <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.MultiStepGRPOAlgorithm.can_balance_batch">(trinity.algorithm.algorithm.MultiStepGRPOAlgorithm attribute)</a>
 </li>
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.OPMDAlgorithm.can_balance_batch">(trinity.algorithm.algorithm.OPMDAlgorithm attribute)</a>
 </li>
@@ -1470,6 +1470,8 @@ document.write(`
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.MIXAlgorithm.compute_advantage_in_trainer">(trinity.algorithm.algorithm.MIXAlgorithm attribute)</a>
 </li>
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.MIXCHORDAlgorithm.compute_advantage_in_trainer">(trinity.algorithm.algorithm.MIXCHORDAlgorithm attribute)</a>
+</li>
+        <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.MultiStepGRPOAlgorithm.compute_advantage_in_trainer">(trinity.algorithm.algorithm.MultiStepGRPOAlgorithm attribute)</a>
 </li>
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.OPMDAlgorithm.compute_advantage_in_trainer">(trinity.algorithm.algorithm.OPMDAlgorithm attribute)</a>
 </li>
@@ -1786,6 +1788,8 @@ document.write(`
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.MIXAlgorithm.default_config">(trinity.algorithm.algorithm.MIXAlgorithm class method)</a>
 </li>
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.MIXCHORDAlgorithm.default_config">(trinity.algorithm.algorithm.MIXCHORDAlgorithm class method)</a>
+</li>
+        <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.MultiStepGRPOAlgorithm.default_config">(trinity.algorithm.algorithm.MultiStepGRPOAlgorithm class method)</a>
 </li>
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.OPMDAlgorithm.default_config">(trinity.algorithm.algorithm.OPMDAlgorithm class method)</a>
 </li>
@@ -3285,6 +3289,8 @@ document.write(`
       </ul></li>
       <li><a href="build_api/trinity.common.verl_config.html#trinity.common.verl_config.Rollout.multi_turn">multi_turn (trinity.common.verl_config.Rollout attribute)</a>
 </li>
+      <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.MultiStepGRPOAlgorithm">MultiStepGRPOAlgorithm (class in trinity.algorithm.algorithm)</a>
+</li>
       <li><a href="build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.workflow.MultiTurnWorkflow">MultiTurnWorkflow (class in trinity.common.workflows.workflow)</a>
 </li>
   </ul></td>
@@ -4232,6 +4238,8 @@ document.write(`
 </li>
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.MIXCHORDAlgorithm.schema">(trinity.algorithm.algorithm.MIXCHORDAlgorithm attribute)</a>
 </li>
+        <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.MultiStepGRPOAlgorithm.schema">(trinity.algorithm.algorithm.MultiStepGRPOAlgorithm attribute)</a>
+</li>
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.OPMDAlgorithm.schema">(trinity.algorithm.algorithm.OPMDAlgorithm attribute)</a>
 </li>
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.PPOAlgorithm.schema">(trinity.algorithm.algorithm.PPOAlgorithm attribute)</a>
@@ -4501,10 +4509,10 @@ document.write(`
 </li>
       <li><a href="build_api/trinity.manager.config_registry.model_config_manager.html#trinity.manager.config_registry.model_config_manager.set_max_model_len">set_max_model_len() (in module trinity.manager.config_registry.model_config_manager)</a>
 </li>
-      <li><a href="build_api/trinity.manager.config_registry.model_config_manager.html#trinity.manager.config_registry.model_config_manager.set_max_prompt_tokens">set_max_prompt_tokens() (in module trinity.manager.config_registry.model_config_manager)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="build_api/trinity.manager.config_registry.model_config_manager.html#trinity.manager.config_registry.model_config_manager.set_max_prompt_tokens">set_max_prompt_tokens() (in module trinity.manager.config_registry.model_config_manager)</a>
+</li>
       <li><a href="build_api/trinity.manager.config_registry.model_config_manager.html#trinity.manager.config_registry.model_config_manager.set_max_response_tokens">set_max_response_tokens() (in module trinity.manager.config_registry.model_config_manager)</a>
 </li>
       <li><a href="build_api/trinity.manager.config_registry.buffer_config_manager.html#trinity.manager.config_registry.buffer_config_manager.set_max_retry_interval">set_max_retry_interval() (in module trinity.manager.config_registry.buffer_config_manager)</a>
@@ -5966,6 +5974,8 @@ document.write(`
 </li>
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.MIXCHORDAlgorithm.use_critic">(trinity.algorithm.algorithm.MIXCHORDAlgorithm attribute)</a>
 </li>
+        <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.MultiStepGRPOAlgorithm.use_critic">(trinity.algorithm.algorithm.MultiStepGRPOAlgorithm attribute)</a>
+</li>
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.OPMDAlgorithm.use_critic">(trinity.algorithm.algorithm.OPMDAlgorithm attribute)</a>
 </li>
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.PPOAlgorithm.use_critic">(trinity.algorithm.algorithm.PPOAlgorithm attribute)</a>
@@ -6025,6 +6035,8 @@ document.write(`
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.MIXAlgorithm.use_reference">(trinity.algorithm.algorithm.MIXAlgorithm attribute)</a>
 </li>
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.MIXCHORDAlgorithm.use_reference">(trinity.algorithm.algorithm.MIXCHORDAlgorithm attribute)</a>
+</li>
+        <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.MultiStepGRPOAlgorithm.use_reference">(trinity.algorithm.algorithm.MultiStepGRPOAlgorithm attribute)</a>
 </li>
         <li><a href="build_api/trinity.algorithm.algorithm.html#trinity.algorithm.algorithm.OPMDAlgorithm.use_reference">(trinity.algorithm.algorithm.OPMDAlgorithm attribute)</a>
 </li>

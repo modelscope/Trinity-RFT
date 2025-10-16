@@ -77,7 +77,7 @@ and include it in the init file `trinity/common/workflows/__init__.py`
 
 In general multi-step scenarios, each run may generate various number of experiences. To accomodate this case, we provide some flexible designs.
 
-- `algorithm.advantage_fn = step_wise_grpo`: This function allows you compute the advantages for the collected experience before adding to the buffer. For this example, we use `step_wise_grpo` which broadcasts advantages from the last step to previous steps.
+- `algorithm.algorithm_type = multi_step_grpo`: This algorithm allows you to have multiple steps in each run and generate multiple experiences for training, and it broadcasts the advantages value of the last step experience to the previous experiences.
 
 - `buffer.train_batch_size`: The number of experiences to be sampled from the buffer for training, which can be different from the number of generated experiences in each explore step.
 
@@ -93,9 +93,8 @@ project: "ALFWORLD"
 name: "Step_Wise_Alfworld"
 checkpoint_root_dir: ${oc.env:TRINITY_CHECKPOINT_ROOT_DIR,./checkpoints}
 algorithm:
-  algorithm_type: grpo
+  algorithm_type: multi_step_grpo
   repeat_times: 16
-  advantage_fn: step_wise_grpo
 model:
   model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-7B-Instruct}
   max_response_tokens: 16384
