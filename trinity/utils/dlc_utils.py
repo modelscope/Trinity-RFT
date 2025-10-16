@@ -2,6 +2,7 @@ import os
 import subprocess
 import sys
 import time
+from typing import Dict
 
 import ray
 
@@ -64,20 +65,23 @@ def wait_for_ray_worker_nodes(world_size: int) -> None:
             time.sleep(1)
 
 
-def setup_ray_cluster(namespace: str) -> str:
+def setup_ray_cluster(namespace: str) -> Dict:
     """Setup a ray cluster in DLC environment.
 
     This function will start a ray cluster if it is not running, otherwise it will reuse the existing ray cluster.
 
     Returns:
-        str: The address of the ray cluster.
+        Dict:
+            - ray_address: The address of the ray cluster.
+            - node_num (Optional): The world size of the ray cluster.
+            - gpu_per_node (Optional): The number of GPUs per node.
     """
     env_vars = get_dlc_env_vars()
     is_master = env_vars["RANK"] == 0
 
     if is_running():
         # reuse existing ray cluster
-        return "auto"
+        return {"ray_address": "auto"}
     else:
         if is_master:
             cmd = f"ray start --head --port={env_vars['MASTER_PORT']} --node-ip-address={env_vars['MASTER_ADDR']}"
@@ -98,11 +102,28 @@ def setup_ray_cluster(namespace: str) -> str:
             namespace=namespace,
             ignore_reinit_error=True,
         )
+
+        # get gpu_per_node from enviroment variables
+        gpu_per_node = None
+        if "PAI_GPU_COUNT" in os.environ:
+            try:
+                gpu_per_node = int(os.environ["PAI_GPU_COUNT"])
+            except ValueError:
+                logger.warning("Could not parse PAI_GPU_COUNT as an integer.")
+        elif "CUDA_VISIBLE_DEVICES" in os.environ:
+            visible_devices = os.environ["CUDA_VISIBLE_DEVICES"]
+            if visible_devices:
+                gpu_per_node = len(visible_devices.split(","))
+
         if is_master:
             # master wait for worker nodes to join
             wait_for_ray_worker_nodes(env_vars["WORLD_SIZE"])
             ray.shutdown()
-            return f"{env_vars['MASTER_ADDR']}:{env_vars['MASTER_PORT']}"
+            return {
+                "ray_address": f"{env_vars['MASTER_ADDR']}:{env_vars['MASTER_PORT']}",
+                "node_num": env_vars["WORLD_SIZE"],
+                "gpu_per_node": gpu_per_node,
+            }
         else:
             # worker wait on the cluster status actor
             cluster_status = (

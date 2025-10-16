@@ -614,6 +614,7 @@ class Config:
             )
 
     def _update_config_from_ray_cluster(self) -> None:
+        """Update config if `node_num` or `gpu_per_node` are not set."""
         if self.cluster.node_num is not None and self.cluster.gpu_per_node is not None:
             return
 

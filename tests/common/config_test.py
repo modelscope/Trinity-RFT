@@ -82,6 +82,15 @@ class TestConfig(unittest.TestCase):
             self.assertIsInstance(key, str)
             self.assertNotIsInstance(value, dict)
 
+    def test_update_config_from_ray_cluster(self):
+        config = get_template_config()
+        config.cluster.node_num = None
+        config.cluster.gpu_per_node = None
+
+        config._update_config_from_ray_cluster()
+        self.assertTrue(config.cluster.node_num > 0)
+        self.assertTrue(config.cluster.gpu_per_node > 0)
+
     def tearDown(self):
         if os.path.exists(CHECKPOINT_ROOT_DIR):
             shutil.rmtree(CHECKPOINT_ROOT_DIR)
