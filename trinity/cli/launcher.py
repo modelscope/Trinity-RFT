@@ -170,12 +170,7 @@ def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
 
     if dlc:
         cluster_namespace = f"{config.project}-{config.name}"
-        cluster_information = setup_ray_cluster(namespace=cluster_namespace)
-        config.cluster.ray_address = cluster_information.get("ray_address", "auto")
-        if config.cluster.node_num is None:
-            config.cluster.node_num = cluster_information.get("node_num")
-        if config.cluster.gpu_per_node is None:
-            config.cluster.gpu_per_node = cluster_information.get("gpu_per_node")
+        config.cluster.ray_address = setup_ray_cluster(namespace=cluster_namespace)
 
     if not is_running():
         raise RuntimeError("Ray is not running, please start it by `ray start --head`.")

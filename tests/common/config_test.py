@@ -88,8 +88,8 @@ class TestConfig(unittest.TestCase):
         config.cluster.gpu_per_node = None
 
         config._update_config_from_ray_cluster()
-        self.assertTrue(config.cluster.node_num > 0)
-        self.assertTrue(config.cluster.gpu_per_node > 0)
+        self.assertEqual(config.cluster.node_num, 2)
+        self.assertEqual(config.cluster.gpu_per_node, 2)
 
     def tearDown(self):
         if os.path.exists(CHECKPOINT_ROOT_DIR):

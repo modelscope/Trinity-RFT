@@ -619,12 +619,13 @@ class Config:
             return
 
         # init ray cluster to detect node_num and gpu_per_node
-        ray.init(
-            address=self.cluster.ray_address,
-            ignore_reinit_error=True,
-            namespace=self.ray_namespace,
-            runtime_env={"env_vars": self.get_envs()},
-        )
+        was_initialized = ray.is_initialized()
+        if not was_initialized:
+            ray.init(
+                address=self.cluster.ray_address,
+                ignore_reinit_error=True,
+                namespace=self.ray_namespace,
+            )
 
         alive_nodes = [n for n in ray.nodes() if n["alive"]]
         if not alive_nodes:
@@ -647,7 +648,8 @@ class Config:
             self.cluster.gpu_per_node = gpu_per_node
             logger.info(f"Auto-detected and set gpu_per_node: {self.cluster.gpu_per_node}")
 
-        ray.shutdown()
+        if not was_initialized:
+            ray.shutdown()
 
     def _check_interval(self) -> None:
         assert self.synchronizer.sync_interval > 0
