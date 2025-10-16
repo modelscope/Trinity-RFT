@@ -131,7 +131,7 @@ class TestExplorerGSM8k(BaseExplorerCase):
 
 def run_serve(config):
     config.check_and_update()
-    run_stage(config, "auto")
+    run_stage(config)
 
 
 def run_agent(base_url, model_path: str):
