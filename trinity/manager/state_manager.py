@@ -49,13 +49,13 @@ class StateManager:
     def save_explorer(
         self,
         current_task_index: int,
-        current_step: int,
+        taskset_state: dict,
     ) -> None:
         with open(self.explorer_state_path, "w", encoding="utf-8") as f:
             json.dump(
                 {
                     "latest_task_index": current_task_index,
-                    "latest_iteration": current_step,
+                    "taskset_state": taskset_state,
                 },
                 f,
                 indent=2,

@@ -3,7 +3,7 @@
 from typing import List, Optional
 
 import datasets
-from datasets import Dataset, load_dataset
+from datasets import Dataset, IterableDataset, load_dataset
 
 from trinity.buffer.buffer_reader import BufferReader
 from trinity.buffer.schema.formatter import FORMATTER
@@ -32,18 +32,24 @@ class _HFBatchReader:
         drop_last: bool = True,
         total_steps: Optional[int] = None,
         enable_progress_bar: Optional[bool] = True,
+        shuffle: bool = False,
+        base_seed: Optional[int] = 42,
     ):
-        self.dataset = dataset
         self.dataset_size = len(dataset)
         self.name = name
         self.current_batch_size = None
         self.drop_last = drop_last
+        self.shuffle = shuffle
+        self.base_seed = base_seed
 
         self.current_offset = offset
-        self.iter = iter(self.dataset)
-
-        for _ in range(self.current_offset % self.dataset_size):
-            next(self.iter)
+        if self.shuffle:
+            assert not isinstance(
+                dataset, IterableDataset
+            ), "Shuffle is not supported for IterableDataset"
+            self.dataset = dataset.shuffle(seed=self.current_seed)
+        else:
+            self.dataset = dataset
 
         # convert epochs/steps to sample number
         if total_steps:
@@ -63,6 +69,9 @@ class _HFBatchReader:
 
         self.progress_bar.update(self.current_offset)
 
+    def current_seed(self):
+        return self.base_seed + self.current_offset // self.dataset_size
+
     def read_batch(self, batch_size: int) -> List:
         if self.current_offset >= self.total_samples:
             self.progress_bar.close()
@@ -70,22 +79,19 @@ class _HFBatchReader:
         batch = []
 
         while len(batch) < batch_size:
-            try:
-                item = next(self.iter)
-                batch.append(item)
-                self.current_offset += 1
-            except StopIteration:
-                if self.current_offset >= self.total_samples:
-                    # No more data to read
-                    if not self.drop_last and len(batch) > 0:
-                        # return last batch
-                        self.progress_bar.update(len(batch))
-                        return batch
-                    else:
-                        self.progress_bar.close()
-                        raise StopIteration
-                # Step to the next epoch
-                self.iter = iter(self.dataset)
+            batch.append(self.dataset[self.current_offset % self.dataset_size])
+            self.current_offset += 1
+            if self.shuffle and self.current_offset % self.dataset_size == 0:
+                self.dataset = self.dataset.shuffle(seed=self.current_seed)
+            if self.current_offset >= self.total_samples:
+                # No more data to read
+                if not self.drop_last and len(batch) > 0:
+                    # return last batch
+                    self.progress_bar.update(len(batch))
+                    return batch
+                else:
+                    self.progress_bar.close()
+                    raise StopIteration
         self.progress_bar.update(batch_size)
         return batch
 
@@ -144,8 +150,14 @@ class TaskFileReader(BaseFileReader):
             drop_last=not self.meta.is_eval,
             total_steps=meta.total_steps,
             enable_progress_bar=meta.enable_progress_bar,
+            shuffle=meta.shuffle,
+            base_seed=meta.seed,
         )
         self.formatter = FORMATTER.get("task")(meta)
+
+    @property
+    def index(self) -> int:
+        return self.dataset.current_offset
 
     def read(self, batch_size: Optional[int] = None) -> List:
         batch_size = batch_size or self.read_batch_size

@@ -15,6 +15,7 @@ from ray.util.scheduling_strategies import NodeAffinitySchedulingStrategy
 
 from trinity.buffer.buffer import get_buffer_reader
 from trinity.buffer.pipelines.experience_pipeline import ExperiencePipeline
+from trinity.buffer.task_scheduler import TasksetScheduler
 from trinity.common.config import Config
 from trinity.common.constants import (
     ROLLOUT_WEIGHT_SYNC_GROUP_NAME,
@@ -49,12 +50,7 @@ class Explorer:
         self.config = config
         self.models, self.auxiliary_models = create_inference_models(config)
         self.experience_pipeline = self._init_experience_pipeline()
-        self.config.buffer.explorer_input.taskset.index = explorer_state.get("latest_task_index", 0)
-        self.taskset = (
-            get_buffer_reader(self.config.buffer.explorer_input.taskset, self.config.buffer)
-            if self.config.mode != "serve"
-            else None
-        )
+        self.taskset = TasksetScheduler(explorer_state, config)
         self.scheduler = None
         self.monitor = MONITOR.get(self.config.monitor.monitor_type)(
             project=self.config.project,
@@ -324,7 +320,7 @@ class Explorer:
         # save explore checkpoint
         self.state.save_explorer(
             current_step=self.explore_step_num,
-            current_task_index=self.explore_step_num * self.config.buffer.batch_size,
+            taskset_state=self.taskset.save_state(),
         )
 
     async def sync_weight(self) -> None:
@@ -335,10 +331,13 @@ class Explorer:
     async def _finish_steps(self, start_step: int, end_step: int, model_version: int) -> None:
         for step in range(start_step, end_step + 1):
             self.logger.info(f"Log metrics of step {step}")
-            await self._finish_explore_step(step=step, model_version=model_version)
-            await self._finish_eval_step(step=step)
+            explore_metric, exps = await self._finish_explore_step(
+                step=step, model_version=model_version
+            )
+            eval_metric = await self._finish_eval_step(step=step)
+            self.taskset.update(exps, explore_metric, eval_metric)
 
-    async def _finish_explore_step(self, step: int, model_version: int) -> None:
+    async def _finish_explore_step(self, step: int, model_version: int):
         statuses, exps = await self.scheduler.get_results(batch_id=step)
         metric = {"rollout/model_version": model_version}
         pipeline_metrics = await self.experience_pipeline.process.remote(exps)
@@ -346,8 +345,9 @@ class Explorer:
         if statuses:
             metric.update(gather_metrics([status.metric for status in statuses], "rollout"))
             self.monitor.log(metric, step=step)
+        return metric, exps
 
-    async def _finish_eval_step(self, step: Optional[int] = None, prefix: str = "eval") -> None:
+    async def _finish_eval_step(self, step: Optional[int] = None, prefix: str = "eval"):
         if not self.pending_eval_tasks:
             return
         step = step or self.explore_step_num
@@ -366,6 +366,7 @@ class Explorer:
             )
         metric[f"{prefix}/total_time"] = time.time() - st
         self.monitor.log(metric, step)
+        return metric
 
     async def shutdown(self) -> None:
         if self.scheduler:
