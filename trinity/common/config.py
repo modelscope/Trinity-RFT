@@ -9,6 +9,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
+import ray
 from omegaconf import OmegaConf
 
 from trinity.common.constants import (
@@ -360,8 +361,9 @@ class AlgorithmConfig:
 class ClusterConfig:
     """Config for the cluster."""
 
-    node_num: int = 1
-    gpu_per_node: int = 8
+    ray_address: str = "auto"
+    node_num: Optional[int] = None
+    gpu_per_node: Optional[int] = None
 
 
 @Experimental
@@ -610,6 +612,41 @@ class Config:
             logger.warning(
                 "`explorer.runner_num` is deprecated, please use `explorer.runner_per_model` instead."
             )
+
+    def _update_config_from_ray_cluster(self) -> None:
+        if self.cluster.node_num is not None and self.cluster.gpu_per_node is not None:
+            return
+
+        # init ray cluster to detect node_num and gpu_per_node
+        ray.init(
+            address=self.cluster.ray_address,
+            ignore_reinit_error=True,
+            namespace=self.ray_namespace,
+            runtime_env={"env_vars": self.get_envs()},
+        )
+
+        alive_nodes = [n for n in ray.nodes() if n["alive"]]
+        if not alive_nodes:
+            raise RuntimeError("Could not find any alive nodes in the Ray cluster.")
+
+        # set node_num
+        if self.cluster.node_num is None:
+            self.cluster.node_num = len(alive_nodes)
+            logger.info(f"Auto-detected and set node_num: {self.cluster.node_num}")
+
+        # set gpu_per_node
+        if self.cluster.gpu_per_node is None:
+            gpu_per_node = 0
+            for node in alive_nodes:
+                node_gpus = node.get("Resources", {}).get("GPU")
+                if node_gpus and node_gpus > 0:
+                    gpu_per_node = int(node_gpus)
+                    break
+
+            self.cluster.gpu_per_node = gpu_per_node
+            logger.info(f"Auto-detected and set gpu_per_node: {self.cluster.gpu_per_node}")
+
+        ray.shutdown()
 
     def _check_interval(self) -> None:
         assert self.synchronizer.sync_interval > 0
@@ -900,6 +937,9 @@ class Config:
         # set namespace
         if self.ray_namespace is None or len(self.ray_namespace) == 0:
             self.ray_namespace = f"{self.project}/{self.name}"
+
+        # check cluster infomation
+        self._update_config_from_ray_cluster()
 
         # check algorithm
         self._check_algorithm()

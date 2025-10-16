@@ -358,6 +358,8 @@ class veRLConfig:
         else:
             rollout_gpu_num = 0
 
+        assert config.cluster.node_num is not None
+        assert config.cluster.gpu_per_node is not None
         if config.cluster.node_num == 1:
             # for single node scenarios, rollout and training are on the same node
             self.trainer.nnodes = config.cluster.node_num
