@@ -864,6 +864,8 @@ document.write(`
         <span class="k">else</span><span class="p">:</span>
             <span class="n">rollout_gpu_num</span> <span class="o">=</span> <span class="mi">0</span>
 
+        <span class="k">assert</span> <span class="n">config</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">node_num</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">assert</span> <span class="n">config</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">gpu_per_node</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">node_num</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="c1"># for single node scenarios, rollout and training are on the same node</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">nnodes</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">node_num</span>
