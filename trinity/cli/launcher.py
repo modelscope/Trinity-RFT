@@ -171,7 +171,7 @@ def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
     if dlc:
         cluster_namespace = f"{config.project}-{config.name}"
         cluster_information = setup_ray_cluster(namespace=cluster_namespace)
-        config.cluster.ray_address = cluster_information["ray_address"]
+        config.cluster.ray_address = cluster_information.get("ray_address", "auto")
         if config.cluster.node_num is None:
             config.cluster.node_num = cluster_information.get("node_num")
         if config.cluster.gpu_per_node is None:

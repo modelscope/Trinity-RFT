@@ -103,17 +103,14 @@ def setup_ray_cluster(namespace: str) -> Dict:
             ignore_reinit_error=True,
         )
 
-        # get gpu_per_node from enviroment variables
+        # get gpu_per_node from ray cluster
         gpu_per_node = None
-        if "PAI_GPU_COUNT" in os.environ:
-            try:
-                gpu_per_node = int(os.environ["PAI_GPU_COUNT"])
-            except ValueError:
-                logger.warning("Could not parse PAI_GPU_COUNT as an integer.")
-        elif "CUDA_VISIBLE_DEVICES" in os.environ:
-            visible_devices = os.environ["CUDA_VISIBLE_DEVICES"]
-            if visible_devices:
-                gpu_per_node = len(visible_devices.split(","))
+        alive_nodes = [n for n in ray.nodes() if n["alive"]]
+        for node in alive_nodes:
+            node_gpus = node.get("Resources", {}).get("GPU")
+            if node_gpus and node_gpus > 0:
+                gpu_per_node = int(node_gpus)
+                break
 
         if is_master:
             # master wait for worker nodes to join
