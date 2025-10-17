@@ -15,6 +15,7 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
+   trinity.common.workflows.agentscope_workflow
    trinity.common.workflows.customized_math_workflows
    trinity.common.workflows.customized_toolcall_workflows
    trinity.common.workflows.eval_workflow
