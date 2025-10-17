@@ -7,7 +7,7 @@ algorithm:
   algorithm_type: grpo
   repeat_times: 8
   optimizer:
-    lr: 1.0e-05
+    lr: 1e-5
     lr_warmup_steps_ratio: 0.0
     warmup_style: constant
   sample_strategy: warmup

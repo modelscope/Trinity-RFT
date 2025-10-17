@@ -137,7 +137,7 @@ trainer:
     critic:
       strategy: fsdp
       optim:
-        lr: 1.0e-05
+        lr: 1e-5
         lr_warmup_steps_ratio: 0.0
         warmup_style: constant
       model:

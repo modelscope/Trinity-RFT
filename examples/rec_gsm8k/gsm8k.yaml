@@ -10,7 +10,7 @@ model:
 algorithm:
   algorithm_type: rec
   repeat_times: 8
-  optiimzer:
+  optimizer:
     lr: 1e-6
   policy_loss_fn_args:
     epsilon_low: 0.2
