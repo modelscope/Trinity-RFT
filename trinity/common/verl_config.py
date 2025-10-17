@@ -132,12 +132,12 @@ class Actor:
     ppo_mini_batch_size: int = 256
     ppo_micro_batch_size: Optional[int] = None
     ppo_micro_batch_size_per_gpu: int = 1
-    use_dynamic_bsz: bool = True
-    ppo_max_token_len_per_gpu: int = 16384
-    grad_clip: float = 1.0
+    use_dynamic_bsz: Optional[bool] = None
+    ppo_max_token_len_per_gpu: Optional[int] = None
+    grad_clip: Optional[float] = None
     ppo_epochs: int = 1
     shuffle: bool = False
-    ulysses_sequence_parallel_size: int = 1
+    ulysses_sequence_parallel_size: Optional[int] = None
     entropy_from_logits_with_chunking: bool = False
     entropy_checkpointing: bool = False
     checkpoint: Checkpoint = field(default_factory=Checkpoint)
@@ -163,9 +163,9 @@ class Ref:
     fsdp_config: FSDPConfig = field(default_factory=FSDPConfig)
     log_prob_micro_batch_size: Optional[int] = None
     log_prob_micro_batch_size_per_gpu: int = 1
-    log_prob_use_dynamic_bsz: bool = True
-    log_prob_max_token_len_per_gpu: int = 0
-    ulysses_sequence_parallel_size: int = 1
+    log_prob_use_dynamic_bsz: Optional[bool] = None
+    log_prob_max_token_len_per_gpu: Optional[int] = None
+    ulysses_sequence_parallel_size: Optional[int] = None
     entropy_from_logits_with_chunking: bool = False
     entropy_checkpointing: bool = False
     checkpoint: Checkpoint = field(
@@ -231,13 +231,13 @@ class Critic:
     ppo_micro_batch_size_per_gpu: int = 1
     forward_micro_batch_size: Optional[int] = None
     forward_micro_batch_size_per_gpu: Optional[int] = None
-    use_dynamic_bsz: bool = True
-    ppo_max_token_len_per_gpu: int = 0
+    use_dynamic_bsz: Optional[bool] = None
+    ppo_max_token_len_per_gpu: Optional[int] = None
     forward_max_token_len_per_gpu: int = 0
-    ulysses_sequence_parallel_size: int = 1
+    ulysses_sequence_parallel_size: Optional[int] = None
     ppo_epochs: int = 0
     shuffle: bool = False
-    grad_clip: float = 0.0
+    grad_clip: Optional[float] = None
     cliprange_value: float = 0.0
     checkpoint: Checkpoint = field(default_factory=Checkpoint)
     rollout_n: int = 1
@@ -404,22 +404,27 @@ class veRLConfig:
         self.actor_rollout_ref.explorer_name = config.explorer.name
         self.critic.ray_namespace = config.synchronizer.ray_namespace
 
-        # Actor / Critic / Ref config
+        # Actor / Rollout Config
         self.actor_rollout_ref.model.path = config.model.model_path
         self.actor_rollout_ref.model.custom_chat_template = config.model.custom_chat_template
         self.actor_rollout_ref.actor.optim.total_training_steps = self.trainer.total_training_steps
-        self.critic.strategy = self.actor_rollout_ref.actor.strategy
-        self.critic.model.path = config.model.critic_model_path
-        self.critic.model.tokenizer_path = config.model.critic_model_path
         self.actor_rollout_ref.actor.ppo_mini_batch_size = config.buffer.train_batch_size
         self.actor_rollout_ref.rollout.temperature = (
             config.buffer.explorer_input.taskset.rollout_args.temperature
         )
         self.actor_rollout_ref.rollout.n = config.algorithm.repeat_times
-        self.critic.ppo_mini_batch_size = config.buffer.train_batch_size
-        self.critic.rollout_n = self.actor_rollout_ref.rollout.n
-        self.critic.optim.total_training_steps = self.trainer.total_training_steps
-
+        if self.actor_rollout_ref.actor.grad_clip is None:
+            self.actor_rollout_ref.actor.grad_clip = config.trainer.grad_clip
+        if self.actor_rollout_ref.actor.use_dynamic_bsz is None:
+            self.actor_rollout_ref.actor.use_dynamic_bsz = config.trainer.use_dynamic_bsz
+        if self.actor_rollout_ref.actor.ppo_max_token_len_per_gpu is None:
+            self.actor_rollout_ref.actor.ppo_max_token_len_per_gpu = (
+                config.trainer.ppo_max_token_len_per_gpu
+            )
+        if self.actor_rollout_ref.actor.ulysses_sequence_parallel_size is None:
+            self.actor_rollout_ref.actor.ulysses_sequence_parallel_size = (
+                config.trainer.ulysses_sequence_parallel_size
+            )
         if (
             self.actor_rollout_ref.actor.ppo_max_token_len_per_gpu  # type: ignore [operator]
             * self.actor_rollout_ref.actor.ulysses_sequence_parallel_size
@@ -432,6 +437,36 @@ class veRLConfig:
             logger.warning(
                 f"Warning: actor.ppo_max_token_len_per_gpu is automatically set to {self.actor_rollout_ref.actor.ppo_max_token_len_per_gpu} to match model.max_model_len ({config.model.max_model_len})"
             )
+
+        # Ref Config
+        if self.actor_rollout_ref.ref.log_prob_use_dynamic_bsz is None:
+            self.actor_rollout_ref.ref.log_prob_use_dynamic_bsz = config.trainer.use_dynamic_bsz
+        if self.actor_rollout_ref.ref.log_prob_max_token_len_per_gpu is None:
+            self.actor_rollout_ref.ref.log_prob_max_token_len_per_gpu = (
+                config.trainer.ppo_max_token_len_per_gpu
+            )
+        if self.actor_rollout_ref.ref.ulysses_sequence_parallel_size is None:
+            self.actor_rollout_ref.ref.ulysses_sequence_parallel_size = (
+                config.trainer.ulysses_sequence_parallel_size
+            )
+
+        # Critic config
+        self.critic.strategy = self.actor_rollout_ref.actor.strategy
+        self.critic.model.path = config.model.critic_model_path
+        self.critic.model.tokenizer_path = config.model.critic_model_path
+        self.critic.ppo_mini_batch_size = config.buffer.train_batch_size
+        self.critic.rollout_n = self.actor_rollout_ref.rollout.n
+        self.critic.optim.total_training_steps = self.trainer.total_training_steps
+        if self.critic.grad_clip is None:
+            self.critic.grad_clip = config.trainer.grad_clip
+        if self.critic.use_dynamic_bsz is None:
+            self.critic.use_dynamic_bsz = config.trainer.use_dynamic_bsz
+        if self.critic.ppo_max_token_len_per_gpu is None:
+            self.critic.ppo_max_token_len_per_gpu = config.trainer.ppo_max_token_len_per_gpu
+        if self.critic.ulysses_sequence_parallel_size is None:
+            self.critic.ulysses_sequence_parallel_size = (
+                config.trainer.ulysses_sequence_parallel_size
+            )
         if (
             self.critic.ppo_max_token_len_per_gpu * self.critic.ulysses_sequence_parallel_size  # type: ignore [operator]
             < config.model.max_model_len
@@ -442,18 +477,6 @@ class veRLConfig:
             logger.warning(
                 f"Warning: critic.ppo_max_token_len_per_gpu is automatically set to {self.critic.ppo_max_token_len_per_gpu} to match model.max_model_len ({config.model.max_model_len})"
             )
-        if config.trainer.actor_grad_clip is not None:
-            self.actor_rollout_ref.actor.grad_clip = config.trainer.actor_grad_clip
-
-        self.actor_rollout_ref.ref.log_prob_use_dynamic_bsz = (
-            self.actor_rollout_ref.actor.use_dynamic_bsz
-        )
-        self.actor_rollout_ref.ref.log_prob_max_token_len_per_gpu = (
-            self.actor_rollout_ref.actor.ppo_max_token_len_per_gpu
-        )
-        self.actor_rollout_ref.ref.ulysses_sequence_parallel_size = (
-            self.actor_rollout_ref.actor.ulysses_sequence_parallel_size
-        )
 
         # LoRA related config
         if config.model.lora_configs is not None:
@@ -474,8 +497,8 @@ class veRLConfig:
                 self.critic.strategy = "fsdp"
 
         # Algorithm related config
-        for field_name in config.algorithm.optimizer_config.__dataclass_fields__:
-            field_value = getattr(config.algorithm.optimizer_config, field_name)
+        for field_name in config.algorithm.optimizer.__dataclass_fields__:
+            field_value = getattr(config.algorithm.optimizer, field_name)
             if hasattr(self.actor_rollout_ref.actor.optim, field_name):
                 setattr(self.actor_rollout_ref.actor.optim, field_name, field_value)
         self.actor_rollout_ref.actor.use_kl_loss = config.algorithm.kl_loss_fn != "none"
@@ -493,7 +516,6 @@ class veRLConfig:
                 self.actor_rollout_ref.rollout.n = 2
 
         # check rollout config (only works for lora)
-        self.actor_rollout_ref.rollout.n = config.algorithm.repeat_times
         self.actor_rollout_ref.rollout.log_prob_use_dynamic_bsz = (
             self.actor_rollout_ref.actor.use_dynamic_bsz
         )
