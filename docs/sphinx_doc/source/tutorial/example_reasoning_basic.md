@@ -55,6 +55,8 @@ checkpoint_root_dir: ${oc.env:TRINITY_CHECKPOINT_ROOT_DIR,./checkpoints}
 algorithm:
   algorithm_type: grpo
   repeat_times: 8
+  optimizer:
+    lr: 1e-5
 model:
   model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-1.5B-Instruct}
 cluster:
@@ -100,11 +102,6 @@ synchronizer:
   sync_interval: 1
 trainer:
   save_interval: 100
-  trainer_config:
-    actor_rollout_ref:
-      actor:
-        optim:
-          lr: 1e-5
 ```
 
 
