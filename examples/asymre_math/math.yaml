@@ -10,15 +10,16 @@ model:
   max_model_len: 1280
 algorithm:
   algorithm_type: asymre
+  repeat_times: 8
+  optimizer:
+    lr: 6e-8
   policy_loss_fn_args:
     tau: 0
   advantage_fn_args:
     baseline_shift: -0.1  # Baseline shift for the AsymRE
-  repeat_times: 8
 cluster:
   node_num: 1
   gpu_per_node: 8
-
 buffer:
   total_steps: 2000    # Exactly 2000 training steps as desired
   batch_size: 16       # 128 trajectories per gradient step, batch_size is the number of tasks per batch
@@ -70,17 +71,7 @@ synchronizer:
   sync_timeout: 3600  # Increased from 2000 to 3600 seconds (1 hour)
 trainer:
   save_interval: 100
-  trainer_config:
-    actor_rollout_ref:
-      model:
-        use_remove_padding: true
-      actor:
-        use_dynamic_bsz: true
-        ppo_max_token_len_per_gpu: 16384
-        ulysses_sequence_parallel_size: 1
-        optim:
-          lr: 6e-8
-      ref:
-        log_prob_use_dynamic_bsz: ${trainer.trainer_config.actor_rollout_ref.actor.use_dynamic_bsz}
-        log_prob_max_token_len_per_gpu: ${trainer.trainer_config.actor_rollout_ref.actor.ppo_max_token_len_per_gpu}
-        ulysses_sequence_parallel_size: ${trainer.trainer_config.actor_rollout_ref.actor.ulysses_sequence_parallel_size} # sp size
+  grad_clip: 1.0
+  use_dynamic_bsz: true
+  ppo_max_token_len_per_gpu: 16384
+  ulysses_sequence_parallel_size: 1

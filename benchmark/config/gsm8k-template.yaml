@@ -6,6 +6,10 @@ checkpoint_root_dir: placeholder
 algorithm:
   algorithm_type: grpo
   repeat_times: 8
+  optimizer:
+    lr: 1.0e-05
+    lr_warmup_steps_ratio: 0.0
+    warmup_style: constant
   sample_strategy: warmup
   policy_loss_fn: ppo
   advantage_fn: grpo
@@ -101,11 +105,6 @@ trainer:
           - model
           - optimizer
           - extra
-        optim:
-          lr: 1.0e-05
-          lr_warmup_steps_ratio: 0.0
-          warmup_style: constant
-          total_training_steps: -1
         fsdp_config:
           wrap_policy:
             min_num_params: 0

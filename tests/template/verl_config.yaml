@@ -19,12 +19,6 @@ actor_rollout_ref:
     checkpoint:
       load_contents: ['model', 'optimizer', 'extra']  # with 'hf_model' you can save whole model as hf format, now only use sharded model checkpoint to save space
       save_contents: ['model', 'optimizer', 'extra']
-    optim:
-      lr: 1e-6
-      lr_warmup_steps_ratio: 0.  # the total steps will be injected during runtime
-      # min_lr_ratio: null   # only useful for warmup with cosine
-      warmup_style: constant  # select from constant/cosine
-      total_training_steps: -1  # must be override by program
     fsdp_config:
       wrap_policy:
         # transformer_layer_cls_to_wrap: None
