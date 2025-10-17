@@ -98,7 +98,7 @@ def prepare_configs(args, rank, current_time):
             config["buffer"]["explorer_input"]["taskset"]["path"] is not None
         ), "Please specify taskset path."
         if args.lr:
-            config["algorithm"]["optimizer_config"]["lr"] = args.lr
+            config["algorithm"]["optimizer"]["lr"] = args.lr
         if args.sync_interval:
             config["synchronizer"]["sync_interval"] = args.sync_interval
 

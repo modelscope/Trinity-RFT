@@ -554,7 +554,7 @@ class ConfigManager:
             "warmup_style": st.session_state["actor_warmup_style"],
             "total_training_steps": (st.session_state["total_training_steps"] or -1),
         }
-        algorithm_config["optimizer_config"] = optimizer_config
+        algorithm_config["optimizer"] = optimizer_config
         return algorithm_config
 
     def _gen_buffer_config(self):

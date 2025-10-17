@@ -7,8 +7,7 @@ algorithm:
   repeat_times: 1
   optimizer:
     lr: 1e-6
-    lr_warmup_steps_ratio: 0.  # the total steps will be injected during runtime
-    # min_lr_ratio: null   # only useful for warmup with cosine
+    lr_warmup_steps_ratio: 0.
     warmup_style: constant  # select from constant/cosine
   policy_loss_fn: ppo
   policy_loss_fn_args:

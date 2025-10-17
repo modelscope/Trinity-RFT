@@ -1102,9 +1102,7 @@ class Config:
                 else:
                     from trinity.common.verl_config import veRLConfig
 
-                    logger.warning(
-                        "Neither `trainer_config` nor `trainer_config_path` is provided."
-                    )
+                    logger.info("Neither `trainer_config` nor `trainer_config_path` is provided.")
                     self.trainer.trainer_config = veRLConfig()
             else:
                 raise ValueError(f"Invalid trainer type: {self.trainer_type}")

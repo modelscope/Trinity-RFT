@@ -81,6 +81,8 @@ trainer:
   ulysses_sequence_parallel_size: 1
   trainer_config:
     actor_rollout_ref:
+      model:
+        use_remove_padding: false
       actor:
         ppo_micro_batch_size_per_gpu: 2
       ref:

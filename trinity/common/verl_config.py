@@ -43,6 +43,8 @@ class ActorModel:
 
 @dataclass
 class Optim:
+    # For actor, most fields are set in algorithm.optimizer
+    # For critic, you can set trainer_config.critic.optim
     lr: float = 1e-6
     lr_warmup_steps: int = -1
     lr_warmup_steps_ratio: float = 0.0
@@ -303,7 +305,9 @@ class Algorithm:
 class Trainer:
     balance_batch: bool = True
     total_epochs: int = 30
-    total_training_steps: Optional[int] = None  # ! DO NOT SET, use trainer.total_steps
+    total_training_steps: Optional[int] = (
+        None  # ! DO NOT SET, use trainer.total_steps in global_config
+    )
     project_name: str = ""
     group_name: str = ""
     experiment_name: str = ""

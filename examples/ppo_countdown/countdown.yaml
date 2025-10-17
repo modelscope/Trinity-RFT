@@ -5,7 +5,7 @@ algorithm:
   algorithm_type: ppo
   repeat_times: 5
   optimizer:
-    lr: 1e-5
+    lr: 1e-6
 model:
   model_path: ${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-1.5B-Instruct}
   max_response_tokens: 1024
@@ -64,6 +64,7 @@ trainer:
       optim:
         lr: 1e-5
       ppo_max_token_len_per_gpu: 32768  # (${actor_rollout_ref.actor.ppo_max_token_len_per_gpu}) * 2
+      forward_max_token_len_per_gpu: ${trainer.trainer_config.critic.ppo_max_token_len_per_gpu}
       cliprange_value: 0.5
     trainer:
       max_actor_ckpt_to_keep: 5
