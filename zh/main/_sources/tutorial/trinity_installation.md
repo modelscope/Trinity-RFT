@@ -65,14 +65,14 @@ uv sync --extra dev --extra flash_attn
 如果您只需使用 Trinity-RFT 而不打算修改代码：
 
 ```bash
-pip install trinity-rft==0.3.0
+pip install trinity-rft==0.3.1
 pip install flash-attn==2.8.1
 ```
 
 或使用 `uv`：
 
 ```bash
-uv pip install trinity-rft==0.3.0
+uv pip install trinity-rft==0.3.1
 uv pip install flash-attn==2.8.1
 ```
 
