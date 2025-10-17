@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name =  "trinity-rft"
-version = "0.3.1.dev0"
+version = "0.3.1"
 authors = [
     {name="Trinity-RFT Team", email="trinity-rft@outlook.com"},
 ]
@@ -53,7 +53,7 @@ data = [
     "py-data-juicer>=1.4.3"
 ]
 agent = [
-    "agentscope"
+    "agentscope>=1.0.5"
 ]
 rm_gallery = [
     "rm-gallery>=0.1.5"

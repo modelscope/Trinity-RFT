@@ -6,16 +6,18 @@ from dataclasses import dataclass, field
 from typing import Dict, Optional
 from unittest.mock import MagicMock
 
+import ray
 from parameterized import parameterized, parameterized_class
 from torch import Tensor
 
 from tests.common.vllm_test import CHAT_TEMPLATE
 from tests.tools import get_model_path, get_template_config, get_unittest_dataset_config
-from trinity.common.experience import EID
+from trinity.common.experience import EID, Experience
 from trinity.common.models import create_inference_models
 from trinity.common.models.model import ModelWrapper
 from trinity.common.rewards import RMGalleryFn
 from trinity.common.workflows import (
+    WORKFLOWS,
     MathBoxedWorkflow,
     MathEvalWorkflow,
     MathRMWorkflow,
@@ -489,3 +491,44 @@ class MultiTurnWorkflowTest(unittest.TestCase):
         else:
             answer = workflow.run()
         self.assertEqual(len(answer), 2)
+
+    def tearDown(self):
+        ray.shutdown(_exiting_interpreter=True)
+
+
+class TestAgentScopeWorkflowAdapter(unittest.IsolatedAsyncioTestCase):
+    @unittest.skip("Waiting for agentscope>=0.1.6")
+    async def test_adapter(self):
+        try:
+            from agentscope.model import TrinityChatModel
+        except ImportError:
+            self.skipTest("agentscope >= 0.1.6 is not installed")
+
+        async def as_workflow_func(task, model) -> float:
+            self.assertIsInstance(task, dict)
+            self.assertIsInstance(model, TrinityChatModel)
+            return task["reward"]
+
+        model = MagicMock()
+        openai_client = MagicMock()
+        openai_client.model_path = "Qwen/Qwen3-8B"
+        model.get_openai_async_client.return_value = openai_client
+        model.extract_experience_from_history.return_value = [
+            Experience(tokens=Tensor([0, 1, 2]), prompt_length=1, logprobs=Tensor([0.1, 0.2])),
+            Experience(tokens=Tensor([3, 4, 5]), prompt_length=2, logprobs=Tensor([0.3])),
+        ]
+
+        as_adapter_cls = WORKFLOWS.get("agentscope_workflow_adapter")
+        as_adapter = as_adapter_cls(
+            task=Task(
+                raw_task={"reward": 0.1},
+                workflow_args={"workflow_func": as_workflow_func},
+            ),
+            model=model,
+        )
+        result = await as_adapter.run_async()
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result[0].reward, 0.1)
+        self.assertEqual(result[0].prompt_length, 1)
+        self.assertEqual(result[1].reward, 0.1)
+        self.assertEqual(result[1].prompt_length, 2)
