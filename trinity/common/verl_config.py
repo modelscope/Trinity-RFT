@@ -132,7 +132,7 @@ class Actor:
     ppo_mini_batch_size: int = 256
     ppo_micro_batch_size: Optional[int] = None
     ppo_micro_batch_size_per_gpu: int = 1
-    use_dynamic_bsz: bool = False
+    use_dynamic_bsz: bool = True
     ppo_max_token_len_per_gpu: int = 16384
     grad_clip: float = 1.0
     ppo_epochs: int = 1
@@ -404,7 +404,7 @@ class veRLConfig:
         self.actor_rollout_ref.explorer_name = config.explorer.name
         self.critic.ray_namespace = config.synchronizer.ray_namespace
 
-        # Actor / Critic config
+        # Actor / Critic / Ref config
         self.actor_rollout_ref.model.path = config.model.model_path
         self.actor_rollout_ref.model.custom_chat_template = config.model.custom_chat_template
         self.actor_rollout_ref.actor.optim.total_training_steps = self.trainer.total_training_steps
@@ -445,6 +445,16 @@ class veRLConfig:
         if config.trainer.actor_grad_clip is not None:
             self.actor_rollout_ref.actor.grad_clip = config.trainer.actor_grad_clip
 
+        self.actor_rollout_ref.ref.log_prob_use_dynamic_bsz = (
+            self.actor_rollout_ref.actor.use_dynamic_bsz
+        )
+        self.actor_rollout_ref.ref.log_prob_max_token_len_per_gpu = (
+            self.actor_rollout_ref.actor.ppo_max_token_len_per_gpu
+        )
+        self.actor_rollout_ref.ref.ulysses_sequence_parallel_size = (
+            self.actor_rollout_ref.actor.ulysses_sequence_parallel_size
+        )
+
         # LoRA related config
         if config.model.lora_configs is not None:
             self.actor_rollout_ref.model.lora_rank = config.model.lora_configs[0].lora_rank
@@ -464,6 +474,10 @@ class veRLConfig:
                 self.critic.strategy = "fsdp"
 
         # Algorithm related config
+        for field_name in config.algorithm.optimizer_config.__dataclass_fields__:
+            field_value = getattr(config.algorithm.optimizer_config, field_name)
+            if hasattr(self.actor_rollout_ref.actor.optim, field_name):
+                setattr(self.actor_rollout_ref.actor.optim, field_name, field_value)
         self.actor_rollout_ref.actor.use_kl_loss = config.algorithm.kl_loss_fn != "none"
         self.algorithm.use_kl_in_reward = config.algorithm.kl_penalty_fn != "none"
         # TODO (yanxi): it seems that adv_estimator now only affects whether use_critic is set to

@@ -88,6 +88,27 @@ class GenerationConfig:
 
 
 @dataclass
+class OptimizerConfig:
+    lr: float = 1e-6
+    lr_warmup_steps: int = -1
+    lr_warmup_steps_ratio: float = 0.0
+    min_lr_ratio: Optional[float] = 0.0
+    warmup_style: str = "constant"
+    betas: List[float] = field(default_factory=lambda: [0.9, 0.999])
+    optimizer: str = "adam"
+    clip_grad: float = 1.0
+    lr_warmup_init: float = 0.0
+    lr_decay_steps: Optional[int] = None
+    lr_decay_style: str = "constant"
+    min_lr: float = 0.0
+    weight_decay: float = 0.01
+    weight_decay_incr_style: str = "constant"
+    lr_wsd_decay_style: str = "exponential"
+    lr_wsd_decay_steps: Optional[int] = None
+    use_checkpoint_opt_param_scheduler: bool = False
+
+
+@dataclass
 class LoRAConfig:
     """LoRA config, only effective for rollout model, not for auxiliary models."""
 
@@ -331,6 +352,8 @@ class AlgorithmConfig:
     algorithm_type: str = "ppo"
     # for GRPO-like algorithms, repeat each task for `repeat_times` times
     repeat_times: int = 1
+
+    optimizer_config: OptimizerConfig = field(default_factory=OptimizerConfig)
 
     # the strategy for sampling experiences from the buffer
     sample_strategy: Optional[str] = None
