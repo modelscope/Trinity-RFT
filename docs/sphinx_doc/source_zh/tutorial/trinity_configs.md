@@ -97,6 +97,7 @@ algorithm:
   repeat_times: 8
   optimizer:
     lr: 1e-6
+    warmup_style: constant
   # 以下参数为可选
   # 若未指定，将根据 `algorithm_type` 自动设置
   sample_strategy: "default"
@@ -109,6 +110,8 @@ algorithm:
 - `algorithm_type`: 强化学习算法类型。支持类型：`ppo`、`grpo`、`opmd`、`dpo`、`sft`、`mix`。
 - `repeat_times`: 每个任务重复的次数。默认为 `1`。在 `dpo` 中自动设为 `2`。某些算法如 GRPO 和 OPMD 要求 `repeat_times` > 1。
 - `optimizer`: Actor 优化器的参数。
+  - `lr`: 优化器的学习率。
+  - `warmup_style`: 学习率的预热策略。
 - `sample_strategy`: 从 experience buffer 加载 experience 时使用的采样策略。
 - `advantage_fn`: 用于计算优势值的函数。
 - `kl_penalty_fn`: 用于在奖励中计算 KL 惩罚的函数。

@@ -503,7 +503,9 @@ class veRLConfig:
         # Algorithm related config
         for field_name in config.algorithm.optimizer.__dataclass_fields__:
             field_value = getattr(config.algorithm.optimizer, field_name)
-            if hasattr(self.actor_rollout_ref.actor.optim, field_name):
+            if field_name == "optimizer_type":
+                setattr(self.actor_rollout_ref.actor.optim, "optimizer", field_value)
+            elif hasattr(self.actor_rollout_ref.actor.optim, field_name):
                 setattr(self.actor_rollout_ref.actor.optim, field_name, field_value)
         self.actor_rollout_ref.actor.use_kl_loss = config.algorithm.kl_loss_fn != "none"
         self.algorithm.use_kl_in_reward = config.algorithm.kl_penalty_fn != "none"

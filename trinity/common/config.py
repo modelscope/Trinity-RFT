@@ -94,8 +94,8 @@ class OptimizerConfig:
     lr_warmup_steps_ratio: float = 0.0
     min_lr_ratio: Optional[float] = 0.0
     warmup_style: str = "constant"
+    optimizer_type: str = "adam"
     betas: List[float] = field(default_factory=lambda: [0.9, 0.999])
-    optimizer: str = "adam"
 
 
 @dataclass
