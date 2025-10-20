@@ -552,7 +552,6 @@ class ConfigManager:
             "lr": st.session_state["actor_lr"],
             "lr_warmup_steps_ratio": st.session_state["actor_lr_warmup_steps_ratio"],
             "warmup_style": st.session_state["actor_warmup_style"],
-            "total_training_steps": (st.session_state["total_training_steps"] or -1),
         }
         algorithm_config["optimizer"] = optimizer_config
         return algorithm_config

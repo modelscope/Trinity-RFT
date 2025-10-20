@@ -1095,10 +1095,15 @@ class Config:
                         trainer_config_schema, self.trainer.trainer_config
                     )
                     self.trainer.trainer_config = OmegaConf.to_object(trainer_config)
-                elif os.path.isfile(self.trainer.trainer_config_path):
-                    from trinity.common.verl_config import load_config
+                elif self.trainer.trainer_config_path:
+                    if os.path.isfile(self.trainer.trainer_config_path):
+                        from trinity.common.verl_config import load_config
 
-                    self.trainer.trainer_config = load_config(self.trainer.trainer_config_path)
+                        self.trainer.trainer_config = load_config(self.trainer.trainer_config_path)
+                    else:
+                        raise ValueError(
+                            f"Invalid trainer config path: {self.trainer.trainer_config_path}"
+                        )
                 else:
                     from trinity.common.verl_config import veRLConfig
 
