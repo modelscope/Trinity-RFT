@@ -65,6 +65,7 @@ trainer:
       model:
         use_remove_padding: false
       ppo_max_token_len_per_gpu: 32768 # (${actor_rollout_ref.actor.ppo_max_token_len_per_gpu}) * 2
+      forward_max_token_len_per_gpu: ${trainer.trainer_config.critic.ppo_max_token_len_per_gpu}
       cliprange_value: 0.5
       checkpoint:
         load_contents: ['model', 'optimizer', 'extra']
