@@ -7,7 +7,7 @@ algorithm:
   algorithm_type: ppo
   repeat_times: 5
   optimizer:
-    lr: 1.0e-06
+    lr: 1e-06
     lr_warmup_steps_ratio: 0.0
     warmup_style: constant
   advantage_fn: ppo

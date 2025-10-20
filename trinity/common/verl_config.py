@@ -305,9 +305,9 @@ class Algorithm:
 class Trainer:
     balance_batch: bool = True
     total_epochs: int = 30
-    total_training_steps: Optional[int] = (
-        None  # ! DO NOT SET, use trainer.total_steps in global_config
-    )
+    total_training_steps: Optional[
+        int
+    ] = None  # ! DO NOT SET, use trainer.total_steps in global_config
     project_name: str = ""
     group_name: str = ""
     experiment_name: str = ""
@@ -516,8 +516,6 @@ class veRLConfig:
             logger.warning("DPO micro batch size is doubled for computing loss.")
             self.actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu *= 2
             self.actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu *= 2
-            if self.actor_rollout_ref.rollout.n != 2:
-                self.actor_rollout_ref.rollout.n = 2
 
         # check rollout config (only works for lora)
         self.actor_rollout_ref.rollout.log_prob_use_dynamic_bsz = (
