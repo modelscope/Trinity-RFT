@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Configuration Guide &#8212; Trinity-RFT 0.3.1 documentation</title>
+    <title>Configuration Guide &#8212; Trinity-RFT 0.4.0.dev0 documentation</title>
   
   
   
@@ -36,7 +36,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../_static/documentation_options.js?v=385a908f"></script>
+    <script src="../_static/documentation_options.js?v=299b8a96"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -136,8 +136,8 @@
       
     
     
-    <img src="../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.3.1 documentation - Home"/>
-    <script>document.write(`<img src="../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.3.1 documentation - Home"/>`);</script>
+    <img src="../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.4.0.dev0 documentation - Home"/>
+    <script>document.write(`<img src="../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.4.0.dev0 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -155,6 +155,7 @@
           </summary>
           <ul>
             <li class="toctree-l2 current "><a class="reference" href="trinity_configs.html">latest</a></li>
+            <li class="toctree-l2  "><a class="reference" href="../../v0.3.1/tutorial/trinity_configs.html">v0.3.1</a></li>
             <li class="toctree-l2  "><a class="reference" href="../../v0.3.0/tutorial/trinity_configs.html">v0.3.0</a></li>
             <li class="toctree-l2  "><a class="reference" href="../../v0.2.1/tutorial/trinity_configs.html">v0.2.1</a></li>
             <li class="toctree-l2  "><a class="reference" href="../../v0.2.0/tutorial/trinity_configs.html">v0.2.0</a></li>
@@ -715,7 +716,9 @@ Users can use these features to simplify configuration.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">algorithm</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">algorithm_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">grpo</span>
 <span class="w">  </span><span class="nt">repeat_times</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
-
+<span class="w">  </span><span class="nt">optimizer</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">lr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1e-6</span>
+<span class="w">    </span><span class="nt">warmup_style</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;warmup&quot;</span>
 <span class="w">  </span><span class="c1"># The following parameters are optional</span>
 <span class="w">  </span><span class="c1"># If not specified, they will automatically be set based on the `algorithm_type`</span>
 <span class="w">  </span><span class="nt">sample_strategy</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;default&quot;</span>
@@ -728,6 +731,12 @@ Users can use these features to simplify configuration.</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">algorithm_type</span></code>: Type of reinforcement learning algorithm. Supported types: <code class="docutils literal notranslate"><span class="pre">ppo</span></code>, <code class="docutils literal notranslate"><span class="pre">grpo</span></code>, <code class="docutils literal notranslate"><span class="pre">opmd</span></code>, <code class="docutils literal notranslate"><span class="pre">dpo</span></code>, <code class="docutils literal notranslate"><span class="pre">sft</span></code>, <code class="docutils literal notranslate"><span class="pre">mix</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">repeat_times</span></code>: Number of times each task is repeated. Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>. In <code class="docutils literal notranslate"><span class="pre">dpo</span></code>, this is automatically set to <code class="docutils literal notranslate"><span class="pre">2</span></code>. Some algorithms such as GRPO and OPMD require <code class="docutils literal notranslate"><span class="pre">repeat_times</span></code> &gt; 1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">optimizer</span></code>: Optimizer configuration for actor.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">lr</span></code>: Learning rate for actor.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">warmup_style</span></code>: Warmup style for actor’s learning rate.</p></li>
+</ul>
+</li>
 <li><p><code class="docutils literal notranslate"><span class="pre">sample_strategy</span></code>: The sampling strategy used for loading experiences from experience buffer.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">advantage_fn</span></code>: The advantage function used for computing advantages.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">kl_penalty_fn</span></code>: The KL penalty function used for computing KL penalty applied in reward.</p></li>
@@ -1058,8 +1067,11 @@ Users can use these features to simplify configuration.</p>
 <span class="w">  </span><span class="nt">save_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
 <span class="w">  </span><span class="nt">total_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
 <span class="w">  </span><span class="nt">save_strategy</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unrestricted&quot;</span>
+<span class="w">  </span><span class="nt">grad_clip</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">  </span><span class="nt">use_dynamic_bsz</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">ppo_max_token_len_per_gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16384</span>
+<span class="w">  </span><span class="nt">ulysses_sequence_parallel_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="w">  </span><span class="nt">trainer_config</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
-<span class="w">  </span><span class="nt">trainer_config_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;&#39;</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -1075,8 +1087,11 @@ Users can use these features to simplify configuration.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">unrestricted</span></code>: No restrictions on saving operations; multiple nodes, processes, or threads are allowed to save the model simultaneously.</p></li>
 </ul>
 </li>
+<li><p><code class="docutils literal notranslate"><span class="pre">grad_clip</span></code>: Gradient clipping for updates.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">use_dynamic_bsz</span></code>: Whether to use dynamic batch size.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ppo_max_token_len_per_gpu</span></code>:  The maximum number of tokens to be processed in forward and backward when updating the policy. Effective when <code class="docutils literal notranslate"><span class="pre">use_dynamic_bsz=true</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ulysses_sequence_parallel_size</span></code>: Sequence parallel size.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">trainer_config</span></code>: The trainer configuration provided inline.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">trainer_config_path</span></code>: The path to the trainer configuration file. Only one of <code class="docutils literal notranslate"><span class="pre">trainer_config_path</span></code> and <code class="docutils literal notranslate"><span class="pre">trainer_config</span></code> should be specified.</p></li>
 </ul>
 </section>
 <hr class="docutils" />

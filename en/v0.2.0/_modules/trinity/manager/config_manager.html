@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>trinity.manager.config_manager &#8212; Trinity-RFT 0.3.1 documentation</title>
+    <title>trinity.manager.config_manager &#8212; Trinity-RFT 0.4.0.dev0 documentation</title>
   
   
   
@@ -35,7 +35,7 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../_static/documentation_options.js?v=385a908f"></script>
+    <script src="../../../_static/documentation_options.js?v=299b8a96"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -143,8 +143,8 @@ window.addEventListener("load", () => mermaid.run());
       
     
     
-    <img src="../../../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.3.1 documentation - Home"/>
-    <script>document.write(`<img src="../../../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.3.1 documentation - Home"/>`);</script>
+    <img src="../../../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.4.0.dev0 documentation - Home"/>
+    <script>document.write(`<img src="../../../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.4.0.dev0 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -162,6 +162,7 @@ window.addEventListener("load", () => mermaid.run());
           </summary>
           <ul>
             <li class="toctree-l2  "><a class="reference" href="../../../../main/index.html">latest</a></li>
+            <li class="toctree-l2  "><a class="reference" href="../../../../v0.3.1/index.html">v0.3.1</a></li>
             <li class="toctree-l2  "><a class="reference" href="../../../../v0.3.0/index.html">v0.3.0</a></li>
             <li class="toctree-l2  "><a class="reference" href="../../../../v0.2.1/index.html">v0.2.1</a></li>
             <li class="toctree-l2 current "><a class="reference" href="config_manager.html">v0.2.0</a></li>
@@ -957,12 +958,6 @@ document.write(`
                         <span class="s2">&quot;load_contents&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_load_checkpoint&quot;</span><span class="p">],</span>
                         <span class="s2">&quot;save_contents&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_save_checkpoint&quot;</span><span class="p">],</span>
                     <span class="p">},</span>
-                    <span class="s2">&quot;optim&quot;</span><span class="p">:</span> <span class="p">{</span>
-                        <span class="s2">&quot;lr&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_lr&quot;</span><span class="p">],</span>
-                        <span class="s2">&quot;lr_warmup_steps_ratio&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_lr_warmup_steps_ratio&quot;</span><span class="p">],</span>
-                        <span class="s2">&quot;warmup_style&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_warmup_style&quot;</span><span class="p">],</span>
-                        <span class="s2">&quot;total_training_steps&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;total_training_steps&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
-                    <span class="p">},</span>
                 <span class="p">},</span>
                 <span class="s2">&quot;ref&quot;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="s2">&quot;log_prob_micro_batch_size_per_gpu&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span>
@@ -1064,6 +1059,12 @@ document.write(`
                 <span class="n">current_config</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;_args&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span>
         <span class="k">if</span> <span class="n">default_config</span> <span class="o">!=</span> <span class="n">current_config</span><span class="p">:</span>
             <span class="n">algorithm_config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">current_config</span><span class="p">)</span>
+        <span class="n">optimizer_config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;lr&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_lr&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;lr_warmup_steps_ratio&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_lr_warmup_steps_ratio&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;warmup_style&quot;</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">session_state</span><span class="p">[</span><span class="s2">&quot;actor_warmup_style&quot;</span><span class="p">],</span>
+        <span class="p">}</span>
+        <span class="n">algorithm_config</span><span class="p">[</span><span class="s2">&quot;optimizer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">optimizer_config</span>
         <span class="k">return</span> <span class="n">algorithm_config</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_gen_buffer_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>FAQ &#8212; Trinity-RFT 0.3.1 documentation</title>
+    <title>FAQ &#8212; Trinity-RFT 0.4.0.dev0 documentation</title>
   
   
   
@@ -36,7 +36,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../_static/documentation_options.js?v=385a908f"></script>
+    <script src="../_static/documentation_options.js?v=299b8a96"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -136,8 +136,8 @@
       
     
     
-    <img src="../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.3.1 documentation - Home"/>
-    <script>document.write(`<img src="../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.3.1 documentation - Home"/>`);</script>
+    <img src="../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.4.0.dev0 documentation - Home"/>
+    <script>document.write(`<img src="../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.4.0.dev0 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -155,6 +155,7 @@
           </summary>
           <ul>
             <li class="toctree-l2 current "><a class="reference" href="faq.html">latest</a></li>
+            <li class="toctree-l2  "><a class="reference" href="../../v0.3.1/tutorial/faq.html">v0.3.1</a></li>
             <li class="toctree-l2  "><a class="reference" href="../../v0.3.0/tutorial/faq.html">v0.3.0</a></li>
             <li class="toctree-l2  "><a class="reference" href="../../v0.2.1/tutorial/faq.html">v0.2.1</a></li>
             <li class="toctree-l2  "><a class="reference" href="../../v0.2.0/tutorial/faq.html">v0.2.0</a></li>
@@ -612,7 +613,7 @@ document.write(`
 <p><strong>Q:</strong> How do I configure the parameters?</p>
 <p><strong>A:</strong> You can use the config manager to configure the parameters by running <code class="docutils literal notranslate"><span class="pre">trinity</span> <span class="pre">studio</span> <span class="pre">--port</span> <span class="pre">8080</span></code>. This approach provides a convenient way to configure the parameters.</p>
 <p>Advanced users can also edit the config file directly, referred to the YAML files in <code class="docutils literal notranslate"><span class="pre">examples</span></code>.
-Trinity-RFT uses <a class="reference external" href="https://github.com/volcengine/verl">veRL</a> as the training backend, which can have massive parameters, referred to <a class="reference external" href="https://verl.readthedocs.io/en/latest/examples/config.html">veRL documentation</a>. You may specify these parameters in two ways: (1) specify the parameters in the <code class="docutils literal notranslate"><span class="pre">trainer.trainer_config</span></code> dictionary; (2) specify them in an auxiliary YAML file starting with <code class="docutils literal notranslate"><span class="pre">train_</span></code> and pass the path to <code class="docutils literal notranslate"><span class="pre">train_gsm8k.yaml</span></code> in <code class="docutils literal notranslate"><span class="pre">trainer.trainer_config_path</span></code>. These two ways are mutually exclusive.</p>
+Trinity-RFT uses <a class="reference external" href="https://github.com/volcengine/verl">veRL</a> as the training backend, which can have massive parameters, referred to <a class="reference external" href="https://verl.readthedocs.io/en/latest/examples/config.html">veRL documentation</a>. You may specify these parameters in the <code class="docutils literal notranslate"><span class="pre">trainer.trainer_config</span></code> dictionary.</p>
 <hr class="docutils" />
 <p><strong>Q:</strong> What’s the relationship between <code class="docutils literal notranslate"><span class="pre">buffer.batch_size</span></code>, <code class="docutils literal notranslate"><span class="pre">buffer.train_batch_size</span></code>, <code class="docutils literal notranslate"><span class="pre">actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu</span></code> and other batch sizes?</p>
 <p><strong>A:</strong> The following parameters are closely related:</p>

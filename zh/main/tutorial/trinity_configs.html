@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>参数配置指南 &#8212; Trinity-RFT 0.3.1 文档</title>
+    <title>参数配置指南 &#8212; Trinity-RFT 0.4.0.dev0 文档</title>
   
   
   
@@ -36,7 +36,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../_static/documentation_options.js?v=464ca075"></script>
+    <script src="../_static/documentation_options.js?v=09f53066"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -137,8 +137,8 @@
       
     
     
-    <img src="../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.3.1 文档 - Home"/>
-    <script>document.write(`<img src="../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.3.1 文档 - Home"/>`);</script>
+    <img src="../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.4.0.dev0 文档 - Home"/>
+    <script>document.write(`<img src="../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.4.0.dev0 文档 - Home"/>`);</script>
   
   
 </a></div>
@@ -156,6 +156,7 @@
           </summary>
           <ul>
             <li class="toctree-l2 current "><a class="reference" href="trinity_configs.html">latest</a></li>
+            <li class="toctree-l2  "><a class="reference" href="../../v0.3.1/tutorial/trinity_configs.html">v0.3.1</a></li>
           </ul>
         </details>
       </li>
@@ -711,7 +712,9 @@ document.write(`
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">algorithm</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">algorithm_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">grpo</span>
 <span class="w">  </span><span class="nt">repeat_times</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
-
+<span class="w">  </span><span class="nt">optimizer</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">lr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1e-6</span>
+<span class="w">    </span><span class="nt">warmup_style</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">constant</span>
 <span class="w">  </span><span class="c1"># 以下参数为可选</span>
 <span class="w">  </span><span class="c1"># 若未指定，将根据 `algorithm_type` 自动设置</span>
 <span class="w">  </span><span class="nt">sample_strategy</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;default&quot;</span>
@@ -724,6 +727,12 @@ document.write(`
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">algorithm_type</span></code>: 强化学习算法类型。支持类型：<code class="docutils literal notranslate"><span class="pre">ppo</span></code>、<code class="docutils literal notranslate"><span class="pre">grpo</span></code>、<code class="docutils literal notranslate"><span class="pre">opmd</span></code>、<code class="docutils literal notranslate"><span class="pre">dpo</span></code>、<code class="docutils literal notranslate"><span class="pre">sft</span></code>、<code class="docutils literal notranslate"><span class="pre">mix</span></code>。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">repeat_times</span></code>: 每个任务重复的次数。默认为 <code class="docutils literal notranslate"><span class="pre">1</span></code>。在 <code class="docutils literal notranslate"><span class="pre">dpo</span></code> 中自动设为 <code class="docutils literal notranslate"><span class="pre">2</span></code>。某些算法如 GRPO 和 OPMD 要求 <code class="docutils literal notranslate"><span class="pre">repeat_times</span></code> &gt; 1。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">optimizer</span></code>: Actor 优化器的参数。</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">lr</span></code>: 优化器的学习率。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">warmup_style</span></code>: 学习率的预热策略。</p></li>
+</ul>
+</li>
 <li><p><code class="docutils literal notranslate"><span class="pre">sample_strategy</span></code>: 从 experience buffer 加载 experience 时使用的采样策略。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">advantage_fn</span></code>: 用于计算优势值的函数。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">kl_penalty_fn</span></code>: 用于在奖励中计算 KL 惩罚的函数。</p></li>
@@ -1054,8 +1063,11 @@ document.write(`
 <span class="w">  </span><span class="nt">save_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
 <span class="w">  </span><span class="nt">total_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
 <span class="w">  </span><span class="nt">save_strategy</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unrestricted&quot;</span>
+<span class="w">  </span><span class="nt">grad_clip</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">  </span><span class="nt">use_dynamic_bsz</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">ppo_max_token_len_per_gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16384</span>
+<span class="w">  </span><span class="nt">ulysses_sequence_parallel_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="w">  </span><span class="nt">trainer_config</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
-<span class="w">  </span><span class="nt">trainer_config_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;&#39;</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -1071,8 +1083,11 @@ document.write(`
 <li><p><code class="docutils literal notranslate"><span class="pre">unrestricted</span></code>：不限制保存操作，允许多个节点、进程或线程同时保存模型。</p></li>
 </ul>
 </li>
+<li><p><code class="docutils literal notranslate"><span class="pre">grad_clip</span></code>: 梯度裁剪阈值。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">use_dynamic_bsz</span></code>: 是否使用动态批量大小。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ppo_max_token_len_per_gpu</span></code>: 训练过程中，每个 GPU 最大 token 长度; 当 <code class="docutils literal notranslate"><span class="pre">use_dynamic_bsz=true</span></code> 时生效。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ulysses_sequence_parallel_size</span></code>: 序列并行的并行度，即用于分割单个序列的 GPU 数量。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">trainer_config</span></code>: 内联提供的 trainer 配置。</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">trainer_config_path</span></code>: trainer 配置文件的路径。<code class="docutils literal notranslate"><span class="pre">trainer_config_path</span></code> 和 <code class="docutils literal notranslate"><span class="pre">trainer_config</span></code> 只能指定其一。</p></li>
 </ul>
 </section>
 <hr class="docutils" />

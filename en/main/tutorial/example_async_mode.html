@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Asynchronous RFT &#8212; Trinity-RFT 0.3.1 documentation</title>
+    <title>Asynchronous RFT &#8212; Trinity-RFT 0.4.0.dev0 documentation</title>
   
   
   
@@ -36,7 +36,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../_static/documentation_options.js?v=385a908f"></script>
+    <script src="../_static/documentation_options.js?v=299b8a96"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -136,8 +136,8 @@
       
     
     
-    <img src="../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.3.1 documentation - Home"/>
-    <script>document.write(`<img src="../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.3.1 documentation - Home"/>`);</script>
+    <img src="../_static/logo.svg" class="logo__image only-light" alt="Trinity-RFT 0.4.0.dev0 documentation - Home"/>
+    <script>document.write(`<img src="../_static/logo.svg" class="logo__image only-dark" alt="Trinity-RFT 0.4.0.dev0 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -155,6 +155,7 @@
           </summary>
           <ul>
             <li class="toctree-l2 current "><a class="reference" href="example_async_mode.html">latest</a></li>
+            <li class="toctree-l2  "><a class="reference" href="../../v0.3.1/tutorial/example_async_mode.html">v0.3.1</a></li>
             <li class="toctree-l2  "><a class="reference" href="../../v0.3.0/tutorial/example_async_mode.html">v0.3.0</a></li>
             <li class="toctree-l2  "><a class="reference" href="../../v0.2.1/tutorial/example_async_mode.html">v0.2.1</a></li>
             <li class="toctree-l2  "><a class="reference" href="../../v0.2.0/tutorial/example_async_mode.html">v0.2.0</a></li>
@@ -649,6 +650,8 @@ The model weights of the explorer and trainer are synchronized once every <code 
 <span class="nt">algorithm</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">algorithm_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">grpo</span>
 <span class="w">  </span><span class="nt">repeat_times</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
+<span class="w">  </span><span class="nt">optimizer</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">lr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1e-6</span>
 <span class="nt">model</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">model_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${oc.env:TRINITY_MODEL_PATH,Qwen/Qwen2.5-1.5B-Instruct}</span>
 <span class="nt">cluster</span><span class="p">:</span>
@@ -678,20 +681,10 @@ The model weights of the explorer and trainer are synchronized once every <code 
 <span class="w">  </span><span class="nt">sync_method</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;checkpoint&#39;</span>
 <span class="w">  </span><span class="nt">sync_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
 <span class="nt">trainer</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">trainer_config</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">actor_rollout_ref</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">model</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">use_remove_padding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">      </span><span class="nt">actor</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">use_dynamic_bsz</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">        </span><span class="nt">ppo_max_token_len_per_gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16384</span>
-<span class="w">        </span><span class="nt">ulysses_sequence_parallel_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">        </span><span class="nt">optim</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">lr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1e-6</span>
-<span class="w">      </span><span class="nt">ref</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">log_prob_use_dynamic_bsz</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${trainer.trainer_config.actor_rollout_ref.actor.use_dynamic_bsz}</span>
-<span class="w">        </span><span class="nt">log_prob_max_token_len_per_gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${trainer.trainer_config.actor_rollout_ref.actor.ppo_max_token_len_per_gpu}</span>
-<span class="w">        </span><span class="nt">ulysses_sequence_parallel_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${trainer.trainer_config.actor_rollout_ref.actor.ulysses_sequence_parallel_size}</span><span class="w"> </span><span class="c1"># sp size</span>
+<span class="w">  </span><span class="nt">grad_clip</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">  </span><span class="nt">use_dynamic_bsz</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">ppo_max_token_len_per_gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16384</span>
+<span class="w">  </span><span class="nt">ulysses_sequence_parallel_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 </pre></div>
 </div>
 <p>You can run this example with the following command:</p>
