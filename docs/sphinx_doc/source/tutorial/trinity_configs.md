@@ -413,7 +413,6 @@ trainer:
   ppo_max_token_len_per_gpu: 16384
   ulysses_sequence_parallel_size: 1
   trainer_config: null
-  trainer_config_path: ''
 ```
 
 - `name`: Name of the trainer. This name will be used as the Ray actor's name, so it must be unique.
@@ -430,8 +429,6 @@ trainer:
 - `ppo_max_token_len_per_gpu`:  The maximum number of tokens to be processed in forward and backward when updating the policy. Effective when `use_dynamic_bsz=true`.
 - `ulysses_sequence_parallel_size`: Sequence parallel size.
 - `trainer_config`: The trainer configuration provided inline.
-- `trainer_config_path`: The path to the trainer configuration file. Only one of `trainer_config_path` and `trainer_config` can be specified.
-
 ---
 
 ## Service Configuration

@@ -491,9 +491,8 @@ class TrainerConfig:
 
     save_strategy: SaveStrategy = SaveStrategy.UNRESTRICTED
 
-    # Only one needs to be set for `trainer_config` and `trainer_config_path`
     trainer_config: Any = field(default_factory=dict)
-    trainer_config_path: str = ""
+    trainer_config_path: str = ""  # deprecated, use `trainer_config` instead
 
 
 @dataclass
@@ -1096,6 +1095,9 @@ class Config:
                     )
                     self.trainer.trainer_config = OmegaConf.to_object(trainer_config)
                 elif self.trainer.trainer_config_path:
+                    logger.warning(
+                        "`trainer_config_path` is deprecated; please use `trainer_config` instead."
+                    )
                     if os.path.isfile(self.trainer.trainer_config_path):
                         from trinity.common.verl_config import load_config
 
@@ -1107,7 +1109,7 @@ class Config:
                 else:
                     from trinity.common.verl_config import veRLConfig
 
-                    logger.info("Neither `trainer_config` nor `trainer_config_path` is provided.")
+                    logger.info("`trainer_config` is not provided, using default trainer config.")
                     self.trainer.trainer_config = veRLConfig()
             else:
                 raise ValueError(f"Invalid trainer type: {self.trainer_type}")

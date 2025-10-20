@@ -413,7 +413,6 @@ trainer:
   ppo_max_token_len_per_gpu: 16384
   ulysses_sequence_parallel_size: 1
   trainer_config: null
-  trainer_config_path: ''
 ```
 
 - `name`: trainer 的名称。该名称将用作 Ray actor 的名称，因此必须唯一。
@@ -430,7 +429,6 @@ trainer:
 - `ppo_max_token_len_per_gpu`: 训练过程中，每个 GPU 最大 token 长度; 当 `use_dynamic_bsz=true` 时生效。
 - `ulysses_sequence_parallel_size`: 序列并行的并行度，即用于分割单个序列的 GPU 数量。
 - `trainer_config`: 内联提供的 trainer 配置。
-- `trainer_config_path`: trainer 配置文件的路径。`trainer_config_path` 和 `trainer_config` 只能指定其一。
 
 ---
 

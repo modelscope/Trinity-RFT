@@ -73,7 +73,7 @@ trainer:
   save_interval: 100
   total_steps: 1000
   enable_preview: true
-  actor_grad_clip: 1.0
+  grad_clip: 1.0
   trainer_config:
     actor_rollout_ref:
       hybrid_engine: true
