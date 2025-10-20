@@ -39,3 +39,7 @@ class QueueReader(BufferReader):
                 f"Read incomplete batch ({len(exps)}/{batch_size}), please check your workflow."
             )
         return exps
+
+    @property
+    def index(self) -> int:
+        return 0

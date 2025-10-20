@@ -32,3 +32,7 @@ class SQLReader(BufferReader):
                 raise StopAsyncIteration
         else:
             return self.storage.read(batch_size)
+
+    @property
+    def index(self) -> int:
+        return self.storage.offset

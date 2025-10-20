@@ -8,6 +8,7 @@ from typing import Any, List, Optional, Type, Union
 
 import openai
 
+from trinity.buffer.task_scheduler import TaskIndex
 from trinity.common.config import FormatConfig, GenerationConfig
 from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
@@ -36,6 +37,8 @@ class Task(dict):
     # automatically assigned ids
     batch_id: Union[int, str] = ""
     task_id: Union[int, str] = ""
+
+    index: TaskIndex = field(default_factory=TaskIndex)
 
     def to_workflow(
         self, model: Any, auxiliary_models: Optional[List[openai.OpenAI]] = None

@@ -1,11 +1,12 @@
 """Filed based buffer reader."""
 
-from typing import List, Optional
+from typing import Iterable, List, Optional, Union
 
 import datasets
 from datasets import Dataset, IterableDataset, load_dataset
 
 from trinity.buffer.buffer_reader import BufferReader
+from trinity.buffer.reader.diff_based_selector import build_selector
 from trinity.buffer.schema.formatter import FORMATTER
 from trinity.common.config import BufferConfig, StorageConfig
 
@@ -69,14 +70,16 @@ class _HFBatchReader:
 
         self.progress_bar.update(self.current_offset)
 
+    @property
     def current_seed(self):
         return self.base_seed + self.current_offset // self.dataset_size
 
-    def read_batch(self, batch_size: int) -> List:
+    def read_batch(self, batch_size: int) -> Union[List, Iterable]:
         if self.current_offset >= self.total_samples:
             self.progress_bar.close()
             raise StopIteration
         batch = []
+        start_index = self.current_offset
 
         while len(batch) < batch_size:
             batch.append(self.dataset[self.current_offset % self.dataset_size])
@@ -93,10 +96,21 @@ class _HFBatchReader:
                     self.progress_bar.close()
                     raise StopIteration
         self.progress_bar.update(batch_size)
+        return batch, range(start_index, self.current_offset)
+
+    def select_batch(self, indices: List[int]) -> List:
+        batch = []
+        for i in indices:
+            assert 0 <= i < self.dataset_size
+            batch.append(self.dataset[int(i)])
         return batch
 
 
 class BaseFileReader(BufferReader):
+    @property
+    def index(self) -> int:
+        return self.dataset.current_offset
+
     async def read_async(self, batch_size: Optional[int] = None):
         try:
             return self.read(batch_size)
@@ -123,7 +137,7 @@ class ExperienceFileReader(BaseFileReader):
         )
 
     def read(self, batch_size: Optional[int] = None) -> List:
-        samples = self.dataset.read_batch(batch_size or self.read_batch_size)
+        samples, _ = self.dataset.read_batch(batch_size or self.read_batch_size)
         exp_list = []
         for sample in samples:
             experience = self.formatter.format(sample)
@@ -155,15 +169,34 @@ class TaskFileReader(BaseFileReader):
         )
         self.formatter = FORMATTER.get("task")(meta)
 
-    @property
-    def index(self) -> int:
-        return self.dataset.current_offset
-
     def read(self, batch_size: Optional[int] = None) -> List:
         batch_size = batch_size or self.read_batch_size
         tasks = []
-        samples = self.dataset.read_batch(batch_size)
-        for sample in samples:
+        samples, indices = self.dataset.read_batch(batch_size)
+        for sample, index in zip(samples, indices):
             task = self.formatter.format(sample)
+            task.index.index = index
             tasks.append(task)
         return tasks
+
+
+class TaskFileReaderWithSelector(TaskFileReader):
+    def __init__(self, meta: StorageConfig, config: BufferConfig):
+        super().__init__(meta, config)
+        self.data_selector = build_selector(self.dataset.dataset, meta)
+
+    def read(self, batch_size: Optional[int] = None) -> List:
+        batch_size = batch_size or self.read_batch_size
+        selected_indices, extra_info = self.data_selector.get_indices(
+            batch_size, return_extra_info=True
+        )
+        samples = self.dataset.select_batch(selected_indices)
+        tasks = []
+        for sample, index in zip(samples, selected_indices):
+            task = self.formatter.format(sample)
+            task.index.index = index
+            tasks.append(task)
+        return tasks
+
+    def update(self, indices: List[int], values: List[float]) -> None:
+        self.data_selector.update(indices, values)

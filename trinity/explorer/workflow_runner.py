@@ -122,6 +122,7 @@ class WorkflowRunner:
             # set eid for each experience
             for i, exp in enumerate(exps):
                 exp.eid.batch = task.batch_id
+                exp.eid.task_index = task.index
                 # keep exp.eid.task if it has been set before (e.g., in workflow)
                 if exp.eid.task == "":  # "" is the default value
                     exp.eid.task = task.task_id
@@ -163,7 +164,7 @@ class DebugWorkflowRunner(WorkflowRunner):
     ) -> None:
         model, auxiliary_models = get_debug_inference_model(config)
         super().__init__(config, model, auxiliary_models, 0)
-        self.taskset = get_buffer_reader(config.buffer.explorer_input.taskset, config.buffer)
+        self.taskset = get_buffer_reader(config.buffer.explorer_input.tasksets[0], config.buffer)
         self.output_file = output_file
 
     async def debug(self) -> None:

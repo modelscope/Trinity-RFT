@@ -7,7 +7,7 @@ import os
 import time
 import traceback
 from collections import deque
-from typing import List, Optional
+from typing import Dict, List, Optional, Tuple
 
 import ray
 import torch
@@ -23,6 +23,7 @@ from trinity.common.constants import (
     SyncMethod,
     SyncStyle,
 )
+from trinity.common.experience import Experience
 from trinity.common.models import create_inference_models
 from trinity.common.models.utils import get_checkpoint_dir_with_step_num
 from trinity.explorer.scheduler import Scheduler
@@ -320,7 +321,7 @@ class Explorer:
         # save explore checkpoint
         self.state.save_explorer(
             current_step=self.explore_step_num,
-            taskset_state=self.taskset.save_state(),
+            taskset_states=self.taskset.state_dict(),
         )
 
     async def sync_weight(self) -> None:
@@ -331,23 +332,23 @@ class Explorer:
     async def _finish_steps(self, start_step: int, end_step: int, model_version: int) -> None:
         for step in range(start_step, end_step + 1):
             self.logger.info(f"Log metrics of step {step}")
-            explore_metric, exps = await self._finish_explore_step(
-                step=step, model_version=model_version
-            )
-            eval_metric = await self._finish_eval_step(step=step)
-            self.taskset.update(exps, explore_metric, eval_metric)
+            await self._finish_explore_step(step=step, model_version=model_version)
+            await self._finish_eval_step(step=step)
 
-    async def _finish_explore_step(self, step: int, model_version: int):
+    async def _finish_explore_step(
+        self, step: int, model_version: int
+    ) -> Tuple[Dict, List[Experience]]:
         statuses, exps = await self.scheduler.get_results(batch_id=step)
         metric = {"rollout/model_version": model_version}
         pipeline_metrics = await self.experience_pipeline.process.remote(exps)
+        self.taskset.update(pipeline_metrics)
         metric.update(pipeline_metrics)
         if statuses:
             metric.update(gather_metrics([status.metric for status in statuses], "rollout"))
             self.monitor.log(metric, step=step)
         return metric, exps
 
-    async def _finish_eval_step(self, step: Optional[int] = None, prefix: str = "eval"):
+    async def _finish_eval_step(self, step: Optional[int] = None, prefix: str = "eval") -> None:
         if not self.pending_eval_tasks:
             return
         step = step or self.explore_step_num
@@ -366,7 +367,6 @@ class Explorer:
             )
         metric[f"{prefix}/total_time"] = time.time() - st
         self.monitor.log(metric, step)
-        return metric
 
     async def shutdown(self) -> None:
         if self.scheduler:

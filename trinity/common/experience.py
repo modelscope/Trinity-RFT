@@ -11,6 +11,8 @@ import torch
 from datasets import Dataset
 from torch import Tensor
 
+from trinity.buffer.task_scheduler import TaskIndex
+
 
 @dataclass
 class EID:
@@ -35,6 +37,8 @@ class EID:
     suffix: str = field(
         default_factory=lambda: uuid.uuid4().hex[:6]
     )  # Unique identifier suffix, e.g., a UUID
+
+    task_index: TaskIndex = field(default_factory=TaskIndex)
 
     @property
     def uid(self) -> str:

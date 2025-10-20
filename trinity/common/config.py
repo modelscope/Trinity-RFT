@@ -7,7 +7,7 @@ from copy import deepcopy
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 from omegaconf import OmegaConf
 
@@ -100,6 +100,24 @@ class LoRAConfig:
 
 
 @dataclass
+class DataSelectorConfig:
+    """Data selector config."""
+
+    selector_type: Optional[str] = "random"
+    feature_keys: List[str] = field(default_factory=lambda: [])
+
+    # Estimator Config
+    adaptive_rho: bool = False
+    m: int = 16
+    lamb: float = 0.2
+    rho: float = 0.2
+
+    do_sample: bool = False
+    tau: float = 1.0
+    target_reward: float = 1.0
+
+
+@dataclass
 class StorageConfig:
     """Storage config."""
 
@@ -143,6 +161,7 @@ class StorageConfig:
     rollout_args: GenerationConfig = field(default_factory=GenerationConfig)
     workflow_args: dict = field(default_factory=dict)
     reward_fn_args: dict = field(default_factory=dict)
+    task_selector: Optional[DataSelectorConfig] = None
 
     # enable progress bar (tqdm) for _HFBatchReader
     enable_progress_bar: Optional[bool] = False
@@ -640,6 +659,15 @@ class Config:
             explorer_input.tasksets.append(explorer_input.taskset)
         tasksets = explorer_input.tasksets
 
+        if self.mode == "train":
+            assert (
+                experience_buffer is not None
+            ), "`buffer.trainer_input.experience_buffer` is required when `mode` is `train`."
+            experience_buffer.total_epochs = self.buffer.total_epochs
+            experience_buffer.total_steps = self.buffer.total_steps
+        else:
+            assert len(tasksets) > 0
+
         for taskset in tasksets:
             if self.mode != "train" and not taskset.path:
                 raise ValueError(
@@ -653,16 +681,9 @@ class Config:
                     "`buffer.explorer_input.taskset.repeat_times` is set to `algorithm.repeat_times`"
                     f" (={self.algorithm.repeat_times})."
                 )
-            if self.mode == "train":
-                assert (
-                    experience_buffer is not None
-                ), "`buffer.trainer_input.experience_buffer` is required when `mode` is `train`."
-                experience_buffer.total_epochs = self.buffer.total_epochs
-                experience_buffer.total_steps = self.buffer.total_steps
-            else:
-                taskset.is_eval = False
-                taskset.total_epochs = self.buffer.total_epochs
-                taskset.total_steps = self.buffer.total_steps
+            taskset.is_eval = False
+            taskset.total_epochs = self.buffer.total_epochs
+            taskset.total_steps = self.buffer.total_steps
 
             set_if_none(taskset, "default_workflow_type", explorer_input.default_workflow_type)
             set_if_none(
@@ -739,7 +760,7 @@ class Config:
         task_pipeline = self.data_processor.task_pipeline
         if task_pipeline is not None:
             if task_pipeline.output is None:
-                if tasksets[0].path is not None:
+                if tasksets and tasksets[0].path is not None:
                     task_pipeline.output = tasksets[0]
                 elif (
                     experience_buffer.schema_type in {"dpo", "sft"}
