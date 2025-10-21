@@ -23,6 +23,7 @@ from trinity.algorithm.policy_loss_fn import (
 from trinity.algorithm.sample_strategy import SAMPLE_STRATEGY, MixSampleStrategy
 from trinity.manager.config_registry.config_registry import CONFIG_GENERATORS
 from trinity.manager.config_registry.model_config_manager import set_trainer_gpu_num
+from trinity.utils.registry import Registry
 
 
 @CONFIG_GENERATORS.register_config(
@@ -97,16 +98,7 @@ def set_repeat_times(**kwargs):
     visible=lambda: "sample_strategy" in st.session_state["_current_default_config"],
 )
 def set_sample_strategy(**kwargs):
-    def on_change():
-        # Update sample strategy specific parameters when strategy changes
-        sample_strategy = st.session_state[kwargs.get("key", "sample_strategy")]
-        strategy_class = SAMPLE_STRATEGY.get(sample_strategy)
-        if strategy_class:
-            default_args = strategy_class.default_args()
-            for arg_key, arg_value in default_args.items():
-                full_key = f"{arg_key}_in_sample_strategy"
-                st.session_state[full_key] = arg_value
-
+    on_change = _create_on_change_callback("sample_strategy", SAMPLE_STRATEGY, **kwargs)
     candidates = list(SAMPLE_STRATEGY.modules.keys())
     st.selectbox(
         "Sample Strategy",
@@ -140,15 +132,7 @@ def set_expert_data_ratio_in_sample_strategy(**kwargs):
     visible=lambda: "advantage_fn" in st.session_state["_current_default_config"],
 )
 def set_advantage_fn(**kwargs):
-    def on_change():
-        advantage_fn = st.session_state[kwargs.get("key", "advantage_fn")]
-        advantage_class = ADVANTAGE_FN.get(advantage_fn)
-        if advantage_class:
-            default_args = advantage_class.default_args()
-            for arg_key, arg_value in default_args.items():
-                full_key = f"{arg_key}_in_advantage_fn"
-                st.session_state[full_key] = arg_value
-
+    on_change = _create_on_change_callback("advantage_fn", ADVANTAGE_FN, **kwargs)
     candidates = list(ADVANTAGE_FN.modules.keys())
     st.selectbox(
         "Advantage Function",
@@ -224,15 +208,7 @@ def set_tau_in_advantage_fn(**kwargs):
     visible=lambda: "kl_loss_fn" in st.session_state["_current_default_config"],
 )
 def set_kl_loss_fn(**kwargs):
-    def on_change():
-        kl_loss_fn = st.session_state[kwargs.get("key", "kl_loss_fn")]
-        kl_loss_class = KL_FN.get(kl_loss_fn)
-        if kl_loss_class:
-            default_args = kl_loss_class.default_args()
-            for arg_key, arg_value in default_args.items():
-                full_key = f"{arg_key}_in_kl_loss_fn"
-                st.session_state[full_key] = arg_value
-
+    on_change = _create_on_change_callback("kl_loss_fn", KL_FN, **kwargs)
     candidates = list(KL_FN.modules.keys())
     st.selectbox(
         "KL Loss Type",
@@ -264,15 +240,7 @@ def set_kl_coef_in_kl_loss_fn(**kwargs):
     visible=lambda: "kl_penalty_fn" in st.session_state["_current_default_config"],
 )
 def set_kl_penalty_fn(**kwargs):
-    def on_change():
-        kl_penalty_fn = st.session_state[kwargs.get("key", "kl_penalty_fn")]
-        kl_penalty_class = KL_FN.get(kl_penalty_fn)
-        if kl_penalty_class:
-            default_args = kl_penalty_class.default_args()
-            for arg_key, arg_value in default_args.items():
-                full_key = f"{arg_key}_in_kl_penalty_fn"
-                st.session_state[full_key] = arg_value
-
+    on_change = _create_on_change_callback("kl_penalty_fn", KL_FN, **kwargs)
     candidates = list(KL_FN.modules.keys())
     st.selectbox(
         "KL Penalty Type",
@@ -317,15 +285,7 @@ def set_kl_coef_in_kl_penalty_fn(**kwargs):
     visible=lambda: "policy_loss_fn" in st.session_state["_current_default_config"],
 )
 def set_policy_loss_fn(**kwargs):
-    def on_change():
-        policy_loss_fn = st.session_state[kwargs.get("key", "policy_loss_fn")]
-        policy_loss_class = POLICY_LOSS_FN.get(policy_loss_fn)
-        if policy_loss_class:
-            default_args = policy_loss_class.default_args()
-            for arg_key, arg_value in default_args.items():
-                full_key = f"{arg_key}_in_policy_loss_fn"
-                st.session_state[full_key] = arg_value
-
+    on_change = _create_on_change_callback("policy_loss_fn", POLICY_LOSS_FN, **kwargs)
     candidates = list(POLICY_LOSS_FN.modules.keys())
     st.selectbox(
         "Policy Loss Fn",
@@ -416,15 +376,7 @@ def set_mu_in_policy_loss_fn(**kwargs):
     visible=lambda: "entropy_loss_fn" in st.session_state["_current_default_config"],
 )
 def set_entropy_loss_fn(**kwargs):
-    def on_change():
-        entropy_loss_fn = st.session_state[kwargs.get("key", "entropy_loss_fn")]
-        entropy_loss_class = ENTROPY_LOSS_FN.get(entropy_loss_fn)
-        if entropy_loss_class:
-            default_args = entropy_loss_class.default_args()
-            for arg_key, arg_value in default_args.items():
-                full_key = f"{arg_key}_in_entropy_loss_fn"
-                st.session_state[full_key] = arg_value
-
+    on_change = _create_on_change_callback("entropy_loss_fn", ENTROPY_LOSS_FN, **kwargs)
     candidates = list(ENTROPY_LOSS_FN.modules.keys())
     st.selectbox("Entropy Loss Function", candidates, on_change=on_change, **kwargs)
 
@@ -441,3 +393,19 @@ def set_entropy_coef_in_entropy_loss_fn(**kwargs):
         format="%.1e",
         **kwargs,
     )
+
+
+# define on_change
+def _create_on_change_callback(key_name: str, registry: Registry, **kwargs):
+    """Creates an on_change callback to update dependent configs."""
+
+    def on_change():
+        value = st.session_state[kwargs.get("key", key_name)]
+        value_class = registry.get(value)
+        if value_class:
+            default_args = value_class.default_args()
+            for arg_key, arg_value in default_args.items():
+                full_key = f"{arg_key}_in_{key_name}"
+                st.session_state[full_key] = arg_value
+
+    return on_change
