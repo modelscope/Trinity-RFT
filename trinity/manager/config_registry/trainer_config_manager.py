@@ -233,11 +233,6 @@ def set_critic_warmup(**kwargs):
 
 
 @CONFIG_GENERATORS.register_config(default_value=None)
-def set_total_training_steps(**kwargs):
-    st.number_input("Total Training Steps", min_value=1, **kwargs)
-
-
-@CONFIG_GENERATORS.register_config(default_value=None)
 def set_default_hdfs_dir(**kwargs):
     st.text_input("Default HDFS Dir", **kwargs)
 

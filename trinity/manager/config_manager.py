@@ -93,10 +93,8 @@ class ConfigManager:
 
         self.inference_model_keys = [
             "model_path",
-            "engine_type",
             "engine_num",
             "tensor_parallel_size",
-            "use_v1",
             "enforce_eager",
             "enable_prefix_caching",
             "enable_chunked_prefill",
@@ -104,6 +102,7 @@ class ConfigManager:
             "dtype",
             "seed",
             "enable_thinking",
+            "enable_history",
             "enable_openai_api",
             "enable_auto_tool_choice",
             "tool_call_parser",
@@ -122,7 +121,7 @@ class ConfigManager:
 
         self.get_configs("checkpoint_root_dir")
 
-        if st.session_state["algorithm_type"] != "dpo":
+        if st.session_state["algorithm_type"] not in ("dpo", "sft"):
             self.get_configs("taskset_path")
         else:
             self.get_configs("experience_buffer_path")
@@ -132,7 +131,9 @@ class ConfigManager:
         st.header("Important Configs")
         self.get_configs("node_num", "gpu_per_node", "engine_num", "tensor_parallel_size")
 
-        self.get_configs("total_epochs", "explore_batch_size", "repeat_times", "train_batch_size")
+        self.get_configs(
+            "total_epochs", "total_steps", "explore_batch_size", "repeat_times", "train_batch_size"
+        )
 
         self.get_configs("storage_type", "max_response_tokens", "max_model_len", "ppo_epochs")
 
@@ -167,7 +168,7 @@ class ConfigManager:
         self.get_configs("max_response_tokens", "max_model_len")
 
     def _expert_buffer_part(self):
-        self.get_configs("total_epochs", "explore_batch_size", "train_batch_size")
+        self.get_configs("total_epochs", "total_steps", "explore_batch_size", "train_batch_size")
 
         self.get_configs(
             "default_workflow_type", "default_eval_workflow_type", "default_reward_fn_type"
@@ -201,11 +202,9 @@ class ConfigManager:
         #     self.get_configs("buffer_max_retry_times", "max_retry_interval")
 
     def _expert_explorer_part(self):
-        self.get_configs("sync_method", "sync_interval", "sync_timeout")
+        self.get_configs("sync_method", "sync_style", "sync_interval", "sync_timeout")
 
-        self.get_configs(
-            "runner_per_model", "max_timeout", "explorer_max_retry_times", "eval_interval"
-        )
+        self.get_configs("runner_per_model", "eval_interval")
 
         self.get_configs("bench_on_latest_checkpoint")
 
@@ -214,11 +213,11 @@ class ConfigManager:
 
             self.get_configs("gpu_memory_utilization", "dtype", "seed")
 
-            self.get_configs(
-                "use_v1", "enforce_eager", "enable_prefix_caching", "enable_chunked_prefill"
-            )
+            self.get_configs("enforce_eager", "enable_prefix_caching", "enable_chunked_prefill")
 
-            self.get_configs("enable_thinking", "enable_openai_api", "enable_auto_tool_choice")
+            self.get_configs(
+                "enable_thinking", "enable_history", "enable_openai_api", "enable_auto_tool_choice"
+            )
             self.get_configs("tool_call_parser", "reasoning_parser")
 
         with st.expander("Auxiliary Models", expanded=True):
@@ -292,7 +291,7 @@ class ConfigManager:
                 self.get_configs("recompute_modules")
 
         with st.expander("Advanced Config"):
-            self.get_configs("critic_warmup", "total_training_steps")
+            self.get_configs("critic_warmup")
 
             self.get_configs("default_hdfs_dir")
 
@@ -451,7 +450,6 @@ class ConfigManager:
                         "lr": st.session_state["actor_lr"],
                         "lr_warmup_steps_ratio": st.session_state["actor_lr_warmup_steps_ratio"],
                         "warmup_style": st.session_state["actor_warmup_style"],
-                        "total_training_steps": (st.session_state["total_training_steps"] or -1),
                     },
                 },
                 "ref": {
@@ -497,7 +495,6 @@ class ConfigManager:
                     "lr": st.session_state["critic_lr"],
                     "lr_warmup_steps_ratio": st.session_state["critic_lr_warmup_steps_ratio"],
                     "warmup_style": st.session_state["critic_warmup_style"],
-                    "total_training_steps": (st.session_state["total_training_steps"] or -1),
                 },
                 "model": {
                     "override_config": {},
@@ -558,7 +555,7 @@ class ConfigManager:
 
     def _gen_buffer_config(self):
         experience_buffer_path = st.session_state["experience_buffer_path"].strip()
-        if st.session_state["algorithm_type"] != "dpo":
+        if st.session_state["algorithm_type"] not in ("dpo", "sft"):
             if (
                 not experience_buffer_path
                 and st.session_state["storage_type"] == StorageType.SQL.value
@@ -569,6 +566,7 @@ class ConfigManager:
             "batch_size": st.session_state["explore_batch_size"],
             "train_batch_size": st.session_state["train_batch_size"],
             "total_epochs": st.session_state["total_epochs"],
+            "total_steps": st.session_state["total_steps"],
             "explorer_input": {},
             "trainer_input": {
                 "experience_buffer": {
@@ -584,7 +582,7 @@ class ConfigManager:
             del buffer_config["trainer_input"]["experience_buffer"]["path"]
         if st.session_state["train_batch_size"] is None:
             del buffer_config["train_batch_size"]
-        if st.session_state["algorithm_type"] != "dpo":
+        if st.session_state["algorithm_type"] not in ("dpo", "sft"):
             experience_buffer = buffer_config["trainer_input"]["experience_buffer"]
             experience_buffer["use_priority_queue"] = st.session_state["use_priority_queue"]
             experience_buffer["reuse_cooldown_time"] = st.session_state["reuse_cooldown_time"]
@@ -656,8 +654,6 @@ class ConfigManager:
     def _gen_explorer_config(self):
         explorer_config = {
             "runner_per_model": st.session_state["runner_per_model"],
-            "max_timeout": st.session_state["max_timeout"],
-            "max_retry_times": st.session_state["explorer_max_retry_times"],
             "rollout_model": {
                 key: st.session_state[key]
                 for key in self.inference_model_keys
@@ -734,6 +730,7 @@ class ConfigManager:
                 },
                 "synchronizer": {
                     "sync_method": st.session_state["sync_method"],
+                    "sync_style": st.session_state["sync_style"],
                     "sync_interval": st.session_state["sync_interval"],
                     "sync_timeout": st.session_state["sync_timeout"],
                 },

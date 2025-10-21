@@ -31,7 +31,7 @@ from trinity.manager.config_registry.model_config_manager import set_trainer_gpu
 )
 def set_algorithm_type(**kwargs):
     def on_change():
-        if st.session_state["algorithm_type"] == "dpo":
+        if st.session_state["algorithm_type"] in ("dpo", "sft"):
             st.session_state["mode"] = "train"
         else:
             st.session_state["mode"] = "both"

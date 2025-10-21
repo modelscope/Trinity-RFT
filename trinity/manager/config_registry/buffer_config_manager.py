@@ -12,6 +12,13 @@ def set_total_epochs(**kwargs):
     st.number_input("Total Epochs", min_value=1, **kwargs)
 
 
+@CONFIG_GENERATORS.register_config(default_value=None)
+def set_total_steps(**kwargs):
+    st.number_input(
+        "Total Steps", min_value=1, help="If set, 'Total Epochs' will be ignored", **kwargs
+    )
+
+
 @CONFIG_GENERATORS.register_config(default_value=96)
 def set_explore_batch_size(**kwargs):
     st.number_input(
