@@ -8,9 +8,8 @@ from typing import Any, List, Optional, Type, Union
 
 import openai
 
-from trinity.buffer.task_scheduler import TaskIndex
 from trinity.common.config import FormatConfig, GenerationConfig
-from trinity.common.experience import Experience
+from trinity.common.experience import Experience, TaskIndex
 from trinity.common.models.model import ModelWrapper
 from trinity.common.rewards.math_reward import MathRewardFn
 from trinity.common.rewards.reward_fn import RewardFn

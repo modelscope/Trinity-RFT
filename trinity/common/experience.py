@@ -11,7 +11,11 @@ import torch
 from datasets import Dataset
 from torch import Tensor
 
-from trinity.buffer.task_scheduler import TaskIndex
+
+@dataclass
+class TaskIndex:
+    taskset_id: Optional[int] = None
+    index: Optional[int] = None
 
 
 @dataclass

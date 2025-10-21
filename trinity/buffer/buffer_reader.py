@@ -14,6 +14,10 @@ class BufferReader(ABC):
     async def read_async(self, batch_size: Optional[int] = None) -> List:
         """Read from buffer asynchronously."""
 
+    def __len__(self) -> int:
+        """Get the number of samples in buffer."""
+        raise NotImplementedError
+
     @property
     @abstractmethod
     def index(self) -> int:

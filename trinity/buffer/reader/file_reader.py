@@ -6,7 +6,6 @@ import datasets
 from datasets import Dataset, IterableDataset, load_dataset
 
 from trinity.buffer.buffer_reader import BufferReader
-from trinity.buffer.reader.diff_based_selector import build_selector
 from trinity.buffer.schema.formatter import FORMATTER
 from trinity.common.config import BufferConfig, StorageConfig
 
@@ -56,7 +55,11 @@ class _HFBatchReader:
         if total_steps:
             self.total_samples = default_batch_size * total_steps
         else:
-            self.total_samples = self.dataset_size * total_epochs
+            if drop_last:
+                self.num_per_epoch = self.dataset_size - (self.dataset_size % default_batch_size)
+            else:
+                self.num_per_epoch = self.dataset_size
+            self.total_samples = self.num_per_epoch * total_epochs
 
         if enable_progress_bar:
             from ray.experimental.tqdm_ray import tqdm
@@ -78,24 +81,24 @@ class _HFBatchReader:
         if self.current_offset >= self.total_samples:
             self.progress_bar.close()
             raise StopIteration
-        batch = []
-        start_index = self.current_offset
+        start_epoch = self.current_offset // self.num_per_epoch
+        start_index = self.current_offset % self.num_per_epoch
 
-        while len(batch) < batch_size:
-            batch.append(self.dataset[self.current_offset % self.dataset_size])
-            self.current_offset += 1
-            if self.shuffle and self.current_offset % self.dataset_size == 0:
+        batch = []
+        for i in range(start_index, start_index + batch_size):
+            if i < self.num_per_epoch:
+                batch.append(self.dataset[i])
+            else:
+                assert not self.drop_last
+                break
+
+        self.current_offset += len(batch)
+        self.progress_bar.update(len(batch))
+        if start_epoch != self.current_offset // self.num_per_epoch:
+            assert self.current_offset % self.num_per_epoch == 0
+            if self.shuffle:
                 self.dataset = self.dataset.shuffle(seed=self.current_seed)
-            if self.current_offset >= self.total_samples:
-                # No more data to read
-                if not self.drop_last and len(batch) > 0:
-                    # return last batch
-                    self.progress_bar.update(len(batch))
-                    return batch
-                else:
-                    self.progress_bar.close()
-                    raise StopIteration
-        self.progress_bar.update(batch_size)
+
         return batch, range(start_index, self.current_offset)
 
     def select_batch(self, indices: List[int]) -> List:
@@ -107,6 +110,9 @@ class _HFBatchReader:
 
 
 class BaseFileReader(BufferReader):
+    def __len__(self):
+        return len(self.dataset.dataset)
+
     @property
     def index(self) -> int:
         return self.dataset.current_offset
@@ -179,24 +185,16 @@ class TaskFileReader(BaseFileReader):
             tasks.append(task)
         return tasks
 
-
-class TaskFileReaderWithSelector(TaskFileReader):
-    def __init__(self, meta: StorageConfig, config: BufferConfig):
-        super().__init__(meta, config)
-        self.data_selector = build_selector(self.dataset.dataset, meta)
-
-    def read(self, batch_size: Optional[int] = None) -> List:
-        batch_size = batch_size or self.read_batch_size
-        selected_indices, extra_info = self.data_selector.get_indices(
-            batch_size, return_extra_info=True
-        )
-        samples = self.dataset.select_batch(selected_indices)
+    def read_with_indices(self, indices: List[int]) -> List:
+        """Read tasks with indices."""
+        samples = self.dataset.select_batch(indices)
         tasks = []
-        for sample, index in zip(samples, selected_indices):
+        for index, sample in zip(indices, samples):
             task = self.formatter.format(sample)
             task.index.index = index
             tasks.append(task)
         return tasks
 
-    def update(self, indices: List[int], values: List[float]) -> None:
-        self.data_selector.update(indices, values)
+    async def read_with_indices_async(self, indices: List[int]) -> List:
+        """Read tasks with indices asynchronously."""
+        return self.read_with_indices(indices)

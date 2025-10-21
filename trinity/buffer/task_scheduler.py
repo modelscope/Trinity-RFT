@@ -1,83 +1,88 @@
 # -*- coding: utf-8 -*-
 """The taskset scheduler."""
 
-from collections import deque
-from dataclasses import dataclass
-from typing import Dict, List, Optional
+import copy
+from collections import Counter
+from typing import Dict, List
+
+import numpy as np
 
 from trinity.buffer.buffer import get_buffer_reader
+from trinity.buffer.selector import SELECTORS
 from trinity.common.config import Config
 
 TASKSET_SCHEDULE_METRIC = "taskset_schedule"
 
 
-@dataclass
-class TaskIndex:
-    taskset_id: Optional[int] = None
-    index: Optional[int] = None
-
-
 class TasksetScheduler:
     def __init__(self, explorer_state, config: Config):
+        self.config = config
         if "latest_task_index" in explorer_state:
             assert len(config.buffer.explorer_input.tasksets) == 1  # old format
             explorer_state["taskset"] = [
                 {
-                    "index": explorer_state["latest_task_index"],
+                    "current_index": explorer_state["latest_task_index"],
                 }
             ]
 
         self.read_batch_size = config.buffer.batch_size
         tasksets_config = config.buffer.explorer_input.tasksets
 
+        from trinity.buffer.reader.file_reader import TaskFileReader
+
         tasksets_state = explorer_state.get("taskset", [{"index": 0}] * len(tasksets_config))
         self.tasksets = []
+        self.selectors = []
         for taskset_config, taskset_state in zip(tasksets_config, tasksets_state):
-            taskset_config.index = taskset_state["index"]
-            assert not taskset_config.is_eval
+            taskset_config.index = taskset_state["current_index"]
+            assert not taskset_config.is_eval  # assume drop last
             taskset = get_buffer_reader(taskset_config, config.buffer)
-            taskset.load_state_dict(taskset_state.get("state_dict", {}))
+            assert isinstance(taskset, TaskFileReader), "Currently only support `TaskFileReader`"
+            selector = SELECTORS.get(taskset_config.task_selector.selector_type)(
+                taskset.dataset, taskset_config
+            )
+            selector.load_state_dict(taskset_state.get("state_dict", {}))
             self.tasksets.append(taskset)
+            self.selectors.append(selector)
 
-        # self.step = explorer_state.get("latest_iteration", 0)  # TODO
-        # total_epoch = config.buffer.total_epochs
-        self.tasksets_queue = deque()
+        # assume each explorer_step will only call read_async once
+        self.step = explorer_state.get("latest_iteration", 0)
+        self.base_taskset_ids = []
         for i, taskset in enumerate(self.tasksets):
-            self.tasksets_queue.append((i, taskset))
+            self.base_taskset_ids.extend([i] * len(taskset))
+        self.steps_per_epoch = len(self.base_taskset_ids) // self.read_batch_size
+        self.epoch = self.step // self.steps_per_epoch
+        self.orders = self.build_orders(self.epoch)
 
-    def read(self, batch_size: Optional[int] = None) -> List:
-        batch_size = batch_size or self.read_batch_size
+    def build_orders(self, epoch: int):
+        taskset_ids = copy.deepcopy(self.base_taskset_ids)
+        rng = np.random.default_rng(epoch)
+        rng.shuffle(taskset_ids)
+        return taskset_ids
+
+    async def read_async(self) -> List:
+        batch_size = self.read_batch_size
         batch = []
-        for _ in range(len(self.tasksets_queue)):
-            taskset_id, taskset = self.tasksets_queue.popleft()
-            try:
-                batch = taskset.read(batch_size)
-                assert (
-                    len(batch) == batch_size
-                ), f"Batch size mismatch: {len(batch)} != {batch_size}"
-                self.tasksets_queue.append((taskset_id, taskset))
-                for task in batch:
-                    task.index.taskset_id = taskset_id
-                break
-            except StopIteration:
-                pass
-        if len(batch) == 0:
-            raise StopIteration
+        if self.step // self.steps_per_epoch != self.epoch:
+            self.epoch = self.step // self.steps_per_epoch
+            if self.epoch >= self.config.buffer.total_epochs:
+                raise StopAsyncIteration
+            self.orders = self.build_orders(self.epoch)
+        start = (self.step - self.epoch * self.steps_per_epoch) * batch_size
+        taskset_ids = self.orders[start : start + batch_size]
+        counter = Counter(taskset_ids)
+        for taskset_id, count in counter.items():
+            indices = self.selectors[taskset_id].get_indices(batch_size=count)
+            batch.extend(await self.tasksets[taskset_id].read_with_indices_async(indices))
+        self.step += 1
         return batch
-
-    async def read_async(self, batch_size: Optional[int] = None) -> List:
-        try:
-            return self.read(batch_size)
-        except StopIteration as e:
-            raise StopAsyncIteration from e
 
     def state_dict(self) -> List[Dict]:
         return [
             {
-                "index": taskset.index,
-                "state_dict": taskset.state_dict(),
+                "state_dict": selector.state_dict(),
             }
-            for taskset in self.tasksets
+            for selector in self.selectors
         ]
 
     def update(self, explore_metric: Dict) -> None:

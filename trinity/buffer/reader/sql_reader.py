@@ -35,4 +35,7 @@ class SQLReader(BufferReader):
 
     @property
     def index(self) -> int:
-        return self.storage.offset
+        if self.wrap_in_ray:
+            return ray.get(self.storage.get_offset.remote())
+        else:
+            return self.storage.offset

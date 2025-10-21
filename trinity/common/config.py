@@ -103,7 +103,7 @@ class LoRAConfig:
 class DataSelectorConfig:
     """Data selector config."""
 
-    selector_type: Optional[str] = "random"
+    selector_type: Optional[str] = "sequential"
     feature_keys: List[str] = field(default_factory=lambda: [])
 
     # Estimator Config
@@ -161,7 +161,7 @@ class StorageConfig:
     rollout_args: GenerationConfig = field(default_factory=GenerationConfig)
     workflow_args: dict = field(default_factory=dict)
     reward_fn_args: dict = field(default_factory=dict)
-    task_selector: Optional[DataSelectorConfig] = None
+    task_selector: DataSelectorConfig = field(default_factory=DataSelectorConfig)
 
     # enable progress bar (tqdm) for _HFBatchReader
     enable_progress_bar: Optional[bool] = False
