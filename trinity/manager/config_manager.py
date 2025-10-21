@@ -139,10 +139,12 @@ class ConfigManager:
 
         self.get_configs("sync_interval", "eval_interval", "save_interval")
 
-        if st.session_state["algorithm_type"] != "dpo":
-            self.get_configs("taskset_args")
-        else:
+        if st.session_state["algorithm_type"] == "dpo":
             self.get_configs("dpo_dataset_kwargs")
+        elif st.session_state["algorithm_type"] == "sft":
+            self.get_configs("sft_dataset_kwargs")
+        else:
+            self.get_configs("taskset_args")
 
         self.get_configs(
             "default_workflow_type", "default_eval_workflow_type", "default_reward_fn_type"
@@ -176,20 +178,25 @@ class ConfigManager:
         self.get_configs("system_prompt")
         self.get_configs("reply_prefix")
 
-        if st.session_state["algorithm_type"] != "dpo":
-            with st.expander("Taskset Configs", expanded=True):
-                self.get_configs("taskset_path")
-                self.get_configs("taskset_args")
-        else:
+        if st.session_state["algorithm_type"] == "dpo":
             with st.expander("DPO Dataset Configs", expanded=True):
                 self.get_configs("experience_buffer_path")
                 self.get_configs("storage_type")
                 self.get_configs("dpo_dataset_kwargs")
+        elif st.session_state["algorithm_type"] == "sft":
+            with st.expander("SFT Dataset Configs", expanded=True):
+                self.get_configs("experience_buffer_path")
+                self.get_configs("storage_type")
+                self.get_configs("sft_dataset_kwargs")
+        else:
+            with st.expander("Taskset Configs", expanded=True):
+                self.get_configs("taskset_path")
+                self.get_configs("taskset_args")
 
         with st.expander("Eval Tasksets Configs", expanded=True):
             self.get_configs("eval_tasksets")
 
-        if st.session_state["algorithm_type"] != "dpo":
+        if st.session_state["algorithm_type"] not in ("dpo", "sft"):
             with st.expander("Experiences Buffer Configs", expanded=True):
                 self.get_configs("storage_type")
                 self.get_configs("experience_buffer_path")
@@ -225,8 +232,9 @@ class ConfigManager:
 
     def _expert_trainer_part(self):
         self.get_configs("algorithm_type", "repeat_times", "save_interval")
-        self.get_configs("sample_strategy", "advantage_fn", "entropy_loss_fn")
-        self.get_configs("policy_loss_fn", "kl_penalty_fn", "kl_loss_fn")
+        self.get_configs("policy_loss_fn", "advantage_fn", "sample_strategy")
+        self.get_configs("kl_penalty_fn", "kl_loss_fn", "kl_coef_in_kl_loss_fn")
+        self.get_configs("entropy_loss_fn", "entropy_coef_in_entropy_loss_fn")
 
         with st.expander("Advanced Algorithm Config"):
             algorithm = ALGORITHM_TYPE.get(st.session_state["algorithm_type"])
@@ -239,6 +247,8 @@ class ConfigManager:
                 default_args = register_map[key].get(value).default_args()
                 for sub_key in default_args.keys():
                     full_key = sub_key + "_in_" + key
+                    if full_key in ("kl_coef_in_kl_loss_fn", "entropy_coef_in_entropy_loss_fn"):
+                        continue
                     config_key_list.append(full_key)
 
             idx = 0
@@ -305,13 +315,15 @@ class ConfigManager:
             "actor_ppo_micro_batch_size_per_gpu",
             "ref_log_prob_micro_batch_size_per_gpu",
             "actor_ulysses_sequence_parallel_size",
-            "actor_entropy_from_logits_with_chunking",
-            "actor_entropy_checkpointing",
         )
 
         self.get_configs("actor_lr", "actor_warmup_style", "actor_lr_warmup_steps_ratio")
 
-        self.get_configs("actor_grad_clip")
+        self.get_configs(
+            "actor_grad_clip",
+            "actor_entropy_from_logits_with_chunking",
+            "actor_entropy_checkpointing",
+        )
 
         self.get_configs("actor_load_checkpoint", "actor_save_checkpoint")
 
@@ -648,6 +660,14 @@ class ConfigManager:
                 "chosen_key": st.session_state["dpo_dataset_chosen_key"],
                 "rejected_key": st.session_state["dpo_dataset_rejected_key"],
             }
+        elif st.session_state["algorithm_type"] == "sft":
+            experience_buffer = buffer_config["trainer_input"]["experience_buffer"]
+            experience_buffer["split"] = st.session_state["sft_dataset_train_split"]
+            experience_buffer["format"] = {
+                "prompt_type": st.session_state["sft_dataset_prompt_type"],
+                "prompt_key": st.session_state["sft_dataset_prompt_key"],
+                "messages_key": st.session_state["sft_dataset_messages_key"],
+            }
 
         return buffer_config
 
@@ -658,8 +678,6 @@ class ConfigManager:
                 key: st.session_state[key]
                 for key in self.inference_model_keys
                 if key != "model_path"
-                # "max_response_tokens": None,  # TODO
-                # "max_model_len": None,  # TODO
                 # "chat_template": None,  # TODO: add chat template
             },
             "auxiliary_models": [],

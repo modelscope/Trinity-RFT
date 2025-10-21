@@ -118,7 +118,7 @@ def set_enable_thinking(**kwargs):
 
 
 @CONFIG_GENERATORS.register_config(default_value=False, visible=explorer_visible)
-def set_enable_hitory(**kwargs):
+def set_enable_history(**kwargs):
     st.checkbox("Enable History Recording", **kwargs)
 
 
@@ -253,7 +253,7 @@ def check_auxiliary_models(unfinished_fields: set, key: str):
 @CONFIG_GENERATORS.register_config(
     default_value=SyncMethod.NCCL.value,
     visible=explorer_visible,
-    other_configs={"_not_dpo_or_sft_sync_method": SyncMethod.NCCL.value},
+    other_configs={"_not_offline_dataset_sync_method": SyncMethod.NCCL.value},
 )
 def set_sync_method(**kwargs):
     key = kwargs.get("key")
@@ -261,15 +261,12 @@ def set_sync_method(**kwargs):
         st.session_state[key] = SyncMethod.CHECKPOINT.value
         disabled = True
     else:
-        st.session_state[key] = st.session_state["_not_dpo_or_sft_sync_method"]
+        st.session_state[key] = st.session_state["_not_offline_dataset_sync_method"]
         disabled = False
 
     def on_change():
-        if (
-            st.session_state["algorithm_type"] != "dpo"
-            and st.session_state["algorithm_type"] != "sft"
-        ):
-            st.session_state["_not_dpo_or_sft_sync_method"] = st.session_state[key]
+        if st.session_state["algorithm_type"] not in ("dpo", "sft"):
+            st.session_state["_not_offline_dataset_sync_method"] = st.session_state[key]
 
     st.selectbox(
         "Sync Method",
@@ -288,7 +285,7 @@ def set_sync_method(**kwargs):
 @CONFIG_GENERATORS.register_config(
     default_value=SyncStyle.FIXED.value,
     visible=explorer_visible,
-    other_configs={"_not_dpo_or_sft_sync_style": SyncStyle.FIXED.value},
+    other_configs={"_not_offline_dataset_sync_style": SyncStyle.FIXED.value},
 )
 def set_sync_style(**kwargs):
     key = kwargs.get("key")
@@ -296,15 +293,12 @@ def set_sync_style(**kwargs):
         st.session_state[key] = SyncStyle.CHECKPOINT.value
         disabled = True
     else:
-        st.session_state[key] = st.session_state["_not_dpo_or_sft_sync_style"]
+        st.session_state[key] = st.session_state["_not_offline_dataset_sync_style"]
         disabled = False
 
     def on_change():
-        if (
-            st.session_state["algorithm_type"] != "dpo"
-            and st.session_state["algorithm_type"] != "sft"
-        ):
-            st.session_state["_not_dpo_or_sft_sync_style"] = st.session_state[key]
+        if st.session_state["algorithm_type"] not in ("dpo", "sft"):
+            st.session_state["_not_offline_dataset_sync_style"] = st.session_state[key]
 
     st.selectbox(
         "Sync Style",

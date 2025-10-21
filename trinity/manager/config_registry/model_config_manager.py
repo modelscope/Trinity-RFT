@@ -59,6 +59,7 @@ def set_monitor_type(**kwargs):
     st.selectbox(
         "Monitor Type",
         options=MONITOR.modules.keys(),
+        help="Set your API_KEY in environment variables if using `Wandb` or `MLFlow`",
         **kwargs,
     )
 

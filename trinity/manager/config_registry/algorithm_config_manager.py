@@ -59,11 +59,12 @@ def set_algorithm_type(**kwargs):
         "_not_grouped_adv_repeat_times": 1,
     },
 )
-def set_repeat_times(**kwargs):  # TODO
+def set_repeat_times(**kwargs):
     key = kwargs.get("key")
     grouped_adv_algorithms = [
         "grpo",
-        "opmd",  # TODO: may add rloo
+        "opmd",
+        "rloo",
     ]
     if st.session_state["algorithm_type"] in grouped_adv_algorithms:
         min_repeat_times = 2
@@ -82,7 +83,7 @@ def set_repeat_times(**kwargs):  # TODO
         "Repeat Times",
         min_value=min_repeat_times,
         help="`repeat_times` is used to set how many experiences each task can generate, "
-        "and it must be greater than `1` when `algorithm_type` is `opmd` or `grpo`.",
+        "and it must be greater than `1` when `algorithm_type` is `grpo`, `opmd` or 'rloo`.",
         on_change=on_change,
         **kwargs,
     )
@@ -96,11 +97,22 @@ def set_repeat_times(**kwargs):  # TODO
     visible=lambda: "sample_strategy" in st.session_state["_current_default_config"],
 )
 def set_sample_strategy(**kwargs):
+    def on_change():
+        # Update sample strategy specific parameters when strategy changes
+        sample_strategy = st.session_state[kwargs.get("key", "sample_strategy")]
+        strategy_class = SAMPLE_STRATEGY.get(sample_strategy)
+        if strategy_class:
+            default_args = strategy_class.default_args()
+            for arg_key, arg_value in default_args.items():
+                full_key = f"{arg_key}_in_sample_strategy"
+                st.session_state[full_key] = arg_value
+
     candidates = list(SAMPLE_STRATEGY.modules.keys())
     st.selectbox(
         "Sample Strategy",
         candidates,
         help="The sample strategy used to obtain experiences.",
+        on_change=on_change,
         **kwargs,
     )
 
@@ -128,11 +140,21 @@ def set_expert_data_ratio_in_sample_strategy(**kwargs):
     visible=lambda: "advantage_fn" in st.session_state["_current_default_config"],
 )
 def set_advantage_fn(**kwargs):
+    def on_change():
+        advantage_fn = st.session_state[kwargs.get("key", "advantage_fn")]
+        advantage_class = ADVANTAGE_FN.get(advantage_fn)
+        if advantage_class:
+            default_args = advantage_class.default_args()
+            for arg_key, arg_value in default_args.items():
+                full_key = f"{arg_key}_in_advantage_fn"
+                st.session_state[full_key] = arg_value
+
     candidates = list(ADVANTAGE_FN.modules.keys())
     st.selectbox(
         "Advantage Function",
         candidates,
         help="The advantage function used to compute advantages.",
+        on_change=on_change,
         **kwargs,
     )
 
@@ -142,7 +164,7 @@ def set_advantage_fn(**kwargs):
     visible=lambda: st.session_state["advantage_fn"] in {"ppo", "reinforceplusplus"},
 )
 def set_gamma_in_advantage_fn(**kwargs):
-    st.number_input(r"Gamma :blue-badge[$\gamma$]", **kwargs)
+    st.number_input(r"Gamma :blue-badge[$\gamma$]", help="Discounted factor used in RL", **kwargs)
 
 
 @CONFIG_GENERATORS.register_config(
@@ -150,14 +172,18 @@ def set_gamma_in_advantage_fn(**kwargs):
     visible=lambda: st.session_state["advantage_fn"] == "ppo",
 )
 def set_lam_in_advantage_fn(**kwargs):
-    st.number_input(r"Lambda :blue-badge[$\lambda$]", **kwargs)
+    st.number_input(
+        r"Lambda :blue-badge[$\lambda$]",
+        help="Lambda value when computing Generalized Advantage Estimation",
+        **kwargs,
+    )
 
 
 @CONFIG_GENERATORS.register_config(
     default_value=GRPOAdvantageFn.default_args()["epsilon"],
     visible=lambda: st.session_state["advantage_fn"] == "grpo",
 )
-def set_epsilon_in_advantage_fn(**kwargs):  # TODO: update help message
+def set_epsilon_in_advantage_fn(**kwargs):
     st.number_input(
         r"GRPO Epsilon",
         help=r"""
@@ -198,10 +224,20 @@ def set_tau_in_advantage_fn(**kwargs):
     visible=lambda: "kl_loss_fn" in st.session_state["_current_default_config"],
 )
 def set_kl_loss_fn(**kwargs):
+    def on_change():
+        kl_loss_fn = st.session_state[kwargs.get("key", "kl_loss_fn")]
+        kl_loss_class = KL_FN.get(kl_loss_fn)
+        if kl_loss_class:
+            default_args = kl_loss_class.default_args()
+            for arg_key, arg_value in default_args.items():
+                full_key = f"{arg_key}_in_kl_loss_fn"
+                st.session_state[full_key] = arg_value
+
     candidates = list(KL_FN.modules.keys())
     st.selectbox(
         "KL Loss Type",
         candidates,
+        on_change=on_change,
         **kwargs,
     )
 
@@ -228,10 +264,20 @@ def set_kl_coef_in_kl_loss_fn(**kwargs):
     visible=lambda: "kl_penalty_fn" in st.session_state["_current_default_config"],
 )
 def set_kl_penalty_fn(**kwargs):
+    def on_change():
+        kl_penalty_fn = st.session_state[kwargs.get("key", "kl_penalty_fn")]
+        kl_penalty_class = KL_FN.get(kl_penalty_fn)
+        if kl_penalty_class:
+            default_args = kl_penalty_class.default_args()
+            for arg_key, arg_value in default_args.items():
+                full_key = f"{arg_key}_in_kl_penalty_fn"
+                st.session_state[full_key] = arg_value
+
     candidates = list(KL_FN.modules.keys())
     st.selectbox(
         "KL Penalty Type",
         candidates,
+        on_change=on_change,
         **kwargs,
     )
 
@@ -271,10 +317,20 @@ def set_kl_coef_in_kl_penalty_fn(**kwargs):
     visible=lambda: "policy_loss_fn" in st.session_state["_current_default_config"],
 )
 def set_policy_loss_fn(**kwargs):
+    def on_change():
+        policy_loss_fn = st.session_state[kwargs.get("key", "policy_loss_fn")]
+        policy_loss_class = POLICY_LOSS_FN.get(policy_loss_fn)
+        if policy_loss_class:
+            default_args = policy_loss_class.default_args()
+            for arg_key, arg_value in default_args.items():
+                full_key = f"{arg_key}_in_policy_loss_fn"
+                st.session_state[full_key] = arg_value
+
     candidates = list(POLICY_LOSS_FN.modules.keys())
     st.selectbox(
         "Policy Loss Fn",
         candidates,
+        on_change=on_change,
         **kwargs,
     )
 
@@ -360,8 +416,17 @@ def set_mu_in_policy_loss_fn(**kwargs):
     visible=lambda: "entropy_loss_fn" in st.session_state["_current_default_config"],
 )
 def set_entropy_loss_fn(**kwargs):
+    def on_change():
+        entropy_loss_fn = st.session_state[kwargs.get("key", "entropy_loss_fn")]
+        entropy_loss_class = ENTROPY_LOSS_FN.get(entropy_loss_fn)
+        if entropy_loss_class:
+            default_args = entropy_loss_class.default_args()
+            for arg_key, arg_value in default_args.items():
+                full_key = f"{arg_key}_in_entropy_loss_fn"
+                st.session_state[full_key] = arg_value
+
     candidates = list(ENTROPY_LOSS_FN.modules.keys())
-    st.selectbox("Entropy Loss Function", candidates, **kwargs)
+    st.selectbox("Entropy Loss Function", candidates, on_change=on_change, **kwargs)
 
 
 @CONFIG_GENERATORS.register_config(
