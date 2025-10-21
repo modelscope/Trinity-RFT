@@ -150,13 +150,7 @@ class ConfigManager:
             "default_workflow_type", "default_eval_workflow_type", "default_reward_fn_type"
         )
 
-        self.get_configs(
-            "actor_ppo_micro_batch_size_per_gpu",
-            "actor_lr",
-            "ref_log_prob_micro_batch_size_per_gpu",
-        )
-
-        self.get_configs("critic_ppo_micro_batch_size_per_gpu", "critic_lr")
+        self.get_configs("actor_lr", "actor_ulysses_sequence_parallel_size", "critic_lr")
 
     def _expert_model_part(self):
         self.get_configs("project", "exp_name", columns_spec=[1, 2])
@@ -311,21 +305,22 @@ class ConfigManager:
 
     def _expert_verl_actor_part(self):
         st.subheader("Actor Model Config")
-        self.get_configs(
-            "actor_ppo_micro_batch_size_per_gpu",
-            "ref_log_prob_micro_batch_size_per_gpu",
-            "actor_ulysses_sequence_parallel_size",
-        )
 
         self.get_configs("actor_lr", "actor_warmup_style", "actor_lr_warmup_steps_ratio")
 
+        self.get_configs("actor_grad_clip", "actor_ulysses_sequence_parallel_size")
+
         self.get_configs(
-            "actor_grad_clip",
-            "actor_entropy_from_logits_with_chunking",
-            "actor_entropy_checkpointing",
+            "actor_ppo_micro_batch_size_per_gpu",
+            "ref_log_prob_micro_batch_size_per_gpu",
+            "actor_ppo_max_token_len_per_gpu",
         )
 
-        self.get_configs("actor_load_checkpoint", "actor_save_checkpoint")
+        self.get_configs("actor_entropy_from_logits_with_chunking", "actor_entropy_checkpointing")
+
+        self.get_configs("actor_load_checkpoint")
+
+        self.get_configs("actor_save_checkpoint")
 
     def _expert_verl_critic_part(self):
         st.subheader("Critic Model Config")
@@ -445,7 +440,8 @@ class ConfigManager:
                         "actor_ppo_micro_batch_size_per_gpu"
                     ],
                     "use_dynamic_bsz": use_dynamic_bsz,
-                    "ppo_max_token_len_per_gpu": ppo_max_token_len_per_gpu,
+                    "ppo_max_token_len_per_gpu": st.session_state["actor_ppo_max_token_len_per_gpu"]
+                    or ppo_max_token_len_per_gpu,
                     "ppo_epochs": st.session_state["ppo_epochs"],
                     "ulysses_sequence_parallel_size": st.session_state[
                         "actor_ulysses_sequence_parallel_size"
@@ -460,9 +456,6 @@ class ConfigManager:
                     },
                 },
                 "ref": {
-                    "log_prob_micro_batch_size_per_gpu": st.session_state[
-                        "ref_log_prob_micro_batch_size_per_gpu"
-                    ],
                     "log_prob_use_dynamic_bsz": use_dynamic_bsz,
                     "log_prob_max_token_len_per_gpu": ppo_max_token_len_per_gpu,
                     "ulysses_sequence_parallel_size": st.session_state[

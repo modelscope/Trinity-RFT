@@ -293,7 +293,11 @@ def set_actor_ppo_micro_batch_size_per_gpu(**kwargs):
     max_value = get_train_batch_size_per_gpu()
     st.session_state[key] = min(st.session_state[key], max_value)
     st.number_input(
-        "Micro Batch Size Per GPU :blue-badge[(Actor)]", min_value=1, max_value=max_value, **kwargs
+        "Micro Batch Size Per GPU :blue-badge[(Actor)]",
+        min_value=1,
+        max_value=max_value,
+        help="Batch size per GPU; effective when `use_dynamic_bsz` is False",
+        **kwargs,
     )
 
 
@@ -304,6 +308,16 @@ def set_ref_log_prob_micro_batch_size_per_gpu(**kwargs):
     st.session_state[key] = min(st.session_state[key], max_value)
     st.number_input(
         "Micro Batch Size Per GPU :blue-badge[(Ref)]", min_value=1, max_value=max_value, **kwargs
+    )
+
+
+@CONFIG_GENERATORS.register_config(default_value=16384)
+def set_actor_ppo_max_token_len_per_gpu(**kwargs):
+    st.number_input(
+        "Max Token Len Per GPU :blue-badge[(Actor)]",
+        min_value=1,
+        help="Max token length per GPU for actor model; effective when `use_dynamic_bsz` is True",
+        **kwargs,
     )
 
 
