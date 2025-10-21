@@ -812,17 +812,15 @@ document.write(`
 <section id="id7">
 <h4>避免重复初始化<a class="headerlink" href="#id7" title="Link to this heading">#</a></h4>
 <p>对于较为复杂的工作流，每次重新初始化会带来额外计算开销。
-此时，你可以实现 <code class="docutils literal notranslate"><span class="pre">resettable</span></code> 和 <code class="docutils literal notranslate"><span class="pre">reset</span></code> 方法以避免重复初始化。</p>
-<p><code class="docutils literal notranslate"><span class="pre">resettable</span></code> 方法返回一个布尔值，指示工作流是否支持轻量化重置。</p>
+此时，你可以设置 <code class="docutils literal notranslate"><span class="pre">can_reset</span></code> 属性并实现 <code class="docutils literal notranslate"><span class="pre">reset</span></code> 方法以避免重复初始化。</p>
+<p><code class="docutils literal notranslate"><span class="pre">can_reset</span></code> 是一个类属性，表示工作流是否支持轻量化重置。</p>
 <p><code class="docutils literal notranslate"><span class="pre">reset</span></code> 方法接受一个新的 <code class="docutils literal notranslate"><span class="pre">Task</span></code> 实例，并使用该实例更新工作流的状态。</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;example_workflow&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+    <span class="n">can_reset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+
     <span class="c1"># some code</span>
     <span class="c1"># ...</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">resettable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">True</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">question</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">raw_task</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;question&quot;</span><span class="p">)</span>
@@ -833,16 +831,13 @@ document.write(`
 <section id="id8">
 <h4>批量运行推理任务<a class="headerlink" href="#id8" title="Link to this heading">#</a></h4>
 <p>当前流行的很多 RL 算法需要多次运行同一个任务(例如 GRPO)。该场景下一些简单任务可以直接通过模型批量推理来获得一个问题的多个回复以提升效率。
-针对该情况，你可以实现 <code class="docutils literal notranslate"><span class="pre">repeatable</span></code> 属性以及 <code class="docutils literal notranslate"><span class="pre">set_repeat_times</span></code> 方法。</p>
-<p><code class="docutils literal notranslate"><span class="pre">repeatable</span></code> 属性返回一个布尔值，指示工作流是否支持在 <code class="docutils literal notranslate"><span class="pre">run</span></code> 方法内多次执行。</p>
+针对该情况，你可以设置 <code class="docutils literal notranslate"><span class="pre">can_repeat</span></code> 属性并实现 <code class="docutils literal notranslate"><span class="pre">set_repeat_times</span></code> 方法。</p>
+<p><code class="docutils literal notranslate"><span class="pre">can_repeat</span></code> 是一个类属性，指示工作流是否支持在 <code class="docutils literal notranslate"><span class="pre">run</span></code> 方法内多次执行。</p>
 <p><code class="docutils literal notranslate"><span class="pre">set_repeat_times</span></code> 方法接受两个参数：<code class="docutils literal notranslate"><span class="pre">repeat_times</span></code> 指定了在 <code class="docutils literal notranslate"><span class="pre">run</span></code> 方法内需要执行的次数，<code class="docutils literal notranslate"><span class="pre">run_id_base</span></code> 是一个整数，用于标识多次运行中第一次的运行 ID，之后各次的 ID 基于此递增（该参数用于多轮交互场景，单次模型调用即可完成的任务可以忽略该项）。</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;example_workflow&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+    <span class="n">can_repeat</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="c1"># some code</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">repeatable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">True</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">set_repeat_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">repeat_times</span><span class="p">,</span> <span class="n">run_id_base</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">repeat_times</span> <span class="o">=</span> <span class="n">repeat_times</span>
@@ -882,6 +877,8 @@ document.write(`
 <h3>完整代码示例<a class="headerlink" href="#id9" title="Link to this heading">#</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;example_workflow&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+    <span class="n">can_reset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">can_repeat</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">ModelWrapper</span><span class="p">,</span> <span class="n">auxiliary_models</span><span class="p">:</span> <span class="n">List</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">auxiliary_models</span><span class="o">=</span><span class="n">auxiliary_models</span><span class="p">)</span>
@@ -922,17 +919,9 @@ document.write(`
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">experiences</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">resettable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">True</span>
-
     <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">question</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">raw_task</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;question&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">answer</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">raw_task</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;answer&quot;</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">repeatable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">True</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">set_repeat_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">repeat_times</span><span class="p">,</span> <span class="n">run_id_base</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">repeat_times</span> <span class="o">=</span> <span class="n">repeat_times</span>
@@ -964,13 +953,11 @@ document.write(`
 <h2>其他进阶特性<a class="headerlink" href="#id11" title="Link to this heading">#</a></h2>
 <section id="async">
 <h3>async 支持<a class="headerlink" href="#async" title="Link to this heading">#</a></h3>
-<p>本节样例主要针对同步模式，如果你的工作流需要使用异步方法（例如异步 API）,你可以实现 <code class="docutils literal notranslate"><span class="pre">asynchronous</span></code> 属性并将其设置为 <code class="docutils literal notranslate"><span class="pre">True</span></code>，然后实现 <code class="docutils literal notranslate"><span class="pre">run_async</span></code> 方法，在这种情况下不再需要实现 <code class="docutils literal notranslate"><span class="pre">run</span></code> 方法，其余方法和属性不受影响。</p>
+<p>本节样例主要针对同步模式，如果你的工作流需要使用异步方法（例如异步 API）,你可以将 <code class="docutils literal notranslate"><span class="pre">is_async</span></code> 属性设置为 <code class="docutils literal notranslate"><span class="pre">True</span></code>，然后实现 <code class="docutils literal notranslate"><span class="pre">run_async</span></code> 方法，在这种情况下不再需要实现 <code class="docutils literal notranslate"><span class="pre">run</span></code> 方法，并且初始化参数 <code class="docutils literal notranslate"><span class="pre">auxiliary_models</span></code> 也会自动变为 <code class="docutils literal notranslate"><span class="pre">List[openai.AsyncOpenAI]</span></code> 类型，其余方法和属性保持不变。</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;example_workflow_async&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflowAsync</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">asynchronous</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">True</span>
+    <span class="n">is_async</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
         <span class="c1"># your async code here</span>
@@ -1051,7 +1038,7 @@ document.write(`
 </pre></div>
 </div>
 <p>请注意，每个辅助模型会独立占用 <code class="docutils literal notranslate"><span class="pre">tensor_parallel_size</span> <span class="pre">*</span> <span class="pre">engine_num</span></code> 个 GPU，请根据硬件资源合理配置。在启用辅助模型后，Trainer 可用的 GPU 数量为总 GPU 数量减去所有辅助模型及被训练的推理模型（<code class="docutils literal notranslate"><span class="pre">rollout_model</span></code>）所占用的 GPU 数量。</p>
-<p>配置文件中指定的辅助模型会自动激活 OpenAI API，并将对应的 <code class="docutils literal notranslate"><span class="pre">openai.OpenAI</span></code> 实例传递给 <code class="docutils literal notranslate"><span class="pre">Workflow</span></code> 初始化方法的 <code class="docutils literal notranslate"><span class="pre">auxiliary_models</span></code> 参数。例如：</p>
+<p>配置文件中指定的辅助模型会自动激活 OpenAI API，并将对应的 <code class="docutils literal notranslate"><span class="pre">openai.OpenAI</span></code> 或 <code class="docutils literal notranslate"><span class="pre">openai.AsyncOpenAI</span></code> 实例 (取决于 <code class="docutils literal notranslate"><span class="pre">is_async</span></code>) 传递给 <code class="docutils literal notranslate"><span class="pre">Workflow</span></code> 初始化方法的 <code class="docutils literal notranslate"><span class="pre">auxiliary_models</span></code> 参数。例如：</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>

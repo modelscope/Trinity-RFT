@@ -651,6 +651,8 @@ document.write(`
 <span class="k">class</span><span class="w"> </span><span class="nc">AlfworldWorkflow</span><span class="p">(</span><span class="n">MultiTurnWorkflow</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A workflow for alfworld task.&quot;&quot;&quot;</span>
 
+    <span class="n">is_async</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+
 <div class="viewcode-block" id="AlfworldWorkflow.__init__">
 <a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.AlfworldWorkflow.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -667,10 +669,6 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">repeat_times</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">repeat_times</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_env_steps</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">workflow_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;max_env_steps&quot;</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span></div>
 
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">asynchronous</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="AlfworldWorkflow.get_model_response">
 <a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.AlfworldWorkflow.get_model_response">[docs]</a>

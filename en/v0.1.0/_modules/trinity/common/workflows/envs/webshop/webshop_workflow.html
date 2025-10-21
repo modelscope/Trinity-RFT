@@ -612,6 +612,9 @@ document.write(`
 <span class="k">class</span><span class="w"> </span><span class="nc">WebShopWorkflow</span><span class="p">(</span><span class="n">MultiTurnWorkflow</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A workflow for webshop task.&quot;&quot;&quot;</span>
 
+    <span class="n">can_reset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">is_async</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+
 <div class="viewcode-block" id="WebShopWorkflow.__init__">
 <a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.WebShopWorkflow.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -642,10 +645,6 @@ document.write(`
             <span class="s2">&quot;WebAgentTextEnv-v0&quot;</span><span class="p">,</span> <span class="n">observation_mode</span><span class="o">=</span><span class="s2">&quot;text_rich&quot;</span><span class="p">,</span> <span class="n">num_products</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">human_goals</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span></div>
 
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">resettable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="WebShopWorkflow.reset">
 <a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.WebShopWorkflow.reset">[docs]</a>

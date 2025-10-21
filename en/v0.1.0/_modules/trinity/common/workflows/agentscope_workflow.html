@@ -442,6 +442,8 @@ document.write(`
 <span class="k">class</span><span class="w"> </span><span class="nc">AgentScopeWorkflowAdapter</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Adapter to wrap a agentscope trainable workflow function into a Trinity Workflow.&quot;&quot;&quot;</span>
 
+    <span class="n">is_async</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+
 <div class="viewcode-block" id="AgentScopeWorkflowAdapter.__init__">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeWorkflowAdapter.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -478,21 +480,6 @@ document.write(`
             <span class="n">model</span><span class="o">.</span><span class="n">get_openai_async_client</span><span class="p">(),</span>
         <span class="p">)</span></div>
 
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">asynchronous</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;This workflow runs asynchronously.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="kc">True</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">repeatable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;This workflow is not repeatable.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="kc">False</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">resetable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;This workflow cannot be reset.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="kc">False</span>
 
 <div class="viewcode-block" id="AgentScopeWorkflowAdapter.construct_experiences">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.AgentScopeWorkflowAdapter.construct_experiences">[docs]</a>

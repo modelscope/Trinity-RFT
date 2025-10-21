@@ -646,6 +646,8 @@ document.write(`
 <span class="sd">    Only support qwen model for now. You can change the prompt construction and reward calculation by yourself for other models.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="n">is_async</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+
 <div class="viewcode-block" id="ToolCallWorkflow.reset">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.ToolCallWorkflow.reset">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">):</span>
@@ -660,10 +662,6 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">workflow_args</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">workflow_args</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reward_fn_args</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">reward_fn_args</span></div>
 
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">asynchronous</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="ToolCallWorkflow.format_prompt">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.ToolCallWorkflow.format_prompt">[docs]</a>

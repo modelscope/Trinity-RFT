@@ -519,6 +519,10 @@ document.write(`
 <span class="sd">    2. Generate SFT data from successful attempt</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="n">can_reset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">can_repeat</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">is_async</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+
 <div class="viewcode-block" id="RAFTAlfworldWorkflow.__init__">
 <a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.RAFTAlfworldWorkflow.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -550,10 +554,6 @@ document.write(`
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">task</span><span class="p">)</span></div>
 
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">asynchronous</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="RAFTAlfworldWorkflow.reset">
 <a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.RAFTAlfworldWorkflow.reset">[docs]</a>
@@ -730,17 +730,6 @@ document.write(`
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">experience</span><span class="p">]</span></div>
 
-
-<div class="viewcode-block" id="RAFTAlfworldWorkflow.resettable">
-<a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.RAFTAlfworldWorkflow.resettable">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">resettable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Indicate that this workflow can be reset to avoid re-initialization&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="kc">True</span></div>
-
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">repeatable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="RAFTAlfworldWorkflow.set_repeat_times">
 <a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.RAFTAlfworldWorkflow.set_repeat_times">[docs]</a>

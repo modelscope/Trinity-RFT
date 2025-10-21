@@ -205,19 +205,19 @@ __all__ = [
 ##### Avoid Re-initialization
 
 For heavy workflows, re-initializing every time can incurs extra computational costs.
-In this case, you can implement the `resettable` property and `reset` method to avoid re-initialization.
+In this case, you can set the `can_reset` property and implement `reset` method to avoid re-initialization.
 
-The `resettable` property returns a boolean indicating whether the workflow supports resetting.
+The `can_reset` is a class property that indicates whether the workflow supports resetting.
+
 The `reset` method accepts a `Task` parameter and resets the workflow's internal state based on the new task.
 
 ```python
 @WORKFLOWS.register_module("example_workflow")
 class ExampleWorkflow(Workflow):
+    can_reset: bool = True
+
     # some code
     # ...
-
-    def resettable(self):
-        return True
 
     def reset(self, task: Task):
         self.question = task.raw_task.get("question")
@@ -227,19 +227,17 @@ class ExampleWorkflow(Workflow):
 ##### Support Batch Inference
 
 In many popular RL algorithms, multiple runs of the same task are required (e.g., GRPO). In such scenarios, you can directly use batch inference to obtain multiple responses for a single question to improve efficiency.
-For this case, you can implement the `repeatable` property and `set_repeat_times` method.
+For this case, you can implement the `can_repeat` property and `set_repeat_times` method.
 
-The `repeatable` property returns a boolean indicating whether the workflow supports multiple executions within the `run` method.
+The `can_repeat` is a class property that indicates whether the workflow supports multiple executions within the `run` method.
+
 The `set_repeat_times` method accepts two parameters: `repeat_times` specifies the number of times to execute within the `run` method, and `run_id_base` is an integer used to identify the first run ID in multiple runs (this parameter is used in multi-turn interaction scenarios; for tasks that can be completed with a single model call, this can be ignored).
 
 ```python
 @WORKFLOWS.register_module("example_workflow")
 class ExampleWorkflow(Workflow):
+    can_repeat: bool = True
     # some code
-
-    @property
-    def repeatable(self) -> bool:
-        return True
 
     def set_repeat_times(self, repeat_times, run_id_base):
         self.repeat_times = repeat_times
@@ -279,6 +277,8 @@ class ExampleWorkflow(Workflow):
 ```python
 @WORKFLOWS.register_module("example_workflow")
 class ExampleWorkflow(Workflow):
+    can_reset: bool = True
+    can_repeat: bool = True
 
     def __init__(self, task: Task, model: ModelWrapper, auxiliary_models: List):
         super().__init__(task=task, model=model, auxiliary_models=auxiliary_models)
@@ -319,17 +319,9 @@ class ExampleWorkflow(Workflow):
             )
         return experiences
 
-    @property
-    def resettable(self):
-        return True
-
     def reset(self, task: Task):
         self.question = task.raw_task.get("question")
         self.answer = task.raw_task.get("answer")
-
-    @property
-    def repeatable(self) -> bool:
-        return True
 
     def set_repeat_times(self, repeat_times, run_id_base):
         self.repeat_times = repeat_times
@@ -364,15 +356,13 @@ trinity run --config <your_yaml_file>
 
 #### Async Support
 
-The example above mainly targets synchronous mode. If your workflow needs to use asynchronous methods (e.g., asynchronous API), you can implement the `asynchronous` property and set it to `True`, then implement the `run_async` method. In this case, you no longer need to implement the `run` method, while other methods and properties remain unaffected.
+The example above mainly targets synchronous mode. If your workflow needs to use asynchronous methods (e.g., asynchronous API), you can set `is_async` to `True`, then implement the `run_async` method. In this case, you no longer need to implement the `run` method, and the initialization parameter `auxiliary_models` will also change to `List[openai.AsyncOpenAI]`, while other methods and properties remain changed.
 
 ```python
 @WORKFLOWS.register_module("example_workflow_async")
 class ExampleWorkflowAsync(Workflow):
 
-    @property
-    def asynchronous(self):
-        return True
+    is_async: bool = True
 
     async def run_async(self) -> List[Experience]:
         # your async code here
@@ -458,7 +448,7 @@ explorer:
 
 Note that each auxiliary model will independently occupy `tensor_parallel_size * engine_num` GPUs. Please configure according to your hardware resources. After enabling auxiliary models, the number of GPUs available to the Trainer is the total GPU count minus those occupied by all auxiliary models and the inference model being trained (`rollout_model`).
 
-The auxiliary models specified in the configuration file will automatically activate the OpenAI API and pass the corresponding `openai.OpenAI` instances to the `auxiliary_models` parameter of the `Workflow` initialization method. For example:
+The auxiliary models specified in the configuration file will automatically activate the OpenAI API and pass the corresponding `openai.OpenAI` or `openai.AsyncOpenAI` instances (depending on the `is_async` setting) to the `auxiliary_models` parameter of the `Workflow` initialization method. For example:
 
 ```python
 class MyWorkflow(Workflow):

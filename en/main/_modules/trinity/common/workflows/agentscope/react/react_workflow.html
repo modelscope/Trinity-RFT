@@ -570,6 +570,8 @@ document.write(`
 <a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.agentscope.react.react_workflow.html#trinity.common.workflows.AgentScopeReActWorkflow">[docs]</a>
 <span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;as_react_workflow&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">AgentScopeReActWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+    <span class="n">is_async</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+
 <div class="viewcode-block" id="AgentScopeReActWorkflow.__init__">
 <a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.agentscope.react.react_workflow.html#trinity.common.workflows.AgentScopeReActWorkflow.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -611,8 +613,8 @@ document.write(`
             <span class="n">openai_client</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_client</span><span class="p">,</span>
             <span class="n">system_prompt</span><span class="o">=</span><span class="n">template</span><span class="o">.</span><span class="n">system_prompt</span><span class="p">,</span>
             <span class="n">generate_kwargs</span><span class="o">=</span><span class="p">{</span>
-                <span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rollout_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;temperature&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
-                <span class="s2">&quot;max_tokens&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rollout_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;max_tokens&quot;</span><span class="p">,</span> <span class="mi">4096</span><span class="p">),</span>
+                <span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">rollout_args</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span>
+                <span class="s2">&quot;max_tokens&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">rollout_args</span><span class="o">.</span><span class="n">max_tokens</span> <span class="ow">or</span> <span class="mi">4096</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">response_structure</span><span class="o">=</span><span class="n">template</span><span class="o">.</span><span class="n">response_structure</span><span class="p">,</span>
         <span class="p">)</span></div>
@@ -660,17 +662,7 @@ document.write(`
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reward</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
                 <span class="n">exp</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">reward</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">exps</span></div>
-
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">asynchronous</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;AgentScope&#39;s ReAct agent only supports asynchronous calls, so we set this to True.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="kc">True</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">repeatable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;This workflow is not repeatable.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="kc">False</span></div>
+</div>
 
 </pre></div>
 

@@ -499,6 +499,7 @@ document.write(`
             <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="p">(</span><span class="n">auxiliary_models</span> <span class="ow">or</span> <span class="p">[])</span>
         <span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_model_clients</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_model_async_clients</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">workflow_instance</span><span class="p">:</span> <span class="n">Workflow</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">runner_id</span> <span class="o">=</span> <span class="n">runner_id</span></div>
 
@@ -513,7 +514,9 @@ document.write(`
         <span class="p">)</span>
         <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_models</span><span class="p">:</span>
             <span class="n">api_client</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_openai_client</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_model_clients</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">api_client</span><span class="p">)</span></div>
+            <span class="n">async_api_client</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_openai_async_client</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_model_clients</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">api_client</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_model_async_clients</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">async_api_client</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="WorkflowRunner.is_alive">
@@ -531,7 +534,12 @@ document.write(`
             <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflow_instance</span><span class="o">.</span><span class="n">resettable</span>
         <span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">workflow_instance</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">to_workflow</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_model_clients</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model_wrapper</span><span class="p">,</span>
+                <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_model_async_clients</span>
+                    <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">workflow</span><span class="o">.</span><span class="n">is_async</span>
+                    <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">auxiliary_model_clients</span>
+                <span class="p">),</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">workflow_instance</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>

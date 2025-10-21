@@ -582,6 +582,10 @@ document.write(`
 <span class="sd">    A workflow is a runnable object which generates a list of experiences.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="n">can_reset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># whether the workflow can be reset with a new task. If true, `reset()` must be implemented.</span>
+    <span class="n">can_repeat</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># whether the workflow can be repeated multiple times. If true, `set_repeat_times()` must be implemented.</span>
+    <span class="n">is_async</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># whether the workflow runs in async mode. If true, `run_async()` must be implemented, else `run()` must be implemented.</span>
+
 <div class="viewcode-block" id="Workflow.__init__">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.Workflow.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -600,21 +604,21 @@ document.write(`
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">resettable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">False</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Deprecated, use cls.can_reset instead.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">can_reset</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">repeatable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;A workflow is repeatable if it can be run multiple times within the run() or run_async() method.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="kc">False</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Deprecated, use cls.can_repeat instead.</span>
+<span class="sd">        A workflow is repeatable if it can be run multiple times within the run() or run_async() method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">can_repeat</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">asynchronous</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether the workflow runs in async mode.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="kc">False</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">rollout_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">asdict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">rollout_args</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Deprecated, use cls.is_async instead.</span>
+<span class="sd">        Whether the workflow runs in async mode.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">is_async</span>
 
 <div class="viewcode-block" id="Workflow.reset">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.Workflow.reset">[docs]</a>
@@ -660,6 +664,8 @@ document.write(`
 <span class="sd">    The base workflow class for concatenated multi-turn tasks.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="n">can_repeat</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+
 <div class="viewcode-block" id="MultiTurnWorkflow.__init__">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.MultiTurnWorkflow.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -675,10 +681,6 @@ document.write(`
             <span class="n">auxiliary_models</span><span class="o">=</span><span class="n">auxiliary_models</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">repeatable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="MultiTurnWorkflow.set_repeat_times">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.MultiTurnWorkflow.set_repeat_times">[docs]</a>
@@ -722,6 +724,9 @@ document.write(`
 <span class="k">class</span><span class="w"> </span><span class="nc">SimpleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A workflow for simple single-round task.&quot;&quot;&quot;</span>
 
+    <span class="n">can_reset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">can_repeat</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+
 <div class="viewcode-block" id="SimpleWorkflow.__init__">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.SimpleWorkflow.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -738,10 +743,6 @@ document.write(`
             <span class="n">auxiliary_models</span><span class="o">=</span><span class="n">auxiliary_models</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">resettable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="SimpleWorkflow.reset">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.SimpleWorkflow.reset">[docs]</a>
@@ -762,10 +763,6 @@ document.write(`
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;`reward_fn` must be a subclass of `RewardFn`&quot;</span><span class="p">)</span></div>
 
 
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">repeatable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">True</span>
-
 <div class="viewcode-block" id="SimpleWorkflow.set_repeat_times">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.SimpleWorkflow.set_repeat_times">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_repeat_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">repeat_times</span><span class="p">,</span> <span class="n">run_id_base</span><span class="p">):</span>
@@ -773,6 +770,10 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">rollout_args</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="n">repeat_times</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">run_id_base</span> <span class="o">=</span> <span class="n">run_id_base</span></div>
 
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">rollout_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">asdict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">rollout_args</span><span class="p">)</span>
 
 <div class="viewcode-block" id="SimpleWorkflow.format_messages">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.SimpleWorkflow.format_messages">[docs]</a>
@@ -820,9 +821,7 @@ document.write(`
 <a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.AsyncSimpleWorkflow">[docs]</a>
 <span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;async_simple_workflow&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">AsyncSimpleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">asynchronous</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">True</span>
+    <span class="n">is_async</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="AsyncSimpleWorkflow.run_async">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.workflow.html#trinity.common.workflows.AsyncSimpleWorkflow.run_async">[docs]</a>

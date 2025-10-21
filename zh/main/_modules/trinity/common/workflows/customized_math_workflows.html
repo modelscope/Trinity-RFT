@@ -657,9 +657,7 @@ document.write(`
 <a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_math_workflows.html#trinity.common.workflows.AsyncMathBoxedWorkflow">[文档]</a>
 <span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;async_math_boxed_workflow&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">AsyncMathBoxedWorkflow</span><span class="p">(</span><span class="n">MathBoxedWorkflow</span><span class="p">):</span>
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">asynchronous</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">True</span>
+    <span class="n">is_async</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="AsyncMathBoxedWorkflow.run_async">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.customized_math_workflows.html#trinity.common.workflows.AsyncMathBoxedWorkflow.run_async">[文档]</a>

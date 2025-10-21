@@ -615,11 +615,7 @@ document.write(`
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">max_step_num</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the maximum number of steps in the task.&quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">repeatable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">False</span></div>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 
 
@@ -628,9 +624,7 @@ document.write(`
 <span class="k">class</span><span class="w"> </span><span class="nc">AsyncStepWiseRewardWorkflow</span><span class="p">(</span><span class="n">StepWiseRewardWorkflow</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Async version of `StepWiseRewardWorkflow`.&quot;&quot;&quot;</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">asynchronous</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">True</span>
+    <span class="n">is_async</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="AsyncStepWiseRewardWorkflow.run_async">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.step_wise_workflow.html#trinity.common.workflows.step_wise_workflow.AsyncStepWiseRewardWorkflow.run_async">[docs]</a>
@@ -759,11 +753,7 @@ document.write(`
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">max_step_num</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the maximum number of steps in the task.&quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">repeatable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">False</span></div>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 
 
@@ -772,9 +762,7 @@ document.write(`
 <span class="k">class</span><span class="w"> </span><span class="nc">AsyncRewardPropagationWorkflow</span><span class="p">(</span><span class="n">RewardPropagationWorkflow</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Async version of `RewardPropagationWorkflow`.&quot;&quot;&quot;</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">asynchronous</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">True</span>
+    <span class="n">is_async</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="AsyncRewardPropagationWorkflow.run_async">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.step_wise_workflow.html#trinity.common.workflows.step_wise_workflow.AsyncRewardPropagationWorkflow.run_async">[docs]</a>

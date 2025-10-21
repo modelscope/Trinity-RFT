@@ -599,14 +599,6 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">eval_gen_args</span> <span class="o">=</span> <span class="n">asdict</span><span class="p">(</span><span class="n">GenerationConfig</span><span class="p">(</span><span class="n">temperature</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">top_p</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">logprobs</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span></div>
 
 
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">resettable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">False</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">repeatable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">False</span>
-
 <div class="viewcode-block" id="MathEvalWorkflow.format_messages">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.eval_workflow.html#trinity.common.workflows.MathEvalWorkflow.format_messages">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">format_messages</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -655,9 +647,7 @@ document.write(`
 <a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.eval_workflow.html#trinity.common.workflows.AsyncMathEvalWorkflow">[docs]</a>
 <span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;async_math_eval_workflow&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">AsyncMathEvalWorkflow</span><span class="p">(</span><span class="n">MathEvalWorkflow</span><span class="p">):</span>
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">asynchronous</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">True</span>
+    <span class="n">is_async</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="AsyncMathEvalWorkflow.run_async">
 <a class="viewcode-back" href="../../../../build_api/trinity.common.workflows.eval_workflow.html#trinity.common.workflows.AsyncMathEvalWorkflow.run_async">[docs]</a>

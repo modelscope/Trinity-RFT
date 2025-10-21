@@ -821,16 +821,15 @@ Ensure the name does not conflict with existing workflows.</p>
 <section id="avoid-re-initialization">
 <h4>Avoid Re-initialization<a class="headerlink" href="#avoid-re-initialization" title="Link to this heading">#</a></h4>
 <p>For heavy workflows, re-initializing every time can incurs extra computational costs.
-In this case, you can implement the <code class="docutils literal notranslate"><span class="pre">resettable</span></code> property and <code class="docutils literal notranslate"><span class="pre">reset</span></code> method to avoid re-initialization.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">resettable</span></code> property returns a boolean indicating whether the workflow supports resetting.
-The <code class="docutils literal notranslate"><span class="pre">reset</span></code> method accepts a <code class="docutils literal notranslate"><span class="pre">Task</span></code> parameter and resets the workflow’s internal state based on the new task.</p>
+In this case, you can set the <code class="docutils literal notranslate"><span class="pre">can_reset</span></code> property and implement <code class="docutils literal notranslate"><span class="pre">reset</span></code> method to avoid re-initialization.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">can_reset</span></code> is a class property that indicates whether the workflow supports resetting.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">reset</span></code> method accepts a <code class="docutils literal notranslate"><span class="pre">Task</span></code> parameter and resets the workflow’s internal state based on the new task.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;example_workflow&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+    <span class="n">can_reset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+
     <span class="c1"># some code</span>
     <span class="c1"># ...</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">resettable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">True</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">question</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">raw_task</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;question&quot;</span><span class="p">)</span>
@@ -841,16 +840,13 @@ The <code class="docutils literal notranslate"><span class="pre">reset</span></c
 <section id="support-batch-inference">
 <h4>Support Batch Inference<a class="headerlink" href="#support-batch-inference" title="Link to this heading">#</a></h4>
 <p>In many popular RL algorithms, multiple runs of the same task are required (e.g., GRPO). In such scenarios, you can directly use batch inference to obtain multiple responses for a single question to improve efficiency.
-For this case, you can implement the <code class="docutils literal notranslate"><span class="pre">repeatable</span></code> property and <code class="docutils literal notranslate"><span class="pre">set_repeat_times</span></code> method.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">repeatable</span></code> property returns a boolean indicating whether the workflow supports multiple executions within the <code class="docutils literal notranslate"><span class="pre">run</span></code> method.
-The <code class="docutils literal notranslate"><span class="pre">set_repeat_times</span></code> method accepts two parameters: <code class="docutils literal notranslate"><span class="pre">repeat_times</span></code> specifies the number of times to execute within the <code class="docutils literal notranslate"><span class="pre">run</span></code> method, and <code class="docutils literal notranslate"><span class="pre">run_id_base</span></code> is an integer used to identify the first run ID in multiple runs (this parameter is used in multi-turn interaction scenarios; for tasks that can be completed with a single model call, this can be ignored).</p>
+For this case, you can implement the <code class="docutils literal notranslate"><span class="pre">can_repeat</span></code> property and <code class="docutils literal notranslate"><span class="pre">set_repeat_times</span></code> method.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">can_repeat</span></code> is a class property that indicates whether the workflow supports multiple executions within the <code class="docutils literal notranslate"><span class="pre">run</span></code> method.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">set_repeat_times</span></code> method accepts two parameters: <code class="docutils literal notranslate"><span class="pre">repeat_times</span></code> specifies the number of times to execute within the <code class="docutils literal notranslate"><span class="pre">run</span></code> method, and <code class="docutils literal notranslate"><span class="pre">run_id_base</span></code> is an integer used to identify the first run ID in multiple runs (this parameter is used in multi-turn interaction scenarios; for tasks that can be completed with a single model call, this can be ignored).</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;example_workflow&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+    <span class="n">can_repeat</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="c1"># some code</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">repeatable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">True</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">set_repeat_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">repeat_times</span><span class="p">,</span> <span class="n">run_id_base</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">repeat_times</span> <span class="o">=</span> <span class="n">repeat_times</span>
@@ -890,6 +886,8 @@ The <code class="docutils literal notranslate"><span class="pre">set_repeat_time
 <h3>Full Code Example<a class="headerlink" href="#full-code-example" title="Link to this heading">#</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;example_workflow&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
+    <span class="n">can_reset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">can_repeat</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">ModelWrapper</span><span class="p">,</span> <span class="n">auxiliary_models</span><span class="p">:</span> <span class="n">List</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">auxiliary_models</span><span class="o">=</span><span class="n">auxiliary_models</span><span class="p">)</span>
@@ -930,17 +928,9 @@ The <code class="docutils literal notranslate"><span class="pre">set_repeat_time
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">experiences</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">resettable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">True</span>
-
     <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">Task</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">question</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">raw_task</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;question&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">answer</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">raw_task</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;answer&quot;</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">repeatable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">True</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">set_repeat_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">repeat_times</span><span class="p">,</span> <span class="n">run_id_base</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">repeat_times</span> <span class="o">=</span> <span class="n">repeat_times</span>
@@ -972,13 +962,11 @@ The <code class="docutils literal notranslate"><span class="pre">set_repeat_time
 <h2>Advanced Features<a class="headerlink" href="#advanced-features" title="Link to this heading">#</a></h2>
 <section id="async-support">
 <h3>Async Support<a class="headerlink" href="#async-support" title="Link to this heading">#</a></h3>
-<p>The example above mainly targets synchronous mode. If your workflow needs to use asynchronous methods (e.g., asynchronous API), you can implement the <code class="docutils literal notranslate"><span class="pre">asynchronous</span></code> property and set it to <code class="docutils literal notranslate"><span class="pre">True</span></code>, then implement the <code class="docutils literal notranslate"><span class="pre">run_async</span></code> method. In this case, you no longer need to implement the <code class="docutils literal notranslate"><span class="pre">run</span></code> method, while other methods and properties remain unaffected.</p>
+<p>The example above mainly targets synchronous mode. If your workflow needs to use asynchronous methods (e.g., asynchronous API), you can set <code class="docutils literal notranslate"><span class="pre">is_async</span></code> to <code class="docutils literal notranslate"><span class="pre">True</span></code>, then implement the <code class="docutils literal notranslate"><span class="pre">run_async</span></code> method. In this case, you no longer need to implement the <code class="docutils literal notranslate"><span class="pre">run</span></code> method, and the initialization parameter <code class="docutils literal notranslate"><span class="pre">auxiliary_models</span></code> will also change to <code class="docutils literal notranslate"><span class="pre">List[openai.AsyncOpenAI]</span></code>, while other methods and properties remain changed.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@WORKFLOWS</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="s2">&quot;example_workflow_async&quot;</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ExampleWorkflowAsync</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">asynchronous</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">True</span>
+    <span class="n">is_async</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Experience</span><span class="p">]:</span>
         <span class="c1"># your async code here</span>
@@ -1058,7 +1046,7 @@ The <code class="docutils literal notranslate"><span class="pre">set_repeat_time
 </pre></div>
 </div>
 <p>Note that each auxiliary model will independently occupy <code class="docutils literal notranslate"><span class="pre">tensor_parallel_size</span> <span class="pre">*</span> <span class="pre">engine_num</span></code> GPUs. Please configure according to your hardware resources. After enabling auxiliary models, the number of GPUs available to the Trainer is the total GPU count minus those occupied by all auxiliary models and the inference model being trained (<code class="docutils literal notranslate"><span class="pre">rollout_model</span></code>).</p>
-<p>The auxiliary models specified in the configuration file will automatically activate the OpenAI API and pass the corresponding <code class="docutils literal notranslate"><span class="pre">openai.OpenAI</span></code> instances to the <code class="docutils literal notranslate"><span class="pre">auxiliary_models</span></code> parameter of the <code class="docutils literal notranslate"><span class="pre">Workflow</span></code> initialization method. For example:</p>
+<p>The auxiliary models specified in the configuration file will automatically activate the OpenAI API and pass the corresponding <code class="docutils literal notranslate"><span class="pre">openai.OpenAI</span></code> or <code class="docutils literal notranslate"><span class="pre">openai.AsyncOpenAI</span></code> instances (depending on the <code class="docutils literal notranslate"><span class="pre">is_async</span></code> setting) to the <code class="docutils literal notranslate"><span class="pre">auxiliary_models</span></code> parameter of the <code class="docutils literal notranslate"><span class="pre">Workflow</span></code> initialization method. For example:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyWorkflow</span><span class="p">(</span><span class="n">Workflow</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>

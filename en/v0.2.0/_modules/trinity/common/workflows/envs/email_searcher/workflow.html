@@ -520,6 +520,9 @@ document.write(`
 <span class="sd">    Multi-turn Email Search workflow (ReAct-style tool use).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="n">can_reset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">is_async</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+
 <div class="viewcode-block" id="EmailSearchWorkflow.__init__">
 <a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.EmailSearchWorkflow.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -540,18 +543,6 @@ document.write(`
 
         <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">task</span><span class="p">)</span></div>
 
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">repeatable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">False</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">resettable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">True</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">asynchronous</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="EmailSearchWorkflow.reset">
 <a class="viewcode-back" href="../../../../../../build_api/trinity.common.workflows.html#trinity.common.workflows.EmailSearchWorkflow.reset">[docs]</a>
@@ -585,8 +576,8 @@ document.write(`
             <span class="n">openai_client</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">openai_client</span><span class="p">,</span>
             <span class="n">system_prompt</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">system_prompt</span><span class="p">,</span>
             <span class="n">generate_kwargs</span><span class="o">=</span><span class="p">{</span>
-                <span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rollout_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;temperature&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
-                <span class="s2">&quot;max_tokens&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rollout_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;max_tokens&quot;</span><span class="p">,</span> <span class="mi">4096</span><span class="p">),</span>
+                <span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">rollout_args</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span>
+                <span class="s2">&quot;max_tokens&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">rollout_args</span><span class="o">.</span><span class="n">max_tokens</span> <span class="ow">or</span> <span class="mi">4096</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">response_structure</span><span class="o">=</span><span class="n">AnswerModel</span><span class="p">,</span>
         <span class="p">)</span></div>
