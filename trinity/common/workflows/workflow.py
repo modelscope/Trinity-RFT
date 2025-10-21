@@ -80,6 +80,10 @@ class Workflow:
     A workflow is a runnable object which generates a list of experiences.
     """
 
+    can_reset: bool = False  # whether the workflow can be reset with a new task. If true, `reset()` must be implemented.
+    can_repeat: bool = False  # whether the workflow can be repeated multiple times. If true, `set_repeat_times()` must be implemented.
+    is_async: bool = False  # whether the workflow runs in async mode. If true, `run_async()` must be implemented, else `run()` must be implemented.
+
     def __init__(
         self,
         *,
@@ -95,21 +99,21 @@ class Workflow:
 
     @property
     def resettable(self):
-        return False
+        """Deprecated, use cls.can_reset instead."""
+        return self.__class__.can_reset
 
     @property
     def repeatable(self):
-        """A workflow is repeatable if it can be run multiple times within the run() or run_async() method."""
-        return False
+        """Deprecated, use cls.can_repeat instead.
+        A workflow is repeatable if it can be run multiple times within the run() or run_async() method.
+        """
+        return self.__class__.can_repeat
 
     @property
     def asynchronous(self):
-        """Whether the workflow runs in async mode."""
-        return False
-
-    @property
-    def rollout_args(self):
-        return asdict(self.task.rollout_args)
+        """Deprecated, use cls.is_async instead.
+        Whether the workflow runs in async mode."""
+        return self.__class__.is_async
 
     def reset(self, task: Task):
         """Reset the workflow."""
@@ -140,6 +144,8 @@ class MultiTurnWorkflow(Workflow):
     The base workflow class for concatenated multi-turn tasks.
     """
 
+    can_repeat: bool = True
+
     def __init__(
         self,
         *,
@@ -152,10 +158,6 @@ class MultiTurnWorkflow(Workflow):
             model=model,
             auxiliary_models=auxiliary_models,
         )
-
-    @property
-    def repeatable(self):
-        return True
 
     def set_repeat_times(self, repeat_times, run_id_base):
         self.repeat_times = repeat_times
@@ -190,6 +192,9 @@ class MultiTurnWorkflow(Workflow):
 class SimpleWorkflow(Workflow):
     """A workflow for simple single-round task."""
 
+    can_reset: bool = True
+    can_repeat: bool = True
+
     def __init__(
         self,
         *,
@@ -203,10 +208,6 @@ class SimpleWorkflow(Workflow):
             model=model,
             auxiliary_models=auxiliary_models,
         )
-
-    @property
-    def resettable(self):
-        return True
 
     def reset(self, task: Task):
         self.format_args = task.format_args
@@ -224,14 +225,14 @@ class SimpleWorkflow(Workflow):
         else:
             raise ValueError("`reward_fn` must be a subclass of `RewardFn`")
 
-    @property
-    def repeatable(self):
-        return True
-
     def set_repeat_times(self, repeat_times, run_id_base):
         self.repeat_times = repeat_times
         self.task.rollout_args.n = repeat_times
         self.run_id_base = run_id_base
+
+    @property
+    def rollout_args(self):
+        return asdict(self.task.rollout_args)
 
     def format_messages(self):
         """Format messages for the instruct model."""
@@ -270,9 +271,7 @@ class SimpleWorkflow(Workflow):
 
 @WORKFLOWS.register_module("async_simple_workflow")
 class AsyncSimpleWorkflow(Workflow):
-    @property
-    def asynchronous(self):
-        return True
+    is_async: bool = True
 
     async def run_async(self) -> List[Experience]:
         # TODO: Optimize the generate function

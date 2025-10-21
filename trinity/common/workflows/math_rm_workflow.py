@@ -55,9 +55,7 @@ class MathRMWorkflow(SimpleWorkflow):
 
 @WORKFLOWS.register_module("async_math_rm_workflow")
 class AsyncMathRMWorkflow(MathRMWorkflow):
-    @property
-    def asynchronous(self):
-        return True
+    is_async: bool = True
 
     async def run_async(self) -> List[Experience]:
         messages = self.format_messages()

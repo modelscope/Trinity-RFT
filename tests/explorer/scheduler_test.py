@@ -18,6 +18,8 @@ from trinity.explorer.scheduler import Scheduler
 
 @WORKFLOWS.register_module("dummy_workflow")
 class DummyWorkflow(Workflow):
+    can_repeat: bool = True
+
     def __init__(self, *, task, model, auxiliary_models):
         super().__init__(task=task, model=model, auxiliary_models=auxiliary_models)
         self.step_num = task.workflow_args.get("step_num", 1)
@@ -29,10 +31,6 @@ class DummyWorkflow(Workflow):
                 self.seconds = int(parts[-1])
             else:
                 self.seconds = 10
-
-    @property
-    def repeatable(self):
-        return True
 
     def set_repeat_times(self, repeat_times, run_id_base):
         self.repeat_times = repeat_times
@@ -63,18 +61,12 @@ class DummyWorkflow(Workflow):
 
 @WORKFLOWS.register_module("dummy_nonrepeat_workflow")
 class DummyNonRepeatWorkflow(Workflow):
+    can_reset: bool = True
+
     def __init__(self, *, task, model, auxiliary_models):
         super().__init__(task=task, model=model, auxiliary_models=auxiliary_models)
         self.reset_flag = False
         self.step_num = task.workflow_args.get("step_num", 1)
-
-    @property
-    def resettable(self):
-        return True
-
-    @property
-    def repeatable(self):
-        return False
 
     def reset(self, task: Task):
         self.task = task
@@ -95,17 +87,12 @@ class DummyNonRepeatWorkflow(Workflow):
 
 @WORKFLOWS.register_module("dummy_async_workflow")
 class DummyAsyncWorkflow(Workflow):
+    can_repeat: bool = True
+    is_async: bool = True
+
     def __init__(self, *, task, model, auxiliary_models):
         super().__init__(task=task, model=model, auxiliary_models=auxiliary_models)
         self.step_num = task.workflow_args.get("step_num", 1)
-
-    @property
-    def asynchronous(self):
-        return True
-
-    @property
-    def repeatable(self):
-        return True
 
     def set_repeat_times(self, repeat_times, run_id_base):
         self.repeat_times = repeat_times

@@ -82,9 +82,7 @@ class SimpleMMWorkflow(SimpleWorkflow):
 
 @WORKFLOWS.register_module("async_simple_mm_workflow")
 class AsyncSimpleMMWorkflow(SimpleMMWorkflow):
-    @property
-    def asynchronous(self):
-        return True
+    is_async: bool = True
 
     async def run_async(self) -> List[Experience]:
         # TODO: test generate_mm

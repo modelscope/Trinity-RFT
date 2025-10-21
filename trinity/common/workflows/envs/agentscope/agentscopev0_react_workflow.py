@@ -19,6 +19,8 @@ class AgentScopeV0ReactMathWorkflow(Workflow):
     We use the AgentScope V0 version here. The code will be deprecated soon.
     """
 
+    can_reset: bool = True
+
     def __init__(
         self,
         *,
@@ -44,9 +46,6 @@ class AgentScopeV0ReactMathWorkflow(Workflow):
         self.openai_client = model.get_openai_client()
         self.model_name = self.openai_client.model_path
 
-        temperature = self.rollout_args.get("temperature", 1.0)
-        max_tokens = self.rollout_args.get("max_tokens", 4096)
-
         agentscope.init(
             model_configs=[
                 {
@@ -55,8 +54,8 @@ class AgentScopeV0ReactMathWorkflow(Workflow):
                     "model_name": self.model_name,
                     "api_key": "EMPTY",
                     "generate_args": {
-                        "temperature": temperature,
-                        "max_tokens": max_tokens,
+                        "temperature": self.task.rollout_args.temperature,
+                        "max_tokens": self.task.rollout_args.max_tokens or 4096,
                     },
                     "use_openai_formatter": True,
                 }
@@ -71,10 +70,6 @@ class AgentScopeV0ReactMathWorkflow(Workflow):
             maximum_memory_bytes=None,
         )
         self.reset(task)
-
-    @property
-    def resettable(self):
-        return True
 
     def reset(self, task: Task):
         self.system_prompt = """
@@ -114,10 +109,6 @@ You are an agent specialized in solving math problems with tools. Please solve t
 
         # we use the boxed format to evaluate the answer
         self.reward_fn = MathBoxedRewardFn()
-
-    @property
-    def repeatable(self):
-        return False
 
     def run(self):
         # make sure that we have the correct import

@@ -8,6 +8,9 @@ model:
 algorithm:
   algorithm_type: grpo
   repeat_times: 16
+  optimizer:
+    lr: 1e-6
+    lr_warmup_steps: 20
   policy_loss_fn_args:
     clip_range_low: 0.2
     clip_range_high: 0.28
@@ -72,18 +75,7 @@ synchronizer:
   sync_timeout: 1200
 trainer:
   save_interval: 100
-  trainer_config:
-    actor_rollout_ref:
-      model:
-        use_remove_padding: true
-      actor:
-        use_dynamic_bsz: true
-        ppo_max_token_len_per_gpu: 22000
-        ulysses_sequence_parallel_size: 1
-        optim:
-          lr: 1e-6
-          lr_warmup_steps: 20
-      ref:
-        log_prob_use_dynamic_bsz: ${trainer.trainer_config.actor_rollout_ref.actor.use_dynamic_bsz}
-        log_prob_max_token_len_per_gpu: ${trainer.trainer_config.actor_rollout_ref.actor.ppo_max_token_len_per_gpu}
-        ulysses_sequence_parallel_size: ${trainer.trainer_config.actor_rollout_ref.actor.ulysses_sequence_parallel_size} # sp size
+  grad_clip: 1.0
+  use_dynamic_bsz: true
+  ppo_max_token_len_per_gpu: 22000
+  ulysses_sequence_parallel_size: 1

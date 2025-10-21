@@ -11,6 +11,8 @@ from trinity.common.workflows.workflow import WORKFLOWS, Task, Workflow
 class AgentScopeWorkflowAdapter(Workflow):
     """Adapter to wrap a agentscope trainable workflow function into a Trinity Workflow."""
 
+    is_async: bool = True
+
     def __init__(
         self,
         *,
@@ -44,21 +46,6 @@ class AgentScopeWorkflowAdapter(Workflow):
         self.chat_model: TrinityChatModel = TrinityChatModel(
             model.get_openai_async_client(),
         )
-
-    @property
-    def asynchronous(self) -> bool:
-        """This workflow runs asynchronously."""
-        return True
-
-    @property
-    def repeatable(self) -> bool:
-        """This workflow is not repeatable."""
-        return False
-
-    @property
-    def resetable(self) -> bool:
-        """This workflow cannot be reset."""
-        return False
 
     def construct_experiences(
         self,

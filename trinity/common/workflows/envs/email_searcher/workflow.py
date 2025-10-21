@@ -27,6 +27,9 @@ class EmailSearchWorkflow(Workflow):
     Multi-turn Email Search workflow (ReAct-style tool use).
     """
 
+    can_reset: bool = True
+    is_async: bool = True
+
     def __init__(
         self,
         *,
@@ -44,18 +47,6 @@ class EmailSearchWorkflow(Workflow):
         )
 
         self.reset(task)
-
-    @property
-    def repeatable(self) -> bool:
-        return False
-
-    @property
-    def resettable(self):
-        return True
-
-    @property
-    def asynchronous(self):
-        return True
 
     def reset(self, task: Task):
         self.query = QueryModel.model_validate(task.raw_task)
@@ -87,8 +78,8 @@ class EmailSearchWorkflow(Workflow):
             openai_client=self.openai_client,
             system_prompt=self.system_prompt,
             generate_kwargs={
-                "temperature": self.rollout_args.get("temperature", 1.0),
-                "max_tokens": self.rollout_args.get("max_tokens", 4096),
+                "temperature": self.task.rollout_args.temperature,
+                "max_tokens": self.task.rollout_args.max_tokens or 4096,
             },
             response_structure=AnswerModel,
         )

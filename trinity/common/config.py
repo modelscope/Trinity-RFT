@@ -88,6 +88,17 @@ class GenerationConfig:
 
 
 @dataclass
+class OptimizerConfig:
+    lr: float = 1e-6
+    lr_warmup_steps: int = -1
+    lr_warmup_steps_ratio: float = 0.0
+    min_lr_ratio: Optional[float] = 0.0
+    warmup_style: str = "constant"
+    optimizer_type: str = "adam"
+    betas: List[float] = field(default_factory=lambda: [0.9, 0.999])
+
+
+@dataclass
 class LoRAConfig:
     """LoRA config, only effective for rollout model, not for auxiliary models."""
 
@@ -332,6 +343,8 @@ class AlgorithmConfig:
     # for GRPO-like algorithms, repeat each task for `repeat_times` times
     repeat_times: int = 1
 
+    optimizer: OptimizerConfig = field(default_factory=OptimizerConfig)
+
     # the strategy for sampling experiences from the buffer
     sample_strategy: Optional[str] = None
     sample_strategy_args: Optional[dict] = None
@@ -470,14 +483,16 @@ class TrainerConfig:
     ] = None  # total training steps, training stops when reaching this step, None means no limit
 
     # trainer configs
-    actor_grad_clip: Optional[float] = None
+    grad_clip: float = 1.0
+    use_dynamic_bsz: bool = True
+    ppo_max_token_len_per_gpu: int = 16384
+    ulysses_sequence_parallel_size: int = 1  # sp size
     # TODO: extract more train-related params from underlying trainer engine
 
     save_strategy: SaveStrategy = SaveStrategy.UNRESTRICTED
 
-    # Only one needs to be set for `trainer_config` and `trainer_config_path`
     trainer_config: Any = field(default_factory=dict)
-    trainer_config_path: str = ""
+    trainer_config_path: str = ""  # deprecated, use `trainer_config` instead
 
 
 @dataclass
@@ -1079,7 +1094,10 @@ class Config:
                         trainer_config_schema, self.trainer.trainer_config
                     )
                     self.trainer.trainer_config = OmegaConf.to_object(trainer_config)
-                else:
+                elif self.trainer.trainer_config_path:
+                    logger.warning(
+                        "`trainer_config_path` is deprecated; please use `trainer_config` instead."
+                    )
                     if os.path.isfile(self.trainer.trainer_config_path):
                         from trinity.common.verl_config import load_config
 
@@ -1088,6 +1106,11 @@ class Config:
                         raise ValueError(
                             f"Invalid trainer config path: {self.trainer.trainer_config_path}"
                         )
+                else:
+                    from trinity.common.verl_config import veRLConfig
+
+                    logger.info("`trainer_config` is not provided, using default trainer config.")
+                    self.trainer.trainer_config = veRLConfig()
             else:
                 raise ValueError(f"Invalid trainer type: {self.trainer_type}")
             self.trainer.trainer_config.synchronize_config(self)

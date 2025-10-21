@@ -16,6 +16,8 @@ from .templates import TEMPLATE_MAP
 
 @WORKFLOWS.register_module("as_react_workflow")
 class AgentScopeReActWorkflow(Workflow):
+    is_async: bool = True
+
     def __init__(
         self,
         *,
@@ -55,8 +57,8 @@ class AgentScopeReActWorkflow(Workflow):
             openai_client=self.model_client,
             system_prompt=template.system_prompt,
             generate_kwargs={
-                "temperature": self.rollout_args.get("temperature", 1.0),
-                "max_tokens": self.rollout_args.get("max_tokens", 4096),
+                "temperature": self.task.rollout_args.temperature,
+                "max_tokens": self.task.rollout_args.max_tokens or 4096,
             },
             response_structure=template.response_structure,
         )
@@ -95,13 +97,3 @@ class AgentScopeReActWorkflow(Workflow):
             if isinstance(reward, dict):
                 exp.metrics.update(reward)
         return exps
-
-    @property
-    def asynchronous(self):
-        """AgentScope's ReAct agent only supports asynchronous calls, so we set this to True."""
-        return True
-
-    @property
-    def repeatable(self):
-        """This workflow is not repeatable."""
-        return False

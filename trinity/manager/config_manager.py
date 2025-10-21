@@ -458,11 +458,6 @@ class ConfigManager:
                         "load_contents": st.session_state["actor_load_checkpoint"],
                         "save_contents": st.session_state["actor_save_checkpoint"],
                     },
-                    "optim": {
-                        "lr": st.session_state["actor_lr"],
-                        "lr_warmup_steps_ratio": st.session_state["actor_lr_warmup_steps_ratio"],
-                        "warmup_style": st.session_state["actor_warmup_style"],
-                    },
                 },
                 "ref": {
                     "log_prob_micro_batch_size_per_gpu": st.session_state[
@@ -563,6 +558,12 @@ class ConfigManager:
                 current_config[key + "_args"] = args
         if default_config != current_config:
             algorithm_config.update(current_config)
+        optimizer_config = {
+            "lr": st.session_state["actor_lr"],
+            "lr_warmup_steps_ratio": st.session_state["actor_lr_warmup_steps_ratio"],
+            "warmup_style": st.session_state["actor_warmup_style"],
+        }
+        algorithm_config["optimizer"] = optimizer_config
         return algorithm_config
 
     def _gen_buffer_config(self):

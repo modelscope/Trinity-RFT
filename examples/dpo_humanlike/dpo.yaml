@@ -3,6 +3,12 @@ name: "trinity_dpo"
 mode: train
 algorithm:
   algorithm_type: dpo
+  optimizer:
+    lr: 5e-7
+    lr_warmup_steps_ratio: 0.03  # the total steps will be injected during runtime
+    min_lr_ratio: 0.1   # only useful for warmup with cosine
+    warmup_style: cosine  # select from constant/cosine
+    betas: [0.9, 0.95]
   kl_loss_fn: k1
   kl_loss_fn_args:
     kl_coef: 0.1
@@ -35,25 +41,16 @@ synchronizer:
 trainer:
   save_interval: 30
   total_steps: 200
+  use_dynamic_bsz: false
+  ppo_max_token_len_per_gpu: 16384
+  ulysses_sequence_parallel_size: 1
   trainer_config:
     actor_rollout_ref:
       model:
         use_remove_padding: false
       actor:
-        use_dynamic_bsz: false
         ppo_micro_batch_size_per_gpu: 2
-        ppo_max_token_len_per_gpu: 16384
-        ulysses_sequence_parallel_size: 1
-        optim:
-          lr: 5e-7
-          lr_warmup_steps_ratio: 0.03  # the total steps will be injected during runtime
-          min_lr_ratio: 0.1   # only useful for warmup with cosine
-          warmup_style: cosine  # select from constant/cosine
-          betas: [0.9, 0.95]
       ref:
         log_prob_micro_batch_size_per_gpu: 2
-        log_prob_use_dynamic_bsz: ${trainer.trainer_config.actor_rollout_ref.actor.use_dynamic_bsz}
-        log_prob_max_token_len_per_gpu: ${trainer.trainer_config.actor_rollout_ref.actor.ppo_max_token_len_per_gpu}
-        ulysses_sequence_parallel_size: ${trainer.trainer_config.actor_rollout_ref.actor.ulysses_sequence_parallel_size} # sp size
     trainer:
       balance_batch: false

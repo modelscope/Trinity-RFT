@@ -215,6 +215,8 @@ class ToolCallWorkflow(SimpleWorkflow):
     Only support qwen model for now. You can change the prompt construction and reward calculation by yourself for other models.
     """
 
+    is_async: bool = True
+
     def reset(self, task: Task):
         self.format_args = task.format_args
         self.system_prompt = task.format_args.system_prompt
@@ -226,10 +228,6 @@ class ToolCallWorkflow(SimpleWorkflow):
 
         self.workflow_args = task.workflow_args
         self.reward_fn_args = task.reward_fn_args
-
-    @property
-    def asynchronous(self):
-        return True
 
     def format_prompt(self):
         raw_task = self.raw_task

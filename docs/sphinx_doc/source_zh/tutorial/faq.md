@@ -6,7 +6,7 @@
 **A:** 你可以通过运行 `trinity studio --port 8080` 使用配置管理器来配置参数。这种方式提供了便捷的参数配置途径。
 
 高级用户也可以直接编辑配置文件，参见各例子（`examples`）中的 YAML 文件。
-Trinity-RFT 使用 [veRL](https://github.com/volcengine/verl) 作为训练后端，其参数数量较多，详见 [veRL 文档](https://verl.readthedocs.io/en/latest/examples/config.html)。你可以通过两种方式指定这些参数：(1) 在 `trainer.trainer_config` 字典中直接指定；(2) 在一个以 `train_` 开头的辅助 YAML 文件中指定，并将该文件路径（例如 `train_gsm8k.yaml`）传给 `trainer.trainer_config_path`。这两种方式互斥，不可同时使用。
+Trinity-RFT 使用 [veRL](https://github.com/volcengine/verl) 作为训练后端，其参数数量较多，详见 [veRL 文档](https://verl.readthedocs.io/en/latest/examples/config.html)。你可以在 `trainer.trainer_config` 字典中指定这些参数。
 
 ---
 

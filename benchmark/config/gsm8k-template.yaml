@@ -6,6 +6,10 @@ checkpoint_root_dir: placeholder
 algorithm:
   algorithm_type: grpo
   repeat_times: 8
+  optimizer:
+    lr: 1e-5
+    lr_warmup_steps_ratio: 0.0
+    warmup_style: constant
   sample_strategy: warmup
   policy_loss_fn: ppo
   advantage_fn: grpo
@@ -73,65 +77,10 @@ trainer:
   save_interval: 100
   total_steps: 100
   enable_preview: true
-  actor_grad_clip: 1.0
-  trainer_config:
-    actor_rollout_ref:
-      model:
-        external_lib: null
-        override_config: {}
-        enable_gradient_checkpointing: true
-        use_remove_padding: true
-        use_fused_kernels: false
-        # fused_kernel_options:
-        #   impl_backend: triton
-      actor:
-        strategy: fsdp
-        ppo_micro_batch_size_per_gpu: 4
-        use_dynamic_bsz: true
-        ppo_max_token_len_per_gpu: 10240
-        ppo_epochs: 1
-        shuffle: false
-        ulysses_sequence_parallel_size: 1
-        checkpoint:
-          load_contents:
-          - model
-          - optimizer
-          - extra
-          save_contents:
-          - model
-          - optimizer
-          - extra
-        optim:
-          lr: 1.0e-05
-          lr_warmup_steps_ratio: 0.0
-          warmup_style: constant
-          total_training_steps: -1
-        fsdp_config:
-          wrap_policy:
-            min_num_params: 0
-          param_offload: false
-          optimizer_offload: false
-          fsdp_size: -1
-      ref:
-        fsdp_config:
-          wrap_policy:
-            min_num_params: 0
-          param_offload: false
-          optimizer_offload: false
-          fsdp_size: -1
-        log_prob_micro_batch_size_per_gpu: 8
-        log_prob_use_dynamic_bsz: true
-        log_prob_max_token_len_per_gpu: 10240
-        ulysses_sequence_parallel_size: 1
-    trainer:
-      balance_batch: true
-      resume_mode: auto
-      resume_from_path: ''
-      default_hdfs_dir: null
-      remove_previous_ckpt_in_save: false
-      del_local_ckpt_after_load: false
-      max_actor_ckpt_to_keep: null
-      max_critic_ckpt_to_keep: null
+  grad_clip: 1.0
+  use_dynamic_bsz: true
+  ppo_max_token_len_per_gpu: 10240
+  ulysses_sequence_parallel_size: 1
 monitor:
   monitor_type: wandb
 synchronizer:

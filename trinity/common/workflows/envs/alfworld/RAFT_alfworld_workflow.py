@@ -26,6 +26,10 @@ class RAFTAlfworldWorkflow(Workflow):
     2. Generate SFT data from successful attempt
     """
 
+    can_reset: bool = True
+    can_repeat: bool = True
+    is_async: bool = True
+
     def __init__(
         self,
         model: ModelWrapper,
@@ -54,10 +58,6 @@ class RAFTAlfworldWorkflow(Workflow):
             f"Initializing RAFTAlfworldWorkflow with RAFT learning, temperature={self.temperature}"
         )
         self.reset(task)
-
-    @property
-    def asynchronous(self):
-        return True
 
     def reset(self, task: Task):
         """Reset the workflow with a new task"""
@@ -219,14 +219,6 @@ class RAFTAlfworldWorkflow(Workflow):
             metrics={"success": float(success), "reward": float(reward), "steps": float(steps)},
         )
         return [experience]
-
-    def resettable(self) -> bool:
-        """Indicate that this workflow can be reset to avoid re-initialization"""
-        return True
-
-    @property
-    def repeatable(self) -> bool:
-        return True
 
     def set_repeat_times(self, repeat_times, run_id_base):
         self.repeat_times = repeat_times

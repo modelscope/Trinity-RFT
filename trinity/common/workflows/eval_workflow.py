@@ -42,14 +42,6 @@ class MathEvalWorkflow(Workflow):
         # TODO: customize the config in the yaml
         self.eval_gen_args = asdict(GenerationConfig(temperature=0.6, top_p=0.8, logprobs=0, n=1))
 
-    @property
-    def resettable(self):
-        return False
-
-    @property
-    def repeatable(self):
-        return False
-
     def format_messages(self):
         """Format message for the evaluation of qwen_boxed type."""
         if not self.raw_task or "question" not in self.raw_task:
@@ -89,9 +81,7 @@ class MathEvalWorkflow(Workflow):
 
 @WORKFLOWS.register_module("async_math_eval_workflow")
 class AsyncMathEvalWorkflow(MathEvalWorkflow):
-    @property
-    def asynchronous(self):
-        return True
+    is_async: bool = True
 
     async def run_async(self) -> List[Experience]:
         messages = self.format_messages()
