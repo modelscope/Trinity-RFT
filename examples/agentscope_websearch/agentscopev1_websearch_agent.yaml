@@ -33,6 +33,7 @@ buffer:
         temperature: 1.0
         max_tokens: 4096
       enable_progress_bar: false
+      default_workflow_type: 'agentscope_v1_react_search_workflow'
     eval_tasksets:
     - name: webqa_test
       storage_type: file
@@ -47,7 +48,7 @@ buffer:
       rollout_args:
         temperature: 0.6
         max_tokens: 4096
-    default_workflow_type: 'agentscope_v1_react_search_workflow'
+      default_workflow_type: 'agentscope_v1_react_search_workflow'
   trainer_input:
     experience_buffer:
       name: experience_buffer
@@ -88,5 +89,5 @@ trainer:
   save_interval: 20
   grad_clip: 1.0
   use_dynamic_bsz: true
-  ppo_max_token_len_per_gpu: 16384
+  max_token_len_per_gpu: 16384
   ulysses_sequence_parallel_size: 2

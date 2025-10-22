@@ -39,14 +39,14 @@ buffer:
         response_key: 'answer'
       rollout_args:
         temperature: 1.0
-    default_workflow_type: 'math_workflow'
+      default_workflow_type: 'math_workflow'
   trainer_input:
     experience_buffer:
       name: gsm8k_buffer
       storage_type: queue
       path: 'sqlite:///gsm8k.db'
 explorer:
-  runner_num: 32
+  runner_per_model: 16
   rollout_model:
     engine_num: 4
 synchronizer:
@@ -86,7 +86,7 @@ buffer:
         response_key: 'answer'
       rollout_args:
         temperature: 1.0
-    default_workflow_type: 'math_workflow'
+      default_workflow_type: 'math_workflow'
   trainer_input:
     experience_buffer:
       name: gsm8k_buffer
@@ -133,7 +133,7 @@ cluster:  # important
   gpu_per_node: 8
 explorer:
   name: 'explorer_new'  # important
-  runner_num: 64
+  runner_per_model: 8
   rollout_model:
     engine_num: 8
 buffer:
@@ -150,7 +150,7 @@ buffer:
         response_key: 'answer'
       rollout_args:
         temperature: 1.0
-    default_workflow_type: 'math_workflow'
+      default_workflow_type: 'math_workflow'
   trainer_input:
     experience_buffer:
       name: gsm8k_buffer

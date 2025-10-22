@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 """Test cases for Config modules."""
 import datetime
+import math
 import os
 import shutil
 import unittest
 
-from tests.tools import get_template_config
+from tests.tools import get_template_config, get_unittest_dataset_config
 from trinity.common.config import InferenceModelConfig, load_config
 
 CHECKPOINT_ROOT_DIR = os.path.join(os.path.dirname(__file__), "temp_checkpoint_dir")
@@ -90,6 +91,51 @@ class TestConfig(unittest.TestCase):
         config._update_config_from_ray_cluster()
         self.assertEqual(config.cluster.node_num, 2)
         self.assertEqual(config.cluster.gpu_per_node, 2)
+
+    def test_default_workflow(self):
+        config = get_template_config()
+        config.buffer.explorer_input.default_workflow_type = "simple_workflow"
+        config.buffer.explorer_input.default_eval_workflow_type = "math_boxed_workflow"
+        config.buffer.explorer_input.eval_tasksets.append(get_unittest_dataset_config("gsm8k"))
+        st = get_unittest_dataset_config("countdown")
+        st.default_workflow_type = None
+        config.buffer.explorer_input.eval_tasksets.append(st)
+        config.check_and_update()
+        self.assertEqual(
+            config.buffer.explorer_input.eval_tasksets[0].default_workflow_type,
+            "math_workflow",
+        )
+        self.assertEqual(
+            config.buffer.explorer_input.eval_tasksets[1].default_workflow_type,
+            "math_boxed_workflow",
+        )
+        self.assertEqual(
+            config.buffer.explorer_input.taskset.default_workflow_type,
+            "simple_workflow",
+        )
+
+    def test_max_token_len_per_gpu_set_correctly(self):
+        config = get_template_config()
+        config.model.max_model_len = 8192
+        config.trainer.ulysses_sequence_parallel_size = 2
+        config.trainer.max_token_len_per_gpu = None
+        config.check_and_update()
+        self.assertIsNotNone(config.trainer.trainer_config)
+        expected_max_token_len = math.ceil(
+            (2 * config.model.max_model_len) / config.trainer.ulysses_sequence_parallel_size
+        )
+        self.assertEqual(
+            config.trainer.trainer_config.actor_rollout_ref.actor.ppo_max_token_len_per_gpu,
+            expected_max_token_len,
+        )
+        self.assertEqual(
+            config.trainer.trainer_config.actor_rollout_ref.ref.log_prob_max_token_len_per_gpu,
+            expected_max_token_len,
+        )
+        self.assertEqual(
+            config.trainer.trainer_config.critic.ppo_max_token_len_per_gpu,
+            expected_max_token_len,
+        )
 
     def tearDown(self):
         if os.path.exists(CHECKPOINT_ROOT_DIR):

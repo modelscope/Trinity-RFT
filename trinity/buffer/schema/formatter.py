@@ -40,8 +40,6 @@ class TaskFormatter:
         self.config = config
         self.is_eval = config.is_eval
         self.default_workflow_cls = WORKFLOWS.get(config.default_workflow_type)  # type: ignore
-        if self.is_eval and config.default_eval_workflow_type:
-            self.default_workflow_cls = WORKFLOWS.get(config.default_eval_workflow_type)
         self.default_reward_fn_cls = REWARD_FUNCTIONS.get(config.default_reward_fn_type)  # type: ignore
         self.workflow_key = config.format.workflow_key
         self.reward_fn_key = config.format.reward_fn_key

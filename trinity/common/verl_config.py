@@ -235,7 +235,7 @@ class Critic:
     forward_micro_batch_size_per_gpu: Optional[int] = None
     use_dynamic_bsz: Optional[bool] = None
     ppo_max_token_len_per_gpu: Optional[int] = None
-    forward_max_token_len_per_gpu: int = 0
+    forward_max_token_len_per_gpu: Optional[int] = None
     ulysses_sequence_parallel_size: Optional[int] = None
     ppo_epochs: int = 0
     shuffle: bool = False
@@ -423,7 +423,7 @@ class veRLConfig:
             self.actor_rollout_ref.actor.use_dynamic_bsz = config.trainer.use_dynamic_bsz
         if self.actor_rollout_ref.actor.ppo_max_token_len_per_gpu is None:
             self.actor_rollout_ref.actor.ppo_max_token_len_per_gpu = (
-                config.trainer.ppo_max_token_len_per_gpu
+                config.trainer.max_token_len_per_gpu
             )
         if self.actor_rollout_ref.actor.ulysses_sequence_parallel_size is None:
             self.actor_rollout_ref.actor.ulysses_sequence_parallel_size = (
@@ -432,14 +432,17 @@ class veRLConfig:
         if (
             self.actor_rollout_ref.actor.ppo_max_token_len_per_gpu  # type: ignore [operator]
             * self.actor_rollout_ref.actor.ulysses_sequence_parallel_size
-            < config.model.max_model_len
+            < config.model.max_model_len * 2  # type: ignore [operator]
         ):
             self.actor_rollout_ref.actor.ppo_max_token_len_per_gpu = math.ceil(
                 config.model.max_model_len  # type: ignore [operator]
-                / self.actor_rollout_ref.actor.ulysses_sequence_parallel_size
+                * 2
+                / self.actor_rollout_ref.actor.ulysses_sequence_parallel_size  # type: ignore [operator]
             )
             logger.warning(
-                f"Warning: actor.ppo_max_token_len_per_gpu is automatically set to {self.actor_rollout_ref.actor.ppo_max_token_len_per_gpu} to match model.max_model_len ({config.model.max_model_len})"
+                f"actor.ppo_max_token_len_per_gpu is automatically set to {self.actor_rollout_ref.actor.ppo_max_token_len_per_gpu} "
+                f"to match model.max_model_len ({config.model.max_model_len}). If you face OOM issues, "
+                "please set `model.max_model_len` to a smaller value."
             )
 
         # Ref Config
@@ -447,11 +450,26 @@ class veRLConfig:
             self.actor_rollout_ref.ref.log_prob_use_dynamic_bsz = config.trainer.use_dynamic_bsz
         if self.actor_rollout_ref.ref.log_prob_max_token_len_per_gpu is None:
             self.actor_rollout_ref.ref.log_prob_max_token_len_per_gpu = (
-                config.trainer.ppo_max_token_len_per_gpu
+                self.actor_rollout_ref.actor.ppo_max_token_len_per_gpu
             )
         if self.actor_rollout_ref.ref.ulysses_sequence_parallel_size is None:
             self.actor_rollout_ref.ref.ulysses_sequence_parallel_size = (
                 config.trainer.ulysses_sequence_parallel_size
+            )
+        if (
+            self.actor_rollout_ref.ref.log_prob_max_token_len_per_gpu  # type: ignore [operator]
+            * self.actor_rollout_ref.ref.ulysses_sequence_parallel_size
+            < config.model.max_model_len * 2  # type: ignore [operator]
+        ):
+            self.actor_rollout_ref.ref.log_prob_max_token_len_per_gpu = math.ceil(
+                config.model.max_model_len  # type: ignore [operator]
+                * 2
+                / self.actor_rollout_ref.ref.ulysses_sequence_parallel_size  # type: ignore [operator]
+            )
+            logger.warning(
+                f"ref.log_prob_max_token_len_per_gpu is automatically set to {self.actor_rollout_ref.ref.log_prob_max_token_len_per_gpu} "
+                f"to match model.max_model_len ({config.model.max_model_len}). If you face OOM issues, "
+                "please set `model.max_model_len` to a smaller value."
             )
 
         # Critic config
@@ -466,21 +484,30 @@ class veRLConfig:
         if self.critic.use_dynamic_bsz is None:
             self.critic.use_dynamic_bsz = config.trainer.use_dynamic_bsz
         if self.critic.ppo_max_token_len_per_gpu is None:
-            self.critic.ppo_max_token_len_per_gpu = config.trainer.ppo_max_token_len_per_gpu
+            self.critic.ppo_max_token_len_per_gpu = (
+                self.actor_rollout_ref.actor.ppo_max_token_len_per_gpu
+            )
         if self.critic.ulysses_sequence_parallel_size is None:
             self.critic.ulysses_sequence_parallel_size = (
                 config.trainer.ulysses_sequence_parallel_size
             )
+
         if (
             self.critic.ppo_max_token_len_per_gpu * self.critic.ulysses_sequence_parallel_size  # type: ignore [operator]
-            < config.model.max_model_len
+            < config.model.max_model_len * 2  # type: ignore [operator]
         ):
             self.critic.ppo_max_token_len_per_gpu = math.ceil(
-                config.model.max_model_len / self.critic.ulysses_sequence_parallel_size  # type: ignore [operator]
+                config.model.max_model_len  # type: ignore [operator]
+                * 2
+                / self.critic.ulysses_sequence_parallel_size  # type: ignore [operator]
             )
             logger.warning(
-                f"Warning: critic.ppo_max_token_len_per_gpu is automatically set to {self.critic.ppo_max_token_len_per_gpu} to match model.max_model_len ({config.model.max_model_len})"
+                f"critic.ppo_max_token_len_per_gpu is automatically set to {self.critic.ppo_max_token_len_per_gpu} "
+                f"to match model.max_model_len ({config.model.max_model_len}). If you face OOM issues, "
+                "please set `model.max_model_len` to a smaller value."
             )
+        if self.critic.forward_max_token_len_per_gpu is None:
+            self.critic.forward_max_token_len_per_gpu = self.critic.ppo_max_token_len_per_gpu
 
         # LoRA related config
         if config.model.lora_configs is not None:

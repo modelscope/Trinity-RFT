@@ -221,8 +221,6 @@ class SQLTaskStorage(SQLStorage):
         self.batch_size = config.batch_size
         self.is_eval = storage_config.is_eval
         self.default_workflow_cls = WORKFLOWS.get(storage_config.default_workflow_type)  # type: ignore
-        if self.is_eval and storage_config.default_eval_workflow_type:
-            self.default_workflow_cls = WORKFLOWS.get(storage_config.default_eval_workflow_type)
         self.default_reward_fn_cls = REWARD_FUNCTIONS.get(storage_config.default_reward_fn_type)  # type: ignore
         self.formatter = TaskFormatter(storage_config)
         self.offset = storage_config.index

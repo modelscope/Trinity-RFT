@@ -40,11 +40,9 @@ buffer:
       rollout_args:
         temperature: 1.0
         logprobs: 0
+      default_workflow_type: math_workflow
+      default_reward_fn_type: math_reward
     eval_tasksets: []
-    default_workflow_type: math_workflow
-    default_reward_fn_type: math_reward
-    system_prompt: null
-    reply_prefix: null
   trainer_input:
     experience_buffer:
       name: experience_buffer
@@ -79,7 +77,7 @@ trainer:
   enable_preview: true
   grad_clip: 1.0
   use_dynamic_bsz: true
-  ppo_max_token_len_per_gpu: 10240
+  max_token_len_per_gpu: 10240
   ulysses_sequence_parallel_size: 1
 monitor:
   monitor_type: wandb

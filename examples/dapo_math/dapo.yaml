@@ -77,5 +77,5 @@ trainer:
   save_interval: 100
   grad_clip: 1.0
   use_dynamic_bsz: true
-  ppo_max_token_len_per_gpu: 22000
+  max_token_len_per_gpu: 22000
   ulysses_sequence_parallel_size: 1

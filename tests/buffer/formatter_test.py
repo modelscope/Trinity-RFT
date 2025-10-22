@@ -263,8 +263,7 @@ class TestFormatter(unittest.TestCase):
         }
         config = StorageConfig(
             is_eval=True,
-            default_workflow_type="math_workflow",
-            default_eval_workflow_type="math_boxed_workflow",
+            default_workflow_type="math_boxed_workflow",
             workflow_args={"use_base": True, "with_think": True},
         )
         formatter = FORMATTER.get("task")(config=config)
@@ -279,7 +278,6 @@ class TestFormatter(unittest.TestCase):
         config = StorageConfig(
             is_eval=False,
             default_workflow_type="math_workflow",
-            default_eval_workflow_type="math_boxed_workflow",
             default_reward_fn_type="math_reward",
             workflow_args={"use_base": False, "with_think": True},
         )
@@ -296,7 +294,7 @@ class TestFormatter(unittest.TestCase):
 
         config = StorageConfig(
             is_eval=False,
-            default_eval_workflow_type="math_workflow",
+            default_workflow_type="math_workflow",
             workflow_args={"use_base": True, "with_think": False},
             format=FormatConfig(
                 workflow_key="workflow",

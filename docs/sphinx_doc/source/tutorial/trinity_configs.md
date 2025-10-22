@@ -200,6 +200,7 @@ buffer:
   batch_size: 32
   train_batch_size: 256
   total_epochs: 100
+  total_steps: null
 
   explorer_input:
     taskset:
@@ -214,9 +215,6 @@ buffer:
         ...
       buffer_2:
         ...
-
-  default_workflow_type: 'math_workflow'
-  default_reward_fn_type: 'countdown_reward'
 ```
 
 - `batch_size`: Number of tasks used per training step. *Please do not multiply this value by the `algorithm.repeat_times` manually*.
@@ -231,6 +229,9 @@ Defines the dataset(s) used by the explorer for training and evaluation.
 ```yaml
 buffer:
   explorer_input:
+    default_workflow_type: 'math_workflow'
+    default_eval_workflow_type: 'math_workflow'
+    default_reward_fn_type: 'countdown_reward'
     taskset:
       name: countdown_train
       storage_type: file
@@ -262,7 +263,10 @@ buffer:
 ```
 
 - `buffer.explorer_input.taskset`: Task dataset used for training exploration policies.
-- `buffer.explorer_input.eval_taskset`: List of task datasets used for evaluation.
+- `buffer.explorer_input.eval_tasksets`: List of task datasets used for evaluation.
+- `buffer.explorer_input.default_workflow_type`: Default workflow type for all task datasets under `explorer_input` if not specified at the dataset level.
+- `buffer.explorer_input.default_eval_workflow_type`: Default evaluation workflow type for all eval task datasets under `explorer_input` if not specified at the dataset level.
+- `buffer.explorer_input.default_reward_fn_type`: Default reward function type for all task datasets under `explorer_input` if not specified at the dataset level.
 
 The configuration for each task dataset is defined as follows:
 
@@ -413,7 +417,7 @@ trainer:
   save_strategy: "unrestricted"
   grad_clip: 1.0
   use_dynamic_bsz: true
-  ppo_max_token_len_per_gpu: 16384
+  max_token_len_per_gpu: 16384
   ulysses_sequence_parallel_size: 1
   trainer_config: null
 ```
@@ -429,7 +433,7 @@ trainer:
   - `unrestricted`: No restrictions on saving operations; multiple nodes, processes, or threads are allowed to save the model simultaneously.
 - `grad_clip`: Gradient clipping for updates.
 - `use_dynamic_bsz`: Whether to use dynamic batch size.
-- `ppo_max_token_len_per_gpu`:  The maximum number of tokens to be processed in forward and backward when updating the policy. Effective when `use_dynamic_bsz=true`.
+- `max_token_len_per_gpu`:  The maximum number of tokens to be processed in forward and backward when updating the policy. Effective when `use_dynamic_bsz=true`.
 - `ulysses_sequence_parallel_size`: Sequence parallel size.
 - `trainer_config`: The trainer configuration provided inline.
 ---

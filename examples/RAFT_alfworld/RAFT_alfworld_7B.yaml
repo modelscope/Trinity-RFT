@@ -70,7 +70,7 @@ trainer:
   save_interval: 100000
   grad_clip: 1.0
   use_dynamic_bsz: true
-  ppo_max_token_len_per_gpu: 20000  # Adjusted for alfworld longer sequences
+  max_token_len_per_gpu: 20000  # Adjusted for alfworld longer sequences
   ulysses_sequence_parallel_size: 1
 monitor:
   monitor_type: wandb

@@ -119,7 +119,7 @@ buffer:
       workflow_args:
         max_env_steps: 30
       enable_progress_bar: false
-    default_workflow_type: 'step_wise_alfworld_workflow'
+      default_workflow_type: 'step_wise_alfworld_workflow'
   trainer_input:
     experience_buffer:
       name: alfworld_buffer
@@ -127,7 +127,7 @@ buffer:
       use_priority_queue: true
 explorer:
   max_repeat_times_per_runner: 1
-  runner_num: 32
+  runner_per_model: 16
   max_timeout: 3600
   rollout_model:
     enable_history: true
@@ -150,7 +150,7 @@ trainer:
   save_interval: 50
   grad_clip: 1.0
   use_dynamic_bsz: true
-  ppo_max_token_len_per_gpu: 16384
+  max_token_len_per_gpu: 16384
   ulysses_sequence_parallel_size: 1
 ```
 

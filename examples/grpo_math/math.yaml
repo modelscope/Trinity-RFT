@@ -29,8 +29,8 @@ buffer:
         logprobs: 0
       reward_fn_args:
         reward_name: math_verify_reward
-    default_workflow_type: 'math_rm_workflow'
-    default_reward_fn_type: 'rm_gallery_reward'
+      default_workflow_type: 'math_rm_workflow'
+      default_reward_fn_type: 'rm_gallery_reward'
   trainer_input:
     experience_buffer:
       name: math_buffer
@@ -54,5 +54,5 @@ trainer:
   save_interval: 100
   grad_clip: 1.0
   use_dynamic_bsz: true
-  ppo_max_token_len_per_gpu: 16384
+  max_token_len_per_gpu: 16384
   ulysses_sequence_parallel_size: 1

@@ -2,6 +2,7 @@
 """Configs for RFT."""
 from __future__ import annotations
 
+import math
 import os
 from copy import deepcopy
 from dataclasses import dataclass, field
@@ -123,9 +124,6 @@ class StorageConfig:
     # For continuing training
     index: int = 0
 
-    # used for multi-modal data
-    mm_data_kwargs: dict = field(default_factory=dict)
-
     # used for StorageType.FILE
     split: str = "train"
     subset_name: Optional[str] = None
@@ -146,7 +144,6 @@ class StorageConfig:
 
     # used for rollout tasks
     default_workflow_type: Optional[str] = None
-    default_eval_workflow_type: Optional[str] = None
     default_reward_fn_type: Optional[str] = None
     rollout_args: GenerationConfig = field(default_factory=GenerationConfig)
     workflow_args: dict = field(default_factory=dict)
@@ -390,8 +387,6 @@ class ExplorerInput:
     default_workflow_type: Optional[str] = None
     default_eval_workflow_type: Optional[str] = None
     default_reward_fn_type: Optional[str] = None
-    system_prompt: Optional[str] = None
-    reply_prefix: Optional[str] = None
 
 
 @dataclass
@@ -404,10 +399,6 @@ class TrainerInput:
 
     # Some auxiliary buffers to facilitate training (e.g., data mixing)
     auxiliary_buffers: Dict[str, StorageConfig] = field(default_factory=dict)
-
-    # ! Deprecated, keep for backward compatibility, do not use it in new code
-    sft_warmup_dataset: Optional[StorageConfig] = None
-    sft_warmup_steps: Optional[int] = None
 
 
 @dataclass
@@ -485,7 +476,8 @@ class TrainerConfig:
     # trainer configs
     grad_clip: float = 1.0
     use_dynamic_bsz: bool = True
-    ppo_max_token_len_per_gpu: int = 16384
+    # if None, automatically set to ceil(2 * model.max_model_len / ulysses_sequence_parallel_size)
+    max_token_len_per_gpu: Optional[int] = None
     ulysses_sequence_parallel_size: int = 1  # sp size
     # TODO: extract more train-related params from underlying trainer engine
 
@@ -615,14 +607,6 @@ class Config:
             OmegaConf.save(self, f)
 
     def _check_deprecated(self) -> None:
-        if self.buffer.trainer_input.sft_warmup_steps is not None:
-            logger.warning(
-                "`buffer.trainer_input.sft_warmup_steps` is deprecated, SFT warmup related settings are moved to `stages`."
-            )
-        if self.buffer.trainer_input.sft_warmup_dataset is not None:
-            logger.warning(
-                "`buffer.trainer_input.sft_warmup_dataset` is deprecated, SFT warmup related settings are moved to `stages`."
-            )
         if self.explorer.runner_num is not None:
             logger.warning(
                 "`explorer.runner_num` is deprecated, please use `explorer.runner_per_model` instead."
@@ -706,17 +690,11 @@ class Config:
             experience_buffer.total_epochs = self.buffer.total_epochs
             experience_buffer.total_steps = self.buffer.total_steps
         else:
-            taskset.is_eval = False
             taskset.total_epochs = self.buffer.total_epochs
             taskset.total_steps = self.buffer.total_steps
 
         set_if_none(taskset, "default_workflow_type", explorer_input.default_workflow_type)
-        set_if_none(
-            taskset, "default_eval_workflow_type", explorer_input.default_eval_workflow_type
-        )
         set_if_none(taskset, "default_reward_fn_type", explorer_input.default_reward_fn_type)
-        set_if_none(taskset.format, "system_prompt", explorer_input.system_prompt)
-        set_if_none(taskset.format, "reply_prefix", explorer_input.reply_prefix)
         set_if_none(taskset, "ray_namespace", self.ray_namespace)
         set_if_none(taskset.rollout_args, "max_tokens", self.model.max_response_tokens)
 
@@ -729,13 +707,10 @@ class Config:
             if not dataset.name:
                 dataset.name = f"eval_taskset_{idx}"
             set_if_none(dataset, "repeat_times", 1)
+            # eval_workflow has higher priority than workflow in eval tasksets, so we set it first
+            set_if_none(dataset, "default_workflow_type", explorer_input.default_eval_workflow_type)
             set_if_none(dataset, "default_workflow_type", explorer_input.default_workflow_type)
-            set_if_none(
-                dataset, "default_eval_workflow_type", explorer_input.default_eval_workflow_type
-            )
             set_if_none(dataset, "default_reward_fn_type", explorer_input.default_reward_fn_type)
-            set_if_none(dataset.format, "system_prompt", explorer_input.system_prompt)
-            set_if_none(dataset.format, "reply_prefix", explorer_input.reply_prefix)
             set_if_none(dataset, "ray_namespace", self.ray_namespace)
             set_if_none(dataset.rollout_args, "max_tokens", self.model.max_response_tokens)
             remained_tasksets.append(dataset)
@@ -1095,22 +1070,18 @@ class Config:
                     )
                     self.trainer.trainer_config = OmegaConf.to_object(trainer_config)
                 elif self.trainer.trainer_config_path:
-                    logger.warning(
+                    raise ValueError(
                         "`trainer_config_path` is deprecated; please use `trainer_config` instead."
                     )
-                    if os.path.isfile(self.trainer.trainer_config_path):
-                        from trinity.common.verl_config import load_config
-
-                        self.trainer.trainer_config = load_config(self.trainer.trainer_config_path)
-                    else:
-                        raise ValueError(
-                            f"Invalid trainer config path: {self.trainer.trainer_config_path}"
-                        )
                 else:
                     from trinity.common.verl_config import veRLConfig
 
                     logger.info("`trainer_config` is not provided, using default trainer config.")
                     self.trainer.trainer_config = veRLConfig()
+                if self.trainer.max_token_len_per_gpu is None:
+                    self.trainer.max_token_len_per_gpu = math.ceil(
+                        2 * self.model.max_model_len / self.trainer.ulysses_sequence_parallel_size  # type: ignore [operator]
+                    )
             else:
                 raise ValueError(f"Invalid trainer type: {self.trainer_type}")
             self.trainer.trainer_config.synchronize_config(self)
