@@ -99,6 +99,7 @@ class LoRAConfig:
     target_modules: str = "all-linear"
 
 
+@Experimental
 @dataclass
 class DataSelectorConfig:
     """Data selector config."""
@@ -110,14 +111,7 @@ class DataSelectorConfig:
 
     # Estimator Config
     feature_keys: List[str] = field(default_factory=lambda: [])
-    adaptive_rho: bool = False
-    m: int = 16
-    lamb: float = 0.2
-    rho: float = 0.2
-
-    do_sample: bool = False
-    tau: float = 1.0
-    target_reward: float = 1.0
+    kwargs: dict = field(default_factory=dict)
 
 
 @dataclass

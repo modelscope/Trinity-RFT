@@ -7,7 +7,7 @@ import os
 import time
 import traceback
 from collections import deque
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional
 
 import ray
 import torch
@@ -23,7 +23,6 @@ from trinity.common.constants import (
     SyncMethod,
     SyncStyle,
 )
-from trinity.common.experience import Experience
 from trinity.common.models import create_inference_models
 from trinity.common.models.utils import get_checkpoint_dir_with_step_num
 from trinity.explorer.scheduler import Scheduler
@@ -51,7 +50,9 @@ class Explorer:
         self.config = config
         self.models, self.auxiliary_models = create_inference_models(config)
         self.experience_pipeline = self._init_experience_pipeline()
-        self.taskset = TasksetScheduler(explorer_state, config)
+        self.taskset = (
+            TasksetScheduler(explorer_state, config) if self.config.mode != "serve" else None
+        )
         self.scheduler = None
         self.monitor = MONITOR.get(self.config.monitor.monitor_type)(
             project=self.config.project,
@@ -335,9 +336,7 @@ class Explorer:
             await self._finish_explore_step(step=step, model_version=model_version)
             await self._finish_eval_step(step=step)
 
-    async def _finish_explore_step(
-        self, step: int, model_version: int
-    ) -> Tuple[Dict, List[Experience]]:
+    async def _finish_explore_step(self, step: int, model_version: int) -> None:
         statuses, exps = await self.scheduler.get_results(batch_id=step)
         metric = {"rollout/model_version": model_version}
         pipeline_metrics = await self.experience_pipeline.process.remote(exps)
@@ -346,7 +345,6 @@ class Explorer:
         if statuses:
             metric.update(gather_metrics([status.metric for status in statuses], "rollout"))
             self.monitor.log(metric, step=step)
-        return metric, exps
 
     async def _finish_eval_step(self, step: Optional[int] = None, prefix: str = "eval") -> None:
         if not self.pending_eval_tasks:
