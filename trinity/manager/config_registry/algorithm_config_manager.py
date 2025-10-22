@@ -27,7 +27,7 @@ from trinity.utils.registry import Registry
 
 
 @CONFIG_GENERATORS.register_config(
-    default_value="grpo",
+    default_value="ppo",
     other_configs={"mode": "both", "_current_default_config": PPOAlgorithm.default_config()},
 )
 def set_algorithm_type(**kwargs):

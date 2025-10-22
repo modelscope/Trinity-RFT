@@ -52,7 +52,7 @@ def _str_for_train_batch_size():
         else "`gpu_per_node * node_num`"
     )
     return (
-        f"`train_batch_size` defaults to `task_batch_size` * `repeat_times`.\n\n"
+        f"Number of experiences in a mini-batch; defaults to `task_batch_size` * `repeat_times`.\n\n"
         f"Please ensure that `train_batch_size` ({get_train_batch_size()}) can be divided by "
         f"{trainer_gpu_num_str} ({st.session_state['trainer_gpu_num']})."
     )
@@ -331,7 +331,7 @@ def set_reuse_cooldown_time(**kwargs):
         "Reuse Cooldown Time",
         min_value=0.0,
         max_value=1e5,
-        help="Leave blank to indicate no reuse",
+        help="Leave blank to indicate no experience reuse",
         placeholder=None,
         **kwargs,
     )

@@ -151,7 +151,7 @@ class ConfigManager:
             self.get_configs("sync_method", "sync_style", "sync_interval")
 
     def _expert_model_part(self):
-        self.get_configs("project", "exp_name", columns_spec=[1, 2])
+        self.get_configs("project", "exp_name")
 
         self.get_configs("model_path")
         self.get_configs("critic_model_path")
@@ -189,7 +189,7 @@ class ConfigManager:
             self.get_configs("eval_tasksets")
 
         if st.session_state["algorithm_type"] not in ("dpo", "sft"):
-            with st.expander("Experiences Buffer Configs", expanded=True):
+            with st.expander("Experience Buffer Configs", expanded=True):
                 self.get_configs("storage_type")
                 self.get_configs("experience_buffer_path")
                 self.get_configs("use_priority_queue")
