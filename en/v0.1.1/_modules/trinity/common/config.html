@@ -443,6 +443,7 @@ document.write(`
 <span class="sd">&quot;&quot;&quot;Configs for RFT.&quot;&quot;&quot;</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
@@ -581,9 +582,6 @@ document.write(`
     <span class="c1"># For continuing training</span>
     <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="c1"># used for multi-modal data</span>
-    <span class="n">mm_data_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
-
     <span class="c1"># used for StorageType.FILE</span>
     <span class="n">split</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;train&quot;</span>
     <span class="n">subset_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -604,7 +602,6 @@ document.write(`
 
     <span class="c1"># used for rollout tasks</span>
     <span class="n">default_workflow_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">default_eval_workflow_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">default_reward_fn_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">rollout_args</span><span class="p">:</span> <span class="n">GenerationConfig</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">GenerationConfig</span><span class="p">)</span>
     <span class="n">workflow_args</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
@@ -874,9 +871,7 @@ document.write(`
     <span class="c1"># The following args provide default values for the corresponding args in `taskset` and `eval_tasksets`</span>
     <span class="n">default_workflow_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">default_eval_workflow_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">default_reward_fn_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">system_prompt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">reply_prefix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+    <span class="n">default_reward_fn_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 
 
@@ -891,11 +886,7 @@ document.write(`
     <span class="n">experience_buffer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StorageConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1"># Some auxiliary buffers to facilitate training (e.g., data mixing)</span>
-    <span class="n">auxiliary_buffers</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">StorageConfig</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
-
-    <span class="c1"># ! Deprecated, keep for backward compatibility, do not use it in new code</span>
-    <span class="n">sft_warmup_dataset</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StorageConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">sft_warmup_steps</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+    <span class="n">auxiliary_buffers</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">StorageConfig</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span></div>
 
 
 
@@ -982,7 +973,8 @@ document.write(`
     <span class="c1"># trainer configs</span>
     <span class="n">grad_clip</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span>
     <span class="n">use_dynamic_bsz</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">ppo_max_token_len_per_gpu</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">16384</span>
+    <span class="c1"># if None, automatically set to 2 * model.max_model_len / ulysses_sequence_parallel_size</span>
+    <span class="n">max_token_len_per_gpu</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">ulysses_sequence_parallel_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># sp size</span>
     <span class="c1"># TODO: extract more train-related params from underlying trainer engine</span>
 
@@ -1136,14 +1128,6 @@ document.write(`
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_check_deprecated</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">sft_warmup_steps</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                <span class="s2">&quot;`buffer.trainer_input.sft_warmup_steps` is deprecated, SFT warmup related settings are moved to `stages`.&quot;</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">trainer_input</span><span class="o">.</span><span class="n">sft_warmup_dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                <span class="s2">&quot;`buffer.trainer_input.sft_warmup_dataset` is deprecated, SFT warmup related settings are moved to `stages`.&quot;</span>
-            <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">explorer</span><span class="o">.</span><span class="n">runner_num</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                 <span class="s2">&quot;`explorer.runner_num` is deprecated, please use `explorer.runner_per_model` instead.&quot;</span>
@@ -1227,17 +1211,11 @@ document.write(`
             <span class="n">experience_buffer</span><span class="o">.</span><span class="n">total_epochs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">total_epochs</span>
             <span class="n">experience_buffer</span><span class="o">.</span><span class="n">total_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">total_steps</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">taskset</span><span class="o">.</span><span class="n">is_eval</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">taskset</span><span class="o">.</span><span class="n">total_epochs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">total_epochs</span>
             <span class="n">taskset</span><span class="o">.</span><span class="n">total_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">total_steps</span>
 
         <span class="n">set_if_none</span><span class="p">(</span><span class="n">taskset</span><span class="p">,</span> <span class="s2">&quot;default_workflow_type&quot;</span><span class="p">,</span> <span class="n">explorer_input</span><span class="o">.</span><span class="n">default_workflow_type</span><span class="p">)</span>
-        <span class="n">set_if_none</span><span class="p">(</span>
-            <span class="n">taskset</span><span class="p">,</span> <span class="s2">&quot;default_eval_workflow_type&quot;</span><span class="p">,</span> <span class="n">explorer_input</span><span class="o">.</span><span class="n">default_eval_workflow_type</span>
-        <span class="p">)</span>
         <span class="n">set_if_none</span><span class="p">(</span><span class="n">taskset</span><span class="p">,</span> <span class="s2">&quot;default_reward_fn_type&quot;</span><span class="p">,</span> <span class="n">explorer_input</span><span class="o">.</span><span class="n">default_reward_fn_type</span><span class="p">)</span>
-        <span class="n">set_if_none</span><span class="p">(</span><span class="n">taskset</span><span class="o">.</span><span class="n">format</span><span class="p">,</span> <span class="s2">&quot;system_prompt&quot;</span><span class="p">,</span> <span class="n">explorer_input</span><span class="o">.</span><span class="n">system_prompt</span><span class="p">)</span>
-        <span class="n">set_if_none</span><span class="p">(</span><span class="n">taskset</span><span class="o">.</span><span class="n">format</span><span class="p">,</span> <span class="s2">&quot;reply_prefix&quot;</span><span class="p">,</span> <span class="n">explorer_input</span><span class="o">.</span><span class="n">reply_prefix</span><span class="p">)</span>
         <span class="n">set_if_none</span><span class="p">(</span><span class="n">taskset</span><span class="p">,</span> <span class="s2">&quot;ray_namespace&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ray_namespace</span><span class="p">)</span>
         <span class="n">set_if_none</span><span class="p">(</span><span class="n">taskset</span><span class="o">.</span><span class="n">rollout_args</span><span class="p">,</span> <span class="s2">&quot;max_tokens&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">max_response_tokens</span><span class="p">)</span>
 
@@ -1250,13 +1228,10 @@ document.write(`
             <span class="k">if</span> <span class="ow">not</span> <span class="n">dataset</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
                 <span class="n">dataset</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;eval_taskset_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="n">set_if_none</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="s2">&quot;repeat_times&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="c1"># eval_workflow has higher priority than workflow in eval tasksets, so we set it first</span>
+            <span class="n">set_if_none</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="s2">&quot;default_workflow_type&quot;</span><span class="p">,</span> <span class="n">explorer_input</span><span class="o">.</span><span class="n">default_eval_workflow_type</span><span class="p">)</span>
             <span class="n">set_if_none</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="s2">&quot;default_workflow_type&quot;</span><span class="p">,</span> <span class="n">explorer_input</span><span class="o">.</span><span class="n">default_workflow_type</span><span class="p">)</span>
-            <span class="n">set_if_none</span><span class="p">(</span>
-                <span class="n">dataset</span><span class="p">,</span> <span class="s2">&quot;default_eval_workflow_type&quot;</span><span class="p">,</span> <span class="n">explorer_input</span><span class="o">.</span><span class="n">default_eval_workflow_type</span>
-            <span class="p">)</span>
             <span class="n">set_if_none</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="s2">&quot;default_reward_fn_type&quot;</span><span class="p">,</span> <span class="n">explorer_input</span><span class="o">.</span><span class="n">default_reward_fn_type</span><span class="p">)</span>
-            <span class="n">set_if_none</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">format</span><span class="p">,</span> <span class="s2">&quot;system_prompt&quot;</span><span class="p">,</span> <span class="n">explorer_input</span><span class="o">.</span><span class="n">system_prompt</span><span class="p">)</span>
-            <span class="n">set_if_none</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">format</span><span class="p">,</span> <span class="s2">&quot;reply_prefix&quot;</span><span class="p">,</span> <span class="n">explorer_input</span><span class="o">.</span><span class="n">reply_prefix</span><span class="p">)</span>
             <span class="n">set_if_none</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="s2">&quot;ray_namespace&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ray_namespace</span><span class="p">)</span>
             <span class="n">set_if_none</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">rollout_args</span><span class="p">,</span> <span class="s2">&quot;max_tokens&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">max_response_tokens</span><span class="p">)</span>
             <span class="n">remained_tasksets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
@@ -1618,22 +1593,18 @@ document.write(`
                     <span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config</span> <span class="o">=</span> <span class="n">OmegaConf</span><span class="o">.</span><span class="n">to_object</span><span class="p">(</span><span class="n">trainer_config</span><span class="p">)</span>
                 <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config_path</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                         <span class="s2">&quot;`trainer_config_path` is deprecated; please use `trainer_config` instead.&quot;</span>
                     <span class="p">)</span>
-                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config_path</span><span class="p">):</span>
-                        <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.verl_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_config</span>
-
-                        <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config_path</span><span class="p">)</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                            <span class="sa">f</span><span class="s2">&quot;Invalid trainer config path: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config_path</span><span class="si">}</span><span class="s2">&quot;</span>
-                        <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="kn">from</span><span class="w"> </span><span class="nn">trinity.common.verl_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">veRLConfig</span>
 
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;`trainer_config` is not provided, using default trainer config.&quot;</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config</span> <span class="o">=</span> <span class="n">veRLConfig</span><span class="p">()</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">max_token_len_per_gpu</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">max_token_len_per_gpu</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span>
+                        <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">max_model_len</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">ulysses_sequence_parallel_size</span>  <span class="c1"># type: ignore [operator]</span>
+                    <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid trainer type: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">trainer_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">trainer_config</span><span class="o">.</span><span class="n">synchronize_config</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>

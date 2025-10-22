@@ -832,6 +832,7 @@ Users can use these features to simplify configuration.</p>
 <span class="w">  </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32</span>
 <span class="w">  </span><span class="nt">train_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">256</span>
 <span class="w">  </span><span class="nt">total_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">  </span><span class="nt">total_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
 
 <span class="w">  </span><span class="nt">explorer_input</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">taskset</span><span class="p">:</span>
@@ -846,9 +847,6 @@ Users can use these features to simplify configuration.</p>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">      </span><span class="nt">buffer_2</span><span class="p">:</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
-
-<span class="w">  </span><span class="nt">default_workflow_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;math_workflow&#39;</span>
-<span class="w">  </span><span class="nt">default_reward_fn_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;countdown_reward&#39;</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -862,6 +860,9 @@ Users can use these features to simplify configuration.</p>
 <p>Defines the dataset(s) used by the explorer for training and evaluation.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">buffer</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">explorer_input</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">default_workflow_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;math_workflow&#39;</span>
+<span class="w">    </span><span class="nt">default_eval_workflow_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;math_workflow&#39;</span>
+<span class="w">    </span><span class="nt">default_reward_fn_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;countdown_reward&#39;</span>
 <span class="w">    </span><span class="nt">taskset</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">countdown_train</span>
 <span class="w">      </span><span class="nt">storage_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">file</span>
@@ -894,7 +895,10 @@ Users can use these features to simplify configuration.</p>
 </div>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.taskset</span></code>: Task dataset used for training exploration policies.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.eval_taskset</span></code>: List of task datasets used for evaluation.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.eval_tasksets</span></code>: List of task datasets used for evaluation.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.default_workflow_type</span></code>: Default workflow type for all task datasets under <code class="docutils literal notranslate"><span class="pre">explorer_input</span></code> if not specified at the dataset level.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.default_eval_workflow_type</span></code>: Default evaluation workflow type for all eval task datasets under <code class="docutils literal notranslate"><span class="pre">explorer_input</span></code> if not specified at the dataset level.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">buffer.explorer_input.default_reward_fn_type</span></code>: Default reward function type for all task datasets under <code class="docutils literal notranslate"><span class="pre">explorer_input</span></code> if not specified at the dataset level.</p></li>
 </ul>
 <p>The configuration for each task dataset is defined as follows:</p>
 <ul class="simple">
@@ -1069,7 +1073,7 @@ Users can use these features to simplify configuration.</p>
 <span class="w">  </span><span class="nt">save_strategy</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unrestricted&quot;</span>
 <span class="w">  </span><span class="nt">grad_clip</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
 <span class="w">  </span><span class="nt">use_dynamic_bsz</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">  </span><span class="nt">ppo_max_token_len_per_gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16384</span>
+<span class="w">  </span><span class="nt">max_token_len_per_gpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16384</span>
 <span class="w">  </span><span class="nt">ulysses_sequence_parallel_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="w">  </span><span class="nt">trainer_config</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
 </pre></div>
@@ -1089,7 +1093,7 @@ Users can use these features to simplify configuration.</p>
 </li>
 <li><p><code class="docutils literal notranslate"><span class="pre">grad_clip</span></code>: Gradient clipping for updates.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">use_dynamic_bsz</span></code>: Whether to use dynamic batch size.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ppo_max_token_len_per_gpu</span></code>:  The maximum number of tokens to be processed in forward and backward when updating the policy. Effective when <code class="docutils literal notranslate"><span class="pre">use_dynamic_bsz=true</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_token_len_per_gpu</span></code>:  The maximum number of tokens to be processed in forward and backward when updating the policy. Effective when <code class="docutils literal notranslate"><span class="pre">use_dynamic_bsz=true</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ulysses_sequence_parallel_size</span></code>: Sequence parallel size.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">trainer_config</span></code>: The trainer configuration provided inline.</p></li>
 </ul>
