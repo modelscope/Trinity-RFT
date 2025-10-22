@@ -113,24 +113,27 @@ class VerlPolicyLossTest(unittest.TestCase):
         """Test PPO policy loss with truncate large IS enabled."""
         policy_loss_fn_cls = POLICY_LOSS_FN.get("ppo")
         policy_loss_fn_args = policy_loss_fn_cls.default_args()
-        # Enable truncate large IS with custom bounds
+        # Enable truncate large IS with default bounds [0.0, 2.0]
         policy_loss_fn_args["truncate_large_is"] = True
         policy_loss_fn_args["truncate_is_range_low"] = 0.0
         policy_loss_fn_args["truncate_is_range_high"] = 2.0
         policy_loss_fn = policy_loss_fn_cls(**policy_loss_fn_args)
         loss, metrics = policy_loss_fn(log_prob=self.logprob, **self.input_data.batch)
 
-        # Expected values with IS truncation enabled
-        # Need calculations for these values
-        # ppo_loss_truncated = torch.tensor(0.27213451266288757)
-        # pg_clipfrac_truncated = torch.tensor(0.36458331346511841)
-        # ppo_kl_truncated = torch.tensor(-0.21663446724414825)
+        # Expected values with IS truncation enabled (range: [0.0, 2.0])
+        ppo_loss_truncated = torch.tensor(0.2230827361345291)
+        pg_clipfrac_truncated = torch.tensor(0.3541666567325592)
+        ppo_kl_truncated = torch.tensor(-0.21663446724414825)
+        is_truncate_frac_expected = torch.tensor(0.2708333432674408)
 
-        # self.assertTrue(torch.allclose(loss, ppo_loss_truncated))
-        # self.assertTrue(torch.allclose(torch.tensor(metrics["pg_clipfrac"]), pg_clipfrac_truncated))
-        # self.assertTrue(torch.allclose(torch.tensor(metrics["ppo_kl"]), ppo_kl_truncated))
-        # self.assertTrue(torch.allclose(torch.tensor(metrics["pg_loss"]), ppo_loss_truncated))
-        # Check that IS truncation metric is present
+        self.assertTrue(torch.allclose(loss, ppo_loss_truncated))
+        self.assertTrue(torch.allclose(torch.tensor(metrics["pg_clipfrac"]), pg_clipfrac_truncated))
+        self.assertTrue(torch.allclose(torch.tensor(metrics["ppo_kl"]), ppo_kl_truncated))
+        self.assertTrue(torch.allclose(torch.tensor(metrics["pg_loss"]), ppo_loss_truncated))
+        # Check that IS truncation metric is present and has expected value
         self.assertIn("is_truncate_frac", metrics)
+        self.assertTrue(
+            torch.allclose(torch.tensor(metrics["is_truncate_frac"]), is_truncate_frac_expected)
+        )
         self.assertGreaterEqual(metrics["is_truncate_frac"], 0.0)
         self.assertLessEqual(metrics["is_truncate_frac"], 1.0)
