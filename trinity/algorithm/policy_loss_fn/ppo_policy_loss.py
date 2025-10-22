@@ -26,14 +26,14 @@ class PPOPolicyLossFn(PolicyLossFn):
     ) -> None:
         """
         Initialize PPO policy loss function.
-        
+
         Args:
             backend: Backend framework (default: "verl")
             clip_range: Symmetric clipping range for PPO
             clip_range_low: Lower bound for clipping (1.0 - clip_range_low)
             clip_range_high: Upper bound for clipping (1.0 + clip_range_high)
             loss_agg_mode: Loss aggregation mode (default: "token-mean")
-            truncate_large_is: Whether to truncate large importance sampling ratios 
+            truncate_large_is: Whether to truncate large importance sampling ratios
                 to handle computation errors between VLLM and transformer calculations
             truncate_is_range_low: Lower bound for IS ratio truncation (default: 0.0)
             truncate_is_range_high: Upper bound for IS ratio truncation (default: 2.0)
@@ -50,15 +50,20 @@ class PPOPolicyLossFn(PolicyLossFn):
         assert self.clip_range_low is not None, "clip_range_low must be specified."
         assert self.clip_range_high is not None, "clip_range_high must be specified."
         self.loss_agg_mode = loss_agg_mode
-        
+
         # Truncate large IS configuration
         self.truncate_large_is = truncate_large_is
         if truncate_large_is:
-            self.truncate_is_range_low = truncate_is_range_low if truncate_is_range_low is not None else 0.0
-            self.truncate_is_range_high = truncate_is_range_high if truncate_is_range_high is not None else 2.0
+            self.truncate_is_range_low = (
+                truncate_is_range_low if truncate_is_range_low is not None else 0.0
+            )
+            self.truncate_is_range_high = (
+                truncate_is_range_high if truncate_is_range_high is not None else 2.0
+            )
             assert self.truncate_is_range_low >= 0.0, "truncate_is_range_low must be non-negative."
-            assert self.truncate_is_range_high > self.truncate_is_range_low, \
-                "truncate_is_range_high must be greater than truncate_is_range_low."
+            assert (
+                self.truncate_is_range_high > self.truncate_is_range_low
+            ), "truncate_is_range_high must be greater than truncate_is_range_low."
         else:
             self.truncate_is_range_low = None
             self.truncate_is_range_high = None
@@ -101,11 +106,11 @@ class PPOPolicyLossFn(PolicyLossFn):
             "ppo_kl": ppo_kl.detach().item(),
             "pg_loss": pg_loss.detach().item(),
         }
-        
+
         # Add IS truncation metrics if enabled
         if self.truncate_large_is:
             metrics["is_truncate_frac"] = is_truncate_frac.detach().item()
-        
+
         return pg_loss, metrics
 
     @classmethod

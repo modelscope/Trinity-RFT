@@ -119,13 +119,13 @@ class VerlPolicyLossTest(unittest.TestCase):
         policy_loss_fn_args["truncate_is_range_high"] = 2.0
         policy_loss_fn = policy_loss_fn_cls(**policy_loss_fn_args)
         loss, metrics = policy_loss_fn(log_prob=self.logprob, **self.input_data.batch)
-        
+
         # Expected values with IS truncation enabled
         # Need calculations for these values
-        # ppo_loss_truncated = torch.tensor(0.27213451266288757) 
+        # ppo_loss_truncated = torch.tensor(0.27213451266288757)
         # pg_clipfrac_truncated = torch.tensor(0.36458331346511841)
         # ppo_kl_truncated = torch.tensor(-0.21663446724414825)
-        
+
         # self.assertTrue(torch.allclose(loss, ppo_loss_truncated))
         # self.assertTrue(torch.allclose(torch.tensor(metrics["pg_clipfrac"]), pg_clipfrac_truncated))
         # self.assertTrue(torch.allclose(torch.tensor(metrics["ppo_kl"]), ppo_kl_truncated))
