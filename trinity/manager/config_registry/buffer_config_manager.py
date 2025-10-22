@@ -137,7 +137,7 @@ def set_taskset_args(**kwargs):
     subset_name_col.text_input(
         "Subset Name :orange-badge[(Needs review)]",
         key="taskset_subset_name",
-        help="The subset name used for `datasets.load_datasets`",
+        help="The subset name used for `datasets.load_datasets`, defaults to `None`",
     )
     split_col.text_input("Train Split :orange-badge[(Needs review)]", key="taskset_split")
     prompt_key_col, response_key_col = st.columns(2)
@@ -169,7 +169,7 @@ def _set_eval_taskset_idx(idx):
     subset_name_col.text_input(
         "Subset Name :orange-badge[(Needs review)]",
         key=f"eval_taskset_{idx}_subset_name",
-        help="The subset name used for `datasets.load_datasets`",
+        help="The subset name used for `datasets.load_datasets`, defaults to `None`",
     )
     split_col.text_input(
         "Eval Split :orange-badge[(Needs review)]",

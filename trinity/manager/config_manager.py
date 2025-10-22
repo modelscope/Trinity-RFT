@@ -115,12 +115,9 @@ class ConfigManager:
 
     def beginner_mode(self):
         st.header("Global Config")
-        self.get_configs("project", "exp_name", columns_spec=[1, 2])
-        self.get_configs("checkpoint_root_dir", "save_interval", columns_spec=[3, 1])
-        self.get_configs(
-            "monitor_type",
-            "log_level",
-        )
+        self.get_configs("project", "exp_name")
+        self.get_configs("checkpoint_root_dir")
+        self.get_configs("monitor_type", "log_level", "save_interval")
 
         st.header("Model Config")
         self.get_configs("model_path", "max_model_len", columns_spec=[3, 1])
@@ -208,8 +205,6 @@ class ConfigManager:
 
         self.get_configs("runner_per_model", "eval_interval")
 
-        self.get_configs("bench_on_latest_checkpoint")
-
         with st.expander("Rollout Model Config", expanded=True):
             self.get_configs("engine_type", "engine_num", "tensor_parallel_size")
 
@@ -217,9 +212,8 @@ class ConfigManager:
 
             self.get_configs("enforce_eager", "enable_prefix_caching", "enable_chunked_prefill")
 
-            self.get_configs(
-                "enable_thinking", "enable_history", "enable_openai_api", "enable_auto_tool_choice"
-            )
+            self.get_configs("enable_thinking", "enable_history")
+            self.get_configs("enable_openai_api", "enable_auto_tool_choice")
             self.get_configs("tool_call_parser", "reasoning_parser")
 
         with st.expander("Auxiliary Models", expanded=True):
@@ -677,7 +671,6 @@ class ConfigManager:
             },
             "auxiliary_models": [],
             "eval_interval": st.session_state["eval_interval"],
-            "bench_on_latest_checkpoint": st.session_state["bench_on_latest_checkpoint"],
         }
         for i in range(st.session_state["_auxiliary_models_num"]):
             auxiliary_model_config = {

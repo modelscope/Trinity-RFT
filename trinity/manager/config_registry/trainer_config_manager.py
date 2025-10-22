@@ -42,7 +42,7 @@ def set_save_interval(**kwargs):
 
 @CONFIG_GENERATORS.register_config(default_value=True)
 def set_enable_preview(**kwargs):
-    st.checkbox("Enable Preview", **kwargs)
+    st.checkbox("Enable Experience Preview", **kwargs)
 
 
 @CONFIG_GENERATORS.register_config(default_value=1.0)

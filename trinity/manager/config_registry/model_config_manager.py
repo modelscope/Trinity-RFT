@@ -67,6 +67,15 @@ def set_monitor_type(**kwargs):
     )
 
 
+@CONFIG_GENERATORS.register_config(default_value="INFO")
+def set_log_level(**kwargs):
+    st.selectbox(
+        "Log Level",
+        options=["DEBUG", "INFO", "WARNING", "ERROR"],
+        **kwargs,
+    )
+
+
 # Model Configs
 
 

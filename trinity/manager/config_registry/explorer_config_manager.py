@@ -19,11 +19,6 @@ def set_eval_interval(**kwargs):
     st.number_input("Eval Interval", min_value=1, **kwargs)
 
 
-@CONFIG_GENERATORS.register_config(default_value=True, visible=explorer_visible)
-def set_bench_on_latest_checkpoint(**kwargs):
-    st.checkbox("Eval on Latest Checkpoint", **kwargs)
-
-
 @CONFIG_GENERATORS.register_config(default_value=2, visible=explorer_visible)
 def set_engine_num(**kwargs):
     key = kwargs.get("key")
@@ -105,11 +100,6 @@ def set_dtype(**kwargs):
 @CONFIG_GENERATORS.register_config(default_value=42, visible=explorer_visible)
 def set_seed(**kwargs):
     st.number_input("Seed", step=1, **kwargs)
-
-
-# TODO: max_response_tokens
-# TODO: max_model_len
-# TODO: chat_template
 
 
 @CONFIG_GENERATORS.register_config(default_value=False, visible=explorer_visible)
