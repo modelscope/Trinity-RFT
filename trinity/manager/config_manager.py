@@ -31,13 +31,13 @@ register_map = {
 
 class ConfigManager:
     def __init__(self):
-        load_plugins()
+        if "_init_config_manager" not in st.session_state:
+            self.reset_session_state()
+            load_plugins()
         self.unfinished_fields = set()
         CONFIG_GENERATORS.set_unfinished_fields(self.unfinished_fields)
         st.set_page_config(page_title="Trinity-RFT Config Generator", page_icon=":robot:")
         st.title("Trinity-RFT Config Generator")
-        if "_init_config_manager" not in st.session_state:
-            self.reset_session_state()
         self.maintain_session_state()
         mode = st.pills(
             "Select Mode",
