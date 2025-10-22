@@ -114,11 +114,13 @@ class ConfigManager:
         CONFIG_GENERATORS.get_configs(*config_names, columns_spec=columns_spec)
 
     def beginner_mode(self):
-
         st.header("Global Config")
         self.get_configs("project", "exp_name", columns_spec=[1, 2])
         self.get_configs("checkpoint_root_dir", "save_interval", columns_spec=[3, 1])
-        self.get_configs("monitor_type", "log_level",)
+        self.get_configs(
+            "monitor_type",
+            "log_level",
+        )
 
         st.header("Model Config")
         self.get_configs("model_path", "max_model_len", columns_spec=[3, 1])
@@ -126,7 +128,7 @@ class ConfigManager:
         st.header("Algorithm Config")
         self.get_configs("algorithm_type", "policy_loss_fn", "advantage_fn")
         self.get_configs("repeat_times", "explore_batch_size", "actor_lr", "critic_lr")
-        
+
         st.header("Dataset Config")
         if st.session_state["algorithm_type"] not in ("dpo", "sft"):
             self.get_configs("taskset_path")
@@ -138,18 +140,18 @@ class ConfigManager:
             self.get_configs("sft_dataset_kwargs")
         else:
             self.get_configs("taskset_args")
-        self.get_configs("default_workflow_type","default_reward_fn_type")
+        self.get_configs("default_workflow_type", "default_reward_fn_type")
         self.get_configs("total_epochs", "total_steps")
 
         st.header("Resource Config")
         self.get_configs("node_num", "gpu_per_node")
         self.get_configs("engine_num", "tensor_parallel_size")
-        self.get_configs("trainer_gpu_num", "actor_ulysses_sequence_parallel_size")
+        self.get_configs("trainer_gpu_num_display", "actor_ulysses_sequence_parallel_size")
 
-        st.header("Synchronizer Config")
-        st.caption("Synchronization between trainer and explorer.")
-        self.get_configs("sync_method", "sync_style", "sync_interval")
-
+        if st.session_state["algorithm_type"] not in ("dpo", "sft"):
+            st.header("Synchronizer Config")
+            st.caption("Synchronization between trainer and explorer.")
+            self.get_configs("sync_method", "sync_style", "sync_interval")
 
     def _expert_model_part(self):
         self.get_configs("project", "exp_name", columns_spec=[1, 2])

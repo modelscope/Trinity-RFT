@@ -7,6 +7,20 @@ from trinity.manager.config_registry.buffer_config_manager import (
 from trinity.manager.config_registry.config_registry import CONFIG_GENERATORS
 
 
+@CONFIG_GENERATORS.register_config(default_value=6)
+def set_trainer_gpu_num_display(**kwargs):
+    from trinity.manager.config_registry.model_config_manager import set_trainer_gpu_num
+
+    st.number_input(
+        "Trainer GPU Num",
+        disabled=True,
+        step=1,
+        on_change=set_trainer_gpu_num,
+        help="Automatically calculated based on total GPU number and Explorer configurations",
+        **kwargs,
+    )
+
+
 def use_critic():
     algorithm = ALGORITHM_TYPE.get(st.session_state["algorithm_type"])
     return algorithm.use_critic

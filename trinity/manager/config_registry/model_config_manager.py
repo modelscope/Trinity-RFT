@@ -24,9 +24,12 @@ def set_trainer_gpu_num():
             engine_num = st.session_state[f"auxiliary_model_{idx}_engine_num"]
             tensor_parallel_size = st.session_state[f"auxiliary_model_{idx}_tensor_parallel_size"]
             trainer_gpu_num -= engine_num * tensor_parallel_size
-        st.session_state["trainer_gpu_num"] = trainer_gpu_num
+        st.session_state["trainer_gpu_num"] = int(trainer_gpu_num)
     else:  # model == train
-        st.session_state["trainer_gpu_num"] = st.session_state["total_gpu_num"]
+        st.session_state["trainer_gpu_num"] = int(st.session_state["total_gpu_num"])
+
+    # sync number to display
+    st.session_state["trainer_gpu_num_display"] = st.session_state["trainer_gpu_num"]
 
 
 @CONFIG_GENERATORS.register_config(default_value="Trinity-RFT")

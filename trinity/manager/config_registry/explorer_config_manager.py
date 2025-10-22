@@ -312,7 +312,7 @@ def set_sync_style(**kwargs):
     )
 
 
-@CONFIG_GENERATORS.register_config(default_value=10, visible=explorer_visible)
+@CONFIG_GENERATORS.register_config(default_value=1, visible=explorer_visible)
 def set_sync_interval(**kwargs):
     st.number_input(
         "Sync Interval",
