@@ -378,7 +378,7 @@ def set_experience_buffer_path(**kwargs):
             ]
         st.session_state[key] = st.session_state["_offline_dataset_experience_buffer_path"]
         title = "Offline Dataset Path"
-        help_msg = r"""This path to offline dataset,
+        help_msg = r"""Path to offline dataset,
 
 if `storage_type == StorageType.FILE`, this should be a path to a file,
 

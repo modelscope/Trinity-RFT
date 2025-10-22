@@ -261,7 +261,7 @@ def set_sync_method(**kwargs):
     st.selectbox(
         "Sync Method",
         [sync_method.value for sync_method in SyncMethod],
-        help="""`nccl`: The explorer and trainer sync model weights once every `sync_interval` steps.
+        help="""`nccl`: The explorer and trainer sync model weights once by NCCL.
 
 `checkpoint`: The trainer saves the model checkpoint, and the explorer loads it at `sync_interval`.
 

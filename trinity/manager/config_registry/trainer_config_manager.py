@@ -310,7 +310,7 @@ def set_actor_ppo_micro_batch_size_per_gpu(**kwargs):
         "Micro Batch Size Per GPU :blue-badge[(Actor)]",
         min_value=1,
         max_value=max_value,
-        help="Batch size per GPU; effective when `use_dynamic_bsz` is False",
+        help="Micro batch size per GPU; effective when `use_dynamic_bsz` is False",
         **kwargs,
     )
 
