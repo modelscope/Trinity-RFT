@@ -108,3 +108,40 @@ class VerlPolicyLossTest(unittest.TestCase):
         self.assertTrue(torch.allclose(torch.tensor(metrics["usual/pg_loss"]), pg_loss))
         self.assertTrue(torch.allclose(torch.tensor(metrics["expert/sft_loss"]), sft_loss))
         self.assertTrue(torch.allclose(torch.tensor(metrics["loss"]), mix_loss))
+
+    def test_ppo_policy_loss_with_truncate_is(self):
+        """Test PPO policy loss with truncate large IS enabled."""
+        policy_loss_fn_cls = POLICY_LOSS_FN.get("ppo")
+        policy_loss_fn_args = policy_loss_fn_cls.default_args()
+        # Enable truncate large IS with default bounds [0.0, 2.0]
+        policy_loss_fn_args["truncate_adv_pos_is"] = True
+        policy_loss_fn_args["truncate_adv_neg_is"] = True
+        policy_loss_fn_args["truncate_is_range_low"] = 0.0
+        policy_loss_fn_args["truncate_is_range_high"] = 2.0
+        policy_loss_fn = policy_loss_fn_cls(**policy_loss_fn_args)
+        loss, metrics = policy_loss_fn(log_prob=self.logprob, **self.input_data.batch)
+
+        # Expected values with IS truncation enabled (range: [0.0, 2.0])
+        ppo_loss_truncated = torch.tensor(0.2230827361345291)
+        pg_clipfrac_truncated = torch.tensor(0.3541666567325592)
+        ppo_kl_truncated = torch.tensor(-0.21663446724414825)
+        is_truncate_frac_pos_expected = torch.tensor(0.0)
+        is_truncate_frac_neg_expected = torch.tensor(0.1041666641831398)
+
+        self.assertTrue(torch.allclose(loss, ppo_loss_truncated))
+        self.assertTrue(torch.allclose(torch.tensor(metrics["pg_clipfrac"]), pg_clipfrac_truncated))
+        self.assertTrue(torch.allclose(torch.tensor(metrics["ppo_kl"]), ppo_kl_truncated))
+        self.assertTrue(torch.allclose(torch.tensor(metrics["pg_loss"]), ppo_loss_truncated))
+        # Check that IS truncation metric is present and has expected value
+        self.assertIn("is_truncate_frac_pos", metrics)
+        self.assertIn("is_truncate_frac_neg", metrics)
+        self.assertTrue(
+            torch.allclose(torch.tensor(metrics["is_truncate_frac_pos"]), is_truncate_frac_pos_expected)
+        )
+        self.assertTrue(
+            torch.allclose(torch.tensor(metrics["is_truncate_frac_neg"]), is_truncate_frac_neg_expected)
+        )
+        self.assertGreaterEqual(metrics["is_truncate_frac_pos"], 0.0)
+        self.assertLessEqual(metrics["is_truncate_frac_pos"], 1.0)
+        self.assertGreaterEqual(metrics["is_truncate_frac_neg"], 0.0)
+        self.assertLessEqual(metrics["is_truncate_frac_neg"], 1.0)
