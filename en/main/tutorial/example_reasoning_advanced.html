@@ -565,9 +565,7 @@ document.write(`
   </button>
 `);
 </script>
-<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="fa-solid fa-list"></span>
-</button>
+
 </div></div>
       
     </div>
@@ -583,14 +581,6 @@ document.write(`
     <div id="print-main-content">
         <div id="jb-print-toc">
             
-            <div>
-                <h2> Contents </h2>
-            </div>
-            <nav aria-label="Page">
-                <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#opmd-a-native-off-policy-rl-algorithm">OPMD: a native off-policy RL algorithm</a></li>
-</ul>
-            </nav>
         </div>
     </div>
 </div>
@@ -601,24 +591,22 @@ document.write(`
                 <article class="bd-article">
                   
   <section class="tex2jax_ignore mathjax_ignore" id="off-policy-rft">
-<h1>Off-Policy RFT<a class="headerlink" href="#off-policy-rft" title="Link to this heading">#</a></h1>
-<p>Let’s continue with the <a class="reference internal" href="example_reasoning_basic.html"><span class="std std-doc">previous GSM8k example</span></a> and show some advanced features provided by Trinity-RFT, namely, off-policy or asynchronous RFT mode.</p>
-<section id="opmd-a-native-off-policy-rl-algorithm">
-<span id="opmd"></span><h2>OPMD: a native off-policy RL algorithm<a class="headerlink" href="#opmd-a-native-off-policy-rl-algorithm" title="Link to this heading">#</a></h2>
-<p>As an experimental feature of Trinity-RFT, we develop an embarrasingly simple off-policy RL algorithm, termed as OPMD (Online Policy Mirror Descent, inspired by <a class="reference external" href="https://arxiv.org/abs/2501.12599">Kimi k1.5</a>).
-The algorithm design and analysis can be found in Appendix A of <a class="reference external" href="https://arxiv.org/abs/2505.17826">the technique report of Trinity-RFT</a>.
+<span id="opmd"></span><h1>Off-Policy RFT<a class="headerlink" href="#off-policy-rft" title="Link to this heading">#</a></h1>
+<p>Let’s continue with the <a class="reference internal" href="example_reasoning_basic.html"><span class="std std-doc">previous GSM8k example</span></a>, but switch from on-policy to off-policy RFT.
+In this example, we consider an off-policy RL algorithm termed as OPMD (Online Policy Mirror Descent) in Trinity-RFT.
+The algorithm design and analysis can be found in Section 2.2 of <a class="reference external" href="https://arxiv.org/abs/2509.24203">our paper</a>.
 The config file is <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/blob/main/examples/opmd_gsm8k/opmd_gsm8k.yaml"><code class="docutils literal notranslate"><span class="pre">opmd_gsm8k.yaml</span></code></a>.</p>
 <p>To try out the OPMD algorithm:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>examples/opmd_gsm8k/opmd_gsm8k.yaml
 </pre></div>
 </div>
 <p>Note that in this config file, <code class="docutils literal notranslate"><span class="pre">sync_interval</span></code> is set to 10, i.e., the model weights of explorer and trainer are synchronized only once every 10 training steps, which leads to a challenging off-policy scenario (potentially with abrupt distribution shift during the RFT process).</p>
-<p>The red curve below shows an example of OPMD’s learning curves.
+<p>In the plot below, the red curve shows the score achieved by the explorer during OPMD training.
 Since the explorer’s model weights remain unchanged for the first 10 steps, its score remains flat.
 Then, after the model weights of explorer and trainer are synchronized at the end of step 10, we see an abrupt increase in score at step 11, which indicates effective off-policy learning in the first 10 steps.
 A similar performance boost is shown at step 21, which leads to a converged score matching what is achieved by GRPO in a mostly on-policy case (with <code class="docutils literal notranslate"><span class="pre">sync_interval=2</span></code>).</p>
 <p><img alt="opmd" src="../_images/opmd-curve.png" /></p>
-</section>
+<p>If you’re interested in more findings about off-policy RL algorithms, please refer to <a class="reference external" href="https://arxiv.org/abs/2509.24203">our paper</a>.</p>
 </section>
 
 
@@ -656,21 +644,6 @@ A similar performance boost is shown at step 21, which leads to a converged scor
             </div>
             
             
-              
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
-
-
-  <div class="sidebar-secondary-item">
-  <div class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> Contents
-  </div>
-  <nav class="bd-toc-nav page-toc">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#opmd-a-native-off-policy-rl-algorithm">OPMD: a native off-policy RL algorithm</a></li>
-</ul>
-  </nav></div>
-
-</div></div>
               
             
           </div>

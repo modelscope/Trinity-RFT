@@ -561,9 +561,7 @@ document.write(`
   </button>
 `);
 </script>
-<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="fa-solid fa-list"></span>
-</button>
+
 </div></div>
       
     </div>
@@ -579,14 +577,6 @@ document.write(`
     <div id="print-main-content">
         <div id="jb-print-toc">
             
-            <div>
-                <h2> 目录 </h2>
-            </div>
-            <nav aria-label="Page">
-                <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#opmd-off-policy">OPMD：一种原生的 off-policy 强化学习算法</a></li>
-</ul>
-            </nav>
         </div>
     </div>
 </div>
@@ -597,24 +587,22 @@ document.write(`
                 <article class="bd-article">
                   
   <section class="tex2jax_ignore mathjax_ignore" id="off-policy-rft">
-<h1>Off-Policy RFT<a class="headerlink" href="#off-policy-rft" title="Link to this heading">#</a></h1>
-<p>让我们继续使用 <a class="reference internal" href="example_reasoning_basic.html"><span class="std std-doc">之前的 GSM8k 例子</span></a>，并展示 Trinity-RFT 提供的一些高级功能，即 off-policy 或异步 RFT 模式。</p>
-<section id="opmd-off-policy">
-<span id="opmd"></span><h2>OPMD：一种原生的 off-policy 强化学习算法<a class="headerlink" href="#opmd-off-policy" title="Link to this heading">#</a></h2>
-<p>作为 Trinity-RFT 的一个实验性功能，我们开发了一种极其简单的 off-policy 强化学习算法，称为 OPMD（Online Policy Mirror Descent，灵感来自 <a class="reference external" href="https://arxiv.org/abs/2501.12599">Kimi k1.5</a>）。
-该算法的设计与分析详见<a class="reference external" href="https://arxiv.org/abs/2505.17826">Trinity-RFT 技术报告</a>的附录A。
+<span id="opmd"></span><h1>Off-Policy RFT<a class="headerlink" href="#off-policy-rft" title="Link to this heading">#</a></h1>
+<p>让我们继续使用 <a class="reference internal" href="example_reasoning_basic.html"><span class="std std-doc">之前的 GSM8k 例子</span></a>，区别在于从 on-policy 模式切换到 off-policy 模式。
+在这个例子中，我们考虑一个名为 OPMD 的 off-policy 强化学习算法。
+该算法的设计与分析详见<a class="reference external" href="https://arxiv.org/abs/2509.24203">我们的论文</a>中的 Section 2.2。
 本例子对应的配置文件为 <a class="reference external" href="https://github.com/modelscope/Trinity-RFT/blob/main/examples/opmd_gsm8k/opmd_gsm8k.yaml"><code class="docutils literal notranslate"><span class="pre">opmd_gsm8k.yaml</span></code></a>。</p>
 <p>要尝试 OPMD 算法，请运行：</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>trinity<span class="w"> </span>run<span class="w"> </span>--config<span class="w"> </span>examples/opmd_gsm8k/opmd_gsm8k.yaml
 </pre></div>
 </div>
 <p>注意，在此配置文件中，<code class="docutils literal notranslate"><span class="pre">sync_interval</span></code> 被设置为 10，也就是说，explorer 和 trainer 每 10 个训练步骤才同步一次模型权重，这导致了一个具有挑战性的 off-policy 场景（在 RFT 过程中可能出现剧烈的分布偏移）。</p>
-<p>下图中的红色曲线展示了 OPMD 学习过程的一个示例。
+<p>下图中的红色曲线展示了 OPMD 训练过程中 explorer 取得的分数。
 由于 explorer 的模型权重在前 10 步保持不变，其得分也保持平稳。
 然后，在第 10 步结束时，explorer 和 trainer 完成模型权重同步，我们在第 11 步观察到得分突然上升，这表明前 10 步的 off-policy 学习是有效的。
 类似的性能提升在第 21 步再次出现，最终收敛的得分与在准在线策略情况下（<code class="docutils literal notranslate"><span class="pre">sync_interval=2</span></code>）GRPO 所达到的结果相当。</p>
 <p><img alt="opmd" src="../_images/opmd-curve.png" /></p>
-</section>
+<p>对 off-policy 强化学习算法感兴趣的读者，可以参考<a class="reference external" href="https://arxiv.org/abs/2509.24203">我们的论文</a>。</p>
 </section>
 
 
@@ -652,21 +640,6 @@ document.write(`
             </div>
             
             
-              
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
-
-
-  <div class="sidebar-secondary-item">
-  <div class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> 目录
-  </div>
-  <nav class="bd-toc-nav page-toc">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#opmd-off-policy">OPMD：一种原生的 off-policy 强化学习算法</a></li>
-</ul>
-  </nav></div>
-
-</div></div>
               
             
           </div>
