@@ -59,9 +59,10 @@ def check_checkpoint_root_dir(unfinished_fields: set, key: str):
 
 @CONFIG_GENERATORS.register_config(default_value="tensorboard")
 def set_monitor_type(**kwargs):
+    candidates = [c.upper() for c in MONITOR.modules.keys()]
     st.selectbox(
         "Monitor Type",
-        options=MONITOR.modules.keys(),
+        options=candidates,
         help="Set your API_KEY in environment variables if using `Wandb` or `MLFlow`",
         **kwargs,
     )
