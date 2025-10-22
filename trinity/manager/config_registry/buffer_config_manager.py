@@ -15,7 +15,7 @@ def set_total_epochs(**kwargs):
 @CONFIG_GENERATORS.register_config(default_value=None)
 def set_total_steps(**kwargs):
     st.number_input(
-        "Total Steps", min_value=1, help="If set, 'Total Epochs' will be ignored", **kwargs
+        "Total Steps", min_value=1, help="If set, `Total Epochs` will be ignored", **kwargs
     )
 
 
@@ -137,8 +137,7 @@ def set_taskset_args(**kwargs):
     subset_name_col.text_input(
         "Subset Name :orange-badge[(Needs review)]",
         key="taskset_subset_name",
-        help="The subset name used for `datasets.load_datasets`, see "
-        "[here](https://huggingface.co/docs/datasets/v3.5.0/en/package_reference/loading_methods#datasets.load_dataset.name) for details.",
+        help="The subset name used for `datasets.load_datasets`",
     )
     split_col.text_input("Train Split :orange-badge[(Needs review)]", key="taskset_split")
     prompt_key_col, response_key_col = st.columns(2)
@@ -170,8 +169,7 @@ def _set_eval_taskset_idx(idx):
     subset_name_col.text_input(
         "Subset Name :orange-badge[(Needs review)]",
         key=f"eval_taskset_{idx}_subset_name",
-        help="The subset name used for `datasets.load_datasets`, see "
-        "[here](https://huggingface.co/docs/datasets/v3.5.0/en/package_reference/loading_methods#datasets.load_dataset.name) for details.",
+        help="The subset name used for `datasets.load_datasets`",
     )
     split_col.text_input(
         "Eval Split :orange-badge[(Needs review)]",

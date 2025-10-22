@@ -396,6 +396,7 @@ def set_critic_lr(**kwargs):
         min_value=1e-7,
         max_value=1e-3,
         format="%.1e",
+        help="Effective only when using PPO algorithm",
         **kwargs,
     )
 

@@ -114,43 +114,42 @@ class ConfigManager:
         CONFIG_GENERATORS.get_configs(*config_names, columns_spec=columns_spec)
 
     def beginner_mode(self):
-        st.header("Essential Configs")
+
+        st.header("Global Config")
         self.get_configs("project", "exp_name", columns_spec=[1, 2])
+        self.get_configs("checkpoint_root_dir", "save_interval", columns_spec=[3, 1])
+        self.get_configs("monitor_type", "log_level",)
 
-        self.get_configs("model_path")
+        st.header("Model Config")
+        self.get_configs("model_path", "max_model_len", columns_spec=[3, 1])
 
-        self.get_configs("checkpoint_root_dir")
-
+        st.header("Algorithm Config")
+        self.get_configs("algorithm_type", "policy_loss_fn", "advantage_fn")
+        self.get_configs("repeat_times", "explore_batch_size", "actor_lr", "critic_lr")
+        
+        st.header("Dataset Config")
         if st.session_state["algorithm_type"] not in ("dpo", "sft"):
             self.get_configs("taskset_path")
         else:
             self.get_configs("experience_buffer_path")
-
-        self.get_configs("algorithm_type", "monitor_type")
-
-        st.header("Important Configs")
-        self.get_configs("node_num", "gpu_per_node", "engine_num", "tensor_parallel_size")
-
-        self.get_configs(
-            "total_epochs", "total_steps", "explore_batch_size", "repeat_times", "train_batch_size"
-        )
-
-        self.get_configs("storage_type", "max_response_tokens", "max_model_len", "ppo_epochs")
-
-        self.get_configs("sync_interval", "eval_interval", "save_interval")
-
         if st.session_state["algorithm_type"] == "dpo":
             self.get_configs("dpo_dataset_kwargs")
         elif st.session_state["algorithm_type"] == "sft":
             self.get_configs("sft_dataset_kwargs")
         else:
             self.get_configs("taskset_args")
+        self.get_configs("default_workflow_type","default_reward_fn_type")
+        self.get_configs("total_epochs", "total_steps")
 
-        self.get_configs(
-            "default_workflow_type", "default_eval_workflow_type", "default_reward_fn_type"
-        )
+        st.header("Resource Config")
+        self.get_configs("node_num", "gpu_per_node")
+        self.get_configs("engine_num", "tensor_parallel_size")
+        self.get_configs("trainer_gpu_num", "actor_ulysses_sequence_parallel_size")
 
-        self.get_configs("actor_lr", "actor_ulysses_sequence_parallel_size", "critic_lr")
+        st.header("Synchronizer Config")
+        st.caption("Synchronization between trainer and explorer.")
+        self.get_configs("sync_method", "sync_style", "sync_interval")
+
 
     def _expert_model_part(self):
         self.get_configs("project", "exp_name", columns_spec=[1, 2])
@@ -745,6 +744,9 @@ class ConfigManager:
                     "sync_style": st.session_state["sync_style"],
                     "sync_interval": st.session_state["sync_interval"],
                     "sync_timeout": st.session_state["sync_timeout"],
+                },
+                "log": {
+                    "level": st.session_state["log_level"],
                 },
             }
 
