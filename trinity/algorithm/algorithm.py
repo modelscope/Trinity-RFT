@@ -82,7 +82,7 @@ class PPOAlgorithm(AlgorithmType):
     def default_config(cls) -> Dict:
         return {
             "repeat_times": 1,
-            "sample_strategy": "warmup",
+            "sample_strategy": "default",
             "policy_loss_fn": "ppo",
             "advantage_fn": "ppo",
             "kl_penalty_fn": "none",
@@ -106,7 +106,7 @@ class GRPOAlgorithm(AlgorithmType):
         return {
             "repeat_times": 2,
             "advantage_fn": "grpo",
-            "sample_strategy": "warmup",
+            "sample_strategy": "default",
             "policy_loss_fn": "ppo",
             "kl_penalty_fn": "none",
             "kl_loss_fn": "k2",
@@ -129,7 +129,7 @@ class OPMDAlgorithm(AlgorithmType):
         return {
             "repeat_times": 2,
             "advantage_fn": "opmd",
-            "sample_strategy": "warmup",
+            "sample_strategy": "default",
             "policy_loss_fn": "opmd",
             "kl_penalty_fn": "none",
             "kl_loss_fn": "k2",
@@ -151,7 +151,7 @@ class AsymREAlgorithm(AlgorithmType):
     def default_config(cls) -> Dict:
         return {
             "repeat_times": 2,
-            "sample_strategy": "warmup",
+            "sample_strategy": "default",
             "policy_loss_fn": "opmd",
             "advantage_fn": "asymre",
             "kl_penalty_fn": "none",
@@ -173,7 +173,7 @@ class DPOAlgorithm(AlgorithmType):
     @classmethod
     def default_config(cls) -> Dict:
         return {
-            "sample_strategy": "warmup",
+            "sample_strategy": "default",
             "policy_loss_fn": "dpo",
             "kl_loss_fn": "k2",
             "entropy_loss_fn": "default",
@@ -219,7 +219,7 @@ class TOPRAlgorithm(AlgorithmType):
         return {
             "repeat_times": 2,
             "advantage_fn": "reinforce",  # or simply use grpo
-            "sample_strategy": "warmup",
+            "sample_strategy": "default",
             "policy_loss_fn": "topr",
             "kl_penalty_fn": "none",
             "kl_loss_fn": "k2",
@@ -242,7 +242,7 @@ class CISPOAlgorithm(AlgorithmType):
         return {
             "repeat_times": 2,
             "advantage_fn": "grpo",
-            "sample_strategy": "warmup",
+            "sample_strategy": "default",
             "policy_loss_fn": "cispo",
             "kl_penalty_fn": "none",
             "kl_loss_fn": "k2",
@@ -331,7 +331,7 @@ class sPPOAlgorithm(AlgorithmType):
     def default_config(cls) -> Dict:
         return {
             "repeat_times": 2,
-            "sample_strategy": "warmup",
+            "sample_strategy": "default",
             "policy_loss_fn": "sppo",
             "advantage_fn": "opmd",
             "kl_penalty_fn": "none",
@@ -354,10 +354,33 @@ class RECAlgorithm(AlgorithmType):
     def default_config(cls) -> Dict:
         return {
             "repeat_times": 2,
-            "sample_strategy": "warmup",
+            "sample_strategy": "default",
             "policy_loss_fn": "rec",
             "advantage_fn": "rec",
             "kl_penalty_fn": "none",
             "kl_loss_fn": "none",
             "entropy_loss_fn": "none",
+        }
+
+
+@ALGORITHM_TYPE.register_module("multi_step_grpo")
+class MultiStepGRPOAlgorithm(AlgorithmType):
+    """Multi-Step GRPO Algorithm."""
+
+    use_critic: bool = False
+    use_reference: bool = True
+    compute_advantage_in_trainer: bool = False
+    can_balance_batch: bool = True
+    schema: str = "experience"
+
+    @classmethod
+    def default_config(cls) -> Dict:
+        return {
+            "repeat_times": 8,
+            "advantage_fn": "step_wise_grpo",
+            "sample_strategy": "default",
+            "policy_loss_fn": "ppo",
+            "kl_penalty_fn": "none",
+            "kl_loss_fn": "k2",
+            "entropy_loss_fn": "default",
         }

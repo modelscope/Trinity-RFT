@@ -9,6 +9,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
+import ray
 from omegaconf import OmegaConf
 
 from trinity.common.constants import (
@@ -84,6 +85,17 @@ class GenerationConfig:
     # repeat each task for `n` times
     # ! DO NOT SET in `buffer.explorer_input.taskset.rollout_args`
     n: int = 1
+
+
+@dataclass
+class OptimizerConfig:
+    lr: float = 1e-6
+    lr_warmup_steps: int = -1
+    lr_warmup_steps_ratio: float = 0.0
+    min_lr_ratio: Optional[float] = 0.0
+    warmup_style: str = "constant"
+    optimizer_type: str = "adam"
+    betas: List[float] = field(default_factory=lambda: [0.9, 0.999])
 
 
 @dataclass
@@ -347,6 +359,8 @@ class AlgorithmConfig:
     # for GRPO-like algorithms, repeat each task for `repeat_times` times
     repeat_times: int = 1
 
+    optimizer: OptimizerConfig = field(default_factory=OptimizerConfig)
+
     # the strategy for sampling experiences from the buffer
     sample_strategy: Optional[str] = None
     sample_strategy_args: Optional[dict] = None
@@ -376,8 +390,9 @@ class AlgorithmConfig:
 class ClusterConfig:
     """Config for the cluster."""
 
-    node_num: int = 1
-    gpu_per_node: int = 8
+    ray_address: str = "auto"
+    node_num: Optional[int] = None
+    gpu_per_node: Optional[int] = None
 
 
 @Experimental
@@ -485,14 +500,16 @@ class TrainerConfig:
     ] = None  # total training steps, training stops when reaching this step, None means no limit
 
     # trainer configs
-    actor_grad_clip: Optional[float] = None
+    grad_clip: float = 1.0
+    use_dynamic_bsz: bool = True
+    ppo_max_token_len_per_gpu: int = 16384
+    ulysses_sequence_parallel_size: int = 1  # sp size
     # TODO: extract more train-related params from underlying trainer engine
 
     save_strategy: SaveStrategy = SaveStrategy.UNRESTRICTED
 
-    # Only one needs to be set for `trainer_config` and `trainer_config_path`
     trainer_config: Any = field(default_factory=dict)
-    trainer_config_path: str = ""
+    trainer_config_path: str = ""  # deprecated, use `trainer_config` instead
 
 
 @dataclass
@@ -627,6 +644,44 @@ class Config:
             logger.warning(
                 "`explorer.runner_num` is deprecated, please use `explorer.runner_per_model` instead."
             )
+
+    def _update_config_from_ray_cluster(self) -> None:
+        """Update config if `node_num` or `gpu_per_node` are not set."""
+        if self.cluster.node_num is not None and self.cluster.gpu_per_node is not None:
+            return
+
+        # init ray cluster to detect node_num and gpu_per_node
+        was_initialized = ray.is_initialized()
+        if not was_initialized:
+            ray.init(
+                address=self.cluster.ray_address,
+                ignore_reinit_error=True,
+                namespace=self.ray_namespace,
+            )
+
+        alive_nodes = [n for n in ray.nodes() if n["alive"]]
+        if not alive_nodes:
+            raise RuntimeError("Could not find any alive nodes in the Ray cluster.")
+
+        # set node_num
+        if self.cluster.node_num is None:
+            self.cluster.node_num = len(alive_nodes)
+            logger.info(f"Auto-detected and set node_num: {self.cluster.node_num}")
+
+        # set gpu_per_node
+        if self.cluster.gpu_per_node is None:
+            gpu_per_node = 0
+            for node in alive_nodes:
+                node_gpus = node.get("Resources", {}).get("GPU")
+                if node_gpus and node_gpus > 0:
+                    gpu_per_node = int(node_gpus)
+                    break
+
+            self.cluster.gpu_per_node = gpu_per_node
+            logger.info(f"Auto-detected and set gpu_per_node: {self.cluster.gpu_per_node}")
+
+        if not was_initialized:
+            ray.shutdown()
 
     def _check_interval(self) -> None:
         assert self.synchronizer.sync_interval > 0
@@ -924,6 +979,9 @@ class Config:
         if self.ray_namespace is None or len(self.ray_namespace) == 0:
             self.ray_namespace = f"{self.project}/{self.name}"
 
+        # check cluster infomation
+        self._update_config_from_ray_cluster()
+
         # check algorithm
         self._check_algorithm()
 
@@ -1059,7 +1117,10 @@ class Config:
                         trainer_config_schema, self.trainer.trainer_config
                     )
                     self.trainer.trainer_config = OmegaConf.to_object(trainer_config)
-                else:
+                elif self.trainer.trainer_config_path:
+                    logger.warning(
+                        "`trainer_config_path` is deprecated; please use `trainer_config` instead."
+                    )
                     if os.path.isfile(self.trainer.trainer_config_path):
                         from trinity.common.verl_config import load_config
 
@@ -1068,6 +1129,11 @@ class Config:
                         raise ValueError(
                             f"Invalid trainer config path: {self.trainer.trainer_config_path}"
                         )
+                else:
+                    from trinity.common.verl_config import veRLConfig
+
+                    logger.info("`trainer_config` is not provided, using default trainer config.")
+                    self.trainer.trainer_config = veRLConfig()
             else:
                 raise ValueError(f"Invalid trainer type: {self.trainer_type}")
             self.trainer.trainer_config.synchronize_config(self)

@@ -142,9 +142,9 @@ MODE_MAP = {
 }
 
 
-def run_stage(config: Config, ray_address: str) -> None:
+def run_stage(config: Config) -> None:
     ray.init(
-        address=ray_address,
+        address=config.cluster.ray_address,
         ignore_reinit_error=True,
         namespace=config.ray_namespace,
         runtime_env={"env_vars": config.get_envs()},
@@ -168,11 +168,9 @@ def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
     load_plugins()
     config = load_config(config_path)
 
-    ray_address = "auto"
-
     if dlc:
         cluster_namespace = f"{config.project}-{config.name}"
-        ray_address = setup_ray_cluster(namespace=cluster_namespace)
+        config.cluster.ray_address = setup_ray_cluster(namespace=cluster_namespace)
 
     if not is_running():
         raise RuntimeError("Ray is not running, please start it by `ray start --head`.")
@@ -203,7 +201,7 @@ def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
                     if prev_stage_checkpoint is not None:
                         stage_config.model.model_path = prev_stage_checkpoint
                     stage_config.check_and_update()
-                    run_stage(stage_config, ray_address=ray_address)
+                    run_stage(stage_config)
                     logger.info(
                         "===========================================================\n"
                         f"> Stage {i + 1}/{len(config.stages)} finished.\n"
@@ -212,7 +210,7 @@ def run(config_path: str, dlc: bool = False, plugin_dir: str = None):
                 prev_stage_checkpoint = get_latest_hf_checkpoint_path(stage_config)
         else:
             config.check_and_update()
-            run_stage(config, ray_address=ray_address)
+            run_stage(config)
 
     finally:
         if dlc:

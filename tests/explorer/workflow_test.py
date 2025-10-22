@@ -4,18 +4,22 @@ import asyncio
 import unittest
 from dataclasses import dataclass, field
 from typing import Dict, Optional
+from unittest import mock
 from unittest.mock import MagicMock
 
+import openai
+import ray
 from parameterized import parameterized, parameterized_class
 from torch import Tensor
 
 from tests.common.vllm_test import CHAT_TEMPLATE
 from tests.tools import get_model_path, get_template_config, get_unittest_dataset_config
-from trinity.common.experience import EID
+from trinity.common.experience import EID, Experience
 from trinity.common.models import create_inference_models
 from trinity.common.models.model import ModelWrapper
 from trinity.common.rewards import RMGalleryFn
 from trinity.common.workflows import (
+    WORKFLOWS,
     MathBoxedWorkflow,
     MathEvalWorkflow,
     MathRMWorkflow,
@@ -23,6 +27,7 @@ from trinity.common.workflows import (
     Workflow,
 )
 from trinity.common.workflows.workflow import MultiTurnWorkflow, Task
+from trinity.explorer.workflow_runner import WorkflowRunner
 
 
 @dataclass
@@ -38,19 +43,17 @@ class MockResponse:
 
 
 class DummyWorkflow(Workflow):
+    can_reset: bool = True
+    can_repeat: bool = True
+
     def __init__(self, model, task: Task, auxiliary_models=None):
         super().__init__(task=task, model=model, auxiliary_models=auxiliary_models)
         self.obj = task.raw_task
         self.output_format = task.workflow_args["output_format"]
         self.repeat_times = task.rollout_args.n
-
-    @property
-    def resettable(self):
-        return True
-
-    @property
-    def repeatable(self):
-        return True
+        if auxiliary_models is not None:
+            for model in auxiliary_models:
+                assert isinstance(model, openai.OpenAI)
 
     def reset(self, task: Task):
         self.obj = task.raw_task
@@ -61,36 +64,40 @@ class DummyWorkflow(Workflow):
         self.run_id_base = run_id_base
 
     def run(self):
+        exps = []
         if self.output_format == "json":
             import json
 
-            return [json.dumps(self.obj)] * self.repeat_times
+            for i in range(self.repeat_times):
+                exp = Experience(tokens=Tensor([0, 1, 2, 3]), prompt_length=1)
+                exp.response_text = json.dumps(self.obj)
+                exps.append(exp)
+            return exps
         elif self.output_format == "yaml":
             import yaml
 
-            return [yaml.safe_dump(self.obj)] * self.repeat_times
+            for i in range(self.repeat_times):
+                exp = Experience(tokens=Tensor([0, 1, 2, 3]), prompt_length=1)
+                exp.response_text = yaml.safe_dump(self.obj)
+                exps.append(exp)
+            return exps
         else:
             raise ValueError("Invalid output format")
 
 
 class DummyAsyncWorkflow(Workflow):
+    can_reset: bool = True
+    can_repeat: bool = True
+    is_async: bool = True
+
     def __init__(self, model, task: Task, auxiliary_models=None):
         super().__init__(task=task, model=model, auxiliary_models=auxiliary_models)
         self.obj = task.raw_task
         self.output_format = task.workflow_args["output_format"]
         self.repeat_times = task.rollout_args.n
-
-    @property
-    def resettable(self):
-        return True
-
-    @property
-    def repeatable(self):
-        return True
-
-    @property
-    def asynchronous(self):
-        return True
+        if auxiliary_models is not None:
+            for model in auxiliary_models:
+                assert isinstance(model, openai.AsyncOpenAI)
 
     def reset(self, task: Task):
         self.obj = task.raw_task
@@ -102,14 +109,23 @@ class DummyAsyncWorkflow(Workflow):
 
     async def run_async(self):
         await asyncio.sleep(0.1)
+        exps = []
         if self.output_format == "json":
             import json
 
-            return [json.dumps(self.obj)] * self.repeat_times
+            for i in range(self.repeat_times):
+                exp = Experience(tokens=Tensor([0, 1, 2, 3]), prompt_length=1)
+                exp.response_text = json.dumps(self.obj)
+                exps.append(exp)
+            return exps
         elif self.output_format == "yaml":
             import yaml
 
-            return [yaml.safe_dump(self.obj)] * self.repeat_times
+            for i in range(self.repeat_times):
+                exp = Experience(tokens=Tensor([0, 1, 2, 3]), prompt_length=1)
+                exp.response_text = yaml.safe_dump(self.obj)
+                exps.append(exp)
+            return exps
         else:
             raise ValueError("Invalid output format")
 
@@ -131,13 +147,11 @@ class DummyMultiTurnWorkflow(MultiTurnWorkflow):
 
 
 class DummyAsyncMultiTurnWorkflow(MultiTurnWorkflow):
+    is_async: bool = True
+
     def __init__(self, model, task: Task, auxiliary_models=None):
         super().__init__(task=task, model=model, auxiliary_models=auxiliary_models)
         self.contents = task.raw_task["contents"]  # type: ignore
-
-    @property
-    def asynchronous(self):
-        return True
 
     async def run_async(self):
         memory = [{"role": "system", "content": "You are a helpful assistant."}]
@@ -426,13 +440,13 @@ class WorkflowTest(unittest.TestCase):
             answer = asyncio.run(workflow.run_async())
         else:
             answer = workflow.run()
-        self.assertEqual(answer[0], '{"a": 1}')
+        self.assertEqual(answer[0].response_text, '{"a": 1}')
         workflow.reset(yaml_task)
         if workflow.asynchronous:
             answer = asyncio.run(workflow.run_async())
         else:
             answer = workflow.run()
-        self.assertEqual(answer[0], "a: 1\n")
+        self.assertEqual(answer[0].response_text, "a: 1\n")
 
     @parameterized.expand([(DummyWorkflow,), (DummyAsyncWorkflow,)])
     def test_workflow_repeatable(self, workflow_cls) -> None:
@@ -489,3 +503,104 @@ class MultiTurnWorkflowTest(unittest.TestCase):
         else:
             answer = workflow.run()
         self.assertEqual(len(answer), 2)
+
+    def tearDown(self):
+        ray.shutdown(_exiting_interpreter=True)
+
+
+class TestAgentScopeWorkflowAdapter(unittest.IsolatedAsyncioTestCase):
+    @unittest.skip("Waiting for agentscope>=0.1.6")
+    async def test_adapter(self):
+        try:
+            from agentscope.model import TrinityChatModel
+        except ImportError:
+            self.skipTest("agentscope >= 0.1.6 is not installed")
+
+        async def as_workflow_func(task, model) -> float:
+            self.assertIsInstance(task, dict)
+            self.assertIsInstance(model, TrinityChatModel)
+            return task["reward"]
+
+        model = MagicMock()
+        openai_client = MagicMock()
+        openai_client.model_path = "Qwen/Qwen3-8B"
+        model.get_openai_async_client.return_value = openai_client
+        model.extract_experience_from_history.return_value = [
+            Experience(tokens=Tensor([0, 1, 2]), prompt_length=1, logprobs=Tensor([0.1, 0.2])),
+            Experience(tokens=Tensor([3, 4, 5]), prompt_length=2, logprobs=Tensor([0.3])),
+        ]
+
+        as_adapter_cls = WORKFLOWS.get("agentscope_workflow_adapter")
+        as_adapter = as_adapter_cls(
+            task=Task(
+                raw_task={"reward": 0.1},
+                workflow_args={"workflow_func": as_workflow_func},
+            ),
+            model=model,
+        )
+        result = await as_adapter.run_async()
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result[0].reward, 0.1)
+        self.assertEqual(result[0].prompt_length, 1)
+        self.assertEqual(result[1].reward, 0.1)
+        self.assertEqual(result[1].prompt_length, 2)
+
+
+class DummyModelWrapper:
+    def __init__(self, model, engine_type="vllm", **kwargs):
+        pass
+
+    async def prepare(self):
+        return None
+
+    def get_openai_client(self):
+        return openai.OpenAI(api_key="EMPTY")
+
+    def get_openai_async_client(self):
+        return openai.AsyncOpenAI(api_key="EMPTY")
+
+    @property
+    async def model_version_async(self):
+        return 0
+
+
+class TestWorkflowRunner(unittest.IsolatedAsyncioTestCase):
+    async def test_workflow_runner(self):
+        config = get_template_config()
+
+        with mock.patch(
+            "trinity.explorer.workflow_runner.ModelWrapper",
+            DummyModelWrapper,
+        ):
+            runner = WorkflowRunner(
+                config,
+                model=MagicMock(),
+                auxiliary_models=[MagicMock(), MagicMock()],
+                runner_id=0,
+            )
+            await runner.prepare()
+
+            task = Task(
+                workflow=DummyWorkflow,
+                repeat_times=3,
+                raw_task={"a": 1},
+                workflow_args={"output_format": "json"},
+            )
+
+            status, exps = await runner.run_task(task, repeat_times=3, run_id_base=0)
+
+            self.assertTrue(status.ok)
+            self.assertIsInstance(exps, list)
+            self.assertEqual(len(exps), 3)
+
+            task = Task(
+                workflow=DummyAsyncWorkflow,
+                repeat_times=2,
+                raw_task={"a": 1},
+                workflow_args={"output_format": "yaml"},
+            )
+
+            status, exps = await runner.run_task(task, repeat_times=2, run_id_base=0)
+            self.assertTrue(status.ok)
+            self.assertIsInstance(exps, list)
+            self.assertEqual(len(exps), 2)

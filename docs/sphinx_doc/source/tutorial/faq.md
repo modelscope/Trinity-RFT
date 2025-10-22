@@ -6,7 +6,7 @@
 **A:** You can use the config manager to configure the parameters by running `trinity studio --port 8080`. This approach provides a convenient way to configure the parameters.
 
 Advanced users can also edit the config file directly, referred to the YAML files in `examples`.
-Trinity-RFT uses [veRL](https://github.com/volcengine/verl) as the training backend, which can have massive parameters, referred to [veRL documentation](https://verl.readthedocs.io/en/latest/examples/config.html). You may specify these parameters in two ways: (1) specify the parameters in the `trainer.trainer_config` dictionary; (2) specify them in an auxiliary YAML file starting with `train_` and pass the path to `train_gsm8k.yaml` in `trainer.trainer_config_path`. These two ways are mutually exclusive.
+Trinity-RFT uses [veRL](https://github.com/volcengine/verl) as the training backend, which can have massive parameters, referred to [veRL documentation](https://verl.readthedocs.io/en/latest/examples/config.html). You may specify these parameters in the `trainer.trainer_config` dictionary.
 
 ---
 

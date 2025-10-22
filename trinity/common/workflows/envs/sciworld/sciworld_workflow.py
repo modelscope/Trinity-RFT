@@ -59,6 +59,8 @@ def parse_action(response):
 class SciWorldWorkflow(MultiTurnWorkflow):
     """A workflow for sciworld task."""
 
+    is_async: bool = True
+
     def __init__(
         self,
         model: ModelWrapper,
@@ -72,10 +74,6 @@ class SciWorldWorkflow(MultiTurnWorkflow):
         self.task_desc = task.task_desc or "0"
         self.repeat_times = task.repeat_times
         self.max_env_steps = 30  # should be less than 100
-
-    @property
-    def asynchronous(self):
-        return True
 
     async def get_model_response(self, messages):
         responses = await self.model.chat_async(messages, n=1)

@@ -97,6 +97,8 @@ def parse_action(response):
 class AlfworldWorkflow(MultiTurnWorkflow):
     """A workflow for alfworld task."""
 
+    is_async: bool = True
+
     def __init__(
         self,
         model: ModelWrapper,
@@ -110,10 +112,6 @@ class AlfworldWorkflow(MultiTurnWorkflow):
         self.task_desc = task.task_desc or "0"
         self.repeat_times = task.repeat_times
         self.max_env_steps = task.workflow_args.get("max_env_steps", 30)
-
-    @property
-    def asynchronous(self):
-        return True
 
     async def get_model_response(self, messages):
         responses = await self.model.chat_async(messages, n=1)

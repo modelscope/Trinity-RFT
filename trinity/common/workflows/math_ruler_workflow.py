@@ -160,9 +160,7 @@ Conclude your response with a list of scores, in the following format: [score fo
 
 @WORKFLOWS.register_module("async_math_ruler_workflow")
 class AsyncMathRULERWorkflow(MathRULERWorkflow):
-    @property
-    def asynchronous(self):
-        return True
+    is_async: bool = True
 
     async def run_async(self) -> List[Experience]:
         """Modified from SimpleWorkflow.run"""

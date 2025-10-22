@@ -17,6 +17,9 @@ class AgentScopeReactMathWorkflow(Workflow):
     We use the AgentScope V1 version here.
     """
 
+    can_reset: bool = True
+    is_async: bool = True
+
     def __init__(
         self,
         *,
@@ -42,24 +45,18 @@ class AgentScopeReactMathWorkflow(Workflow):
         self.openai_async_client = model.get_openai_async_client()
         self.model_name = self.openai_async_client.model_path
 
-        temperature = self.rollout_args.get("temperature", 1.0)
-        max_tokens = self.rollout_args.get("max_tokens", 4096)
         self.agent_model = OpenAIChatModel(
             api_key="EMPTY",
             model_name=self.model_name,
             stream=False,
             generate_kwargs={
-                "temperature": temperature,
-                "max_tokens": max_tokens,
+                "temperature": self.task.rollout_args.temperature,
+                "max_tokens": self.task.rollout_args.max_tokens or 4096,
             },
         )
         self.agent_model.client = self.openai_async_client
         self.agent_model_formatter = OpenAIChatFormatter()
         self.reset(task)
-
-    @property
-    def resettable(self):
-        return True
 
     def reset(self, task: Task):
         self.system_prompt = """
@@ -103,15 +100,6 @@ You are an agent specialized in solving math problems with tools. Please solve t
 
         # we use the boxed format to evaluate the answer
         self.reward_fn = MathBoxedRewardFn()
-
-    @property
-    def repeatable(self):
-        return False
-
-    @property
-    def asynchronous(self):
-        """Whether the workflow runs in async mode."""
-        return True
 
     async def run_async(self):
         # make sure that we have the correct import

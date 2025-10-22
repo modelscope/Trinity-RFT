@@ -67,17 +67,11 @@ class StepWiseRewardWorkflow(Workflow):
         """Return the maximum number of steps in the task."""
         raise NotImplementedError
 
-    @property
-    def repeatable(self):
-        return False
-
 
 class AsyncStepWiseRewardWorkflow(StepWiseRewardWorkflow):
     """Async version of `StepWiseRewardWorkflow`."""
 
-    @property
-    def asynchronous(self):
-        return True
+    is_async: bool = True
 
     async def run_async(self) -> list[Experience]:
         """Run the workflow and return a list of experiences with step-wise rewards asynchronously."""
@@ -184,17 +178,11 @@ class RewardPropagationWorkflow(Workflow):
         """Return the maximum number of steps in the task."""
         raise NotImplementedError
 
-    @property
-    def repeatable(self):
-        return False
-
 
 class AsyncRewardPropagationWorkflow(RewardPropagationWorkflow):
     """Async version of `RewardPropagationWorkflow`."""
 
-    @property
-    def asynchronous(self):
-        return True
+    is_async: bool = True
 
     async def run_async(self) -> list[Experience]:
         """Run the workflow and return a list of experiences with step-wise rewards asynchronously."""

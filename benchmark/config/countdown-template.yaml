@@ -6,6 +6,10 @@ checkpoint_root_dir: placeholder
 algorithm:
   algorithm_type: ppo
   repeat_times: 5
+  optimizer:
+    lr: 1e-06
+    lr_warmup_steps_ratio: 0.0
+    warmup_style: constant
   advantage_fn: ppo
 data_processor: {}
 model:
@@ -69,7 +73,7 @@ trainer:
   save_interval: 100
   total_steps: 1000
   enable_preview: true
-  actor_grad_clip: 1.0
+  grad_clip: 1.0
   trainer_config:
     actor_rollout_ref:
       hybrid_engine: true
@@ -95,10 +99,6 @@ trainer:
           - model
           - optimizer
           - extra
-        optim:
-          lr: 1.0e-06
-          lr_warmup_steps_ratio: 0.0
-          warmup_style: constant
         fsdp_config:
           wrap_policy:
             min_num_params: 0
@@ -137,7 +137,7 @@ trainer:
     critic:
       strategy: fsdp
       optim:
-        lr: 1.0e-05
+        lr: 1e-5
         lr_warmup_steps_ratio: 0.0
         warmup_style: constant
       model:

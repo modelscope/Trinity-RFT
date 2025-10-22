@@ -153,8 +153,7 @@ explorer:
 
 ```yaml
 algorithm:
-  algorithm_type: grpo
-  advantage_fn: step_wise_grpo # 多步训练的关键，该策略告诉 Trinity 为智能体执行路径中的每一步创建独立的训练样本。`grpo` 算法随后使用这些样本来更新模型。
+  algorithm_type: multi_step_grpo # 指定多步 GRPO 训练算法
 ```
 
 #### 动态同步配置

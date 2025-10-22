@@ -181,6 +181,9 @@ def validate_action(action, available_actions):
 class WebShopWorkflow(MultiTurnWorkflow):
     """A workflow for webshop task."""
 
+    can_reset: bool = True
+    is_async: bool = True
+
     def __init__(
         self,
         model: ModelWrapper,
@@ -208,10 +211,6 @@ class WebShopWorkflow(MultiTurnWorkflow):
         self.env = gym.make(
             "WebAgentTextEnv-v0", observation_mode="text_rich", num_products=None, human_goals=True
         )
-
-    @property
-    def resettable(self):
-        return True
 
     def reset(self, task: Task):
         self.task_desc = task.task_desc or "0"

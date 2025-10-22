@@ -146,8 +146,7 @@ The `algorithm` section configures the training algorithm for the agent applicat
 
 ```yaml
 algorithm:
-  algorithm_type: grpo
-  advantage_fn: step_wise_grpo # The key for multi-step training. This strategy tells Trinity to create independent training samples for each step in the agent's execution path. The `grpo` algorithm then uses these samples to update the model.
+  algorithm_type: multi_step_grpo # Specify multi-step GRPO training algorithm
 ```
 
 #### Dynamic Synchronization Configuration

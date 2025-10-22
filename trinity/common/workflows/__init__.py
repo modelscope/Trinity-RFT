@@ -3,6 +3,7 @@
 from trinity.common.workflows.agentscope.react.react_workflow import (
     AgentScopeReActWorkflow,
 )
+from trinity.common.workflows.agentscope_workflow import AgentScopeWorkflowAdapter
 from trinity.common.workflows.customized_math_workflows import (
     AsyncMathBoxedWorkflow,
     MathBoxedWorkflow,
@@ -92,4 +93,5 @@ __all__ = [
     "AsyncSimpleMMWorkflow",
     "SimpleMMWorkflow",
     "RubricJudgeWorkflow",
+    "AgentScopeWorkflowAdapter",
 ]

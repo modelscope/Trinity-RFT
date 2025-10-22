@@ -59,10 +59,6 @@ class RAFTReflectAlfworldWorkflow(RAFTAlfworldWorkflow):
             f"Initializing RAFTReflectAlfworldWorkflow with RAFT learning, temperature={self.temperature}"
         )
 
-    @property
-    def asynchronous(self):
-        return True
-
     async def construct_sft_data(
         self,
         first_trajectory: List[Dict[str, str]],

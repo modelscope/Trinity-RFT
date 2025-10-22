@@ -95,9 +95,7 @@ class MathBoxedWorkflow(SimpleWorkflow):
 
 @WORKFLOWS.register_module("async_math_boxed_workflow")
 class AsyncMathBoxedWorkflow(MathBoxedWorkflow):
-    @property
-    def asynchronous(self):
-        return True
+    is_async: bool = True
 
     async def run_async(self) -> List[Experience]:
         if not self.use_base:

@@ -65,14 +65,14 @@ uv sync --extra dev --extra flash_attn
 If you just want to use the package without modifying the code:
 
 ```bash
-pip install trinity-rft==0.3.0
+pip install trinity-rft==0.3.1
 pip install flash-attn==2.8.1
 ```
 
 Or with `uv`:
 
 ```bash
-uv pip install trinity-rft==0.3.0
+uv pip install trinity-rft==0.3.1
 uv pip install flash-attn==2.8.1
 ```
 
