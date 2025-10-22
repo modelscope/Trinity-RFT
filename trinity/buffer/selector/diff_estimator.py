@@ -2,6 +2,8 @@ from typing import List
 
 import numpy as np
 
+from trinity.utils.log import get_logger
+
 
 class BaseBetaPREstimator:
     n: int
@@ -26,8 +28,9 @@ class BaseBetaPREstimator:
         self.rho = rho
         self.alphas = np.ones(n, dtype=float)
         self.betas = np.ones(n, dtype=float)
-        print(
-            f"[DEBUG] {self.n=}, {self.m=}, {self.lamb=}, {self.rho=}, {self.alphas=}, {self.betas=}"
+        self.logger = get_logger("BetaPREstimator")
+        self.logger.debug(
+            f"{self.n=}, {self.m=}, {self.lamb=}, {self.rho=}, {self.alphas=}, {self.betas=}"
         )
 
     def set(self, alphas, betas):
@@ -51,13 +54,15 @@ class BaseBetaPREstimator:
     def update(self, ref_indices: List[int], ref_pass_rates: List[float]):
         raise NotImplementedError
 
-    def predict_pr(self, indices=None, do_sample=False):
+    def predict_pr(self, rng=None, indices=None, do_sample=False):
+        if rng is None:
+            rng = np.random.default_rng()
         if indices is None:
             indices = np.arange(self.n)
         if not do_sample:
             return self.alphas[indices] / (self.alphas[indices] + self.betas[indices])
         else:
-            return np.random.beta(self.alphas[indices], self.betas[indices])
+            return rng.beta(self.alphas[indices], self.betas[indices])
 
     def equivalent_count(self, indices=None):
         if indices is None:
@@ -106,7 +111,7 @@ class InterpolationBetaPREstimator(BaseBetaPREstimator):
         mean_abs_error = np.mean(np.abs(np.array(predicted_pass_rates) - np.array(ref_pass_rates)))
         if self.adaptive_rho and mean_abs_error >= 0.25:
             self.rho = self.rho * 0.5
-        print(f"[DEBUG]: {mean_abs_error=}, {self.rho=}")
+        self.logger.debug(f"{mean_abs_error=}, {self.rho=}")
         p_tilde[ref_indices] = np.array(ref_pass_rates)
 
         self._update(s_bar, f_bar, p_tilde)

@@ -55,7 +55,7 @@ class StateManager:
             json.dump(
                 {
                     "latest_iteration": current_step,
-                    "taskset_state": taskset_states,
+                    "taskset_states": taskset_states,
                 },
                 f,
                 indent=2,

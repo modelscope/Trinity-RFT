@@ -122,7 +122,6 @@ class WorkflowRunner:
             # set eid for each experience
             for i, exp in enumerate(exps):
                 exp.eid.batch = task.batch_id
-                exp.eid.task_index = task.index
                 # keep exp.eid.task if it has been set before (e.g., in workflow)
                 if exp.eid.task == "":  # "" is the default value
                     exp.eid.task = task.task_id
@@ -130,6 +129,7 @@ class WorkflowRunner:
                     exp.info = {}
                 exp.info["model_version"] = model_version
                 exp.info["use_count"] = 0
+                exp.info["task_index"] = task.index
 
                 if not hasattr(exp, "metrics") or exp.metrics is None:
                     exp.metrics = {}

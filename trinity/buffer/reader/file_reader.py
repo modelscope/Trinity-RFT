@@ -3,7 +3,7 @@
 from typing import Iterable, List, Optional, Union
 
 import datasets
-from datasets import Dataset, IterableDataset, load_dataset
+from datasets import Dataset, load_dataset
 
 from trinity.buffer.buffer_reader import BufferReader
 from trinity.buffer.schema.formatter import FORMATTER
@@ -32,24 +32,14 @@ class _HFBatchReader:
         drop_last: bool = True,
         total_steps: Optional[int] = None,
         enable_progress_bar: Optional[bool] = True,
-        shuffle: bool = False,
-        base_seed: Optional[int] = 42,
     ):
+        self.dataset = dataset
         self.dataset_size = len(dataset)
         self.name = name
         self.current_batch_size = None
         self.drop_last = drop_last
-        self.shuffle = shuffle
-        self.base_seed = base_seed
 
         self.current_offset = offset
-        if self.shuffle:
-            assert not isinstance(
-                dataset, IterableDataset
-            ), "Shuffle is not supported for IterableDataset"
-            self.dataset = dataset.shuffle(seed=self.current_seed)
-        else:
-            self.dataset = dataset
 
         # convert epochs/steps to sample number
         if total_steps:
@@ -96,8 +86,6 @@ class _HFBatchReader:
         self.progress_bar.update(len(batch))
         if start_epoch != self.current_offset // self.num_per_epoch:
             assert self.current_offset % self.num_per_epoch == 0
-            if self.shuffle:
-                self.dataset = self.dataset.shuffle(seed=self.current_seed)
 
         return batch, range(start_index, self.current_offset)
 
@@ -111,7 +99,7 @@ class _HFBatchReader:
 
 class BaseFileReader(BufferReader):
     def __len__(self):
-        return len(self.dataset.dataset)
+        return self.dataset.num_per_epoch
 
     @property
     def index(self) -> int:
@@ -170,8 +158,6 @@ class TaskFileReader(BaseFileReader):
             drop_last=not self.meta.is_eval,
             total_steps=meta.total_steps,
             enable_progress_bar=meta.enable_progress_bar,
-            shuffle=meta.shuffle,
-            base_seed=meta.seed,
         )
         self.formatter = FORMATTER.get("task")(meta)
 
@@ -181,7 +167,7 @@ class TaskFileReader(BaseFileReader):
         samples, indices = self.dataset.read_batch(batch_size)
         for sample, index in zip(samples, indices):
             task = self.formatter.format(sample)
-            task.index.index = index
+            task.index["index"] = index
             tasks.append(task)
         return tasks
 
@@ -191,7 +177,7 @@ class TaskFileReader(BaseFileReader):
         tasks = []
         for index, sample in zip(indices, samples):
             task = self.formatter.format(sample)
-            task.index.index = index
+            task.index["index"] = int(index)
             tasks.append(task)
         return tasks
 

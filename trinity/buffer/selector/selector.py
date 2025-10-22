@@ -3,13 +3,11 @@ from typing import Dict, List
 import numpy as np
 import torch
 
-
 from trinity.buffer.reader.file_reader import _HFBatchReader
-from trinity.common.config import DataSelectorConfig
-from trinity.utils.registry import Registry
-
 from trinity.buffer.selector.diff_estimator import InterpolationBetaPREstimator
-
+from trinity.common.config import DataSelectorConfig
+from trinity.utils.log import get_logger
+from trinity.utils.registry import Registry
 
 SELECTORS = Registry("selectors")
 
@@ -26,10 +24,10 @@ class BaseSelector:
         raise NotImplementedError
 
     def state_dict(self) -> Dict:
-        pass
+        raise NotImplementedError
 
     def load_state_dict(self, state_dict: Dict) -> None:
-        pass
+        raise NotImplementedError
 
 
 @SELECTORS.register_module("sequential")
@@ -62,17 +60,25 @@ class SequentialSelector(BaseSelector):
 class ShuffleSelector(BaseSelector):
     def __init__(self, data_source: _HFBatchReader, config: DataSelectorConfig):
         super().__init__(data_source, config)
+        self.dataset_size = data_source.dataset_size
         self.num_per_epoch = data_source.num_per_epoch
         self.current_index = 0
-        rng = np.random.default_rng(self.current_index // self.num_per_epoch)
-        self.order = rng.permutation(self.num_per_epoch)
+        self.seed = config.seed
+        self.order = self._get_order()
+
+    def _get_order(self) -> List[int]:
+        rng = np.random.default_rng(self.seed + self.current_index // self.num_per_epoch)
+        return rng.choice(self.dataset_size, self.num_per_epoch, replace=False)
 
     def get_indices(self, batch_size: int, return_extra_info: bool = False) -> List[int]:
         start = self.current_index % self.num_per_epoch
         end = start + batch_size
         assert end <= self.num_per_epoch, f"Batch size ({batch_size}) is too large"
+        ret = self.order[start:end]
         self.current_index += batch_size
-        return self.order[start: end]
+        if self.current_index % self.num_per_epoch == 0:
+            self.order = self._get_order()
+        return ret
 
     def update(self, indices: List[int], values: List[float]) -> None:
         pass
@@ -84,29 +90,28 @@ class ShuffleSelector(BaseSelector):
 
     def load_state_dict(self, state_dict):
         self.current_index = state_dict.get("current_index", 0)
-        rng = np.random.default_rng(self.current_index // self.num_per_epoch)
-        self.order = rng.permutation(self.num_per_epoch)
+        self.order = self._get_order()
 
 
 @SELECTORS.register_module("random")
 class RandomSelector(BaseSelector):
     def __init__(self, data_source: _HFBatchReader, config: DataSelectorConfig):
         super().__init__(data_source, config)
+        self.dataset_size = data_source.dataset_size
         self.num_per_epoch = data_source.num_per_epoch
         self.current_index = 0
-        # print(f"[DEBUG]: RandomSelector-{self.n=}")
+        self.seed = config.seed
 
     def get_indices(self, batch_size, return_extra_info=False):
-        rng = np.random.default_rng(self.current_index)
-        selected_indices = rng.choice(self.num_per_epoch, batch_size, replace=False)
+        rng = np.random.default_rng(self.seed + self.current_index)
+        selected_indices = rng.choice(self.dataset_size, batch_size, replace=False)
         self.current_index += batch_size
-        # print(f"[DEBUG]: RandomSelector-{selected_indices=}")
         if return_extra_info:
             return selected_indices, {}
         else:
             return selected_indices
 
-    def update(self, *args, **kwargs):
+    def update(self, indices: List[int], values: List[float]) -> None:
         pass
 
     def state_dict(self) -> Dict:
@@ -122,20 +127,21 @@ class RandomSelector(BaseSelector):
 class OfflineEasy2HardSelector(BaseSelector):
     def __init__(self, data_source, config: DataSelectorConfig):
         super().__init__(data_source, config)
+        self.logger = get_logger("offline_easy2hard_selector")
 
         feature_keys = config.feature_keys
-        self.features = np.concat(
+        self.features = np.concatenate(
             [np.array(list(data_source.dataset[k]))[:, None] for k in feature_keys], axis=1
         )
         features_with_index = [list(self.features[i]) + [i] for i in range(len(self.features))]
         features_with_index = sorted(features_with_index)[::-1]
-        print(f"[DEBUG]: OfflineEasy2HardSelector, sorted {features_with_index[:20]}")
-        self.sorted_index = np.array([i[2] for i in features_with_index])
+        self.logger.debug(f"OfflineEasy2HardSelector, sorted {features_with_index[:20]}")
+        self.sorted_index = np.array([i[-1] for i in features_with_index])
 
         self.num_per_epoch = data_source.num_per_epoch
         self.current_index = 0
 
-    def update(self, *args, **kwargs) -> None:
+    def update(self, indices: List[int], values: List[float]) -> None:
         pass
 
     def get_indices(self, batch_size, return_extra_info=False):
@@ -167,25 +173,35 @@ class OfflineEasy2HardSelector(BaseSelector):
 class DiffBasedSelector(BaseSelector):
     def __init__(self, data_source, config: DataSelectorConfig) -> None:
         super().__init__(data_source, config)
+        self.logger = get_logger("diff_based_selector")
         self.diff_estimator = self.build_diff_estimator(data_source.dataset, config)
+        self.current_index = 0
+        self.seed = config.seed
 
-    @classmethod
-    def build_diff_estimator(dataset, config: DataSelectorConfig):
-        print(f"[DEBUG]: {config=}")
+    def build_diff_estimator(self, dataset, config: DataSelectorConfig):
+        self.logger.debug(f"{config=}")
         feature_keys = config.feature_keys
-        features = np.concat([np.array(list(dataset[k]))[:, None] for k in feature_keys], axis=1)
-        print(f"[DEBUG]: {features.shape=}")
-        print(f"[DEBUG]: {features[:5]=}")
+        assert len(feature_keys) == 2
+        features = np.concatenate(
+            [np.array(list(dataset[k]))[:, None] for k in feature_keys], axis=1
+        )
+        self.logger.debug(f"{features.shape=}")
+        self.logger.debug(f"{features[:5]=}")
         adaptive_rho = hasattr(config, "adaptive_rho") and config.adaptive_rho
         return InterpolationBetaPREstimator(
-            features=features, m=config.m, lamb=config.lamb, rho=config.rho, adaptive_rho=adaptive_rho
+            features=features,
+            m=config.m,
+            lamb=config.lamb,
+            rho=config.rho,
+            adaptive_rho=adaptive_rho,
         )
 
     def update(self, indices: List[int], values: List[float]) -> None:
         self.diff_estimator.update(indices, values)
 
     def get_scores(self) -> List[float]:
-        predicted_pr = self.diff_estimator.predict_pr(do_sample=self.config.do_sample)
+        rng = np.random.default_rng(self.seed + self.current_index)
+        predicted_pr = self.diff_estimator.predict_pr(rng=rng, do_sample=self.config.do_sample)
         scores = -np.abs(self.config.target_reward - predicted_pr)
         return scores
 
@@ -198,12 +214,18 @@ class DiffBasedSelector(BaseSelector):
             sampling_logits = sampling_scores / self.config.tau
             sampling_logits -= sampling_logits.max()
             sampling_probabilities = torch.softmax(sampling_logits, dim=0)
+            rng = torch.Generator()
+            rng.manual_seed(self.seed + self.current_index)
             selected_indices = torch.multinomial(
-                sampling_probabilities, batch_size, replacement=False
+                sampling_probabilities,
+                batch_size,
+                replacement=False,
+                generator=rng,
             )
-        print(f"[DEBUG]: {selected_indices=}")
-        print(f"[DEBUG]: {sampling_scores=}")
-        print(f"[DEBUG]: {sampling_scores[selected_indices]=}")
+        self.logger.debug(f"{selected_indices=}")
+        self.logger.debug(f"{sampling_scores=}")
+        self.logger.debug(f"{sampling_scores[selected_indices]=}")
+        self.current_index += batch_size
 
         if return_extra_info:
             selected_indices_list = selected_indices.tolist()
@@ -221,23 +243,10 @@ class DiffBasedSelector(BaseSelector):
         else:
             return selected_indices
 
-
     def state_dict(self) -> Dict:
-        return {}
+        return {
+            "current_index": self.current_index,
+        }
 
     def load_state_dict(self, state_dict):
-        pass
-
-
-# def build_selector(dataset, config: StorageConfig) -> BaseSelector:
-#     selector_config = config.task_selector
-#     assert selector_config is not None
-#     selector_type = selector_config.selector_type
-#     if selector_type == "random":
-#         return RandomSelector(dataset, selector_config)
-#     elif selector_type == "diff":
-#         return DiffBasedSelector(dataset, selector_config)
-#     elif selector_type == "offline":
-#         return OfflineEasy2HardSelector(dataset, selector_config)
-#     else:
-#         raise ValueError(f"Unknown selector type: {selector_type}")
+        self.current_index = state_dict.get("current_index", 0)

@@ -11,7 +11,7 @@ from trinity.buffer.buffer import get_buffer_reader
 from trinity.buffer.selector import SELECTORS
 from trinity.common.config import Config
 
-TASKSET_SCHEDULE_METRIC = "taskset_schedule"
+SELECTOR_METRIC = "taskset_schedule"
 
 
 class TasksetScheduler:
@@ -19,29 +19,30 @@ class TasksetScheduler:
         self.config = config
         if "latest_task_index" in explorer_state:
             assert len(config.buffer.explorer_input.tasksets) == 1  # old format
-            explorer_state["taskset"] = [
+            explorer_state["taskset_states"] = [
                 {
                     "current_index": explorer_state["latest_task_index"],
                 }
             ]
 
         self.read_batch_size = config.buffer.batch_size
-        tasksets_config = config.buffer.explorer_input.tasksets
+        taskset_configs = config.buffer.explorer_input.tasksets
 
         from trinity.buffer.reader.file_reader import TaskFileReader
 
-        tasksets_state = explorer_state.get("taskset", [{"index": 0}] * len(tasksets_config))
+        taskset_states = explorer_state.get(
+            "taskset_states", [{"current_index": 0}] * len(taskset_configs)
+        )
         self.tasksets = []
         self.selectors = []
-        for taskset_config, taskset_state in zip(tasksets_config, tasksets_state):
-            taskset_config.index = taskset_state["current_index"]
+        for taskset_config, taskset_state in zip(taskset_configs, taskset_states):
             assert not taskset_config.is_eval  # assume drop last
             taskset = get_buffer_reader(taskset_config, config.buffer)
             assert isinstance(taskset, TaskFileReader), "Currently only support `TaskFileReader`"
             selector = SELECTORS.get(taskset_config.task_selector.selector_type)(
-                taskset.dataset, taskset_config
+                taskset.dataset, taskset_config.task_selector
             )
-            selector.load_state_dict(taskset_state.get("state_dict", {}))
+            selector.load_state_dict(taskset_state)
             self.tasksets.append(taskset)
             self.selectors.append(selector)
 
@@ -73,34 +74,20 @@ class TasksetScheduler:
         counter = Counter(taskset_ids)
         for taskset_id, count in counter.items():
             indices = self.selectors[taskset_id].get_indices(batch_size=count)
-            batch.extend(await self.tasksets[taskset_id].read_with_indices_async(indices))
+            tasks = await self.tasksets[taskset_id].read_with_indices_async(indices)
+            for task in tasks:
+                task.index["taskset_id"] = taskset_id
+            batch.extend(tasks)
         self.step += 1
         return batch
 
     def state_dict(self) -> List[Dict]:
-        return [
-            {
-                "state_dict": selector.state_dict(),
-            }
-            for selector in self.selectors
-        ]
+        return [selector.state_dict() for selector in self.selectors]
 
-    def update(self, explore_metric: Dict) -> None:
-        if TASKSET_SCHEDULE_METRIC not in explore_metric:
+    def update(self, pipeline_metrics: Dict) -> None:
+        if SELECTOR_METRIC not in pipeline_metrics:
             return
-        metric = explore_metric.pop(TASKSET_SCHEDULE_METRIC)
-        taskset_update_kwargs = {}
-        for index, value in metric.items():
-            taskset_id = index.taskset_id
-            if taskset_id not in taskset_update_kwargs:
-                taskset_update_kwargs[taskset_id] = {
-                    "indices": [],
-                    "values": [],
-                }
-            kwargs = taskset_update_kwargs[taskset_id]
-            kwargs["indices"].append(index.index)
-            kwargs["values"].append(value)
-        for taskset_id, kwargs in taskset_update_kwargs.items():
-            taskset = self.tasksets[taskset_id]
-            if hasattr(taskset, "update"):
-                taskset.update(**kwargs)
+        selector_metric = pipeline_metrics[SELECTOR_METRIC]
+        for taskset_id, taskset_kwargs in selector_metric.items():
+            selector = self.selectors[taskset_id]
+            selector.update(**taskset_kwargs)

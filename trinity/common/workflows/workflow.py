@@ -9,7 +9,7 @@ from typing import Any, List, Optional, Type, Union
 import openai
 
 from trinity.common.config import FormatConfig, GenerationConfig
-from trinity.common.experience import Experience, TaskIndex
+from trinity.common.experience import Experience
 from trinity.common.models.model import ModelWrapper
 from trinity.common.rewards.math_reward import MathRewardFn
 from trinity.common.rewards.reward_fn import RewardFn
@@ -37,7 +37,7 @@ class Task(dict):
     batch_id: Union[int, str] = ""
     task_id: Union[int, str] = ""
 
-    index: TaskIndex = field(default_factory=TaskIndex)
+    index: dict = field(default_factory=dict)
 
     def to_workflow(
         self, model: Any, auxiliary_models: Optional[List[openai.OpenAI]] = None

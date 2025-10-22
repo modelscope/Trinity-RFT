@@ -13,12 +13,6 @@ from torch import Tensor
 
 
 @dataclass
-class TaskIndex:
-    taskset_id: Optional[int] = None
-    index: Optional[int] = None
-
-
-@dataclass
 class EID:
     """Experience ID class to uniquely identify an experience.
 
@@ -41,8 +35,6 @@ class EID:
     suffix: str = field(
         default_factory=lambda: uuid.uuid4().hex[:6]
     )  # Unique identifier suffix, e.g., a UUID
-
-    task_index: TaskIndex = field(default_factory=TaskIndex)
 
     @property
     def uid(self) -> str:

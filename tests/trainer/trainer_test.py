@@ -27,6 +27,7 @@ from trinity.common.config import (
     AlgorithmConfig,
     BufferConfig,
     Config,
+    DataSelectorConfig,
     ExplorerInput,
     StageConfig,
     StorageConfig,
@@ -73,6 +74,9 @@ class TestTrainerCountdown(BaseTrainerCase):
         """Test the both and bench mode."""
         # test both mode
         self.config.buffer.explorer_input.taskset = get_unittest_dataset_config("countdown")
+        self.config.buffer.explorer_input.taskset.task_selector = DataSelectorConfig(
+            selector_type="shuffle", seed=42
+        )
         self.config.buffer.explorer_input.eval_tasksets.append(
             get_unittest_dataset_config("countdown", "test")
         )

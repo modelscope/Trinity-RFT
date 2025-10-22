@@ -412,9 +412,9 @@ class veRLConfig:
         self.critic.model.path = config.model.critic_model_path
         self.critic.model.tokenizer_path = config.model.critic_model_path
         self.actor_rollout_ref.actor.ppo_mini_batch_size = config.buffer.train_batch_size
-        self.actor_rollout_ref.rollout.temperature = (
-            config.buffer.explorer_input.taskset.rollout_args.temperature
-        )
+        self.actor_rollout_ref.rollout.temperature = config.buffer.explorer_input.tasksets[
+            0
+        ].rollout_args.temperature
         self.actor_rollout_ref.rollout.n = config.algorithm.repeat_times
         self.critic.ppo_mini_batch_size = config.buffer.train_batch_size
         self.critic.rollout_n = self.actor_rollout_ref.rollout.n

@@ -104,9 +104,12 @@ class DataSelectorConfig:
     """Data selector config."""
 
     selector_type: Optional[str] = "sequential"
-    feature_keys: List[str] = field(default_factory=lambda: [])
+
+    # For shuffle
+    seed: int = 42
 
     # Estimator Config
+    feature_keys: List[str] = field(default_factory=lambda: [])
     adaptive_rho: bool = False
     m: int = 16
     lamb: float = 0.2
@@ -125,10 +128,6 @@ class StorageConfig:
     storage_type: StorageType = StorageType.FILE
     path: Optional[str] = None
     repeat_times: Optional[int] = None
-
-    # For shuffle
-    shuffle: bool = False
-    seed: int = 42
 
     # For continuing training
     index: int = 0
