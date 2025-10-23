@@ -1,7 +1,7 @@
 # 🧪 实验性功能：任务选择与调度系统
 
 ```{note}
-该模块目前处于 **实验阶段**，接口可能在后续版本中发生变化。  
+该模块目前处于 **实验阶段**，接口可能在后续版本中发生变化。
 本文档描述了系统的功能及预期使用方式。
 ```
 
@@ -157,12 +157,12 @@ class PassRateCalculator(ExperienceOperator):
 
     def process(self, exps: List[Experience]) -> Tuple[List[Experience], Dict]:
         raw_metric = defaultdict(lambda: defaultdict(list))
-        
+
         for exp in exps:
             task_index = exp.info["task_index"]
             assert "taskset_id" in task_index and "index" in task_index
             raw_metric[task_index["taskset_id"]][task_index["index"]].append(exp.reward)
-        
+
         metric = {}
         for taskset_id, task_metrics in raw_metric.items():
             indices = []

@@ -2,7 +2,7 @@
 # 🧪 Experimental: Task Selection & Scheduling System
 
 ```{note}
-This module is currently in **experimental status**. Interfaces may change in future versions.  
+This module is currently in **experimental status**. Interfaces may change in future versions.
 This document describes the functionality and intended usage of the system.
 ```
 
@@ -160,12 +160,12 @@ class PassRateCalculator(ExperienceOperator):
 
     def process(self, exps: List[Experience]) -> Tuple[List[Experience], Dict]:
         raw_metric = defaultdict(lambda: defaultdict(list))
-        
+
         for exp in exps:
             task_index = exp.info["task_index"]
             assert "taskset_id" in task_index and "index" in task_index
             raw_metric[task_index["taskset_id"]][task_index["index"]].append(exp.reward)
-        
+
         metric = {}
         for taskset_id, task_metrics in raw_metric.items():
             indices = []
