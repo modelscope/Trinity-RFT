@@ -114,18 +114,18 @@ class ConfigManager:
         CONFIG_GENERATORS.get_configs(*config_names, columns_spec=columns_spec)
 
     def beginner_mode(self):
-        st.header("Global Config")
+        st.subheader("Global Config")
         self.get_configs("project", "exp_name")
         self.get_configs("checkpoint_root_dir")
         self.get_configs("monitor_type", "log_level", "save_interval")
 
-        st.header("Model Config")
+        st.subheader("Model Config")
         self.get_configs("model_path", "max_model_len", columns_spec=[3, 1])
 
-        st.header("Algorithm Config")
+        st.subheader("Algorithm Config")
         self.get_configs("algorithm_type", "repeat_times", "actor_lr", "critic_lr")
 
-        st.header("Dataset Config")
+        st.subheader("Dataset Config")
         if st.session_state["algorithm_type"] not in ("dpo", "sft"):
             self.get_configs("taskset_path", "explore_batch_size", columns_spec=[3, 1])
         else:
@@ -139,13 +139,13 @@ class ConfigManager:
         self.get_configs("default_workflow_type", "default_reward_fn_type")
         self.get_configs("total_epochs", "total_steps")
 
-        st.header("Resource Config")
+        st.subheader("Resource Config")
         self.get_configs("node_num", "gpu_per_node")
         self.get_configs("engine_num", "tensor_parallel_size")
         self.get_configs("trainer_gpu_num_display", "actor_ulysses_sequence_parallel_size")
 
         if st.session_state["algorithm_type"] not in ("dpo", "sft"):
-            st.header("Synchronizer Config")
+            st.subheader("Synchronizer Config")
             st.caption("Synchronization between trainer and explorer.")
             self.get_configs("sync_method", "sync_style", "sync_interval")
 
@@ -723,7 +723,7 @@ class ConfigManager:
                     "trainer_type": st.session_state["trainer_type"],
                     "save_interval": st.session_state["save_interval"],
                     "enable_preview": st.session_state["enable_preview"],
-                    "actor_grad_clip": st.session_state["actor_grad_clip"],
+                    "grad_clip": st.session_state["actor_grad_clip"],
                     "trainer_config": trainer_config,
                 },
                 "monitor": {
@@ -748,7 +748,7 @@ class ConfigManager:
                 )
 
             st.session_state.config_generated = True
-            st.header("Generated Config File")
+            st.subheader("Generated Config File")
             buttons = st.container()
             save_btn, run_btn = buttons.columns(2, vertical_alignment="bottom")
             yaml_config = yaml.dump(config, allow_unicode=True, sort_keys=False)
